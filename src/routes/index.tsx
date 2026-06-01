@@ -221,7 +221,7 @@ function Home() {
               <img
                 src={trustedLogos.url}
                 alt="Trusted by Unilever, Ticketmaster, Unified, Hogarth, Tixel, 19 Crimes, Transgenre, KFC, Fraks"
-                className="mx-auto h-10 w-auto max-w-full md:h-14"
+                className="mx-auto h-6 w-auto max-w-full md:h-8"
               />
             </motion.div>
           </motion.div>
