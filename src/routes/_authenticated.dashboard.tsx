@@ -54,6 +54,7 @@ function DashboardPage() {
   const [email, setEmail] = useState<string | null>(null);
   const [latestVibe, setLatestVibe] = useState<VibeRow | null>(null);
   const [roster, setRoster] = useState<RosterRow[]>([]);
+  const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,7 +63,7 @@ function DashboardPage() {
       setEmail(u.user?.email ?? null);
       if (!u.user) return;
 
-      const [{ data: vibes }, { data: rosterRows }] = await Promise.all([
+      const [{ data: vibes }, { data: rosterRows }, { data: communityRows }] = await Promise.all([
         supabase
           .from("vibe_check_responses")
           .select("id, created_at, result, answers, artist_score, brand_score")
@@ -72,9 +73,15 @@ function DashboardPage() {
           .from("roster_members")
           .select("id, member_id, created_at")
           .order("created_at", { ascending: false }),
+        supabase
+          .from("community_profiles")
+          .select("id, display_name, account_type, tagline, location, avatar_url")
+          .order("created_at", { ascending: false })
+          .limit(8),
       ]);
 
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
+      setCommunity((communityRows as CommunityMember[]) ?? []);
 
       if (rosterRows && rosterRows.length) {
         const memberIds = rosterRows.map((r) => r.member_id);
