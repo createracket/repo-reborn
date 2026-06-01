@@ -1,52 +1,57 @@
 import { Link } from "@tanstack/react-router";
-import { WordmarkInline } from "@/components/brand/Wordmark";
-import { Instagram, Mail } from "lucide-react";
+import { Wordmark } from "@/components/brand/Wordmark";
+import { Instagram, Linkedin, Mail } from "lucide-react";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border/60 bg-sidebar mt-24">
-      <div className="container mx-auto grid gap-8 px-4 py-12 md:grid-cols-4">
-        <div className="md:col-span-2">
-          <WordmarkInline />
-          <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-            The community + dashboard for musicians, brands, creators and fans
-            building louder, stranger, more meaningful collaborations.
-          </p>
-        </div>
-        <div>
-          <h4 className="font-display text-sm tracking-wider text-foreground">EXPLORE</h4>
-          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/vibe-check" className="hover:text-foreground">Vibe Check</Link></li>
-            <li><Link to="/fan-signup" className="hover:text-foreground">Join the mailing list</Link></li>
-            <li><Link to="/login" className="hover:text-foreground">Log in</Link></li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="font-display text-sm tracking-wider text-foreground">FOLLOW</h4>
-          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li>
-              <a
-                href="https://instagram.com/createracket"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 hover:text-foreground"
-              >
-                <Instagram className="size-4" />
-                <span>@createracket</span>
-              </a>
-            </li>
-            <li>
-              <a href="mailto:community@createracket.com" className="inline-flex items-center gap-2 hover:text-foreground">
-                <Mail className="size-4" />
-                <span>community@createracket.com</span>
-              </a>
-            </li>
-          </ul>
+    <footer className="mt-20 border-t border-border bg-pink-accent text-[#2b2b2b]">
+      <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-6">
+            <Link to="/" className="inline-block">
+              <Wordmark variant="dark" className="h-11 w-auto" />
+            </Link>
+            <p className="mt-4 max-w-md text-base text-[#2b2b2b]/80">
+              Create Racket acknowledges the Traditional Owners of Country throughout
+              Australia. We pay our respects to Elders past and present.
+            </p>
+          </div>
 
+          <div className="lg:col-span-3">
+            <h3 className="mb-3 font-headline text-sm">Explore</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/vibe-check" className="hover:text-purple">Vibe Check</Link></li>
+              <li><Link to="/fan-signup" className="hover:text-purple">Join the mailing list</Link></li>
+              <li><Link to="/login" className="hover:text-purple">Log in</Link></li>
+            </ul>
+          </div>
+
+          <div className="lg:col-span-3">
+            <h3 className="mb-3 font-headline text-sm">Contact</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="mailto:community@createracket.com" className="inline-flex items-center gap-2 hover:text-purple">
+                  <Mail className="size-4" /> community@createracket.com
+                </a>
+              </li>
+              <li>
+                <a href="https://instagram.com/createracket" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 hover:text-purple">
+                  <Instagram className="size-4" /> Instagram
+                </a>
+              </li>
+              <li>
+                <a href="https://www.linkedin.com/company/create-racket" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 hover:text-purple">
+                  <Linkedin className="size-4" /> LinkedIn
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
-      <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Create Racket. Made loud.
+
+        <div className="mt-10 flex flex-col items-center justify-between gap-2 border-t border-[#2b2b2b]/20 pt-6 text-xs text-[#2b2b2b]/70 sm:flex-row">
+          <span>© {new Date().getFullYear()} Create Racket. Made loud.</span>
+          <span>Where creative partners connect.</span>
+        </div>
       </div>
     </footer>
   );

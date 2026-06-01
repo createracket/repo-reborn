@@ -1,36 +1,30 @@
 import { cn } from "@/lib/utils";
+import logoFullColour from "@/assets/logo/CR-Logo-Full-Colour.svg";
+import logoFullDark from "@/assets/logo/CR-Logo-Full-Dark.svg";
+import logoHalfColour from "@/assets/logo/CR-Logo-Half-Colour.svg";
+import logoIcon from "@/assets/logo/cr-icon-colour.svg";
 
-interface WordmarkProps {
+type Variant = "colour" | "dark" | "half-colour" | "icon";
+
+interface LogoProps {
   className?: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  variant?: Variant;
+  alt?: string;
 }
 
-/**
- * The "CREATE RACKET" wordmark. Display font (Bungee) with a lime → coral
- * gradient on the second word so it reads like a sticker / patch.
- */
-export function Wordmark({ className, size = "md" }: WordmarkProps) {
-  const sizeClass = {
-    sm: "text-lg",
-    md: "text-2xl",
-    lg: "text-4xl md:text-5xl",
-    xl: "text-6xl md:text-7xl lg:text-8xl",
-  }[size];
+const SRC: Record<Variant, string> = {
+  colour: logoFullColour,
+  dark: logoFullDark,
+  "half-colour": logoHalfColour,
+  icon: logoIcon,
+};
 
-  return (
-    <span className={cn("font-display leading-none inline-flex flex-col", sizeClass, className)}>
-      <span className="text-foreground">CREATE</span>
-      <span className="text-gradient-racket -mt-1">RACKET</span>
-    </span>
-  );
+/** Full Create Racket logo (SVG from the brand kit). */
+export function Wordmark({ className, variant = "colour", alt = "Create Racket" }: LogoProps) {
+  return <img src={SRC[variant]} alt={alt} className={cn("h-8 w-auto select-none", className)} />;
 }
 
-/** Compact inline version for the header. */
+/** Compact inline logo for headers. */
 export function WordmarkInline({ className }: { className?: string }) {
-  return (
-    <span className={cn("font-display text-xl tracking-tight", className)}>
-      <span className="text-foreground">CREATE</span>
-      <span className="text-gradient-racket ml-1">RACKET</span>
-    </span>
-  );
+  return <Wordmark variant="colour" className={cn("h-7 w-auto", className)} />;
 }

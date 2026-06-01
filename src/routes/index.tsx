@@ -1,153 +1,362 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Sparkles, Users, Mic2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
+import { Users, Handshake, Link2, Loader2, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 
-import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Create Racket — Louder, stranger collaborations" },
+      { title: "Create Racket — Where creative partners connect" },
       {
         name: "description",
         content:
-          "Create Racket is the community + dashboard for musicians, brands, creators and fans building louder, stranger, more meaningful collaborations.",
+          "We operate at the cultural edge of media and music, using fan-built tech to authentically pair artists with the right collaborators.",
       },
       { property: "og:title", content: "Create Racket" },
       {
         property: "og:description",
-        content:
-          "Match with the right artists, brands and creators. Take the Vibe Check to find your archetype.",
+        content: "Where creative partners connect.",
       },
     ],
   }),
   component: Home,
 });
 
+// ─── Waitlist form (writes straight to mailing_list_subscribers) ──────────
+function WaitlistForm({
+  className,
+  inputClassName,
+  buttonClassName,
+}: {
+  className?: string;
+  inputClassName?: string;
+  buttonClassName?: string;
+}) {
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) return;
+    setBusy(true);
+    const { error } = await supabase.from("mailing_list_subscribers").insert({
+      email,
+      source: "homepage-waitlist",
+      marketing_opt_in: true,
+    });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("You're in. Welcome to the racket. 🎉");
+    setEmail("");
+  }
+
+  return (
+    <form onSubmit={onSubmit} className={className}>
+      <Input
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Enter your email"
+        className={inputClassName}
+      />
+      <Button type="submit" size="lg" disabled={busy} className={buttonClassName}>
+        {busy ? <Loader2 className="size-5 animate-spin" /> : "Join Waitlist"}
+      </Button>
+    </form>
+  );
+}
+
+// ─── Animated counter ────────────────────────────────────────────────────
+function Counter({ from, to, duration = 2.5 }: { from: number; to: number; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+  const [v, setV] = useState(from);
+  useEffect(() => {
+    if (!inView) return;
+    const start = Date.now();
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      if (elapsed < duration * 1000) {
+        setV(from + (to - from) * (elapsed / (duration * 1000)));
+        requestAnimationFrame(tick);
+      } else setV(to);
+    };
+    requestAnimationFrame(tick);
+  }, [inView, from, to, duration]);
+  return <span ref={ref}>{v.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>;
+}
+
+const fadeUp = {
+  hidden: { y: 24, opacity: 0 },
+  visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } },
+};
+const stagger = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
+};
+
+const testimonials = [
+  {
+    id: 1,
+    name: "Jenna Oberstein",
+    title: "AU Agency Partner",
+    quote:
+      "They went above and beyond to find the perfect talent for my client, all while maintaining incredibly quick response times. A smooth, efficient, genuinely enjoyable process.",
+  },
+  {
+    id: 2,
+    name: "Dale Tanner",
+    title: "AU Artist",
+    quote:
+      "As an artist, it's great to know these legends are on our side, connecting us with paying opportunities and making the process as easy-going as possible.",
+  },
+  {
+    id: 3,
+    name: "Grace Taylor",
+    title: "UK Artist Manager",
+    quote:
+      "Create Racket made it a breeze for BEX to create branded content that still resonated with her fans — easy!",
+  },
+];
+
 function Home() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader />
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      {/* ── HERO ─────────────────────────────────────────────────────── */}
+      <div className="voicenotes-gradient">
+        <header className="container mx-auto flex items-center justify-between px-4 pt-6">
+          <Link to="/">
+            <Wordmark variant="colour" className="h-9 w-auto" />
+          </Link>
+          <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex">
+            <Link to="/vibe-check" className="hover:text-white">Vibe Check</Link>
+            <a href="#ecosystem" className="hover:text-white">How it works</a>
+            <a href="#testimonials" className="hover:text-white">Community</a>
+          </nav>
+          <Button asChild size="sm" variant="secondary" className="rounded-full">
+            <Link to="/login">Log in</Link>
+          </Button>
+        </header>
 
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-32 left-1/2 h-[480px] w-[820px] -translate-x-1/2 rounded-full opacity-30 blur-3xl"
-          style={{ background: "radial-gradient(circle, var(--primary), transparent 60%)" }}
-        />
-        <div className="container relative mx-auto px-4 pt-20 pb-24 text-center md:pt-28 md:pb-32">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-3 py-1 text-xs uppercase tracking-widest text-muted-foreground backdrop-blur">
-            <Sparkles className="size-3 text-primary" /> New: the Vibe Check is live
+        <main className="flex flex-grow items-center justify-center pt-12 pb-8 md:pt-20 md:pb-12">
+          <motion.div
+            className="mx-auto max-w-5xl px-4 text-center"
+            variants={stagger}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={fadeUp} className="mb-10">
+              <Wordmark variant="half-colour" className="mx-auto h-44 w-auto md:h-56" />
+            </motion.div>
+
+            <motion.h1
+              variants={fadeUp}
+              className="font-headline text-4xl leading-tight tracking-tighter md:text-6xl"
+            >
+              <span className="text-white">Where </span>
+              <span className="text-pink-accent">creative</span>
+              <br />
+              <span className="text-pink-accent">partners </span>
+              <span className="text-white">connect</span>
+            </motion.h1>
+
+            <motion.p
+              variants={fadeUp}
+              className="mx-auto mt-6 max-w-2xl text-lg leading-snug text-white/90 md:text-xl"
+            >
+              We operate at the cultural edge of media and music, using fan-built tech to
+              authentically pair artists with the right collaborators.
+            </motion.p>
+
+            <motion.div variants={fadeUp} className="mt-10 flex justify-center">
+              <WaitlistForm
+                className="flex w-full max-w-2xl items-center gap-2 rounded-full bg-white py-2 pl-6 pr-2 transition-shadow duration-300 hover:shadow-[0_0_20px_5px_rgba(255,255,255,0.5)] focus-within:shadow-[0_0_20px_5px_rgba(255,255,255,0.5)]"
+                inputClassName="h-14 flex-grow border-0 bg-transparent p-0 text-base text-[#2b2b2b] placeholder:text-[#2b2b2b]/70 focus-visible:ring-0 focus-visible:ring-offset-0 md:text-lg md:h-16"
+                buttonClassName="h-14 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 md:h-16 md:text-lg"
+              />
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="mt-6">
+              <Button asChild variant="link" className="text-white/80 hover:text-white">
+                <Link to="/vibe-check">
+                  Or take the Vibe Check <ArrowRight className="ml-1 size-4" />
+                </Link>
+              </Button>
+            </motion.div>
+          </motion.div>
+        </main>
+      </div>
+
+      {/* Curve into dark section */}
+      <div className="-mt-12 rounded-t-[3rem] bg-[#2b2b2b]">
+        {/* ── ECOSYSTEM ──────────────────────────────────────────────── */}
+        <section id="ecosystem" className="relative z-10 py-20">
+          <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <motion.div
+              className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2"
+              variants={stagger}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              <motion.div variants={fadeUp} className="space-y-6 text-center lg:text-left">
+                <h2 className="font-headline text-4xl tracking-tighter text-white md:text-5xl">
+                  Trusted by artists and brands, globally
+                </h2>
+                <p className="text-lg text-white/85">
+                  Tap into the Create Racket Community to source top-tier talent or
+                  collaborate directly with our expert team across content, partnerships
+                  and fan activations.
+                </p>
+              </motion.div>
+
+              <div className="mx-auto grid w-full max-w-md grid-cols-1 gap-6">
+                <EcosystemCard
+                  icon={<Users />}
+                  title="Co-create"
+                  body="Build your own roster — a verified network of like-minded partners to co-create with."
+                  bg="bg-pink-accent text-[#2b2b2b]"
+                />
+                <EcosystemCard
+                  icon={<Handshake />}
+                  title="Collaborate"
+                  body="Work directly with our team to put fans at the heart of your creative content."
+                  bg="bg-purple text-white"
+                />
+                <EcosystemCard
+                  icon={<Link2 />}
+                  title="Connect"
+                  body="Fuel your next campaign or media activation with the right creative partners."
+                  bg="bg-primary text-primary-foreground"
+                />
+              </div>
+            </motion.div>
           </div>
+        </section>
 
-          <h1 className="mx-auto max-w-4xl">
-            <Wordmark size="xl" className="justify-center text-center" />
-          </h1>
+        <Divider />
 
-          <p className="mx-auto mt-8 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            The community + dashboard for{" "}
-            <span className="text-foreground">musicians</span>,{" "}
-            <span className="text-foreground">brands</span>,{" "}
-            <span className="text-foreground">creators</span> and{" "}
-            <span className="text-foreground">fans</span> building louder, stranger,
-            more meaningful collaborations.
-          </p>
-
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg" className="text-base">
-              <Link to="/vibe-check">
-                Take the Vibe Check <ArrowRight className="ml-1 size-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="text-base">
-              <Link to="/fan-signup">Just here to follow along</Link>
-            </Button>
+        {/* ── TESTIMONIALS ───────────────────────────────────────────── */}
+        <section id="testimonials" className="py-20">
+          <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="font-headline text-4xl tracking-tighter text-white md:text-5xl">
+              Fuelling long-lasting partnerships
+            </h2>
+            <motion.div
+              className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3"
+              variants={stagger}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+            >
+              {testimonials.map((t) => (
+                <motion.div
+                  key={t.id}
+                  variants={fadeUp}
+                  whileHover={{ scale: 1.04 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Card className="h-full rounded-2xl border-0 bg-card text-foreground shadow-xl">
+                    <CardContent className="space-y-6 p-6 text-center">
+                      <p className="text-lg font-medium">"{t.quote}"</p>
+                      <div>
+                        <p className="font-bold text-pink-accent">{t.name}</p>
+                        <p className="text-sm text-muted-foreground">{t.title}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* WHO IT'S FOR */}
-      <section id="how-it-works" className="container mx-auto px-4 py-16 md:py-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-display text-3xl md:text-5xl">PICK YOUR LANE</h2>
-          <p className="mt-4 text-muted-foreground">
-            Two flows, one community. Tell us who you are and we'll match you with
-            the right people.
-          </p>
-        </div>
+        <Divider />
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
-          <LaneCard
-            icon={<Mic2 className="size-6 text-primary" />}
-            title="I'm a musician / creator"
-            blurb="Find your archetype, get matched with values-aligned brands, and build a roster that actually fits your vibe."
-            cta="Start the musician Vibe Check"
-            to="/vibe-check/musician"
-          />
-          <LaneCard
-            icon={<Users className="size-6 text-coral" />}
-            title="I'm a brand / agency"
-            blurb="Brief us once. We surface artists whose values, audience and energy genuinely line up with what you're building."
-            cta="Start the brand Vibe Check"
-            to="/vibe-check/brand"
-          />
-        </div>
-      </section>
-
-      {/* COMMUNITY STRIP */}
-      <section id="community" className="border-t border-border/60 bg-sidebar/60">
-        <div className="container mx-auto grid gap-10 px-4 py-16 md:grid-cols-3 md:py-20">
-          <Stat n="7" label="Artist archetypes you might be" />
-          <Stat n="5" label="Brand archetypes we map to" />
-          <Stat n="∞" label="Ways to create racket" />
-        </div>
-      </section>
+        {/* ── COUNTER ────────────────────────────────────────────────── */}
+        <section className="py-20">
+          <motion.div whileHover={{ scale: 1.03 }} transition={{ type: "spring", stiffness: 300 }}>
+            <motion.div
+              className="container mx-auto w-full max-w-2xl rounded-2xl border border-white/10 bg-brand-light p-8 text-[#2b2b2b] backdrop-blur-md"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.5 }}
+              variants={stagger}
+            >
+              <div className="text-center">
+                <motion.p variants={fadeUp} className="mb-6 text-lg font-bold md:text-xl">
+                  Unlocking brand new revenue streams for musicians at every stage of their
+                  careers.
+                </motion.p>
+                <motion.p variants={fadeUp} className="mt-4 text-lg font-light text-[#2b2b2b]/80 md:text-xl">
+                  We've already converted over $300k to artists, that's over
+                </motion.p>
+                <motion.h2
+                  variants={fadeUp}
+                  className="my-4 font-headline text-6xl tracking-tighter text-purple md:text-8xl"
+                >
+                  <Counter from={0} to={66947847} duration={2.5} />
+                </motion.h2>
+                <motion.p variants={fadeUp} className="text-lg font-light text-[#2b2b2b]/80 md:text-xl">
+                  in equivalent Spotify streams 💸
+                </motion.p>
+              </div>
+            </motion.div>
+          </motion.div>
+        </section>
+      </div>
 
       <SiteFooter />
     </div>
   );
 }
 
-function LaneCard({
+function EcosystemCard({
   icon,
   title,
-  blurb,
-  cta,
-  to,
+  body,
+  bg,
 }: {
   icon: React.ReactNode;
   title: string;
-  blurb: string;
-  cta: string;
-  to: string;
+  body: string;
+  bg: string;
 }) {
   return (
-    <Link
-      to={to}
-      className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-8 transition-all hover:border-primary/60 hover:shadow-lg"
+    <motion.div
+      variants={fadeUp}
+      whileHover={{ scale: 1.05 }}
+      transition={{ type: "spring", stiffness: 300 }}
     >
-      <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-background">
-        {icon}
-      </div>
-      <h3 className="font-display text-2xl">{title}</h3>
-      <p className="mt-3 text-muted-foreground">{blurb}</p>
-      <div className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary">
-        {cta} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-      </div>
-    </Link>
+      <Card className={`rounded-2xl border-0 shadow-lg ${bg}`}>
+        <CardHeader className="flex flex-row items-center justify-center gap-3 lg:justify-start">
+          {icon}
+          <CardTitle className="font-headline">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="text-center lg:text-left">
+          <p>{body}</p>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
-function Stat({ n, label }: { n: string; label: string }) {
+function Divider() {
   return (
-    <div className="text-center md:text-left">
-      <div className="font-display text-5xl text-gradient-racket md:text-6xl">{n}</div>
-      <div className="mt-2 text-sm uppercase tracking-widest text-muted-foreground">
-        {label}
-      </div>
+    <div className="w-full py-4">
+      <div className="container mx-auto h-px w-3/4 bg-white/10" />
     </div>
   );
 }
