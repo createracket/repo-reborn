@@ -122,11 +122,14 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          is_mock: boolean
+          location: string | null
           marketing_opt_in: boolean
           notify_direct_messages: boolean
           notify_new_matches: boolean
           notify_newsletter: boolean
           socials: Json
+          tagline: string | null
           updated_at: string
           values: string[]
         }
@@ -138,11 +141,14 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id: string
+          is_mock?: boolean
+          location?: string | null
           marketing_opt_in?: boolean
           notify_direct_messages?: boolean
           notify_new_matches?: boolean
           notify_newsletter?: boolean
           socials?: Json
+          tagline?: string | null
           updated_at?: string
           values?: string[]
         }
@@ -154,11 +160,14 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          is_mock?: boolean
+          location?: string | null
           marketing_opt_in?: boolean
           notify_direct_messages?: boolean
           notify_new_matches?: boolean
           notify_newsletter?: boolean
           socials?: Json
+          tagline?: string | null
           updated_at?: string
           values?: string[]
         }
