@@ -151,6 +151,24 @@ const testimonials = [
   },
 ];
 
+function HeroAuthButton() {
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(!!session);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+  return (
+    <Button asChild size="sm" variant="secondary" className="rounded-full">
+      <Link to={signedIn ? "/dashboard" : "/login"}>
+        {signedIn ? "Dashboard" : "Log in"}
+      </Link>
+    </Button>
+  );
+}
+
 function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -165,9 +183,8 @@ function Home() {
             <a href="#ecosystem" className="hover:text-white">How it works</a>
             <a href="#testimonials" className="hover:text-white">Community</a>
           </nav>
-          <Button asChild size="sm" variant="secondary" className="rounded-full">
-            <Link to="/login">Log in</Link>
-          </Button>
+          <HeroAuthButton />
+
         </header>
 
         <main className="flex flex-grow items-center justify-center pt-12 pb-8 md:pt-20 md:pb-12">
