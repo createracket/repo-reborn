@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SubmitBriefRouteImport } from './routes/submit-brief'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FanSignupRouteImport } from './routes/fan-signup'
@@ -21,6 +22,11 @@ import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated.connect'
 
+const SubmitBriefRoute = SubmitBriefRouteImport.update({
+  id: '/submit-brief',
+  path: '/submit-brief',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultsRoute = ResultsRouteImport.update({
   id: '/results',
   path: '/results',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/fan-signup': typeof FanSignupRoute
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
+  '/submit-brief': typeof SubmitBriefRoute
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/fan-signup': typeof FanSignupRoute
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
+  '/submit-brief': typeof SubmitBriefRoute
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/fan-signup': typeof FanSignupRoute
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
+  '/submit-brief': typeof SubmitBriefRoute
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/login'
     | '/results'
+    | '/submit-brief'
     | '/connect'
     | '/dashboard'
     | '/vibe-check/brand'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/login'
     | '/results'
+    | '/submit-brief'
     | '/connect'
     | '/dashboard'
     | '/vibe-check/brand'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/login'
     | '/results'
+    | '/submit-brief'
     | '/_authenticated/connect'
     | '/_authenticated/dashboard'
     | '/vibe-check/brand'
@@ -161,6 +173,7 @@ export interface RootRouteChildren {
   FanSignupRoute: typeof FanSignupRoute
   LoginRoute: typeof LoginRoute
   ResultsRoute: typeof ResultsRoute
+  SubmitBriefRoute: typeof SubmitBriefRoute
   VibeCheckBrandRoute: typeof VibeCheckBrandRoute
   VibeCheckMusicianRoute: typeof VibeCheckMusicianRoute
   VibeCheckIndexRoute: typeof VibeCheckIndexRoute
@@ -168,6 +181,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/submit-brief': {
+      id: '/submit-brief'
+      path: '/submit-brief'
+      fullPath: '/submit-brief'
+      preLoaderRoute: typeof SubmitBriefRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/results': {
       id: '/results'
       path: '/results'
@@ -269,6 +289,7 @@ const rootRouteChildren: RootRouteChildren = {
   FanSignupRoute: FanSignupRoute,
   LoginRoute: LoginRoute,
   ResultsRoute: ResultsRoute,
+  SubmitBriefRoute: SubmitBriefRoute,
   VibeCheckBrandRoute: VibeCheckBrandRoute,
   VibeCheckMusicianRoute: VibeCheckMusicianRoute,
   VibeCheckIndexRoute: VibeCheckIndexRoute,
