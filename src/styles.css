@@ -5,14 +5,15 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Create Racket design system.
- * Dark charcoal canvas, lime green primary, coral accent.
- * All colors in oklch.
+ * Create Racket design system — ported from the original brand.
+ * Dark charcoal canvas, Racket Green primary (#BADA55),
+ * Racket Pink accent (#FFC0CB) and Racket Purple (#5C37D0).
+ * Type: Archivo Black (headline) + Lexend (body).
  */
 
 @theme inline {
-  --font-display: "Bungee", "Archivo Black", system-ui, sans-serif;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Archivo Black", system-ui, sans-serif;
+  --font-sans: "Lexend", system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -55,69 +56,70 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --color-coral: var(--coral);
+
+  /* Brand accent tokens */
+  --color-pink-accent: var(--pink-accent);
+  --color-purple: var(--purple);
+  --color-coral: var(--pink-accent);
   --color-lime: var(--primary);
+  --color-brand-light: var(--brand-light);
 }
 
-/*
- * Dark-by-default. We expose the same tokens under :root so we don't need
- * to toggle a `.dark` class — the whole app lives in dark mode.
- */
 :root {
   --radius: 0.875rem;
 
-  /* Surfaces */
-  --background: oklch(0.18 0.005 270);          /* deep charcoal #1c1c1f */
-  --foreground: oklch(0.97 0.005 90);           /* warm off-white */
-  --card: oklch(0.22 0.006 270);                /* slightly lifted charcoal */
-  --card-foreground: oklch(0.97 0.005 90);
-  --popover: oklch(0.22 0.006 270);
-  --popover-foreground: oklch(0.97 0.005 90);
+  /* Surfaces — Create Racket charcoal */
+  --background: oklch(0.255 0 0);               /* #2B2B2B */
+  --foreground: oklch(1 0 0);                   /* #FFFFFF */
+  --card: oklch(0.29 0 0);                      /* slightly lifted */
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.255 0 0);
+  --popover-foreground: oklch(1 0 0);
 
-  /* Primary = lime green (signature action color) */
-  --primary: oklch(0.9 0.21 125);               /* electric lime ~#c4f542 */
-  --primary-foreground: oklch(0.18 0.005 270);
+  /* Primary — Racket Green #BADA55 */
+  --primary: oklch(0.86 0.21 125);
+  --primary-foreground: oklch(0.18 0 0);
 
-  /* Secondary = muted charcoal panel */
-  --secondary: oklch(0.27 0.008 270);
-  --secondary-foreground: oklch(0.97 0.005 90);
+  --secondary: oklch(0.32 0 0);
+  --secondary-foreground: oklch(0.98 0 0);
 
-  --muted: oklch(0.25 0.006 270);
-  --muted-foreground: oklch(0.7 0.015 90);
+  --muted: oklch(0.32 0 0);
+  --muted-foreground: oklch(0.72 0 0);
 
-  /* Accent = warm coral/pink */
-  --accent: oklch(0.78 0.16 25);                /* coral ~#ff7a7a */
-  --accent-foreground: oklch(0.18 0.005 270);
+  --accent: oklch(0.32 0 0);
+  --accent-foreground: oklch(0.98 0 0);
 
-  /* Standalone coral token for splashes */
-  --coral: oklch(0.78 0.16 25);
+  /* Racket Pink #FFC0CB */
+  --pink-accent: oklch(0.86 0.07 12);
+  /* Racket Purple #5C37D0 */
+  --purple: oklch(0.45 0.21 290);
+  /* Light pink panel background #FAFAFA */
+  --brand-light: oklch(0.98 0 0);
 
   --destructive: oklch(0.62 0.23 27);
-  --destructive-foreground: oklch(0.98 0.005 90);
+  --destructive-foreground: oklch(0.98 0 0);
 
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.9 0.21 125 / 60%);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.86 0.21 125 / 60%);
 
-  --chart-1: oklch(0.9 0.21 125);
-  --chart-2: oklch(0.78 0.16 25);
-  --chart-3: oklch(0.7 0.15 280);
+  --chart-1: oklch(0.86 0.21 125);
+  --chart-2: oklch(0.86 0.07 12);
+  --chart-3: oklch(0.45 0.21 290);
   --chart-4: oklch(0.8 0.18 70);
   --chart-5: oklch(0.65 0.18 200);
 
-  /* Sidebar — a touch darker than the canvas for separation */
-  --sidebar: oklch(0.15 0.005 270);
-  --sidebar-foreground: oklch(0.97 0.005 90);
-  --sidebar-primary: oklch(0.9 0.21 125);
-  --sidebar-primary-foreground: oklch(0.18 0.005 270);
-  --sidebar-accent: oklch(0.24 0.008 270);
-  --sidebar-accent-foreground: oklch(0.97 0.005 90);
+  --sidebar: oklch(0.21 0 0);
+  --sidebar-foreground: oklch(0.97 0 0);
+  --sidebar-primary: oklch(0.86 0.21 125);
+  --sidebar-primary-foreground: oklch(0.18 0 0);
+  --sidebar-accent: oklch(0.28 0 0);
+  --sidebar-accent-foreground: oklch(0.97 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.9 0.21 125 / 60%);
+  --sidebar-ring: oklch(0.86 0.21 125 / 60%);
 }
 
 .dark {
-  /* Same as :root — app is dark only. Kept so shadcn dark-aware utilities work. */
   color-scheme: dark;
 }
 
@@ -133,25 +135,25 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  .font-display {
+  .font-display, .font-headline {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 }
 
-/* Brand utility: the punky RACKET wordmark gradient */
 @layer utilities {
+  /* Hero gradient: charcoal → racket purple, ported from globals.css */
+  .voicenotes-gradient {
+    background-image: linear-gradient(to bottom, #2b2b2b 30%, #5C37D0);
+  }
+
   .text-gradient-racket {
-    background: linear-gradient(95deg, var(--primary) 0%, var(--coral) 100%);
+    background: linear-gradient(95deg, var(--primary) 0%, var(--pink-accent) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
-  .bg-grain {
-    background-image: radial-gradient(
-      oklch(1 0 0 / 4%) 1px,
-      transparent 1px
-    );
-    background-size: 4px 4px;
-  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 }
