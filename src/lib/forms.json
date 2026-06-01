@@ -1,0 +1,97 @@
+{
+  "brand": {
+    "totalSections": 5,
+    "sections": [
+      {
+        "title": "Start with AI",
+        "description": "Tell us about your brand in your own words, and we'll pre-fill the form for you.",
+        "timeEstimate": "Takes 1 minute"
+      },
+      {
+        "title": "Brand Basics",
+        "description": "Let's get the essentials down. What's your name and what do you do?",
+        "timeEstimate": "Takes 2 minutes"
+      },
+      {
+        "title": "Your Vibe",
+        "description": "Help us understand what your brand stands for.",
+        "timeEstimate": "Takes 2 minutes"
+      },
+      {
+        "title": "Campaign Details",
+        "description": "Tell us about your collaboration goals.",
+        "timeEstimate": "Takes 3 minutes"
+      },
+      {
+        "title": "Final Step!",
+        "description": "You're almost there. Just one more question.",
+        "timeEstimate": "Takes 30 seconds"
+      }
+    ],
+    "fields": {
+      "naturalLanguageInput": { "section": 1, "type": "textarea", "label": "Start by telling us about your brand", "placeholder": "Describe your brand's mission, values, and target audience. For example: 'We are a sustainable fashion brand from Portland, OR, creating timeless pieces from eco-friendly materials...'" },
+      "name": { "section": 2, "type": "text", "label": "What is your brand name?", "placeholder": "e.g., Terra Threads" },
+      "industry": { "section": 2, "type": "radio", "label": "What industry is your brand in?", "options": ["Food & Beverage", "Fashion & Lifestyle", "Tech & Gadgets", "Gaming & Esports", "Travel & Experiences", "Music Events & Venues", "Wellness & Lifestyle", "Automotive", "Sustainability & Eco-Conscious", "Arts & Culture", "Financial & Professional Services"] },
+      "brandValues": { "section": 3, "type": "checkbox", "label": "What are your brand values?", "description": "(Select at least 3)", "options": ["Community & connection", "Authenticity & realness", "Innovation & creativity", "Quality & craftsmanship", "Sustainability & environmental responsibility", "Diversity & inclusion", "Social impact & purpose", "Fun & entertainment", "Luxury & aspiration", "Wellness & self-care"] },
+      "targetAudience": { "section": 3, "type": "checkbox", "label": "Who is your target audience (age)?", "description": "(Select all that apply)", "options": ["Gen Z (18-27)", "Millennials (28-43)", "Gen X (44-59)", "Boomers+ (60+)"] },
+      "primaryGoal": { "section": 4, "type": "radio", "label": "What's your primary goal for music partnerships?", "options": ["Brand awareness (reach new audiences)", "Engagement (build community and connection)", "Drive purchases or conversions", "Content creation (UGC, social content)"] },
+      "campaignTypes": { "section": 4, "type": "checkbox", "label": "What types of campaigns are you planning?", "description": "(Select all that apply)", "options": ["Product launch or new collection", "Event or festival activation", "Content series or ambassadorship", "Social media campaign", "Other"] },
+      "budgetRange": { "section": 4, "type": "radio", "label": "What is your typical budget range?", "options": ["Under $5K", "$5K - $15K", "$15K - $50K", "$50K - $100K", "$100K+", "Flexible / depends on partnership", "Product/value exchange only"] },
+      "timeline": { "section": 4, "type": "radio", "label": "What's your typical campaign timeline?", "options": ["ASAP (within 1 month)", "Soon (1-3 months)", "Planning ahead (3-6 months)", "Long-term (6+ months)", "Ongoing partnerships"] },
+      "readyToConnect": { "section": 5, "type": "radio", "label": "Are you ready to find your vibe?", "options": ["Let's do it!", "Absolutely"] }
+    }
+  },
+  "musician": {
+    "totalSections": 6,
+    "sections": [
+      {
+        "title": "Start with AI",
+        "description": "Describe yourself and your music, and we'll get your profile started.",
+        "timeEstimate": "Takes 1 minute"
+      },
+      {
+        "title": "Artist Details",
+        "description": "Let's cover the basics about you and your music career.",
+        "timeEstimate": "Takes 2 minutes"
+      },
+      {
+        "title": "Your Vibe",
+        "description": "What are you passionate about? This helps us find brands that match your style.",
+        "timeEstimate": "Takes 3 minutes"
+      },
+      {
+        "title": "Your Goals",
+        "description": "What are you looking to achieve with brand partnerships?",
+        "timeEstimate": "Takes 2 minutes"
+      },
+      {
+        "title": "Collaboration Style",
+        "description": "Tell us how you like to work with partners.",
+        "timeEstimate": "Takes 2 minutes"
+      },
+      {
+        "title": "Final Step!",
+        "description": "Let's get this show on the road.",
+        "timeEstimate": "Takes 30 seconds"
+      }
+    ],
+    "fields": {
+      "naturalLanguageInput": { "section": 1, "type": "textarea", "label": "Start with a brief intro", "placeholder": "Describe yourself and your music. For example: 'I'm Luna Bloom, an indie-pop artist from Austin, TX. My music blends dreamy synths with heartfelt lyrics about introspection and connection...'" },
+      "name": { "section": 2, "type": "text", "label": "What's your artist name?", "placeholder": "e.g., Luna Bloom" },
+      "artistType": { "section": 2, "type": "checkbox", "label": "Which of the following best applies to you...", "options": ["Solo artist", "In a band", "Both", "DJ", "Producer", "Songwriter", "Composer", "Session musician"] },
+      "recordContract": { "section": 2, "type": "radio", "label": "Do you have a current record contract?", "options": ["Yes", "No", "Currently in negotiations"] },
+      "recordLabel": { "section": 2, "type": "text", "label": "If yes, please let us know which record label you are currently signed to...", "placeholder": "Record label name", "dependsOn": "recordContract", "dependsOnValue": "Yes" },
+      "interests": { "section": 3, "type": "checkbox", "label": "What are your interests?", "description": "(Select at least 3)", "options": ["Automotive", "Arts & Culture", "Books/Reading", "Business/Finance", "DIY/Home Improvements", "Fashion (designer, luxury)", "Fashion (casual, streetwear)", "Fine Art", "Fitness", "Food", "Gaming", "Health/Beauty", "Interior Design", "LGBTQIA+", "First Nations", "Mental Health", "Movies", "Music", "Current Events", "Outdoor/Adventure", "Parenting/Family", "Pets", "Photography/Videography", "Podcasts", "Sports", "Sustainability/Environment", "Tech/Gadgets", "Travel", "Vegan/Vegetarian", "Wellness", "Crypto/Web3"] },
+      "story": { "section": 3, "type": "textarea", "label": "What's your story?", "placeholder": "Tell us about your journey as an artist. What inspires you? What message do you want to share with the world?" },
+      "creativeAesthetic": { "section": 3, "type": "textarea", "label": "Describe your creative aesthetic.", "placeholder": "How would you describe your visual style, your sound, and the overall vibe of your creative work?" },
+      "goals": { "section": 4, "type": "checkbox", "label": "What are your primary goals for brand partnerships?", "description": "(Select all that apply)", "options": ["Grow my audience & streams", "Increase profile or recognition", "Deepen fan engagement", "Secure funding for a project", "Expand live shows / touring", "Build industry connections"] },
+      "support": { "section": 4, "type": "checkbox", "label": "What kind of support are you looking for?", "description": "(Select all that apply)", "options": ["Brand partnerships", "Creative content (video, photo)", "Strategy, analytics or audience growth", "Connect with creators or collaborators", "Industry intros & networking", "All of the above"] },
+      "sustainabilityImportance": { "section": 5, "type": "radio", "label": "How important is sustainability to you?", "options": ["Very important", "Important", "Neutral", "Not a priority"] },
+      "ecoConsciousBrands": { "section": 5, "type": "radio", "label": "Would you prioritize working with eco-conscious brands?", "options": ["Yes, definitely", "Yes, when possible", "No preference", "No"] },
+      "representationImportance": { "section": 5, "type": "radio", "label": "How important is representation of diverse communities to you?", "options": ["Very important", "Important", "Neutral", "Not a priority"] },
+      "underrepresentedCommunities": { "section": 5, "type": "checkbox", "label": "Do you identify with any underrepresented communities?", "description": "(Optional, select all that apply)", "options": ["LGBTQIA+", "Person of color", "Person with a disability", "Neurodivergent"] },
+      "contentComfortLevel": { "section": 5, "type": "radio", "label": "Your comfort level with creating your own content", "options": ["1 (Not at all)", "2", "3", "4", "5 (Very comfortable)"] },
+      "readyToCreateRacket": { "section": 6, "type": "radio", "label": "Are you ready to Create Racket?", "options": ["Hell yeah", "Hell yeah, again"] }
+    }
+  }
+}
