@@ -1,9 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { WordmarkInline } from "@/components/brand/Wordmark";
+import { Wordmark } from "@/components/brand/Wordmark";
 import { supabase } from "@/integrations/supabase/client";
 
+/**
+ * Header for inner pages (vibe-check, login, dashboard, etc).
+ * The homepage has its own transparent header rendered inside the hero.
+ */
 export function SiteHeader() {
   const [signedIn, setSignedIn] = useState(false);
 
@@ -19,18 +23,15 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center">
-          <WordmarkInline />
+          <Wordmark variant="colour" className="h-8 w-auto" />
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
           <Link to="/vibe-check" className="hover:text-foreground transition-colors">
             Vibe Check
           </Link>
-          <a href="#how-it-works" className="hover:text-foreground transition-colors">
-            How it works
-          </a>
-          <a href="#community" className="hover:text-foreground transition-colors">
-            Community
-          </a>
+          <Link to="/fan-signup" className="hover:text-foreground transition-colors">
+            Mailing list
+          </Link>
         </nav>
         <div className="flex items-center gap-2">
           {signedIn ? (
