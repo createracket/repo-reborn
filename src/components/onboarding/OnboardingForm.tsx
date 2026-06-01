@@ -1,10 +1,13 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Clock } from "lucide-react";
+import { Clock, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+import { parseVibeIntro } from "@/lib/vibe-intro.functions";
 
 import { Button } from "@/components/ui/button";
 import {

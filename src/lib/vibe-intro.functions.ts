@@ -65,11 +65,11 @@ Rules:
       choices?: Array<{ message?: { content?: string } }>;
     };
     const content = json.choices?.[0]?.message?.content ?? "{}";
-    let parsed: Record<string, unknown> = {};
+    let parsed: Record<string, any> = {};
     try {
       parsed = JSON.parse(content);
     } catch {
       parsed = {};
     }
-    return { fields: parsed };
+    return { fields: parsed as Record<string, any> };
   });
