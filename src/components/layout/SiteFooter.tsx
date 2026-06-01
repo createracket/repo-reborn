@@ -31,15 +31,18 @@ export function SiteFooter() {
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 hover:text-foreground"
               >
-                <Instagram className="size-4" /> @createracket
+                <Instagram className="size-4" />
+                <span>@createracket</span>
               </a>
             </li>
             <li>
               <a href="mailto:community@createracket.com" className="inline-flex items-center gap-2 hover:text-foreground">
-                <Mail className="size-4" /> community@createracket.com
+                <Mail className="size-4" />
+                <span>community@createracket.com</span>
               </a>
             </li>
           </ul>
+
         </div>
       </div>
       <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">

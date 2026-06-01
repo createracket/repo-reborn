@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 import {
   calculateVibeScore,
   calculateBrandVibe,
@@ -30,6 +32,8 @@ function Results() {
   const navigate = useNavigate();
   const [stored, setStored] = useState<Stored | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+  const savedRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -39,7 +43,47 @@ function Results() {
       // ignore
     }
     setLoaded(true);
+
+    supabase.auth.getUser().then(({ data }) => setSignedIn(!!data.user));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(!!session);
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Auto-save once when both a result and a session are available.
+  useEffect(() => {
+    if (!stored || !signedIn || savedRef.current) return;
+    savedRef.current = true;
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      const scoring =
+        stored.flow === "musician"
+          ? calculateVibeScore(stored.data)
+          : calculateBrandVibe(stored.data);
+      const payload =
+        stored.flow === "musician"
+          ? {
+              user_id: u.user.id,
+              answers: stored.data,
+              result: "artist" as const,
+              artist_score: (scoring as any).sortedScores?.[0]?.score ?? 0,
+              brand_score: 0,
+            }
+
+          : {
+              user_id: u.user.id,
+              answers: stored.data,
+              result: "brand" as const,
+              artist_score: 0,
+              brand_score: (scoring as any).brandArchetype?.score ?? 0,
+            };
+      const { error } = await supabase.from("vibe_check_responses").insert(payload as any);
+      if (!error) toast.success("Saved to your dashboard.");
+    })();
+  }, [stored, signedIn]);
+
 
   if (!loaded) return null;
 
