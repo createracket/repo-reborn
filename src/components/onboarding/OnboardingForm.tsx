@@ -207,6 +207,54 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
 
   const section = sections[currentSection - 1];
 
+  if (showIntro) {
+    return (
+      <Card className="w-full max-w-3xl mx-auto">
+        <CardHeader>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span>Start with AI · Optional · ~1 min</span>
+          </div>
+          <CardTitle className="font-display text-3xl pt-2">
+            {flow === "musician" ? "Tell us about you" : "Tell us about your brand"}
+          </CardTitle>
+          <CardDescription>
+            {flow === "musician"
+              ? "Drop a quick intro — who you are, your sound, what you care about. We'll pre-fill what we can."
+              : "Drop a quick brief — what you make, who it's for, what you stand for. We'll pre-fill what we can."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Textarea
+            value={introText}
+            onChange={(e) => setIntroText(e.target.value)}
+            rows={7}
+            placeholder={
+              flow === "musician"
+                ? "e.g. I'm Luna Bloom, an indie-pop artist from Austin. My music blends dreamy synths with lyrics about introspection and connection. I care about mental health and authentic community..."
+                : "e.g. We're Terra Threads, a sustainable fashion brand from Portland creating timeless pieces from eco-friendly materials. We want to partner with artists who care about craft and the planet..."
+            }
+          />
+          <p className="text-xs text-muted-foreground">
+            You'll be able to review and edit every field before submitting.
+          </p>
+          <div className="flex flex-wrap justify-between gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setShowIntro(false)}>
+              Skip — I'll fill it in
+            </Button>
+            <Button type="button" onClick={generateFromIntro} disabled={introLoading}>
+              {introLoading ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating…</>
+              ) : (
+                <><Sparkles className="mr-2 h-4 w-4" /> Pre-fill my form</>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full max-w-3xl mx-auto">
       <CardHeader>
@@ -258,6 +306,7 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
         </Form>
       </CardContent>
     </Card>
+
   );
 }
 
