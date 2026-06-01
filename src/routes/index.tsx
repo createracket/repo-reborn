@@ -11,6 +11,17 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 
+import video1 from "@/assets/videos/video-1.mp4.asset.json";
+import video2 from "@/assets/videos/video-2.mp4.asset.json";
+import video3 from "@/assets/videos/video-3.mp4.asset.json";
+import video4 from "@/assets/videos/video-4.mp4.asset.json";
+import video5 from "@/assets/videos/video-5.mp4.asset.json";
+import video6 from "@/assets/videos/video-6.mp4.asset.json";
+import video7 from "@/assets/videos/video-7.mp4.asset.json";
+import video8 from "@/assets/videos/video-8.mp4.asset.json";
+
+const homeVideos = [video1, video2, video3, video4, video5, video6, video7, video8];
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -203,6 +214,30 @@ function Home() {
 
       {/* Curve into dark section */}
       <div className="-mt-12 rounded-t-[3rem] bg-[#2b2b2b]">
+        {/* ── VIDEO GRID ─────────────────────────────────────────────── */}
+        <section className="relative z-10 pt-20 pb-4">
+          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+              {homeVideos.map((v, i) => (
+                <div
+                  key={i}
+                  className="aspect-[9/16] overflow-hidden rounded-2xl bg-black/40 shadow-lg"
+                >
+                  <video
+                    src={v.url}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ── ECOSYSTEM ──────────────────────────────────────────────── */}
         <section id="ecosystem" className="relative z-10 py-20">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
