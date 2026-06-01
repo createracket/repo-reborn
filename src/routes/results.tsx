@@ -1,0 +1,175 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { ArrowRight, RefreshCw } from "lucide-react";
+
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  calculateVibeScore,
+  calculateBrandVibe,
+  getArtistArchetypeDescription,
+} from "@/lib/vibe-check";
+
+type Stored =
+  | { flow: "musician"; data: any; at: number }
+  | { flow: "brand"; data: any; at: number };
+
+export const Route = createFileRoute("/results")({
+  head: () => ({
+    meta: [
+      { title: "Your Vibe — Create Racket" },
+      { name: "description", content: "Your Vibe Check results." },
+    ],
+  }),
+  component: Results,
+});
+
+function Results() {
+  const navigate = useNavigate();
+  const [stored, setStored] = useState<Stored | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("vibeCheck");
+      if (raw) setStored(JSON.parse(raw));
+    } catch {
+      // ignore
+    }
+    setLoaded(true);
+  }, []);
+
+  if (!loaded) return null;
+
+  if (!stored) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <main className="container mx-auto px-4 py-24 text-center">
+          <h1 className="font-display text-4xl">No vibe to check yet</h1>
+          <p className="mt-3 text-muted-foreground">
+            Take the Vibe Check first and we'll show your archetype here.
+          </p>
+          <Button asChild className="mt-6">
+            <Link to="/vibe-check">Take the Vibe Check</Link>
+          </Button>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <SiteHeader />
+      <main className="container mx-auto px-4 py-12 md:py-20">
+        {stored.flow === "musician" ? (
+          <MusicianResults data={stored.data} />
+        ) : (
+          <BrandResults data={stored.data} />
+        )}
+
+        <div className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-3">
+          <Button asChild>
+            <Link to="/login">
+              Save my results <ArrowRight className="ml-1 size-4" />
+            </Link>
+          </Button>
+          <Button variant="outline" onClick={() => navigate({ to: "/vibe-check" })}>
+            <RefreshCw className="mr-1 size-4" /> Retake
+          </Button>
+        </div>
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
+
+function MusicianResults({ data }: { data: any }) {
+  const result = calculateVibeScore(data);
+  return (
+    <div className="mx-auto max-w-3xl">
+      <p className="text-center text-sm uppercase tracking-[0.25em] text-muted-foreground">
+        Your Vibe
+      </p>
+      <h1 className="mt-2 text-center font-display text-4xl md:text-6xl">
+        <span className="text-gradient-racket">{result.primary}</span>
+      </h1>
+      {result.secondary && (
+        <p className="mt-3 text-center text-muted-foreground">
+          with hints of <span className="text-foreground">{result.secondary}</span>
+          {result.isMultiHyphenate && " — you're a multi-hyphenate"}
+        </p>
+      )}
+
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle className="font-display text-2xl">What this means</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            {getArtistArchetypeDescription(result.primary)}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="font-display text-2xl">Your archetype breakdown</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {result.sortedScores.map((s) => (
+            <ScoreBar key={s.archetype} label={s.archetype} score={s.score} />
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function BrandResults({ data }: { data: any }) {
+  const result = calculateBrandVibe(data);
+  return (
+    <div className="mx-auto max-w-3xl">
+      <p className="text-center text-sm uppercase tracking-[0.25em] text-muted-foreground">
+        Your Brand Vibe
+      </p>
+      <h1 className="mt-2 text-center font-display text-4xl md:text-6xl">
+        <span className="text-gradient-racket">{result.brandArchetype}</span>
+      </h1>
+
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle className="font-display text-2xl">Top artist matches</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {(result.artistMatches || []).slice(0, 5).map((m: any) => (
+            <ScoreBar key={m.archetype} label={m.archetype} score={m.score} />
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function ScoreBar({ label, score }: { label: string; score: number }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-medium">{label}</span>
+        <span className="text-muted-foreground">{Math.round(score)}</span>
+      </div>
+      <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${Math.min(100, Math.max(0, score))}%`,
+            background: "linear-gradient(90deg, var(--primary), var(--coral))",
+          }}
+        />
+      </div>
+    </div>
+  );
+}

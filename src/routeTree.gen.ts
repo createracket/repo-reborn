@@ -9,38 +9,173 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VibeCheckRouteImport } from './routes/vibe-check'
+import { Route as ResultsRouteImport } from './routes/results'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as FanSignupRouteImport } from './routes/fan-signup'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
+import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 
+const VibeCheckRoute = VibeCheckRouteImport.update({
+  id: '/vibe-check',
+  path: '/vibe-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultsRoute = ResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FanSignupRoute = FanSignupRouteImport.update({
+  id: '/fan-signup',
+  path: '/fan-signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VibeCheckMusicianRoute = VibeCheckMusicianRouteImport.update({
+  id: '/musician',
+  path: '/musician',
+  getParentRoute: () => VibeCheckRoute,
+} as any)
+const VibeCheckBrandRoute = VibeCheckBrandRouteImport.update({
+  id: '/brand',
+  path: '/brand',
+  getParentRoute: () => VibeCheckRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/fan-signup': typeof FanSignupRoute
+  '/login': typeof LoginRoute
+  '/results': typeof ResultsRoute
+  '/vibe-check': typeof VibeCheckRouteWithChildren
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/vibe-check/brand': typeof VibeCheckBrandRoute
+  '/vibe-check/musician': typeof VibeCheckMusicianRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/fan-signup': typeof FanSignupRoute
+  '/login': typeof LoginRoute
+  '/results': typeof ResultsRoute
+  '/vibe-check': typeof VibeCheckRouteWithChildren
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/vibe-check/brand': typeof VibeCheckBrandRoute
+  '/vibe-check/musician': typeof VibeCheckMusicianRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/fan-signup': typeof FanSignupRoute
+  '/login': typeof LoginRoute
+  '/results': typeof ResultsRoute
+  '/vibe-check': typeof VibeCheckRouteWithChildren
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/vibe-check/brand': typeof VibeCheckBrandRoute
+  '/vibe-check/musician': typeof VibeCheckMusicianRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/fan-signup'
+    | '/login'
+    | '/results'
+    | '/vibe-check'
+    | '/dashboard'
+    | '/vibe-check/brand'
+    | '/vibe-check/musician'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/fan-signup'
+    | '/login'
+    | '/results'
+    | '/vibe-check'
+    | '/dashboard'
+    | '/vibe-check/brand'
+    | '/vibe-check/musician'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/fan-signup'
+    | '/login'
+    | '/results'
+    | '/vibe-check'
+    | '/_authenticated/dashboard'
+    | '/vibe-check/brand'
+    | '/vibe-check/musician'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  FanSignupRoute: typeof FanSignupRoute
+  LoginRoute: typeof LoginRoute
+  ResultsRoute: typeof ResultsRoute
+  VibeCheckRoute: typeof VibeCheckRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vibe-check': {
+      id: '/vibe-check'
+      path: '/vibe-check'
+      fullPath: '/vibe-check'
+      preLoaderRoute: typeof VibeCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/results': {
+      id: '/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof ResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fan-signup': {
+      id: '/fan-signup'
+      path: '/fan-signup'
+      fullPath: '/fan-signup'
+      preLoaderRoute: typeof FanSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +183,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vibe-check/musician': {
+      id: '/vibe-check/musician'
+      path: '/musician'
+      fullPath: '/vibe-check/musician'
+      preLoaderRoute: typeof VibeCheckMusicianRouteImport
+      parentRoute: typeof VibeCheckRoute
+    }
+    '/vibe-check/brand': {
+      id: '/vibe-check/brand'
+      path: '/brand'
+      fullPath: '/vibe-check/brand'
+      preLoaderRoute: typeof VibeCheckBrandRouteImport
+      parentRoute: typeof VibeCheckRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
+interface VibeCheckRouteChildren {
+  VibeCheckBrandRoute: typeof VibeCheckBrandRoute
+  VibeCheckMusicianRoute: typeof VibeCheckMusicianRoute
+}
+
+const VibeCheckRouteChildren: VibeCheckRouteChildren = {
+  VibeCheckBrandRoute: VibeCheckBrandRoute,
+  VibeCheckMusicianRoute: VibeCheckMusicianRoute,
+}
+
+const VibeCheckRouteWithChildren = VibeCheckRoute._addFileChildren(
+  VibeCheckRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  FanSignupRoute: FanSignupRoute,
+  LoginRoute: LoginRoute,
+  ResultsRoute: ResultsRoute,
+  VibeCheckRoute: VibeCheckRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
