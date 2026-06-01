@@ -56,14 +56,14 @@ const VibeCheckIndexRoute = VibeCheckIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const VibeCheckMusicianRoute = VibeCheckMusicianRouteImport.update({
-  id: '/musician',
-  path: '/musician',
-  getParentRoute: () => VibeCheckRoute,
+  id: '/vibe-check/musician',
+  path: '/vibe-check/musician',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const VibeCheckBrandRoute = VibeCheckBrandRouteImport.update({
-  id: '/brand',
-  path: '/brand',
-  getParentRoute: () => VibeCheckRoute,
+  id: '/vibe-check/brand',
+  path: '/vibe-check/brand',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
@@ -161,6 +161,8 @@ export interface RootRouteChildren {
   FanSignupRoute: typeof FanSignupRoute
   LoginRoute: typeof LoginRoute
   ResultsRoute: typeof ResultsRoute
+  VibeCheckBrandRoute: typeof VibeCheckBrandRoute
+  VibeCheckMusicianRoute: typeof VibeCheckMusicianRoute
   VibeCheckIndexRoute: typeof VibeCheckIndexRoute
 }
 
@@ -217,17 +219,17 @@ declare module '@tanstack/react-router' {
     }
     '/vibe-check/musician': {
       id: '/vibe-check/musician'
-      path: '/musician'
+      path: '/vibe-check/musician'
       fullPath: '/vibe-check/musician'
       preLoaderRoute: typeof VibeCheckMusicianRouteImport
-      parentRoute: typeof VibeCheckRoute
+      parentRoute: typeof rootRouteImport
     }
     '/vibe-check/brand': {
       id: '/vibe-check/brand'
-      path: '/brand'
+      path: '/vibe-check/brand'
       fullPath: '/vibe-check/brand'
       preLoaderRoute: typeof VibeCheckBrandRouteImport
-      parentRoute: typeof VibeCheckRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
@@ -267,6 +269,8 @@ const rootRouteChildren: RootRouteChildren = {
   FanSignupRoute: FanSignupRoute,
   LoginRoute: LoginRoute,
   ResultsRoute: ResultsRoute,
+  VibeCheckBrandRoute: VibeCheckBrandRoute,
+  VibeCheckMusicianRoute: VibeCheckMusicianRoute,
   VibeCheckIndexRoute: VibeCheckIndexRoute,
 }
 export const routeTree = rootRouteImport
