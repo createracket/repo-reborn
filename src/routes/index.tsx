@@ -306,7 +306,13 @@ function Home() {
                 Artists, brands and creative partners collaborating across every corner of
                 the map.
               </motion.p>
-              <div className="mt-10">
+              <motion.div
+                className="mt-10"
+                initial={{ opacity: 0, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ type: "spring", stiffness: 120, damping: 10, mass: 0.8 }}
+              >
                 <div
                   className="mx-auto w-full max-w-5xl overflow-hidden rounded-3xl p-4 sm:p-6 md:p-8"
                   style={{
@@ -320,7 +326,8 @@ function Home() {
                     className="block w-full"
                   />
                 </div>
-              </div>
+              </motion.div>
+
             </motion.div>
           </div>
         </section>
