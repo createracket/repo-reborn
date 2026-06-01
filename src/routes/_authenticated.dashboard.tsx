@@ -85,11 +85,12 @@ function DashboardPage() {
 
       if (rosterRows && rosterRows.length) {
         const memberIds = rosterRows.map((r) => r.member_id);
-        const { data: profiles } = await supabase
-          .from("profiles")
+        const { data: profilesData } = await (supabase as any)
+          .from("public_profiles")
           .select("id, display_name, avatar_url")
           .in("id", memberIds);
-        const byId = new Map((profiles ?? []).map((p) => [p.id, p]));
+        const profiles = (profilesData ?? []) as Array<{ id: string; display_name: string | null; avatar_url: string | null }>;
+        const byId = new Map(profiles.map((p) => [p.id, p]));
         setRoster(
           rosterRows.map((r) => ({ ...r, member: byId.get(r.member_id) ?? null }))
         );
