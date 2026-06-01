@@ -19,8 +19,12 @@ import video5 from "@/assets/videos/video-5.mp4.asset.json";
 import video6 from "@/assets/videos/video-6.mp4.asset.json";
 import video7 from "@/assets/videos/video-7.mp4.asset.json";
 import video8 from "@/assets/videos/video-8.mp4.asset.json";
+import video9 from "@/assets/videos/video-9.mp4.asset.json";
+import video10 from "@/assets/videos/video-10.mp4.asset.json";
+import video11 from "@/assets/videos/video-11.mp4.asset.json";
+import video12 from "@/assets/videos/video-12.mp4.asset.json";
 
-const homeVideos = [video1, video2, video3, video4, video5, video6, video7, video8];
+const homeVideos = [video1, video2, video3, video4, video5, video6, video7, video8, video9, video10, video11, video12];
 
 export const Route = createFileRoute("/")({
   head: () => ({
