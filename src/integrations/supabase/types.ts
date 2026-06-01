@@ -59,6 +59,45 @@ export type Database = {
         }
         Relationships: []
       }
+      community_profiles: {
+        Row: {
+          account_type: string
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string
+          id: string
+          location: string | null
+          socials: Json
+          tagline: string | null
+          values: string[]
+        }
+        Insert: {
+          account_type: string
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          location?: string | null
+          socials?: Json
+          tagline?: string | null
+          values?: string[]
+        }
+        Update: {
+          account_type?: string
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          location?: string | null
+          socials?: Json
+          tagline?: string | null
+          values?: string[]
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -122,14 +161,11 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
-          is_mock: boolean
-          location: string | null
           marketing_opt_in: boolean
           notify_direct_messages: boolean
           notify_new_matches: boolean
           notify_newsletter: boolean
           socials: Json
-          tagline: string | null
           updated_at: string
           values: string[]
         }
@@ -141,14 +177,11 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id: string
-          is_mock?: boolean
-          location?: string | null
           marketing_opt_in?: boolean
           notify_direct_messages?: boolean
           notify_new_matches?: boolean
           notify_newsletter?: boolean
           socials?: Json
-          tagline?: string | null
           updated_at?: string
           values?: string[]
         }
@@ -160,14 +193,11 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
-          is_mock?: boolean
-          location?: string | null
           marketing_opt_in?: boolean
           notify_direct_messages?: boolean
           notify_new_matches?: boolean
           notify_newsletter?: boolean
           socials?: Json
-          tagline?: string | null
           updated_at?: string
           values?: string[]
         }
