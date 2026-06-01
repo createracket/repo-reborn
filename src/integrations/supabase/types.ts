@@ -14,7 +14,180 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      campaign_briefs: {
+        Row: {
+          budget: number | null
+          collaboration_types: string[]
+          contact_email: string | null
+          core_values: string[]
+          created_at: string
+          description: string
+          id: string
+          status: string
+          target_audience: string | null
+          timeline: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          budget?: number | null
+          collaboration_types?: string[]
+          contact_email?: string | null
+          core_values?: string[]
+          created_at?: string
+          description?: string
+          id?: string
+          status?: string
+          target_audience?: string | null
+          timeline?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          budget?: number | null
+          collaboration_types?: string[]
+          contact_email?: string | null
+          core_values?: string[]
+          created_at?: string
+          description?: string
+          id?: string
+          status?: string
+          target_audience?: string | null
+          timeline?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mailing_list_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          marketing_opt_in: boolean
+          name: string | null
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          marketing_opt_in?: boolean
+          name?: string | null
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          marketing_opt_in?: boolean
+          name?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          account_type: Database["public"]["Enums"]["account_type"] | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          marketing_opt_in: boolean
+          notify_direct_messages: boolean
+          notify_new_matches: boolean
+          notify_newsletter: boolean
+          socials: Json
+          updated_at: string
+          values: string[]
+        }
+        Insert: {
+          account_type?: Database["public"]["Enums"]["account_type"] | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          marketing_opt_in?: boolean
+          notify_direct_messages?: boolean
+          notify_new_matches?: boolean
+          notify_newsletter?: boolean
+          socials?: Json
+          updated_at?: string
+          values?: string[]
+        }
+        Update: {
+          account_type?: Database["public"]["Enums"]["account_type"] | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          marketing_opt_in?: boolean
+          notify_direct_messages?: boolean
+          notify_new_matches?: boolean
+          notify_newsletter?: boolean
+          socials?: Json
+          updated_at?: string
+          values?: string[]
+        }
+        Relationships: []
+      }
+      roster_members: {
+        Row: {
+          created_at: string
+          id: string
+          member_id: string
+          owner_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          member_id: string
+          owner_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          member_id?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
+      vibe_check_responses: {
+        Row: {
+          answers: Json
+          artist_score: number
+          brand_score: number
+          created_at: string
+          id: string
+          result: Database["public"]["Enums"]["account_type"] | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          artist_score?: number
+          brand_score?: number
+          created_at?: string
+          id?: string
+          result?: Database["public"]["Enums"]["account_type"] | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          artist_score?: number
+          brand_score?: number
+          created_at?: string
+          id?: string
+          result?: Database["public"]["Enums"]["account_type"] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +196,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      account_type: "artist" | "brand" | "fan"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +323,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_type: ["artist", "brand", "fan"],
+    },
   },
 } as const
