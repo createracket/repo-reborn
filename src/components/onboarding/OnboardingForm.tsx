@@ -138,6 +138,41 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
   }, [fields]);
 
   const [currentSection, setCurrentSection] = useState(1);
+  const [showIntro, setShowIntro] = useState(true);
+  const [introText, setIntroText] = useState("");
+  const [introLoading, setIntroLoading] = useState(false);
+  const parseIntroFn = useServerFn(parseVibeIntro);
+
+  async function generateFromIntro() {
+    if (introText.trim().length < 20) {
+      toast.error("Add a sentence or two more so we have something to work with.");
+      return;
+    }
+    setIntroLoading(true);
+    try {
+      const { fields: prefill } = await parseIntroFn({ data: { flow, text: introText } });
+      const validKeys = new Set(Object.keys(fields));
+      let applied = 0;
+      Object.entries(prefill || {}).forEach(([key, value]) => {
+        if (!validKeys.has(key)) return;
+        if (value === null || value === undefined || value === "") return;
+        if (Array.isArray(value) && value.length === 0) return;
+        form.setValue(key as any, value as any, { shouldValidate: false, shouldDirty: true });
+        applied += 1;
+      });
+      if (applied === 0) {
+        toast.message("We didn't catch enough — fill it in manually below.");
+      } else {
+        toast.success(`Pre-filled ${applied} field${applied === 1 ? "" : "s"}. Review and edit anything.`);
+      }
+      setShowIntro(false);
+    } catch (err: any) {
+      toast.error(err?.message || "Couldn't process that. Try again or skip.");
+    } finally {
+      setIntroLoading(false);
+    }
+  }
+
 
   const form = useForm<any>({
     resolver: zodResolver((flow === "musician" ? musicianSchema : brandSchema) as any) as any,
