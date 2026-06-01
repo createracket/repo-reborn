@@ -79,7 +79,7 @@ function Results() {
               artist_score: 0,
               brand_score: (scoring as any).brandArchetype?.score ?? 0,
             };
-      const { error } = await supabase.from("vibe_check_responses").insert(payload);
+      const { error } = await supabase.from("vibe_check_responses").insert(payload as any);
       if (!error) toast.success("Saved to your dashboard.");
     })();
   }, [stored, signedIn]);
