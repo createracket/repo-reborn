@@ -232,29 +232,7 @@ function Home() {
       <div className="-mt-12 rounded-t-[3rem] bg-[#2b2b2b]">
         {/* ── VIDEO MARQUEE ──────────────────────────────────────────── */}
         <section className="relative z-10 overflow-hidden pt-16 pb-4">
-          <div
-            className="flex w-max gap-4 animate-marquee"
-            style={{ animationDuration: "80s" }}
-          >
-            {[...homeVideos, ...homeVideos].map((v, i) => (
-              <div
-                key={i}
-                className="w-[200px] shrink-0 overflow-hidden rounded-2xl bg-black/40 shadow-lg sm:w-[240px] md:w-[280px]"
-              >
-                <div className="aspect-[9/16]">
-                  <video
-                    src={v.url}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          <VideoMarquee />
         </section>
 
 
