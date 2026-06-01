@@ -19,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated.connect'
 
 const VibeCheckRoute = VibeCheckRouteImport.update({
   id: '/vibe-check',
@@ -69,6 +70,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedConnectRoute = AuthenticatedConnectRouteImport.update({
+  id: '/connect',
+  path: '/connect',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
   '/vibe-check': typeof VibeCheckRouteWithChildren
+  '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
   '/vibe-check': typeof VibeCheckRouteWithChildren
+  '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
   '/vibe-check': typeof VibeCheckRouteWithChildren
+  '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/results'
     | '/vibe-check'
+    | '/connect'
     | '/dashboard'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/results'
     | '/vibe-check'
+    | '/connect'
     | '/dashboard'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/results'
     | '/vibe-check'
+    | '/_authenticated/connect'
     | '/_authenticated/dashboard'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
@@ -224,14 +236,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/connect': {
+      id: '/_authenticated/connect'
+      path: '/connect'
+      fullPath: '/connect'
+      preLoaderRoute: typeof AuthenticatedConnectRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedConnectRoute: typeof AuthenticatedConnectRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedConnectRoute: AuthenticatedConnectRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
 }
 
