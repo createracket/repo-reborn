@@ -125,6 +125,54 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_briefs: {
+        Row: {
+          budget: number | null
+          collaboration_types: string[]
+          company: string | null
+          contact_email: string
+          contact_name: string | null
+          core_values: string[]
+          created_at: string
+          description: string
+          id: string
+          status: string
+          target_audience: string | null
+          timeline: string | null
+          title: string
+        }
+        Insert: {
+          budget?: number | null
+          collaboration_types?: string[]
+          company?: string | null
+          contact_email: string
+          contact_name?: string | null
+          core_values?: string[]
+          created_at?: string
+          description?: string
+          id?: string
+          status?: string
+          target_audience?: string | null
+          timeline?: string | null
+          title: string
+        }
+        Update: {
+          budget?: number | null
+          collaboration_types?: string[]
+          company?: string | null
+          contact_email?: string
+          contact_name?: string | null
+          core_values?: string[]
+          created_at?: string
+          description?: string
+          id?: string
+          status?: string
+          target_audience?: string | null
+          timeline?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       mailing_list_subscribers: {
         Row: {
           created_at: string
