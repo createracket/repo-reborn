@@ -67,10 +67,11 @@ function Results() {
           ? {
               user_id: u.user.id,
               answers: stored.data,
-              result: "musician" as const,
+              result: "artist" as const,
               artist_score: (scoring as any).sortedScores?.[0]?.score ?? 0,
               brand_score: 0,
             }
+
           : {
               user_id: u.user.id,
               answers: stored.data,
