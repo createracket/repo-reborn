@@ -13,6 +13,7 @@ import { Route as VibeCheckRouteImport } from './routes/vibe-check'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FanSignupRouteImport } from './routes/fan-signup'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
@@ -37,6 +38,11 @@ const LoginRoute = LoginRouteImport.update({
 const FanSignupRoute = FanSignupRouteImport.update({
   id: '/fan-signup',
   path: '/fan-signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -66,6 +72,7 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/contact'
     | '/fan-signup'
     | '/login'
     | '/results'
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/contact'
     | '/fan-signup'
     | '/login'
     | '/results'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/contact'
     | '/fan-signup'
     | '/login'
     | '/results'
@@ -133,6 +145,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  ContactRoute: typeof ContactRoute
   FanSignupRoute: typeof FanSignupRoute
   LoginRoute: typeof LoginRoute
   ResultsRoute: typeof ResultsRoute
@@ -167,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/fan-signup'
       fullPath: '/fan-signup'
       preLoaderRoute: typeof FanSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -236,6 +256,7 @@ const VibeCheckRouteWithChildren = VibeCheckRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  ContactRoute: ContactRoute,
   FanSignupRoute: FanSignupRoute,
   LoginRoute: LoginRoute,
   ResultsRoute: ResultsRoute,
@@ -244,3 +265,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
