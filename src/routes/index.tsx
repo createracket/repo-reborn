@@ -216,12 +216,12 @@ function Home() {
               </Button>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="mt-14">
-              <p className="mb-4 text-center text-sm text-white/70">Trusted by</p>
+            <motion.div variants={fadeUp} className="mt-20 md:mt-24">
+              <p className="mb-8 text-center text-sm tracking-wide text-white/80">Trusted by</p>
               <img
                 src={trustedLogos.url}
                 alt="Trusted by Unilever, Ticketmaster, Unified, Hogarth, Tixel, 19 Crimes, Transgenre, KFC, Fraks"
-                className="mx-auto h-8 w-auto max-w-full opacity-90 md:h-10"
+                className="mx-auto h-10 w-auto max-w-full md:h-14"
               />
             </motion.div>
           </motion.div>
