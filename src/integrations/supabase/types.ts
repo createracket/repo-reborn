@@ -59,6 +59,45 @@ export type Database = {
         }
         Relationships: []
       }
+      community_profiles: {
+        Row: {
+          account_type: string
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string
+          id: string
+          location: string | null
+          socials: Json
+          tagline: string | null
+          values: string[]
+        }
+        Insert: {
+          account_type: string
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name: string
+          id?: string
+          location?: string | null
+          socials?: Json
+          tagline?: string | null
+          values?: string[]
+        }
+        Update: {
+          account_type?: string
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          location?: string | null
+          socials?: Json
+          tagline?: string | null
+          values?: string[]
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string

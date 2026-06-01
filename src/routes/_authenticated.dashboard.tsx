@@ -40,11 +40,21 @@ type RosterRow = {
   member?: { id: string; display_name: string | null; avatar_url: string | null } | null;
 };
 
+type CommunityMember = {
+  id: string;
+  display_name: string;
+  account_type: "artist" | "brand" | "fan";
+  tagline: string | null;
+  location: string | null;
+  avatar_url: string | null;
+};
+
 function DashboardPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string | null>(null);
   const [latestVibe, setLatestVibe] = useState<VibeRow | null>(null);
   const [roster, setRoster] = useState<RosterRow[]>([]);
+  const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,7 +63,7 @@ function DashboardPage() {
       setEmail(u.user?.email ?? null);
       if (!u.user) return;
 
-      const [{ data: vibes }, { data: rosterRows }] = await Promise.all([
+      const [{ data: vibes }, { data: rosterRows }, { data: communityRows }] = await Promise.all([
         supabase
           .from("vibe_check_responses")
           .select("id, created_at, result, answers, artist_score, brand_score")
@@ -63,9 +73,15 @@ function DashboardPage() {
           .from("roster_members")
           .select("id, member_id, created_at")
           .order("created_at", { ascending: false }),
+        supabase
+          .from("community_profiles")
+          .select("id, display_name, account_type, tagline, location, avatar_url")
+          .order("created_at", { ascending: false })
+          .limit(8),
       ]);
 
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
+      setCommunity((communityRows as CommunityMember[]) ?? []);
 
       if (rosterRows && rosterRows.length) {
         const memberIds = rosterRows.map((r) => r.member_id);
@@ -197,6 +213,57 @@ function DashboardPage() {
                         >
                           Remove
                         </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* SUGGESTED MATCHES (community) */}
+          <div className="lg:col-span-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-display text-2xl flex items-center gap-2">
+                  <Sparkles className="size-5 text-primary" /> Suggested matches
+                </CardTitle>
+                <CardDescription>
+                  A taste of who's on Create Racket — sample artists and brands to give you a feel
+                  for the kind of matches we'll surface as the community grows.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <p className="text-sm text-muted-foreground">Loading…</p>
+                ) : community.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No community members yet.</p>
+                ) : (
+                  <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    {community.map((m) => (
+                      <li
+                        key={m.id}
+                        className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="size-10 overflow-hidden rounded-full bg-muted">
+                            {m.avatar_url ? (
+                              <img src={m.avatar_url} alt="" className="size-full object-cover" />
+                            ) : null}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="truncate font-medium">{m.display_name}</div>
+                            <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                              {m.account_type}
+                            </div>
+                          </div>
+                        </div>
+                        {m.tagline ? (
+                          <p className="text-sm text-muted-foreground line-clamp-2">{m.tagline}</p>
+                        ) : null}
+                        {m.location ? (
+                          <p className="text-xs text-muted-foreground">{m.location}</p>
+                        ) : null}
                       </li>
                     ))}
                   </ul>

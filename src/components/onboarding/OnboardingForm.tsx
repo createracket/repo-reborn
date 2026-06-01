@@ -1,10 +1,13 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Clock } from "lucide-react";
+import { Clock, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+
+import { parseVibeIntro } from "@/lib/vibe-intro.functions";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -135,6 +138,41 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
   }, [fields]);
 
   const [currentSection, setCurrentSection] = useState(1);
+  const [showIntro, setShowIntro] = useState(true);
+  const [introText, setIntroText] = useState("");
+  const [introLoading, setIntroLoading] = useState(false);
+  const parseIntroFn = useServerFn(parseVibeIntro);
+
+  async function generateFromIntro() {
+    if (introText.trim().length < 20) {
+      toast.error("Add a sentence or two more so we have something to work with.");
+      return;
+    }
+    setIntroLoading(true);
+    try {
+      const { fields: prefill } = await parseIntroFn({ data: { flow, text: introText } });
+      const validKeys = new Set(Object.keys(fields));
+      let applied = 0;
+      Object.entries(prefill || {}).forEach(([key, value]) => {
+        if (!validKeys.has(key)) return;
+        if (value === null || value === undefined || value === "") return;
+        if (Array.isArray(value) && value.length === 0) return;
+        form.setValue(key as any, value as any, { shouldValidate: false, shouldDirty: true });
+        applied += 1;
+      });
+      if (applied === 0) {
+        toast.message("We didn't catch enough — fill it in manually below.");
+      } else {
+        toast.success(`Pre-filled ${applied} field${applied === 1 ? "" : "s"}. Review and edit anything.`);
+      }
+      setShowIntro(false);
+    } catch (err: any) {
+      toast.error(err?.message || "Couldn't process that. Try again or skip.");
+    } finally {
+      setIntroLoading(false);
+    }
+  }
+
 
   const form = useForm<any>({
     resolver: zodResolver((flow === "musician" ? musicianSchema : brandSchema) as any) as any,
@@ -168,6 +206,54 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
   }
 
   const section = sections[currentSection - 1];
+
+  if (showIntro) {
+    return (
+      <Card className="w-full max-w-3xl mx-auto">
+        <CardHeader>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span>Start with AI · Optional · ~1 min</span>
+          </div>
+          <CardTitle className="font-display text-3xl pt-2">
+            {flow === "musician" ? "Tell us about you" : "Tell us about your brand"}
+          </CardTitle>
+          <CardDescription>
+            {flow === "musician"
+              ? "Drop a quick intro — who you are, your sound, what you care about. We'll pre-fill what we can."
+              : "Drop a quick brief — what you make, who it's for, what you stand for. We'll pre-fill what we can."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Textarea
+            value={introText}
+            onChange={(e) => setIntroText(e.target.value)}
+            rows={7}
+            placeholder={
+              flow === "musician"
+                ? "e.g. I'm Luna Bloom, an indie-pop artist from Austin. My music blends dreamy synths with lyrics about introspection and connection. I care about mental health and authentic community..."
+                : "e.g. We're Terra Threads, a sustainable fashion brand from Portland creating timeless pieces from eco-friendly materials. We want to partner with artists who care about craft and the planet..."
+            }
+          />
+          <p className="text-xs text-muted-foreground">
+            You'll be able to review and edit every field before submitting.
+          </p>
+          <div className="flex flex-wrap justify-between gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={() => setShowIntro(false)}>
+              Skip — I'll fill it in
+            </Button>
+            <Button type="button" onClick={generateFromIntro} disabled={introLoading}>
+              {introLoading ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating…</>
+              ) : (
+                <><Sparkles className="mr-2 h-4 w-4" /> Pre-fill my form</>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-3xl mx-auto">
@@ -220,6 +306,7 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
         </Form>
       </CardContent>
     </Card>
+
   );
 }
 
