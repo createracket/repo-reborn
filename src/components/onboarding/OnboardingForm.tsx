@@ -137,7 +137,7 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
   const [currentSection, setCurrentSection] = useState(1);
 
   const form = useForm<any>({
-    resolver: zodResolver(flow === "musician" ? musicianSchema : brandSchema) as any,
+    resolver: zodResolver((flow === "musician" ? musicianSchema : brandSchema) as any) as any,
     defaultValues: (flow === "musician" ? MUSICIAN_DEFAULTS : BRAND_DEFAULTS) as any,
     mode: "onChange",
   });
@@ -285,6 +285,7 @@ function FieldRenderer({
   }
 
   if (config.type === "checkbox" && config.options) {
+    const options = config.options;
     return (
       <FormField
         control={form.control}
@@ -302,7 +303,7 @@ function FieldRenderer({
               )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2">
-              {config.options.map((item) => (
+              {options.map((item) => (
                 <FormField
                   key={item}
                   control={form.control}
@@ -334,6 +335,7 @@ function FieldRenderer({
   }
 
   if (config.type === "radio" && config.options) {
+    const options = config.options;
     return (
       <FormField
         control={form.control}
@@ -354,7 +356,7 @@ function FieldRenderer({
                 defaultValue={field.value as string}
                 className="space-y-2"
               >
-                {config.options.map((option) => {
+                {options.map((option) => {
                   const id = `${name}-${option.replace(/\s+/g, "-").toLowerCase()}`;
                   return (
                     <FormItem
