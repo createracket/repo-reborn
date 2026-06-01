@@ -26,6 +26,9 @@ import video12 from "@/assets/videos/video-12.mp4.asset.json";
 
 const homeVideos = [video1, video2, video3, video4, video5, video6, video7, video8, video9, video10, video11, video12];
 
+import trustedLogos from "@/assets/home/trusted-logos.png.asset.json";
+import communityMap from "@/assets/home/community-map.svg.asset.json";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -212,6 +215,15 @@ function Home() {
                 </Link>
               </Button>
             </motion.div>
+
+            <motion.div variants={fadeUp} className="mt-14">
+              <p className="mb-4 text-center text-sm text-white/70">Trusted by</p>
+              <img
+                src={trustedLogos.url}
+                alt="Trusted by Unilever, Ticketmaster, Unified, Hogarth, Tixel, 19 Crimes, Transgenre, KFC, Fraks"
+                className="mx-auto h-8 w-auto max-w-full opacity-90 md:h-10"
+              />
+            </motion.div>
           </motion.div>
         </main>
       </div>
@@ -292,6 +304,43 @@ function Home() {
         </section>
 
         <Divider />
+
+        {/* ── COMMUNITY MAP ──────────────────────────────────────────── */}
+        <section className="py-20">
+          <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <motion.div
+              className="text-center"
+              variants={stagger}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              <motion.h2
+                variants={fadeUp}
+                className="font-headline text-4xl tracking-tighter text-white md:text-5xl"
+              >
+                A global community
+              </motion.h2>
+              <motion.p
+                variants={fadeUp}
+                className="mx-auto mt-4 max-w-2xl text-lg text-white/80"
+              >
+                Artists, brands and creative partners collaborating across every corner of
+                the map.
+              </motion.p>
+              <motion.div variants={fadeUp} className="mt-10">
+                <img
+                  src={communityMap.url}
+                  alt="Map of the Create Racket global community"
+                  className="mx-auto w-full max-w-5xl"
+                />
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
+        <Divider />
+
 
         {/* ── TESTIMONIALS ───────────────────────────────────────────── */}
         <section id="testimonials" className="py-20">
