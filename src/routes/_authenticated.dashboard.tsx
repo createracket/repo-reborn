@@ -40,6 +40,15 @@ type RosterRow = {
   member?: { id: string; display_name: string | null; avatar_url: string | null } | null;
 };
 
+type CommunityMember = {
+  id: string;
+  display_name: string;
+  account_type: "artist" | "brand" | "fan";
+  tagline: string | null;
+  location: string | null;
+  avatar_url: string | null;
+};
+
 function DashboardPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string | null>(null);
