@@ -26,6 +26,9 @@ import video12 from "@/assets/videos/video-12.mp4.asset.json";
 
 const homeVideos = [video1, video2, video3, video4, video5, video6, video7, video8, video9, video10, video11, video12];
 
+import trustedLogos from "@/assets/home/trusted-logos.png.asset.json";
+import communityMap from "@/assets/home/community-map.svg.asset.json";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -211,6 +214,15 @@ function Home() {
                   Or take the Vibe Check <ArrowRight className="ml-1 size-4" />
                 </Link>
               </Button>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="mt-14">
+              <p className="mb-4 text-center text-sm text-white/70">Trusted by</p>
+              <img
+                src={trustedLogos.url}
+                alt="Trusted by Unilever, Ticketmaster, Unified, Hogarth, Tixel, 19 Crimes, Transgenre, KFC, Fraks"
+                className="mx-auto h-8 w-auto max-w-full opacity-90 md:h-10"
+              />
             </motion.div>
           </motion.div>
         </main>
