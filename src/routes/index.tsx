@@ -328,13 +328,21 @@ function Home() {
                 Artists, brands and creative partners collaborating across every corner of
                 the map.
               </motion.p>
-              <motion.div variants={fadeUp} className="mt-10">
-                <img
-                  src={communityMap.url}
-                  alt="Map of the Create Racket global community"
-                  className="mx-auto w-full max-w-5xl"
-                />
-              </motion.div>
+              <div className="mt-10">
+                <div
+                  className="mx-auto w-full max-w-5xl overflow-hidden rounded-3xl p-4 sm:p-6 md:p-8"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(135deg, #2b2256 0%, #5C37D0 100%)",
+                  }}
+                >
+                  <img
+                    src={communityMap.url}
+                    alt="Map of the Create Racket global community"
+                    className="block w-full"
+                  />
+                </div>
+              </div>
             </motion.div>
           </div>
         </section>
