@@ -98,7 +98,9 @@ function Counter({ from, to, duration = 2.5 }: { from: number; to: number; durat
   return <span ref={ref}>{v.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>;
 }
 
-const fadeUp = {
+import type { Variants } from "framer-motion";
+
+const fadeUp: Variants = {
   hidden: { y: 24, opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } },
 };

@@ -142,6 +142,11 @@ function DashboardPage() {
               <CardTitle className="font-display text-2xl">Quick actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
+              <Button asChild className="w-full justify-start">
+                <Link to="/connect">
+                  <ClipboardList className="mr-2 size-4" /> Submit a brief
+                </Link>
+              </Button>
               <Button asChild className="w-full justify-start" variant="outline">
                 <Link to="/vibe-check">
                   <Sparkles className="mr-2 size-4" /> Retake the Vibe Check
