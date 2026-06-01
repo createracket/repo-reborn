@@ -305,6 +305,43 @@ function Home() {
 
         <Divider />
 
+        {/* ── COMMUNITY MAP ──────────────────────────────────────────── */}
+        <section className="py-20">
+          <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <motion.div
+              className="text-center"
+              variants={stagger}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              <motion.h2
+                variants={fadeUp}
+                className="font-headline text-4xl tracking-tighter text-white md:text-5xl"
+              >
+                A global community
+              </motion.h2>
+              <motion.p
+                variants={fadeUp}
+                className="mx-auto mt-4 max-w-2xl text-lg text-white/80"
+              >
+                Artists, brands and creative partners collaborating across every corner of
+                the map.
+              </motion.p>
+              <motion.div variants={fadeUp} className="mt-10">
+                <img
+                  src={communityMap.url}
+                  alt="Map of the Create Racket global community"
+                  className="mx-auto w-full max-w-5xl"
+                />
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
+        <Divider />
+
+
         {/* ── TESTIMONIALS ───────────────────────────────────────────── */}
         <section id="testimonials" className="py-20">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 text-center">
