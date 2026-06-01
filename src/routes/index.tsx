@@ -216,7 +216,7 @@ function Home() {
               </Button>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="mt-20 md:mt-24">
+            <motion.div variants={fadeUp} className="mt-28 pb-8 md:mt-36 md:pb-12">
               <p className="mb-8 text-center text-sm tracking-wide text-white/80">Trusted by</p>
               <img
                 src={trustedLogos.url}
