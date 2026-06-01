@@ -21,6 +21,7 @@ import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.music
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated.connect'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 
 const SubmitBriefRoute = SubmitBriefRouteImport.update({
   id: '/submit-brief',
@@ -81,6 +82,11 @@ const AuthenticatedConnectRoute = AuthenticatedConnectRouteImport.update({
   path: '/connect',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
   '/submit-brief': typeof SubmitBriefRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
   '/submit-brief': typeof SubmitBriefRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
   '/submit-brief': typeof SubmitBriefRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/results'
     | '/submit-brief'
+    | '/admin'
     | '/connect'
     | '/dashboard'
     | '/vibe-check/brand'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/results'
     | '/submit-brief'
+    | '/admin'
     | '/connect'
     | '/dashboard'
     | '/vibe-check/brand'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/results'
     | '/submit-brief'
+    | '/_authenticated/admin'
     | '/_authenticated/connect'
     | '/_authenticated/dashboard'
     | '/vibe-check/brand'
@@ -265,15 +277,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConnectRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedConnectRoute: typeof AuthenticatedConnectRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedConnectRoute: AuthenticatedConnectRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
 }
@@ -297,3 +318,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
