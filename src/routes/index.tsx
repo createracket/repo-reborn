@@ -218,15 +218,18 @@ function Home() {
 
       {/* Curve into dark section */}
       <div className="-mt-12 rounded-t-[3rem] bg-[#2b2b2b]">
-        {/* ── VIDEO GRID ─────────────────────────────────────────────── */}
-        <section className="relative z-10 pt-20 pb-4">
-          <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-              {homeVideos.map((v, i) => (
-                <div
-                  key={i}
-                  className="aspect-[9/16] overflow-hidden rounded-2xl bg-black/40 shadow-lg"
-                >
+        {/* ── VIDEO MARQUEE ──────────────────────────────────────────── */}
+        <section className="relative z-10 overflow-hidden pt-16 pb-4">
+          <div
+            className="flex w-max gap-4 animate-marquee"
+            style={{ animationDuration: "80s" }}
+          >
+            {[...homeVideos, ...homeVideos].map((v, i) => (
+              <div
+                key={i}
+                className="w-[200px] shrink-0 overflow-hidden rounded-2xl bg-black/40 shadow-lg sm:w-[240px] md:w-[280px]"
+              >
+                <div className="aspect-[9/16]">
                   <video
                     src={v.url}
                     autoPlay
@@ -237,10 +240,11 @@ function Home() {
                     className="h-full w-full object-cover"
                   />
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </section>
+
 
         {/* ── ECOSYSTEM ──────────────────────────────────────────────── */}
         <section id="ecosystem" className="relative z-10 py-20">
