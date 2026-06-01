@@ -4,7 +4,7 @@ import { Mic2, Users, ArrowRight } from "lucide-react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 
-export const Route = createFileRoute("/vibe-check")({
+export const Route = createFileRoute("/vibe-check/")({
   head: () => ({
     meta: [
       { title: "The Vibe Check — Create Racket" },
