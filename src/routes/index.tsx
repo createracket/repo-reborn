@@ -165,9 +165,8 @@ function Home() {
             <a href="#ecosystem" className="hover:text-white">How it works</a>
             <a href="#testimonials" className="hover:text-white">Community</a>
           </nav>
-          <Button asChild size="sm" variant="secondary" className="rounded-full">
-            <Link to="/login">Log in</Link>
-          </Button>
+          <HeroAuthButton />
+
         </header>
 
         <main className="flex flex-grow items-center justify-center pt-12 pb-8 md:pt-20 md:pb-12">
