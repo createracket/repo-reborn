@@ -137,8 +137,11 @@ function BrandResults({ data }: { data: any }) {
         Your Brand Vibe
       </p>
       <h1 className="mt-2 text-center font-display text-4xl md:text-6xl">
-        <span className="text-gradient-racket">{result.brandArchetype}</span>
+        <span className="text-gradient-racket">{result.brandArchetype.type}</span>
       </h1>
+      <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
+        {result.brandArchetype.description}
+      </p>
 
       <Card className="mt-8">
         <CardHeader>
@@ -150,6 +153,7 @@ function BrandResults({ data }: { data: any }) {
           ))}
         </CardContent>
       </Card>
+
     </div>
   );
 }
