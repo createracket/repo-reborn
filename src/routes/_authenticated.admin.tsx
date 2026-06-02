@@ -145,6 +145,7 @@ function AdminPage() {
           <TabsList className="flex flex-wrap">
             <TabsTrigger value="leads">Lead briefs ({leadBriefs.length})</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign briefs ({campaigns.length})</TabsTrigger>
+            <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
             <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
             <TabsTrigger value="contact">Contact ({contacts.length})</TabsTrigger>
             <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
