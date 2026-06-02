@@ -8,12 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { getSocialEmbed } from "@/lib/social-embed";
 
 type PartnerLinks = {
   instagram?: string;
   spotify?: string;
   spotifyEmbed?: string;
   contact?: string;
+  video1?: string;
+  video2?: string;
+  video3?: string;
 };
 
 type PartnerPage = {
