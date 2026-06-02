@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ShieldAlert, ExternalLink, Trash2, Pencil } from "lucide-react";
+import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
