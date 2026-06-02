@@ -485,6 +485,9 @@ function SpotlightForm({
     spotify: editData?.links?.spotify ?? "",
     spotifyEmbed: editData?.links?.spotifyEmbed ?? "",
     contact: editData?.links?.contact ?? "",
+    video1: editData?.links?.video1 ?? "",
+    video2: editData?.links?.video2 ?? "",
+    video3: editData?.links?.video3 ?? "",
     header_image_url: editData?.header_image_url ?? "",
     profile_image_url: editData?.profile_image_url ?? "",
     published: editData?.published ?? false,
@@ -519,6 +522,9 @@ function SpotlightForm({
         spotify: form.spotify,
         spotifyEmbed: form.spotifyEmbed,
         contact: form.contact,
+        video1: form.video1,
+        video2: form.video2,
+        video3: form.video3,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
@@ -548,6 +554,7 @@ function SpotlightForm({
         slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
         instagram: "", spotify: "", spotifyEmbed: "", contact: "",
+        video1: "", video2: "", video3: "",
         header_image_url: "", profile_image_url: "", published: false,
       });
     }
@@ -637,6 +644,22 @@ function SpotlightForm({
           <div className="space-y-1.5">
             <Label htmlFor="contact">Contact (email or URL)</Label>
             <Input id="contact" value={form.contact} onChange={(e) => set("contact", e.target.value)} />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label>Featured videos (TikTok or Instagram URLs)</Label>
+            <p className="text-xs text-muted-foreground">Paste up to three public TikTok or Instagram post/reel URLs. They'll embed at the bottom of the spotlight page.</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="video1">Video 1</Label>
+            <Input id="video1" value={form.video1} onChange={(e) => set("video1", e.target.value)} placeholder="https://www.tiktok.com/@user/video/123…" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="video2">Video 2</Label>
+            <Input id="video2" value={form.video2} onChange={(e) => set("video2", e.target.value)} placeholder="https://www.instagram.com/reel/…" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="video3">Video 3</Label>
+            <Input id="video3" value={form.video3} onChange={(e) => set("video3", e.target.value)} placeholder="https://www.tiktok.com/@user/video/…" />
           </div>
           <div className="flex items-center gap-3 md:col-span-2">
             <Switch id="published" checked={form.published} onCheckedChange={(v) => set("published", v)} />
