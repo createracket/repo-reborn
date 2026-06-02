@@ -257,14 +257,6 @@ function LoginPage() {
                     id="access-code"
                     value={accessCode}
                     onChange={(e) => setAccessCode(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        if (!accessCodeOk) {
-                          toast.error("That access code isn't valid. Join the waitlist to get notified.");
-                        }
-                      }
-                    }}
                     placeholder="Enter your code"
                     autoComplete="off"
                   />
@@ -276,20 +268,6 @@ function LoginPage() {
                     .
                   </p>
                 </div>
-                {!accessCodeOk && (
-                  <Button
-                    type="button"
-                    className="w-full"
-                    disabled={!accessCode.trim()}
-                    onClick={() => {
-                      if (!accessCodeOk) {
-                        toast.error("That access code isn't valid. Join the waitlist to get notified.");
-                      }
-                    }}
-                  >
-                    Unlock signup
-                  </Button>
-                )}
                 {accessCodeOk && (
                   <div className="space-y-1">
                     <Label htmlFor="account-type" className="text-xs uppercase tracking-wider">
@@ -314,7 +292,6 @@ function LoginPage() {
                 )}
               </div>
             )}
-
 
             {/* Full signup form — only visible once access code is correct */}
             {mode === "signup" && accessCodeOk && (
