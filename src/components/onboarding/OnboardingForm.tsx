@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useForm, type UseFormReturn } from "react-hook-form";
@@ -26,7 +26,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import formData from "@/lib/forms.json";
+import { DEFAULT_VIBE_CONFIG, loadVibeCheckConfig, type VibeCheckConfig } from "@/lib/vibe-check-config";
 import { cn } from "@/lib/utils";
 
 type Flow = "musician" | "brand";
@@ -108,7 +108,11 @@ const BRAND_DEFAULTS: BrandData = {
 // ---------- Component ----------
 export function OnboardingForm({ flow }: { flow: Flow }) {
   const navigate = useNavigate();
-  const config = (formData as any)[flow];
+  const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
+  useEffect(() => {
+    loadVibeCheckConfig().then(setVibeConfig).catch(() => {});
+  }, []);
+  const config = vibeConfig.surveys[flow];
   const sections = (config.sections as Array<{ title: string; description: string; timeEstimate: string }>).slice(1);
   const totalSections = config.totalSections - 1;
   const fields = config.fields as Record<
