@@ -207,7 +207,56 @@ function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button type="button" variant="outline" className="w-full" onClick={handleGoogle}>
+            {mode === "signup" && (
+              <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+                <div className="space-y-1">
+                  <Label htmlFor="access-code" className="text-xs uppercase tracking-wider">
+                    Access code
+                  </Label>
+                  <Input
+                    id="access-code"
+                    value={accessCode}
+                    onChange={(e) => setAccessCode(e.target.value)}
+                    placeholder="Enter your soft-launch code"
+                    autoComplete="off"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    We're in soft launch. No code?{" "}
+                    <Link to="/fan-signup" className="font-medium text-primary hover:underline">
+                      Join the waitlist
+                    </Link>
+                    .
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="account-type" className="text-xs uppercase tracking-wider">
+                    I'm a…
+                  </Label>
+                  <Select
+                    value={accountType}
+                    onValueChange={(v) => setAccountType(v as AccountTypeValue)}
+                  >
+                    <SelectTrigger id="account-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ACCOUNT_TYPES.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>
+                          {t.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleGoogle}
+              disabled={mode === "signup" && !accessCodeOk}
+            >
               Continue with Google
             </Button>
             <div className="relative">
@@ -218,6 +267,7 @@ function LoginPage() {
                 <span className="bg-card px-2 text-muted-foreground">or with email</span>
               </div>
             </div>
+
             <form onSubmit={handleEmail} className="space-y-3">
               <div className="space-y-1">
                 <Label htmlFor="email">Email</Label>
