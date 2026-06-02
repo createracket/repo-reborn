@@ -131,22 +131,36 @@ function EditProfilePage() {
     setUploading(true);
     const ext = pendingFile.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
     const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, pendingFile, {
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, pendingFile, {
       cacheControl: "3600",
       upsert: false,
       contentType: pendingFile.type,
     });
-    if (error) {
+    if (upErr) {
       setUploading(false);
-      toast.error("Photo upload failed. Please try again.");
+      toast.error(`Photo upload failed: ${upErr.message}`);
       return;
     }
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    set("avatar_url", data.publicUrl);
+    const publicUrl = data.publicUrl;
+
+    // Persist immediately so it can't be lost between steps
+    const { error: saveErr } = await supabase
+      .from("profiles")
+      .update({ avatar_url: publicUrl })
+      .eq("id", userId);
+    if (saveErr) {
+      setUploading(false);
+      toast.error(`Saved photo but couldn't update profile: ${saveErr.message}`);
+      return;
+    }
+
+    set("avatar_url", publicUrl);
     clearPending();
     setUploading(false);
-    toast.success("Thumbnail uploaded. Click Save profile to update your profile.");
+    toast.success("Profile photo updated ✓");
   }
+
 
 
   function num(v: string): number | null {
@@ -283,8 +297,9 @@ function EditProfilePage() {
                       ) : null}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      JPG or PNG, up to 8MB. {pendingFile ? "Click Upload to store, then Save profile to apply." : "Click Save profile to apply changes."}
+                      JPG or PNG, up to 8MB. {pendingFile ? "Click Upload to save your new photo." : "Your photo saves as soon as you click Upload."}
                     </p>
+
                   </div>
                 </div>
               </div>
