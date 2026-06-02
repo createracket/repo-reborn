@@ -65,18 +65,20 @@ function DashboardPage() {
       if (!u.user) return;
 
       // Auto-enrol new accounts into the mailing list
-      const { data: existing } = await supabase
-        .from("mailing_list_subscribers")
-        .select("id")
-        .eq("email", u.user.email)
-        .maybeSingle();
-      if (!existing) {
-        await supabase.from("mailing_list_subscribers").insert({
-          email: u.user.email,
-          name: u.user.user_metadata?.full_name ?? u.user.user_metadata?.name ?? null,
-          source: "account-creation",
-          marketing_opt_in: true,
-        });
+      if (u.user.email) {
+        const { data: existing } = await supabase
+          .from("mailing_list_subscribers")
+          .select("id")
+          .eq("email", u.user.email)
+          .maybeSingle();
+        if (!existing) {
+          await supabase.from("mailing_list_subscribers").insert({
+            email: u.user.email,
+            name: u.user.user_metadata?.full_name ?? u.user.user_metadata?.name ?? null,
+            source: "account-creation",
+            marketing_opt_in: true,
+          });
+        }
       }
 
       const [{ data: vibes }, { data: rosterRows }, { data: communityRows }, { data: profile }] = await Promise.all([
