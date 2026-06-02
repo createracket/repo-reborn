@@ -490,6 +490,33 @@ function Meta({ date, status }: { date: string; status: string }) {
     </div>
   );
 }
+function ProfileChip({ profile, fallbackEmail }: {
+  profile: { display_name: string | null; slug: string | null; avatar_url: string | null; email: string | null } | null;
+  fallbackEmail?: string | null;
+}) {
+  if (!profile) {
+    return fallbackEmail ? (
+      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+        <span className="rounded-full bg-muted px-2 py-0.5">No profile</span>
+        <span>{fallbackEmail}</span>
+      </span>
+    ) : null;
+  }
+  const name = profile.display_name || profile.email || "User";
+  const inner = (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-xs hover:bg-muted">
+      {profile.avatar_url ? (
+        <img src={profile.avatar_url} alt="" className="size-4 rounded-full object-cover" />
+      ) : (
+        <span className="size-4 rounded-full bg-primary/20" />
+      )}
+      <span className="font-medium">{name}</span>
+    </span>
+  );
+  return profile.slug ? (
+    <a href={`/u/${profile.slug}`} target="_blank" rel="noreferrer">{inner}</a>
+  ) : inner;
+}
 function Table({ headers, children }: { headers: string[]; children: React.ReactNode }) {
   return (
     <div className="overflow-x-auto">
