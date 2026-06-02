@@ -253,17 +253,17 @@ function LoginPage() {
               <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <div className="space-y-1">
                   <Label htmlFor="access-code" className="text-xs uppercase tracking-wider">
-                    Access code
+                    EARLY ACCESS CODE
                   </Label>
                   <Input
                     id="access-code"
                     value={accessCode}
                     onChange={(e) => setAccessCode(e.target.value)}
-                    placeholder="Enter your soft-launch code"
+                    placeholder="Enter your code"
                     autoComplete="off"
                   />
                   <p className="text-xs text-muted-foreground">
-                    We're in soft launch. No code?{" "}
+                    We're loading in. No code?{" "}
                     <Link to="/fan-signup" className="font-medium text-primary hover:underline">
                       Join the waitlist
                     </Link>
