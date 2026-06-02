@@ -463,7 +463,7 @@ function LoginPage() {
               Keep signing up
             </Button>
             <Button onClick={() => setShowVibeNudge(false)}>
-              Enter access code
+              Enter EARLY ACCESS CODE
             </Button>
           </DialogFooter>
         </DialogContent>
