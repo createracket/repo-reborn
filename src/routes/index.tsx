@@ -181,7 +181,6 @@ function Home() {
           <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex">
             <Link to="/vibe-check" className="hover:text-white">Vibe Check</Link>
             <a href="#ecosystem" className="hover:text-white">How it works</a>
-            <a href="#testimonials" className="hover:text-white">Community</a>
           </nav>
           <HeroAuthButton />
 
@@ -238,7 +237,7 @@ function Home() {
               <img
                 src={trustedLogos.url}
                 alt="Trusted by Unilever, Ticketmaster, Unified, Hogarth, Tixel, 19 Crimes, Transgenre, KFC, Fraks"
-                className="mx-auto h-6 w-auto max-w-full md:h-8"
+                className="mx-auto h-5 w-auto max-w-full object-contain md:h-6"
               />
             </motion.div>
           </motion.div>

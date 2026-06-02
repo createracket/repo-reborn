@@ -59,6 +59,9 @@ export function SiteHeader() {
               <Link to="/connect" className="hover:text-foreground transition-colors">
                 Connect
               </Link>
+              <Link to="/community" className="hover:text-foreground transition-colors">
+                Community
+              </Link>
             </>
           )}
         </nav>
