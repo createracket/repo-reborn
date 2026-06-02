@@ -349,7 +349,8 @@ function VibeCard({ loading, vibe }: { loading: boolean; vibe: VibeRow | null })
     : getArtistArchetypeDescription((scoring as any).primary);
 
   return (
-    <Card>
+    <Card className="lg:h-full">
+
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div>
