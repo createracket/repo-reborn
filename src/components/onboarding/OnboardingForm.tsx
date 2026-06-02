@@ -26,7 +26,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { DEFAULT_VIBE_CONFIG, loadVibeCheckConfig, type VibeCheckConfig } from "@/lib/vibe-check-config";
+import { DEFAULT_VIBE_CONFIG, loadVibeCheckConfig, startVibeCheckConfigRealtime, type VibeCheckConfig } from "@/lib/vibe-check-config";
 import { cn } from "@/lib/utils";
 
 type Flow = "musician" | "brand";
