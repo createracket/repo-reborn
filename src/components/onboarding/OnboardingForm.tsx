@@ -108,7 +108,14 @@ const BRAND_DEFAULTS: BrandData = {
 // ---------- Component ----------
 export function OnboardingForm({ flow }: { flow: Flow }) {
   const navigate = useNavigate();
-  const config = (formData as any)[flow];
+  const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
+  // Load admin overrides for the survey; fall back to defaults on error.
+  // Using useEffect inside the component below would also work, but we want the form to render immediately.
+  useState(() => {
+    loadVibeCheckConfig().then((c) => setVibeConfig(c)).catch(() => {});
+    return 0;
+  });
+  const config = vibeConfig.surveys[flow];
   const sections = (config.sections as Array<{ title: string; description: string; timeEstimate: string }>).slice(1);
   const totalSections = config.totalSections - 1;
   const fields = config.fields as Record<
