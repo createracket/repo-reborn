@@ -80,19 +80,28 @@ function WaitlistForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className={className}>
-      <Input
-        type="email"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter your email"
-        className={inputClassName}
-      />
-      <Button type="submit" size="lg" disabled={busy} className={buttonClassName}>
-        {busy ? <Loader2 className="size-5 animate-spin" /> : "Join Waitlist"}
-      </Button>
-    </form>
+    <div className={className?.includes("flex") ? "w-full" : undefined}>
+      <form onSubmit={onSubmit} className={className}>
+        <Input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email"
+          className={inputClassName}
+        />
+        <Button type="submit" size="lg" disabled={busy} className={buttonClassName}>
+          {busy ? <Loader2 className="size-5 animate-spin" /> : "Join Waitlist"}
+        </Button>
+      </form>
+      <p className="mt-2 text-xs text-muted-foreground">
+        By joining you agree to our{" "}
+        <Link to="/terms" className="underline hover:text-primary">Terms</Link>
+        {" "}and{" "}
+        <Link to="/privacy" className="underline hover:text-primary">Privacy Policy</Link>
+        , and to receive emails from Create Racket. Unsubscribe anytime.
+      </p>
+    </div>
   );
 }
 
