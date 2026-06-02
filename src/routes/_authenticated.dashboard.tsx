@@ -190,13 +190,21 @@ function DashboardPage() {
                   <p className="text-sm text-muted-foreground">Loading…</p>
                 ) : roster.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
-                    <p className="text-muted-foreground">
-                      Your roster is empty. Community browsing is coming soon — for now,
-                      take the Vibe Check to start surfacing matches.
-                    </p>
-                    <Button asChild className="mt-4">
-                      <Link to="/vibe-check">Take the Vibe Check</Link>
-                    </Button>
+                    {latestVibe ? (
+                      <p className="text-muted-foreground">
+                        Your roster is empty. Community browsing is coming soon — we'll start
+                        surfacing matches based on your Vibe Check results here.
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-muted-foreground">
+                          Your roster is empty. Take the Vibe Check to start surfacing matches.
+                        </p>
+                        <Button asChild className="mt-4">
+                          <Link to="/vibe-check">Take the Vibe Check</Link>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
