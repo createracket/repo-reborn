@@ -466,9 +466,6 @@ function LoginPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="ghost" onClick={() => setShowVibeNudge(false)}>
-              Keep signing up
-            </Button>
             <Button onClick={() => setShowVibeNudge(false)}>
               Enter EARLY ACCESS CODE
             </Button>
