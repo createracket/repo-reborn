@@ -150,9 +150,6 @@ function DashboardPage() {
               {displayName ?? email ?? "Your dashboard"}
             </h1>
           </div>
-          <Button variant="outline" size="sm" onClick={signOut}>
-            <LogOut className="mr-1 size-4" /> Sign out
-          </Button>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
