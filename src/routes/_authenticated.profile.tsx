@@ -243,24 +243,36 @@ function EditProfilePage() {
                 <Label>Profile photo (1:1)</Label>
                 <div className="mt-2 flex flex-wrap items-start gap-3">
                   <div className="size-28 overflow-hidden rounded-full border border-border/60 bg-muted/40">
-                    {form.avatar_url ? (
-                      <img src={form.avatar_url} alt="" className="size-full object-cover" />
+                    {(pendingPreview || form.avatar_url) ? (
+                      <img src={pendingPreview || form.avatar_url} alt="" className="size-full object-cover" />
                     ) : null}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Input type="file" accept="image/*" onChange={handleAvatar} disabled={uploading} />
-                    {form.avatar_url ? (
-                      <Button type="button" size="sm" variant="ghost" onClick={async () => {
-                        set("avatar_url", "");
-                        if (userId) {
-                          await supabase.from("profiles").upsert({ id: userId, avatar_url: null }, { onConflict: "id" });
-                        }
-                      }}>Remove</Button>
-                    ) : null}
-                    <p className="text-xs text-muted-foreground">JPG or PNG, up to 8MB.</p>
+                    <Input type="file" accept="image/*" onChange={handleAvatarPick} disabled={uploading} />
+                    <div className="flex flex-wrap gap-2">
+                      {pendingFile ? (
+                        <>
+                          <Button type="button" size="sm" onClick={handleAvatarUpload} disabled={uploading}>
+                            {uploading ? "Uploading…" : "Upload"}
+                          </Button>
+                          <Button type="button" size="sm" variant="ghost" onClick={clearPending} disabled={uploading}>
+                            Cancel
+                          </Button>
+                        </>
+                      ) : null}
+                      {!pendingFile && form.avatar_url ? (
+                        <Button type="button" size="sm" variant="ghost" onClick={() => set("avatar_url", "")}>
+                          Remove
+                        </Button>
+                      ) : null}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      JPG or PNG, up to 8MB. {pendingFile ? "Click Upload to store, then Save profile to apply." : "Click Save profile to apply changes."}
+                    </p>
                   </div>
                 </div>
               </div>
+
 
               <div className="space-y-1.5">
                 <Label htmlFor="name">Name</Label>
