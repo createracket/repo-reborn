@@ -348,3 +348,143 @@ function Table({ headers, children }: { headers: string[]; children: React.React
     </div>
   );
 }
+
+function SpotlightForm({ onCreated }: { onCreated: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    slug: "",
+    type: "podcast",
+    headline: "",
+    subtitle: "",
+    intro: "",
+    host_bio: "",
+    partnership_pitch: "",
+    eoi_opportunities: "",
+    audience_segments: "",
+    instagram: "",
+    spotify: "",
+    spotifyEmbed: "",
+    contact: "",
+    published: false,
+  });
+
+  function set<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
+    setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.slug || !form.headline) {
+      toast.error("Slug and headline are required");
+      return;
+    }
+    setSaving(true);
+    const slug = form.slug.toLowerCase().trim().replace(/\s+/g, "-");
+    const payload = {
+      slug,
+      type: form.type || "podcast",
+      headline: form.headline,
+      subtitle: form.subtitle || null,
+      intro: form.intro || null,
+      host_bio: form.host_bio || null,
+      partnership_pitch: form.partnership_pitch || null,
+      eoi_opportunities: form.eoi_opportunities
+        .split("\n").map((s) => s.trim()).filter(Boolean),
+      audience_segments: form.audience_segments
+        .split("\n").map((s) => s.trim()).filter(Boolean),
+      links: {
+        instagram: form.instagram,
+        spotify: form.spotify,
+        spotifyEmbed: form.spotifyEmbed,
+        contact: form.contact,
+      },
+      published: form.published,
+    };
+    const { error } = await supabase.from("partner_pages" as any).insert(payload);
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Spotlight created at /spotlight/${slug}`);
+    setForm({
+      slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
+      host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
+      instagram: "", spotify: "", spotifyEmbed: "", contact: "", published: false,
+    });
+    onCreated();
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display text-2xl">New artist spotlight</CardTitle>
+        <CardDescription>Create a partner page. Lives at /spotlight/&lt;slug&gt; with noindex.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="slug">Slug *</Label>
+            <Input id="slug" value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="ymyb-spotlight" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="type">Type</Label>
+            <Input id="type" value={form.type} onChange={(e) => set("type", e.target.value)} placeholder="podcast" />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="headline">Headline *</Label>
+            <Input id="headline" value={form.headline} onChange={(e) => set("headline", e.target.value)} placeholder="Your Music, Your Business" />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="subtitle">Subtitle</Label>
+            <Input id="subtitle" value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="UNLOCK REAL FAN INSIGHTS" />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="intro">Intro</Label>
+            <Textarea id="intro" rows={3} value={form.intro} onChange={(e) => set("intro", e.target.value)} />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="host_bio">Host bio</Label>
+            <Textarea id="host_bio" rows={3} value={form.host_bio} onChange={(e) => set("host_bio", e.target.value)} />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="partnership_pitch">Partnership pitch</Label>
+            <Textarea id="partnership_pitch" rows={3} value={form.partnership_pitch} onChange={(e) => set("partnership_pitch", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="eoi">EOI opportunities (one per line)</Label>
+            <Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="audience">Audience segments (one per line)</Label>
+            <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="instagram">Instagram URL</Label>
+            <Input id="instagram" value={form.instagram} onChange={(e) => set("instagram", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="spotify">Spotify URL</Label>
+            <Input id="spotify" value={form.spotify} onChange={(e) => set("spotify", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="spotifyEmbed">Spotify embed URL</Label>
+            <Input id="spotifyEmbed" value={form.spotifyEmbed} onChange={(e) => set("spotifyEmbed", e.target.value)} placeholder="https://open.spotify.com/embed/show/..." />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="contact">Contact (email or URL)</Label>
+            <Input id="contact" value={form.contact} onChange={(e) => set("contact", e.target.value)} />
+          </div>
+          <div className="flex items-center gap-3 md:col-span-2">
+            <Switch id="published" checked={form.published} onCheckedChange={(v) => set("published", v)} />
+            <Label htmlFor="published" className="cursor-pointer">Publish immediately</Label>
+          </div>
+          <div className="md:col-span-2">
+            <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create spotlight"}</Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
