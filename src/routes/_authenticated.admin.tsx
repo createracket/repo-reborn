@@ -501,9 +501,9 @@ function SpotlightForm({
       host_bio: form.host_bio || null,
       partnership_pitch: form.partnership_pitch || null,
       eoi_opportunities: form.eoi_opportunities
-        .split("\n").map((s) => s.trim()).filter(Boolean),
+        .split("\n").map((s: string) => s.trim()).filter(Boolean),
       audience_segments: form.audience_segments
-        .split("\n").map((s) => s.trim()).filter(Boolean),
+        .split("\n").map((s: string) => s.trim()).filter(Boolean),
       links: {
         instagram: form.instagram,
         spotify: form.spotify,
