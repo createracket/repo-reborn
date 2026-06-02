@@ -312,6 +312,30 @@ function AdminPage() {
                         </div>
                       </div>
                     </CardHeader>
+                    {(() => {
+                      const rows = interests.filter((i) => i.partner_page_id === s.id);
+                      if (rows.length === 0) return null;
+                      return (
+                        <CardContent className="border-t border-border/60 pt-4">
+                          <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">
+                            Registered interest ({rows.length})
+                          </p>
+                          <ul className="space-y-1 text-sm">
+                            {rows.map((r) => (
+                              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2">
+                                <span>
+                                  {r.profile?.display_name ?? "Unnamed user"}
+                                  {r.profile?.email ? <span className="text-muted-foreground"> · {r.profile.email}</span> : null}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(r.created_at).toLocaleDateString()}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                      );
+                    })()}
                   </Card>
                 ))}
               </div>
