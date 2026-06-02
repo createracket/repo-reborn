@@ -552,7 +552,19 @@ function SpotlightForm({
     header_image_url: editData?.header_image_url ?? "",
     profile_image_url: editData?.profile_image_url ?? "",
     published: editData?.published ?? false,
+    total_followers: editData?.total_followers?.toString() ?? "",
+    total_streams: editData?.total_streams?.toString() ?? "",
+    monthly_streams: editData?.monthly_streams?.toString() ?? "",
+    avg_reach: editData?.avg_reach?.toString() ?? "",
+    avg_engagement: editData?.avg_engagement?.toString() ?? "",
   });
+
+  function numOrNull(v: string): number | null {
+    const t = v.trim();
+    if (!t) return null;
+    const n = Number(t);
+    return Number.isFinite(n) ? n : null;
+  }
 
   function set<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
     setForm((f) => ({ ...f, [k]: v }));
