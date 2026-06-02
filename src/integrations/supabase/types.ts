@@ -536,7 +536,7 @@ export type Database = {
       }
     }
     Enums: {
-      account_type: "artist" | "brand" | "fan"
+      account_type: "artist" | "brand" | "fan" | "creative" | "crew"
       app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
@@ -665,7 +665,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      account_type: ["artist", "brand", "fan"],
+      account_type: ["artist", "brand", "fan", "creative", "crew"],
       app_role: ["admin", "moderator", "user"],
     },
   },
