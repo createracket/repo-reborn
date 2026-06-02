@@ -1,6 +1,7 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Instagram, Mail, ExternalLink, Mic2 } from "lucide-react";
+import { Instagram, Mail, ExternalLink, Mic2, Check } from "lucide-react";
+import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
