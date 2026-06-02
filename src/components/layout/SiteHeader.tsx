@@ -56,8 +56,8 @@ export function SiteHeader() {
               <Link to="/admin" className="text-primary hover:text-foreground transition-colors">
                 Admin
               </Link>
-              <Link to="/submit-brief" className="hover:text-foreground transition-colors">
-                Collaborate
+              <Link to="/connect" className="hover:text-foreground transition-colors">
+                Connect
               </Link>
             </>
           )}
