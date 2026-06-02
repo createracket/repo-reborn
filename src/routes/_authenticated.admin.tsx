@@ -498,3 +498,75 @@ function SpotlightForm({ onCreated }: { onCreated: () => void }) {
   );
 }
 
+function NewUserForm({ onCreated }: { onCreated: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+    display_name: "",
+    email_confirm: true,
+  });
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.email || form.password.length < 8) {
+      toast.error("Email and a password of at least 8 characters are required");
+      return;
+    }
+    setSaving(true);
+    try {
+      await adminCreateUser({
+        data: {
+          email: form.email.trim(),
+          password: form.password,
+          display_name: form.display_name.trim() || undefined,
+          email_confirm: form.email_confirm,
+        },
+      });
+      toast.success(`Created ${form.email}`);
+      setForm({ email: "", password: "", display_name: "", email_confirm: true });
+      onCreated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create user");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display text-2xl">Add a new user</CardTitle>
+        <CardDescription>Manually provision an account. They can sign in immediately with the password you set.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+          <div>
+            <Label htmlFor="nu-email">Email</Label>
+            <Input id="nu-email" type="email" autoComplete="off" value={form.email}
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} required />
+          </div>
+          <div>
+            <Label htmlFor="nu-name">Display name (optional)</Label>
+            <Input id="nu-name" value={form.display_name}
+              onChange={(e) => setForm((f) => ({ ...f, display_name: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="nu-password">Temporary password</Label>
+            <Input id="nu-password" type="text" autoComplete="off" minLength={8} value={form.password}
+              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} required />
+          </div>
+          <div className="flex items-center gap-3 pt-6">
+            <Switch id="nu-confirm" checked={form.email_confirm}
+              onCheckedChange={(v) => setForm((f) => ({ ...f, email_confirm: v }))} />
+            <Label htmlFor="nu-confirm" className="cursor-pointer">Skip email verification</Label>
+          </div>
+          <div className="md:col-span-2">
+            <Button type="submit" disabled={saving}>{saving ? "Creating…" : "Create user"}</Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
