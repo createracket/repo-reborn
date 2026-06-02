@@ -72,21 +72,31 @@ function AdminPage() {
       }
       setIsAdmin(true);
 
-      const [lb, cm, ml, pr, cb] = await Promise.all([
+      const [lb, cm, ml, pr, cb, sp] = await Promise.all([
         supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("id, email, display_name, account_type, created_at").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email").order("created_at", { ascending: false }),
+        supabase.from("partner_pages" as any).select("id, slug, type, headline, subtitle, published, created_at").order("created_at", { ascending: false }),
       ]);
       setLeadBriefs((lb.data as LeadBrief[]) ?? []);
       setContacts((cm.data as ContactMsg[]) ?? []);
       setSubs((ml.data as Subscriber[]) ?? []);
       setProfiles((pr.data as Profile[]) ?? []);
       setCampaigns((cb.data as CampaignBrief[]) ?? []);
+      setSpotlights((sp.data as unknown as Spotlight[]) ?? []);
       setChecking(false);
     })();
   }, [navigate]);
+
+  async function refreshSpotlights() {
+    const { data } = await supabase
+      .from("partner_pages" as any)
+      .select("id, slug, type, headline, subtitle, published, created_at")
+      .order("created_at", { ascending: false });
+    setSpotlights((data as unknown as Spotlight[]) ?? []);
+  }
 
   if (checking) {
     return (
