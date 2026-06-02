@@ -170,6 +170,15 @@ function HeroAuthButton() {
 }
 
 function Home() {
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(!!session);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       {/* ── HERO ─────────────────────────────────────────────────────── */}
