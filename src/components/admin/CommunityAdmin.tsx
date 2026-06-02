@@ -208,7 +208,8 @@ export function CommunityAdmin() {
           </div>
         </CardHeader>
         {draft && (
-          <CardContent className="space-y-4 border-t border-border/50 pt-6">
+          <CardContent className="border-t border-border/50 pt-6">
+            <form className="space-y-4" onSubmit={handleSave}>
             <h3 className="font-display text-lg">
               {draft.id ? "Edit member" : "New member"}
             </h3>
@@ -326,13 +327,14 @@ export function CommunityAdmin() {
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="ghost" onClick={() => setDraft(null)} disabled={saving}>
+              <Button type="button" variant="ghost" onClick={() => setDraft(null)} disabled={saving || uploading}>
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? "Saving…" : draft.id ? "Save changes" : "Add member"}
+              <Button type="submit" disabled={saving || uploading}>
+                {uploading ? "Uploading…" : saving ? "Saving…" : draft.id ? "Save changes" : "Add member"}
               </Button>
             </div>
+            </form>
           </CardContent>
         )}
       </Card>
