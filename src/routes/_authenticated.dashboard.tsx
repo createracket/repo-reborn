@@ -52,6 +52,7 @@ type CommunityMember = {
 function DashboardPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
   const [latestVibe, setLatestVibe] = useState<VibeRow | null>(null);
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [community, setCommunity] = useState<CommunityMember[]>([]);
@@ -63,7 +64,7 @@ function DashboardPage() {
       setEmail(u.user?.email ?? null);
       if (!u.user) return;
 
-      const [{ data: vibes }, { data: rosterRows }, { data: communityRows }] = await Promise.all([
+      const [{ data: vibes }, { data: rosterRows }, { data: communityRows }, { data: profile }] = await Promise.all([
         supabase
           .from("vibe_check_responses")
           .select("id, created_at, result, answers, artist_score, brand_score")
@@ -78,8 +79,14 @@ function DashboardPage() {
           .select("id, display_name, account_type, tagline, location, avatar_url")
           .order("created_at", { ascending: false })
           .limit(8),
+        supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("id", u.user.id)
+          .single(),
       ]);
 
+      setDisplayName(profile?.display_name ?? null);
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
       setCommunity((communityRows as CommunityMember[]) ?? []);
 
@@ -123,7 +130,7 @@ function DashboardPage() {
               Welcome back
             </p>
             <h1 className="mt-1 font-display text-4xl md:text-5xl">
-              {email ?? "Your dashboard"}
+              {displayName ?? email ?? "Your dashboard"}
             </h1>
           </div>
           <Button variant="outline" size="sm" onClick={signOut}>
