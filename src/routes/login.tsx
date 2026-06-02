@@ -72,9 +72,14 @@ function LoginPage() {
   const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accessCode, setAccessCode] = useState("");
+  const [accountType, setAccountType] = useState<AccountTypeValue>("fan");
   const [busy, setBusy] = useState(false);
   const [showVibeNudge, setShowVibeNudge] = useState(false);
   const nudgeShownRef = useRef(false);
+
+  const accessCodeOk = accessCode.trim().toUpperCase() === ACCESS_CODE;
+
 
   // Where to send the user after auth succeeds. If they came from the Vibe
   // Check "Save my results" CTA — or we just see a pending vibe in storage —
