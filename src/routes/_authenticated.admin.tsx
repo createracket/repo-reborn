@@ -810,9 +810,7 @@ function SpotlightForm({
               </Button>
             )}
           </div>
-        </form>
-      </CardContent>
-    </Card>
+    </form>
   );
 }
 
