@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 export function SiteHeader() {
   const [signedIn, setSignedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const onLoginPage = pathname === "/login";
 
   useEffect(() => {
     const checkAdmin = async (userId: string | undefined) => {
