@@ -110,7 +110,9 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
   const navigate = useNavigate();
   const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   useEffect(() => {
-    loadVibeCheckConfig().then(setVibeConfig).catch(() => {});
+    startVibeCheckConfigRealtime();
+    // Force a fresh fetch on each mount so retakes pick up admin edits.
+    loadVibeCheckConfig(true).then(setVibeConfig).catch(() => {});
   }, []);
   const config = vibeConfig.surveys[flow];
   const sections = (config.sections as Array<{ title: string; description: string; timeEstimate: string }>).slice(1);
