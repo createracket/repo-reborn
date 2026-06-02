@@ -116,15 +116,33 @@ function SpotlightPage() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <main className="container mx-auto max-w-4xl px-4 py-12 md:py-20">
+        {/* Header image (16:9) */}
+        {page.header_image_url ? (
+          <div className="mb-10 overflow-hidden rounded-2xl border border-border/60" style={{ aspectRatio: "16 / 9" }}>
+            <img src={page.header_image_url} alt={page.headline} className="size-full object-cover" />
+          </div>
+        ) : null}
+
         {/* Hero */}
         <section className="space-y-4">
-          <Badge variant="outline" className="uppercase tracking-[0.2em]">
-            <Mic2 className="mr-1.5 size-3" /> {page.type}
-          </Badge>
-          {page.subtitle ? (
-            <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">{page.subtitle}</p>
-          ) : null}
-          <h1 className="font-display text-5xl leading-tight md:text-6xl">{page.headline}</h1>
+          <div className="flex flex-wrap items-start gap-6">
+            {page.profile_image_url ? (
+              <img
+                src={page.profile_image_url}
+                alt={page.headline}
+                className="size-28 shrink-0 rounded-xl border border-border/60 object-cover md:size-36"
+              />
+            ) : null}
+            <div className="flex-1 space-y-3">
+              <Badge variant="outline" className="uppercase tracking-[0.2em]">
+                <Mic2 className="mr-1.5 size-3" /> {page.type}
+              </Badge>
+              {page.subtitle ? (
+                <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">{page.subtitle}</p>
+              ) : null}
+              <h1 className="font-display text-5xl leading-tight md:text-6xl">{page.headline}</h1>
+            </div>
+          </div>
           {page.intro ? (
             <p className="max-w-2xl text-lg text-muted-foreground">{page.intro}</p>
           ) : null}
