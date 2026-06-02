@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ShieldAlert, ExternalLink, Trash2, Pencil } from "lucide-react";
+import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -60,6 +60,7 @@ function AdminPage() {
   const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
   const [editingSpotlight, setEditingSpotlight] = useState<Record<string, any> | null>(null);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
+  const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     (async () => {
@@ -315,24 +316,39 @@ function AdminPage() {
                     {(() => {
                       const rows = interests.filter((i) => i.partner_page_id === s.id);
                       if (rows.length === 0) return null;
+                      const isExpanded = expandedInterests.has(s.id);
                       return (
                         <CardContent className="border-t border-border/60 pt-4">
-                          <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">
-                            Registered interest ({rows.length})
-                          </p>
-                          <ul className="space-y-1 text-sm">
-                            {rows.map((r) => (
-                              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2">
-                                <span>
-                                  {r.profile?.display_name ?? "Unnamed user"}
-                                  {r.profile?.email ? <span className="text-muted-foreground"> · {r.profile.email}</span> : null}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {new Date(r.created_at).toLocaleDateString()}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setExpandedInterests((prev) => {
+                                const next = new Set(prev);
+                                if (next.has(s.id)) next.delete(s.id);
+                                else next.add(s.id);
+                                return next;
+                              });
+                            }}
+                            className="mb-2 flex w-full items-center justify-between text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                          >
+                            <span>Registered interest ({rows.length})</span>
+                            {isExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                          </button>
+                          {isExpanded && (
+                            <ul className="space-y-1 text-sm">
+                              {rows.map((r) => (
+                                <li key={r.id} className="flex flex-wrap items-center justify-between gap-2">
+                                  <span>
+                                    {r.profile?.display_name ?? "Unnamed user"}
+                                    {r.profile?.email ? <span className="text-muted-foreground"> · {r.profile.email}</span> : null}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(r.created_at).toLocaleDateString()}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </CardContent>
                       );
                     })()}
