@@ -497,6 +497,10 @@ function AdminPage() {
           <TabsContent value="brief-form" className="mt-6">
             <BriefFormAdmin />
           </TabsContent>
+
+          <TabsContent value="community" className="mt-6">
+            <CommunityAdmin />
+          </TabsContent>
         </Tabs>
       </main>
       <SiteFooter />
