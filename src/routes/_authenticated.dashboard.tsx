@@ -144,6 +144,11 @@ function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               <Button asChild className="w-full justify-start">
+                <Link to="/profile">
+                  <UserCircle2 className="mr-2 size-4" /> Edit your profile
+                </Link>
+              </Button>
+              <Button asChild className="w-full justify-start" variant="outline">
                 <Link to="/connect">
                   <ClipboardList className="mr-2 size-4" /> Submit a brief
                 </Link>
