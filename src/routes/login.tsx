@@ -41,11 +41,11 @@ type AccountTypeValue = (typeof ACCOUNT_TYPES)[number]["value"];
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>) => ({
-    mode: search.mode === "signup" ? ("signup" as const) : undefined,
+    mode: search.mode === "signin" ? ("signin" as const) : ("signup" as const),
     next: typeof search.next === "string" ? search.next : undefined,
   }),
   head: () => ({
-    meta: [{ title: "Log in — Create Racket" }],
+    meta: [{ title: "Get Started — Create Racket" }],
   }),
   component: LoginPage,
 });
@@ -54,11 +54,10 @@ function LoginPage() {
   const navigate = useNavigate();
   const { mode: modeParam, next } = Route.useSearch();
 
-  // Default to signup when (a) explicitly asked via ?mode=signup, or
-  // (b) we can see a pending Vibe Check in sessionStorage — those users are
-  // almost certainly first-timers trying to save their result.
+  // Default to signup. Only show signin if explicitly requested via
+  // ?mode=signin; otherwise every visitor sees the new-user experience.
   const initialMode: "signin" | "signup" = (() => {
-    if (modeParam === "signup") return "signup";
+    if (modeParam === "signin") return "signin";
     if (typeof window !== "undefined") {
       try {
         if (sessionStorage.getItem("vibeCheck")) return "signup";
@@ -66,7 +65,7 @@ function LoginPage() {
         // ignore
       }
     }
-    return "signin";
+    return "signup";
   })();
 
   const [mode, setMode] = useState<"signin" | "signup">(initialMode);
@@ -249,6 +248,7 @@ function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Soft-launch gate: access code shown in signup mode */}
             {mode === "signup" && (
               <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <div className="space-y-1">
@@ -270,106 +270,159 @@ function LoginPage() {
                     .
                   </p>
                 </div>
-                <div className="space-y-1">
-                  <Label htmlFor="account-type" className="text-xs uppercase tracking-wider">
-                    I'm a…
-                  </Label>
-                  <Select
-                    value={accountType}
-                    onValueChange={(v) => setAccountType(v as AccountTypeValue)}
-                  >
-                    <SelectTrigger id="account-type">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ACCOUNT_TYPES.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>
-                          {t.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleGoogle}
-              disabled={mode === "signup" && !accessCodeOk}
-            >
-              Continue with Google
-            </Button>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/60" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">or with email</span>
-              </div>
-            </div>
-
-            <form onSubmit={handleEmail} className="space-y-3">
-              <div className="space-y-1">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@band.com"
-                />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  {mode === "signin" && (
-                    <Link
-                      to="/forgot-password"
-                      className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                {accessCodeOk && (
+                  <div className="space-y-1">
+                    <Label htmlFor="account-type" className="text-xs uppercase tracking-wider">
+                      I'm a…
+                    </Label>
+                    <Select
+                      value={accountType}
+                      onValueChange={(v) => setAccountType(v as AccountTypeValue)}
                     >
-                      Forgot password?
-                    </Link>
-                  )}
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                      <SelectTrigger id="account-type">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ACCOUNT_TYPES.map((t) => (
+                          <SelectItem key={t.value} value={t.value}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
-
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={busy || (mode === "signup" && !accessCodeOk)}
-              >
-                {busy ? "..." : mode === "signin" ? "Log in" : "Create account"}
-              </Button>
-
-            </form>
-            {mode === "signup" && (
-              <Link
-                to="/vibe-check"
-                className="group flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 transition-colors hover:border-primary/60 hover:bg-primary/10"
-              >
-                <Sparkles className="mt-0.5 size-5 shrink-0 text-primary" />
-                <div className="text-sm">
-                  <p className="font-medium text-foreground">
-                    Not ready to sign up? Take the Vibe Check first.
-                  </p>
-                  <p className="mt-0.5 text-muted-foreground">
-                    2 minutes. See your archetype and who you'd match with — then
-                    save it with an account.
-                  </p>
-                </div>
-              </Link>
             )}
+
+            {/* Full signup form — only visible once access code is correct */}
+            {mode === "signup" && accessCodeOk && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleGoogle}
+                >
+                  Continue with Google
+                </Button>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border/60" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">or with email</span>
+                  </div>
+                </div>
+
+                <form onSubmit={handleEmail} className="space-y-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@band.com"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={busy}>
+                    {busy ? "..." : "Create account"}
+                  </Button>
+                </form>
+
+                <Link
+                  to="/vibe-check"
+                  className="group flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 transition-colors hover:border-primary/60 hover:bg-primary/10"
+                >
+                  <Sparkles className="mt-0.5 size-5 shrink-0 text-primary" />
+                  <div className="text-sm">
+                    <p className="font-medium text-foreground">
+                      Not ready to sign up? Take the Vibe Check first.
+                    </p>
+                    <p className="mt-0.5 text-muted-foreground">
+                      2 minutes. See your archetype and who you'd match with — then
+                      save it with an account.
+                    </p>
+                  </div>
+                </Link>
+              </>
+            )}
+
+            {/* Signin form — always fully visible */}
+            {mode === "signin" && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleGoogle}
+                >
+                  Continue with Google
+                </Button>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border/60" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">or with email</span>
+                  </div>
+                </div>
+
+                <form onSubmit={handleEmail} className="space-y-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@band.com"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      <Link
+                        to="/forgot-password"
+                        className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={busy}>
+                    {busy ? "..." : "Log in"}
+                  </Button>
+                </form>
+              </>
+            )}
+
             <p className="text-center text-sm text-muted-foreground">
               {mode === "signin" ? "New here? " : "Already have an account? "}
               <button
