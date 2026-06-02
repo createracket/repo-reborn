@@ -150,31 +150,29 @@ function LoginPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
-  // Exit-intent + idle nudge — only when the user is on the signup tab and
-  // hasn't completed the form. We pitch the Vibe Check as a no-commitment way
-  // in: they get a result, then we ask them to save it by creating an account.
-  useEffect(() => {
-    if (mode !== "signup" || typeof window === "undefined") return;
-    nudgeShownRef.current = false;
-
-    const trigger = () => {
-      if (nudgeShownRef.current || busy) return;
-      nudgeShownRef.current = true;
-      setShowVibeNudge(true);
-    };
-
-    const onMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0) trigger();
-    };
-
-    const idleTimer = window.setTimeout(trigger, 20000);
-    document.addEventListener("mouseleave", onMouseLeave);
-
-    return () => {
-      window.clearTimeout(idleTimer);
-      document.removeEventListener("mouseleave", onMouseLeave);
-    };
-  }, [mode, busy]);
+  // Exit-intent + idle nudge — DISABLED during soft-launch phase
+  // useEffect(() => {
+  //   if (mode !== "signup" || typeof window === "undefined") return;
+  //   nudgeShownRef.current = false;
+  //
+  //   const trigger = () => {
+  //     if (nudgeShownRef.current || busy) return;
+  //     nudgeShownRef.current = true;
+  //     setShowVibeNudge(true);
+  //   };
+  //
+  //   const onMouseLeave = (e: MouseEvent) => {
+  //     if (e.clientY <= 0) trigger();
+  //   };
+  //
+  //   const idleTimer = window.setTimeout(trigger, 20000);
+  //   document.addEventListener("mouseleave", onMouseLeave);
+  //
+  //   return () => {
+  //     window.clearTimeout(idleTimer);
+  //     document.removeEventListener("mouseleave", onMouseLeave);
+  //   };
+  // }, [mode, busy]);
 
   function gateSignupOrWaitlist(): boolean {
     if (mode !== "signup") return true;
@@ -466,8 +464,15 @@ function LoginPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button onClick={() => setShowVibeNudge(false)}>
-              Enter EARLY ACCESS CODE
+            <Link
+              to="/vibe-check"
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              onClick={() => setShowVibeNudge(false)}
+            >
+              Take the Vibe Check
+            </Link>
+            <Button variant="ghost" onClick={() => setShowVibeNudge(false)}>
+              Keep signing up
             </Button>
           </DialogFooter>
         </DialogContent>
