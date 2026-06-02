@@ -121,7 +121,7 @@ function Results() {
 
         <div className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-3">
           <Button asChild>
-            <Link to="/login">
+            <Link to="/login" search={{ mode: "signup", next: "results" }}>
               Save my results <ArrowRight className="ml-1 size-4" />
             </Link>
           </Button>
