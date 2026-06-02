@@ -297,8 +297,9 @@ function EditProfilePage() {
                       ) : null}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      JPG or PNG, up to 8MB. {pendingFile ? "Click Upload to store, then Save profile to apply." : "Click Save profile to apply changes."}
+                      JPG or PNG, up to 8MB. {pendingFile ? "Click Upload to save your new photo." : "Your photo saves as soon as you click Upload."}
                     </p>
+
                   </div>
                 </div>
               </div>
