@@ -53,6 +53,7 @@ function AdminPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
   const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
+  const [editingSpotlight, setEditingSpotlight] = useState<Record<string, any> | null>(null);
 
   useEffect(() => {
     (async () => {
