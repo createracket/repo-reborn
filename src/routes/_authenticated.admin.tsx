@@ -1,12 +1,18 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, ExternalLink, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -31,6 +37,11 @@ type Subscriber = { id: string; created_at: string; email: string; name: string 
 type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string };
 type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null };
 
+type Spotlight = {
+  id: string; slug: string; type: string; headline: string; subtitle: string | null;
+  published: boolean; created_at: string;
+};
+
 function AdminPage() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
@@ -40,6 +51,7 @@ function AdminPage() {
   const [subs, setSubs] = useState<Subscriber[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
+  const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -60,21 +72,31 @@ function AdminPage() {
       }
       setIsAdmin(true);
 
-      const [lb, cm, ml, pr, cb] = await Promise.all([
+      const [lb, cm, ml, pr, cb, sp] = await Promise.all([
         supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("id, email, display_name, account_type, created_at").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email").order("created_at", { ascending: false }),
+        supabase.from("partner_pages" as any).select("id, slug, type, headline, subtitle, published, created_at").order("created_at", { ascending: false }),
       ]);
       setLeadBriefs((lb.data as LeadBrief[]) ?? []);
       setContacts((cm.data as ContactMsg[]) ?? []);
       setSubs((ml.data as Subscriber[]) ?? []);
       setProfiles((pr.data as Profile[]) ?? []);
       setCampaigns((cb.data as CampaignBrief[]) ?? []);
+      setSpotlights((sp.data as unknown as Spotlight[]) ?? []);
       setChecking(false);
     })();
   }, [navigate]);
+
+  async function refreshSpotlights() {
+    const { data } = await supabase
+      .from("partner_pages" as any)
+      .select("id, slug, type, headline, subtitle, published, created_at")
+      .order("created_at", { ascending: false });
+    setSpotlights((data as unknown as Spotlight[]) ?? []);
+  }
 
   if (checking) {
     return (
@@ -123,6 +145,7 @@ function AdminPage() {
           <TabsList className="flex flex-wrap">
             <TabsTrigger value="leads">Lead briefs ({leadBriefs.length})</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign briefs ({campaigns.length})</TabsTrigger>
+            <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
             <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
             <TabsTrigger value="contact">Contact ({contacts.length})</TabsTrigger>
             <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
@@ -173,6 +196,71 @@ function AdminPage() {
               </Card>
             ))}
           </TabsContent>
+
+          <TabsContent value="spotlights" className="mt-6 space-y-6">
+            <SpotlightForm onCreated={refreshSpotlights} />
+            {spotlights.length === 0 ? <Empty /> : (
+              <div className="space-y-3">
+                {spotlights.map((s) => (
+                  <Card key={s.id}>
+                    <CardHeader>
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <CardTitle className="text-lg">{s.headline}</CardTitle>
+                          <CardDescription>
+                            /spotlight/{s.slug} · {s.type}
+                            {s.subtitle ? ` · ${s.subtitle}` : ""}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={s.published ? "default" : "outline"}>
+                            {s.published ? "Published" : "Draft"}
+                          </Badge>
+                          <Button asChild size="sm" variant="outline">
+                            <a href={`/spotlight/${s.slug}`} target="_blank" rel="noreferrer">
+                              View <ExternalLink className="ml-1 size-3" />
+                            </a>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              const { error } = await supabase
+                                .from("partner_pages" as any)
+                                .update({ published: !s.published })
+                                .eq("id", s.id);
+                              if (error) return toast.error(error.message);
+                              toast.success(s.published ? "Unpublished" : "Published");
+                              refreshSpotlights();
+                            }}
+                          >
+                            {s.published ? "Unpublish" : "Publish"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={async () => {
+                              if (!confirm(`Delete spotlight "${s.headline}"?`)) return;
+                              const { error } = await supabase
+                                .from("partner_pages" as any)
+                                .delete()
+                                .eq("id", s.id);
+                              if (error) return toast.error(error.message);
+                              toast.success("Deleted");
+                              refreshSpotlights();
+                            }}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
 
           <TabsContent value="users" className="mt-6">
             <Card>
@@ -260,3 +348,143 @@ function Table({ headers, children }: { headers: string[]; children: React.React
     </div>
   );
 }
+
+function SpotlightForm({ onCreated }: { onCreated: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    slug: "",
+    type: "podcast",
+    headline: "",
+    subtitle: "",
+    intro: "",
+    host_bio: "",
+    partnership_pitch: "",
+    eoi_opportunities: "",
+    audience_segments: "",
+    instagram: "",
+    spotify: "",
+    spotifyEmbed: "",
+    contact: "",
+    published: false,
+  });
+
+  function set<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
+    setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.slug || !form.headline) {
+      toast.error("Slug and headline are required");
+      return;
+    }
+    setSaving(true);
+    const slug = form.slug.toLowerCase().trim().replace(/\s+/g, "-");
+    const payload = {
+      slug,
+      type: form.type || "podcast",
+      headline: form.headline,
+      subtitle: form.subtitle || null,
+      intro: form.intro || null,
+      host_bio: form.host_bio || null,
+      partnership_pitch: form.partnership_pitch || null,
+      eoi_opportunities: form.eoi_opportunities
+        .split("\n").map((s) => s.trim()).filter(Boolean),
+      audience_segments: form.audience_segments
+        .split("\n").map((s) => s.trim()).filter(Boolean),
+      links: {
+        instagram: form.instagram,
+        spotify: form.spotify,
+        spotifyEmbed: form.spotifyEmbed,
+        contact: form.contact,
+      },
+      published: form.published,
+    };
+    const { error } = await supabase.from("partner_pages" as any).insert(payload);
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(`Spotlight created at /spotlight/${slug}`);
+    setForm({
+      slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
+      host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
+      instagram: "", spotify: "", spotifyEmbed: "", contact: "", published: false,
+    });
+    onCreated();
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display text-2xl">New artist spotlight</CardTitle>
+        <CardDescription>Create a partner page. Lives at /spotlight/&lt;slug&gt; with noindex.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="slug">Slug *</Label>
+            <Input id="slug" value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="ymyb-spotlight" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="type">Type</Label>
+            <Input id="type" value={form.type} onChange={(e) => set("type", e.target.value)} placeholder="podcast" />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="headline">Headline *</Label>
+            <Input id="headline" value={form.headline} onChange={(e) => set("headline", e.target.value)} placeholder="Your Music, Your Business" />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="subtitle">Subtitle</Label>
+            <Input id="subtitle" value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="UNLOCK REAL FAN INSIGHTS" />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="intro">Intro</Label>
+            <Textarea id="intro" rows={3} value={form.intro} onChange={(e) => set("intro", e.target.value)} />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="host_bio">Host bio</Label>
+            <Textarea id="host_bio" rows={3} value={form.host_bio} onChange={(e) => set("host_bio", e.target.value)} />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="partnership_pitch">Partnership pitch</Label>
+            <Textarea id="partnership_pitch" rows={3} value={form.partnership_pitch} onChange={(e) => set("partnership_pitch", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="eoi">EOI opportunities (one per line)</Label>
+            <Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="audience">Audience segments (one per line)</Label>
+            <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="instagram">Instagram URL</Label>
+            <Input id="instagram" value={form.instagram} onChange={(e) => set("instagram", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="spotify">Spotify URL</Label>
+            <Input id="spotify" value={form.spotify} onChange={(e) => set("spotify", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="spotifyEmbed">Spotify embed URL</Label>
+            <Input id="spotifyEmbed" value={form.spotifyEmbed} onChange={(e) => set("spotifyEmbed", e.target.value)} placeholder="https://open.spotify.com/embed/show/..." />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="contact">Contact (email or URL)</Label>
+            <Input id="contact" value={form.contact} onChange={(e) => set("contact", e.target.value)} />
+          </div>
+          <div className="flex items-center gap-3 md:col-span-2">
+            <Switch id="published" checked={form.published} onCheckedChange={(v) => set("published", v)} />
+            <Label htmlFor="published" className="cursor-pointer">Publish immediately</Label>
+          </div>
+          <div className="md:col-span-2">
+            <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create spotlight"}</Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+

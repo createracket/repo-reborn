@@ -200,6 +200,57 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_pages: {
+        Row: {
+          audience_segments: string[]
+          created_at: string
+          eoi_opportunities: string[]
+          headline: string
+          host_bio: string | null
+          id: string
+          intro: string | null
+          links: Json
+          partnership_pitch: string | null
+          published: boolean
+          slug: string
+          subtitle: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          audience_segments?: string[]
+          created_at?: string
+          eoi_opportunities?: string[]
+          headline: string
+          host_bio?: string | null
+          id?: string
+          intro?: string | null
+          links?: Json
+          partnership_pitch?: string | null
+          published?: boolean
+          slug: string
+          subtitle?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          audience_segments?: string[]
+          created_at?: string
+          eoi_opportunities?: string[]
+          headline?: string
+          host_bio?: string | null
+          id?: string
+          intro?: string | null
+          links?: Json
+          partnership_pitch?: string | null
+          published?: boolean
+          slug?: string
+          subtitle?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"] | null
