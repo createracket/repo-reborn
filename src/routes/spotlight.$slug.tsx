@@ -250,6 +250,38 @@ function SpotlightPage() {
             </Card>
           </section>
         ) : null}
+        {/* Videos */}
+        {(() => {
+          const videos = [links.video1, links.video2, links.video3]
+            .map((u) => (u ? getSocialEmbed(u) : null))
+            .filter((x): x is { src: string; provider: "tiktok" | "instagram" } => !!x);
+          if (videos.length === 0) return null;
+          return (
+            <section className="mt-16">
+              <h2 className="font-display text-3xl">Watch</h2>
+              <div className="mt-4 grid gap-4 md:grid-cols-3">
+                {videos.map((v, i) => (
+                  <div
+                    key={i}
+                    className="overflow-hidden rounded-2xl border border-border/60 bg-muted/40"
+                    style={{ aspectRatio: "9 / 16" }}
+                  >
+                    <iframe
+                      src={v.src}
+                      title={`${v.provider} video ${i + 1}`}
+                      className="size-full"
+                      frameBorder={0}
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture; web-share"
+                      allowFullScreen
+                      loading="lazy"
+                      scrolling="no"
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
       </main>
       <SiteFooter />
     </div>
