@@ -144,7 +144,7 @@ function SpotlightPage() {
             </div>
           </div>
           {page.intro ? (
-            <p className="max-w-2xl text-lg text-muted-foreground">{page.intro}</p>
+            <p className="text-lg text-muted-foreground">{page.intro}</p>
           ) : null}
 
           <div className="flex flex-wrap gap-2 pt-2">
