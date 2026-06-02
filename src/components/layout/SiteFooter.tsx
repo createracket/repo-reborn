@@ -45,7 +45,8 @@ export function SiteFooter() {
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="mailto:community@createracket.com" className="inline-flex items-center gap-2 hover:text-purple">
-                  <Mail className="size-4" /> community@createracket.com
+                  <Mail className="size-4" />
+                  <span suppressHydrationWarning>community@createracket.com</span>
                 </a>
               </li>
               <li>
