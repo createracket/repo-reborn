@@ -10,6 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -19,6 +26,18 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+
+export const ACCESS_CODE = "VERIFIEDFAN";
+
+const ACCOUNT_TYPES = [
+  { value: "artist", label: "Artist" },
+  { value: "brand", label: "Brand" },
+  { value: "creative", label: "Creative" },
+  { value: "fan", label: "Fan" },
+  { value: "crew", label: "Crew" },
+] as const;
+type AccountTypeValue = (typeof ACCOUNT_TYPES)[number]["value"];
+
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>) => ({
