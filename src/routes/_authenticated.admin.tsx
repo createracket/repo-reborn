@@ -60,6 +60,7 @@ function AdminPage() {
   const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
   const [editingSpotlight, setEditingSpotlight] = useState<Record<string, any> | null>(null);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
+  const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     (async () => {
