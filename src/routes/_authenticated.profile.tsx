@@ -97,18 +97,32 @@ function EditProfilePage() {
     setForm((f) => ({ ...f, socials: { ...f.socials, [k]: v } }));
   }
 
-  async function handleAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleAvatarPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file || !userId) return;
+    if (!file) return;
     if (file.size > 8 * 1024 * 1024) {
       toast.error("Image must be under 8MB");
+      e.target.value = "";
       return;
     }
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(file);
+    setPendingPreview(URL.createObjectURL(file));
+  }
+
+  function clearPending() {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(null);
+    setPendingPreview(null);
+  }
+
+  async function handleAvatarUpload() {
+    if (!pendingFile || !userId) return;
     setUploading(true);
-    const ext = file.name.split(".").pop() || "jpg";
+    const ext = pendingFile.name.split(".").pop() || "jpg";
     const path = `${userId}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file, {
-      cacheControl: "3600", upsert: true, contentType: file.type,
+    const { error } = await supabase.storage.from("avatars").upload(path, pendingFile, {
+      cacheControl: "3600", upsert: true, contentType: pendingFile.type,
     });
     if (error) {
       setUploading(false);
@@ -116,20 +130,12 @@ function EditProfilePage() {
       return;
     }
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    const publicUrl = data.publicUrl;
-    set("avatar_url", publicUrl);
-    // Persist immediately so the photo survives a page reload even before "Save profile".
-    const { error: saveErr } = await supabase
-      .from("profiles")
-      .upsert({ id: userId, avatar_url: publicUrl }, { onConflict: "id" });
+    set("avatar_url", data.publicUrl);
+    clearPending();
     setUploading(false);
-    if (saveErr) {
-      toast.error(`Photo uploaded but couldn't be saved: ${saveErr.message}`);
-    } else {
-      toast.success("Photo saved");
-    }
-    e.target.value = "";
+    toast.success("Photo uploaded — remember to click Save profile.");
   }
+
 
   function num(v: string): number | null {
     const t = v.trim();
