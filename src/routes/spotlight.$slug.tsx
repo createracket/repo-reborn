@@ -1,6 +1,7 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Instagram, Mail, ExternalLink, Mic2 } from "lucide-react";
+import { Instagram, Mail, ExternalLink, Mic2, Check } from "lucide-react";
+import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -81,8 +82,11 @@ function NotFound() {
 
 function SpotlightPage() {
   const { slug } = Route.useParams();
+  const navigate = useNavigate();
   const [page, setPage] = useState<PartnerPage | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
+  const [registered, setRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -96,10 +100,44 @@ function SpotlightPage() {
         setStatus("missing");
         return;
       }
-      setPage(data as unknown as PartnerPage);
+      const p = data as unknown as PartnerPage;
+      setPage(p);
       setStatus("ready");
+
+      const { data: u } = await supabase.auth.getUser();
+      if (u.user) {
+        const { data: existing } = await supabase
+          .from("spotlight_interests" as any)
+          .select("id")
+          .eq("partner_page_id", p.id)
+          .eq("user_id", u.user.id)
+          .maybeSingle();
+        if (existing) setRegistered(true);
+      }
     })();
   }, [slug]);
+
+  async function handleRegister() {
+    if (!page) return;
+    setRegistering(true);
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) {
+      toast.info("Sign in to register your interest");
+      navigate({ to: "/login" });
+      return;
+    }
+    const { error } = await supabase
+      .from("spotlight_interests" as any)
+      .insert({ partner_page_id: page.id, user_id: u.user.id });
+    setRegistering(false);
+    if (error && !error.message.toLowerCase().includes("duplicate")) {
+      toast.error(error.message);
+      return;
+    }
+    setRegistered(true);
+    toast.success("Interest registered — we'll be in touch.");
+  }
+
 
   if (status === "loading") {
     return (
@@ -237,15 +275,20 @@ function SpotlightPage() {
                     </li>
                   ))}
                 </ul>
-                {links.contact ? (
-                  <Button asChild className="mt-6">
-                    <a href={links.contact.startsWith("http") ? links.contact : `mailto:${links.contact}`}>
-                      Register interest
-                    </a>
+                <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <Button onClick={handleRegister} disabled={registering || registered}>
+                    {registered ? (
+                      <><Check className="mr-1.5 size-4" /> Interest registered</>
+                    ) : registering ? "Registering…" : "Register interest"}
                   </Button>
-                ) : (
-                  <Button asChild className="mt-6"><Link to="/contact">Register interest</Link></Button>
-                )}
+                  {links.contact ? (
+                    <Button asChild variant="outline">
+                      <a href={links.contact.startsWith("http") ? links.contact : `mailto:${links.contact}`}>
+                        <Mail className="mr-1.5 size-4" /> Contact directly
+                      </a>
+                    </Button>
+                  ) : null}
+                </div>
               </CardContent>
             </Card>
           </section>

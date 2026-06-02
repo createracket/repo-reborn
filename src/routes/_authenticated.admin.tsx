@@ -43,6 +43,11 @@ type Spotlight = {
   published: boolean; created_at: string;
 };
 
+type SpotlightInterest = {
+  id: string; created_at: string; partner_page_id: string; user_id: string;
+  profile?: { display_name: string | null; email: string | null } | null;
+};
+
 function AdminPage() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
@@ -54,6 +59,7 @@ function AdminPage() {
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
   const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
   const [editingSpotlight, setEditingSpotlight] = useState<Record<string, any> | null>(null);
+  const [interests, setInterests] = useState<SpotlightInterest[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -74,13 +80,14 @@ function AdminPage() {
       }
       setIsAdmin(true);
 
-      const [lb, cm, ml, pr, cb, sp] = await Promise.all([
+      const [lb, cm, ml, pr, cb, sp, si] = await Promise.all([
         supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("id, email, display_name, account_type, created_at").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("id, slug, type, headline, subtitle, published, created_at").order("created_at", { ascending: false }),
+        supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id").order("created_at", { ascending: false }),
       ]);
       setLeadBriefs((lb.data as LeadBrief[]) ?? []);
       setContacts((cm.data as ContactMsg[]) ?? []);
@@ -88,6 +95,20 @@ function AdminPage() {
       setProfiles((pr.data as Profile[]) ?? []);
       setCampaigns((cb.data as CampaignBrief[]) ?? []);
       setSpotlights((sp.data as unknown as Spotlight[]) ?? []);
+
+      // Hydrate interests with profile info (display name + email)
+      const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
+      const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id)));
+      if (userIds.length) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, display_name, email")
+          .in("id", userIds);
+        const map = new Map((profs ?? []).map((p: any) => [p.id, { display_name: p.display_name, email: p.email }]));
+        setInterests(rawInterests.map((i) => ({ ...i, profile: map.get(i.user_id) ?? null })));
+      } else {
+        setInterests(rawInterests);
+      }
       setChecking(false);
     })();
   }, [navigate]);
@@ -291,6 +312,30 @@ function AdminPage() {
                         </div>
                       </div>
                     </CardHeader>
+                    {(() => {
+                      const rows = interests.filter((i) => i.partner_page_id === s.id);
+                      if (rows.length === 0) return null;
+                      return (
+                        <CardContent className="border-t border-border/60 pt-4">
+                          <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">
+                            Registered interest ({rows.length})
+                          </p>
+                          <ul className="space-y-1 text-sm">
+                            {rows.map((r) => (
+                              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2">
+                                <span>
+                                  {r.profile?.display_name ?? "Unnamed user"}
+                                  {r.profile?.email ? <span className="text-muted-foreground"> · {r.profile.email}</span> : null}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(r.created_at).toLocaleDateString()}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </CardContent>
+                      );
+                    })()}
                   </Card>
                 ))}
               </div>
