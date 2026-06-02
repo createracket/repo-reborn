@@ -160,6 +160,23 @@ function LoginPage() {
                 {busy ? "..." : mode === "signin" ? "Log in" : "Create account"}
               </Button>
             </form>
+            {mode === "signup" && (
+              <Link
+                to="/vibe-check"
+                className="group flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 transition-colors hover:border-primary/60 hover:bg-primary/10"
+              >
+                <Sparkles className="mt-0.5 size-5 shrink-0 text-primary" />
+                <div className="text-sm">
+                  <p className="font-medium text-foreground">
+                    Not ready to sign up? Take the Vibe Check first.
+                  </p>
+                  <p className="mt-0.5 text-muted-foreground">
+                    2 minutes. See your archetype and who you'd match with — then
+                    save it with an account.
+                  </p>
+                </div>
+              </Link>
+            )}
             <p className="text-center text-sm text-muted-foreground">
               {mode === "signin" ? "New here? " : "Already have an account? "}
               <button
