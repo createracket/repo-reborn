@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,12 +36,12 @@ type LeadBrief = {
 };
 type ContactMsg = { id: string; created_at: string; name: string; email: string; message: string; handled: boolean };
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
-type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string };
+type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null };
 type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null };
 
 type Spotlight = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
-  published: boolean; created_at: string;
+  published: boolean; created_at: string; links?: Record<string, string> | null;
 };
 
 type SpotlightInterest = {
@@ -63,6 +63,15 @@ function AdminPage() {
   const [spotlightFormOpen, setSpotlightFormOpen] = useState(false);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
+
+  const profileByEmail = useMemo(() => {
+    const m = new Map<string, Profile>();
+    profiles.forEach((p) => { if (p.email) m.set(p.email.trim().toLowerCase(), p); });
+    return m;
+  }, [profiles]);
+  const lookupProfile = (email?: string | null) => email ? profileByEmail.get(email.trim().toLowerCase()) ?? null : null;
+
+
 
   useEffect(() => {
     (async () => {
@@ -87,7 +96,7 @@ function AdminPage() {
         supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
-        supabase.from("profiles").select("id, email, display_name, account_type, created_at").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id").order("created_at", { ascending: false }),
@@ -187,6 +196,9 @@ function AdminPage() {
                       <CardDescription>
                         {b.contact_name ?? "—"} · {b.contact_email} {b.company ? `· ${b.company}` : ""}
                       </CardDescription>
+                      <div className="mt-1">
+                        <ProfileChip profile={lookupProfile(b.contact_email)} fallbackEmail={b.contact_email} />
+                      </div>
                     </div>
                     <Meta date={b.created_at} status={b.status} />
                   </div>
@@ -220,6 +232,12 @@ function AdminPage() {
                     <div>
                       <CardTitle className="text-lg">{b.title}</CardTitle>
                       <CardDescription>{b.contact_email ?? b.user_id}</CardDescription>
+                      <div className="mt-1">
+                        <ProfileChip
+                          profile={lookupProfile(b.contact_email) ?? profiles.find((p) => p.id === b.user_id) ?? null}
+                          fallbackEmail={b.contact_email}
+                        />
+                      </div>
                     </div>
                     <Meta date={b.created_at} status={b.status} />
                   </div>
@@ -292,6 +310,11 @@ function AdminPage() {
                             /spotlight/{s.slug} · {s.type}
                             {s.subtitle ? ` · ${s.subtitle}` : ""}
                           </CardDescription>
+                          {s.links?.contact ? (
+                            <div className="mt-1">
+                              <ProfileChip profile={lookupProfile(s.links.contact)} fallbackEmail={s.links.contact} />
+                            </div>
+                          ) : null}
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant={s.published ? "default" : "outline"}>
@@ -480,6 +503,33 @@ function Meta({ date, status }: { date: string; status: string }) {
       <div className="mt-1 inline-block rounded-full border border-border/60 px-2 py-0.5">{status}</div>
     </div>
   );
+}
+function ProfileChip({ profile, fallbackEmail }: {
+  profile: { display_name: string | null; slug: string | null; avatar_url: string | null; email: string | null } | null;
+  fallbackEmail?: string | null;
+}) {
+  if (!profile) {
+    return fallbackEmail ? (
+      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+        <span className="rounded-full bg-muted px-2 py-0.5">No profile</span>
+        <span>{fallbackEmail}</span>
+      </span>
+    ) : null;
+  }
+  const name = profile.display_name || profile.email || "User";
+  const inner = (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-xs hover:bg-muted">
+      {profile.avatar_url ? (
+        <img src={profile.avatar_url} alt="" className="size-4 rounded-full object-cover" />
+      ) : (
+        <span className="size-4 rounded-full bg-primary/20" />
+      )}
+      <span className="font-medium">{name}</span>
+    </span>
+  );
+  return profile.slug ? (
+    <a href={`/u/${profile.slug}`} target="_blank" rel="noreferrer">{inner}</a>
+  ) : inner;
 }
 function Table({ headers, children }: { headers: string[]; children: React.ReactNode }) {
   return (
