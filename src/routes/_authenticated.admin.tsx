@@ -16,9 +16,11 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 import { adminCreateUser } from "@/lib/admin-users.functions";
+import { ACCESS_CODE } from "@/routes/login";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
 import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
+
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -428,6 +430,32 @@ function AdminPage() {
 
 
           <TabsContent value="users" className="mt-6 space-y-6">
+            <Card className="border-primary/40 bg-primary/5">
+              <CardHeader>
+                <CardTitle className="text-lg">Soft-launch access code</CardTitle>
+                <CardDescription>
+                  Share this code with people you want to let in. Without it,
+                  visitors are routed to the waitlist instead of sign-up.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap items-center gap-3">
+                  <code className="rounded-md border border-primary/40 bg-background px-3 py-1.5 font-mono text-lg tracking-widest">
+                    {ACCESS_CODE}
+                  </code>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(ACCESS_CODE);
+                      toast.success("Code copied");
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
             <NewUserForm
               onCreated={async () => {
                 const { data } = await supabase
@@ -439,12 +467,20 @@ function AdminPage() {
             />
             <Card>
               <CardContent className="p-0">
-                <Table headers={["Display name", "Email", "Type", "Joined"]}>
+                <Table headers={["Display name", "Email", "Profile type", "Joined"]}>
                   {profiles.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
                       <td className="p-3">{p.email ?? "—"}</td>
-                      <td className="p-3">{p.account_type ?? "—"}</td>
+                      <td className="p-3">
+                        {p.account_type ? (
+                          <span className="inline-block rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-xs uppercase tracking-wider">
+                            {p.account_type}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
                       <td className="p-3 text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
                     </tr>
                   ))}
@@ -452,6 +488,7 @@ function AdminPage() {
               </CardContent>
             </Card>
           </TabsContent>
+
 
           <TabsContent value="contact" className="mt-6 space-y-3">
             {contacts.length === 0 ? <Empty /> : contacts.map((m) => (

@@ -10,6 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -19,6 +26,18 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+
+export const ACCESS_CODE = "VERIFIEDFAN";
+
+const ACCOUNT_TYPES = [
+  { value: "artist", label: "Artist" },
+  { value: "brand", label: "Brand" },
+  { value: "creative", label: "Creative" },
+  { value: "fan", label: "Fan" },
+  { value: "crew", label: "Crew" },
+] as const;
+type AccountTypeValue = (typeof ACCOUNT_TYPES)[number]["value"];
+
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -53,9 +72,14 @@ function LoginPage() {
   const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accessCode, setAccessCode] = useState("");
+  const [accountType, setAccountType] = useState<AccountTypeValue>("fan");
   const [busy, setBusy] = useState(false);
   const [showVibeNudge, setShowVibeNudge] = useState(false);
   const nudgeShownRef = useRef(false);
+
+  const accessCodeOk = accessCode.trim().toUpperCase() === ACCESS_CODE;
+
 
   // Where to send the user after auth succeeds. If they came from the Vibe
   // Check "Save my results" CTA — or we just see a pending vibe in storage —
@@ -73,11 +97,53 @@ function LoginPage() {
     return "/dashboard";
   }
 
-  // Redirect once session is present.
+  // Redirect once session is present. If the user selected a profile type
+  // before signing in with Google (where we can't pass it via supabase.auth),
+  // apply it to their profile now.
   useEffect(() => {
+    async function applyPendingAccountType(userId: string) {
+      if (typeof window === "undefined") return;
+      let pending: string | null = null;
+      try {
+        pending = sessionStorage.getItem("pendingAccountType");
+      } catch {
+        return;
+      }
+      if (!pending) return;
+      const allowed = ["artist", "brand", "creative", "fan", "crew"];
+      if (!allowed.includes(pending)) {
+        try {
+          sessionStorage.removeItem("pendingAccountType");
+        } catch {
+          // ignore
+        }
+        return;
+      }
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("account_type")
+        .eq("id", userId)
+        .maybeSingle();
+      if (prof && !prof.account_type) {
+        await supabase
+          .from("profiles")
+          .update({ account_type: pending as AccountTypeValue })
+          .eq("id", userId);
+      }
+      try {
+        sessionStorage.removeItem("pendingAccountType");
+      } catch {
+        // ignore
+      }
+    }
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) navigate({ to: postAuthDestination(), replace: true });
+      if (session) {
+        applyPendingAccountType(session.user.id).finally(() => {
+          navigate({ to: postAuthDestination(), replace: true });
+        });
+      }
     });
+
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: postAuthDestination(), replace: true });
     });
@@ -111,15 +177,27 @@ function LoginPage() {
     };
   }, [mode, busy]);
 
+  function gateSignupOrWaitlist(): boolean {
+    if (mode !== "signup") return true;
+    if (accessCodeOk) return true;
+    toast.error("That access code isn't valid. Join the waitlist to get notified.");
+    navigate({ to: "/fan-signup" });
+    return false;
+  }
+
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
+    if (!gateSignupOrWaitlist()) return;
     setBusy(true);
     try {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { account_type: accountType },
+          },
         });
         if (error) throw error;
         toast.success("Check your email to confirm your account.");
@@ -135,7 +213,17 @@ function LoginPage() {
   }
 
   async function handleGoogle() {
+    if (!gateSignupOrWaitlist()) return;
     try {
+      if (mode === "signup" && typeof window !== "undefined") {
+        // Persist the chosen profile type so we can apply it after the
+        // OAuth round-trip lands the user back on the app.
+        try {
+          sessionStorage.setItem("pendingAccountType", accountType);
+        } catch {
+          // ignore
+        }
+      }
       await lovable.auth.signInWithOAuth("google", {
         redirect_uri: `${window.location.origin}${postAuthDestination()}`,
       });
@@ -143,6 +231,7 @@ function LoginPage() {
       toast.error(err.message ?? "Couldn't start Google sign-in");
     }
   }
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -160,7 +249,56 @@ function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button type="button" variant="outline" className="w-full" onClick={handleGoogle}>
+            {mode === "signup" && (
+              <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+                <div className="space-y-1">
+                  <Label htmlFor="access-code" className="text-xs uppercase tracking-wider">
+                    Access code
+                  </Label>
+                  <Input
+                    id="access-code"
+                    value={accessCode}
+                    onChange={(e) => setAccessCode(e.target.value)}
+                    placeholder="Enter your soft-launch code"
+                    autoComplete="off"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    We're in soft launch. No code?{" "}
+                    <Link to="/fan-signup" className="font-medium text-primary hover:underline">
+                      Join the waitlist
+                    </Link>
+                    .
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="account-type" className="text-xs uppercase tracking-wider">
+                    I'm a…
+                  </Label>
+                  <Select
+                    value={accountType}
+                    onValueChange={(v) => setAccountType(v as AccountTypeValue)}
+                  >
+                    <SelectTrigger id="account-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ACCOUNT_TYPES.map((t) => (
+                        <SelectItem key={t.value} value={t.value}>
+                          {t.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleGoogle}
+              disabled={mode === "signup" && !accessCodeOk}
+            >
               Continue with Google
             </Button>
             <div className="relative">
@@ -171,6 +309,7 @@ function LoginPage() {
                 <span className="bg-card px-2 text-muted-foreground">or with email</span>
               </div>
             </div>
+
             <form onSubmit={handleEmail} className="space-y-3">
               <div className="space-y-1">
                 <Label htmlFor="email">Email</Label>
@@ -205,9 +344,14 @@ function LoginPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={busy}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={busy || (mode === "signup" && !accessCodeOk)}
+              >
                 {busy ? "..." : mode === "signin" ? "Log in" : "Create account"}
               </Button>
+
             </form>
             {mode === "signup" && (
               <Link
