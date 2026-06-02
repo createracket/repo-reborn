@@ -6,8 +6,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function SiteFooter() {
   const [signedIn, setSignedIn] = useState(false);
+  const [contactEmail, setContactEmail] = useState("");
 
   useEffect(() => {
+    setContactEmail(["community", "createracket.com"].join("@"));
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setSignedIn(!!session);
@@ -44,9 +46,9 @@ export function SiteFooter() {
             <h3 className="mb-3 font-headline text-sm">Contact</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="mailto:community@createracket.com" className="inline-flex items-center gap-2 hover:text-purple">
+                <a href={contactEmail ? `mailto:${contactEmail}` : undefined} className="inline-flex items-center gap-2 hover:text-purple">
                   <Mail className="size-4" />
-                  <span suppressHydrationWarning>community@createracket.com</span>
+                  <span>{contactEmail}</span>
                 </a>
               </li>
               <li>
