@@ -263,7 +263,16 @@ function AdminPage() {
           </TabsContent>
 
 
-          <TabsContent value="users" className="mt-6">
+          <TabsContent value="users" className="mt-6 space-y-6">
+            <NewUserForm
+              onCreated={async () => {
+                const { data } = await supabase
+                  .from("profiles")
+                  .select("id, email, display_name, account_type, created_at")
+                  .order("created_at", { ascending: false });
+                setProfiles((data as Profile[]) ?? []);
+              }}
+            />
             <Card>
               <CardContent className="p-0">
                 <Table headers={["Display name", "Email", "Type", "Joined"]}>
