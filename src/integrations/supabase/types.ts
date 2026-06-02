@@ -424,6 +424,27 @@ export type Database = {
         }
         Relationships: []
       }
+      vibe_check_config: {
+        Row: {
+          config: Json
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          config?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       vibe_check_responses: {
         Row: {
           answers: Json
