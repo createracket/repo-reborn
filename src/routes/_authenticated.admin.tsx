@@ -179,7 +179,16 @@ function AdminPage() {
             ))}
           </TabsContent>
 
-          <TabsContent value="campaigns" className="mt-6 space-y-3">
+          <TabsContent value="campaigns" className="mt-6 space-y-6">
+            <NewCampaignBriefForm
+              onCreated={async () => {
+                const { data } = await supabase
+                  .from("campaign_briefs")
+                  .select("id, created_at, title, description, user_id, budget, status, contact_email")
+                  .order("created_at", { ascending: false });
+                setCampaigns((data as CampaignBrief[]) ?? []);
+              }}
+            />
             {campaigns.length === 0 ? <Empty /> : campaigns.map((b) => (
               <Card key={b.id}>
                 <CardHeader>
@@ -198,6 +207,7 @@ function AdminPage() {
               </Card>
             ))}
           </TabsContent>
+
 
           <TabsContent value="spotlights" className="mt-6 space-y-6">
             <SpotlightForm
@@ -717,4 +727,160 @@ function NewUserForm({ onCreated }: { onCreated: () => void }) {
     </Card>
   );
 }
+
+const BRIEF_COLLABORATION_TYPES = [
+  "Social Media Campaign",
+  "Live Performance",
+  "Content Creation",
+  "Brand Ambassadorship",
+  "Merchandise Collaboration",
+  "Sponsored Song/Video",
+];
+
+const BRIEF_CORE_VALUES = [
+  "Authenticity",
+  "Creativity",
+  "Community",
+  "Sustainability",
+  "Innovation",
+  "Inclusivity",
+];
+
+function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [values, setValues] = useState<string[]>([]);
+  const [types, setTypes] = useState<string[]>([]);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    contact_email: "",
+    budget: "",
+    timeline: "",
+    target_audience: "",
+    status: "in_review",
+  });
+
+  function toggle(list: string[], setList: (v: string[]) => void, item: string, max?: number) {
+    if (list.includes(item)) {
+      setList(list.filter((x) => x !== item));
+    } else {
+      if (max && list.length >= max) {
+        toast.error(`You can pick up to ${max}`);
+        return;
+      }
+      setList([...list, item]);
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (form.title.trim().length < 2 || form.description.trim().length < 10) {
+      toast.error("Add a title and a description (10+ chars)");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Not signed in");
+      const { error } = await supabase.from("campaign_briefs").insert({
+        user_id: u.user.id,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        contact_email: form.contact_email.trim() || null,
+        budget: form.budget ? Number(form.budget) : null,
+        timeline: form.timeline.trim() || null,
+        target_audience: form.target_audience.trim() || null,
+        collaboration_types: types,
+        core_values: values,
+        status: form.status || "in_review",
+      });
+      if (error) throw error;
+      toast.success("Campaign brief added");
+      setForm({ title: "", description: "", contact_email: "", budget: "", timeline: "", target_audience: "", status: "in_review" });
+      setValues([]);
+      setTypes([]);
+      onCreated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to add brief");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display text-2xl">Add a campaign brief</CardTitle>
+        <CardDescription>Manually create a brief using the same fields as the public submission form.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+          <div className="md:col-span-2">
+            <Label htmlFor="cb-title">Campaign title *</Label>
+            <Input id="cb-title" value={form.title} maxLength={200}
+              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} required />
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="cb-desc">Project description *</Label>
+            <Textarea id="cb-desc" rows={5} value={form.description} maxLength={5000}
+              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} required />
+          </div>
+          <div>
+            <Label htmlFor="cb-email">Contact email</Label>
+            <Input id="cb-email" type="email" value={form.contact_email} maxLength={320}
+              onChange={(e) => setForm((f) => ({ ...f, contact_email: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="cb-budget">Estimated budget ($)</Label>
+            <Input id="cb-budget" type="number" min={0} value={form.budget}
+              onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="cb-timeline">Timeline</Label>
+            <Input id="cb-timeline" value={form.timeline} maxLength={120}
+              onChange={(e) => setForm((f) => ({ ...f, timeline: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="cb-status">Status</Label>
+            <Input id="cb-status" value={form.status}
+              onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))} />
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor="cb-audience">Target audience</Label>
+            <Textarea id="cb-audience" rows={2} value={form.target_audience} maxLength={2000}
+              onChange={(e) => setForm((f) => ({ ...f, target_audience: e.target.value }))} />
+          </div>
+          <div className="md:col-span-2 space-y-2">
+            <Label>Core values (pick up to 3)</Label>
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+              {BRIEF_CORE_VALUES.map((v) => (
+                <label key={v} className="flex cursor-pointer items-center gap-2 rounded-md border border-border/60 p-2 text-sm">
+                  <input type="checkbox" checked={values.includes(v)}
+                    onChange={() => toggle(values, setValues, v, 3)} />
+                  {v}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="md:col-span-2 space-y-2">
+            <Label>Collaboration types</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {BRIEF_COLLABORATION_TYPES.map((t) => (
+                <label key={t} className="flex cursor-pointer items-center gap-2 rounded-md border border-border/60 p-2 text-sm">
+                  <input type="checkbox" checked={types.includes(t)}
+                    onChange={() => toggle(types, setTypes, t)} />
+                  {t}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="md:col-span-2">
+            <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Add brief"}</Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 
