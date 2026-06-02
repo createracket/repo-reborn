@@ -911,6 +911,10 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
       toast.error("Add a title and a description (10+ chars)");
       return;
     }
+    if (findProfanityIn(form)) {
+      toast.error("Please remove offensive or inappropriate language from the brief before saving.");
+      return;
+    }
     setSaving(true);
     try {
       const { data: u } = await supabase.auth.getUser();
