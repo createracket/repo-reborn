@@ -176,7 +176,7 @@ export async function loadBriefFormConfig(force = false): Promise<BriefFormConfi
         .maybeSingle();
       if (error || !data) return DEFAULT_BRIEF_FORM_CONFIG;
       return mergeBriefFormConfig(
-        (data as { config: Partial<BriefFormConfig> }).config ?? {},
+        (data as unknown as { config: Partial<BriefFormConfig> }).config ?? {},
       );
     } catch {
       return DEFAULT_BRIEF_FORM_CONFIG;
