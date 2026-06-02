@@ -43,6 +43,11 @@ type Spotlight = {
   published: boolean; created_at: string;
 };
 
+type SpotlightInterest = {
+  id: string; created_at: string; partner_page_id: string; user_id: string;
+  profile?: { display_name: string | null; email: string | null } | null;
+};
+
 function AdminPage() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
@@ -54,6 +59,7 @@ function AdminPage() {
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
   const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
   const [editingSpotlight, setEditingSpotlight] = useState<Record<string, any> | null>(null);
+  const [interests, setInterests] = useState<SpotlightInterest[]>([]);
 
   useEffect(() => {
     (async () => {
