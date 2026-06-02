@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Sparkles } from "lucide-react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -8,6 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
@@ -24,6 +33,8 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showVibeNudge, setShowVibeNudge] = useState(false);
+  const nudgeShownRef = useRef(false);
 
   // Redirect once session is present.
   useEffect(() => {
@@ -35,6 +46,32 @@ function LoginPage() {
     });
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
+
+  // Exit-intent + idle nudge — only when the user is on the signup tab and
+  // hasn't completed the form. We pitch the Vibe Check as a no-commitment way
+  // in: they get a result, then we ask them to save it by creating an account.
+  useEffect(() => {
+    if (mode !== "signup" || typeof window === "undefined") return;
+    nudgeShownRef.current = false;
+
+    const trigger = () => {
+      if (nudgeShownRef.current || busy) return;
+      nudgeShownRef.current = true;
+      setShowVibeNudge(true);
+    };
+
+    const onMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0) trigger();
+    };
+
+    const idleTimer = window.setTimeout(trigger, 20000);
+    document.addEventListener("mouseleave", onMouseLeave);
+
+    return () => {
+      window.clearTimeout(idleTimer);
+      document.removeEventListener("mouseleave", onMouseLeave);
+    };
+  }, [mode, busy]);
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -123,6 +160,23 @@ function LoginPage() {
                 {busy ? "..." : mode === "signin" ? "Log in" : "Create account"}
               </Button>
             </form>
+            {mode === "signup" && (
+              <Link
+                to="/vibe-check"
+                className="group flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 transition-colors hover:border-primary/60 hover:bg-primary/10"
+              >
+                <Sparkles className="mt-0.5 size-5 shrink-0 text-primary" />
+                <div className="text-sm">
+                  <p className="font-medium text-foreground">
+                    Not ready to sign up? Take the Vibe Check first.
+                  </p>
+                  <p className="mt-0.5 text-muted-foreground">
+                    2 minutes. See your archetype and who you'd match with — then
+                    save it with an account.
+                  </p>
+                </div>
+              </Link>
+            )}
             <p className="text-center text-sm text-muted-foreground">
               {mode === "signin" ? "New here? " : "Already have an account? "}
               <button
@@ -142,6 +196,32 @@ function LoginPage() {
         </Card>
       </main>
       <SiteFooter />
+
+      <Dialog open={showVibeNudge} onOpenChange={setShowVibeNudge}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mb-2 inline-flex size-10 items-center justify-center rounded-full bg-primary/10">
+              <Sparkles className="size-5 text-primary" />
+            </div>
+            <DialogTitle className="font-display text-2xl">
+              Before you go — try the Vibe Check
+            </DialogTitle>
+            <DialogDescription>
+              No account needed. In about 2 minutes you'll get your archetype and a
+              preview of the partners we'd match you with. Save it with one click at
+              the end.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="ghost" onClick={() => setShowVibeNudge(false)}>
+              Keep signing up
+            </Button>
+            <Button asChild>
+              <Link to="/vibe-check">Take the Vibe Check</Link>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

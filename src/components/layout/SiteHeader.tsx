@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/brand/Wordmark";
@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 export function SiteHeader() {
   const [signedIn, setSignedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const onLoginPage = pathname === "/login";
 
   useEffect(() => {
     const checkAdmin = async (userId: string | undefined) => {
@@ -77,9 +79,11 @@ export function SiteHeader() {
               <Button asChild size="sm" variant="ghost" className="hidden sm:inline-flex">
                 <Link to="/login">Log in</Link>
               </Button>
-              <Button asChild size="sm">
-                <Link to="/vibe-check">Take the Vibe Check</Link>
-              </Button>
+              {!onLoginPage && (
+                <Button asChild size="sm">
+                  <Link to="/vibe-check">Take the Vibe Check</Link>
+                </Button>
+              )}
             </>
           )}
         </div>

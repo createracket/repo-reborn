@@ -163,7 +163,7 @@ function HeroAuthButton() {
   return (
     <Button asChild size="sm" variant="secondary" className="rounded-full">
       <Link to={signedIn ? "/dashboard" : "/login"}>
-        {signedIn ? "Dashboard" : "Log in"}
+        {signedIn ? "Dashboard" : "Log in / Sign up"}
       </Link>
     </Button>
   );
