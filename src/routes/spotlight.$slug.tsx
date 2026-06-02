@@ -82,8 +82,11 @@ function NotFound() {
 
 function SpotlightPage() {
   const { slug } = Route.useParams();
+  const navigate = useNavigate();
   const [page, setPage] = useState<PartnerPage | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
+  const [registered, setRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -97,10 +100,44 @@ function SpotlightPage() {
         setStatus("missing");
         return;
       }
-      setPage(data as unknown as PartnerPage);
+      const p = data as unknown as PartnerPage;
+      setPage(p);
       setStatus("ready");
+
+      const { data: u } = await supabase.auth.getUser();
+      if (u.user) {
+        const { data: existing } = await supabase
+          .from("spotlight_interests" as any)
+          .select("id")
+          .eq("partner_page_id", p.id)
+          .eq("user_id", u.user.id)
+          .maybeSingle();
+        if (existing) setRegistered(true);
+      }
     })();
   }, [slug]);
+
+  async function handleRegister() {
+    if (!page) return;
+    setRegistering(true);
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) {
+      toast.info("Sign in to register your interest");
+      navigate({ to: "/login", search: { redirect: `/spotlight/${slug}` } as any });
+      return;
+    }
+    const { error } = await supabase
+      .from("spotlight_interests" as any)
+      .insert({ partner_page_id: page.id, user_id: u.user.id });
+    setRegistering(false);
+    if (error && !error.message.toLowerCase().includes("duplicate")) {
+      toast.error(error.message);
+      return;
+    }
+    setRegistered(true);
+    toast.success("Interest registered — we'll be in touch.");
+  }
+
 
   if (status === "loading") {
     return (
