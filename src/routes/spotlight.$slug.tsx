@@ -29,6 +29,8 @@ type PartnerPage = {
   audience_segments: string[];
   links: PartnerLinks;
   published: boolean;
+  header_image_url: string | null;
+  profile_image_url: string | null;
 };
 
 export const Route = createFileRoute("/spotlight/$slug")({
