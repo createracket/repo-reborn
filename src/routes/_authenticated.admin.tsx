@@ -645,6 +645,22 @@ function SpotlightForm({
             <Label htmlFor="contact">Contact (email or URL)</Label>
             <Input id="contact" value={form.contact} onChange={(e) => set("contact", e.target.value)} />
           </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label>Featured videos (TikTok or Instagram URLs)</Label>
+            <p className="text-xs text-muted-foreground">Paste up to three public TikTok or Instagram post/reel URLs. They'll embed at the bottom of the spotlight page.</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="video1">Video 1</Label>
+            <Input id="video1" value={form.video1} onChange={(e) => set("video1", e.target.value)} placeholder="https://www.tiktok.com/@user/video/123…" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="video2">Video 2</Label>
+            <Input id="video2" value={form.video2} onChange={(e) => set("video2", e.target.value)} placeholder="https://www.instagram.com/reel/…" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="video3">Video 3</Label>
+            <Input id="video3" value={form.video3} onChange={(e) => set("video3", e.target.value)} placeholder="https://www.tiktok.com/@user/video/…" />
+          </div>
           <div className="flex items-center gap-3 md:col-span-2">
             <Switch id="published" checked={form.published} onCheckedChange={(v) => set("published", v)} />
             <Label htmlFor="published" className="cursor-pointer">Publish immediately</Label>
