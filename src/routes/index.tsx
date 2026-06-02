@@ -248,13 +248,6 @@ function Home() {
               )}
             </motion.div>
 
-            <motion.div variants={fadeUp} className="mt-6">
-              <Button asChild variant="link" className="text-white/80 hover:text-white">
-                <Link to="/vibe-check">
-                  Or take the Vibe Check <ArrowRight className="ml-1 size-4" />
-                </Link>
-              </Button>
-            </motion.div>
 
             <motion.div variants={fadeUp} className="mt-28 pb-8 md:mt-36 md:pb-12">
               <p className="mb-8 text-center text-sm tracking-wide text-white/80">Trusted by</p>
