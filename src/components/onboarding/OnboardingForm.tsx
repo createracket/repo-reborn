@@ -26,7 +26,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { DEFAULT_VIBE_CONFIG, loadVibeCheckConfig, type VibeCheckConfig } from "@/lib/vibe-check-config";
+import { DEFAULT_VIBE_CONFIG, loadVibeCheckConfig, startVibeCheckConfigRealtime, type VibeCheckConfig } from "@/lib/vibe-check-config";
 import { cn } from "@/lib/utils";
 
 type Flow = "musician" | "brand";
@@ -110,7 +110,9 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
   const navigate = useNavigate();
   const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   useEffect(() => {
-    loadVibeCheckConfig().then(setVibeConfig).catch(() => {});
+    startVibeCheckConfigRealtime();
+    // Force a fresh fetch on each mount so retakes pick up admin edits.
+    loadVibeCheckConfig(true).then(setVibeConfig).catch(() => {});
   }, []);
   const config = vibeConfig.surveys[flow];
   const sections = (config.sections as Array<{ title: string; description: string; timeEstimate: string }>).slice(1);
