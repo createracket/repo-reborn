@@ -200,7 +200,15 @@ function AdminPage() {
           </TabsContent>
 
           <TabsContent value="spotlights" className="mt-6 space-y-6">
-            <SpotlightForm onCreated={refreshSpotlights} />
+            <SpotlightForm
+              key={editingSpotlight?.id ?? "new"}
+              editData={editingSpotlight}
+              onCreated={() => {
+                refreshSpotlights();
+                setEditingSpotlight(null);
+              }}
+              onCancel={() => setEditingSpotlight(null)}
+            />
             {spotlights.length === 0 ? <Empty /> : (
               <div className="space-y-3">
                 {spotlights.map((s) => (
@@ -222,6 +230,22 @@ function AdminPage() {
                             <a href={`/spotlight/${s.slug}`} target="_blank" rel="noreferrer">
                               View <ExternalLink className="ml-1 size-3" />
                             </a>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              const { data, error } = await supabase
+                                .from("partner_pages" as any)
+                                .select("*")
+                                .eq("id", s.id)
+                                .single();
+                              if (error) return toast.error(error.message);
+                              setEditingSpotlight(data);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                          >
+                            <Pencil className="mr-1 size-3" /> Edit
                           </Button>
                           <Button
                             size="sm"
