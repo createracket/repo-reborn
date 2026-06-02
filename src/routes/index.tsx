@@ -217,11 +217,17 @@ function Home() {
             </motion.p>
 
             <motion.div variants={fadeUp} className="mt-10 flex justify-center">
-              <WaitlistForm
-                className="flex w-full max-w-2xl items-center gap-2 rounded-full bg-white py-2 pl-6 pr-2 transition-shadow duration-300 hover:shadow-[0_0_20px_5px_rgba(255,255,255,0.5)] focus-within:shadow-[0_0_20px_5px_rgba(255,255,255,0.5)]"
-                inputClassName="h-14 flex-grow border-0 bg-transparent p-0 text-base text-[#2b2b2b] placeholder:text-[#2b2b2b]/70 focus-visible:ring-0 focus-visible:ring-offset-0 md:text-lg md:h-16"
-                buttonClassName="h-14 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 md:h-16 md:text-lg"
-              />
+              {signedIn ? (
+                <Button asChild size="lg" className="h-14 rounded-full md:h-16 md:text-lg">
+                  <Link to="/dashboard">Go to Dashboard</Link>
+                </Button>
+              ) : (
+                <WaitlistForm
+                  className="flex w-full max-w-2xl items-center gap-2 rounded-full bg-white py-2 pl-6 pr-2 transition-shadow duration-300 hover:shadow-[0_0_20px_5px_rgba(255,255,255,0.5)] focus-within:shadow-[0_0_20px_5px_rgba(255,255,255,0.5)]"
+                  inputClassName="h-14 flex-grow border-0 bg-transparent p-0 text-base text-[#2b2b2b] placeholder:text-[#2b2b2b]/70 focus-visible:ring-0 focus-visible:ring-offset-0 md:text-lg md:h-16"
+                  buttonClassName="h-14 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 md:h-16 md:text-lg"
+                />
+              )}
             </motion.div>
 
             <motion.div variants={fadeUp} className="mt-6">
