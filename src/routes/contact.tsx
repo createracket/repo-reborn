@@ -30,6 +30,10 @@ function ContactPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (findProfanityIn({ name, message })) {
+      toast.error("Please remove offensive or inappropriate language before sending.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase
       .from("contact_messages")
