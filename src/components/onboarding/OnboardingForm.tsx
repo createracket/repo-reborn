@@ -237,7 +237,7 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
             rows={7}
             placeholder={
               flow === "musician"
-                ? "e.g. I'm Luna Bloom, an indie-pop artist from Austin. My music blends dreamy synths with lyrics about introspection and connection. I care about mental health and authentic community..."
+                ? "Give us the lowdown including your artist name, audience, campaign goals, content style, timings and info on your upcoming campaign...."
                 : "e.g. We're Terra Threads, a sustainable fashion brand from Portland creating timeless pieces from eco-friendly materials. We want to partner with artists who care about craft and the planet..."
             }
           />
