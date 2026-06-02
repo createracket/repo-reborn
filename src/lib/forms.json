@@ -76,7 +76,7 @@
       }
     ],
     "fields": {
-      "naturalLanguageInput": { "section": 1, "type": "textarea", "label": "Start with a brief intro", "placeholder": "Describe yourself and your music. For example: 'I'm Luna Bloom, an indie-pop artist from Austin, TX. My music blends dreamy synths with heartfelt lyrics about introspection and connection...'" },
+      "naturalLanguageInput": { "section": 1, "type": "textarea", "label": "Start with a brief intro", "placeholder": "Give us the lowdown including your artist name, audience, campaign goals, content style, timings and info on your upcoming campaign...." },
       "name": { "section": 2, "type": "text", "label": "What's your artist name?", "placeholder": "e.g., Luna Bloom" },
       "artistType": { "section": 2, "type": "checkbox", "label": "Which of the following best applies to you...", "options": ["Solo artist", "In a band", "Both", "DJ", "Producer", "Songwriter", "Composer", "Session musician"] },
       "recordContract": { "section": 2, "type": "radio", "label": "Do you have a current record contract?", "options": ["Yes", "No", "Currently in negotiations"] },
