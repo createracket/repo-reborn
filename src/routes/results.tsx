@@ -13,6 +13,7 @@ import {
   calculateBrandVibe,
   getArtistArchetypeDescription,
 } from "@/lib/vibe-check";
+import { loadVibeCheckConfig, DEFAULT_VIBE_CONFIG, type VibeCheckConfig } from "@/lib/vibe-check-config";
 
 type Stored =
   | { flow: "musician"; data: any; at: number }
@@ -33,6 +34,7 @@ function Results() {
   const [stored, setStored] = useState<Stored | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [config, setConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   const savedRef = useRef(false);
 
   useEffect(() => {
@@ -43,6 +45,8 @@ function Results() {
       // ignore
     }
     setLoaded(true);
+
+    loadVibeCheckConfig().then(setConfig).catch(() => {});
 
     supabase.auth.getUser().then(({ data }) => setSignedIn(!!data.user));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
