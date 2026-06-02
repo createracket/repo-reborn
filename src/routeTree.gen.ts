@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SubmitBriefRouteImport } from './routes/submit-brief'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FanSignupRouteImport } from './routes/fan-signup'
@@ -26,11 +25,6 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated.connect'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 
-const SubmitBriefRoute = SubmitBriefRouteImport.update({
-  id: '/submit-brief',
-  path: '/submit-brief',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ResultsRoute = ResultsRouteImport.update({
   id: '/results',
   path: '/results',
@@ -112,7 +106,6 @@ export interface FileRoutesByFullPath {
   '/fan-signup': typeof FanSignupRoute
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
-  '/submit-brief': typeof SubmitBriefRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -129,7 +122,6 @@ export interface FileRoutesByTo {
   '/fan-signup': typeof FanSignupRoute
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
-  '/submit-brief': typeof SubmitBriefRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -148,7 +140,6 @@ export interface FileRoutesById {
   '/fan-signup': typeof FanSignupRoute
   '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
-  '/submit-brief': typeof SubmitBriefRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -167,7 +158,6 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/login'
     | '/results'
-    | '/submit-brief'
     | '/admin'
     | '/connect'
     | '/dashboard'
@@ -184,7 +174,6 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/login'
     | '/results'
-    | '/submit-brief'
     | '/admin'
     | '/connect'
     | '/dashboard'
@@ -202,7 +191,6 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/login'
     | '/results'
-    | '/submit-brief'
     | '/_authenticated/admin'
     | '/_authenticated/connect'
     | '/_authenticated/dashboard'
@@ -221,7 +209,6 @@ export interface RootRouteChildren {
   FanSignupRoute: typeof FanSignupRoute
   LoginRoute: typeof LoginRoute
   ResultsRoute: typeof ResultsRoute
-  SubmitBriefRoute: typeof SubmitBriefRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
   USlugRoute: typeof USlugRoute
   VibeCheckBrandRoute: typeof VibeCheckBrandRoute
@@ -231,13 +218,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/submit-brief': {
-      id: '/submit-brief'
-      path: '/submit-brief'
-      fullPath: '/submit-brief'
-      preLoaderRoute: typeof SubmitBriefRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/results': {
       id: '/results'
       path: '/results'
@@ -371,7 +351,6 @@ const rootRouteChildren: RootRouteChildren = {
   FanSignupRoute: FanSignupRoute,
   LoginRoute: LoginRoute,
   ResultsRoute: ResultsRoute,
-  SubmitBriefRoute: SubmitBriefRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
   USlugRoute: USlugRoute,
   VibeCheckBrandRoute: VibeCheckBrandRoute,
@@ -381,3 +360,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
