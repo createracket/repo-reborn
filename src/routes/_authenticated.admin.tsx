@@ -118,7 +118,7 @@ function AdminPage() {
   async function refreshSpotlights() {
     const { data } = await supabase
       .from("partner_pages" as any)
-      .select("id, slug, type, headline, subtitle, published, created_at")
+      .select("*")
       .order("created_at", { ascending: false });
     setSpotlights((data as unknown as Spotlight[]) ?? []);
   }
