@@ -184,7 +184,17 @@ function LoginPage() {
                 />
               </div>
               <div className="space-y-1">
-                <Label htmlFor="password">Password</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  {mode === "signin" && (
+                    <Link
+                      to="/forgot-password"
+                      className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                    >
+                      Forgot password?
+                    </Link>
+                  )}
+                </div>
                 <Input
                   id="password"
                   type="password"
@@ -194,6 +204,7 @@ function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
+
               <Button type="submit" className="w-full" disabled={busy}>
                 {busy ? "..." : mode === "signin" ? "Log in" : "Create account"}
               </Button>
