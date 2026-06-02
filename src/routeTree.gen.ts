@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResultsRouteImport } from './routes/results'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FanSignupRouteImport } from './routes/fan-signup'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -30,9 +32,19 @@ const ResultsRoute = ResultsRouteImport.update({
   path: '/results',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FanSignupRoute = FanSignupRouteImport.update({
@@ -104,7 +116,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/connect': typeof AuthenticatedConnectRoute
@@ -120,7 +134,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/connect': typeof AuthenticatedConnectRoute
@@ -138,7 +154,9 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
@@ -156,7 +174,9 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/fan-signup'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/results'
     | '/admin'
     | '/connect'
@@ -172,7 +192,9 @@ export interface FileRouteTypes {
     | '/'
     | '/contact'
     | '/fan-signup'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/results'
     | '/admin'
     | '/connect'
@@ -189,7 +211,9 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/contact'
     | '/fan-signup'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/results'
     | '/_authenticated/admin'
     | '/_authenticated/connect'
@@ -207,7 +231,9 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   ContactRoute: typeof ContactRoute
   FanSignupRoute: typeof FanSignupRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
   USlugRoute: typeof USlugRoute
@@ -225,11 +251,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fan-signup': {
@@ -349,7 +389,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   ContactRoute: ContactRoute,
   FanSignupRoute: FanSignupRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
   USlugRoute: USlugRoute,
