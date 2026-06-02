@@ -359,6 +359,72 @@ function Table({ headers, children }: { headers: string[]; children: React.React
   );
 }
 
+function ImageUploader({
+  label, value, onChange, aspect, hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (url: string) => void;
+  aspect: string;
+  hint: string;
+}) {
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be under 8MB");
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("spotlight-images").upload(path, file, {
+      cacheControl: "3600", upsert: false, contentType: file.type,
+    });
+    if (error) {
+      setUploading(false);
+      toast.error(error.message);
+      return;
+    }
+    const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+    onChange(data.publicUrl);
+    setUploading(false);
+    toast.success(`${label} uploaded`);
+    e.target.value = "";
+  }
+
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="flex flex-wrap items-start gap-3">
+        <div
+          className="overflow-hidden rounded-md border border-border/60 bg-muted/40"
+          style={{ width: 140, aspectRatio: aspect }}
+        >
+          {value ? (
+            <img src={value} alt="" className="size-full object-cover" />
+          ) : (
+            <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
+              {aspect}
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <Input type="file" accept="image/*" onChange={handleFile} disabled={uploading} />
+          {value ? (
+            <Button type="button" size="sm" variant="ghost" onClick={() => onChange("")}>
+              Remove
+            </Button>
+          ) : null}
+          <p className="text-xs text-muted-foreground">{hint}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SpotlightForm({ onCreated }: { onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -375,6 +441,8 @@ function SpotlightForm({ onCreated }: { onCreated: () => void }) {
     spotify: "",
     spotifyEmbed: "",
     contact: "",
+    header_image_url: "",
+    profile_image_url: "",
     published: false,
   });
 
@@ -408,6 +476,8 @@ function SpotlightForm({ onCreated }: { onCreated: () => void }) {
         spotifyEmbed: form.spotifyEmbed,
         contact: form.contact,
       },
+      header_image_url: form.header_image_url || null,
+      profile_image_url: form.profile_image_url || null,
       published: form.published,
     };
     const { error } = await supabase.from("partner_pages" as any).insert(payload);
@@ -420,7 +490,8 @@ function SpotlightForm({ onCreated }: { onCreated: () => void }) {
     setForm({
       slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
       host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
-      instagram: "", spotify: "", spotifyEmbed: "", contact: "", published: false,
+      instagram: "", spotify: "", spotifyEmbed: "", contact: "",
+      header_image_url: "", profile_image_url: "", published: false,
     });
     onCreated();
   }
@@ -440,6 +511,24 @@ function SpotlightForm({ onCreated }: { onCreated: () => void }) {
           <div className="space-y-1.5">
             <Label htmlFor="type">Type</Label>
             <Input id="type" value={form.type} onChange={(e) => set("type", e.target.value)} placeholder="podcast" />
+          </div>
+          <div className="md:col-span-2">
+            <ImageUploader
+              label="Header image"
+              value={form.header_image_url}
+              onChange={(url) => set("header_image_url", url)}
+              aspect="16 / 9"
+              hint="16:9 banner shown at the top of the spotlight page. JPG/PNG, up to 8MB."
+            />
+          </div>
+          <div className="md:col-span-2">
+            <ImageUploader
+              label="Profile photo / artwork"
+              value={form.profile_image_url}
+              onChange={(url) => set("profile_image_url", url)}
+              aspect="1 / 1"
+              hint="Square headshot or cover artwork. JPG/PNG, up to 8MB."
+            />
           </div>
           <div className="space-y-1.5 md:col-span-2">
             <Label htmlFor="headline">Headline *</Label>

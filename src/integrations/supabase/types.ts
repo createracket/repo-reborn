@@ -205,12 +205,14 @@ export type Database = {
           audience_segments: string[]
           created_at: string
           eoi_opportunities: string[]
+          header_image_url: string | null
           headline: string
           host_bio: string | null
           id: string
           intro: string | null
           links: Json
           partnership_pitch: string | null
+          profile_image_url: string | null
           published: boolean
           slug: string
           subtitle: string | null
@@ -221,12 +223,14 @@ export type Database = {
           audience_segments?: string[]
           created_at?: string
           eoi_opportunities?: string[]
+          header_image_url?: string | null
           headline: string
           host_bio?: string | null
           id?: string
           intro?: string | null
           links?: Json
           partnership_pitch?: string | null
+          profile_image_url?: string | null
           published?: boolean
           slug: string
           subtitle?: string | null
@@ -237,12 +241,14 @@ export type Database = {
           audience_segments?: string[]
           created_at?: string
           eoi_opportunities?: string[]
+          header_image_url?: string | null
           headline?: string
           host_bio?: string | null
           id?: string
           intro?: string | null
           links?: Json
           partnership_pitch?: string | null
+          profile_image_url?: string | null
           published?: boolean
           slug?: string
           subtitle?: string | null
