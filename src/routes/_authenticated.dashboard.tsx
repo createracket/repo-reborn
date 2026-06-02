@@ -125,6 +125,29 @@ function DashboardPage() {
     })();
   }, []);
 
+  // Live-update the suggested matches when an admin edits community profiles
+  useEffect(() => {
+    const channel = supabase
+      .channel("community_profiles_dashboard")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "community_profiles" },
+        async () => {
+          const { data } = await supabase
+            .from("community_profiles")
+            .select("id, display_name, account_type, tagline, location, avatar_url")
+            .order("created_at", { ascending: false })
+            .limit(8);
+          setCommunity((data as CommunityMember[]) ?? []);
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+
   async function signOut() {
     await supabase.auth.signOut();
     navigate({ to: "/", replace: true });
