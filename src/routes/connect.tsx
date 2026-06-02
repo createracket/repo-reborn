@@ -16,10 +16,10 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 
-export const Route = createFileRoute("/submit-brief")({
+export const Route = createFileRoute("/connect")({
   head: () => ({
     meta: [
-      { title: "Submit a brief — Create Racket" },
+      { title: "Connect — Create Racket" },
       {
         name: "description",
         content:
