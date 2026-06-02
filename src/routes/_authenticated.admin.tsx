@@ -491,6 +491,10 @@ function AdminPage() {
           <TabsContent value="vibe" className="mt-6">
             <VibeCheckAdmin />
           </TabsContent>
+
+          <TabsContent value="brief-form" className="mt-6">
+            <BriefFormAdmin />
+          </TabsContent>
         </Tabs>
       </main>
       <SiteFooter />
