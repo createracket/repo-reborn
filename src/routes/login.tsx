@@ -462,8 +462,8 @@ function LoginPage() {
             <Button variant="ghost" onClick={() => setShowVibeNudge(false)}>
               Keep signing up
             </Button>
-            <Button asChild>
-              <Link to="/vibe-check">Take the Vibe Check</Link>
+            <Button onClick={() => setShowVibeNudge(false)}>
+              Enter access code
             </Button>
           </DialogFooter>
         </DialogContent>
