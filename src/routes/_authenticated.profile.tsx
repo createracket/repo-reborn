@@ -114,9 +114,18 @@ function EditProfilePage() {
       return;
     }
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    set("avatar_url", data.publicUrl);
+    const publicUrl = data.publicUrl;
+    set("avatar_url", publicUrl);
+    // Persist immediately so the photo survives a page reload even before "Save profile".
+    const { error: saveErr } = await supabase
+      .from("profiles")
+      .upsert({ id: userId, avatar_url: publicUrl }, { onConflict: "id" });
     setUploading(false);
-    toast.success("Photo uploaded");
+    if (saveErr) {
+      toast.error(`Photo uploaded but couldn't be saved: ${saveErr.message}`);
+    } else {
+      toast.success("Photo saved");
+    }
     e.target.value = "";
   }
 
