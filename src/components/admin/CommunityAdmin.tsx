@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, Pencil, Upload, Loader2 } from "lucide-react";
 
@@ -108,29 +108,46 @@ export function CommunityAdmin() {
   };
 
   const handleUpload = async (file: File) => {
-    console.log("[CommunityAdmin] upload start", { name: file.name, size: file.size, type: file.type });
-    setUploading(true);
-    const ext = file.name.split(".").pop() || "png";
-    const path = `community/${crypto.randomUUID()}.${ext}`;
-    const { error: upErr } = await supabase.storage
-      .from("spotlight-images")
-      .upload(path, file, { upsert: false, cacheControl: "3600", contentType: file.type || undefined });
-    if (upErr) {
-      console.error("[CommunityAdmin] upload error", upErr);
-      toast.error(upErr.message);
-      setUploading(false);
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
       return;
     }
-    const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
-    console.log("[CommunityAdmin] upload success", data.publicUrl);
-    setDraft((d) => (d ? { ...d, avatar_url: data.publicUrl } : d));
-    setUploading(false);
-    toast.success("Image uploaded");
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be under 8MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const id = typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const path = `community/${id}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("spotlight-images")
+        .upload(path, file, { upsert: false, cacheControl: "3600", contentType: file.type || undefined });
+      if (upErr) {
+        toast.error(upErr.message);
+        return;
+      }
+      const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+      setDraft((d) => (d ? { ...d, avatar_url: data.publicUrl } : d));
+      toast.success("Image uploaded");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Image upload failed");
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const handleSave = async () => {
-    console.log("[CommunityAdmin] save clicked", draft);
+  const handleSave = async (event?: FormEvent) => {
+    event?.preventDefault();
     if (!draft) return;
+    if (uploading) {
+      toast.error("Wait for the image upload to finish before saving");
+      return;
+    }
     if (!draft.display_name.trim()) {
       toast.error("Name is required");
       return;
@@ -143,19 +160,22 @@ export function CommunityAdmin() {
       location: joinLocation(draft.city, draft.country),
       avatar_url: draft.avatar_url.trim() || null,
     };
-    console.log("[CommunityAdmin] saving payload", payload);
-    const { error } = draft.id
-      ? await supabase.from("community_profiles").update(payload).eq("id", draft.id)
-      : await supabase.from("community_profiles").insert(payload as any);
-    console.log("[CommunityAdmin] save result", { error });
-    setSaving(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const { error } = draft.id
+        ? await supabase.from("community_profiles").update(payload).eq("id", draft.id).select("id").single()
+        : await supabase.from("community_profiles").insert(payload as any).select("id").single();
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success(draft.id ? "Updated" : "Added");
+      setDraft(null);
+      await load();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save member");
+    } finally {
+      setSaving(false);
     }
-    toast.success(draft.id ? "Updated" : "Added");
-    setDraft(null);
-    load();
   };
 
   const handleDelete = async (id: string) => {
