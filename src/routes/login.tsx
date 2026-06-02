@@ -41,11 +41,11 @@ type AccountTypeValue = (typeof ACCOUNT_TYPES)[number]["value"];
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>) => ({
-    mode: search.mode === "signup" ? ("signup" as const) : undefined,
+    mode: search.mode === "signin" ? ("signin" as const) : ("signup" as const),
     next: typeof search.next === "string" ? search.next : undefined,
   }),
   head: () => ({
-    meta: [{ title: "Log in — Create Racket" }],
+    meta: [{ title: "Get Started — Create Racket" }],
   }),
   component: LoginPage,
 });
@@ -54,11 +54,10 @@ function LoginPage() {
   const navigate = useNavigate();
   const { mode: modeParam, next } = Route.useSearch();
 
-  // Default to signup when (a) explicitly asked via ?mode=signup, or
-  // (b) we can see a pending Vibe Check in sessionStorage — those users are
-  // almost certainly first-timers trying to save their result.
+  // Default to signup. Only show signin if explicitly requested via
+  // ?mode=signin; otherwise every visitor sees the new-user experience.
   const initialMode: "signin" | "signup" = (() => {
-    if (modeParam === "signup") return "signup";
+    if (modeParam === "signin") return "signin";
     if (typeof window !== "undefined") {
       try {
         if (sessionStorage.getItem("vibeCheck")) return "signup";
@@ -66,7 +65,7 @@ function LoginPage() {
         // ignore
       }
     }
-    return "signin";
+    return "signup";
   })();
 
   const [mode, setMode] = useState<"signin" | "signup">(initialMode);
