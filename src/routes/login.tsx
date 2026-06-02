@@ -196,6 +196,32 @@ function LoginPage() {
         </Card>
       </main>
       <SiteFooter />
+
+      <Dialog open={showVibeNudge} onOpenChange={setShowVibeNudge}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="mb-2 inline-flex size-10 items-center justify-center rounded-full bg-primary/10">
+              <Sparkles className="size-5 text-primary" />
+            </div>
+            <DialogTitle className="font-display text-2xl">
+              Before you go — try the Vibe Check
+            </DialogTitle>
+            <DialogDescription>
+              No account needed. In about 2 minutes you'll get your archetype and a
+              preview of the partners we'd match you with. Save it with one click at
+              the end.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button variant="ghost" onClick={() => setShowVibeNudge(false)}>
+              Keep signing up
+            </Button>
+            <Button asChild>
+              <Link to="/vibe-check">Take the Vibe Check</Link>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
