@@ -19,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
 import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
+import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated.connect'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
@@ -72,6 +73,11 @@ const VibeCheckBrandRoute = VibeCheckBrandRouteImport.update({
   path: '/vibe-check/brand',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SpotlightSlugRoute = SpotlightSlugRouteImport.update({
+  id: '/spotlight/$slug',
+  path: '/spotlight/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/spotlight/$slug': typeof SpotlightSlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/spotlight/$slug': typeof SpotlightSlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check': typeof VibeCheckIndexRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/spotlight/$slug': typeof SpotlightSlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/connect'
     | '/dashboard'
+    | '/spotlight/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check/'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/connect'
     | '/dashboard'
+    | '/spotlight/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/connect'
     | '/_authenticated/dashboard'
+    | '/spotlight/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check/'
@@ -186,6 +198,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ResultsRoute: typeof ResultsRoute
   SubmitBriefRoute: typeof SubmitBriefRoute
+  SpotlightSlugRoute: typeof SpotlightSlugRoute
   VibeCheckBrandRoute: typeof VibeCheckBrandRoute
   VibeCheckMusicianRoute: typeof VibeCheckMusicianRoute
   VibeCheckIndexRoute: typeof VibeCheckIndexRoute
@@ -263,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VibeCheckBrandRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/spotlight/$slug': {
+      id: '/spotlight/$slug'
+      path: '/spotlight/$slug'
+      fullPath: '/spotlight/$slug'
+      preLoaderRoute: typeof SpotlightSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -311,6 +331,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ResultsRoute: ResultsRoute,
   SubmitBriefRoute: SubmitBriefRoute,
+  SpotlightSlugRoute: SpotlightSlugRoute,
   VibeCheckBrandRoute: VibeCheckBrandRoute,
   VibeCheckMusicianRoute: VibeCheckMusicianRoute,
   VibeCheckIndexRoute: VibeCheckIndexRoute,
@@ -318,3 +339,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
