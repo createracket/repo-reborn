@@ -552,7 +552,19 @@ function SpotlightForm({
     header_image_url: editData?.header_image_url ?? "",
     profile_image_url: editData?.profile_image_url ?? "",
     published: editData?.published ?? false,
+    total_followers: editData?.total_followers?.toString() ?? "",
+    total_streams: editData?.total_streams?.toString() ?? "",
+    monthly_streams: editData?.monthly_streams?.toString() ?? "",
+    avg_reach: editData?.avg_reach?.toString() ?? "",
+    avg_engagement: editData?.avg_engagement?.toString() ?? "",
   });
+
+  function numOrNull(v: string): number | null {
+    const t = v.trim();
+    if (!t) return null;
+    const n = Number(t);
+    return Number.isFinite(n) ? n : null;
+  }
 
   function set<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -590,6 +602,11 @@ function SpotlightForm({
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
       published: form.published,
+      total_followers: numOrNull(form.total_followers),
+      total_streams: numOrNull(form.total_streams),
+      monthly_streams: numOrNull(form.monthly_streams),
+      avg_reach: numOrNull(form.avg_reach),
+      avg_engagement: numOrNull(form.avg_engagement),
     };
 
     if (isEditing) {
@@ -617,6 +634,8 @@ function SpotlightForm({
         instagram: "", spotify: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "",
         header_image_url: "", profile_image_url: "", published: false,
+        total_followers: "", total_streams: "", monthly_streams: "",
+        avg_reach: "", avg_engagement: "",
       });
     }
     onCreated();
@@ -721,6 +740,29 @@ function SpotlightForm({
           <div className="space-y-1.5">
             <Label htmlFor="video3">Video 3</Label>
             <Input id="video3" value={form.video3} onChange={(e) => set("video3", e.target.value)} placeholder="https://www.tiktok.com/@user/video/…" />
+          </div>
+          <div className="md:col-span-2 pt-2">
+            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics (optional)</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sp-tf">Total followers</Label>
+            <Input id="sp-tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sp-ts">Total streams</Label>
+            <Input id="sp-ts" inputMode="numeric" value={form.total_streams} onChange={(e) => set("total_streams", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sp-ms">Monthly streams</Label>
+            <Input id="sp-ms" inputMode="numeric" value={form.monthly_streams} onChange={(e) => set("monthly_streams", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sp-ar">Avg. reach</Label>
+            <Input id="sp-ar" inputMode="numeric" value={form.avg_reach} onChange={(e) => set("avg_reach", e.target.value)} />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="sp-ae">Avg. engagement (%)</Label>
+            <Input id="sp-ae" inputMode="decimal" value={form.avg_engagement} onChange={(e) => set("avg_engagement", e.target.value)} placeholder="e.g. 4.2" />
           </div>
           <div className="flex items-center gap-3 md:col-span-2">
             <Switch id="published" checked={form.published} onCheckedChange={(v) => set("published", v)} />

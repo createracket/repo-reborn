@@ -203,6 +203,8 @@ export type Database = {
       partner_pages: {
         Row: {
           audience_segments: string[]
+          avg_engagement: number | null
+          avg_reach: number | null
           created_at: string
           eoi_opportunities: string[]
           header_image_url: string | null
@@ -211,16 +213,21 @@ export type Database = {
           id: string
           intro: string | null
           links: Json
+          monthly_streams: number | null
           partnership_pitch: string | null
           profile_image_url: string | null
           published: boolean
           slug: string
           subtitle: string | null
+          total_followers: number | null
+          total_streams: number | null
           type: string
           updated_at: string
         }
         Insert: {
           audience_segments?: string[]
+          avg_engagement?: number | null
+          avg_reach?: number | null
           created_at?: string
           eoi_opportunities?: string[]
           header_image_url?: string | null
@@ -229,16 +236,21 @@ export type Database = {
           id?: string
           intro?: string | null
           links?: Json
+          monthly_streams?: number | null
           partnership_pitch?: string | null
           profile_image_url?: string | null
           published?: boolean
           slug: string
           subtitle?: string | null
+          total_followers?: number | null
+          total_streams?: number | null
           type?: string
           updated_at?: string
         }
         Update: {
           audience_segments?: string[]
+          avg_engagement?: number | null
+          avg_reach?: number | null
           created_at?: string
           eoi_opportunities?: string[]
           header_image_url?: string | null
@@ -247,11 +259,14 @@ export type Database = {
           id?: string
           intro?: string | null
           links?: Json
+          monthly_streams?: number | null
           partnership_pitch?: string | null
           profile_image_url?: string | null
           published?: boolean
           slug?: string
           subtitle?: string | null
+          total_followers?: number | null
+          total_streams?: number | null
           type?: string
           updated_at?: string
         }
@@ -260,49 +275,76 @@ export type Database = {
       profiles: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"] | null
+          artist_name: string | null
           avatar_url: string | null
+          avg_engagement: number | null
+          avg_reach: number | null
           bio: string | null
           created_at: string
           display_name: string | null
           email: string | null
           id: string
+          location: string | null
           marketing_opt_in: boolean
+          monthly_streams: number | null
           notify_direct_messages: boolean
           notify_new_matches: boolean
           notify_newsletter: boolean
+          slug: string | null
           socials: Json
+          top_audience_location: string | null
+          total_followers: number | null
+          total_streams: number | null
           updated_at: string
           values: string[]
         }
         Insert: {
           account_type?: Database["public"]["Enums"]["account_type"] | null
+          artist_name?: string | null
           avatar_url?: string | null
+          avg_engagement?: number | null
+          avg_reach?: number | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
           id: string
+          location?: string | null
           marketing_opt_in?: boolean
+          monthly_streams?: number | null
           notify_direct_messages?: boolean
           notify_new_matches?: boolean
           notify_newsletter?: boolean
+          slug?: string | null
           socials?: Json
+          top_audience_location?: string | null
+          total_followers?: number | null
+          total_streams?: number | null
           updated_at?: string
           values?: string[]
         }
         Update: {
           account_type?: Database["public"]["Enums"]["account_type"] | null
+          artist_name?: string | null
           avatar_url?: string | null
+          avg_engagement?: number | null
+          avg_reach?: number | null
           bio?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
           id?: string
+          location?: string | null
           marketing_opt_in?: boolean
+          monthly_streams?: number | null
           notify_direct_messages?: boolean
           notify_new_matches?: boolean
           notify_newsletter?: boolean
+          slug?: string | null
           socials?: Json
+          top_audience_location?: string | null
+          total_followers?: number | null
+          total_streams?: number | null
           updated_at?: string
           values?: string[]
         }

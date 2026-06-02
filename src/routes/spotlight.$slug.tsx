@@ -36,7 +36,19 @@ type PartnerPage = {
   published: boolean;
   header_image_url: string | null;
   profile_image_url: string | null;
+  total_followers: number | null;
+  total_streams: number | null;
+  monthly_streams: number | null;
+  avg_reach: number | null;
+  avg_engagement: number | null;
 };
+
+function formatMetric(n: number | null | undefined): string | null {
+  if (n == null) return null;
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1).replace(/\.0$/, "") + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(n >= 10_000 ? 0 : 1).replace(/\.0$/, "") + "K";
+  return n.toLocaleString();
+}
 
 export const Route = createFileRoute("/spotlight/$slug")({
   // Partner pages are deliberately not indexable.
@@ -213,6 +225,29 @@ function SpotlightPage() {
             ) : null}
           </div>
         </section>
+
+        {/* Metrics */}
+        {(() => {
+          const items: Array<{ label: string; value: string }> = [];
+          const tf = formatMetric(page.total_followers); if (tf) items.push({ label: "Total followers", value: tf });
+          const ts = formatMetric(page.total_streams); if (ts) items.push({ label: "Total streams", value: ts });
+          const ms = formatMetric(page.monthly_streams); if (ms) items.push({ label: "Monthly streams", value: ms });
+          const ar = formatMetric(page.avg_reach); if (ar) items.push({ label: "Avg. reach", value: ar });
+          if (page.avg_engagement != null) items.push({ label: "Avg. engagement", value: `${page.avg_engagement}%` });
+          if (items.length === 0) return null;
+          return (
+            <section className="mt-10 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {items.map((m) => (
+                <Card key={m.label}>
+                  <CardContent className="p-5">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">{m.label}</p>
+                    <p className="mt-1 font-display text-2xl">{m.value}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </section>
+          );
+        })()}
 
         {/* Spotify embed */}
         {links.spotifyEmbed ? (
