@@ -189,6 +189,7 @@ function AdminPage() {
             <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="brief-form">Brief form</TabsTrigger>
+            <TabsTrigger value="community">Community</TabsTrigger>
           </TabsList>
 
           <TabsContent value="leads" className="mt-6 space-y-3">
