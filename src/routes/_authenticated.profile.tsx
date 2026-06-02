@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
@@ -53,6 +53,7 @@ function EditProfilePage() {
   const [form, setForm] = useState(emptyForm);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -100,6 +101,11 @@ function EditProfilePage() {
   function handleAvatarPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      e.target.value = "";
+      return;
+    }
     if (file.size > 8 * 1024 * 1024) {
       toast.error("Image must be under 8MB");
       e.target.value = "";
@@ -114,26 +120,32 @@ function EditProfilePage() {
     if (pendingPreview) URL.revokeObjectURL(pendingPreview);
     setPendingFile(null);
     setPendingPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   async function handleAvatarUpload() {
-    if (!pendingFile || !userId) return;
+    if (!pendingFile || !userId) {
+      toast.error("Choose a profile photo before uploading");
+      return;
+    }
     setUploading(true);
-    const ext = pendingFile.name.split(".").pop() || "jpg";
-    const path = `${userId}/${Date.now()}.${ext}`;
+    const ext = pendingFile.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const path = `${userId}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("avatars").upload(path, pendingFile, {
-      cacheControl: "3600", upsert: true, contentType: pendingFile.type,
+      cacheControl: "3600",
+      upsert: false,
+      contentType: pendingFile.type,
     });
     if (error) {
       setUploading(false);
-      toast.error(error.message);
+      toast.error("Photo upload failed. Please try again.");
       return;
     }
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
     set("avatar_url", data.publicUrl);
     clearPending();
     setUploading(false);
-    toast.success("Photo uploaded — remember to click Save profile.");
+    toast.success("Thumbnail uploaded. Click Save profile to update your profile.");
   }
 
 
@@ -147,6 +159,10 @@ function EditProfilePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!userId) return;
+    if (pendingFile) {
+      toast.error("Please upload or cancel the selected profile photo before saving.");
+      return;
+    }
     const slug = form.slug.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
     if (slug && !/^[a-z0-9][a-z0-9-]{1,40}$/.test(slug)) {
       toast.error("Slug must be 2–41 chars, lowercase letters, numbers and hyphens");
@@ -190,7 +206,7 @@ function EditProfilePage() {
       }
       return;
     }
-    toast.success("Profile saved");
+    toast.success(form.avatar_url ? "Profile updated with your thumbnail" : "Profile updated");
   }
 
   if (loading) {
@@ -248,7 +264,7 @@ function EditProfilePage() {
                     ) : null}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Input type="file" accept="image/*" onChange={handleAvatarPick} disabled={uploading} />
+                    <Input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarPick} disabled={uploading} />
                     <div className="flex flex-wrap gap-2">
                       {pendingFile ? (
                         <>
