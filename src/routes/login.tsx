@@ -21,6 +21,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    mode: search.mode === "signup" ? ("signup" as const) : undefined,
+    next: typeof search.next === "string" ? search.next : undefined,
+  }),
   head: () => ({
     meta: [{ title: "Log in — Create Racket" }],
   }),
@@ -29,22 +33,56 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const { mode: modeParam, next } = Route.useSearch();
+
+  // Default to signup when (a) explicitly asked via ?mode=signup, or
+  // (b) we can see a pending Vibe Check in sessionStorage — those users are
+  // almost certainly first-timers trying to save their result.
+  const initialMode: "signin" | "signup" = (() => {
+    if (modeParam === "signup") return "signup";
+    if (typeof window !== "undefined") {
+      try {
+        if (sessionStorage.getItem("vibeCheck")) return "signup";
+      } catch {
+        // ignore
+      }
+    }
+    return "signin";
+  })();
+
+  const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [showVibeNudge, setShowVibeNudge] = useState(false);
   const nudgeShownRef = useRef(false);
 
+  // Where to send the user after auth succeeds. If they came from the Vibe
+  // Check "Save my results" CTA — or we just see a pending vibe in storage —
+  // we route to /results so its auto-save effect attaches the result to the
+  // newly-created user before they land on the dashboard.
+  function postAuthDestination(): "/results" | "/dashboard" {
+    if (next === "results") return "/results";
+    if (typeof window !== "undefined") {
+      try {
+        if (sessionStorage.getItem("vibeCheck")) return "/results";
+      } catch {
+        // ignore
+      }
+    }
+    return "/dashboard";
+  }
+
   // Redirect once session is present.
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) navigate({ to: "/dashboard", replace: true });
+      if (session) navigate({ to: postAuthDestination(), replace: true });
     });
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/dashboard", replace: true });
+      if (data.user) navigate({ to: postAuthDestination(), replace: true });
     });
     return () => sub.subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
   // Exit-intent + idle nudge — only when the user is on the signup tab and
