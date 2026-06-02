@@ -302,9 +302,14 @@ function LoginPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={busy}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={busy || (mode === "signup" && !accessCodeOk)}
+              >
                 {busy ? "..." : mode === "signin" ? "Log in" : "Create account"}
               </Button>
+
             </form>
             {mode === "signup" && (
               <Link
