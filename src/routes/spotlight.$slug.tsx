@@ -123,7 +123,7 @@ function SpotlightPage() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
       toast.info("Sign in to register your interest");
-      navigate({ to: "/login", search: { redirect: `/spotlight/${slug}` } as any });
+      navigate({ to: "/login" });
       return;
     }
     const { error } = await supabase
