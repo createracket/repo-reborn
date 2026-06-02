@@ -10,11 +10,30 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export function SiteHeader() {
   const [signedIn, setSignedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const checkAdmin = async (userId: string | undefined) => {
+      if (!userId) {
+        setIsAdmin(false);
+        return;
+      }
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!!data);
+    };
+
+    supabase.auth.getSession().then(({ data }) => {
+      setSignedIn(!!data.session);
+      checkAdmin(data.session?.user.id);
+    });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       setSignedIn(!!session);
+      checkAdmin(session?.user.id);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
@@ -32,6 +51,16 @@ export function SiteHeader() {
           <Link to="/fan-signup" className="hover:text-foreground transition-colors">
             Mailing list
           </Link>
+          {isAdmin && (
+            <>
+              <Link to="/admin" className="text-primary hover:text-foreground transition-colors">
+                Admin
+              </Link>
+              <Link to="/submit-brief" className="hover:text-foreground transition-colors">
+                Lead Brief
+              </Link>
+            </>
+          )}
         </nav>
         <div className="flex items-center gap-2">
           {signedIn ? (
