@@ -26,6 +26,10 @@ function FanSignup() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (findProfanityIn({ name })) {
+      toast.error("Please remove offensive or inappropriate language from your name.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase
       .from("mailing_list_subscribers")
