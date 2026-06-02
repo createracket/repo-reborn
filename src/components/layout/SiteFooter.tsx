@@ -62,9 +62,13 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-2 border-t border-[#2b2b2b]/20 pt-6 text-xs text-[#2b2b2b]/70 sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[#2b2b2b]/20 pt-6 text-xs text-[#2b2b2b]/70 sm:flex-row">
           <span>© {new Date().getFullYear()} Create Racket. Made loud.</span>
-          <span>Where creative partners connect.</span>
+          <nav className="flex items-center gap-4">
+            <Link to="/terms" className="hover:text-purple">Terms</Link>
+            <Link to="/privacy" className="hover:text-purple">Privacy</Link>
+            <span className="hidden sm:inline">Where creative partners connect.</span>
+          </nav>
         </div>
       </div>
     </footer>
