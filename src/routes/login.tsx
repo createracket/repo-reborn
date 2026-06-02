@@ -137,7 +137,7 @@ function LoginPage() {
   async function handleGoogle() {
     try {
       await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/dashboard`,
+        redirect_uri: `${window.location.origin}${postAuthDestination()}`,
       });
     } catch (err: any) {
       toast.error(err.message ?? "Couldn't start Google sign-in");
