@@ -310,6 +310,11 @@ function AdminPage() {
                             /spotlight/{s.slug} · {s.type}
                             {s.subtitle ? ` · ${s.subtitle}` : ""}
                           </CardDescription>
+                          {s.links?.contact ? (
+                            <div className="mt-1">
+                              <ProfileChip profile={lookupProfile(s.links.contact)} fallbackEmail={s.links.contact} />
+                            </div>
+                          ) : null}
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant={s.published ? "default" : "outline"}>
