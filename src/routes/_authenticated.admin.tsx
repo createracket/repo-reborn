@@ -64,6 +64,15 @@ function AdminPage() {
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
 
+  const profileByEmail = useMemo(() => {
+    const m = new Map<string, Profile>();
+    profiles.forEach((p) => { if (p.email) m.set(p.email.trim().toLowerCase(), p); });
+    return m;
+  }, [profiles]);
+  const lookupProfile = (email?: string | null) => email ? profileByEmail.get(email.trim().toLowerCase()) ?? null : null;
+
+
+
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
