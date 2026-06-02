@@ -741,6 +741,29 @@ function SpotlightForm({
             <Label htmlFor="video3">Video 3</Label>
             <Input id="video3" value={form.video3} onChange={(e) => set("video3", e.target.value)} placeholder="https://www.tiktok.com/@user/video/…" />
           </div>
+          <div className="md:col-span-2 pt-2">
+            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics (optional)</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sp-tf">Total followers</Label>
+            <Input id="sp-tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sp-ts">Total streams</Label>
+            <Input id="sp-ts" inputMode="numeric" value={form.total_streams} onChange={(e) => set("total_streams", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sp-ms">Monthly streams</Label>
+            <Input id="sp-ms" inputMode="numeric" value={form.monthly_streams} onChange={(e) => set("monthly_streams", e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="sp-ar">Avg. reach</Label>
+            <Input id="sp-ar" inputMode="numeric" value={form.avg_reach} onChange={(e) => set("avg_reach", e.target.value)} />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="sp-ae">Avg. engagement (%)</Label>
+            <Input id="sp-ae" inputMode="decimal" value={form.avg_engagement} onChange={(e) => set("avg_engagement", e.target.value)} placeholder="e.g. 4.2" />
+          </div>
           <div className="flex items-center gap-3 md:col-span-2">
             <Switch id="published" checked={form.published} onCheckedChange={(v) => set("published", v)} />
             <Label htmlFor="published" className="cursor-pointer">Publish immediately</Label>
