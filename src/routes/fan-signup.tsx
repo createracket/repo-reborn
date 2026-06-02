@@ -50,7 +50,7 @@ function FanSignup() {
           <CardHeader>
             <CardTitle className="font-display text-3xl">JOIN RACKET'S STREET TEAM</CardTitle>
             <CardDescription>
-              It's free to subscribe to our newsletter - made for fans and folks who just want to follow along. No spam - just the good stuff.
+              It's free to subscribe to our newsletter - made for fans, future partners, and folks who just want to follow along for now. No spam - just the good stuff.
             </CardDescription>
           </CardHeader>
           <CardContent>
