@@ -197,6 +197,71 @@ function AdminPage() {
             ))}
           </TabsContent>
 
+          <TabsContent value="spotlights" className="mt-6 space-y-6">
+            <SpotlightForm onCreated={refreshSpotlights} />
+            {spotlights.length === 0 ? <Empty /> : (
+              <div className="space-y-3">
+                {spotlights.map((s) => (
+                  <Card key={s.id}>
+                    <CardHeader>
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <CardTitle className="text-lg">{s.headline}</CardTitle>
+                          <CardDescription>
+                            /spotlight/{s.slug} · {s.type}
+                            {s.subtitle ? ` · ${s.subtitle}` : ""}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={s.published ? "default" : "outline"}>
+                            {s.published ? "Published" : "Draft"}
+                          </Badge>
+                          <Button asChild size="sm" variant="outline">
+                            <a href={`/spotlight/${s.slug}`} target="_blank" rel="noreferrer">
+                              View <ExternalLink className="ml-1 size-3" />
+                            </a>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              const { error } = await supabase
+                                .from("partner_pages" as any)
+                                .update({ published: !s.published })
+                                .eq("id", s.id);
+                              if (error) return toast.error(error.message);
+                              toast.success(s.published ? "Unpublished" : "Published");
+                              refreshSpotlights();
+                            }}
+                          >
+                            {s.published ? "Unpublish" : "Publish"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={async () => {
+                              if (!confirm(`Delete spotlight "${s.headline}"?`)) return;
+                              const { error } = await supabase
+                                .from("partner_pages" as any)
+                                .delete()
+                                .eq("id", s.id);
+                              if (error) return toast.error(error.message);
+                              toast.success("Deleted");
+                              refreshSpotlights();
+                            }}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+
           <TabsContent value="users" className="mt-6">
             <Card>
               <CardContent className="p-0">
