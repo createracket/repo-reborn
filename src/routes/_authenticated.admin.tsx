@@ -432,7 +432,7 @@ function AdminPage() {
           <TabsContent value="users" className="mt-6 space-y-6">
             <Card className="border-primary/40 bg-primary/5">
               <CardHeader>
-                <CardTitle className="text-lg">Soft-launch access code</CardTitle>
+                <CardTitle className="text-lg">Soft-launch EARLY ACCESS CODE</CardTitle>
                 <CardDescription>
                   Share this code with people you want to let in. Without it,
                   visitors are routed to the waitlist instead of sign-up.
