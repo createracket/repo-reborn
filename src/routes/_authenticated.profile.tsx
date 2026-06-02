@@ -156,6 +156,12 @@ function EditProfilePage() {
       avg_engagement: num(form.avg_engagement),
       top_audience_location: form.top_audience_location.trim() || null,
     };
+    const bad = findProfanityIn(payload);
+    if (bad) {
+      setSaving(false);
+      toast.error("Please remove offensive or inappropriate language from your profile before saving.");
+      return;
+    }
     const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
     setSaving(false);
     if (error) {
