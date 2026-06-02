@@ -60,6 +60,7 @@ function AdminPage() {
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
   const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
   const [editingSpotlight, setEditingSpotlight] = useState<Record<string, any> | null>(null);
+  const [spotlightFormOpen, setSpotlightFormOpen] = useState(false);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
 
@@ -88,7 +89,7 @@ function AdminPage() {
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("id, email, display_name, account_type, created_at").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email").order("created_at", { ascending: false }),
-        supabase.from("partner_pages" as any).select("id, slug, type, headline, subtitle, published, created_at").order("created_at", { ascending: false }),
+        supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id").order("created_at", { ascending: false }),
       ]);
       setLeadBriefs((lb.data as LeadBrief[]) ?? []);
@@ -118,7 +119,7 @@ function AdminPage() {
   async function refreshSpotlights() {
     const { data } = await supabase
       .from("partner_pages" as any)
-      .select("id, slug, type, headline, subtitle, published, created_at")
+      .select("*")
       .order("created_at", { ascending: false });
     setSpotlights((data as unknown as Spotlight[]) ?? []);
   }
@@ -233,15 +234,52 @@ function AdminPage() {
 
 
           <TabsContent value="spotlights" className="mt-6 space-y-6">
-            <SpotlightForm
-              key={editingSpotlight?.id ?? "new"}
-              editData={editingSpotlight}
-              onCreated={() => {
-                refreshSpotlights();
-                setEditingSpotlight(null);
-              }}
-              onCancel={() => setEditingSpotlight(null)}
-            />
+            <Card>
+              <CardHeader>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (editingSpotlight) {
+                      setEditingSpotlight(null);
+                      setSpotlightFormOpen(false);
+                    } else {
+                      setSpotlightFormOpen((v) => !v);
+                    }
+                  }}
+                  className="flex w-full items-center justify-between gap-2 text-left"
+                >
+                  <div>
+                    <CardTitle className="text-lg">
+                      {editingSpotlight ? "Edit artist spotlight" : "New artist spotlight"}
+                    </CardTitle>
+                    <CardDescription>
+                      {editingSpotlight
+                        ? `Updating /spotlight/${editingSpotlight.slug}`
+                        : "Create a partner page. Lives at /spotlight/<slug>."}
+                    </CardDescription>
+                  </div>
+                  {(spotlightFormOpen || editingSpotlight) ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+              </CardHeader>
+              {(spotlightFormOpen || editingSpotlight) && (
+                <CardContent>
+                  <SpotlightForm
+                    key={editingSpotlight?.id ?? "new"}
+                    editData={editingSpotlight}
+                    onCreated={() => {
+                      refreshSpotlights();
+                      setEditingSpotlight(null);
+                      setSpotlightFormOpen(false);
+                    }}
+                    onCancel={() => {
+                      setEditingSpotlight(null);
+                      setSpotlightFormOpen(false);
+                    }}
+                  />
+                </CardContent>
+              )}
+            </Card>
+
             {spotlights.length === 0 ? <Empty /> : (
               <div className="space-y-3">
                 {spotlights.map((s) => (
@@ -649,19 +687,8 @@ function SpotlightForm({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-display text-2xl">
-          {isEditing ? "Edit artist spotlight" : "New artist spotlight"}
-        </CardTitle>
-        <CardDescription>
-          {isEditing
-            ? `Updating /spotlight/${form.slug}`
-            : "Create a partner page. Lives at /spotlight/<slug> with noindex."}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+    <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+
           <div className="space-y-1.5">
             <Label htmlFor="slug">Slug *</Label>
             <Input id="slug" value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="ymyb-spotlight" />
@@ -783,9 +810,7 @@ function SpotlightForm({
               </Button>
             )}
           </div>
-        </form>
-      </CardContent>
-    </Card>
+    </form>
   );
 }
 
