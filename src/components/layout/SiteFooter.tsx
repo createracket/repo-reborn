@@ -1,8 +1,20 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { Instagram, Linkedin, Mail } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function SiteFooter() {
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(!!session);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
   return (
     <footer className="mt-20 border-t border-border bg-pink-accent text-[#2b2b2b]">
       <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -21,7 +33,9 @@ export function SiteFooter() {
             <h3 className="mb-3 font-headline text-sm">Explore</h3>
             <ul className="space-y-2 text-sm">
               <li><Link to="/vibe-check" className="hover:text-purple">Vibe Check</Link></li>
-              <li><Link to="/fan-signup" className="hover:text-purple">Join the mailing list</Link></li>
+              {!signedIn && (
+                <li><Link to="/fan-signup" className="hover:text-purple">Join the mailing list</Link></li>
+              )}
               <li><Link to="/login" className="hover:text-purple">Log in</Link></li>
             </ul>
           </div>
