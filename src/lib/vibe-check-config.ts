@@ -226,6 +226,30 @@ export function clearVibeCheckConfigCache() {
   cachedConfigPromise = null;
 }
 
+// ---------- Realtime subscription ----------
+// Subscribe once (in the browser) to config changes so cached config is
+// invalidated whenever an admin saves. Existing in-progress survey sessions
+// keep the config they loaded at mount; new mounts (e.g. retakes) fetch fresh.
+let realtimeStarted = false;
+export function startVibeCheckConfigRealtime() {
+  if (realtimeStarted || typeof window === "undefined") return;
+  realtimeStarted = true;
+  try {
+    supabase
+      .channel("vibe_check_config_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "vibe_check_config" },
+        () => {
+          clearVibeCheckConfigCache();
+        },
+      )
+      .subscribe();
+  } catch {
+    realtimeStarted = false;
+  }
+}
+
 // ---------- Saver (admin-only via RLS) ----------
 
 export async function saveVibeCheckConfig(config: VibeCheckConfig): Promise<void> {
