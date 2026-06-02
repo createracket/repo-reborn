@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link2, Send, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -15,6 +15,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
+import {
+  loadBriefFormConfig,
+  DEFAULT_BRIEF_FORM_CONFIG,
+  type BriefFormConfig,
+} from "@/lib/brief-form-config";
 
 export const Route = createFileRoute("/_authenticated/connect")({
   head: () => ({
@@ -33,24 +38,6 @@ export const Route = createFileRoute("/_authenticated/connect")({
   ),
 });
 
-const COLLABORATION_TYPES = [
-  "Social Media Campaign",
-  "Live Performance",
-  "Content Creation",
-  "Brand Ambassadorship",
-  "Merchandise Collaboration",
-  "Sponsored Song/Video",
-] as const;
-
-const CORE_VALUES = [
-  "Authenticity",
-  "Creativity",
-  "Community",
-  "Sustainability",
-  "Innovation",
-  "Inclusivity",
-] as const;
-
 const briefSchema = z.object({
   title: z.string().trim().min(2, "Add a title").max(160),
   description: z.string().trim().min(10, "Add a bit more detail").max(5000),
@@ -62,8 +49,8 @@ const briefSchema = z.object({
   timeline: z.string().trim().max(120).optional(),
   target_audience: z.string().trim().max(2000).optional(),
   contact_email: z.string().trim().email("Enter a valid email").max(320).optional(),
-  collaboration_types: z.array(z.string()).max(10),
-  core_values: z.array(z.string()).max(3, "Pick up to 3"),
+  collaboration_types: z.array(z.string()).max(20),
+  core_values: z.array(z.string()),
 });
 
 function ConnectPage() {
@@ -71,6 +58,11 @@ function ConnectPage() {
   const [submitting, setSubmitting] = useState(false);
   const [values, setValues] = useState<string[]>([]);
   const [types, setTypes] = useState<string[]>([]);
+  const [config, setConfig] = useState<BriefFormConfig>(DEFAULT_BRIEF_FORM_CONFIG);
+
+  useEffect(() => {
+    loadBriefFormConfig().then(setConfig).catch(() => setConfig(DEFAULT_BRIEF_FORM_CONFIG));
+  }, []);
 
   function toggle(list: string[], setList: (v: string[]) => void, item: string, max?: number) {
     if (list.includes(item)) {
@@ -105,6 +97,11 @@ function ConnectPage() {
       return;
     }
 
+    if (values.length > config.coreValuesMax) {
+      toast.error(`You can pick up to ${config.coreValuesMax} core values`);
+      return;
+    }
+
     if (findProfanityIn(parsed.data)) {
       toast.error("Please remove offensive or inappropriate language from your brief before submitting.");
       return;
@@ -130,7 +127,7 @@ function ConnectPage() {
         core_values: parsed.data.core_values,
       });
       if (error) throw error;
-      toast.success("Brief submitted! We'll be in touch shortly.");
+      toast.success(config.page.successMessage);
       navigate({ to: "/dashboard" });
     } catch (err: any) {
       toast.error(err.message ?? "Something went wrong");
@@ -138,6 +135,8 @@ function ConnectPage() {
       setSubmitting(false);
     }
   }
+
+  const f = config.fields;
 
   return (
     <div className="min-h-screen bg-background">
@@ -150,8 +149,8 @@ function ConnectPage() {
         </Button>
 
         <div className="mb-8">
-          <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">Connect</p>
-          <h1 className="mt-1 font-display text-4xl md:text-5xl">Submit a brief</h1>
+          <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">{config.page.eyebrow}</p>
+          <h1 className="mt-1 font-display text-4xl md:text-5xl">{config.page.heading}</h1>
         </div>
 
         <Card>
@@ -161,10 +160,8 @@ function ConnectPage() {
                 <Link2 className="size-7 text-primary" />
               </div>
               <div>
-                <CardTitle className="font-display text-2xl">Plan your next campaign</CardTitle>
-                <CardDescription>
-                  Tell us about the project and we'll match you with creative partners who fit your vibe.
-                </CardDescription>
+                <CardTitle className="font-display text-2xl">{config.page.cardTitle}</CardTitle>
+                <CardDescription>{config.page.cardDescription}</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -173,26 +170,26 @@ function ConnectPage() {
               {/* Section 1 */}
               <section className="space-y-6">
                 <div>
-                  <h3 className="font-display text-lg">Core campaign details</h3>
-                  <p className="text-sm text-muted-foreground">Start with the basics.</p>
+                  <h3 className="font-display text-lg">{config.sections.core.title}</h3>
+                  <p className="text-sm text-muted-foreground">{config.sections.core.description}</p>
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Campaign title</Label>
+                    <Label htmlFor="title">{f.title.label}</Label>
                     <Input
                       id="title"
                       name="title"
-                      placeholder="e.g., Summer Vibes album launch"
+                      placeholder={f.title.placeholder}
                       required
                       maxLength={160}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="description">Project description</Label>
+                    <Label htmlFor="description">{f.description.label}</Label>
                     <Textarea
                       id="description"
                       name="description"
-                      placeholder="Describe your goals, who you're trying to reach, and what you're looking for in a partner…"
+                      placeholder={f.description.placeholder}
                       rows={6}
                       required
                       maxLength={5000}
@@ -200,21 +197,21 @@ function ConnectPage() {
                   </div>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="budget">Estimated budget ($)</Label>
+                      <Label htmlFor="budget">{f.budget.label}</Label>
                       <Input
                         id="budget"
                         name="budget"
                         type="number"
                         min={0}
-                        placeholder="e.g., 10000"
+                        placeholder={f.budget.placeholder}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="timeline">Timeline</Label>
+                      <Label htmlFor="timeline">{f.timeline.label}</Label>
                       <Input
                         id="timeline"
                         name="timeline"
-                        placeholder="e.g., 3 months"
+                        placeholder={f.timeline.placeholder}
                         maxLength={120}
                       />
                     </div>
@@ -227,22 +224,20 @@ function ConnectPage() {
               {/* Section 2 */}
               <section className="space-y-6">
                 <div>
-                  <h3 className="font-display text-lg">The vibe check</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Help us find the perfect match by describing the vibe you're going for.
-                  </p>
+                  <h3 className="font-display text-lg">{config.sections.vibe.title}</h3>
+                  <p className="text-sm text-muted-foreground">{config.sections.vibe.description}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label>Ideal partner's core values (pick up to 3)</Label>
+                  <Label>{config.coreValuesLabel}</Label>
                   <div className="grid grid-cols-2 gap-3 pt-2 md:grid-cols-3">
-                    {CORE_VALUES.map((value) => (
+                    {config.coreValues.map((value) => (
                       <label
                         key={value}
                         className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40"
                       >
                         <Checkbox
                           checked={values.includes(value)}
-                          onCheckedChange={() => toggle(values, setValues, value, 3)}
+                          onCheckedChange={() => toggle(values, setValues, value, config.coreValuesMax)}
                         />
                         <span className="text-sm font-normal">{value}</span>
                       </label>
@@ -250,9 +245,9 @@ function ConnectPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Collaboration type</Label>
+                  <Label>{config.collaborationTypesLabel}</Label>
                   <div className="grid grid-cols-1 gap-3 pt-2 md:grid-cols-2">
-                    {COLLABORATION_TYPES.map((type) => (
+                    {config.collaborationTypes.map((type) => (
                       <label
                         key={type}
                         className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40"
@@ -267,11 +262,11 @@ function ConnectPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="target_audience">Describe your target audience</Label>
+                  <Label htmlFor="target_audience">{f.target_audience.label}</Label>
                   <Textarea
                     id="target_audience"
                     name="target_audience"
-                    placeholder="e.g., Ages 18–25, into indie music, sustainable fashion, outdoor scenes."
+                    placeholder={f.target_audience.placeholder}
                     rows={3}
                     maxLength={2000}
                   />
@@ -283,18 +278,16 @@ function ConnectPage() {
               {/* Section 3 */}
               <section className="space-y-6">
                 <div>
-                  <h3 className="font-display text-lg">Contact</h3>
-                  <p className="text-sm text-muted-foreground">
-                    We'll use this to follow up. Defaults to your account email.
-                  </p>
+                  <h3 className="font-display text-lg">{config.sections.contact.title}</h3>
+                  <p className="text-sm text-muted-foreground">{config.sections.contact.description}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contact_email">Contact email</Label>
+                  <Label htmlFor="contact_email">{f.contact_email.label}</Label>
                   <Input
                     id="contact_email"
                     name="contact_email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder={f.contact_email.placeholder}
                     maxLength={320}
                   />
                 </div>
@@ -303,7 +296,7 @@ function ConnectPage() {
               <div className="flex justify-end pt-2">
                 <Button type="submit" size="lg" disabled={submitting}>
                   <Send className="mr-2 size-4" />
-                  {submitting ? "Submitting…" : "Submit brief"}
+                  {submitting ? config.page.submittingLabel : config.page.submitLabel}
                 </Button>
               </div>
             </form>
