@@ -37,6 +37,11 @@ type Subscriber = { id: string; created_at: string; email: string; name: string 
 type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string };
 type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null };
 
+type Spotlight = {
+  id: string; slug: string; type: string; headline: string; subtitle: string | null;
+  published: boolean; created_at: string;
+};
+
 function AdminPage() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
@@ -46,6 +51,7 @@ function AdminPage() {
   const [subs, setSubs] = useState<Subscriber[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
+  const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
 
   useEffect(() => {
     (async () => {
