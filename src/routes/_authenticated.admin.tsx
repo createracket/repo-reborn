@@ -179,7 +179,16 @@ function AdminPage() {
             ))}
           </TabsContent>
 
-          <TabsContent value="campaigns" className="mt-6 space-y-3">
+          <TabsContent value="campaigns" className="mt-6 space-y-6">
+            <NewCampaignBriefForm
+              onCreated={async () => {
+                const { data } = await supabase
+                  .from("campaign_briefs")
+                  .select("id, created_at, title, description, user_id, budget, status, contact_email")
+                  .order("created_at", { ascending: false });
+                setCampaigns((data as CampaignBrief[]) ?? []);
+              }}
+            />
             {campaigns.length === 0 ? <Empty /> : campaigns.map((b) => (
               <Card key={b.id}>
                 <CardHeader>
@@ -198,6 +207,7 @@ function AdminPage() {
               </Card>
             ))}
           </TabsContent>
+
 
           <TabsContent value="spotlights" className="mt-6 space-y-6">
             <SpotlightForm
