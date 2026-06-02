@@ -196,6 +196,9 @@ function AdminPage() {
                       <CardDescription>
                         {b.contact_name ?? "—"} · {b.contact_email} {b.company ? `· ${b.company}` : ""}
                       </CardDescription>
+                      <div className="mt-1">
+                        <ProfileChip profile={lookupProfile(b.contact_email)} fallbackEmail={b.contact_email} />
+                      </div>
                     </div>
                     <Meta date={b.created_at} status={b.status} />
                   </div>
