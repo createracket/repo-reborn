@@ -687,19 +687,8 @@ function SpotlightForm({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-display text-2xl">
-          {isEditing ? "Edit artist spotlight" : "New artist spotlight"}
-        </CardTitle>
-        <CardDescription>
-          {isEditing
-            ? `Updating /spotlight/${form.slug}`
-            : "Create a partner page. Lives at /spotlight/<slug> with noindex."}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+    <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+
           <div className="space-y-1.5">
             <Label htmlFor="slug">Slug *</Label>
             <Input id="slug" value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="ymyb-spotlight" />
