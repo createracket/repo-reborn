@@ -135,15 +135,27 @@ function LoginPage() {
     };
   }, [mode, busy]);
 
+  function gateSignupOrWaitlist(): boolean {
+    if (mode !== "signup") return true;
+    if (accessCodeOk) return true;
+    toast.error("That access code isn't valid. Join the waitlist to get notified.");
+    navigate({ to: "/fan-signup" });
+    return false;
+  }
+
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
+    if (!gateSignupOrWaitlist()) return;
     setBusy(true);
     try {
       if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { account_type: accountType },
+          },
         });
         if (error) throw error;
         toast.success("Check your email to confirm your account.");
@@ -159,7 +171,17 @@ function LoginPage() {
   }
 
   async function handleGoogle() {
+    if (!gateSignupOrWaitlist()) return;
     try {
+      if (mode === "signup" && typeof window !== "undefined") {
+        // Persist the chosen profile type so we can apply it after the
+        // OAuth round-trip lands the user back on the app.
+        try {
+          sessionStorage.setItem("pendingAccountType", accountType);
+        } catch {
+          // ignore
+        }
+      }
       await lovable.auth.signInWithOAuth("google", {
         redirect_uri: `${window.location.origin}${postAuthDestination()}`,
       });
@@ -167,6 +189,7 @@ function LoginPage() {
       toast.error(err.message ?? "Couldn't start Google sign-in");
     }
   }
+
 
   return (
     <div className="min-h-screen bg-background">
