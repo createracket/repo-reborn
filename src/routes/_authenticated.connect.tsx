@@ -104,6 +104,11 @@ function ConnectPage() {
       return;
     }
 
+    if (findProfanityIn(parsed.data)) {
+      toast.error("Please remove offensive or inappropriate language from your brief before submitting.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const { data: u } = await supabase.auth.getUser();
