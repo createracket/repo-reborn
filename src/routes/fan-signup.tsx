@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { findProfanityIn } from "@/lib/profanity";
 
 export const Route = createFileRoute("/fan-signup")({
   head: () => ({
@@ -25,6 +26,10 @@ function FanSignup() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (findProfanityIn({ name })) {
+      toast.error("Please remove offensive or inappropriate language from your name.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase
       .from("mailing_list_subscribers")

@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { findProfanityIn } from "@/lib/profanity";
 import { adminCreateUser } from "@/lib/admin-users.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -609,6 +610,12 @@ function SpotlightForm({
       avg_engagement: numOrNull(form.avg_engagement),
     };
 
+    if (findProfanityIn(payload)) {
+      setSaving(false);
+      toast.error("Please remove offensive or inappropriate language from the spotlight before saving.");
+      return;
+    }
+
     if (isEditing) {
       const { error } = await supabase
         .from("partner_pages" as any)
@@ -902,6 +909,10 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
     e.preventDefault();
     if (form.title.trim().length < 2 || form.description.trim().length < 10) {
       toast.error("Add a title and a description (10+ chars)");
+      return;
+    }
+    if (findProfanityIn(form)) {
+      toast.error("Please remove offensive or inappropriate language from the brief before saving.");
       return;
     }
     setSaving(true);

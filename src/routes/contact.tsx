@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { findProfanityIn } from "@/lib/profanity";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -30,6 +31,10 @@ function ContactPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (findProfanityIn({ name, message })) {
+      toast.error("Please remove offensive or inappropriate language before sending.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase
       .from("contact_messages")

@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { findProfanityIn } from "@/lib/profanity";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -156,6 +157,12 @@ function EditProfilePage() {
       avg_engagement: num(form.avg_engagement),
       top_audience_location: form.top_audience_location.trim() || null,
     };
+    const bad = findProfanityIn(payload);
+    if (bad) {
+      setSaving(false);
+      toast.error("Please remove offensive or inappropriate language from your profile before saving.");
+      return;
+    }
     const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
     setSaving(false);
     if (error) {

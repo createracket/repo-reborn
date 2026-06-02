@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
+import { findProfanityIn } from "@/lib/profanity";
 
 export const Route = createFileRoute("/_authenticated/connect")({
   head: () => ({
@@ -101,6 +102,11 @@ function ConnectPage() {
 
     if (!parsed.success) {
       toast.error(parsed.error.issues[0]?.message ?? "Please check the form");
+      return;
+    }
+
+    if (findProfanityIn(parsed.data)) {
+      toast.error("Please remove offensive or inappropriate language from your brief before submitting.");
       return;
     }
 
