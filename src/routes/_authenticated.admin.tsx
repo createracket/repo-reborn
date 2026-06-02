@@ -232,6 +232,12 @@ function AdminPage() {
                     <div>
                       <CardTitle className="text-lg">{b.title}</CardTitle>
                       <CardDescription>{b.contact_email ?? b.user_id}</CardDescription>
+                      <div className="mt-1">
+                        <ProfileChip
+                          profile={lookupProfile(b.contact_email) ?? profiles.find((p) => p.id === b.user_id) ?? null}
+                          fallbackEmail={b.contact_email}
+                        />
+                      </div>
                     </div>
                     <Meta date={b.created_at} status={b.status} />
                   </div>
