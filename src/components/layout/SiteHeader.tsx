@@ -48,9 +48,11 @@ export function SiteHeader() {
           <Link to="/vibe-check" className="hover:text-foreground transition-colors">
             Vibe Check
           </Link>
-          <Link to="/fan-signup" className="hover:text-foreground transition-colors">
-            Mailing list
-          </Link>
+          {!signedIn && (
+            <Link to="/fan-signup" className="hover:text-foreground transition-colors">
+              Mailing list
+            </Link>
+          )}
           {isAdmin && (
             <>
               <Link to="/admin" className="text-primary hover:text-foreground transition-colors">
