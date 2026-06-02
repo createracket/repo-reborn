@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import {
   loadVibeCheckConfig,
   saveVibeCheckConfig,
-  mergeVibeConfig,
   DEFAULT_VIBE_CONFIG,
   DEFAULT_ARTIST_ARCHETYPES,
   DEFAULT_BRAND_ARCHETYPES,
