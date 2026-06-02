@@ -108,24 +108,28 @@ export function CommunityAdmin() {
   };
 
   const handleUpload = async (file: File) => {
+    console.log("[CommunityAdmin] upload start", { name: file.name, size: file.size, type: file.type });
     setUploading(true);
     const ext = file.name.split(".").pop() || "png";
     const path = `community/${crypto.randomUUID()}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from("spotlight-images")
-      .upload(path, file, { upsert: false, cacheControl: "3600" });
+      .upload(path, file, { upsert: false, cacheControl: "3600", contentType: file.type || undefined });
     if (upErr) {
+      console.error("[CommunityAdmin] upload error", upErr);
       toast.error(upErr.message);
       setUploading(false);
       return;
     }
     const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+    console.log("[CommunityAdmin] upload success", data.publicUrl);
     setDraft((d) => (d ? { ...d, avatar_url: data.publicUrl } : d));
     setUploading(false);
     toast.success("Image uploaded");
   };
 
   const handleSave = async () => {
+    console.log("[CommunityAdmin] save clicked", draft);
     if (!draft) return;
     if (!draft.display_name.trim()) {
       toast.error("Name is required");
@@ -139,9 +143,11 @@ export function CommunityAdmin() {
       location: joinLocation(draft.city, draft.country),
       avatar_url: draft.avatar_url.trim() || null,
     };
+    console.log("[CommunityAdmin] saving payload", payload);
     const { error } = draft.id
       ? await supabase.from("community_profiles").update(payload).eq("id", draft.id)
       : await supabase.from("community_profiles").insert(payload as any);
+    console.log("[CommunityAdmin] save result", { error });
     setSaving(false);
     if (error) {
       toast.error(error.message);
