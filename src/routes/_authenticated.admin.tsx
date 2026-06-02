@@ -234,15 +234,52 @@ function AdminPage() {
 
 
           <TabsContent value="spotlights" className="mt-6 space-y-6">
-            <SpotlightForm
-              key={editingSpotlight?.id ?? "new"}
-              editData={editingSpotlight}
-              onCreated={() => {
-                refreshSpotlights();
-                setEditingSpotlight(null);
-              }}
-              onCancel={() => setEditingSpotlight(null)}
-            />
+            <Card>
+              <CardHeader>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (editingSpotlight) {
+                      setEditingSpotlight(null);
+                      setSpotlightFormOpen(false);
+                    } else {
+                      setSpotlightFormOpen((v) => !v);
+                    }
+                  }}
+                  className="flex w-full items-center justify-between gap-2 text-left"
+                >
+                  <div>
+                    <CardTitle className="text-lg">
+                      {editingSpotlight ? "Edit artist spotlight" : "New artist spotlight"}
+                    </CardTitle>
+                    <CardDescription>
+                      {editingSpotlight
+                        ? `Updating /spotlight/${editingSpotlight.slug}`
+                        : "Create a partner page. Lives at /spotlight/<slug>."}
+                    </CardDescription>
+                  </div>
+                  {(spotlightFormOpen || editingSpotlight) ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+              </CardHeader>
+              {(spotlightFormOpen || editingSpotlight) && (
+                <CardContent>
+                  <SpotlightForm
+                    key={editingSpotlight?.id ?? "new"}
+                    editData={editingSpotlight}
+                    onCreated={() => {
+                      refreshSpotlights();
+                      setEditingSpotlight(null);
+                      setSpotlightFormOpen(false);
+                    }}
+                    onCancel={() => {
+                      setEditingSpotlight(null);
+                      setSpotlightFormOpen(false);
+                    }}
+                  />
+                </CardContent>
+              )}
+            </Card>
+
             {spotlights.length === 0 ? <Empty /> : (
               <div className="space-y-3">
                 {spotlights.map((s) => (
