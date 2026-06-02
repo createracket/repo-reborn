@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 import { adminCreateUser } from "@/lib/admin-users.functions";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
+import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
