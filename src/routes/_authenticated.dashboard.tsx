@@ -130,7 +130,7 @@ function DashboardPage() {
               Welcome back
             </p>
             <h1 className="mt-1 font-display text-4xl md:text-5xl">
-              {email ?? "Your dashboard"}
+              {displayName ?? email ?? "Your dashboard"}
             </h1>
           </div>
           <Button variant="outline" size="sm" onClick={signOut}>
