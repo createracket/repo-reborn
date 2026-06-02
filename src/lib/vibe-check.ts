@@ -1,95 +1,327 @@
 // ============================================
-// VIBE CHECK — scoring engine
-// Ported verbatim from the original createracket.com logic.
-// Two flows:
-//   - calculateBrandVibe(brandData)   -> { brandArchetype, artistMatches }
-//   - calculateVibeScore(musicianData) -> { primary, secondary, isMultiHyphenate, ... }
+// VIBE CHECK — rule-based scoring engine
+// Rules are defined in code (logic + id + default points + human label).
+// Point values are overridable at runtime from VibeCheckConfig.weights.
 // ============================================
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { VibeCheckConfig } from "./vibe-check-config";
+import {
+  DEFAULT_ARTIST_ARCHETYPES,
+  DEFAULT_BRAND_ARCHETYPES,
+  mergeVibeConfig,
+} from "./vibe-check-config";
+
 // ============================================
-// BRAND SCORING
+// Helpers
 // ============================================
 
-function determineBrandArchetype(data: any) {
-  const archetypes: Record<string, number> = {
-    communityFirst: 0,
-    innovationPartner: 0,
-    valuesLed: 0,
-    cultureDriver: 0,
-    performanceFocused: 0,
-  };
+function containsKeywords(text: string | undefined, keywords: string[]) {
+  if (!text) return false;
+  const lower = text.toLowerCase();
+  return keywords.some((k) => lower.includes(k.toLowerCase()));
+}
 
-  const brandValues = data.brandValues || [];
-  if (brandValues.includes("Community & connection")) archetypes.communityFirst += 25;
-  if (brandValues.includes("Authenticity & realness")) archetypes.communityFirst += 20;
+// contentComfortLevel arrives as "1 (Not at all)" .. "5 (Very comfortable)".
+function comfort(level: any): number {
+  if (typeof level === "number") return level;
+  if (typeof level !== "string") return 0;
+  const n = parseInt(level, 10);
+  return Number.isNaN(n) ? 0 : n;
+}
 
-  if (brandValues.includes("Innovation & creativity")) archetypes.innovationPartner += 25;
-  if (brandValues.includes("Quality & craftsmanship")) archetypes.innovationPartner += 15;
+export type ScoringRule = {
+  id: string;
+  label: string;
+  points: number;
+  when: (d: any) => boolean;
+};
 
-  if (brandValues.includes("Sustainability & environmental responsibility")) archetypes.valuesLed += 25;
-  if (brandValues.includes("Diversity & inclusion")) archetypes.valuesLed += 20;
-  if (brandValues.includes("Social impact & purpose")) archetypes.valuesLed += 15;
+// ============================================
+// ARTIST RULES (musician → archetype)
+// ============================================
 
-  if (brandValues.includes("Fun & entertainment")) archetypes.cultureDriver += 20;
-  if (brandValues.includes("Luxury & aspiration")) archetypes.cultureDriver += 15;
+export const ARTIST_ARCHETYPE_KEYS = [
+  "loyalist",
+  "changemaker",
+  "curator",
+  "builder",
+  "liveWire",
+  "maker",
+  "advocate",
+] as const;
+export type ArtistArchetypeKey = (typeof ARTIST_ARCHETYPE_KEYS)[number];
 
-  if (data.primaryGoal === "Drive purchases or conversions") archetypes.performanceFocused += 30;
-  if (data.primaryGoal === "Engagement (build community and connection)") archetypes.communityFirst += 25;
-  if (data.primaryGoal === "Brand awareness (reach new audiences)") archetypes.cultureDriver += 20;
-  if (data.primaryGoal === "Content creation (UGC, social content)") archetypes.innovationPartner += 20;
+export const ARTIST_RULES: Record<ArtistArchetypeKey, ScoringRule[]> = {
+  loyalist: [
+    { id: "goal_deepen_engagement", label: 'Goal: "Deepen fan engagement"', points: 20, when: (d) => d.goals?.includes("Deepen fan engagement") },
+    { id: "support_connect_creators", label: 'Support: "Connect with creators or collaborators"', points: 15, when: (d) => d.support?.includes("Connect with creators or collaborators") },
+    { id: "story_engagement_words", label: "Story mentions community/fans + comfort ≥ 3", points: 15, when: (d) => comfort(d.contentComfortLevel) >= 3 && containsKeywords(d.story, ["engagement", "connection", "community", "fans"]) },
+    { id: "audience_engaged_words", label: "Audience snapshot mentions engagement/community", points: 20, when: (d) => containsKeywords(d.audienceSnapshot, ["engaged", "engagement", "community", "loyal"]) },
+    { id: "support_industry_intros", label: 'Support: "Industry intros & networking"', points: 10, when: (d) => d.support?.includes("Industry intros & networking") },
+    { id: "interest_parenting", label: "Interest: Parenting/Family", points: 5, when: (d) => d.interests?.includes("Parenting/Family") },
+    { id: "interest_mental_health", label: "Interest: Mental Health", points: 5, when: (d) => d.interests?.includes("Mental Health") },
+    { id: "interest_arts_culture", label: "Interest: Arts & Culture", points: 5, when: (d) => d.interests?.includes("Arts & Culture") },
+    { id: "tellusmore_fans", label: 'Tell us more mentions "fans/community/relationships"', points: 10, when: (d) => containsKeywords(d.tellUsMore, ["fans", "community", "connection", "relationships"]) },
+    { id: "goal_grow_without_profile", label: '"Grow audience" without "Increase profile"', points: 5, when: (d) => d.goals?.includes("Grow my audience & streams") && !d.goals?.includes("Increase profile or recognition") },
+    { id: "artist_type_band", label: "Artist type: In a band / Both", points: 3, when: (d) => d.artistType?.includes("In a band") || d.artistType?.includes("Both") },
+    { id: "has_upcoming_shows", label: "Has upcoming shows", points: 3, when: (d) => d.upcomingShows && d.upcomingShows.length > 0 },
+    { id: "penalty_only_profile_goal", label: "Penalty: only goal is profile/recognition", points: -10, when: (d) => d.goals?.includes("Increase profile or recognition") && d.goals?.length === 1 },
+  ],
+  changemaker: [
+    { id: "sustainability_very_important", label: "Sustainability: Very important", points: 25, when: (d) => d.sustainabilityImportance === "Very important" },
+    { id: "eco_brands_definitely", label: "Eco-conscious brands: Yes, definitely", points: 25, when: (d) => d.ecoConsciousBrands === "Yes, definitely" },
+    { id: "interest_sustainability", label: "Interest: Sustainability/Environment", points: 15, when: (d) => d.interests?.includes("Sustainability/Environment") },
+    { id: "interest_first_nations", label: "Interest: First Nations", points: 15, when: (d) => d.interests?.includes("First Nations") },
+    { id: "representation_very_important", label: "Representation: Very important", points: 15, when: (d) => d.representationImportance === "Very important" },
+    { id: "sustainability_important", label: "Sustainability: Important", points: 10, when: (d) => d.sustainabilityImportance === "Important" },
+    { id: "eco_brands_when_possible", label: "Eco-conscious brands: Yes, when possible", points: 10, when: (d) => d.ecoConsciousBrands === "Yes, when possible" },
+    { id: "interest_lgbtqia", label: "Interest: LGBTQIA+", points: 5, when: (d) => d.interests?.includes("LGBTQIA+") },
+    { id: "interest_arts_culture", label: "Interest: Arts & Culture", points: 5, when: (d) => d.interests?.includes("Arts & Culture") },
+    { id: "has_cause_or_charity", label: "Has a cause or charity", points: 5, when: (d) => d.causeOrCharity && d.causeOrCharity.length > 0 },
+    { id: "interest_vegan", label: "Interest: Vegan/Vegetarian", points: 8, when: (d) => d.interests?.includes("Vegan/Vegetarian") },
+    { id: "interest_current_events", label: "Interest: Current Events", points: 5, when: (d) => d.interests?.includes("Current Events") },
+    { id: "interest_education", label: "Interest: Education/Learning", points: 5, when: (d) => d.interests?.includes("Education/Learning") },
+    { id: "tellusmore_values", label: 'Tell us more mentions "values/mission/impact"', points: 10, when: (d) => containsKeywords(d.tellUsMore, ["values", "mission", "impact", "change", "purpose"]) },
+    { id: "brand_partner_aligned", label: 'Support brand partnerships + "align/values"', points: 5, when: (d) => d.support?.includes("Brand partnerships") && containsKeywords(d.tellUsMore, ["align", "values"]) },
+    { id: "interest_wellness", label: "Interest: Wellness", points: 3, when: (d) => d.interests?.includes("Wellness") },
+    { id: "story_social_justice", label: 'Story mentions social/justice/equality', points: 5, when: (d) => containsKeywords(d.story, ["social", "justice", "equality", "representation"]) },
+    { id: "penalty_all_support_no_values", label: 'Penalty: "All of the above" support, no values mentioned', points: -5, when: (d) => d.support?.includes("All of the above") && !containsKeywords(d.tellUsMore, ["values", "mission"]) },
+    { id: "penalty_sustainability_not_priority", label: "Penalty: Sustainability not a priority", points: -15, when: (d) => d.sustainabilityImportance === "Not a priority" },
+  ],
+  curator: [
+    { id: "interest_fashion_luxury", label: "Interest: Fashion (designer, luxury)", points: 20, when: (d) => d.interests?.includes("Fashion (designer, luxury)") },
+    { id: "interest_fashion_casual", label: "Interest: Fashion (casual, streetwear)", points: 20, when: (d) => d.interests?.includes("Fashion (casual, streetwear)") },
+    { id: "detailed_aesthetic", label: "Detailed creative aesthetic (>50 chars)", points: 20, when: (d) => d.creativeAesthetic && d.creativeAesthetic.length > 50 },
+    { id: "interest_photography", label: "Interest: Photography/Videography", points: 15, when: (d) => d.interests?.includes("Photography/Videography") },
+    { id: "interest_fine_art", label: "Interest: Fine Art", points: 15, when: (d) => d.interests?.includes("Fine Art") },
+    { id: "interest_interior_design", label: "Interest: Interior Design", points: 15, when: (d) => d.interests?.includes("Interior Design") },
+    { id: "comfort_high", label: "Content comfort ≥ 4", points: 10, when: (d) => comfort(d.contentComfortLevel) >= 4 },
+    { id: "interest_arts_crafts", label: "Interest: Arts & Crafts", points: 5, when: (d) => d.interests?.includes("Arts & Crafts") },
+    { id: "interest_books", label: "Interest: Books/Reading", points: 5, when: (d) => d.interests?.includes("Books/Reading") },
+    { id: "goal_profile", label: 'Goal: "Increase profile or recognition"', points: 10, when: (d) => d.goals?.includes("Increase profile or recognition") },
+    { id: "aesthetic_visual_words", label: "Aesthetic mentions visual/aesthetic/style", points: 10, when: (d) => containsKeywords(d.creativeAesthetic, ["visual", "aesthetic", "style", "look", "design"]) },
+    { id: "story_visual_words", label: "Story mentions visual/aesthetic/fashion", points: 8, when: (d) => containsKeywords(d.story, ["visual", "aesthetic", "style", "fashion", "design"]) },
+    { id: "interest_movies", label: "Interest: Movies", points: 3, when: (d) => d.interests?.includes("Movies") },
+    { id: "interest_travel", label: "Interest: Travel", points: 3, when: (d) => d.interests?.includes("Travel") },
+    { id: "genres_visual", label: "Genres mention visual/aesthetic/cinematic", points: 5, when: (d) => containsKeywords(d.genres, ["visual", "aesthetic", "cinematic"]) },
+    { id: "penalty_no_aesthetic", label: "Penalty: no creative aesthetic", points: -10, when: (d) => !d.creativeAesthetic || d.creativeAesthetic.length === 0 },
+    { id: "penalty_low_comfort", label: "Penalty: comfort ≤ 2", points: -5, when: (d) => comfort(d.contentComfortLevel) <= 2 },
+  ],
+  builder: [
+    { id: "support_all", label: 'Support: "All of the above"', points: 25, when: (d) => d.support?.includes("All of the above") },
+    { id: "interest_business", label: "Interest: Business/Finance", points: 20, when: (d) => d.interests?.includes("Business/Finance") },
+    { id: "indie_plus_connections", label: "Independent + goal: build industry connections", points: 20, when: (d) => d.currentDeals?.includes("independent") && d.goals?.includes("Build industry connections") },
+    { id: "goal_funding", label: 'Goal: "Secure funding for a project"', points: 15, when: (d) => d.goals?.includes("Secure funding for a project") },
+    { id: "current_deals_management", label: "Current deal: Management / Brand partnership agency", points: 15, when: (d) => d.currentDeals?.includes("Management") || d.currentDeals?.includes("Brand / partnership agency") },
+    { id: "support_breadth", label: "Selected 4+ support options", points: 10, when: (d) => d.support && d.support.length >= 4 },
+    { id: "support_strategy", label: 'Support: "Strategy, analytics or audience growth"', points: 10, when: (d) => d.support?.includes("Strategy, analytics or audience growth") },
+    { id: "interest_tech", label: "Interest: Tech/Gadgets", points: 8, when: (d) => d.interests?.includes("Tech/Gadgets") },
+    { id: "goal_connections", label: 'Goal: "Build industry connections"', points: 10, when: (d) => d.goals?.includes("Build industry connections") },
+    { id: "tellusmore_business", label: 'Tell us more mentions business/growth/revenue', points: 10, when: (d) => containsKeywords(d.tellUsMore, ["business", "growth", "building", "scaling", "revenue"]) },
+    { id: "goals_breadth", label: "Selected 5+ goals", points: 8, when: (d) => d.goals && d.goals.length >= 5 },
+    { id: "contract_negotiations", label: "Record contract: in negotiations", points: 5, when: (d) => d.recordContract === "Currently in negotiations" },
+    { id: "tellusmore_urgent", label: 'Tell us more mentions "timeline/urgent/asap"', points: 5, when: (d) => containsKeywords(d.tellUsMore, ["timeline", "urgent", "asap"]) },
+    { id: "interest_crypto", label: "Interest: Crypto/Web3", points: 5, when: (d) => d.interests?.includes("Crypto/Web3") },
+    { id: "penalty_low_comfort_no_team", label: "Penalty: low comfort, no mention of team/support", points: -5, when: (d) => comfort(d.contentComfortLevel) <= 2 && !containsKeywords(d.tellUsMore, ["team", "support", "help"]) },
+    { id: "penalty_narrow_support", label: "Penalty: ≤2 support options selected", points: -8, when: (d) => d.support && d.support.length <= 2 },
+  ],
+  liveWire: [
+    { id: "goal_touring", label: 'Goal: "Expand live shows / touring"', points: 25, when: (d) => d.goals?.includes("Expand live shows / touring") },
+    { id: "many_upcoming_shows", label: ">20 upcoming shows", points: 20, when: (d) => d.upcomingShows && d.upcomingShows.length > 20 },
+    { id: "regional_or_intl", label: "Target market: Regional or International", points: 15, when: (d) => d.targetMarkets?.includes("Regional") || d.targetMarkets?.includes("International") },
+    { id: "tellusmore_tour", label: 'Tell us more mentions tour/festival/live', points: 15, when: (d) => containsKeywords(d.tellUsMore, ["tour", "touring", "festival", "live"]) },
+    { id: "interest_sports", label: "Interest: Sports", points: 8, when: (d) => d.interests?.includes("Sports") },
+    { id: "interest_outdoor", label: "Interest: Outdoor/Adventure", points: 8, when: (d) => d.interests?.includes("Outdoor/Adventure") },
+    { id: "interest_travel", label: "Interest: Travel", points: 10, when: (d) => d.interests?.includes("Travel") },
+    { id: "interest_automotive", label: "Interest: Automotive", points: 5, when: (d) => d.interests?.includes("Automotive") },
+    { id: "support_connect_creators", label: 'Support: "Connect with creators or collaborators"', points: 8, when: (d) => d.support?.includes("Connect with creators or collaborators") },
+    { id: "artist_band_both", label: "Artist type: In a band / Both", points: 8, when: (d) => d.artistType?.includes("In a band") || d.artistType?.includes("Both") },
+    { id: "tellusmore_live_energy", label: 'Tell us more mentions live/performance/stage', points: 10, when: (d) => containsKeywords(d.tellUsMore, ["tour", "live", "performance", "energy", "stage"]) },
+    { id: "many_target_markets", label: "Selected 3+ target markets", points: 5, when: (d) => d.targetMarkets && d.targetMarkets.length >= 3 },
+    { id: "story_festival_tour", label: "Story mentions festival/tour/live", points: 5, when: (d) => containsKeywords(d.story, ["festival", "tour", "live"]) },
+    { id: "artist_solo", label: "Artist type: Solo artist", points: 3, when: (d) => d.artistType?.includes("Solo artist") },
+    { id: "interest_food", label: "Interest: Food", points: 3, when: (d) => d.interests?.includes("Food") },
+    { id: "penalty_no_shows_no_touring", label: "Penalty: no shows + no touring goal", points: -15, when: (d) => !d.upcomingShows && !d.goals?.includes("Expand live shows / touring") },
+    { id: "penalty_only_studio_goal", label: "Penalty: only goal mentions studio", points: -8, when: (d) => d.goals?.length === 1 && d.goals[0]?.includes("studio") },
+  ],
+  maker: [
+    { id: "artist_dj_producer", label: "Artist type: DJ / Producer", points: 25, when: (d) => d.artistType?.includes("DJ") || d.artistType?.includes("Producer") },
+    { id: "interest_tech", label: "Interest: Tech/Gadgets", points: 20, when: (d) => d.interests?.includes("Tech/Gadgets") },
+    { id: "support_creative_content", label: 'Support: "Creative content (video, photo)"', points: 15, when: (d) => d.support?.includes("Creative content (video, photo)") },
+    { id: "interest_gaming", label: "Interest: Gaming", points: 15, when: (d) => d.interests?.includes("Gaming") },
+    { id: "interest_photography", label: "Interest: Photography/Videography", points: 10, when: (d) => d.interests?.includes("Photography/Videography") },
+    { id: "artist_songwriter_composer", label: "Artist type: Songwriter / Composer", points: 10, when: (d) => d.artistType?.includes("Songwriter") || d.artistType?.includes("Composer") },
+    { id: "comfort_high", label: "Content comfort ≥ 4", points: 8, when: (d) => comfort(d.contentComfortLevel) >= 4 },
+    { id: "support_strategy", label: 'Support: "Strategy, analytics or audience growth"', points: 8, when: (d) => d.support?.includes("Strategy, analytics or audience growth") },
+    { id: "aesthetic_production", label: "Aesthetic mentions production/technical/studio", points: 10, when: (d) => containsKeywords(d.creativeAesthetic, ["production", "technical", "gear", "studio"]) },
+    { id: "genres_production", label: "Genres mention production/electronic/beat", points: 8, when: (d) => containsKeywords(d.genres, ["production", "electronic", "beat", "produced"]) },
+    { id: "story_production", label: "Story mentions production/studio/gear", points: 5, when: (d) => containsKeywords(d.story, ["production", "studio", "gear", "software"]) },
+    { id: "artist_session", label: "Artist type: Session musician", points: 5, when: (d) => d.artistType?.includes("Session musician") },
+    { id: "interest_business", label: "Interest: Business/Finance", points: 3, when: (d) => d.interests?.includes("Business/Finance") },
+    { id: "interest_diy", label: "Interest: DIY/Home Improvements", points: 3, when: (d) => d.interests?.includes("DIY/Home Improvements") },
+    { id: "penalty_no_tech_no_producer", label: "Penalty: no tech interest and not a producer", points: -10, when: (d) => !d.interests?.includes("Tech/Gadgets") && !d.artistType?.includes("Producer") },
+    { id: "penalty_low_comfort_no_producer", label: "Penalty: low comfort and not a producer", points: -8, when: (d) => comfort(d.contentComfortLevel) <= 2 && !d.artistType?.includes("Producer") },
+  ],
+  advocate: [
+    { id: "interest_mental_health", label: "Interest: Mental Health", points: 25, when: (d) => d.interests?.includes("Mental Health") },
+    { id: "underrep_neurodivergent", label: "Underrepresented: Neurodivergent", points: 20, when: (d) => d.underrepresentedCommunities?.includes("Neurodivergent") },
+    { id: "any_underrep", label: "Identifies with any underrepresented community", points: 15, when: (d) => d.underrepresentedCommunities && d.underrepresentedCommunities.length > 0 },
+    { id: "representation_very_important", label: "Representation: Very important", points: 15, when: (d) => d.representationImportance === "Very important" },
+    { id: "interest_wellness", label: "Interest: Wellness", points: 20, when: (d) => d.interests?.includes("Wellness") },
+    { id: "interest_health_beauty", label: "Interest: Health/Beauty", points: 8, when: (d) => d.interests?.includes("Health/Beauty") },
+    { id: "interest_vegan", label: "Interest: Vegan/Vegetarian", points: 8, when: (d) => d.interests?.includes("Vegan/Vegetarian") },
+    { id: "interest_fitness", label: "Interest: Fitness", points: 8, when: (d) => d.interests?.includes("Fitness") },
+    { id: "lgbtqia", label: "LGBTQIA+ interest or community", points: 10, when: (d) => d.interests?.includes("LGBTQIA+") || d.underrepresentedCommunities?.includes("LGBTQIA+") },
+    { id: "tellusmore_vulnerable", label: 'Tell us more mentions vulnerable/authentic/real', points: 10, when: (d) => containsKeywords(d.tellUsMore, ["vulnerable", "authentic", "real", "honest", "mental health"]) },
+    { id: "interest_sustainability", label: "Interest: Sustainability/Environment", points: 5, when: (d) => d.interests?.includes("Sustainability/Environment") },
+    { id: "interest_parenting", label: "Interest: Parenting/Family", points: 5, when: (d) => d.interests?.includes("Parenting/Family") },
+    { id: "interest_books", label: "Interest: Books/Reading", points: 3, when: (d) => d.interests?.includes("Books/Reading") },
+    { id: "interest_podcasts", label: "Interest: Podcasts", points: 3, when: (d) => d.interests?.includes("Podcasts") },
+    { id: "aesthetic_raw", label: 'Aesthetic mentions raw/unfiltered/honest', points: 5, when: (d) => containsKeywords(d.creativeAesthetic, ["raw", "unfiltered", "honest", "real"]) },
+    { id: "story_mental_health", label: 'Story mentions mental health/wellness/vulnerable', points: 5, when: (d) => containsKeywords(d.story, ["mental health", "wellness", "authentic", "vulnerable"]) },
+    { id: "penalty_no_wellness_interests", label: "Penalty: no wellness-adjacent interests", points: -10, when: (d) => !d.interests?.some((i: string) => ["Mental Health", "Wellness", "Health/Beauty", "Fitness"].includes(i)) },
+  ],
+};
 
-  const category = data.industry || "";
-  if (["Sustainability & Eco-Conscious", "Wellness & Lifestyle"].some((c) => category.includes(c))) {
-    archetypes.valuesLed += 15;
+// ============================================
+// BRAND RULES
+// ============================================
+
+export const BRAND_ARCHETYPE_KEYS = [
+  "communityFirst",
+  "innovationPartner",
+  "valuesLed",
+  "cultureDriver",
+  "performanceFocused",
+] as const;
+export type BrandArchetypeKey = (typeof BRAND_ARCHETYPE_KEYS)[number];
+
+export const BRAND_RULES: Record<BrandArchetypeKey, ScoringRule[]> = {
+  communityFirst: [
+    { id: "value_community", label: 'Brand value: "Community & connection"', points: 25, when: (d) => (d.brandValues || []).includes("Community & connection") },
+    { id: "value_authenticity", label: 'Brand value: "Authenticity & realness"', points: 20, when: (d) => (d.brandValues || []).includes("Authenticity & realness") },
+    { id: "goal_engagement", label: 'Primary goal: Engagement (build community)', points: 25, when: (d) => d.primaryGoal === "Engagement (build community and connection)" },
+  ],
+  innovationPartner: [
+    { id: "value_innovation", label: 'Brand value: "Innovation & creativity"', points: 25, when: (d) => (d.brandValues || []).includes("Innovation & creativity") },
+    { id: "value_quality", label: 'Brand value: "Quality & craftsmanship"', points: 15, when: (d) => (d.brandValues || []).includes("Quality & craftsmanship") },
+    { id: "goal_content_creation", label: 'Primary goal: Content creation (UGC)', points: 20, when: (d) => d.primaryGoal === "Content creation (UGC, social content)" },
+    { id: "industry_tech_gaming", label: "Industry: Tech / Gaming", points: 15, when: (d) => ["Tech & Gadgets", "Gaming & Esports"].some((c) => (d.industry || "").includes(c)) },
+  ],
+  valuesLed: [
+    { id: "value_sustainability", label: 'Brand value: Sustainability', points: 25, when: (d) => (d.brandValues || []).includes("Sustainability & environmental responsibility") },
+    { id: "value_diversity", label: 'Brand value: Diversity & inclusion', points: 20, when: (d) => (d.brandValues || []).includes("Diversity & inclusion") },
+    { id: "value_social_impact", label: 'Brand value: Social impact & purpose', points: 15, when: (d) => (d.brandValues || []).includes("Social impact & purpose") },
+    { id: "industry_sustainability_wellness", label: "Industry: Sustainability / Wellness", points: 15, when: (d) => ["Sustainability & Eco-Conscious", "Wellness & Lifestyle"].some((c) => (d.industry || "").includes(c)) },
+  ],
+  cultureDriver: [
+    { id: "value_fun", label: 'Brand value: Fun & entertainment', points: 20, when: (d) => (d.brandValues || []).includes("Fun & entertainment") },
+    { id: "value_luxury", label: 'Brand value: Luxury & aspiration', points: 15, when: (d) => (d.brandValues || []).includes("Luxury & aspiration") },
+    { id: "goal_brand_awareness", label: "Primary goal: Brand awareness", points: 20, when: (d) => d.primaryGoal === "Brand awareness (reach new audiences)" },
+    { id: "industry_fashion_arts", label: "Industry: Fashion / Arts & Culture", points: 15, when: (d) => ["Fashion & Lifestyle", "Arts & Culture"].some((c) => (d.industry || "").includes(c)) },
+  ],
+  performanceFocused: [
+    { id: "goal_purchases", label: "Primary goal: Drive purchases/conversions", points: 30, when: (d) => d.primaryGoal === "Drive purchases or conversions" },
+  ],
+};
+
+// ============================================
+// Scoring engine
+// ============================================
+
+function runRules(
+  rules: ScoringRule[],
+  data: any,
+  weightOverrides?: Record<string, number>,
+): number {
+  let score = 0;
+  for (const rule of rules) {
+    if (rule.when(data)) {
+      const pts = weightOverrides && rule.id in weightOverrides ? weightOverrides[rule.id] : rule.points;
+      score += pts;
+    }
   }
-  if (["Tech & Gadgets", "Gaming & Esports"].some((c) => category.includes(c))) {
-    archetypes.innovationPartner += 15;
-  }
-  if (["Fashion & Lifestyle", "Arts & Culture"].some((c) => category.includes(c))) {
-    archetypes.cultureDriver += 15;
-  }
+  return Math.max(0, Math.min(100, score));
+}
 
-  const topArchetype = Object.entries(archetypes).sort((a, b) => b[1] - a[1])[0];
+// ---------- Musician (artist) ----------
+
+function assignArchetypes(
+  scores: Record<ArtistArchetypeKey, number>,
+  archetypeNames: Record<ArtistArchetypeKey, string>,
+) {
+  const sortedScores = (Object.entries(scores) as [ArtistArchetypeKey, number][])
+    .map(([archetype, score]) => ({ archetype, score }))
+    .sort((a, b) => b.score - a.score);
+
+  const highScorers = sortedScores.filter((s) => s.score >= 35);
+  const isMultiHyphenate = highScorers.length >= 3;
+
+  const primary: ArtistArchetypeKey = sortedScores[0].score >= 40 ? sortedScores[0].archetype : "builder";
+
+  let secondary: ArtistArchetypeKey | null = null;
+  if (sortedScores[1] && sortedScores[1].score >= 30 && sortedScores[0].score - sortedScores[1].score >= 15) {
+    secondary = sortedScores[1].archetype;
+  }
+  if (sortedScores[1] && sortedScores[0].score - sortedScores[1].score < 10 && sortedScores[0].score >= 35 && sortedScores[1].score >= 35) {
+    secondary = sortedScores[1].archetype;
+  }
 
   return {
-    type: formatBrandArchetype(topArchetype[0]),
-    score: topArchetype[1],
-    description: getBrandArchetypeDescription(topArchetype[0]),
-    allScores: archetypes,
+    primary: archetypeNames[primary],
+    secondary: secondary ? archetypeNames[secondary] : null,
+    isMultiHyphenate,
+    allScores: scores,
+    sortedScores: sortedScores.map((s) => ({ archetype: archetypeNames[s.archetype], score: s.score })),
   };
 }
 
-function formatBrandArchetype(type: string) {
-  const names: Record<string, string> = {
-    communityFirst: "The Community-First Brand",
-    innovationPartner: "The Innovation Partner",
-    valuesLed: "The Values-Led Brand",
-    cultureDriver: "The Culture Driver",
-    performanceFocused: "The Performance-Focused Brand",
-  };
-  return names[type] || type;
+export function calculateVibeScore(surveyData: any, config?: VibeCheckConfig) {
+  const cfg = mergeVibeConfig(config);
+  const scores = {} as Record<ArtistArchetypeKey, number>;
+  for (const key of ARTIST_ARCHETYPE_KEYS) {
+    scores[key] = runRules(ARTIST_RULES[key], surveyData, cfg.weights.artist[key]);
+  }
+  const archetypeNames = {} as Record<ArtistArchetypeKey, string>;
+  for (const key of ARTIST_ARCHETYPE_KEYS) {
+    archetypeNames[key] = cfg.artistArchetypes[key]?.name ?? DEFAULT_ARTIST_ARCHETYPES[key].name;
+  }
+  return assignArchetypes(scores, archetypeNames);
 }
 
-function getBrandArchetypeDescription(type: string) {
-  const descriptions: Record<string, string> = {
-    communityFirst:
-      "You prioritize authentic connections and building loyal communities. You understand that real influence comes from genuine relationships, not just reach.",
-    innovationPartner:
-      "You lead with creativity and cutting-edge thinking. You're looking for creators who push boundaries and bring fresh perspectives to your brand.",
-    valuesLed:
-      "Your brand stands for something bigger. You seek partners who share your commitment to making a positive impact and creating meaningful change.",
-    cultureDriver:
-      "You're at the forefront of cultural movements. You want creators who set trends, spark conversations, and elevate your brand's cultural relevance.",
-    performanceFocused:
-      "You're results-driven and data-informed. You need creators who can deliver measurable impact and drive real business outcomes.",
+// ---------- Brand ----------
+
+function determineBrandArchetype(data: any, config: VibeCheckConfig) {
+  const scores = {} as Record<BrandArchetypeKey, number>;
+  for (const key of BRAND_ARCHETYPE_KEYS) {
+    // Brand rules can stack across archetypes (one rule per archetype), no cap from runRules either way.
+    let s = 0;
+    for (const rule of BRAND_RULES[key]) {
+      if (rule.when(data)) {
+        const overrides = config.weights.brand[key];
+        const pts = overrides && rule.id in overrides ? overrides[rule.id] : rule.points;
+        s += pts;
+      }
+    }
+    scores[key] = s;
+  }
+
+  const top = (Object.entries(scores) as [BrandArchetypeKey, number][])
+    .sort((a, b) => b[1] - a[1])[0];
+
+  const meta = config.brandArchetypes[top[0]] ?? DEFAULT_BRAND_ARCHETYPES[top[0]];
+  return {
+    type: meta.name,
+    score: top[1],
+    description: meta.description,
+    allScores: scores,
   };
-  return descriptions[type] || "";
 }
 
-function calculateArtistMatches(data: any) {
-  const matches: Record<string, { score: number; reasons: string[] }> = {
+function calculateArtistMatches(data: any, config: VibeCheckConfig) {
+  const matches: Record<ArtistArchetypeKey, { score: number; reasons: string[] }> = {
     loyalist: { score: 0, reasons: [] },
     changemaker: { score: 0, reasons: [] },
     curator: { score: 0, reasons: [] },
@@ -100,7 +332,7 @@ function calculateArtistMatches(data: any) {
   };
 
   const category = data.industry || "";
-  const categoryMatches: Record<string, string[]> = {
+  const categoryMatches: Record<string, ArtistArchetypeKey[]> = {
     "Food & Beverage": ["loyalist", "liveWire", "advocate"],
     Fashion: ["curator", "changemaker", "advocate"],
     Tech: ["maker", "builder", "curator"],
@@ -117,41 +349,41 @@ function calculateArtistMatches(data: any) {
   Object.keys(categoryMatches).forEach((key) => {
     if (category.toLowerCase().includes(key.toLowerCase())) {
       categoryMatches[key].forEach((artist, index) => {
-        const score = 25 - index * 5; // 25, 20, 15
+        const score = 25 - index * 5;
         matches[artist].score += score;
         matches[artist].reasons.push(`Strong category fit for ${key}`);
       });
     }
   });
 
-  const brandValues = data.brandValues || [];
-  if (brandValues.includes("Sustainability")) {
+  const brandValues: string[] = data.brandValues || [];
+  if (brandValues.some((v) => v.includes("Sustainability"))) {
     matches.changemaker.score += 20;
     matches.changemaker.reasons.push("Shared sustainability values");
   }
-  if (brandValues.includes("Authenticity")) {
+  if (brandValues.some((v) => v.includes("Authenticity"))) {
     matches.loyalist.score += 20;
     matches.advocate.score += 15;
     matches.loyalist.reasons.push("Authenticity alignment");
     matches.advocate.reasons.push("Authentic storytelling focus");
   }
-  if (brandValues.includes("Innovation")) {
+  if (brandValues.some((v) => v.includes("Innovation"))) {
     matches.maker.score += 20;
     matches.curator.score += 15;
     matches.maker.reasons.push("Innovation-driven approach");
     matches.curator.reasons.push("Creative excellence");
   }
-  if (brandValues.includes("Diversity")) {
+  if (brandValues.some((v) => v.includes("Diversity"))) {
     matches.changemaker.score += 15;
     matches.advocate.score += 15;
     matches.changemaker.reasons.push("Diversity commitment");
     matches.advocate.reasons.push("Inclusive representation");
   }
-  if (brandValues.includes("Community")) {
+  if (brandValues.some((v) => v.includes("Community"))) {
     matches.loyalist.score += 20;
     matches.loyalist.reasons.push("Community-building expertise");
   }
-  if (brandValues.includes("Wellness")) {
+  if (brandValues.some((v) => v.includes("Wellness"))) {
     matches.advocate.score += 20;
     matches.advocate.reasons.push("Wellness advocacy");
   }
@@ -165,289 +397,34 @@ function calculateArtistMatches(data: any) {
     matches.advocate.score += 15;
   }
 
-  const sortedMatches = Object.entries(matches)
-    .map(([archetype, info]) => ({
-      archetype: formatArtistArchetype(archetype),
-      score: Math.min(100, info.score),
-      reasons: [...new Set(info.reasons)],
-      bestFor: getBestCampaignType(archetype),
-    }))
+  return (Object.entries(matches) as [ArtistArchetypeKey, { score: number; reasons: string[] }][])
+    .map(([archetype, info]) => {
+      const meta = config.artistArchetypes[archetype] ?? DEFAULT_ARTIST_ARCHETYPES[archetype];
+      return {
+        archetype: meta.name,
+        score: Math.min(100, info.score),
+        reasons: [...new Set(info.reasons)],
+        bestFor: meta.bestFor,
+      };
+    })
     .sort((a, b) => b.score - a.score)
     .slice(0, 5);
-
-  return sortedMatches;
 }
 
-function getBestCampaignType(archetype: string) {
-  const campaignTypes: Record<string, string> = {
-    loyalist: "Long-term ambassadorships, community engagement",
-    changemaker: "Purpose-driven campaigns, impact storytelling",
-    curator: "Product launches, lifestyle content, visual campaigns",
-    builder: "Performance campaigns, affiliate partnerships",
-    liveWire: "Event activations, festival partnerships, tours",
-    maker: "Product reviews, tutorials, behind-the-scenes content",
-    advocate: "Authentic testimonials, wellness campaigns, social impact",
-  };
-  return campaignTypes[archetype] || "Various partnership types";
-}
-
-export function calculateBrandVibe(brandData: any) {
-  const brandArchetype = determineBrandArchetype(brandData);
-  const artistMatches = calculateArtistMatches(brandData);
+export function calculateBrandVibe(brandData: any, config?: VibeCheckConfig) {
+  const cfg = mergeVibeConfig(config);
+  const brandArchetype = determineBrandArchetype(brandData, cfg);
+  const artistMatches = calculateArtistMatches(brandData, cfg);
   return { brandArchetype, artistMatches };
 }
 
-function formatArtistArchetype(archetype: string) {
-  const names: Record<string, string> = {
-    loyalist: "The Loyalist",
-    changemaker: "The Changemaker",
-    curator: "The Curator",
-    builder: "The Builder",
-    liveWire: "The Live Wire",
-    maker: "The Maker",
-    advocate: "The Advocate",
-  };
-  return names[archetype] || archetype;
-}
+// ---------- Archetype description lookup ----------
 
-// ============================================
-// MUSICIAN SCORING
-// ============================================
-
-function containsKeywords(text: string | undefined, keywords: string[]) {
-  if (!text) return false;
-  const lowerText = text.toLowerCase();
-  return keywords.some((keyword) => lowerText.includes(keyword.toLowerCase()));
-}
-
-// contentComfortLevel comes through as "1 (Not at all)", "2", ... "5 (Very comfortable)".
-// Parse the leading digit so >= 3 comparisons work.
-function comfort(level: any): number {
-  if (typeof level === "number") return level;
-  if (typeof level !== "string") return 0;
-  const n = parseInt(level, 10);
-  return Number.isNaN(n) ? 0 : n;
-}
-
-function calculateLoyalistScore(data: any) {
-  let score = 0;
-  if (data.goals?.includes("Deepen fan engagement")) score += 20;
-  if (data.support?.includes("Connect with creators or collaborators")) score += 15;
-  if (comfort(data.contentComfortLevel) >= 3 && containsKeywords(data.story, ["engagement", "connection", "community", "fans"])) score += 15;
-  if (containsKeywords(data.audienceSnapshot, ["engaged", "engagement", "community", "loyal"])) score += 20;
-  if (data.support?.includes("Industry intros & networking")) score += 10;
-  if (data.interests?.includes("Parenting/Family")) score += 5;
-  if (data.interests?.includes("Mental Health")) score += 5;
-  if (data.interests?.includes("Arts & Culture")) score += 5;
-  if (containsKeywords(data.tellUsMore, ["fans", "community", "connection", "relationships"])) score += 10;
-  if (data.goals?.includes("Grow my audience & streams") && !data.goals?.includes("Increase profile or recognition")) score += 5;
-  if (data.artistType?.includes("In a band") || data.artistType?.includes("Both")) score += 3;
-  if (data.upcomingShows && data.upcomingShows.length > 0) score += 3;
-  if (data.goals?.includes("Increase profile or recognition") && data.goals?.length === 1) score -= 10;
-  return Math.max(0, Math.min(100, score));
-}
-
-function calculateChangemakerScore(data: any) {
-  let score = 0;
-  if (data.sustainabilityImportance === "Very important") score += 25;
-  if (data.ecoConsciousBrands === "Yes, definitely") score += 25;
-  if (data.interests?.includes("Sustainability/Environment")) score += 15;
-  if (data.interests?.includes("First Nations")) score += 15;
-  if (data.representationImportance === "Very important") score += 15;
-  if (data.sustainabilityImportance === "Important") score += 10;
-  if (data.ecoConsciousBrands === "Yes, when possible") score += 10;
-  if (data.interests?.includes("LGBTQIA+")) score += 5;
-  if (data.interests?.includes("Arts & Culture")) score += 5;
-  if (data.causeOrCharity && data.causeOrCharity.length > 0) score += 5;
-  if (data.interests?.includes("Vegan/Vegetarian")) score += 8;
-  if (data.interests?.includes("Current Events")) score += 5;
-  if (data.interests?.includes("Education/Learning")) score += 5;
-  if (containsKeywords(data.tellUsMore, ["values", "mission", "impact", "change", "purpose"])) score += 10;
-  if (data.support?.includes("Brand partnerships") && containsKeywords(data.tellUsMore, ["align", "values"])) score += 5;
-  if (data.interests?.includes("Wellness")) score += 3;
-  if (containsKeywords(data.story, ["social", "justice", "equality", "representation"])) score += 5;
-  if (data.support?.includes("All of the above") && !containsKeywords(data.tellUsMore, ["values", "mission"])) score -= 5;
-  if (data.sustainabilityImportance === "Not a priority") score -= 15;
-  return Math.max(0, Math.min(100, score));
-}
-
-function calculateCuratorScore(data: any) {
-  let score = 0;
-  if (data.interests?.includes("Fashion (designer, luxury)")) score += 20;
-  if (data.interests?.includes("Fashion (casual, streetwear)")) score += 20;
-  if (data.creativeAesthetic && data.creativeAesthetic.length > 50) score += 20;
-  if (data.interests?.includes("Photography/Videography")) score += 15;
-  if (data.interests?.includes("Fine Art")) score += 15;
-  if (data.interests?.includes("Interior Design")) score += 15;
-  if (comfort(data.contentComfortLevel) >= 4) score += 10;
-  if (data.interests?.includes("Arts & Crafts")) score += 5;
-  if (data.interests?.includes("Books/Reading")) score += 5;
-  if (data.goals?.includes("Increase profile or recognition")) score += 10;
-  if (containsKeywords(data.creativeAesthetic, ["visual", "aesthetic", "style", "look", "design"])) score += 10;
-  if (containsKeywords(data.story, ["visual", "aesthetic", "style", "fashion", "design"])) score += 8;
-  if (data.interests?.includes("Movies")) score += 3;
-  if (data.interests?.includes("Travel")) score += 3;
-  if (containsKeywords(data.genres, ["visual", "aesthetic", "cinematic"])) score += 5;
-  if (!data.creativeAesthetic || data.creativeAesthetic.length === 0) score -= 10;
-  if (comfort(data.contentComfortLevel) <= 2) score -= 5;
-  return Math.max(0, Math.min(100, score));
-}
-
-function calculateBuilderScore(data: any) {
-  let score = 0;
-  if (data.support?.includes("All of the above")) score += 25;
-  if (data.interests?.includes("Business/Finance")) score += 20;
-  if (data.currentDeals?.includes("independent") && data.goals?.includes("Build industry connections")) score += 20;
-  if (data.goals?.includes("Secure funding for a project")) score += 15;
-  if (data.currentDeals?.includes("Management") || data.currentDeals?.includes("Brand / partnership agency")) score += 15;
-  if (data.support && data.support.length >= 4) score += 10;
-  if (data.support?.includes("Strategy, analytics or audience growth")) score += 10;
-  if (data.interests?.includes("Tech/Gadgets")) score += 8;
-  if (data.goals?.includes("Build industry connections")) score += 10;
-  if (containsKeywords(data.tellUsMore, ["business", "growth", "building", "scaling", "revenue"])) score += 10;
-  if (data.goals && data.goals.length >= 5) score += 8;
-  if (data.recordContract === "Currently in negotiations") score += 5;
-  if (containsKeywords(data.tellUsMore, ["timeline", "urgent", "asap"])) score += 5;
-  if (data.interests?.includes("Crypto/Web3")) score += 5;
-  if (comfort(data.contentComfortLevel) <= 2 && !containsKeywords(data.tellUsMore, ["team", "support", "help"])) score -= 5;
-  if (data.support && data.support.length <= 2) score -= 8;
-  return Math.max(0, Math.min(100, score));
-}
-
-function calculateLiveWireScore(data: any) {
-  let score = 0;
-  if (data.goals?.includes("Expand live shows / touring")) score += 25;
-  if (data.upcomingShows && data.upcomingShows.length > 20) score += 20;
-  if (data.targetMarkets?.includes("Regional") || data.targetMarkets?.includes("International")) score += 15;
-  if (containsKeywords(data.tellUsMore, ["tour", "touring", "festival", "live"])) score += 15;
-  if (data.interests?.includes("Sports")) score += 8;
-  if (data.interests?.includes("Outdoor/Adventure")) score += 8;
-  if (data.interests?.includes("Travel")) score += 10;
-  if (data.interests?.includes("Automotive")) score += 5;
-  if (data.support?.includes("Connect with creators or collaborators")) score += 8;
-  if (data.artistType?.includes("In a band") || data.artistType?.includes("Both")) score += 8;
-  if (containsKeywords(data.tellUsMore, ["tour", "live", "performance", "energy", "stage"])) score += 10;
-  if (data.targetMarkets && data.targetMarkets.length >= 3) score += 5;
-  if (containsKeywords(data.story, ["festival", "tour", "live"])) score += 5;
-  if (data.artistType?.includes("Solo artist")) score += 3;
-  if (data.interests?.includes("Food")) score += 3;
-  if (!data.upcomingShows && !data.goals?.includes("Expand live shows / touring")) score -= 15;
-  if (data.goals?.length === 1 && data.goals[0].includes("studio")) score -= 8;
-  return Math.max(0, Math.min(100, score));
-}
-
-function calculateMakerScore(data: any) {
-  let score = 0;
-  if (data.artistType?.includes("DJ") || data.artistType?.includes("Producer")) score += 25;
-  if (data.interests?.includes("Tech/Gadgets")) score += 20;
-  if (data.support?.includes("Creative content (video, photo)")) score += 15;
-  if (data.interests?.includes("Gaming")) score += 15;
-  if (data.interests?.includes("Photography/Videography")) score += 10;
-  if (data.artistType?.includes("Songwriter") || data.artistType?.includes("Composer")) score += 10;
-  if (comfort(data.contentComfortLevel) >= 4) score += 8;
-  if (data.support?.includes("Strategy, analytics or audience growth")) score += 8;
-  if (containsKeywords(data.creativeAesthetic, ["production", "technical", "gear", "studio"])) score += 10;
-  if (containsKeywords(data.genres, ["production", "electronic", "beat", "produced"])) score += 8;
-  if (containsKeywords(data.story, ["production", "studio", "gear", "software"])) score += 5;
-  if (data.artistType?.includes("Session musician")) score += 5;
-  if (data.interests?.includes("Business/Finance")) score += 3;
-  if (data.interests?.includes("DIY/Home Improvements")) score += 3;
-  if (!data.interests?.includes("Tech/Gadgets") && !data.artistType?.includes("Producer")) score -= 10;
-  if (comfort(data.contentComfortLevel) <= 2 && !data.artistType?.includes("Producer")) score -= 8;
-  return Math.max(0, Math.min(100, score));
-}
-
-function calculateAdvocateScore(data: any) {
-  let score = 0;
-  if (data.interests?.includes("Mental Health")) score += 25;
-  if (data.underrepresentedCommunities?.includes("Neurodivergent")) score += 20;
-  if (data.underrepresentedCommunities && data.underrepresentedCommunities.length > 0) score += 15;
-  if (data.representationImportance === "Very important") score += 15;
-  if (data.interests?.includes("Wellness")) score += 20;
-  if (data.interests?.includes("Health/Beauty")) score += 8;
-  if (data.interests?.includes("Vegan/Vegetarian")) score += 8;
-  if (data.interests?.includes("Fitness")) score += 8;
-  if (data.interests?.includes("LGBTQIA+") || data.underrepresentedCommunities?.includes("LGBTQIA+")) score += 10;
-  if (containsKeywords(data.tellUsMore, ["vulnerable", "authentic", "real", "honest", "mental health"])) score += 10;
-  if (data.interests?.includes("Sustainability/Environment")) score += 5;
-  if (data.interests?.includes("Parenting/Family")) score += 5;
-  if (data.interests?.includes("Books/Reading")) score += 3;
-  if (data.interests?.includes("Podcasts")) score += 3;
-  if (containsKeywords(data.creativeAesthetic, ["raw", "unfiltered", "honest", "real"])) score += 5;
-  if (containsKeywords(data.story, ["mental health", "wellness", "authentic", "vulnerable"])) score += 5;
-  if (!data.interests?.some((i: string) => ["Mental Health", "Wellness", "Health/Beauty", "Fitness"].includes(i))) score -= 10;
-  return Math.max(0, Math.min(100, score));
-}
-
-function assignArchetypes(scores: Record<string, number>) {
-  const sortedScores = Object.entries(scores)
-    .map(([archetype, score]) => ({ archetype, score }))
-    .sort((a, b) => b.score - a.score);
-
-  const highScorers = sortedScores.filter((s) => s.score >= 35);
-  const isMultiHyphenate = highScorers.length >= 3;
-
-  const primary = sortedScores[0].score >= 40 ? sortedScores[0].archetype : "builder";
-
-  let secondary: string | null = null;
-  if (sortedScores[1] && sortedScores[1].score >= 30 && sortedScores[0].score - sortedScores[1].score >= 15) {
-    secondary = sortedScores[1].archetype;
+export function getArtistArchetypeDescription(name: string, config?: VibeCheckConfig): string {
+  const cfg = mergeVibeConfig(config);
+  for (const key of ARTIST_ARCHETYPE_KEYS) {
+    const meta = cfg.artistArchetypes[key] ?? DEFAULT_ARTIST_ARCHETYPES[key];
+    if (meta.name === name) return meta.description;
   }
-  if (sortedScores[1] && sortedScores[0].score - sortedScores[1].score < 10 && sortedScores[0].score >= 35 && sortedScores[1].score >= 35) {
-    secondary = sortedScores[1].archetype;
-  }
-
-  const formatName = (archetype: string) => {
-    const names: Record<string, string> = {
-      loyalist: "The Loyalist",
-      changemaker: "The Changemaker",
-      curator: "The Curator",
-      builder: "The Builder",
-      liveWire: "The Live Wire",
-      maker: "The Maker",
-      advocate: "The Advocate",
-    };
-    return names[archetype] || archetype;
-  };
-
-  return {
-    primary: formatName(primary),
-    secondary: secondary ? formatName(secondary) : null,
-    isMultiHyphenate,
-    allScores: scores,
-    sortedScores: sortedScores.map((s) => ({ archetype: formatName(s.archetype), score: s.score })),
-  };
-}
-
-export function calculateVibeScore(surveyData: any) {
-  const scores = {
-    loyalist: calculateLoyalistScore(surveyData),
-    changemaker: calculateChangemakerScore(surveyData),
-    curator: calculateCuratorScore(surveyData),
-    builder: calculateBuilderScore(surveyData),
-    liveWire: calculateLiveWireScore(surveyData),
-    maker: calculateMakerScore(surveyData),
-    advocate: calculateAdvocateScore(surveyData),
-  };
-  return assignArchetypes(scores);
-}
-
-export function getArtistArchetypeDescription(type: string) {
-  const descriptions: Record<string, string> = {
-    "The Loyalist":
-      "You're a community builder with deeply engaged fans who prioritize authentic connections over sheer reach. You thrive on building relationships.",
-    "The Changemaker":
-      "You're a mission-driven artist who uses your platform for social and environmental impact. Your art is a vehicle for change.",
-    "The Curator":
-      "You're a style influencer and visual storyteller with a strong aesthetic direction and trend-setting appeal. Your look is as important as your sound.",
-    "The Builder":
-      "You're a business-minded artist focused on growth, professionalization, and maximizing opportunities. You see the big picture.",
-    "The Live Wire":
-      "You're a high-energy performer who thrives on stage and brings audiences to life through shows and tours. The stage is your home.",
-    "The Maker":
-      "You're a production-focused creator who excels at technical content, gear reviews, and educational storytelling. You love the process.",
-    "The Advocate":
-      "You're a wellness champion and authentic voice who prioritizes mental health, vulnerability, and real connection. You speak your truth.",
-  };
-  return descriptions[type] || "A unique creative force with a distinct vibe.";
+  return "A unique creative force with a distinct vibe.";
 }
