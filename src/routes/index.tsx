@@ -334,8 +334,7 @@ function Home() {
                 variants={fadeUp}
                 className="mx-auto mt-4 max-w-2xl text-lg text-white/80"
               >
-                Artists, brands and creative partners collaborating across every corner of
-                the map.
+                Racket fosters creativity and drives audience growth for artists and brands across the globe, connecting likeminded collaborators and empowering authentic partnerships that resonate with real fans.
               </motion.p>
               <motion.div
                 className="mt-10"
