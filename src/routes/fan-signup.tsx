@@ -80,6 +80,13 @@ function FanSignup() {
                 <Button type="submit" className="w-full" disabled={busy}>
                   {busy ? "..." : "Sign me up"}
                 </Button>
+                <p className="text-xs text-muted-foreground">
+                  By subscribing you agree to our{" "}
+                  <Link to="/terms" className="underline hover:text-primary">Terms</Link>
+                  {" "}and{" "}
+                  <Link to="/privacy" className="underline hover:text-primary">Privacy Policy</Link>
+                  , and to receive emails from Create Racket. Unsubscribe anytime.
+                </p>
               </form>
             )}
           </CardContent>
