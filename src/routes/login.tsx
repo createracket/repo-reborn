@@ -97,11 +97,53 @@ function LoginPage() {
     return "/dashboard";
   }
 
-  // Redirect once session is present.
+  // Redirect once session is present. If the user selected a profile type
+  // before signing in with Google (where we can't pass it via supabase.auth),
+  // apply it to their profile now.
   useEffect(() => {
+    async function applyPendingAccountType(userId: string) {
+      if (typeof window === "undefined") return;
+      let pending: string | null = null;
+      try {
+        pending = sessionStorage.getItem("pendingAccountType");
+      } catch {
+        return;
+      }
+      if (!pending) return;
+      const allowed = ["artist", "brand", "creative", "fan", "crew"];
+      if (!allowed.includes(pending)) {
+        try {
+          sessionStorage.removeItem("pendingAccountType");
+        } catch {
+          // ignore
+        }
+        return;
+      }
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("account_type")
+        .eq("id", userId)
+        .maybeSingle();
+      if (prof && !prof.account_type) {
+        await supabase
+          .from("profiles")
+          .update({ account_type: pending as AccountTypeValue })
+          .eq("id", userId);
+      }
+      try {
+        sessionStorage.removeItem("pendingAccountType");
+      } catch {
+        // ignore
+      }
+    }
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (session) navigate({ to: postAuthDestination(), replace: true });
+      if (session) {
+        applyPendingAccountType(session.user.id).finally(() => {
+          navigate({ to: postAuthDestination(), replace: true });
+        });
+      }
     });
+
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: postAuthDestination(), replace: true });
     });
