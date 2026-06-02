@@ -609,6 +609,12 @@ function SpotlightForm({
       avg_engagement: numOrNull(form.avg_engagement),
     };
 
+    if (findProfanityIn(payload)) {
+      setSaving(false);
+      toast.error("Please remove offensive or inappropriate language from the spotlight before saving.");
+      return;
+    }
+
     if (isEditing) {
       const { error } = await supabase
         .from("partner_pages" as any)
