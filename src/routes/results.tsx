@@ -13,6 +13,7 @@ import {
   calculateBrandVibe,
   getArtistArchetypeDescription,
 } from "@/lib/vibe-check";
+import { loadVibeCheckConfig, DEFAULT_VIBE_CONFIG, type VibeCheckConfig } from "@/lib/vibe-check-config";
 
 type Stored =
   | { flow: "musician"; data: any; at: number }
@@ -33,6 +34,7 @@ function Results() {
   const [stored, setStored] = useState<Stored | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
+  const [config, setConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   const savedRef = useRef(false);
 
   useEffect(() => {
@@ -43,6 +45,8 @@ function Results() {
       // ignore
     }
     setLoaded(true);
+
+    loadVibeCheckConfig().then(setConfig).catch(() => {});
 
     supabase.auth.getUser().then(({ data }) => setSignedIn(!!data.user));
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
@@ -60,8 +64,8 @@ function Results() {
       if (!u.user) return;
       const scoring =
         stored.flow === "musician"
-          ? calculateVibeScore(stored.data)
-          : calculateBrandVibe(stored.data);
+          ? calculateVibeScore(stored.data, config)
+          : calculateBrandVibe(stored.data, config);
       const payload =
         stored.flow === "musician"
           ? {
@@ -82,7 +86,7 @@ function Results() {
       const { error } = await supabase.from("vibe_check_responses").insert(payload as any);
       if (!error) toast.success("Saved to your dashboard.");
     })();
-  }, [stored, signedIn]);
+  }, [stored, signedIn, config]);
 
 
   if (!loaded) return null;
@@ -110,9 +114,9 @@ function Results() {
       <SiteHeader />
       <main className="container mx-auto px-4 py-12 md:py-20">
         {stored.flow === "musician" ? (
-          <MusicianResults data={stored.data} />
+          <MusicianResults data={stored.data} config={config} />
         ) : (
-          <BrandResults data={stored.data} />
+          <BrandResults data={stored.data} config={config} />
         )}
 
         <div className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-3">
@@ -131,8 +135,8 @@ function Results() {
   );
 }
 
-function MusicianResults({ data }: { data: any }) {
-  const result = calculateVibeScore(data);
+function MusicianResults({ data, config }: { data: any; config: VibeCheckConfig }) {
+  const result = calculateVibeScore(data, config);
   return (
     <div className="mx-auto max-w-3xl">
       <p className="text-center text-sm uppercase tracking-[0.25em] text-muted-foreground">
@@ -154,7 +158,7 @@ function MusicianResults({ data }: { data: any }) {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            {getArtistArchetypeDescription(result.primary)}
+            {getArtistArchetypeDescription(result.primary, config)}
           </p>
         </CardContent>
       </Card>
@@ -173,8 +177,8 @@ function MusicianResults({ data }: { data: any }) {
   );
 }
 
-function BrandResults({ data }: { data: any }) {
-  const result = calculateBrandVibe(data);
+function BrandResults({ data, config }: { data: any; config: VibeCheckConfig }) {
+  const result = calculateBrandVibe(data, config);
   return (
     <div className="mx-auto max-w-3xl">
       <p className="text-center text-sm uppercase tracking-[0.25em] text-muted-foreground">
