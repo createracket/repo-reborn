@@ -94,7 +94,7 @@ function WaitlistForm({
           {busy ? <Loader2 className="size-5 animate-spin" /> : "Join Waitlist"}
         </Button>
       </form>
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className="mt-2 text-xs text-muted-foreground text-center">
         By joining you agree to our{" "}
         <Link to="/terms" className="underline hover:text-primary">Terms</Link>
         {" "}and{" "}
