@@ -108,6 +108,11 @@ function SubmitBriefPage() {
       return;
     }
 
+    if (findProfanityIn(parsed.data)) {
+      toast.error("Please remove offensive or inappropriate language from your brief before submitting.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const { error } = await supabase.from("lead_briefs").insert({
