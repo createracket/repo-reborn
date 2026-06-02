@@ -522,6 +522,9 @@ function SpotlightForm({
         spotify: form.spotify,
         spotifyEmbed: form.spotifyEmbed,
         contact: form.contact,
+        video1: form.video1,
+        video2: form.video2,
+        video3: form.video3,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
@@ -551,6 +554,7 @@ function SpotlightForm({
         slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
         instagram: "", spotify: "", spotifyEmbed: "", contact: "",
+        video1: "", video2: "", video3: "",
         header_image_url: "", profile_image_url: "", published: false,
       });
     }
