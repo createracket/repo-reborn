@@ -36,7 +36,19 @@ type PartnerPage = {
   published: boolean;
   header_image_url: string | null;
   profile_image_url: string | null;
+  total_followers: number | null;
+  total_streams: number | null;
+  monthly_streams: number | null;
+  avg_reach: number | null;
+  avg_engagement: number | null;
 };
+
+function formatMetric(n: number | null | undefined): string | null {
+  if (n == null) return null;
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1).replace(/\.0$/, "") + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(n >= 10_000 ? 0 : 1).replace(/\.0$/, "") + "K";
+  return n.toLocaleString();
+}
 
 export const Route = createFileRoute("/spotlight/$slug")({
   // Partner pages are deliberately not indexable.
