@@ -33,6 +33,8 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showVibeNudge, setShowVibeNudge] = useState(false);
+  const nudgeShownRef = useRef(false);
 
   // Redirect once session is present.
   useEffect(() => {
@@ -44,6 +46,32 @@ function LoginPage() {
     });
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
+
+  // Exit-intent + idle nudge — only when the user is on the signup tab and
+  // hasn't completed the form. We pitch the Vibe Check as a no-commitment way
+  // in: they get a result, then we ask them to save it by creating an account.
+  useEffect(() => {
+    if (mode !== "signup" || typeof window === "undefined") return;
+    nudgeShownRef.current = false;
+
+    const trigger = () => {
+      if (nudgeShownRef.current || busy) return;
+      nudgeShownRef.current = true;
+      setShowVibeNudge(true);
+    };
+
+    const onMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0) trigger();
+    };
+
+    const idleTimer = window.setTimeout(trigger, 20000);
+    document.addEventListener("mouseleave", onMouseLeave);
+
+    return () => {
+      window.clearTimeout(idleTimer);
+      document.removeEventListener("mouseleave", onMouseLeave);
+    };
+  }, [mode, busy]);
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
