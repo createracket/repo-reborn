@@ -450,25 +450,34 @@ function ImageUploader({
   );
 }
 
-function SpotlightForm({ onCreated }: { onCreated: () => void }) {
+function SpotlightForm({
+  onCreated,
+  editData,
+  onCancel,
+}: {
+  onCreated: () => void;
+  editData?: Record<string, any> | null;
+  onCancel?: () => void;
+}) {
+  const isEditing = !!editData;
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    slug: "",
-    type: "podcast",
-    headline: "",
-    subtitle: "",
-    intro: "",
-    host_bio: "",
-    partnership_pitch: "",
-    eoi_opportunities: "",
-    audience_segments: "",
-    instagram: "",
-    spotify: "",
-    spotifyEmbed: "",
-    contact: "",
-    header_image_url: "",
-    profile_image_url: "",
-    published: false,
+    slug: editData?.slug ?? "",
+    type: editData?.type ?? "podcast",
+    headline: editData?.headline ?? "",
+    subtitle: editData?.subtitle ?? "",
+    intro: editData?.intro ?? "",
+    host_bio: editData?.host_bio ?? "",
+    partnership_pitch: editData?.partnership_pitch ?? "",
+    eoi_opportunities: (editData?.eoi_opportunities ?? []).join("\n"),
+    audience_segments: (editData?.audience_segments ?? []).join("\n"),
+    instagram: editData?.links?.instagram ?? "",
+    spotify: editData?.links?.spotify ?? "",
+    spotifyEmbed: editData?.links?.spotifyEmbed ?? "",
+    contact: editData?.links?.contact ?? "",
+    header_image_url: editData?.header_image_url ?? "",
+    profile_image_url: editData?.profile_image_url ?? "",
+    published: editData?.published ?? false,
   });
 
   function set<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
@@ -505,27 +514,47 @@ function SpotlightForm({ onCreated }: { onCreated: () => void }) {
       profile_image_url: form.profile_image_url || null,
       published: form.published,
     };
-    const { error } = await supabase.from("partner_pages" as any).insert(payload);
-    setSaving(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+
+    if (isEditing) {
+      const { error } = await supabase
+        .from("partner_pages" as any)
+        .update(payload)
+        .eq("id", editData.id);
+      setSaving(false);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success(`Spotlight updated: /spotlight/${slug}`);
+    } else {
+      const { error } = await supabase.from("partner_pages" as any).insert(payload);
+      setSaving(false);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success(`Spotlight created at /spotlight/${slug}`);
+      setForm({
+        slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
+        host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
+        instagram: "", spotify: "", spotifyEmbed: "", contact: "",
+        header_image_url: "", profile_image_url: "", published: false,
+      });
     }
-    toast.success(`Spotlight created at /spotlight/${slug}`);
-    setForm({
-      slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
-      host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
-      instagram: "", spotify: "", spotifyEmbed: "", contact: "",
-      header_image_url: "", profile_image_url: "", published: false,
-    });
     onCreated();
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-display text-2xl">New artist spotlight</CardTitle>
-        <CardDescription>Create a partner page. Lives at /spotlight/&lt;slug&gt; with noindex.</CardDescription>
+        <CardTitle className="font-display text-2xl">
+          {isEditing ? "Edit artist spotlight" : "New artist spotlight"}
+        </CardTitle>
+        <CardDescription>
+          {isEditing
+            ? `Updating /spotlight/${form.slug}`
+            : "Create a partner page. Lives at /spotlight/<slug> with noindex."}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
@@ -603,8 +632,13 @@ function SpotlightForm({ onCreated }: { onCreated: () => void }) {
             <Switch id="published" checked={form.published} onCheckedChange={(v) => set("published", v)} />
             <Label htmlFor="published" className="cursor-pointer">Publish immediately</Label>
           </div>
-          <div className="md:col-span-2">
-            <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Create spotlight"}</Button>
+          <div className="flex items-center gap-3 md:col-span-2">
+            <Button type="submit" disabled={saving}>{saving ? "Saving…" : isEditing ? "Update spotlight" : "Create spotlight"}</Button>
+            {isEditing && onCancel && (
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+            )}
           </div>
         </form>
       </CardContent>
