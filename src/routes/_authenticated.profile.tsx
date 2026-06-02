@@ -51,6 +51,8 @@ function EditProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -95,18 +97,32 @@ function EditProfilePage() {
     setForm((f) => ({ ...f, socials: { ...f.socials, [k]: v } }));
   }
 
-  async function handleAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleAvatarPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file || !userId) return;
+    if (!file) return;
     if (file.size > 8 * 1024 * 1024) {
       toast.error("Image must be under 8MB");
+      e.target.value = "";
       return;
     }
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(file);
+    setPendingPreview(URL.createObjectURL(file));
+  }
+
+  function clearPending() {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(null);
+    setPendingPreview(null);
+  }
+
+  async function handleAvatarUpload() {
+    if (!pendingFile || !userId) return;
     setUploading(true);
-    const ext = file.name.split(".").pop() || "jpg";
+    const ext = pendingFile.name.split(".").pop() || "jpg";
     const path = `${userId}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("avatars").upload(path, file, {
-      cacheControl: "3600", upsert: true, contentType: file.type,
+    const { error } = await supabase.storage.from("avatars").upload(path, pendingFile, {
+      cacheControl: "3600", upsert: true, contentType: pendingFile.type,
     });
     if (error) {
       setUploading(false);
@@ -114,20 +130,12 @@ function EditProfilePage() {
       return;
     }
     const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-    const publicUrl = data.publicUrl;
-    set("avatar_url", publicUrl);
-    // Persist immediately so the photo survives a page reload even before "Save profile".
-    const { error: saveErr } = await supabase
-      .from("profiles")
-      .upsert({ id: userId, avatar_url: publicUrl }, { onConflict: "id" });
+    set("avatar_url", data.publicUrl);
+    clearPending();
     setUploading(false);
-    if (saveErr) {
-      toast.error(`Photo uploaded but couldn't be saved: ${saveErr.message}`);
-    } else {
-      toast.success("Photo saved");
-    }
-    e.target.value = "";
+    toast.success("Photo uploaded — remember to click Save profile.");
   }
+
 
   function num(v: string): number | null {
     const t = v.trim();
@@ -235,24 +243,36 @@ function EditProfilePage() {
                 <Label>Profile photo (1:1)</Label>
                 <div className="mt-2 flex flex-wrap items-start gap-3">
                   <div className="size-28 overflow-hidden rounded-full border border-border/60 bg-muted/40">
-                    {form.avatar_url ? (
-                      <img src={form.avatar_url} alt="" className="size-full object-cover" />
+                    {(pendingPreview || form.avatar_url) ? (
+                      <img src={pendingPreview || form.avatar_url} alt="" className="size-full object-cover" />
                     ) : null}
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Input type="file" accept="image/*" onChange={handleAvatar} disabled={uploading} />
-                    {form.avatar_url ? (
-                      <Button type="button" size="sm" variant="ghost" onClick={async () => {
-                        set("avatar_url", "");
-                        if (userId) {
-                          await supabase.from("profiles").upsert({ id: userId, avatar_url: null }, { onConflict: "id" });
-                        }
-                      }}>Remove</Button>
-                    ) : null}
-                    <p className="text-xs text-muted-foreground">JPG or PNG, up to 8MB.</p>
+                    <Input type="file" accept="image/*" onChange={handleAvatarPick} disabled={uploading} />
+                    <div className="flex flex-wrap gap-2">
+                      {pendingFile ? (
+                        <>
+                          <Button type="button" size="sm" onClick={handleAvatarUpload} disabled={uploading}>
+                            {uploading ? "Uploading…" : "Upload"}
+                          </Button>
+                          <Button type="button" size="sm" variant="ghost" onClick={clearPending} disabled={uploading}>
+                            Cancel
+                          </Button>
+                        </>
+                      ) : null}
+                      {!pendingFile && form.avatar_url ? (
+                        <Button type="button" size="sm" variant="ghost" onClick={() => set("avatar_url", "")}>
+                          Remove
+                        </Button>
+                      ) : null}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      JPG or PNG, up to 8MB. {pendingFile ? "Click Upload to store, then Save profile to apply." : "Click Save profile to apply changes."}
+                    </p>
                   </div>
                 </div>
               </div>
+
 
               <div className="space-y-1.5">
                 <Label htmlFor="name">Name</Label>
