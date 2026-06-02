@@ -275,15 +275,20 @@ function SpotlightPage() {
                     </li>
                   ))}
                 </ul>
-                {links.contact ? (
-                  <Button asChild className="mt-6">
-                    <a href={links.contact.startsWith("http") ? links.contact : `mailto:${links.contact}`}>
-                      Register interest
-                    </a>
+                <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <Button onClick={handleRegister} disabled={registering || registered}>
+                    {registered ? (
+                      <><Check className="mr-1.5 size-4" /> Interest registered</>
+                    ) : registering ? "Registering…" : "Register interest"}
                   </Button>
-                ) : (
-                  <Button asChild className="mt-6"><Link to="/contact">Register interest</Link></Button>
-                )}
+                  {links.contact ? (
+                    <Button asChild variant="outline">
+                      <a href={links.contact.startsWith("http") ? links.contact : `mailto:${links.contact}`}>
+                        <Mail className="mr-1.5 size-4" /> Contact directly
+                      </a>
+                    </Button>
+                  ) : null}
+                </div>
               </CardContent>
             </Card>
           </section>
