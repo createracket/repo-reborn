@@ -242,7 +242,12 @@ function EditProfilePage() {
                   <div className="flex flex-col gap-2">
                     <Input type="file" accept="image/*" onChange={handleAvatar} disabled={uploading} />
                     {form.avatar_url ? (
-                      <Button type="button" size="sm" variant="ghost" onClick={() => set("avatar_url", "")}>Remove</Button>
+                      <Button type="button" size="sm" variant="ghost" onClick={async () => {
+                        set("avatar_url", "");
+                        if (userId) {
+                          await supabase.from("profiles").upsert({ id: userId, avatar_url: null }, { onConflict: "id" });
+                        }
+                      }}>Remove</Button>
                     ) : null}
                     <p className="text-xs text-muted-foreground">JPG or PNG, up to 8MB.</p>
                   </div>
