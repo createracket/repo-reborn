@@ -57,7 +57,7 @@ export function SiteHeader() {
                 Admin
               </Link>
               <Link to="/submit-brief" className="hover:text-foreground transition-colors">
-                Lead Brief
+                Collaborate
               </Link>
             </>
           )}
