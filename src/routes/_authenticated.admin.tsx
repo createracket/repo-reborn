@@ -602,6 +602,11 @@ function SpotlightForm({
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
       published: form.published,
+      total_followers: numOrNull(form.total_followers),
+      total_streams: numOrNull(form.total_streams),
+      monthly_streams: numOrNull(form.monthly_streams),
+      avg_reach: numOrNull(form.avg_reach),
+      avg_engagement: numOrNull(form.avg_engagement),
     };
 
     if (isEditing) {
@@ -629,6 +634,8 @@ function SpotlightForm({
         instagram: "", spotify: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "",
         header_image_url: "", profile_image_url: "", published: false,
+        total_followers: "", total_streams: "", monthly_streams: "",
+        avg_reach: "", avg_engagement: "",
       });
     }
     onCreated();
