@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 import { adminCreateUser } from "@/lib/admin-users.functions";
+import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -184,6 +185,7 @@ function AdminPage() {
             <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
             <TabsTrigger value="contact">Contact ({contacts.length})</TabsTrigger>
             <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
+            <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
           </TabsList>
 
           <TabsContent value="leads" className="mt-6 space-y-3">
@@ -482,6 +484,10 @@ function AdminPage() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="vibe" className="mt-6">
+            <VibeCheckAdmin />
           </TabsContent>
         </Tabs>
       </main>
