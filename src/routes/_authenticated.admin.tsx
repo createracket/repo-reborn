@@ -18,6 +18,7 @@ import { findProfanityIn } from "@/lib/profanity";
 import { adminCreateUser } from "@/lib/admin-users.functions";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
+import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -188,6 +189,7 @@ function AdminPage() {
             <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="brief-form">Brief form</TabsTrigger>
+            <TabsTrigger value="community">Community</TabsTrigger>
           </TabsList>
 
           <TabsContent value="leads" className="mt-6 space-y-3">
@@ -494,6 +496,10 @@ function AdminPage() {
 
           <TabsContent value="brief-form" className="mt-6">
             <BriefFormAdmin />
+          </TabsContent>
+
+          <TabsContent value="community" className="mt-6">
+            <CommunityAdmin />
           </TabsContent>
         </Tabs>
       </main>
