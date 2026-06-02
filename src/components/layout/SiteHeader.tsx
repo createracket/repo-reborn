@@ -51,6 +51,16 @@ export function SiteHeader() {
           <Link to="/fan-signup" className="hover:text-foreground transition-colors">
             Mailing list
           </Link>
+          {isAdmin && (
+            <>
+              <Link to="/admin" className="text-primary hover:text-foreground transition-colors">
+                Admin
+              </Link>
+              <Link to="/submit-brief" className="hover:text-foreground transition-colors">
+                Lead Brief
+              </Link>
+            </>
+          )}
         </nav>
         <div className="flex items-center gap-2">
           {signedIn ? (
