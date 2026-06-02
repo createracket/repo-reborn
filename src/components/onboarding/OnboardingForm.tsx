@@ -235,11 +235,7 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
             value={introText}
             onChange={(e) => setIntroText(e.target.value)}
             rows={7}
-            placeholder={
-              flow === "musician"
-                ? "Give us the lowdown including your artist name, audience, campaign goals, content style, timings and info on your upcoming campaign...."
-                : "e.g. We're Terra Threads, a sustainable fashion brand from Portland creating timeless pieces from eco-friendly materials. We want to partner with artists who care about craft and the planet..."
-            }
+            placeholder={fields.naturalLanguageInput?.placeholder}
           />
           <p className="text-xs text-muted-foreground">
             You'll be able to review and edit every field before submitting.
