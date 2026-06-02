@@ -347,15 +347,6 @@ function VibeCard({ loading, vibe }: { loading: boolean; vibe: VibeRow | null })
   const description = isBrand
     ? (scoring as any).brandArchetype?.description
     : getArtistArchetypeDescription((scoring as any).primary);
-  const bars: { label: string; score: number }[] = isBrand
-    ? ((scoring as any).artistMatches ?? []).slice(0, 5).map((m: any) => ({
-        label: m.archetype,
-        score: m.score,
-      }))
-    : ((scoring as any).sortedScores ?? []).map((s: any) => ({
-        label: s.archetype,
-        score: s.score,
-      }));
 
   return (
     <Card>
@@ -376,26 +367,8 @@ function VibeCard({ loading, vibe }: { loading: boolean; vibe: VibeRow | null })
       </CardHeader>
       <CardContent className="space-y-5">
         <p className="text-muted-foreground">{description}</p>
-        <div className="space-y-3">
-          {bars.map((b) => (
-            <div key={b.label}>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">{b.label}</span>
-                <span className="text-muted-foreground">{Math.round(b.score)}</span>
-              </div>
-              <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full"
-                  style={{
-                    width: `${Math.min(100, Math.max(0, b.score))}%`,
-                    background: "linear-gradient(90deg, var(--primary), var(--coral))",
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
       </CardContent>
     </Card>
   );
 }
+
