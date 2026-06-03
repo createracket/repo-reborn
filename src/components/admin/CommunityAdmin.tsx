@@ -1,4 +1,5 @@
 import { type FormEvent, useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Plus, Trash2, Pencil, Upload, Loader2 } from "lucide-react";
 
@@ -14,7 +15,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  adminDeleteCommunityProfile,
+  adminListCommunityProfiles,
+  adminSaveCommunityProfile,
+  adminUploadCommunityImage,
+} from "@/lib/community-admin.functions";
 
 const ACCOUNT_TYPES = ["ARTIST", "BAND", "CREATIVE", "FAN", "CREW"] as const;
 type AccountType = (typeof ACCOUNT_TYPES)[number];
@@ -64,25 +70,36 @@ function joinLocation(city: string, country: string): string | null {
   return c || co;
 }
 
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+    reader.onerror = () => reject(new Error("Could not read image"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function CommunityAdmin() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const listProfiles = useServerFn(adminListCommunityProfiles);
+  const saveProfile = useServerFn(adminSaveCommunityProfile);
+  const deleteProfile = useServerFn(adminDeleteCommunityProfile);
+  const uploadImage = useServerFn(adminUploadCommunityImage);
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("community_profiles")
-      .select("id, display_name, account_type, tagline, bio, location, avatar_url, values, socials")
-      .order("created_at", { ascending: false });
-    if (error) {
-      toast.error(error.message);
-    } else {
+    try {
+      const data = await listProfiles();
       setMembers((data as Member[]) ?? []);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not load community profiles");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -119,20 +136,11 @@ export function CommunityAdmin() {
 
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "png";
-      const id = typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      const path = `community/${id}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("spotlight-images")
-        .upload(path, file, { upsert: false, cacheControl: "3600", contentType: file.type || undefined });
-      if (upErr) {
-        toast.error(upErr.message);
-        return;
-      }
-      const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
-      setDraft((d) => (d ? { ...d, avatar_url: data.publicUrl } : d));
+      const base64 = await fileToBase64(file);
+      const { publicUrl } = await uploadImage({
+        data: { base64, contentType: file.type as "image/jpeg" | "image/png" | "image/webp" | "image/gif" },
+      });
+      setDraft((d) => (d ? { ...d, avatar_url: publicUrl } : d));
       toast.success("Image uploaded");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Image upload failed");
@@ -161,13 +169,7 @@ export function CommunityAdmin() {
       avatar_url: draft.avatar_url.trim() || null,
     };
     try {
-      const { error } = draft.id
-        ? await supabase.from("community_profiles").update(payload).eq("id", draft.id).select("id").single()
-        : await supabase.from("community_profiles").insert(payload as any).select("id").single();
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
+      await saveProfile({ data: draft.id ? { ...payload, id: draft.id } : payload });
       toast.success(draft.id ? "Updated" : "Added");
       setDraft(null);
       await load();
@@ -180,13 +182,14 @@ export function CommunityAdmin() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this community member?")) return;
-    const { error } = await supabase.from("community_profiles").delete().eq("id", id);
-    if (error) {
-      toast.error(error.message);
+    try {
+      await deleteProfile({ data: { id } });
+      toast.success("Deleted");
+      load();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete member");
       return;
     }
-    toast.success("Deleted");
-    load();
   };
 
   return (
