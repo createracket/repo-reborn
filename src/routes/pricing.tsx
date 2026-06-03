@@ -287,32 +287,105 @@ function PricingPage() {
           </div>
         </div>
 
-        {/* Discount bar */}
-        <div className="mt-8 rounded-2xl border border-pink-accent/40 bg-pink-accent/10 p-6 text-sm">
-          <div className="font-headline text-base tracking-wide text-pink-accent mb-2">
-            ACCESS SUPPORT — WORKING CLASS, LOW INCOME + MINORITY ARTISTS
+        {/* Special discounts */}
+        <section className="mt-20">
+          <div className="mb-8 max-w-2xl">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-pink-accent">
+              Special discounts
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl leading-[1.05]">
+              ACCESS SUPPORT FOR ARTISTS WHO NEED IT
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground">
+              We offer 1–3 months of free paid tier access to artists who face
+              barriers to entry. A genuinely diverse roster makes Create Racket a
+              more credible offer to brands — so this is a core part of how we
+              build it.
+            </p>
           </div>
-          <p className="mb-3 text-foreground/85 leading-relaxed">
-            Racket offers 1–3 months of free paid tier access to artists who would
-            otherwise face barriers to entry. This is a core part of how we build a
-            genuinely diverse, representative roster — which in turn makes Create
-            Racket a more compelling and credible offer to brands.
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {discounts.map((d) => (
+              <div
+                key={d.title}
+                className="rounded-2xl border border-border bg-card p-6 flex flex-col"
+              >
+                <div className="font-headline text-sm tracking-wide text-pink-accent">
+                  {d.title.toUpperCase()}
+                </div>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <span className="font-display text-4xl">{d.months}</span>
+                  <span className="text-sm text-muted-foreground">
+                    month{d.months === "1" ? "" : "s"} free
+                  </span>
+                </div>
+                <p className="mt-4 text-sm text-foreground/85 leading-relaxed flex-1">
+                  {d.body}
+                </p>
+                <div className="mt-5 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="size-1.5 rounded-full bg-pink-accent" />
+                  {d.eligibility}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-6 text-xs text-muted-foreground">
+            Apply at signup or email{" "}
+            <a
+              href="mailto:community@createracket.com"
+              className="text-primary hover:underline"
+            >
+              community@createracket.com
+            </a>{" "}
+            to verify eligibility.
           </p>
-          <ul className="space-y-1.5 text-foreground/85">
-            <li className="flex gap-2">
-              <span className="text-pink-accent">→</span>
-              <span><strong className="font-medium text-foreground">1 month free</strong> — self-declared low income or working class artists, applied at signup</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-pink-accent">→</span>
-              <span><strong className="font-medium text-foreground">2 months free</strong> — artists from underrepresented or minority backgrounds</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-pink-accent">→</span>
-              <span><strong className="font-medium text-foreground">3 months free</strong> — artists meeting both criteria, or referred via a partner organisation</span>
-            </li>
-          </ul>
-        </div>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="mt-20 scroll-mt-24">
+          <div className="mb-8 max-w-2xl">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-primary">
+              FAQ
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl leading-[1.05]">
+              FREQUENTLY ASKED QUESTIONS
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground">
+              Everything you need to know about membership, billing and access.
+              Still stuck? Email{" "}
+              <a
+                href="mailto:community@createracket.com"
+                className="text-primary hover:underline"
+              >
+                community@createracket.com
+              </a>
+              .
+            </p>
+          </div>
+
+          <Accordion
+            type="single"
+            collapsible
+            className="rounded-2xl border border-border bg-card divide-y divide-border"
+          >
+            {faqs.map((f, i) => (
+              <AccordionItem
+                key={f.q}
+                value={`faq-${i}`}
+                className="border-b-0 px-5"
+              >
+                <AccordionTrigger className="font-headline text-base tracking-wide text-left hover:no-underline">
+                  {f.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-foreground/85 leading-relaxed">
+                  {f.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </section>
+
       </main>
       <SiteFooter />
     </div>
