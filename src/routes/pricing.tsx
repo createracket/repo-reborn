@@ -244,34 +244,44 @@ function PricingPage() {
           </p>
         </div>
 
-        {/* Grid */}
+        {/* Free tier hero */}
+        <div className="rounded-2xl border border-border bg-card p-6 md:p-8 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <div className="font-headline text-lg tracking-wide text-muted-foreground">FREE</div>
+              <div className="mt-1 font-display text-5xl tracking-tight">$0</div>
+              <p className="mt-3 text-sm text-muted-foreground max-w-md">
+                A basic artist profile (name, genre, bio, links) and read-only access to the community. Explore everything Racket has to offer before you commit.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 text-sm text-foreground/80">
+              <div className="flex items-center gap-2"><span className="text-primary font-semibold">✓</span> Basic profile</div>
+              <div className="flex items-center gap-2"><span className="text-primary font-semibold">✓</span> Read-only community</div>
+              <div className="flex items-center gap-2"><span className="text-muted-foreground">–</span> No brand briefings</div>
+              <div className="flex items-center gap-2"><span className="text-muted-foreground">–</span> No deals or campaigns</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Paid tiers grid */}
         <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-2xl shadow-black/30">
           <div
-            className="min-w-[860px] grid"
-            style={{ gridTemplateColumns: "170px repeat(4, 1fr)" }}
+            className="min-w-[720px] grid"
+            style={{ gridTemplateColumns: "170px repeat(3, 1fr)" }}
           >
             {/* Header row */}
             <div className="border-r border-b border-border bg-card" />
-            {tiers.map((t) => {
+            {paidTiers.map((t) => {
               const meta: Record<Tier, { name: string; price: React.ReactNode }> = {
-                free: {
-                  name: "Free",
-                  price: (
-                    <>
-                      <div className="text-2xl font-display tracking-tight">$0</div>
-                      <div className="text-xs text-muted-foreground">Always free</div>
-                    </>
-                  ),
-                },
                 starter: {
                   name: "Starter",
                   price: (
                     <>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-display tracking-tight">$20</span>
-                        <span className="text-xs text-muted-foreground">/ mo</span>
+                        <span className="text-3xl font-display tracking-tight">$20</span>
+                        <span className="text-sm text-muted-foreground">/ mo</span>
                       </div>
-                      <div className="mt-1 text-[11px] text-muted-foreground">
+                      <div className="mt-1 text-xs text-muted-foreground">
                         or <span className="text-foreground font-medium">$200/yr</span>
                         <span className="ml-1 text-primary">· save 17%</span>
                       </div>
@@ -283,10 +293,10 @@ function PricingPage() {
                   price: (
                     <>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-display tracking-tight">$50</span>
-                        <span className="text-xs text-muted-foreground">/ mo</span>
+                        <span className="text-3xl font-display tracking-tight">$50</span>
+                        <span className="text-sm text-muted-foreground">/ mo</span>
                       </div>
-                      <div className="mt-1 text-[11px] text-muted-foreground">
+                      <div className="mt-1 text-xs text-muted-foreground">
                         or <span className="text-foreground font-medium">$500/yr</span>
                         <span className="ml-1 text-primary">· save 17%</span>
                       </div>
@@ -297,8 +307,8 @@ function PricingPage() {
                   name: "Ambassador",
                   price: (
                     <>
-                      <div className="text-2xl font-display tracking-tight">Bespoke</div>
-                      <div className="mt-1 text-[11px] text-muted-foreground">
+                      <div className="text-3xl font-display tracking-tight">Bespoke</div>
+                      <div className="mt-1 text-xs text-muted-foreground">
                         Application only · retainer
                       </div>
                     </>
@@ -310,14 +320,14 @@ function PricingPage() {
                 <div
                   key={t}
                   className={cn(
-                    "p-4 border-b border-border",
+                    "p-5 border-b border-border",
                     !isLast && "border-r",
                     tierTint[t],
                     tierAccent[t]
                   )}
                 >
-                  <div className="font-headline text-base tracking-wide">{meta[t].name.toUpperCase()}</div>
-                  <div className="mt-2">{meta[t].price}</div>
+                  <div className="font-headline text-lg tracking-wide">{meta[t].name.toUpperCase()}</div>
+                  <div className="mt-3">{meta[t].price}</div>
                 </div>
               );
             })}
@@ -330,21 +340,20 @@ function PricingPage() {
             <div className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary border-r border-b border-border bg-card flex items-center">
               Racket earns
             </div>
-            <div className="col-span-4 bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary border-b border-border">
+            <div className="col-span-3 bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary border-b border-border">
               Revenue at each tier
             </div>
             <div className="px-3 py-2.5 text-xs font-medium text-muted-foreground border-r border-border bg-card flex items-center">
               Model
             </div>
             {([
-              ["free", "First-party data on the wider artist pool — fuels brand matching + conversion."],
               ["starter", "$20/mo or $200/yr subscription. Scales with roster, low cost to serve."],
               ["pro", "$50/mo or $500/yr sub + small % of affiliate commission on Tier 2 deals."],
               ["ambassador", "15–20% agency fee on brand retainer negotiated for artist."],
             ] as Array<[Tier, string]>).map(([t, text], i) => (
               <div
                 key={t}
-                className={cn("p-3", tierTint[t], i < 3 && "border-r border-border")}
+                className={cn("p-3", tierTint[t], i < 2 && "border-r border-border")}
               >
                 <div className="rounded-md bg-background/40 px-2 py-1.5 text-[11px] leading-relaxed">
                   {text}
