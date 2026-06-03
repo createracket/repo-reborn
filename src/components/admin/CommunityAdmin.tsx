@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Plus, Trash2, Pencil, Upload, Loader2 } from "lucide-react";
@@ -90,7 +90,7 @@ export function CommunityAdmin() {
   const deleteProfile = useServerFn(adminDeleteCommunityProfile);
   const uploadImage = useServerFn(adminUploadCommunityImage);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const data = await listProfiles();
@@ -100,11 +100,11 @@ export function CommunityAdmin() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [listProfiles]);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   const startNew = () => setDraft({ ...EMPTY_DRAFT });
   const startEdit = (m: Member) => {
