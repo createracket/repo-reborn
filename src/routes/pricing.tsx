@@ -27,10 +27,17 @@ export const Route = createFileRoute("/pricing")({
 type Tier = "free" | "starter" | "pro" | "ambassador";
 
 const tierTint: Record<Tier, string> = {
-  free: "bg-muted text-foreground",
-  starter: "bg-[#E1F5EE] text-[#085041] dark:bg-[#085041] dark:text-[#9FE1CB]",
-  pro: "bg-[#EEEDFE] text-[#3C3489] dark:bg-[#3C3489] dark:text-[#CECBF6]",
-  ambassador: "bg-[#FAECE7] text-[#712B13] dark:bg-[#712B13] dark:text-[#F5C4B3]",
+  free: "bg-card text-foreground",
+  starter: "bg-primary/15 text-foreground",
+  pro: "bg-purple/25 text-foreground",
+  ambassador: "bg-pink-accent/25 text-foreground",
+};
+
+const tierAccent: Record<Tier, string> = {
+  free: "border-l-4 border-l-muted-foreground/40",
+  starter: "border-l-4 border-l-primary",
+  pro: "border-l-4 border-l-purple",
+  ambassador: "border-l-4 border-l-pink-accent",
 };
 
 type Row = {
