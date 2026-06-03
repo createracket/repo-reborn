@@ -1,6 +1,5 @@
 import { Fragment } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { cn } from "@/lib/utils";
@@ -162,8 +161,6 @@ function Cell({ tier, value }: { tier: Tier; value: Row["values"][Tier] }) {
 }
 
 function PricingPage() {
-  const [annual, setAnnual] = useState(false);
-
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
@@ -175,43 +172,9 @@ function PricingPage() {
           </h1>
           <p className="mt-4 text-base text-muted-foreground">
             Find the right tier for where you are as an artist — from getting on the
-            radar to a fully managed ambassador partnership.
+            radar to a fully managed ambassador partnership. Pay monthly or save 17%
+            paying annually.
           </p>
-        </div>
-
-        {/* Billing toggle */}
-        <div className="mb-8 flex flex-wrap items-center gap-3">
-          <div className="inline-flex rounded-full border border-border bg-card p-1">
-            <button
-              type="button"
-              onClick={() => setAnnual(false)}
-              className={cn(
-                "px-5 py-1.5 text-sm rounded-full transition-colors font-headline tracking-wide",
-                !annual
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              MONTHLY
-            </button>
-            <button
-              type="button"
-              onClick={() => setAnnual(true)}
-              className={cn(
-                "px-5 py-1.5 text-sm rounded-full transition-colors font-headline tracking-wide",
-                annual
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              ANNUAL
-            </button>
-          </div>
-          {annual && (
-            <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-medium text-primary">
-              2 months free — save 17%
-            </span>
-          )}
         </div>
 
         {/* Grid */}
@@ -224,29 +187,54 @@ function PricingPage() {
             <div className="border-r border-b border-border bg-card" />
             {tiers.map((t) => {
               const meta: Record<Tier, { name: string; price: React.ReactNode }> = {
-                free: { name: "Free", price: <div className="text-xs text-muted-foreground">Always free</div> },
+                free: {
+                  name: "Free",
+                  price: (
+                    <>
+                      <div className="text-2xl font-display tracking-tight">$0</div>
+                      <div className="text-xs text-muted-foreground">Always free</div>
+                    </>
+                  ),
+                },
                 starter: {
                   name: "Starter",
-                  price: annual ? (
-                    <div className="text-[11px] text-muted-foreground">$200 / year · ≈ $16.67/mo</div>
-                  ) : (
-                    <div className="text-xs text-muted-foreground">$20 / month</div>
+                  price: (
+                    <>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-display tracking-tight">$20</span>
+                        <span className="text-xs text-muted-foreground">/ mo</span>
+                      </div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        or <span className="text-foreground font-medium">$200/yr</span>
+                        <span className="ml-1 text-primary">· save 17%</span>
+                      </div>
+                    </>
                   ),
                 },
                 pro: {
                   name: "Pro",
-                  price: annual ? (
-                    <div className="text-[11px] text-muted-foreground">$500 / year · ≈ $41.67/mo</div>
-                  ) : (
-                    <div className="text-xs text-muted-foreground">$50 / month</div>
+                  price: (
+                    <>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-display tracking-tight">$50</span>
+                        <span className="text-xs text-muted-foreground">/ mo</span>
+                      </div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        or <span className="text-foreground font-medium">$500/yr</span>
+                        <span className="ml-1 text-primary">· save 17%</span>
+                      </div>
+                    </>
                   ),
                 },
                 ambassador: {
                   name: "Ambassador",
                   price: (
-                    <div className="text-xs text-muted-foreground">
-                      Application only{annual && <span className="block text-[11px]">Retainer — bespoke</span>}
-                    </div>
+                    <>
+                      <div className="text-2xl font-display tracking-tight">Bespoke</div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        Application only · retainer
+                      </div>
+                    </>
                   ),
                 },
               };
@@ -262,7 +250,7 @@ function PricingPage() {
                   )}
                 >
                   <div className="font-headline text-base tracking-wide">{meta[t].name.toUpperCase()}</div>
-                  <div className="mt-1">{meta[t].price}</div>
+                  <div className="mt-2">{meta[t].price}</div>
                 </div>
               );
             })}
@@ -283,12 +271,8 @@ function PricingPage() {
             </div>
             {([
               ["free", "First-party data on the wider artist pool — fuels brand matching + conversion."],
-              ["starter", annual
-                ? "$200/yr subscription. Improved retention + cash flow predictability."
-                : "$20/mo subscription. Scales with roster. Low cost to serve."],
-              ["pro", annual
-                ? "$500/yr sub + small % of affiliate commission on Tier 2 deals."
-                : "$50/mo sub + small % of affiliate commission on Tier 2 deals."],
+              ["starter", "$20/mo or $200/yr subscription. Scales with roster, low cost to serve."],
+              ["pro", "$50/mo or $500/yr sub + small % of affiliate commission on Tier 2 deals."],
               ["ambassador", "15–20% agency fee on brand retainer negotiated for artist."],
             ] as Array<[Tier, string]>).map(([t, text], i) => (
               <div
