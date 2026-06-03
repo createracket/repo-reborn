@@ -474,7 +474,7 @@ function SectionBlock({ section }: { section: Section }) {
       <div className="bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary border-r border-b border-border flex items-center">
         {section.label}
       </div>
-      <div className="col-span-4 bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary border-b border-border">
+      <div className="col-span-3 bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary border-b border-border">
         {section.heading}
       </div>
       {section.rows.map((row) => (
@@ -482,7 +482,7 @@ function SectionBlock({ section }: { section: Section }) {
           <div className="px-3 py-2.5 text-xs font-medium text-foreground/80 border-r border-b border-border bg-card flex items-center">
             {row.label}
           </div>
-          {tiers.map((t) => (
+          {paidTiers.map((t) => (
             <Cell key={`${section.label}-${row.label}-${t}`} tier={t} value={row.values[t]} />
           ))}
         </Fragment>
