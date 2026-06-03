@@ -108,16 +108,17 @@ export const adminUploadCommunityImage = createServerFn({ method: "POST" })
       "image/webp": "webp",
       "image/gif": "gif",
     } as const;
-    const fileBuffer = Buffer.from(data.base64, "base64");
+    const binary = atob(data.base64);
+    const fileBytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
 
-    if (fileBuffer.byteLength > MAX_UPLOAD_BYTES) {
+    if (fileBytes.byteLength > MAX_UPLOAD_BYTES) {
       throw new Error("Image must be under 8MB");
     }
 
     const path = `community/${crypto.randomUUID()}.${extensionByType[data.contentType]}`;
     const { error } = await supabaseAdmin.storage
       .from("spotlight-images")
-      .upload(path, fileBuffer, {
+      .upload(path, fileBytes, {
         upsert: false,
         cacheControl: "3600",
         contentType: data.contentType,
