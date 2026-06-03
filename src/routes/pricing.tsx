@@ -336,30 +336,6 @@ function PricingPage() {
               <SectionBlock key={section.label} section={section} />
             ))}
 
-            {/* Racket earns */}
-            <div className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary border-r border-b border-border bg-card flex items-center">
-              Racket earns
-            </div>
-            <div className="col-span-3 bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary border-b border-border">
-              Revenue at each tier
-            </div>
-            <div className="px-3 py-2.5 text-xs font-medium text-muted-foreground border-r border-border bg-card flex items-center">
-              Model
-            </div>
-            {([
-              ["starter", "$20/mo or $200/yr subscription. Scales with roster, low cost to serve."],
-              ["pro", "$50/mo or $500/yr sub + small % of affiliate commission on Tier 2 deals."],
-              ["ambassador", "15–20% agency fee on brand retainer negotiated for artist."],
-            ] as Array<[Tier, string]>).map(([t, text], i) => (
-              <div
-                key={t}
-                className={cn("p-3", tierTint[t], i < 2 && "border-r border-border")}
-              >
-                <div className="rounded-md bg-background/40 px-2 py-1.5 text-[11px] leading-relaxed">
-                  {text}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
 
