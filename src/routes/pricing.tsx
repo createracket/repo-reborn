@@ -91,17 +91,15 @@ export const Route = createFileRoute("/pricing")({
   component: PricingPage,
 });
 
-type Tier = "free" | "starter" | "pro" | "ambassador";
+type Tier = "starter" | "pro" | "ambassador";
 
 const tierTint: Record<Tier, string> = {
-  free: "bg-card text-foreground",
   starter: "bg-primary/15 text-foreground",
   pro: "bg-purple/25 text-foreground",
   ambassador: "bg-pink-accent/25 text-foreground",
 };
 
 const tierAccent: Record<Tier, string> = {
-  free: "border-l-4 border-l-muted-foreground/40",
   starter: "border-l-4 border-l-primary",
   pro: "border-l-4 border-l-purple",
   ambassador: "border-l-4 border-l-pink-accent",
@@ -109,7 +107,7 @@ const tierAccent: Record<Tier, string> = {
 
 type Row = {
   label: string;
-  values: Record<Tier, { tick?: boolean; dash?: boolean; text?: string }>;
+  values: Record<"free" | Tier, { tick?: boolean; dash?: boolean; text?: string }>;
 };
 
 type Section = { label: string; heading: string; rows: Row[] };
@@ -216,7 +214,7 @@ const sections: Section[] = [
   },
 ];
 
-const tiers: Tier[] = ["free", "starter", "pro", "ambassador"];
+const paidTiers: Tier[] = ["starter", "pro", "ambassador"];
 
 function Cell({ tier, value }: { tier: Tier; value: Row["values"][Tier] }) {
   return (
@@ -227,6 +225,7 @@ function Cell({ tier, value }: { tier: Tier; value: Row["values"][Tier] }) {
     </div>
   );
 }
+
 
 function PricingPage() {
   return (
