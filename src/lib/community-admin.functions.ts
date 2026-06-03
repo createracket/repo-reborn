@@ -1,7 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 
 const ACCOUNT_TYPES = ["ARTIST", "BAND", "CREATIVE", "FAN", "CREW"] as const;
 const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
@@ -25,7 +27,7 @@ const UploadCommunityImageSchema = z.object({
   contentType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif"]),
 });
 
-async function assertAdmin(supabase: any, userId: string) {
+async function assertAdmin(supabase: SupabaseClient<Database>, userId: string) {
   const { data, error } = await supabase
     .from("user_roles")
     .select("role")
