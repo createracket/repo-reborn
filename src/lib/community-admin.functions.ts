@@ -116,13 +116,11 @@ export const adminUploadCommunityImage = createServerFn({ method: "POST" })
     }
 
     const path = `community/${crypto.randomUUID()}.${extensionByType[data.contentType]}`;
-    const { error } = await supabaseAdmin.storage
-      .from("spotlight-images")
-      .upload(path, fileBytes, {
-        upsert: false,
-        cacheControl: "3600",
-        contentType: data.contentType,
-      });
+    const { error } = await supabaseAdmin.storage.from("spotlight-images").upload(path, fileBytes, {
+      upsert: false,
+      cacheControl: "3600",
+      contentType: data.contentType,
+    });
 
     if (error) throw new Error(error.message);
 
