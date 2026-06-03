@@ -338,15 +338,15 @@ function PricingPage() {
 function SectionBlock({ section }: { section: Section }) {
   return (
     <>
-      <div className="bg-muted/60 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground border-r border-b border-border flex items-center">
+      <div className="bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary border-r border-b border-border flex items-center">
         {section.label}
       </div>
-      <div className="col-span-4 bg-muted/60 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground border-b border-border">
+      <div className="col-span-4 bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-primary border-b border-border">
         {section.heading}
       </div>
       {section.rows.map((row) => (
         <Fragment key={`${section.label}-${row.label}`}>
-          <div className="px-3 py-2.5 text-xs font-medium text-muted-foreground border-r border-b border-border bg-muted flex items-center">
+          <div className="px-3 py-2.5 text-xs font-medium text-foreground/80 border-r border-b border-border bg-card flex items-center">
             {row.label}
           </div>
           {tiers.map((t) => (
