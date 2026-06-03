@@ -1,8 +1,76 @@
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+
+const discounts: Array<{
+  title: string;
+  months: string;
+  body: string;
+  eligibility: string;
+}> = [
+  {
+    title: "Low income / working class",
+    months: "1",
+    body: "Self-declared low income or working class artists. Applied at signup — no proof of income required.",
+    eligibility: "Self-declared at signup",
+  },
+  {
+    title: "Underrepresented backgrounds",
+    months: "2",
+    body: "Artists from underrepresented or minority backgrounds — including First Nations, POC, LGBTQIA+ and disabled artists.",
+    eligibility: "Verified by Racket community team",
+  },
+  {
+    title: "Partner referrals",
+    months: "3",
+    body: "Artists meeting both criteria above, or referred to us by a partner organisation working with underrepresented artists.",
+    eligibility: "Referral or combined eligibility",
+  },
+];
+
+const faqs: Array<{ q: string; a: ReactNode }> = [
+  {
+    q: "What's included in the Free tier?",
+    a: "A basic artist profile (name, genre, bio, links) and read-only access to the community. You won't be matched to brand briefings or eligible for seeded product campaigns, but you can explore everything Racket has to offer.",
+  },
+  {
+    q: "How do brand deals actually work?",
+    a: "Brands send briefs to Racket. We match them to artists on Starter, Pro and Ambassador tiers based on fit. Starter unlocks gifted campaigns; Pro adds priority matching plus paid affiliate placements; Ambassador is a managed retainer relationship where Racket pitches you directly.",
+  },
+  {
+    q: "Can I switch tiers later?",
+    a: "Yes — you can upgrade or downgrade at any time from your dashboard. Upgrades take effect immediately and we prorate the difference. Downgrades take effect at the end of your current billing cycle.",
+  },
+  {
+    q: "How does annual billing work?",
+    a: "Pay for 10 months upfront, get 12 months of access — a 17% saving vs paying monthly. You can cancel annual plans at any time but we don't refund partial years.",
+  },
+  {
+    q: "Do I need to be a full-time artist?",
+    a: "No. Racket is for any musician building a brand-ready career — emerging, part-time, side-project, established. What matters is that you take your audience and your creative output seriously.",
+  },
+  {
+    q: "How does Ambassador work?",
+    a: "Ambassador is application-only. We onboard a small cohort of artists each quarter who become long-term faces of partner brands. The retainer fee is bespoke, negotiated by Racket on your behalf, and we take a 15–20% agency fee.",
+  },
+  {
+    q: "Can I cancel anytime?",
+    a: "Yes. Cancel from your dashboard or email us at community@createracket.com. Monthly plans stop at the end of the current month; annual plans run until the end of the year you paid for.",
+  },
+  {
+    q: "Do you offer team or label plans?",
+    a: "Not yet — Racket is currently artist-first. If you're a label, management company or collective interested in onboarding multiple artists, email community@createracket.com and we'll be in touch.",
+  },
+];
+
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
@@ -287,32 +355,105 @@ function PricingPage() {
           </div>
         </div>
 
-        {/* Discount bar */}
-        <div className="mt-8 rounded-2xl border border-pink-accent/40 bg-pink-accent/10 p-6 text-sm">
-          <div className="font-headline text-base tracking-wide text-pink-accent mb-2">
-            ACCESS SUPPORT — WORKING CLASS, LOW INCOME + MINORITY ARTISTS
+        {/* Special discounts */}
+        <section className="mt-20">
+          <div className="mb-8 max-w-2xl">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-pink-accent">
+              Special discounts
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl leading-[1.05]">
+              ACCESS SUPPORT FOR ARTISTS WHO NEED IT
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground">
+              We offer 1–3 months of free paid tier access to artists who face
+              barriers to entry. A genuinely diverse roster makes Create Racket a
+              more credible offer to brands — so this is a core part of how we
+              build it.
+            </p>
           </div>
-          <p className="mb-3 text-foreground/85 leading-relaxed">
-            Racket offers 1–3 months of free paid tier access to artists who would
-            otherwise face barriers to entry. This is a core part of how we build a
-            genuinely diverse, representative roster — which in turn makes Create
-            Racket a more compelling and credible offer to brands.
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {discounts.map((d) => (
+              <div
+                key={d.title}
+                className="rounded-2xl border border-border bg-card p-6 flex flex-col"
+              >
+                <div className="font-headline text-sm tracking-wide text-pink-accent">
+                  {d.title.toUpperCase()}
+                </div>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <span className="font-display text-4xl">{d.months}</span>
+                  <span className="text-sm text-muted-foreground">
+                    month{d.months === "1" ? "" : "s"} free
+                  </span>
+                </div>
+                <p className="mt-4 text-sm text-foreground/85 leading-relaxed flex-1">
+                  {d.body}
+                </p>
+                <div className="mt-5 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="size-1.5 rounded-full bg-pink-accent" />
+                  {d.eligibility}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-6 text-xs text-muted-foreground">
+            Apply at signup or email{" "}
+            <a
+              href="mailto:community@createracket.com"
+              className="text-primary hover:underline"
+            >
+              community@createracket.com
+            </a>{" "}
+            to verify eligibility.
           </p>
-          <ul className="space-y-1.5 text-foreground/85">
-            <li className="flex gap-2">
-              <span className="text-pink-accent">→</span>
-              <span><strong className="font-medium text-foreground">1 month free</strong> — self-declared low income or working class artists, applied at signup</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-pink-accent">→</span>
-              <span><strong className="font-medium text-foreground">2 months free</strong> — artists from underrepresented or minority backgrounds</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-pink-accent">→</span>
-              <span><strong className="font-medium text-foreground">3 months free</strong> — artists meeting both criteria, or referred via a partner organisation</span>
-            </li>
-          </ul>
-        </div>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="mt-20 scroll-mt-24">
+          <div className="mb-8 max-w-2xl">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-primary">
+              FAQ
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl leading-[1.05]">
+              FREQUENTLY ASKED QUESTIONS
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground">
+              Everything you need to know about membership, billing and access.
+              Still stuck? Email{" "}
+              <a
+                href="mailto:community@createracket.com"
+                className="text-primary hover:underline"
+              >
+                community@createracket.com
+              </a>
+              .
+            </p>
+          </div>
+
+          <Accordion
+            type="single"
+            collapsible
+            className="rounded-2xl border border-border bg-card divide-y divide-border"
+          >
+            {faqs.map((f, i) => (
+              <AccordionItem
+                key={f.q}
+                value={`faq-${i}`}
+                className="border-b-0 px-5"
+              >
+                <AccordionTrigger className="font-headline text-base tracking-wide text-left hover:no-underline">
+                  {f.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-foreground/85 leading-relaxed">
+                  {f.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </section>
+
       </main>
       <SiteFooter />
     </div>
