@@ -316,17 +316,14 @@ function SectionBlock({ section }: { section: Section }) {
         {section.heading}
       </div>
       {section.rows.map((row) => (
-        <>
-          <div
-            key={`${section.label}-${row.label}-label`}
-            className="px-3 py-2.5 text-xs font-medium text-muted-foreground border-r border-b border-border bg-muted flex items-center"
-          >
+        <Fragment key={`${section.label}-${row.label}`}>
+          <div className="px-3 py-2.5 text-xs font-medium text-muted-foreground border-r border-b border-border bg-muted flex items-center">
             {row.label}
           </div>
           {tiers.map((t) => (
             <Cell key={`${section.label}-${row.label}-${t}`} tier={t} value={row.values[t]} />
           ))}
-        </>
+        </Fragment>
       ))}
     </>
   );
