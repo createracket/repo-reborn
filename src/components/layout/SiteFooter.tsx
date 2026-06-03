@@ -38,6 +38,16 @@ export function SiteFooter() {
                   Vibe Check
                 </Link>
               </li>
+              <li>
+                <Link to="/pricing" className="hover:text-purple">
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing" hash="faq" className="hover:text-purple">
+                  FAQs
+                </Link>
+              </li>
               {!signedIn && (
                 <li>
                   <Link to="/fan-signup" className="hover:text-purple">
