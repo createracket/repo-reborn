@@ -74,11 +74,7 @@ export const adminSaveCommunityProfile = createServerFn({ method: "POST" })
           .eq("id", data.id)
           .select("id")
           .single()
-      : await supabaseAdmin
-          .from("community_profiles")
-          .insert(payload)
-          .select("id")
-          .single();
+      : await supabaseAdmin.from("community_profiles").insert(payload).select("id").single();
 
     if (result.error) throw new Error(result.error.message);
     return result.data;
@@ -91,10 +87,7 @@ export const adminDeleteCommunityProfile = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { error } = await supabaseAdmin
-      .from("community_profiles")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await supabaseAdmin.from("community_profiles").delete().eq("id", data.id);
 
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -130,9 +123,7 @@ export const adminUploadCommunityImage = createServerFn({ method: "POST" })
 
     if (error) throw new Error(error.message);
 
-    const { data: publicData } = supabaseAdmin.storage
-      .from("spotlight-images")
-      .getPublicUrl(path);
+    const { data: publicData } = supabaseAdmin.storage.from("spotlight-images").getPublicUrl(path);
 
     return { publicUrl: publicData.publicUrl };
   });
