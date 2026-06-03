@@ -272,12 +272,8 @@ function PricingPage() {
             </div>
             {([
               ["free", "First-party data on the wider artist pool — fuels brand matching + conversion."],
-              ["starter", annual
-                ? "$200/yr subscription. Improved retention + cash flow predictability."
-                : "$20/mo subscription. Scales with roster. Low cost to serve."],
-              ["pro", annual
-                ? "$500/yr sub + small % of affiliate commission on Tier 2 deals."
-                : "$50/mo sub + small % of affiliate commission on Tier 2 deals."],
+              ["starter", "$20/mo or $200/yr subscription. Scales with roster, low cost to serve."],
+              ["pro", "$50/mo or $500/yr sub + small % of affiliate commission on Tier 2 deals."],
               ["ambassador", "15–20% agency fee on brand retainer negotiated for artist."],
             ] as Array<[Tier, string]>).map(([t, text], i) => (
               <div
