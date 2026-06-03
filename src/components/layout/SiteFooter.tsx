@@ -25,19 +25,31 @@ export function SiteFooter() {
               <Wordmark variant="dark" className="h-11 w-auto" />
             </Link>
             <p className="mt-4 max-w-md text-base text-[#2b2b2b]/80">
-              Create Racket acknowledges the Traditional Owners of Country throughout
-              Australia. We pay our respects to Elders past and present.
+              Create Racket acknowledges the Traditional Owners of Country throughout Australia. We
+              pay our respects to Elders past and present.
             </p>
           </div>
 
           <div className="lg:col-span-3">
             <h3 className="mb-3 font-headline text-sm">Explore</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/vibe-check" className="hover:text-purple">Vibe Check</Link></li>
+              <li>
+                <Link to="/vibe-check" className="hover:text-purple">
+                  Vibe Check
+                </Link>
+              </li>
               {!signedIn && (
-                <li><Link to="/fan-signup" className="hover:text-purple">Join the mailing list</Link></li>
+                <li>
+                  <Link to="/fan-signup" className="hover:text-purple">
+                    Join the mailing list
+                  </Link>
+                </li>
               )}
-              <li><Link to="/login" className="hover:text-purple">Log in</Link></li>
+              <li>
+                <Link to="/login" className="hover:text-purple">
+                  Log in
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -45,18 +57,31 @@ export function SiteFooter() {
             <h3 className="mb-3 font-headline text-sm">Contact</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href={`mailto:${contactEmail}`} className="inline-flex items-center gap-2 hover:text-purple">
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="inline-flex items-center gap-2 hover:text-purple"
+                >
                   <Mail className="size-4" />
                   <span>{contactEmail}</span>
                 </a>
               </li>
               <li>
-                <a href="https://instagram.com/createracket" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 hover:text-purple">
+                <a
+                  href="https://instagram.com/createracket"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 hover:text-purple"
+                >
                   <Instagram className="size-4" /> Instagram
                 </a>
               </li>
               <li>
-                <a href="https://www.linkedin.com/company/create-racket" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 hover:text-purple">
+                <a
+                  href="https://www.linkedin.com/company/create-racket"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 hover:text-purple"
+                >
                   <Linkedin className="size-4" /> LinkedIn
                 </a>
               </li>
@@ -67,8 +92,12 @@ export function SiteFooter() {
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[#2b2b2b]/20 pt-6 text-xs text-[#2b2b2b]/70 sm:flex-row">
           <span>© {new Date().getFullYear()} Create Racket. Made loud.</span>
           <nav className="flex items-center gap-4">
-            <Link to="/terms" className="hover:text-purple">Terms</Link>
-            <Link to="/privacy" className="hover:text-purple">Privacy</Link>
+            <Link to="/terms" className="hover:text-purple">
+              Terms
+            </Link>
+            <Link to="/privacy" className="hover:text-purple">
+              Privacy
+            </Link>
             <span className="hidden sm:inline">Where creative partners connect.</span>
           </nav>
         </div>
