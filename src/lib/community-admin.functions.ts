@@ -63,7 +63,7 @@ export const adminSaveCommunityProfile = createServerFn({ method: "POST" })
 
     const payload = {
       display_name: data.display_name,
-      account_type: data.account_type,
+      account_type: data.account_type.toLowerCase(),
       tagline: data.tagline || null,
       location: data.location || null,
       avatar_url: data.avatar_url || null,
