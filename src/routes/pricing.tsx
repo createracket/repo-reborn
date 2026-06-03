@@ -1,8 +1,76 @@
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+
+const discounts: Array<{
+  title: string;
+  months: string;
+  body: string;
+  eligibility: string;
+}> = [
+  {
+    title: "Low income / working class",
+    months: "1",
+    body: "Self-declared low income or working class artists. Applied at signup — no proof of income required.",
+    eligibility: "Self-declared at signup",
+  },
+  {
+    title: "Underrepresented backgrounds",
+    months: "2",
+    body: "Artists from underrepresented or minority backgrounds — including First Nations, POC, LGBTQIA+ and disabled artists.",
+    eligibility: "Verified by Racket community team",
+  },
+  {
+    title: "Partner referrals",
+    months: "3",
+    body: "Artists meeting both criteria above, or referred to us by a partner organisation working with underrepresented artists.",
+    eligibility: "Referral or combined eligibility",
+  },
+];
+
+const faqs: Array<{ q: string; a: ReactNode }> = [
+  {
+    q: "What's included in the Free tier?",
+    a: "A basic artist profile (name, genre, bio, links) and read-only access to the community. You won't be matched to brand briefings or eligible for seeded product campaigns, but you can explore everything Racket has to offer.",
+  },
+  {
+    q: "How do brand deals actually work?",
+    a: "Brands send briefs to Racket. We match them to artists on Starter, Pro and Ambassador tiers based on fit. Starter unlocks gifted campaigns; Pro adds priority matching plus paid affiliate placements; Ambassador is a managed retainer relationship where Racket pitches you directly.",
+  },
+  {
+    q: "Can I switch tiers later?",
+    a: "Yes — you can upgrade or downgrade at any time from your dashboard. Upgrades take effect immediately and we prorate the difference. Downgrades take effect at the end of your current billing cycle.",
+  },
+  {
+    q: "How does annual billing work?",
+    a: "Pay for 10 months upfront, get 12 months of access — a 17% saving vs paying monthly. You can cancel annual plans at any time but we don't refund partial years.",
+  },
+  {
+    q: "Do I need to be a full-time artist?",
+    a: "No. Racket is for any musician building a brand-ready career — emerging, part-time, side-project, established. What matters is that you take your audience and your creative output seriously.",
+  },
+  {
+    q: "How does Ambassador work?",
+    a: "Ambassador is application-only. We onboard a small cohort of artists each quarter who become long-term faces of partner brands. The retainer fee is bespoke, negotiated by Racket on your behalf, and we take a 15–20% agency fee.",
+  },
+  {
+    q: "Can I cancel anytime?",
+    a: "Yes. Cancel from your dashboard or email us at community@createracket.com. Monthly plans stop at the end of the current month; annual plans run until the end of the year you paid for.",
+  },
+  {
+    q: "Do you offer team or label plans?",
+    a: "Not yet — Racket is currently artist-first. If you're a label, management company or collective interested in onboarding multiple artists, email community@createracket.com and we'll be in touch.",
+  },
+];
+
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
