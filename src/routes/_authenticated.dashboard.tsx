@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogOut, Sparkles, Users, ClipboardList, UserCircle2 } from "lucide-react";
+import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -53,6 +53,7 @@ function DashboardPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [profileRow, setProfileRow] = useState<{ slug: string | null; avatar_url: string | null; bio: string | null; display_name: string | null } | null>(null);
   const [latestVibe, setLatestVibe] = useState<VibeRow | null>(null);
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [community, setCommunity] = useState<CommunityMember[]>([]);
@@ -104,12 +105,13 @@ function DashboardPage() {
           .limit(8),
         supabase
           .from("profiles")
-          .select("display_name")
+          .select("display_name, slug, avatar_url, bio")
           .eq("id", u.user.id)
           .single(),
       ]);
 
       setDisplayName(profile?.display_name ?? null);
+      setProfileRow((profile as any) ?? null);
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
       const featuredMembers: CommunityMember[] = ((featuredRows ?? []) as any[]).map((p) => ({
         id: p.id,
@@ -188,6 +190,17 @@ function DashboardPage() {
             </h1>
           </div>
         </div>
+
+        <SetupChecklist
+          loading={loading}
+          hasVibe={!!latestVibe}
+          profileComplete={!!profileRow?.slug && !!profileRow?.avatar_url && !!(profileRow?.display_name || displayName) && !!profileRow?.bio}
+          hasSlug={!!profileRow?.slug}
+          hasAvatar={!!profileRow?.avatar_url}
+          hasBio={!!profileRow?.bio}
+        />
+
+
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* VIBE CARD (spans 2) */}
@@ -424,3 +437,67 @@ function VibeCard({ loading, vibe }: { loading: boolean; vibe: VibeRow | null })
   );
 }
 
+
+function SetupChecklist({
+  loading,
+  hasVibe,
+  profileComplete,
+  hasSlug,
+  hasAvatar,
+  hasBio,
+}: {
+  loading: boolean;
+  hasVibe: boolean;
+  profileComplete: boolean;
+  hasSlug: boolean;
+  hasAvatar: boolean;
+  hasBio: boolean;
+}) {
+  if (loading) return null;
+  if (profileComplete && hasVibe) return null;
+
+  const items: Array<{ done: boolean; label: string; cta: string; to: "/profile" | "/vibe-check" }> = [];
+  if (!hasAvatar) items.push({ done: false, label: "Add a profile photo", cta: "Upload photo", to: "/profile" });
+  if (!hasBio) items.push({ done: false, label: "Write a short bio", cta: "Add bio", to: "/profile" });
+  if (!hasSlug) items.push({ done: false, label: "Claim your /u/ URL so people can find you", cta: "Pick a URL", to: "/profile" });
+  if (!hasVibe) items.push({ done: false, label: "Take the Vibe Check to unlock matches", cta: "Take Vibe Check", to: "/vibe-check" });
+
+  if (items.length === 0) return null;
+  const primary = items[0];
+
+  return (
+    <Card className="mb-6 border-primary/40 bg-primary/5">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <Sparkles className="size-5 text-primary" />
+          <CardTitle className="font-display text-2xl">Finish setting up your profile</CardTitle>
+        </div>
+        <CardDescription>
+          A complete profile plus your Vibe Check is how brands and collaborators find you. Just a couple of quick steps left.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <ul className="space-y-2">
+          {items.map((it) => (
+            <li key={it.label} className="flex items-center gap-3 text-sm">
+              <span className="grid size-5 place-items-center rounded-full border border-border/60 bg-background">
+                <span className="size-2 rounded-full bg-muted-foreground/40" />
+              </span>
+              <span className="flex-1">{it.label}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button asChild size="sm">
+            <Link to={primary.to}>{primary.cta} <ArrowRight className="ml-1.5 size-3.5" /></Link>
+          </Button>
+          {items.length > 1 ? (
+            <Button asChild size="sm" variant="ghost">
+              <Link to={items[items.length - 1].to}>{items[items.length - 1].cta}</Link>
+            </Button>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
+import { validateSlug, normalizeSlug } from "@/lib/slugs";
+import { Check, Loader2, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -54,6 +56,37 @@ function EditProfilePage() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [originalSlug, setOriginalSlug] = useState<string>("");
+  const [slugStatus, setSlugStatus] = useState<
+    | { kind: "idle" }
+    | { kind: "checking" }
+    | { kind: "invalid"; reason: string }
+    | { kind: "taken" }
+    | { kind: "available" }
+    | { kind: "unchanged" }
+  >({ kind: "idle" });
+
+  // Live slug availability check (debounced)
+  useEffect(() => {
+    const raw = form.slug;
+    if (!raw) { setSlugStatus({ kind: "idle" }); return; }
+    const v = validateSlug(raw);
+    if (!v.ok) { setSlugStatus({ kind: "invalid", reason: v.reason }); return; }
+    if (v.normalized === originalSlug) { setSlugStatus({ kind: "unchanged" }); return; }
+    setSlugStatus({ kind: "checking" });
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const { data } = await (supabase as any)
+        .from("public_profiles")
+        .select("id")
+        .eq("slug", v.normalized)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data && data.id !== userId) setSlugStatus({ kind: "taken" });
+      else setSlugStatus({ kind: "available" });
+    }, 400);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [form.slug, originalSlug, userId]);
 
   useEffect(() => {
     (async () => {
@@ -70,6 +103,7 @@ function EditProfilePage() {
         .maybeSingle();
       if (data) {
         const d = data as any;
+        setOriginalSlug(d.slug ?? "");
         setForm({
           slug: d.slug ?? "",
           display_name: d.display_name ?? "",
@@ -177,10 +211,13 @@ function EditProfilePage() {
       toast.error("Please upload or cancel the selected profile photo before saving.");
       return;
     }
-    const slug = form.slug.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-    if (slug && !/^[a-z0-9][a-z0-9-]{1,40}$/.test(slug)) {
-      toast.error("Slug must be 2–41 chars, lowercase letters, numbers and hyphens");
-      return;
+    let slug: string | null = null;
+    if (form.slug.trim()) {
+      const v = validateSlug(form.slug);
+      if (!v.ok) { toast.error(v.reason); return; }
+      slug = v.normalized;
+      if (slugStatus.kind === "taken") { toast.error("That URL slug is already taken — try another"); return; }
+      if (slugStatus.kind === "checking") { toast.error("Still checking slug availability — try again in a sec"); return; }
     }
     setSaving(true);
     const cleanSocials: ProfileSocials = {};
@@ -220,6 +257,7 @@ function EditProfilePage() {
       }
       return;
     }
+    setOriginalSlug(slug ?? "");
     toast.success(form.avatar_url ? "Profile updated with your thumbnail" : "Profile updated");
   }
 
@@ -264,10 +302,34 @@ function EditProfilePage() {
                 <Label htmlFor="slug">Custom URL slug</Label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">/u/</span>
-                  <Input id="slug" value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="your-name" />
+                  <Input
+                    id="slug"
+                    value={form.slug}
+                    onChange={(e) => set("slug", normalizeSlug(e.target.value))}
+                    placeholder="your-name"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                  />
+                  <div className="w-5 shrink-0">
+                    {slugStatus.kind === "checking" ? <Loader2 className="size-4 animate-spin text-muted-foreground" /> : null}
+                    {slugStatus.kind === "available" ? <Check className="size-4 text-emerald-500" /> : null}
+                    {(slugStatus.kind === "taken" || slugStatus.kind === "invalid") ? <X className="size-4 text-destructive" /> : null}
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">Leave blank to keep your profile private.</p>
+                {slugStatus.kind === "available" ? (
+                  <p className="text-xs text-emerald-500">Nice — /u/{form.slug} is available.</p>
+                ) : slugStatus.kind === "unchanged" ? (
+                  <p className="text-xs text-muted-foreground">This is your current public URL.</p>
+                ) : slugStatus.kind === "taken" ? (
+                  <p className="text-xs text-destructive">That slug is already taken — try another.</p>
+                ) : slugStatus.kind === "invalid" ? (
+                  <p className="text-xs text-destructive">{slugStatus.reason}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">2–30 characters, lowercase letters, numbers and hyphens. Leave blank to keep your profile private.</p>
+                )}
               </div>
+
 
               <div className="md:col-span-2">
                 <Label>Profile photo (1:1)</Label>
