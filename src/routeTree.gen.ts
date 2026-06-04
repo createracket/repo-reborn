@@ -13,7 +13,6 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FanSignupRouteImport } from './routes/fan-signup'
@@ -21,6 +20,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
+import { Route as PricingIndexRouteImport } from './routes/pricing.index'
 import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as USlugRouteImport } from './routes/u.$slug'
@@ -49,11 +49,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -88,6 +83,11 @@ const IndexRoute = IndexRouteImport.update({
 const VibeCheckIndexRoute = VibeCheckIndexRouteImport.update({
   id: '/vibe-check/',
   path: '/vibe-check/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingIndexRoute = PricingIndexRouteImport.update({
+  id: '/pricing/',
+  path: '/pricing/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VibeCheckMusicianRoute = VibeCheckMusicianRouteImport.update({
@@ -142,7 +142,6 @@ export interface FileRoutesByFullPath {
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -156,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
+  '/pricing/': typeof PricingIndexRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
 }
 export interface FileRoutesByTo {
@@ -164,7 +164,6 @@ export interface FileRoutesByTo {
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -178,6 +177,7 @@ export interface FileRoutesByTo {
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
+  '/pricing': typeof PricingIndexRoute
   '/vibe-check': typeof VibeCheckIndexRoute
 }
 export interface FileRoutesById {
@@ -188,7 +188,6 @@ export interface FileRoutesById {
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -202,6 +201,7 @@ export interface FileRoutesById {
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
+  '/pricing/': typeof PricingIndexRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
 }
 export interface FileRouteTypes {
@@ -212,7 +212,6 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/forgot-password'
     | '/login'
-    | '/pricing'
     | '/privacy'
     | '/reset-password'
     | '/results'
@@ -226,6 +225,7 @@ export interface FileRouteTypes {
     | '/u/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
+    | '/pricing/'
     | '/vibe-check/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -234,7 +234,6 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/forgot-password'
     | '/login'
-    | '/pricing'
     | '/privacy'
     | '/reset-password'
     | '/results'
@@ -248,6 +247,7 @@ export interface FileRouteTypes {
     | '/u/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
+    | '/pricing'
     | '/vibe-check'
   id:
     | '__root__'
@@ -257,7 +257,6 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/forgot-password'
     | '/login'
-    | '/pricing'
     | '/privacy'
     | '/reset-password'
     | '/results'
@@ -271,6 +270,7 @@ export interface FileRouteTypes {
     | '/u/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
+    | '/pricing/'
     | '/vibe-check/'
   fileRoutesById: FileRoutesById
 }
@@ -281,7 +281,6 @@ export interface RootRouteChildren {
   FanSignupRoute: typeof FanSignupRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
-  PricingRoute: typeof PricingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
@@ -290,6 +289,7 @@ export interface RootRouteChildren {
   USlugRoute: typeof USlugRoute
   VibeCheckBrandRoute: typeof VibeCheckBrandRoute
   VibeCheckMusicianRoute: typeof VibeCheckMusicianRoute
+  PricingIndexRoute: typeof PricingIndexRoute
   VibeCheckIndexRoute: typeof VibeCheckIndexRoute
 }
 
@@ -321,13 +321,6 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -377,6 +370,13 @@ declare module '@tanstack/react-router' {
       path: '/vibe-check'
       fullPath: '/vibe-check/'
       preLoaderRoute: typeof VibeCheckIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing/': {
+      id: '/pricing/'
+      path: '/pricing'
+      fullPath: '/pricing/'
+      preLoaderRoute: typeof PricingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vibe-check/musician': {
@@ -463,17 +463,6 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
-interface PricingRouteChildren {
-  PricingBrandsRoute: typeof PricingBrandsRoute
-}
-
-const PricingRouteChildren: PricingRouteChildren = {
-  PricingBrandsRoute: PricingBrandsRoute,
-}
-
-const PricingRouteWithChildren =
-  PricingRoute._addFileChildren(PricingRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
@@ -481,7 +470,6 @@ const rootRouteChildren: RootRouteChildren = {
   FanSignupRoute: FanSignupRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
-  PricingRoute: PricingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
@@ -490,8 +478,19 @@ const rootRouteChildren: RootRouteChildren = {
   USlugRoute: USlugRoute,
   VibeCheckBrandRoute: VibeCheckBrandRoute,
   VibeCheckMusicianRoute: VibeCheckMusicianRoute,
+  PricingIndexRoute: PricingIndexRoute,
   VibeCheckIndexRoute: VibeCheckIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
