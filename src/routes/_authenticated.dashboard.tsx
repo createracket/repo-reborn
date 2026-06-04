@@ -81,7 +81,7 @@ function DashboardPage() {
         }
       }
 
-      const [{ data: vibes }, { data: rosterRows }, { data: communityRows }, { data: profile }] = await Promise.all([
+      const [{ data: vibes }, { data: rosterRows }, { data: communityRows }, { data: featuredRows }, { data: profile }] = await Promise.all([
         supabase
           .from("vibe_check_responses")
           .select("id, created_at, result, answers, artist_score, brand_score")
@@ -96,6 +96,12 @@ function DashboardPage() {
           .select("id, display_name, account_type, tagline, location, avatar_url")
           .order("created_at", { ascending: false })
           .limit(8),
+        (supabase as any)
+          .from("public_profiles")
+          .select("id, display_name, artist_name, account_type, bio, location, avatar_url")
+          .eq("is_featured", true)
+          .order("created_at", { ascending: false })
+          .limit(8),
         supabase
           .from("profiles")
           .select("display_name")
@@ -105,7 +111,15 @@ function DashboardPage() {
 
       setDisplayName(profile?.display_name ?? null);
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
-      setCommunity((communityRows as CommunityMember[]) ?? []);
+      const featuredMembers: CommunityMember[] = ((featuredRows ?? []) as any[]).map((p) => ({
+        id: p.id,
+        display_name: p.artist_name || p.display_name || "Member",
+        account_type: (p.account_type ?? "artist") as CommunityMember["account_type"],
+        tagline: p.bio ?? null,
+        location: p.location ?? null,
+        avatar_url: p.avatar_url ?? null,
+      }));
+      setCommunity([...featuredMembers, ...((communityRows as CommunityMember[]) ?? [])].slice(0, 12));
 
       if (rosterRows && rosterRows.length) {
         const memberIds = rosterRows.map((r) => r.member_id);
