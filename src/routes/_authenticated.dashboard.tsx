@@ -105,12 +105,13 @@ function DashboardPage() {
           .limit(8),
         supabase
           .from("profiles")
-          .select("display_name")
+          .select("display_name, slug, avatar_url, bio")
           .eq("id", u.user.id)
           .single(),
       ]);
 
       setDisplayName(profile?.display_name ?? null);
+      setProfileRow((profile as any) ?? null);
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
       const featuredMembers: CommunityMember[] = ((featuredRows ?? []) as any[]).map((p) => ({
         id: p.id,
