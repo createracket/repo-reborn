@@ -211,10 +211,13 @@ function EditProfilePage() {
       toast.error("Please upload or cancel the selected profile photo before saving.");
       return;
     }
-    const slug = form.slug.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
-    if (slug && !/^[a-z0-9][a-z0-9-]{1,40}$/.test(slug)) {
-      toast.error("Slug must be 2–41 chars, lowercase letters, numbers and hyphens");
-      return;
+    let slug: string | null = null;
+    if (form.slug.trim()) {
+      const v = validateSlug(form.slug);
+      if (!v.ok) { toast.error(v.reason); return; }
+      slug = v.normalized;
+      if (slugStatus.kind === "taken") { toast.error("That URL slug is already taken — try another"); return; }
+      if (slugStatus.kind === "checking") { toast.error("Still checking slug availability — try again in a sec"); return; }
     }
     setSaving(true);
     const cleanSocials: ProfileSocials = {};
