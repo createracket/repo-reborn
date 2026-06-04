@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogOut, Sparkles, Users, ClipboardList, UserCircle2 } from "lucide-react";
+import { LogOut, Sparkles, Users, ClipboardList, UserCircle2, CheckCircle2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
