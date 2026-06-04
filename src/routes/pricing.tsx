@@ -682,7 +682,7 @@ function BrandSectionBlock({ section }: { section: BrandSection }) {
       <div className="bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-pink-accent border-r border-b border-border flex items-center">
         {section.label}
       </div>
-      <div className="col-span-4 bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-pink-accent border-b border-border">
+      <div className="col-span-3 bg-card px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.15em] text-pink-accent border-b border-border">
         {section.heading}
       </div>
       {section.rows.map((row) => (
