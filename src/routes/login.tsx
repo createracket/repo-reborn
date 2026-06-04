@@ -31,11 +31,12 @@ export const ACCESS_CODE = "VERIFIEDFAN";
 
 const ACCOUNT_TYPES = [
   { value: "artist", label: "Artist" },
-  { value: "brand", label: "Brand" },
+  { value: "brand", label: "Brand (coming soon — join waitlist)" },
   { value: "creative", label: "Creative" },
   { value: "fan", label: "Fan" },
   { value: "crew", label: "Crew" },
 ] as const;
+
 type AccountTypeValue = (typeof ACCOUNT_TYPES)[number]["value"];
 
 
@@ -78,13 +79,15 @@ function LoginPage() {
   const nudgeShownRef = useRef(false);
 
   const accessCodeOk = accessCode.trim().toUpperCase() === ACCESS_CODE;
+  const brandPaused = mode === "signup" && accountType === "brand";
+
 
 
   // Where to send the user after auth succeeds. If they came from the Vibe
   // Check "Save my results" CTA — or we just see a pending vibe in storage —
   // we route to /results so its auto-save effect attaches the result to the
   // newly-created user before they land on the dashboard.
-  function postAuthDestination(): "/results" | "/dashboard" {
+  function postAuthDestination(): "/results" | "/dashboard" | "/vibe-check/musician" {
     if (next === "results") return "/results";
     if (typeof window !== "undefined") {
       try {
@@ -93,8 +96,11 @@ function LoginPage() {
         // ignore
       }
     }
+    // Fresh artist sign-up with no saved vibe → send straight into musician flow
+    if (mode === "signup" && accountType === "artist") return "/vibe-check/musician";
     return "/dashboard";
   }
+
 
   // Redirect once session is present. If the user selected a profile type
   // before signing in with Google (where we can't pass it via supabase.auth),
@@ -176,11 +182,17 @@ function LoginPage() {
 
   function gateSignupOrWaitlist(): boolean {
     if (mode !== "signup") return true;
+    if (brandPaused) {
+      toast.error("Brand sign-ups are paused. Join the waitlist to be first in.");
+      navigate({ to: "/fan-signup" });
+      return false;
+    }
     if (accessCodeOk) return true;
     toast.error("That access code isn't valid. Join the waitlist to get notified.");
     navigate({ to: "/fan-signup" });
     return false;
   }
+
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -293,9 +305,30 @@ function LoginPage() {
               </div>
             )}
 
+            {/* Brand soft-launch: waitlist instead of signup */}
+            {mode === "signup" && accessCodeOk && brandPaused && (
+              <div className="space-y-3 rounded-xl border border-coral/40 bg-coral/5 p-5">
+                <p className="text-xs uppercase tracking-[0.2em] text-coral">
+                  Coming soon
+                </p>
+                <h3 className="font-display text-xl">
+                  Brand & agency accounts open soon
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  We're focusing on artists for our soft launch. Drop your
+                  details on the waitlist and we'll let you know the moment
+                  brand sign-ups go live.
+                </p>
+                <Button asChild className="w-full">
+                  <Link to="/fan-signup">Join the brand waitlist</Link>
+                </Button>
+              </div>
+            )}
+
             {/* Full signup form — only visible once access code is correct */}
-            {mode === "signup" && accessCodeOk && (
+            {mode === "signup" && accessCodeOk && !brandPaused && (
               <>
+
                 <Button
                   type="button"
                   variant="outline"

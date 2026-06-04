@@ -49,6 +49,7 @@ function VibeCheckLanding() {
             title="Brand / Agency"
             blurb="For brands, agencies and labels building a campaign or roster."
             to="/vibe-check/brand"
+            comingSoon
           />
         </div>
       </section>
@@ -62,12 +63,34 @@ function FlowCard({
   title,
   blurb,
   to,
+  comingSoon,
 }: {
   icon: React.ReactNode;
   title: string;
   blurb: string;
   to: string;
+  comingSoon?: boolean;
 }) {
+  if (comingSoon) {
+    return (
+      <div
+        aria-disabled="true"
+        className="relative cursor-not-allowed rounded-2xl border border-border/60 bg-card p-8 opacity-60"
+      >
+        <span className="absolute right-4 top-4 rounded-full border border-border/60 bg-background px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          Coming soon
+        </span>
+        <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-background">
+          {icon}
+        </div>
+        <h3 className="font-display text-2xl">{title}</h3>
+        <p className="mt-2 text-muted-foreground">{blurb}</p>
+        <div className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-muted-foreground">
+          Available soon
+        </div>
+      </div>
+    );
+  }
   return (
     <Link
       to={to}
@@ -84,3 +107,4 @@ function FlowCard({
     </Link>
   );
 }
+
