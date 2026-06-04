@@ -198,7 +198,7 @@ function Home() {
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex">
             <Link to="/vibe-check" className="hover:text-white">Vibe Check</Link>
-            <a href="#ecosystem" className="hover:text-white">How it works</a>
+            <Link to="/how-it-works" className="hover:text-white">How it works</Link>
           </nav>
           <HeroAuthButton />
 

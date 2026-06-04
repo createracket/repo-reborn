@@ -14,6 +14,7 @@ import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FanSignupRouteImport } from './routes/fan-signup'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -54,6 +55,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/fan-signup'
     | '/forgot-password'
+    | '/how-it-works'
     | '/login'
     | '/privacy'
     | '/reset-password'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/fan-signup'
     | '/forgot-password'
+    | '/how-it-works'
     | '/login'
     | '/privacy'
     | '/reset-password'
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/fan-signup'
     | '/forgot-password'
+    | '/how-it-works'
     | '/login'
     | '/privacy'
     | '/reset-password'
@@ -280,6 +292,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   FanSignupRoute: typeof FanSignupRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -329,6 +342,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -470,6 +490,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   FanSignupRoute: FanSignupRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  HowItWorksRoute: HowItWorksRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
