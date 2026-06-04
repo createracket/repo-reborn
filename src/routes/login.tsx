@@ -79,6 +79,8 @@ function LoginPage() {
   const nudgeShownRef = useRef(false);
 
   const accessCodeOk = accessCode.trim().toUpperCase() === ACCESS_CODE;
+  const brandPaused = mode === "signup" && accountType === "brand";
+
 
 
   // Where to send the user after auth succeeds. If they came from the Vibe
