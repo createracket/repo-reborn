@@ -339,6 +339,11 @@ function PricingPage() {
           </div>
         </div>
 
+        {/* Brand-facing tiers */}
+        <BrandTiersSection />
+
+
+
         {/* Special discounts */}
         <section className="mt-20">
           <div className="mb-8 max-w-2xl">
