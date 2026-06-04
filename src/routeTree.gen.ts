@@ -27,6 +27,7 @@ import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as USlugRouteImport } from './routes/u.$slug'
 import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
 import { Route as PricingBrandsRouteImport } from './routes/pricing.brands'
+import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated.connect'
@@ -121,6 +122,11 @@ const PricingBrandsRoute = PricingBrandsRouteImport.update({
   path: '/pricing/brands',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrandsHowItWorksRoute = BrandsHowItWorksRouteImport.update({
+  id: '/brands/how-it-works',
+  path: '/brands/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/pricing/brands': typeof PricingBrandsRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/pricing/brands': typeof PricingBrandsRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/pricing/brands': typeof PricingBrandsRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
@@ -230,6 +239,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/dashboard'
     | '/profile'
+    | '/brands/how-it-works'
     | '/pricing/brands'
     | '/spotlight/$slug'
     | '/u/$slug'
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/dashboard'
     | '/profile'
+    | '/brands/how-it-works'
     | '/pricing/brands'
     | '/spotlight/$slug'
     | '/u/$slug'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/_authenticated/connect'
     | '/_authenticated/dashboard'
     | '/_authenticated/profile'
+    | '/brands/how-it-works'
     | '/pricing/brands'
     | '/spotlight/$slug'
     | '/u/$slug'
@@ -298,6 +310,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
   TermsRoute: typeof TermsRoute
+  BrandsHowItWorksRoute: typeof BrandsHowItWorksRoute
   PricingBrandsRoute: typeof PricingBrandsRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
   USlugRoute: typeof USlugRoute
@@ -435,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingBrandsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/brands/how-it-works': {
+      id: '/brands/how-it-works'
+      path: '/brands/how-it-works'
+      fullPath: '/brands/how-it-works'
+      preLoaderRoute: typeof BrandsHowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -496,6 +516,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
   TermsRoute: TermsRoute,
+  BrandsHowItWorksRoute: BrandsHowItWorksRoute,
   PricingBrandsRoute: PricingBrandsRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
   USlugRoute: USlugRoute,
