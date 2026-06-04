@@ -191,6 +191,17 @@ function DashboardPage() {
           </div>
         </div>
 
+        <SetupChecklist
+          loading={loading}
+          hasVibe={!!latestVibe}
+          profileComplete={!!profileRow?.slug && !!profileRow?.avatar_url && !!(profileRow?.display_name || displayName) && !!profileRow?.bio}
+          hasSlug={!!profileRow?.slug}
+          hasAvatar={!!profileRow?.avatar_url}
+          hasBio={!!profileRow?.bio}
+        />
+
+
+
         <div className="grid gap-6 lg:grid-cols-3">
           {/* VIBE CARD (spans 2) */}
           <div className="lg:col-span-2">
