@@ -103,6 +103,7 @@ function EditProfilePage() {
         .maybeSingle();
       if (data) {
         const d = data as any;
+        setOriginalSlug(d.slug ?? "");
         setForm({
           slug: d.slug ?? "",
           display_name: d.display_name ?? "",
