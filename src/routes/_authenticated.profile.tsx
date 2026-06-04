@@ -257,6 +257,7 @@ function EditProfilePage() {
       }
       return;
     }
+    setOriginalSlug(slug ?? "");
     toast.success(form.avatar_url ? "Profile updated with your thumbnail" : "Profile updated");
   }
 
