@@ -504,7 +504,7 @@ const brandTierMeta: Record<
   },
 };
 
-const brandTiers: BrandTier[] = ["discovery", "seed", "endorse", "partner"];
+const brandTiers: BrandTier[] = ["seed", "endorse", "partner"];
 
 type BrandCell = { tick?: boolean; dash?: boolean; text?: string; note?: string };
 type BrandRow = { label: string; values: Record<BrandTier, BrandCell> };
