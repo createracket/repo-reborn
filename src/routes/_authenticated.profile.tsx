@@ -76,8 +76,8 @@ function EditProfilePage() {
     setSlugStatus({ kind: "checking" });
     let cancelled = false;
     const t = setTimeout(async () => {
-      const { data } = await supabase
-        .from("profiles")
+      const { data } = await (supabase as any)
+        .from("public_profiles")
         .select("id")
         .eq("slug", v.normalized)
         .maybeSingle();
