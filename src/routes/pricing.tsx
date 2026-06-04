@@ -754,11 +754,29 @@ function BrandTiersSection() {
         {n.body}
       </div>
 
+      {/* Discovery (free) hero */}
+      <div className="rounded-2xl border border-border bg-card p-6 md:p-8 mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <div className="font-headline text-lg tracking-wide text-muted-foreground">DISCOVERY</div>
+            <div className="mt-1 font-display text-5xl tracking-tight">Free</div>
+            <p className="mt-3 text-sm text-muted-foreground max-w-md">
+              {n.accessFree}. Browse curated artist profiles and get a feel for how Racket works before you commit to a campaign.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 text-sm text-foreground/80">
+            <div className="flex items-center gap-2"><span className="text-primary font-semibold">✓</span> Browse curated artists</div>
+            <div className="flex items-center gap-2"><span className="text-primary font-semibold">✓</span> No commitment</div>
+            <div className="flex items-center gap-2"><span className="text-primary font-semibold">✓</span> Upgrade when you're ready</div>
+          </div>
+        </div>
+      </div>
+
       {/* Brand grid */}
       <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-2xl shadow-black/30">
         <div
-          className="min-w-[820px] grid"
-          style={{ gridTemplateColumns: "150px repeat(4, 1fr)" }}
+          className="min-w-[720px] grid"
+          style={{ gridTemplateColumns: "170px repeat(3, 1fr)" }}
         >
           {/* Header */}
           <div className="border-r border-b border-border bg-card" />
@@ -769,17 +787,17 @@ function BrandTiersSection() {
               <div
                 key={t}
                 className={cn(
-                  "p-4 border-b border-border",
+                  "p-5 border-b border-border",
                   !isLast && "border-r",
                   meta.tint,
                   meta.accent,
                 )}
               >
-                <div className="font-headline text-base tracking-wide">
+                <div className="font-headline text-lg tracking-wide">
                   {meta.name.toUpperCase()}
                 </div>
-                <div className="mt-1 text-xs opacity-75">{meta.price}</div>
-                <div className="mt-2 inline-block rounded-full bg-background/60 px-2 py-0.5 text-[10px] font-medium">
+                <div className="mt-2 text-xs opacity-75">{meta.price}</div>
+                <div className="mt-3 inline-block rounded-full bg-background/60 px-2 py-0.5 text-[10px] font-medium">
                   {n.tags[t]}
                 </div>
               </div>
