@@ -460,7 +460,7 @@ function AdminPage() {
               onCreated={async () => {
                 const { data } = await supabase
                   .from("profiles")
-                  .select("id, email, display_name, account_type, created_at")
+                  .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured")
                   .order("created_at", { ascending: false });
                 setProfiles((data as Profile[]) ?? []);
               }}
