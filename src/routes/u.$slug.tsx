@@ -60,8 +60,8 @@ function PublicProfilePage() {
 
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
-        .from("profiles")
+      const { data, error } = await (supabase as any)
+        .from("public_profiles")
         .select("id, slug, display_name, artist_name, location, bio, avatar_url, socials, total_followers, total_streams, monthly_streams, avg_reach, avg_engagement, top_audience_location")
         .eq("slug", slug)
         .maybeSingle();

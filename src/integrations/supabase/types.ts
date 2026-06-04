@@ -305,6 +305,7 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          is_featured: boolean
           location: string | null
           marketing_opt_in: boolean
           monthly_streams: number | null
@@ -330,6 +331,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id: string
+          is_featured?: boolean
           location?: string | null
           marketing_opt_in?: boolean
           monthly_streams?: number | null
@@ -355,6 +357,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          is_featured?: boolean
           location?: string | null
           marketing_opt_in?: boolean
           monthly_streams?: number | null
@@ -501,27 +504,63 @@ export type Database = {
       public_profiles: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"] | null
+          artist_name: string | null
           avatar_url: string | null
+          avg_engagement: number | null
+          avg_reach: number | null
           bio: string | null
           created_at: string | null
           display_name: string | null
           id: string | null
+          is_featured: boolean | null
+          location: string | null
+          monthly_streams: number | null
+          slug: string | null
+          socials: Json | null
+          top_audience_location: string | null
+          total_followers: number | null
+          total_streams: number | null
+          values: string[] | null
         }
         Insert: {
           account_type?: Database["public"]["Enums"]["account_type"] | null
+          artist_name?: string | null
           avatar_url?: string | null
+          avg_engagement?: number | null
+          avg_reach?: number | null
           bio?: string | null
           created_at?: string | null
           display_name?: string | null
           id?: string | null
+          is_featured?: boolean | null
+          location?: string | null
+          monthly_streams?: number | null
+          slug?: string | null
+          socials?: Json | null
+          top_audience_location?: string | null
+          total_followers?: number | null
+          total_streams?: number | null
+          values?: string[] | null
         }
         Update: {
           account_type?: Database["public"]["Enums"]["account_type"] | null
+          artist_name?: string | null
           avatar_url?: string | null
+          avg_engagement?: number | null
+          avg_reach?: number | null
           bio?: string | null
           created_at?: string | null
           display_name?: string | null
           id?: string | null
+          is_featured?: boolean | null
+          location?: string | null
+          monthly_streams?: number | null
+          slug?: string | null
+          socials?: Json | null
+          top_audience_location?: string | null
+          total_followers?: number | null
+          total_streams?: number | null
+          values?: string[] | null
         }
         Relationships: []
       }

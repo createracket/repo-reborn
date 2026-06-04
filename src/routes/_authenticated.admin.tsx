@@ -41,7 +41,7 @@ type LeadBrief = {
 };
 type ContactMsg = { id: string; created_at: string; name: string; email: string; message: string; handled: boolean };
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
-type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null };
+type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null };
 type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null };
 
 type Spotlight = {
@@ -101,7 +101,7 @@ function AdminPage() {
         supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
-        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id").order("created_at", { ascending: false }),
@@ -460,14 +460,21 @@ function AdminPage() {
               onCreated={async () => {
                 const { data } = await supabase
                   .from("profiles")
-                  .select("id, email, display_name, account_type, created_at")
+                  .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured")
                   .order("created_at", { ascending: false });
                 setProfiles((data as Profile[]) ?? []);
               }}
             />
             <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Featured in Suggested matches</CardTitle>
+                <CardDescription>
+                  Toggle a user to surface their public profile on every dashboard's "Suggested matches" card.
+                  Users without a public slug won't appear publicly — set one on their profile first.
+                </CardDescription>
+              </CardHeader>
               <CardContent className="p-0">
-                <Table headers={["Display name", "Email", "Profile type", "Joined"]}>
+                <Table headers={["Display name", "Email", "Profile type", "Slug", "Joined", "Featured"]}>
                   {profiles.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
@@ -481,7 +488,30 @@ function AdminPage() {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </td>
+                      <td className="p-3 text-muted-foreground">
+                        {p.slug ? <code className="text-xs">/u/{p.slug}</code> : <span className="text-xs italic">no slug</span>}
+                      </td>
                       <td className="p-3 text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
+                      <td className="p-3">
+                        <Switch
+                          checked={!!p.is_featured}
+                          disabled={!p.slug}
+                          onCheckedChange={async (checked) => {
+                            const prev = profiles;
+                            setProfiles((rows) => rows.map((r) => r.id === p.id ? { ...r, is_featured: checked } : r));
+                            const { error } = await supabase
+                              .from("profiles")
+                              .update({ is_featured: checked })
+                              .eq("id", p.id);
+                            if (error) {
+                              setProfiles(prev);
+                              toast.error(error.message);
+                            } else {
+                              toast.success(checked ? "Now featured" : "Removed from featured");
+                            }
+                          }}
+                        />
+                      </td>
                     </tr>
                   ))}
                 </Table>
