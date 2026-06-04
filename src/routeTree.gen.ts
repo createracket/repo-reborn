@@ -111,9 +111,9 @@ const SpotlightSlugRoute = SpotlightSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingBrandsRoute = PricingBrandsRouteImport.update({
-  id: '/brands',
-  path: '/brands',
-  getParentRoute: () => PricingRoute,
+  id: '/pricing/brands',
+  path: '/pricing/brands',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
@@ -285,6 +285,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
   TermsRoute: typeof TermsRoute
+  PricingBrandsRoute: typeof PricingBrandsRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
   USlugRoute: typeof USlugRoute
   VibeCheckBrandRoute: typeof VibeCheckBrandRoute
@@ -409,10 +410,10 @@ declare module '@tanstack/react-router' {
     }
     '/pricing/brands': {
       id: '/pricing/brands'
-      path: '/brands'
+      path: '/pricing/brands'
       fullPath: '/pricing/brands'
       preLoaderRoute: typeof PricingBrandsRouteImport
-      parentRoute: typeof PricingRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
@@ -474,6 +475,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
   TermsRoute: TermsRoute,
+  PricingBrandsRoute: PricingBrandsRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
   USlugRoute: USlugRoute,
   VibeCheckBrandRoute: VibeCheckBrandRoute,
