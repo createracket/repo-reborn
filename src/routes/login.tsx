@@ -296,9 +296,30 @@ function LoginPage() {
               </div>
             )}
 
+            {/* Brand soft-launch: waitlist instead of signup */}
+            {mode === "signup" && accessCodeOk && brandPaused && (
+              <div className="space-y-3 rounded-xl border border-coral/40 bg-coral/5 p-5">
+                <p className="text-xs uppercase tracking-[0.2em] text-coral">
+                  Coming soon
+                </p>
+                <h3 className="font-display text-xl">
+                  Brand & agency accounts open soon
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  We're focusing on artists for our soft launch. Drop your
+                  details on the waitlist and we'll let you know the moment
+                  brand sign-ups go live.
+                </p>
+                <Button asChild className="w-full">
+                  <Link to="/fan-signup">Join the brand waitlist</Link>
+                </Button>
+              </div>
+            )}
+
             {/* Full signup form — only visible once access code is correct */}
-            {mode === "signup" && accessCodeOk && (
+            {mode === "signup" && accessCodeOk && !brandPaused && (
               <>
+
                 <Button
                   type="button"
                   variant="outline"
