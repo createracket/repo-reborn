@@ -336,8 +336,22 @@ function PricingPage() {
           </div>
         </div>
 
-        {/* Brand-facing tiers */}
-        <BrandTiersSection />
+        {/* Cross-link to brands pricing */}
+        <div className="mt-12 rounded-2xl border border-border bg-card/60 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <div className="font-headline text-sm tracking-wide text-pink-accent">FOR BRANDS</div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Looking to work with Racket artists? See our brand-facing tiers.
+            </p>
+          </div>
+          <Link
+            to="/pricing/brands"
+            className="text-sm font-medium text-primary hover:underline whitespace-nowrap"
+          >
+            View brand pricing →
+          </Link>
+        </div>
+
 
 
 
