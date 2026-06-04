@@ -466,8 +466,15 @@ function AdminPage() {
               }}
             />
             <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Featured in Suggested matches</CardTitle>
+                <CardDescription>
+                  Toggle a user to surface their public profile on every dashboard's "Suggested matches" card.
+                  Users without a public slug won't appear publicly — set one on their profile first.
+                </CardDescription>
+              </CardHeader>
               <CardContent className="p-0">
-                <Table headers={["Display name", "Email", "Profile type", "Joined"]}>
+                <Table headers={["Display name", "Email", "Profile type", "Slug", "Joined", "Featured"]}>
                   {profiles.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
@@ -481,7 +488,30 @@ function AdminPage() {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </td>
+                      <td className="p-3 text-muted-foreground">
+                        {p.slug ? <code className="text-xs">/u/{p.slug}</code> : <span className="text-xs italic">no slug</span>}
+                      </td>
                       <td className="p-3 text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
+                      <td className="p-3">
+                        <Switch
+                          checked={!!p.is_featured}
+                          disabled={!p.slug}
+                          onCheckedChange={async (checked) => {
+                            const prev = profiles;
+                            setProfiles((rows) => rows.map((r) => r.id === p.id ? { ...r, is_featured: checked } : r));
+                            const { error } = await supabase
+                              .from("profiles")
+                              .update({ is_featured: checked })
+                              .eq("id", p.id);
+                            if (error) {
+                              setProfiles(prev);
+                              toast.error(error.message);
+                            } else {
+                              toast.success(checked ? "Now featured" : "Removed from featured");
+                            }
+                          }}
+                        />
+                      </td>
                     </tr>
                   ))}
                 </Table>
