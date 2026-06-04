@@ -87,7 +87,7 @@ function LoginPage() {
   // Check "Save my results" CTA — or we just see a pending vibe in storage —
   // we route to /results so its auto-save effect attaches the result to the
   // newly-created user before they land on the dashboard.
-  function postAuthDestination(): "/results" | "/dashboard" {
+  function postAuthDestination(): "/results" | "/dashboard" | "/vibe-check/musician" {
     if (next === "results") return "/results";
     if (typeof window !== "undefined") {
       try {
@@ -96,8 +96,11 @@ function LoginPage() {
         // ignore
       }
     }
+    // Fresh artist sign-up with no saved vibe → send straight into musician flow
+    if (mode === "signup" && accountType === "artist") return "/vibe-check/musician";
     return "/dashboard";
   }
+
 
   // Redirect once session is present. If the user selected a profile type
   // before signing in with Google (where we can't pass it via supabase.auth),
