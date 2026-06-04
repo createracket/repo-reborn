@@ -19,20 +19,20 @@ const discounts: Array<{
   {
     title: "Low income / working class",
     months: "1",
-    body: "Self-declared low income or working class artists. Applied at signup — no proof of income required.",
-    eligibility: "Self-declared at signup",
+    body: "Self-declared low income or working class artists. Apply here in 2 mins — no proof of income required.",
+    eligibility: "\n",
   },
   {
     title: "Underrepresented backgrounds",
     months: "2",
-    body: "Artists from underrepresented or minority backgrounds — including First Nations, POC, LGBTQIA+ and disabled artists.",
-    eligibility: "Verified by Racket community team",
+    body: "Artists from underrepresented or minority backgrounds — including First Nations, POC, LGBTQIA+, and artists with disability.",
+    eligibility: "\n",
   },
   {
     title: "Partner referrals",
     months: "3",
-    body: "Artists meeting both criteria above, or referred to us by a partner organisation working with underrepresented artists.",
-    eligibility: "Referral or combined eligibility",
+    body: "Racket strives to level the playing field for artists who face multiple disadvantages — our partners can also refer artists for ongoing support.",
+    eligibility: "",
   },
 ];
 
@@ -233,14 +233,12 @@ function PricingPage() {
       <SiteHeader />
       <main className="container mx-auto max-w-6xl px-4 py-16">
         <div className="mb-10 max-w-2xl">
-          <p className="mb-3 text-xs uppercase tracking-[0.2em] text-primary">Membership</p>
+          <p className="mb-3 text-xs uppercase tracking-[0.2em] text-primary">FOR ARTISTS</p>
           <h1 className="font-display text-4xl md:text-5xl leading-[1.05]">
             PICK YOUR <span className="text-gradient-racket">TIER</span>
           </h1>
           <p className="mt-4 text-base text-muted-foreground">
-            Find the right tier for where you are as an artist — from getting on the
-            radar to a fully managed ambassador partnership. Pay monthly or save 17%
-            paying annually.
+            Find the right level of Racket for where you're at as an artist — from growing your community to proactive support for your long-term ambitions.
           </p>
         </div>
 
@@ -251,14 +249,13 @@ function PricingPage() {
               <div className="font-headline text-lg tracking-wide text-muted-foreground">FREE</div>
               <div className="mt-1 font-display text-5xl tracking-tight">$0</div>
               <p className="mt-3 text-sm text-muted-foreground max-w-md">
-                A basic artist profile (name, genre, bio, links) and read-only access to the community. Explore everything Racket has to offer before you commit.
+                Community access includes a basic artist profile (name, genre, bio, links), expert resources, and invites to artist events.
               </p>
             </div>
             <div className="flex flex-col gap-2 text-sm text-foreground/80">
               <div className="flex items-center gap-2"><span className="text-primary font-semibold">✓</span> Basic profile</div>
-              <div className="flex items-center gap-2"><span className="text-primary font-semibold">✓</span> Read-only community</div>
-              <div className="flex items-center gap-2"><span className="text-muted-foreground">–</span> No brand briefings</div>
-              <div className="flex items-center gap-2"><span className="text-muted-foreground">–</span> No deals or campaigns</div>
+              <div className="flex items-center gap-2"><span className="text-primary font-semibold">✓</span> Community access</div>
+              <div className="flex items-center gap-2"><span className="text-primary font-semibold">✓</span> Free resources</div>
             </div>
           </div>
         </div>
@@ -348,16 +345,15 @@ function PricingPage() {
         <section className="mt-20">
           <div className="mb-8 max-w-2xl">
             <p className="mb-3 text-xs uppercase tracking-[0.2em] text-pink-accent">
-              Special discounts
+              ARTIST SUPPORT
             </p>
             <h2 className="font-display text-3xl md:text-4xl leading-[1.05]">
-              ACCESS SUPPORT FOR ARTISTS WHO NEED IT
+              FOR ARTISTS WHO NEED IT
             </h2>
             <p className="mt-4 text-base text-muted-foreground">
-              We offer 1–3 months of free paid tier access to artists who face
-              barriers to entry. A genuinely diverse roster makes Create Racket a
-              more credible offer to brands — so this is a core part of how we
-              build it.
+              We offer 1–3 months of free paid tier access to artists who may be
+              disadvantaged. Removing the barrier to entry helps Racket to foster
+              genuine diversity.
             </p>
           </div>
 
@@ -388,7 +384,7 @@ function PricingPage() {
           </div>
 
           <p className="mt-6 text-xs text-muted-foreground">
-            Apply at signup or email{" "}
+            Email{" "}
             <a
               href="mailto:community@createracket.com"
               className="text-primary hover:underline"
@@ -528,7 +524,7 @@ const narratives = {
     accessFree: "No commitment needed to explore",
     bottomTitle: "Why artists beat traditional lifestyle influencers",
     bottomBody:
-      "Working artists have engaged, trust-based communities built around creative identity — not follower counts. A musician with 4,000 Instagram followers who plays 80 shows a year is reaching real people in real moments. That's not a metric any platform can replicate. Racket gives brands structured, measurable access to that world for the first time.",
+      "Artists have more engaged, trust-based communities that hinge on authentic content — not follower counts. An emerging musician with 4,000 Instagram followers plays 80 shows a year, reaching real people in real moments. Racket measures impact differently, giving brands access to the relevant metrics that other platforms miss. ",
   },
   existing: {
     title:
@@ -722,13 +718,13 @@ function BrandTiersSection() {
           BRAND <span className="text-gradient-racket">TIERS</span>
         </h2>
         <p className="mt-4 text-base text-muted-foreground">
-          How brands work with Racket — from free discovery through to fully
-          managed ambassador programmes.
+          How brands work with Racket — from free discovery through to full
+          service solutions for ambassador partnerships and community management.
         </p>
       </div>
 
       {/* Audience toggle */}
-      <div className="mb-4 text-xs text-muted-foreground">Who are you pitching to?</div>
+      <div className="mb-4 text-xs text-muted-foreground">{"\n"}</div>
       <div className="inline-flex rounded-xl border border-border bg-card p-1 mb-5">
         {(
           [
