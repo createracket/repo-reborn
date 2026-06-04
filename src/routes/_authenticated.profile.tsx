@@ -56,6 +56,37 @@ function EditProfilePage() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [originalSlug, setOriginalSlug] = useState<string>("");
+  const [slugStatus, setSlugStatus] = useState<
+    | { kind: "idle" }
+    | { kind: "checking" }
+    | { kind: "invalid"; reason: string }
+    | { kind: "taken" }
+    | { kind: "available" }
+    | { kind: "unchanged" }
+  >({ kind: "idle" });
+
+  // Live slug availability check (debounced)
+  useEffect(() => {
+    const raw = form.slug;
+    if (!raw) { setSlugStatus({ kind: "idle" }); return; }
+    const v = validateSlug(raw);
+    if (!v.ok) { setSlugStatus({ kind: "invalid", reason: v.reason }); return; }
+    if (v.normalized === originalSlug) { setSlugStatus({ kind: "unchanged" }); return; }
+    setSlugStatus({ kind: "checking" });
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("slug", v.normalized)
+        .maybeSingle();
+      if (cancelled) return;
+      if (data && data.id !== userId) setSlugStatus({ kind: "taken" });
+      else setSlugStatus({ kind: "available" });
+    }, 400);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [form.slug, originalSlug, userId]);
 
   useEffect(() => {
     (async () => {
