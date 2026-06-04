@@ -72,7 +72,7 @@ const faqs: Array<{ q: string; a: ReactNode }> = [
 ];
 
 
-export const Route = createFileRoute("/pricing")({
+export const Route = createFileRoute("/pricing/")({
   head: () => ({
     meta: [
       { title: "Pricing — Create Racket" },
