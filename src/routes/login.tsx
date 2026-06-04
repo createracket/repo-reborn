@@ -31,11 +31,12 @@ export const ACCESS_CODE = "VERIFIEDFAN";
 
 const ACCOUNT_TYPES = [
   { value: "artist", label: "Artist" },
-  { value: "brand", label: "Brand" },
+  { value: "brand", label: "Brand (coming soon — join waitlist)" },
   { value: "creative", label: "Creative" },
   { value: "fan", label: "Fan" },
   { value: "crew", label: "Crew" },
 ] as const;
+
 type AccountTypeValue = (typeof ACCOUNT_TYPES)[number]["value"];
 
 
