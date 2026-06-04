@@ -179,11 +179,17 @@ function LoginPage() {
 
   function gateSignupOrWaitlist(): boolean {
     if (mode !== "signup") return true;
+    if (brandPaused) {
+      toast.error("Brand sign-ups are paused. Join the waitlist to be first in.");
+      navigate({ to: "/fan-signup" });
+      return false;
+    }
     if (accessCodeOk) return true;
     toast.error("That access code isn't valid. Join the waitlist to get notified.");
     navigate({ to: "/fan-signup" });
     return false;
   }
+
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
