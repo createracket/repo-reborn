@@ -302,10 +302,34 @@ function EditProfilePage() {
                 <Label htmlFor="slug">Custom URL slug</Label>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">/u/</span>
-                  <Input id="slug" value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="your-name" />
+                  <Input
+                    id="slug"
+                    value={form.slug}
+                    onChange={(e) => set("slug", normalizeSlug(e.target.value))}
+                    placeholder="your-name"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                  />
+                  <div className="w-5 shrink-0">
+                    {slugStatus.kind === "checking" ? <Loader2 className="size-4 animate-spin text-muted-foreground" /> : null}
+                    {slugStatus.kind === "available" ? <Check className="size-4 text-emerald-500" /> : null}
+                    {(slugStatus.kind === "taken" || slugStatus.kind === "invalid") ? <X className="size-4 text-destructive" /> : null}
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">Leave blank to keep your profile private.</p>
+                {slugStatus.kind === "available" ? (
+                  <p className="text-xs text-emerald-500">Nice — /u/{form.slug} is available.</p>
+                ) : slugStatus.kind === "unchanged" ? (
+                  <p className="text-xs text-muted-foreground">This is your current public URL.</p>
+                ) : slugStatus.kind === "taken" ? (
+                  <p className="text-xs text-destructive">That slug is already taken — try another.</p>
+                ) : slugStatus.kind === "invalid" ? (
+                  <p className="text-xs text-destructive">{slugStatus.reason}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">2–30 characters, lowercase letters, numbers and hyphens. Leave blank to keep your profile private.</p>
+                )}
               </div>
+
 
               <div className="md:col-span-2">
                 <Label>Profile photo (1:1)</Label>
