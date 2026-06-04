@@ -25,6 +25,7 @@ import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.music
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as USlugRouteImport } from './routes/u.$slug'
 import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
+import { Route as PricingBrandsRouteImport } from './routes/pricing.brands'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated.connect'
@@ -109,6 +110,11 @@ const SpotlightSlugRoute = SpotlightSlugRouteImport.update({
   path: '/spotlight/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PricingBrandsRoute = PricingBrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
+  getParentRoute: () => PricingRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -136,7 +142,7 @@ export interface FileRoutesByFullPath {
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
+  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/pricing/brands': typeof PricingBrandsRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -157,7 +164,7 @@ export interface FileRoutesByTo {
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
+  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/pricing/brands': typeof PricingBrandsRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -180,7 +188,7 @@ export interface FileRoutesById {
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
-  '/pricing': typeof PricingRoute
+  '/pricing': typeof PricingRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/pricing/brands': typeof PricingBrandsRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/dashboard'
     | '/profile'
+    | '/pricing/brands'
     | '/spotlight/$slug'
     | '/u/$slug'
     | '/vibe-check/brand'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/dashboard'
     | '/profile'
+    | '/pricing/brands'
     | '/spotlight/$slug'
     | '/u/$slug'
     | '/vibe-check/brand'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/_authenticated/connect'
     | '/_authenticated/dashboard'
     | '/_authenticated/profile'
+    | '/pricing/brands'
     | '/spotlight/$slug'
     | '/u/$slug'
     | '/vibe-check/brand'
@@ -269,7 +281,7 @@ export interface RootRouteChildren {
   FanSignupRoute: typeof FanSignupRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
-  PricingRoute: typeof PricingRoute
+  PricingRoute: typeof PricingRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
@@ -395,6 +407,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SpotlightSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pricing/brands': {
+      id: '/pricing/brands'
+      path: '/brands'
+      fullPath: '/pricing/brands'
+      preLoaderRoute: typeof PricingBrandsRouteImport
+      parentRoute: typeof PricingRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -444,6 +463,17 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface PricingRouteChildren {
+  PricingBrandsRoute: typeof PricingBrandsRoute
+}
+
+const PricingRouteChildren: PricingRouteChildren = {
+  PricingBrandsRoute: PricingBrandsRoute,
+}
+
+const PricingRouteWithChildren =
+  PricingRoute._addFileChildren(PricingRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
@@ -451,7 +481,7 @@ const rootRouteChildren: RootRouteChildren = {
   FanSignupRoute: FanSignupRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
-  PricingRoute: PricingRoute,
+  PricingRoute: PricingRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
