@@ -49,6 +49,15 @@ type CommunityMember = {
   avatar_url: string | null;
 };
 
+type Opportunity = {
+  id: string;
+  title: string;
+  description: string;
+  budget: number | null;
+  published_at: string | null;
+  created_at: string;
+};
+
 function DashboardPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string | null>(null);
@@ -57,7 +66,9 @@ function DashboardPage() {
   const [latestVibe, setLatestVibe] = useState<VibeRow | null>(null);
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [community, setCommunity] = useState<CommunityMember[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     (async () => {
