@@ -256,6 +256,63 @@ function DashboardPage() {
             </CardContent>
           </Card>
 
+          {/* NEW OPPORTUNITIES (full width) */}
+          <div className="lg:col-span-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-display text-2xl flex items-center gap-2">
+                  <Megaphone className="size-5 text-pink-accent" /> New opportunities
+                </CardTitle>
+                <CardDescription>
+                  Live briefs from brands working with Racket. If something fits, reply via{" "}
+                  <Link to="/contact" className="text-primary hover:underline">contact</Link>{" "}
+                  and we'll make the intro.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <p className="text-sm text-muted-foreground">Loading…</p>
+                ) : opportunities.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
+                    No open opportunities right now. We'll surface new briefs here as brands post them.
+                  </div>
+                ) : (
+                  <ul className="grid gap-3 md:grid-cols-2">
+                    {opportunities.map((o) => (
+                      <li
+                        key={o.id}
+                        className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="font-medium leading-tight">{o.title}</h3>
+                          {o.budget ? (
+                            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                              £{o.budget}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">
+                          {o.description}
+                        </p>
+                        <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
+                          <span>
+                            Posted {new Date(o.published_at ?? o.created_at).toLocaleDateString()}
+                          </span>
+                          <Button asChild size="sm" variant="ghost" className="h-7 px-2">
+                            <Link to="/contact">
+                              Express interest <ArrowRight className="ml-1 size-3" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+
           {/* ROSTER (full width) */}
           <div className="lg:col-span-3">
             <Card>
