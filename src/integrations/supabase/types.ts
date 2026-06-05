@@ -44,6 +44,8 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          published: boolean
+          published_at: string | null
           status: string
           target_audience: string | null
           timeline: string | null
@@ -58,6 +60,8 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          published?: boolean
+          published_at?: string | null
           status?: string
           target_audience?: string | null
           timeline?: string | null
@@ -72,6 +76,8 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          published?: boolean
+          published_at?: string | null
           status?: string
           target_audience?: string | null
           timeline?: string | null
