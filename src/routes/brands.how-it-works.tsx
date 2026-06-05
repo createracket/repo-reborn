@@ -15,7 +15,6 @@ import {
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { BrandGate } from "@/components/brands/BrandGate";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -39,20 +38,11 @@ export const Route = createFileRoute("/brands/how-it-works")({
         content:
           "A curated tier of artists with audiences that actually trust them. No follower-count gambles.",
       },
-      // Private brand section — don't index until launch
-      { name: "robots", content: "noindex,nofollow" },
     ],
   }),
-  component: GatedHowItWorksBrands,
+  component: HowItWorksBrands,
 });
 
-function GatedHowItWorksBrands() {
-  return (
-    <BrandGate title="How it works · for brands">
-      <HowItWorksBrands />
-    </BrandGate>
-  );
-}
 
 const fadeUp: Variants = {
   hidden: { y: 24, opacity: 0 },

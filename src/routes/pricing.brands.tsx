@@ -2,7 +2,6 @@ import { Fragment, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { BrandGate } from "@/components/brands/BrandGate";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/pricing/brands")({
@@ -20,19 +19,11 @@ export const Route = createFileRoute("/pricing/brands")({
         content:
           "Brand tiers for working with Racket artists — from free discovery through full-service ambassador programmes.",
       },
-      { name: "robots", content: "noindex,nofollow" },
     ],
   }),
-  component: GatedBrandsPricingPage,
+  component: BrandsPricingPage,
 });
 
-function GatedBrandsPricingPage() {
-  return (
-    <BrandGate title="Brand pricing">
-      <BrandsPricingPage />
-    </BrandGate>
-  );
-}
 
 type BrandTier = "discovery" | "seed" | "endorse" | "partner";
 

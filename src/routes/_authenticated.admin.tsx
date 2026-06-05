@@ -42,7 +42,7 @@ type LeadBrief = {
 type ContactMsg = { id: string; created_at: string; name: string; email: string; message: string; handled: boolean };
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
 type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null };
-type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null };
+type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null; published: boolean; published_at: string | null };
 
 type Spotlight = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
@@ -102,7 +102,7 @@ function AdminPage() {
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
-        supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email").order("created_at", { ascending: false }),
+        supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email, published, published_at").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id").order("created_at", { ascending: false }),
       ]);
@@ -228,17 +228,25 @@ function AdminPage() {
               onCreated={async () => {
                 const { data } = await supabase
                   .from("campaign_briefs")
-                  .select("id, created_at, title, description, user_id, budget, status, contact_email")
+                  .select("id, created_at, title, description, user_id, budget, status, contact_email, published, published_at")
                   .order("created_at", { ascending: false });
                 setCampaigns((data as CampaignBrief[]) ?? []);
               }}
             />
+            <p className="text-xs text-muted-foreground">
+              Toggle <span className="font-medium text-foreground">Publish as opportunity</span> to surface a brief on every signed-in artist's dashboard.
+            </p>
             {campaigns.length === 0 ? <Empty /> : campaigns.map((b) => (
               <Card key={b.id}>
                 <CardHeader>
                   <div className="flex justify-between gap-2">
                     <div>
-                      <CardTitle className="text-lg">{b.title}</CardTitle>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {b.title}
+                        {b.published ? (
+                          <Badge className="bg-primary/15 text-primary border-primary/30">Live opportunity</Badge>
+                        ) : null}
+                      </CardTitle>
                       <CardDescription>{b.contact_email ?? b.user_id}</CardDescription>
                       <div className="mt-1">
                         <ProfileChip
@@ -250,13 +258,46 @@ function AdminPage() {
                     <Meta date={b.created_at} status={b.status} />
                   </div>
                 </CardHeader>
-                <CardContent className="text-sm">
+                <CardContent className="space-y-3 text-sm">
                   <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
                   <KV k="Budget" v={b.budget ? `£${b.budget}` : "—"} />
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+                    <div>
+                      <Label htmlFor={`pub-${b.id}`} className="text-sm font-medium">
+                        Publish as opportunity
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {b.published
+                          ? `Visible to artists${b.published_at ? ` since ${new Date(b.published_at).toLocaleDateString()}` : ""}.`
+                          : "Hidden — only admins can see this brief."}
+                      </p>
+                    </div>
+                    <Switch
+                      id={`pub-${b.id}`}
+                      checked={b.published}
+                      onCheckedChange={async (checked) => {
+                        const nextPublishedAt = checked ? new Date().toISOString() : null;
+                        // optimistic
+                        setCampaigns((cs) => cs.map((c) => c.id === b.id ? { ...c, published: checked, published_at: nextPublishedAt } : c));
+                        const { error } = await supabase
+                          .from("campaign_briefs")
+                          .update({ published: checked, published_at: nextPublishedAt })
+                          .eq("id", b.id);
+                        if (error) {
+                          // revert
+                          setCampaigns((cs) => cs.map((c) => c.id === b.id ? { ...c, published: b.published, published_at: b.published_at } : c));
+                          toast.error(error.message);
+                        } else {
+                          toast.success(checked ? "Published to artist dashboards" : "Unpublished");
+                        }
+                      }}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             ))}
           </TabsContent>
+
 
 
           <TabsContent value="spotlights" className="mt-6 space-y-6">
