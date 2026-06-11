@@ -154,6 +154,7 @@ export type Database = {
       }
       lead_briefs: {
         Row: {
+          additional_info: string | null
           budget: number | null
           collaboration_types: string[]
           company: string | null
@@ -169,6 +170,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          additional_info?: string | null
           budget?: number | null
           collaboration_types?: string[]
           company?: string | null
@@ -184,6 +186,7 @@ export type Database = {
           title: string
         }
         Update: {
+          additional_info?: string | null
           budget?: number | null
           collaboration_types?: string[]
           company?: string | null
