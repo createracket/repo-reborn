@@ -338,49 +338,49 @@ function SpotlightPage() {
             <section className="mt-16">
               <h2 className="font-display text-3xl">Watch</h2>
               <div className="mt-4 grid gap-4 md:grid-cols-3">
-                {videos.map((v, i) => (
-                  <div
-                    key={i}
-                    className="relative overflow-hidden rounded-2xl border border-border/60 bg-muted/40"
-                    style={{ aspectRatio: "9 / 16" }}
-                  >
-                    {v.kind === "iframe" ? (
+                {videos.map((v, i) => {
+                  const isIg = v.provider === "instagram";
+                  return (
+                    <div
+                      key={i}
+                      className="relative overflow-hidden rounded-2xl border border-border/60 bg-muted/40"
+                      style={{ aspectRatio: "9 / 16" }}
+                    >
                       <iframe
                         src={v.src}
                         title={`${v.provider} video ${i + 1}`}
-                        className="size-full"
                         frameBorder={0}
                         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture; web-share"
                         allowFullScreen
                         loading="lazy"
                         scrolling="no"
+                        className={isIg ? "absolute left-1/2 -translate-x-1/2" : "size-full"}
+                        // Instagram embed has ~56px header and ~160px caption/footer.
+                        // Oversize + offset to crop white chrome, keeping only the media.
+                        style={
+                          isIg
+                            ? {
+                                top: "-56px",
+                                width: "100%",
+                                height: "calc(100% + 220px)",
+                              }
+                            : undefined
+                        }
                       />
-                    ) : (
-                      <a
-                        href={v.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group block size-full"
-                        aria-label={`Open ${v.provider} post`}
-                      >
-                        <img
-                          src={v.src}
-                          alt={`${v.provider} post ${i + 1}`}
-                          className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          loading="lazy"
-                          referrerPolicy="no-referrer"
-                        />
-                        <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10 transition-colors group-hover:bg-black/20">
-                          <span className="flex size-14 items-center justify-center rounded-full bg-white/90 shadow-lg">
-                            <svg viewBox="0 0 24 24" className="ml-0.5 size-6 fill-black" aria-hidden>
-                              <path d="M8 5v14l11-7z" />
-                            </svg>
-                          </span>
-                        </span>
-                      </a>
-                    )}
-                  </div>
-                ))}
+                      {isIg && (
+                        <a
+                          href={v.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label="Open on Instagram"
+                          className="absolute right-2 top-2 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-wide text-white backdrop-blur hover:bg-black/70"
+                        >
+                          Open
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </section>
           );
