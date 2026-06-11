@@ -53,6 +53,7 @@ const briefSchema = z.object({
   contact_email: z.string().trim().email("Enter a valid email").max(320),
   collaboration_types: z.array(z.string()).max(20),
   core_values: z.array(z.string()),
+  additional_info: z.string().trim().max(5000).optional(),
 });
 
 function ConnectPage() {
@@ -96,6 +97,7 @@ function ConnectPage() {
       contact_email: fd.get("contact_email")?.toString() ?? "",
       collaboration_types: types,
       core_values: values,
+      additional_info: fd.get("additional_info")?.toString() || undefined,
     });
 
     if (!parsed.success) {
@@ -126,7 +128,8 @@ function ConnectPage() {
         company: parsed.data.company ?? null,
         collaboration_types: parsed.data.collaboration_types,
         core_values: parsed.data.core_values,
-      });
+        additional_info: parsed.data.additional_info ?? null,
+      } as any);
       if (error) throw error;
       setSubmitted({ email: parsed.data.contact_email, name: parsed.data.contact_name });
       window.scrollTo({ top: 0, behavior: "smooth" });
