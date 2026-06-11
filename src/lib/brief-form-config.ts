@@ -11,7 +11,9 @@ export type BriefFieldKey =
   | "budget"
   | "timeline"
   | "target_audience"
-  | "contact_email";
+  | "contact_email"
+  | "additional_info";
+
 
 export type BriefFieldDef = {
   label: string;
@@ -37,6 +39,7 @@ export type BriefFormConfig = {
     core: BriefSection;
     vibe: BriefSection;
     contact: BriefSection;
+    extras: BriefSection;
   };
   fields: Record<BriefFieldKey, BriefFieldDef>;
   coreValuesLabel: string;
@@ -45,6 +48,7 @@ export type BriefFormConfig = {
   collaborationTypesLabel: string;
   collaborationTypes: string[];
 };
+
 
 // ---------- Defaults ----------
 
@@ -73,6 +77,10 @@ export const DEFAULT_BRIEF_FORM_CONFIG: BriefFormConfig = {
       title: "Contact",
       description: "We'll use this to follow up. Defaults to your account email.",
     },
+    extras: {
+      title: "Anything else?",
+      description: "Optional — share anything else that would help us match you with the right partners.",
+    },
   },
   fields: {
     title: { label: "Campaign title", placeholder: "e.g., Summer Vibes album launch" },
@@ -88,6 +96,10 @@ export const DEFAULT_BRIEF_FORM_CONFIG: BriefFormConfig = {
       placeholder: "e.g., Ages 18–25, into indie music, sustainable fashion, outdoor scenes.",
     },
     contact_email: { label: "Contact email", placeholder: "you@example.com" },
+    additional_info: {
+      label: "Anything else?",
+      placeholder: "Share extra context, references, links, or questions…",
+    },
   },
   coreValuesLabel: "Ideal partner's core values (pick up to 3)",
   coreValuesMax: 3,
@@ -125,6 +137,10 @@ export function mergeBriefFormConfig(
         ...DEFAULT_BRIEF_FORM_CONFIG.sections.contact,
         ...(overrides.sections?.contact ?? {}),
       },
+      extras: {
+        ...DEFAULT_BRIEF_FORM_CONFIG.sections.extras,
+        ...(overrides.sections?.extras ?? {}),
+      },
     },
     fields: {
       title: { ...DEFAULT_BRIEF_FORM_CONFIG.fields.title, ...(overrides.fields?.title ?? {}) },
@@ -144,6 +160,10 @@ export function mergeBriefFormConfig(
       contact_email: {
         ...DEFAULT_BRIEF_FORM_CONFIG.fields.contact_email,
         ...(overrides.fields?.contact_email ?? {}),
+      },
+      additional_info: {
+        ...DEFAULT_BRIEF_FORM_CONFIG.fields.additional_info,
+        ...(overrides.fields?.additional_info ?? {}),
       },
     },
     coreValuesLabel: overrides.coreValuesLabel ?? DEFAULT_BRIEF_FORM_CONFIG.coreValuesLabel,
