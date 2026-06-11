@@ -210,6 +210,30 @@ function BrandResults({ data, config }: { data: any; config: VibeCheckConfig }) 
   );
 }
 
+function SecondaryArchetype({ data, config }: { data: any; config: VibeCheckConfig }) {
+  const result = calculateVibeScore(data, config);
+  if (!result.secondary) return null;
+  return (
+    <div className="mx-auto mt-10 max-w-3xl">
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display text-2xl">
+            Close second: <span className="text-gradient-racket">{result.secondary}</span>
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Racket will keep this in mind when pairing you with the right partners.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">
+            {getArtistArchetypeDescription(result.secondary, config)}
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function ScoreBar({ label, score }: { label: string; score: number }) {
   return (
     <div>
