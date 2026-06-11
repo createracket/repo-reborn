@@ -148,7 +148,7 @@ export function BriefFormAdmin() {
             <div key={k} className="grid gap-3 border-b border-border/40 pb-4 last:border-0 md:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>
-                  {k === "core" ? "1. Core" : k === "vibe" ? "2. Vibe" : "3. Contact"} — title
+                  {k === "core" ? "1. Core" : k === "vibe" ? "2. Vibe" : k === "contact" ? "3. Contact" : "4. Extras"} — title
                 </Label>
                 <Input
                   value={draft.sections[k].title}
