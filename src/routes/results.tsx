@@ -129,6 +129,10 @@ function Results() {
             <RefreshCw className="mr-1 size-4" /> Retake
           </Button>
         </div>
+
+        {stored.flow === "musician" && (
+          <SecondaryArchetype data={stored.data} config={config} />
+        )}
       </main>
       <SiteFooter />
     </div>
