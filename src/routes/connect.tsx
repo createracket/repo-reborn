@@ -402,6 +402,28 @@ function ConnectPage() {
                     </div>
                   </section>
 
+                  <Separator />
+
+                  {/* Section 4 — Anything else */}
+                  <section className="space-y-6">
+                    <div>
+                      <h3 className="font-display text-lg">{config.sections.extras.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {config.sections.extras.description}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="additional_info">{f.additional_info.label}</Label>
+                      <Textarea
+                        id="additional_info"
+                        name="additional_info"
+                        placeholder={f.additional_info.placeholder}
+                        rows={5}
+                        maxLength={5000}
+                      />
+                    </div>
+                  </section>
+
                   <div className="flex justify-end pt-2">
                     <Button type="submit" size="lg" disabled={submitting}>
                       <Send className="mr-2 size-4" />
