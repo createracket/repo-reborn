@@ -18,6 +18,7 @@ import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FanSignupRouteImport } from './routes/fan-signup'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
@@ -30,7 +31,6 @@ import { Route as PricingBrandsRouteImport } from './routes/pricing.brands'
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
-import { Route as AuthenticatedConnectRouteImport } from './routes/_authenticated.connect'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 
 const TermsRoute = TermsRouteImport.update({
@@ -76,6 +76,11 @@ const FanSignupRoute = FanSignupRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectRoute = ConnectRouteImport.update({
+  id: '/connect',
+  path: '/connect',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -137,11 +142,6 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedConnectRoute = AuthenticatedConnectRouteImport.update({
-  id: '/connect',
-  path: '/connect',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -150,6 +150,7 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -160,7 +161,6 @@ export interface FileRoutesByFullPath {
   '/results': typeof ResultsRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
@@ -174,6 +174,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -184,7 +185,6 @@ export interface FileRoutesByTo {
   '/results': typeof ResultsRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/connect': typeof AuthenticatedConnectRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
@@ -200,6 +200,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -210,7 +211,6 @@ export interface FileRoutesById {
   '/results': typeof ResultsRoute
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
-  '/_authenticated/connect': typeof AuthenticatedConnectRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
@@ -226,6 +226,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/connect'
     | '/contact'
     | '/fan-signup'
     | '/forgot-password'
@@ -236,7 +237,6 @@ export interface FileRouteTypes {
     | '/results'
     | '/terms'
     | '/admin'
-    | '/connect'
     | '/dashboard'
     | '/profile'
     | '/brands/how-it-works'
@@ -250,6 +250,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/connect'
     | '/contact'
     | '/fan-signup'
     | '/forgot-password'
@@ -260,7 +261,6 @@ export interface FileRouteTypes {
     | '/results'
     | '/terms'
     | '/admin'
-    | '/connect'
     | '/dashboard'
     | '/profile'
     | '/brands/how-it-works'
@@ -275,6 +275,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/connect'
     | '/contact'
     | '/fan-signup'
     | '/forgot-password'
@@ -285,7 +286,6 @@ export interface FileRouteTypes {
     | '/results'
     | '/terms'
     | '/_authenticated/admin'
-    | '/_authenticated/connect'
     | '/_authenticated/dashboard'
     | '/_authenticated/profile'
     | '/brands/how-it-works'
@@ -301,6 +301,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  ConnectRoute: typeof ConnectRoute
   ContactRoute: typeof ContactRoute
   FanSignupRoute: typeof FanSignupRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -383,6 +384,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect': {
+      id: '/connect'
+      path: '/connect'
+      fullPath: '/connect'
+      preLoaderRoute: typeof ConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -469,13 +477,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/connect': {
-      id: '/_authenticated/connect'
-      path: '/connect'
-      fullPath: '/connect'
-      preLoaderRoute: typeof AuthenticatedConnectRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -488,14 +489,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
-  AuthenticatedConnectRoute: typeof AuthenticatedConnectRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
-  AuthenticatedConnectRoute: AuthenticatedConnectRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
 }
@@ -507,6 +506,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  ConnectRoute: ConnectRoute,
   ContactRoute: ContactRoute,
   FanSignupRoute: FanSignupRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
@@ -528,3 +528,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
