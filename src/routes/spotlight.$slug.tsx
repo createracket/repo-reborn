@@ -332,7 +332,7 @@ function SpotlightPage() {
         {(() => {
           const videos = [links.video1, links.video2, links.video3]
             .map((u) => (u ? getSocialEmbed(u) : null))
-            .filter((x): x is { src: string; provider: "tiktok" | "instagram" } => !!x);
+            .filter((x): x is NonNullable<ReturnType<typeof getSocialEmbed>> => !!x);
           if (videos.length === 0) return null;
           return (
             <section className="mt-16">
@@ -341,19 +341,44 @@ function SpotlightPage() {
                 {videos.map((v, i) => (
                   <div
                     key={i}
-                    className="overflow-hidden rounded-2xl border border-border/60 bg-muted/40"
+                    className="relative overflow-hidden rounded-2xl border border-border/60 bg-muted/40"
                     style={{ aspectRatio: "9 / 16" }}
                   >
-                    <iframe
-                      src={v.src}
-                      title={`${v.provider} video ${i + 1}`}
-                      className="size-full"
-                      frameBorder={0}
-                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture; web-share"
-                      allowFullScreen
-                      loading="lazy"
-                      scrolling="no"
-                    />
+                    {v.kind === "iframe" ? (
+                      <iframe
+                        src={v.src}
+                        title={`${v.provider} video ${i + 1}`}
+                        className="size-full"
+                        frameBorder={0}
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture; web-share"
+                        allowFullScreen
+                        loading="lazy"
+                        scrolling="no"
+                      />
+                    ) : (
+                      <a
+                        href={v.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group block size-full"
+                        aria-label={`Open ${v.provider} post`}
+                      >
+                        <img
+                          src={v.src}
+                          alt={`${v.provider} post ${i + 1}`}
+                          className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                        />
+                        <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10 transition-colors group-hover:bg-black/20">
+                          <span className="flex size-14 items-center justify-center rounded-full bg-white/90 shadow-lg">
+                            <svg viewBox="0 0 24 24" className="ml-0.5 size-6 fill-black" aria-hidden>
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
+                          </span>
+                        </span>
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>
