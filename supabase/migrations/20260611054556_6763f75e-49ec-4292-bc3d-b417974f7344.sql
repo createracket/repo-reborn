@@ -1,0 +1,1 @@
+ALTER TABLE public.lead_briefs ADD COLUMN IF NOT EXISTS additional_info text;
