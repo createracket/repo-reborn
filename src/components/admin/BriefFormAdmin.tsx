@@ -23,9 +23,10 @@ const FIELD_KEYS: BriefFieldKey[] = [
   "timeline",
   "target_audience",
   "contact_email",
+  "additional_info",
 ];
 
-const SECTION_KEYS = ["core", "vibe", "contact"] as const;
+const SECTION_KEYS = ["core", "vibe", "contact", "extras"] as const;
 type SectionKey = (typeof SECTION_KEYS)[number];
 
 export function BriefFormAdmin() {
