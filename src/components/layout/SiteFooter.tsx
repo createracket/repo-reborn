@@ -33,21 +33,6 @@ export function SiteFooter() {
           <div className="lg:col-span-3">
             <h3 className="mb-3 font-headline text-sm">Explore</h3>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link to="/vibe-check" className="hover:text-purple">
-                  Vibe Check
-                </Link>
-              </li>
-              <li>
-                <Link to="/pricing" className="hover:text-purple">
-                  Pricing
-                </Link>
-              </li>
-              <li>
-                <Link to="/pricing" hash="faq" className="hover:text-purple">
-                  FAQs
-                </Link>
-              </li>
               {!signedIn && (
                 <li>
                   <Link to="/fan-signup" className="hover:text-purple">
@@ -55,11 +40,6 @@ export function SiteFooter() {
                   </Link>
                 </li>
               )}
-              <li>
-                <Link to="/login" className="hover:text-purple">
-                  Log in
-                </Link>
-              </li>
             </ul>
           </div>
 
