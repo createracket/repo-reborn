@@ -196,10 +196,7 @@ function Home() {
           <Link to="/">
             <Wordmark variant="colour" className="h-9 w-auto" />
           </Link>
-          <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex">
-            <Link to="/vibe-check" className="hover:text-white">Vibe Check</Link>
-            <Link to="/how-it-works" className="hover:text-white">How it works</Link>
-          </nav>
+          <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex" />
           <HeroAuthButton />
 
         </header>
