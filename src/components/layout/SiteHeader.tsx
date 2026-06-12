@@ -60,12 +60,6 @@ export function SiteHeader() {
           <Wordmark variant="colour" className="h-8 w-auto" />
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <Link to="/vibe-check" className="hover:text-foreground transition-colors">
-            Vibe Check
-          </Link>
-          <Link to="/how-it-works" className="hover:text-foreground transition-colors">
-            How it works
-          </Link>
           {!signedIn && (
             <Link to="/fan-signup" className="hover:text-foreground transition-colors">
               Mailing list
