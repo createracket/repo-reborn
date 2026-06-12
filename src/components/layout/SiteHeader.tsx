@@ -105,11 +105,6 @@ export function SiteHeader() {
               <Button asChild size="sm" variant="ghost" className="hidden sm:inline-flex">
                 <Link to="/login">Log in</Link>
               </Button>
-              {!onLoginPage && (
-                <Button asChild size="sm">
-                  <Link to="/vibe-check">Take the Vibe Check</Link>
-                </Button>
-              )}
             </>
           )}
         </div>
