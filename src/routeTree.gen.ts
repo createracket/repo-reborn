@@ -32,6 +32,7 @@ import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-wor
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -147,6 +148,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/pricing/': typeof PricingIndexRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -195,6 +203,7 @@ export interface FileRoutesByTo {
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/pricing': typeof PricingIndexRoute
   '/vibe-check': typeof VibeCheckIndexRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -221,6 +230,7 @@ export interface FileRoutesById {
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/pricing/': typeof PricingIndexRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | '/vibe-check/musician'
     | '/pricing/'
     | '/vibe-check/'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -271,6 +282,7 @@ export interface FileRouteTypes {
     | '/vibe-check/musician'
     | '/pricing'
     | '/vibe-check'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -296,6 +308,7 @@ export interface FileRouteTypes {
     | '/vibe-check/musician'
     | '/pricing/'
     | '/vibe-check/'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -319,6 +332,7 @@ export interface RootRouteChildren {
   VibeCheckMusicianRoute: typeof VibeCheckMusicianRoute
   PricingIndexRoute: typeof PricingIndexRoute
   VibeCheckIndexRoute: typeof VibeCheckIndexRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -484,6 +498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -524,17 +545,8 @@ const rootRouteChildren: RootRouteChildren = {
   VibeCheckMusicianRoute: VibeCheckMusicianRoute,
   PricingIndexRoute: PricingIndexRoute,
   VibeCheckIndexRoute: VibeCheckIndexRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
