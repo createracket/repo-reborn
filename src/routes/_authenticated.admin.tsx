@@ -20,6 +20,7 @@ import { ACCESS_CODE } from "@/routes/login";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
 import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
+import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -192,6 +193,7 @@ function AdminPage() {
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="brief-form">Brief form</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
+            <TabsTrigger value="emails">Emails</TabsTrigger>
           </TabsList>
 
           <TabsContent value="leads" className="mt-6 space-y-3">
@@ -608,6 +610,10 @@ function AdminPage() {
 
           <TabsContent value="community" className="mt-6">
             <CommunityAdmin />
+          </TabsContent>
+
+          <TabsContent value="emails" className="mt-6">
+            <EmailsAdmin />
           </TabsContent>
         </Tabs>
       </main>
