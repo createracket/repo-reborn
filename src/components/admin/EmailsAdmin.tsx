@@ -87,7 +87,7 @@ export function EmailsAdmin() {
           },
         }),
         fetchStats({ data: { from } }),
-        fetchSuppressed({ data: {} }),
+        fetchSuppressed(),
       ]);
       setLogs(logsRes.rows);
       setLogsTotal(logsRes.total);
@@ -102,7 +102,7 @@ export function EmailsAdmin() {
   }
 
   useEffect(() => {
-    fetchTemplates({ data: {} })
+    fetchTemplates()
       .then((r) => setTemplates(r.templates))
       .catch(() => {});
   }, [fetchTemplates]);
