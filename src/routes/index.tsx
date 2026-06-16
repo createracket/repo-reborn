@@ -74,18 +74,24 @@ function WaitlistForm({
     e.preventDefault();
     if (!email) return;
     setBusy(true);
-    const { error } = await supabase.from("mailing_list_subscribers").insert({
-      email,
-      source: "homepage-waitlist",
-      marketing_opt_in: true,
-    });
-    setBusy(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const res = await fetch("/api/public/waitlist-join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "homepage-waitlist", marketing_opt_in: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(data?.error || "Couldn't join waitlist. Try again?");
+        return;
+      }
+      setEmail("");
+      setOpen(true);
+    } catch (err) {
+      toast.error("Network error — please try again.");
+    } finally {
+      setBusy(false);
     }
-    setEmail("");
-    setOpen(true);
   }
 
   return (

@@ -36,16 +36,24 @@ function ContactPage() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase
-      .from("contact_messages")
-      .insert({ name, email, message });
-    setBusy(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const res = await fetch("/api/public/contact-submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(data?.error || "Couldn't send message. Try again?");
+        return;
+      }
+      setDone(true);
+      toast.success("Message sent — we'll be in touch.");
+    } catch {
+      toast.error("Network error — please try again.");
+    } finally {
+      setBusy(false);
     }
-    setDone(true);
-    toast.success("Message sent — we'll be in touch.");
   }
 
   return (

@@ -34,6 +34,8 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
+import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact-submit'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -164,6 +166,16 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWaitlistJoinRoute = ApiPublicWaitlistJoinRouteImport.update({
+  id: '/api/public/waitlist-join',
+  path: '/api/public/waitlist-join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicContactSubmitRoute = ApiPublicContactSubmitRouteImport.update({
+  id: '/api/public/contact-submit',
+  path: '/api/public/contact-submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -217,6 +229,8 @@ export interface FileRoutesByFullPath {
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/pricing/': typeof PricingIndexRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
+  '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
+  '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -248,6 +262,8 @@ export interface FileRoutesByTo {
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/pricing': typeof PricingIndexRoute
   '/vibe-check': typeof VibeCheckIndexRoute
+  '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
+  '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -281,6 +297,8 @@ export interface FileRoutesById {
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/pricing/': typeof PricingIndexRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
+  '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
+  '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -314,6 +332,8 @@ export interface FileRouteTypes {
     | '/vibe-check/musician'
     | '/pricing/'
     | '/vibe-check/'
+    | '/api/public/contact-submit'
+    | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -345,6 +365,8 @@ export interface FileRouteTypes {
     | '/vibe-check/musician'
     | '/pricing'
     | '/vibe-check'
+    | '/api/public/contact-submit'
+    | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -377,6 +399,8 @@ export interface FileRouteTypes {
     | '/vibe-check/musician'
     | '/pricing/'
     | '/vibe-check/'
+    | '/api/public/contact-submit'
+    | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -407,6 +431,8 @@ export interface RootRouteChildren {
   VibeCheckMusicianRoute: typeof VibeCheckMusicianRoute
   PricingIndexRoute: typeof PricingIndexRoute
   VibeCheckIndexRoute: typeof VibeCheckIndexRoute
+  ApiPublicContactSubmitRoute: typeof ApiPublicContactSubmitRoute
+  ApiPublicWaitlistJoinRoute: typeof ApiPublicWaitlistJoinRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -592,6 +618,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/waitlist-join': {
+      id: '/api/public/waitlist-join'
+      path: '/api/public/waitlist-join'
+      fullPath: '/api/public/waitlist-join'
+      preLoaderRoute: typeof ApiPublicWaitlistJoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/contact-submit': {
+      id: '/api/public/contact-submit'
+      path: '/api/public/contact-submit'
+      fullPath: '/api/public/contact-submit'
+      preLoaderRoute: typeof ApiPublicContactSubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
       path: '/lovable/email/transactional/send'
@@ -668,6 +708,8 @@ const rootRouteChildren: RootRouteChildren = {
   VibeCheckMusicianRoute: VibeCheckMusicianRoute,
   PricingIndexRoute: PricingIndexRoute,
   VibeCheckIndexRoute: VibeCheckIndexRoute,
+  ApiPublicContactSubmitRoute: ApiPublicContactSubmitRoute,
+  ApiPublicWaitlistJoinRoute: ApiPublicWaitlistJoinRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
