@@ -116,7 +116,7 @@ function WaitlistForm({
           <DialogHeader>
             <DialogTitle className="text-2xl">You're in. 🎉</DialogTitle>
             <DialogDescription className="pt-2 text-base">
-              Welcome to the racket. We'll be in touch as soon as Create Racket opens up — keep an eye on your inbox.
+              Nice one! We'll be in touch as soon as access to Create Racket opens up — keep an eye on your inbox.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
