@@ -9,6 +9,14 @@ import { Wordmark } from "@/components/brand/Wordmark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 
 import video1 from "@/assets/videos/video-1.mp4.asset.json";
@@ -60,6 +68,7 @@ function WaitlistForm({
 }) {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -75,8 +84,8 @@ function WaitlistForm({
       toast.error(error.message);
       return;
     }
-    toast.success("You're in. Welcome to the racket. 🎉");
     setEmail("");
+    setOpen(true);
   }
 
   return (
@@ -101,6 +110,22 @@ function WaitlistForm({
         <Link to="/privacy" className="underline hover:text-primary">Privacy Policy</Link>
         , and to receive emails from Create Racket. Unsubscribe anytime.
       </p>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">You're in. 🎉</DialogTitle>
+            <DialogDescription className="pt-2 text-base">
+              Welcome to the racket. We'll be in touch as soon as Create Racket opens up — keep an eye on your inbox.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setOpen(false)} className="w-full sm:w-auto">
+              Got it
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
