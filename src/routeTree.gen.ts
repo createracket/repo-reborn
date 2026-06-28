@@ -21,12 +21,10 @@ import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
-import { Route as PricingIndexRouteImport } from './routes/pricing.index'
 import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as USlugRouteImport } from './routes/u.$slug'
 import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
-import { Route as PricingBrandsRouteImport } from './routes/pricing.brands'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
@@ -100,11 +98,6 @@ const VibeCheckIndexRoute = VibeCheckIndexRouteImport.update({
   path: '/vibe-check/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PricingIndexRoute = PricingIndexRouteImport.update({
-  id: '/pricing/',
-  path: '/pricing/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const VibeCheckMusicianRoute = VibeCheckMusicianRouteImport.update({
   id: '/vibe-check/musician',
   path: '/vibe-check/musician',
@@ -123,11 +116,6 @@ const USlugRoute = USlugRouteImport.update({
 const SpotlightSlugRoute = SpotlightSlugRouteImport.update({
   id: '/spotlight/$slug',
   path: '/spotlight/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingBrandsRoute = PricingBrandsRouteImport.update({
-  id: '/pricing/brands',
-  path: '/pricing/brands',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
@@ -215,12 +203,10 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/pricing/brands': typeof PricingBrandsRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
-  '/pricing/': typeof PricingIndexRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
@@ -247,12 +233,10 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/pricing/brands': typeof PricingBrandsRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
-  '/pricing': typeof PricingIndexRoute
   '/vibe-check': typeof VibeCheckIndexRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
@@ -281,12 +265,10 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/pricing/brands': typeof PricingBrandsRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
-  '/pricing/': typeof PricingIndexRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
@@ -315,12 +297,10 @@ export interface FileRouteTypes {
     | '/profile'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
-    | '/pricing/brands'
     | '/spotlight/$slug'
     | '/u/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
-    | '/pricing/'
     | '/vibe-check/'
     | '/api/public/contact-submit'
     | '/api/public/waitlist-join'
@@ -347,12 +327,10 @@ export interface FileRouteTypes {
     | '/profile'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
-    | '/pricing/brands'
     | '/spotlight/$slug'
     | '/u/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
-    | '/pricing'
     | '/vibe-check'
     | '/api/public/contact-submit'
     | '/api/public/waitlist-join'
@@ -380,12 +358,10 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
-    | '/pricing/brands'
     | '/spotlight/$slug'
     | '/u/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
-    | '/pricing/'
     | '/vibe-check/'
     | '/api/public/contact-submit'
     | '/api/public/waitlist-join'
@@ -411,12 +387,10 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   BrandsHowItWorksRoute: typeof BrandsHowItWorksRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
-  PricingBrandsRoute: typeof PricingBrandsRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
   USlugRoute: typeof USlugRoute
   VibeCheckBrandRoute: typeof VibeCheckBrandRoute
   VibeCheckMusicianRoute: typeof VibeCheckMusicianRoute
-  PricingIndexRoute: typeof PricingIndexRoute
   VibeCheckIndexRoute: typeof VibeCheckIndexRoute
   ApiPublicContactSubmitRoute: typeof ApiPublicContactSubmitRoute
   ApiPublicWaitlistJoinRoute: typeof ApiPublicWaitlistJoinRoute
@@ -514,13 +488,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VibeCheckIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pricing/': {
-      id: '/pricing/'
-      path: '/pricing'
-      fullPath: '/pricing/'
-      preLoaderRoute: typeof PricingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/vibe-check/musician': {
       id: '/vibe-check/musician'
       path: '/vibe-check/musician'
@@ -547,13 +514,6 @@ declare module '@tanstack/react-router' {
       path: '/spotlight/$slug'
       fullPath: '/spotlight/$slug'
       preLoaderRoute: typeof SpotlightSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing/brands': {
-      id: '/pricing/brands'
-      path: '/pricing/brands'
-      fullPath: '/pricing/brands'
-      preLoaderRoute: typeof PricingBrandsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -680,12 +640,10 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   BrandsHowItWorksRoute: BrandsHowItWorksRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
-  PricingBrandsRoute: PricingBrandsRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
   USlugRoute: USlugRoute,
   VibeCheckBrandRoute: VibeCheckBrandRoute,
   VibeCheckMusicianRoute: VibeCheckMusicianRoute,
-  PricingIndexRoute: PricingIndexRoute,
   VibeCheckIndexRoute: VibeCheckIndexRoute,
   ApiPublicContactSubmitRoute: ApiPublicContactSubmitRoute,
   ApiPublicWaitlistJoinRoute: ApiPublicWaitlistJoinRoute,
