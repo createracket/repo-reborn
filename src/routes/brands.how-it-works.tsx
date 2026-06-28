@@ -461,7 +461,7 @@ function HowItWorksBrands() {
                   variant="outline"
                   className="h-12 rounded-full border-white/20 px-8 text-white hover:bg-white/10"
                 >
-                  <Link to="/pricing/brands">See brand tiers</Link>
+                  <Link to="/contact">Get in touch</Link>
                 </Button>
               </div>
             </motion.div>
