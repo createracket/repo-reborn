@@ -314,8 +314,8 @@ function Home() {
                 </h2>
                 <div className="text-lg text-white/85">
                   We genuinely believe in the power of cool content - our fan-built tech
-                  gives artists the tools to perform against traditional brand metrics.
-                  Giving marketers a trusted way to integrate into music and culture.&nbsp;
+                  gives artists the tools to out-perform traditional brand metrics.
+                  While connecting marketers to a proven network of diverse creators, helping to craft content that actually cuts through in culture.&nbsp;
                 </div>
               </motion.div>
 
