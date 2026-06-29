@@ -591,7 +591,7 @@ function AdminPage() {
           <TabsContent value="mailing" className="mt-6">
             <Card>
               <CardContent className="p-0">
-                <Table headers={["Email", "Name", "Source", "Opt-in", "Joined"]}>
+                <Table headers={["Email", "Name", "Source", "Opt-in", "Joined", ""]}>
                   {subs.map((s) => (
                     <tr key={s.id} className="border-t border-border/60">
                       <td className="p-3">{s.email}</td>
@@ -599,6 +599,28 @@ function AdminPage() {
                       <td className="p-3">{s.source}</td>
                       <td className="p-3">{s.marketing_opt_in ? "Yes" : "No"}</td>
                       <td className="p-3 text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</td>
+                      <td className="p-3 text-right">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-destructive hover:text-destructive"
+                          onClick={async () => {
+                            if (!confirm(`Remove ${s.email} from the mailing list?`)) return;
+                            const { error } = await supabase
+                              .from("mailing_list_subscribers")
+                              .delete()
+                              .eq("id", s.id);
+                            if (error) {
+                              toast.error(error.message || "Failed to remove subscriber");
+                              return;
+                            }
+                            setSubs((prev) => prev.filter((x) => x.id !== s.id));
+                            toast.success("Subscriber removed");
+                          }}
+                        >
+                          <Trash2 className="size-3.5" /> Remove
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </Table>
