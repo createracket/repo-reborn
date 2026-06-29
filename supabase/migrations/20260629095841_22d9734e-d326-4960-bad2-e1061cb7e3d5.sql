@@ -1,0 +1,2 @@
+CREATE POLICY "Admins can delete mailing list subscribers" ON public.mailing_list_subscribers FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+GRANT DELETE, SELECT ON public.mailing_list_subscribers TO authenticated;
