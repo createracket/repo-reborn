@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Loader2, Eye, Save, Trash2 } from "lucide-react";
+import { marked } from "marked";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,6 @@ import {
 
 import {
   upsertCustomTemplate,
-  previewCustomTemplate,
   deleteCustomTemplate,
   getCustomTemplate,
 } from "@/lib/custom-templates.functions";
@@ -34,6 +34,52 @@ export interface CustomTemplateDraft {
 }
 
 const MERGE_TAG = /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g;
+
+const SAFE_PREVIEW_TAGS = new Set([
+  "A",
+  "P",
+  "BR",
+  "STRONG",
+  "EM",
+  "B",
+  "I",
+  "U",
+  "S",
+  "CODE",
+  "PRE",
+  "BLOCKQUOTE",
+  "UL",
+  "OL",
+  "LI",
+  "HR",
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "H6",
+  "IMG",
+  "SPAN",
+  "DIV",
+  "TABLE",
+  "THEAD",
+  "TBODY",
+  "TR",
+  "TH",
+  "TD",
+]);
+
+const SAFE_PREVIEW_ATTRS = new Set([
+  "href",
+  "title",
+  "alt",
+  "src",
+  "width",
+  "height",
+  "style",
+  "target",
+  "rel",
+]);
 
 function slugify(s: string): string {
   return s
@@ -52,6 +98,91 @@ function extractVars(...sources: string[]): string[] {
   return Array.from(set).sort();
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function applyMergeTags(input: string, sampleData: Record<string, any>): string {
+  return input.replace(MERGE_TAG, (_match, key) => {
+    const value = sampleData?.[key];
+    return value === null || value === undefined ? "" : escapeHtml(String(value));
+  });
+}
+
+function resolveSubject(subject: string, sampleData: Record<string, any>): string {
+  return subject.replace(MERGE_TAG, (_match, key) => {
+    const value = sampleData?.[key];
+    return value === null || value === undefined ? "" : String(value);
+  });
+}
+
+function isSafePreviewUrl(value: string): boolean {
+  return /^(https?:|mailto:|tel:|[#/])/i.test(value.trim());
+}
+
+function sanitizePreviewHtml(html: string): string {
+  if (typeof document === "undefined") return html;
+
+  const template = document.createElement("template");
+  template.innerHTML = html;
+
+  const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
+  const nodes: Element[] = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode as Element);
+
+  for (const node of nodes) {
+    if (!SAFE_PREVIEW_TAGS.has(node.tagName)) {
+      node.replaceWith(...Array.from(node.childNodes));
+      continue;
+    }
+
+    for (const attr of Array.from(node.attributes)) {
+      const name = attr.name.toLowerCase();
+      const value = attr.value;
+      if (!SAFE_PREVIEW_ATTRS.has(name) || name.startsWith("on")) {
+        node.removeAttribute(attr.name);
+        continue;
+      }
+      if ((name === "href" || name === "src") && !isSafePreviewUrl(value)) {
+        node.removeAttribute(attr.name);
+      }
+    }
+
+    if (node.tagName === "A") {
+      node.setAttribute("target", "_blank");
+      node.setAttribute("rel", "noreferrer");
+    }
+  }
+
+  return template.innerHTML;
+}
+
+function renderPreviewDocument(subject: string, bodyMarkdown: string, sampleData: Record<string, any>) {
+  const resolvedSubject = resolveSubject(subject || "(no subject)", sampleData);
+  const mergedBody = applyMergeTags(bodyMarkdown, sampleData);
+  const rawHtml = marked.parse(mergedBody, { async: false, breaks: true, gfm: true }) as string;
+  const bodyHtml = sanitizePreviewHtml(rawHtml);
+
+  return {
+    subject: resolvedSubject,
+    html: `<!doctype html><html><head><meta charset="utf-8"><style>
+      body { margin: 0; background: #ffffff; color: #222222; font-family: Inter, Arial, sans-serif; }
+      main { max-width: 560px; padding: 32px 28px; font-size: 15px; line-height: 1.6; }
+      h1, h2, h3 { line-height: 1.2; margin: 0 0 16px; }
+      p { margin: 0 0 16px; }
+      a { color: #0f766e; }
+      img { max-width: 100%; height: auto; }
+      blockquote { border-left: 3px solid #d4d4d4; margin: 0 0 16px; padding-left: 14px; color: #555555; }
+      code { background: #f3f4f6; padding: 2px 4px; border-radius: 4px; }
+    </style><title>${escapeHtml(resolvedSubject)}</title></head><body><main>${bodyHtml}</main></body></html>`,
+  };
+}
+
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -62,7 +193,6 @@ interface Props {
 export function CustomEmailEditor({ open, onOpenChange, initialId, onSaved }: Props) {
   const fetchOne = useServerFn(getCustomTemplate);
   const save = useServerFn(upsertCustomTemplate);
-  const preview = useServerFn(previewCustomTemplate);
   const remove = useServerFn(deleteCustomTemplate);
 
   const [draft, setDraft] = useState<CustomTemplateDraft>({
@@ -134,13 +264,7 @@ export function CustomEmailEditor({ open, onOpenChange, initialId, onSaved }: Pr
     const t = setTimeout(async () => {
       setPreviewing(true);
       try {
-        const res: any = await preview({
-          data: {
-            subject: draft.subject || "(no subject)",
-            body_markdown: draft.body_markdown,
-            sample_data: draft.sample_data,
-          },
-        });
+        const res = renderPreviewDocument(draft.subject, draft.body_markdown, draft.sample_data);
         setPreviewHtml(res.html);
         setPreviewSubject(res.subject);
       } catch (e: any) {
@@ -150,7 +274,7 @@ export function CustomEmailEditor({ open, onOpenChange, initialId, onSaved }: Pr
       }
     }, 350);
     return () => clearTimeout(t);
-  }, [draft.subject, draft.body_markdown, draft.sample_data, open, preview]);
+  }, [draft.subject, draft.body_markdown, draft.sample_data, open]);
 
   async function handleSave() {
     if (!draft.name || !draft.display_name || !draft.subject) {
