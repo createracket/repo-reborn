@@ -62,9 +62,11 @@ export function EmailsAdmin() {
   const [logs, setLogs] = useState<any[]>([]);
   const [logsTotal, setLogsTotal] = useState(0);
   const [stats, setStats] = useState({ total: 0, sent: 0, failed: 0, suppressed: 0, pending: 0 });
-  const [templates, setTemplates] = useState<{ name: string; displayName: string; subject: string; hasPreviewData: boolean }[]>([]);
+  const [templates, setTemplates] = useState<{ name: string; displayName: string; subject: string; hasPreviewData: boolean; kind: "builtin" | "custom"; id: string | null }[]>([]);
   const [templateNames, setTemplateNames] = useState<string[]>([]);
   const [suppressed, setSuppressed] = useState<any[]>([]);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [testOpen, setTestOpen] = useState(false);
