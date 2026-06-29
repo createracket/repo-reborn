@@ -18,7 +18,7 @@ import {
   DEFAULT_BRIEF_FORM_CONFIG,
   type BriefFormConfig,
 } from "@/lib/brief-form-config";
-import logo from "@/assets/logo/CR-Logo-Full-Colour.svg";
+import logo from "@/assets/CR-Logo-Half-Colour.png.asset.json";
 
 export const Route = createFileRoute("/connect")({
   head: () => ({
@@ -169,7 +169,7 @@ function ConnectPage() {
       <header className="border-b border-border/40">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="Create Racket" className="h-8 w-auto" />
+            <img src={logo.url} alt="Racket" className="h-8 w-auto" />
           </Link>
           <Button asChild variant="ghost" size="sm">
             <Link to="/">
