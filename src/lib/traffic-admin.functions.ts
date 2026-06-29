@@ -53,7 +53,7 @@ export const getTrafficStats = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     type Row = { session_id: string; path: string; referrer: string | null; created_at: string };
-    const list = (rows as Row[] | null) ?? [];
+    const list = (rows as unknown as Row[] | null) ?? [];
 
     const sessionCounts = new Map<string, number>();
     const pageCounts = new Map<string, number>();
