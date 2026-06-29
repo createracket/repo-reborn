@@ -313,9 +313,7 @@ function Home() {
                   Trusted by artists and brands, globally
                 </h2>
                 <div className="text-lg text-white/85">
-                  We genuinely believe in the power of cool content - our fan-built tech
-                  gives artists the tools to out-perform traditional brand metrics.
-                  Connecting marketers to a proven network of diverse creators - trusted by real fans.
+                  We genuinely believe in the power of cool content to build audiences and foster brand loyalty. Our fan-built tech gives artists the tools to out-perform traditional brand metrics. While connecting marketers to a proven network of diverse creators - trusted by real fans.
                 </div>
               </motion.div>
 
