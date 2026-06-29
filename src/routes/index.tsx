@@ -445,11 +445,11 @@ function Home() {
             >
               <div className="text-center">
                 <motion.p variants={fadeUp} className="mb-6 text-lg font-bold md:text-xl">
-                  Unlocking brand new revenue streams for musicians at every stage of their
+                  Unlocking sustainable revenue streams for musicians at every stage of their
                   careers.
                 </motion.p>
                 <motion.p variants={fadeUp} className="mt-4 text-lg font-light text-[#2b2b2b]/80 md:text-xl">
-                  We've already converted over $300k to artists, that's over
+                  Racket has helped brands to invest in music, shifting
                 </motion.p>
                 <motion.h2
                   variants={fadeUp}
