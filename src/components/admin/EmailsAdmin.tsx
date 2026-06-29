@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Mail, RefreshCw, Send, AlertCircle, CheckCircle2, Clock, Ban } from "lucide-react";
+import { Mail, RefreshCw, Send, AlertCircle, CheckCircle2, Clock, Ban, Plus, Pencil } from "lucide-react";
+import { CustomEmailEditor } from "./CustomEmailEditor";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
