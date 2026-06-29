@@ -212,7 +212,7 @@ function SpotlightPage() {
             {links.instagram ? (
               <Button asChild variant="outline" size="sm">
                 <a href={links.instagram} target="_blank" rel="noreferrer">
-                  <Instagram className="mr-1.5 size-3.5" /> Instagram
+                  <Instagram className="mr-1.5 size-3.5" />Instagram
                 </a>
               </Button>
             ) : null}
