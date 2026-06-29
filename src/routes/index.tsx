@@ -40,16 +40,16 @@ import communityMap from "@/assets/home/community-map.svg.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Create Racket — Where creative partners connect" },
+      { title: "Create Racket — Where cool collabs make real noise" },
       {
         name: "description",
         content:
-          "We operate at the cultural edge of media and music, using fan-built tech to authentically pair artists with the right collaborators.",
+          "We operate at the cultural edge of media and music, connecting artists and brands who genuinely vibe - not for the sake of it, but because they share audiences. No vanity deals. No bailing after the intro. Just fan-first partnerships that actually perform.",
       },
       { property: "og:title", content: "Create Racket" },
       {
         property: "og:description",
-        content: "Where creative partners connect.",
+        content: "Where cool collabs make real noise.",
       },
     ],
   }),
