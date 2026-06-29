@@ -86,23 +86,28 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           )
         }
 
-        // 1. Look up template from registry (early — needed to resolve recipient)
-        const template = TEMPLATES[templateName]
-
-        if (!template) {
-          console.error('Template not found in registry', { templateName })
-          return Response.json(
-            {
-              error: `Template '${templateName}' not found. Available: ${Object.keys(TEMPLATES).join(', ')}`,
-            },
-            { status: 404 }
+        // 1. Look up template — built-in registry first, then custom DB templates.
+        const builtin = TEMPLATES[templateName]
+        let customExists = false
+        if (!builtin) {
+          const { fetchCustomTemplateByName } = await import(
+            '@/lib/email-templates/custom-store.server'
           )
+          customExists = !!(await fetchCustomTemplateByName(templateName))
+          if (!customExists) {
+            console.error('Template not found', { templateName })
+            return Response.json(
+              {
+                error: `Template '${templateName}' not found. Built-in: ${Object.keys(TEMPLATES).join(', ')}`,
+              },
+              { status: 404 }
+            )
+          }
         }
 
-        // Resolve effective recipient: template-level `to` takes precedence over
-        // the caller-provided recipientEmail. This allows notification templates
-        // to always send to a fixed address (e.g., site owner from env var).
-        const effectiveRecipient = template.to || recipientEmail
+        // Resolve effective recipient: built-in `to` takes precedence over caller.
+        // Custom templates always use the caller-provided recipient.
+        const effectiveRecipient = builtin?.to || recipientEmail
 
         if (!effectiveRecipient) {
           return Response.json(
@@ -112,6 +117,7 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
             { status: 400 }
           )
         }
+
 
         // 2. Check suppression list (fail-closed: if we can't verify, don't send)
         const { data: suppressed, error: suppressionError } = await supabase
