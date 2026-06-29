@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import racketLogoHalf from "@/assets/CR-Logo-Half-Colour.png.asset.json";
-import racketLogoIcon from "@/assets/CR-Logo-Icon-Colour.png.asset.json";
+import racketLogoIcon from "@/assets/CR-Logo-Icon-Light.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
