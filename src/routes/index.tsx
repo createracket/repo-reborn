@@ -227,7 +227,7 @@ function Home() {
             animate="visible"
           >
             <motion.div variants={fadeUp} className="mb-10">
-              <img src={racketLogoFull.url} alt="Racket" className="mx-auto h-44 w-auto md:h-56" />
+              <img src={createLogoTransparent.url} alt="Create" className="mx-auto h-44 w-auto md:h-56" />
             </motion.div>
 
             <motion.h1
