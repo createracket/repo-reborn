@@ -2,9 +2,10 @@ import { cn } from "@/lib/utils";
 import logoFullColour from "@/assets/logo/CR-Logo-Full-Colour.svg";
 import logoFullDark from "@/assets/logo/CR-Logo-Full-Dark.svg";
 import logoHalfColour from "@/assets/logo/CR-Logo-Half-Colour.svg";
+import logoHalfWhite from "@/assets/logo/CR-Logo-Half-White.svg";
 import logoIcon from "@/assets/logo/cr-icon-colour.svg";
 
-type Variant = "colour" | "dark" | "half-colour" | "icon";
+type Variant = "colour" | "dark" | "half-colour" | "white" | "icon";
 
 interface LogoProps {
   className?: string;
@@ -16,6 +17,7 @@ const SRC: Record<Variant, string> = {
   colour: logoFullColour,
   dark: logoFullDark,
   "half-colour": logoHalfColour,
+  white: logoHalfWhite,
   icon: logoIcon,
 };
 
