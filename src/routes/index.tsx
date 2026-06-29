@@ -241,7 +241,7 @@ function Home() {
             animate="visible"
           >
             <motion.div variants={fadeUp} className="mb-10">
-              <img src={racketLogoIcon.url} alt="Racket" className="mx-auto h-44 w-auto md:h-56" />
+              <img src={racketLogoHalf.url} alt="Racket" className="mx-auto h-44 w-auto md:h-56" />
             </motion.div>
 
             <motion.h1
