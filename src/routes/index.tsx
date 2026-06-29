@@ -359,13 +359,13 @@ function Home() {
                 variants={fadeUp}
                 className="font-headline text-4xl tracking-tighter text-white md:text-5xl"
               >
-                A global community
+                Fostering a global community
               </motion.h2>
               <motion.p
                 variants={fadeUp}
                 className="mx-auto mt-4 max-w-2xl text-lg text-white/80"
               >
-                Racket removes the barrier to audience development - connecting musicians, media partners, publishers, and brand marketers across the globe.
+                Racket removes the barrier to audience development - connecting musicians, media partners, publishers, and brands across the globe.
               </motion.p>
               <motion.div
                 className="mt-10"
