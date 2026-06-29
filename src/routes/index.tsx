@@ -314,26 +314,26 @@ function Home() {
                   Trusted by artists and brands, globally
                 </h2>
                 <div className="text-lg text-white/85">
-                  We genuinely believe in the power of cool content to build audiences and foster brand loyalty. Our fan-built tech gives artists the tools to out-perform traditional brand metrics. While connecting marketers to a proven network of diverse creators - trusted by real fans.
+                  We genuinely believe in the power of cool content to build audiences and foster brand loyalty. Our fan-built tech gives artists the tools to out-perform traditional media metrics. All while connecting marketers to a proven network of diverse creators - trusted by real fans.
                 </div>
               </motion.div>
 
               <div className="mx-auto grid w-full max-w-md grid-cols-1 gap-6">
                 <EcosystemCard
                   icon={<Users />}
-                  title="Co-create"
+                  title="CO-CREATE"
                   body="Build your own roster - connect with verified partners who are on the same wavelength.&nbsp;"
                   bg="bg-pink-accent text-[#2b2b2b]"
                 />
                 <EcosystemCard
                   icon={<Handshake />}
-                  title="Collaborate"
+                  title="COLLAB"
                   body="Put fans at the heart of your next project with bespoke content that cuts through the noise."
                   bg="bg-purple text-white"
                 />
                 <EcosystemCard
                   icon={<Link2 />}
-                  title="Connect"
+                  title="CONNECT"
                   body="Find the right partners to help fuel your next campaign or media activation - globally.&nbsp;"
                   bg="bg-primary text-primary-foreground"
                 />
