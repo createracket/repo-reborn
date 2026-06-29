@@ -184,10 +184,10 @@ const testimonials = [
   },
   {
     id: 3,
-    name: "Grace Taylor",
-    title: "UK Artist Manager",
+    name: "Grace",
+    title: "Artist Manager, UK",
     quote:
-      "Create Racket made it a breeze for BEX to create branded content that still resonated with her fans — easy!",
+      "Racket made it a breeze to create branded content that still resonated with real fans - it was easy!",
   },
 ];
 
