@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import racketLogo from "@/assets/CR-Logo-Half-Colour.png.asset.json";
+import racketLogo from "@/assets/logo/CR-Logo-Full-White.svg";
 import { Instagram, Linkedin, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -80,7 +80,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[#2b2b2b]/20 pt-6 text-xs text-[#2b2b2b]/70 sm:flex-row">
-          <span>© {new Date().getFullYear()} Create Racket. Made loud.</span>
+          <span>© {new Date().getFullYear()} Create Racket. Cool collabs</span>
           <nav className="flex items-center gap-4">
             <Link to="/terms" className="hover:text-purple">
               Terms
