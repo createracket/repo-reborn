@@ -104,11 +104,19 @@ export function EmailsAdmin() {
     }
   }
 
+  async function loadTemplates() {
+    try {
+      const r = await fetchTemplates();
+      setTemplates(r.templates as any);
+    } catch {
+      /* ignore */
+    }
+  }
+
   useEffect(() => {
-    fetchTemplates()
-      .then((r) => setTemplates(r.templates))
-      .catch(() => {});
-  }, [fetchTemplates]);
+    loadTemplates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     loadAll();
