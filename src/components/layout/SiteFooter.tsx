@@ -62,7 +62,7 @@ export function SiteFooter() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 hover:text-purple"
                 >
-                  <Instagram className="size-4" /> Instagram
+                  <Instagram className="size-4" />Instagram
                 </a>
               </li>
               <li>
