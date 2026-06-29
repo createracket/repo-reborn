@@ -5,7 +5,7 @@ import { Users, Handshake, Link2, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import racketLogoFull from "@/assets/CR-Logo-Racket-Full.png.asset.json";
+import createLogoTransparent from "@/assets/CR-Logo-Half-Colour.png.asset.json";
 import racketLogoIconLight from "@/assets/CR-Logo-Icon-Light.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -227,7 +227,7 @@ function Home() {
             animate="visible"
           >
             <motion.div variants={fadeUp} className="mb-10">
-              <img src={racketLogoFull.url} alt="Racket" className="mx-auto h-44 w-auto md:h-56" />
+              <img src={createLogoTransparent.url} alt="Create" className="mx-auto h-44 w-auto md:h-56" />
             </motion.div>
 
             <motion.h1
