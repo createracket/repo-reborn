@@ -312,11 +312,11 @@ function Home() {
                 <h2 className="font-headline text-4xl tracking-tighter text-white md:text-5xl">
                   Trusted by artists and brands, globally
                 </h2>
-                <p className="text-lg text-white/85">
-                  Tap into the Create Racket Community to source top-tier talent or
-                  collaborate directly with our expert team across content, partnerships
-                  and fan activations.
-                </p>
+                <div className="text-lg text-white/85">
+                  We genuinely believe in the power of cool content - our fan-built tech
+                  gives artists the tools to perform against traditional brand metrics.
+                  Giving marketers a trusted way to integrate into music and culture.&nbsp;
+                </div>
               </motion.div>
 
               <div className="mx-auto grid w-full max-w-md grid-cols-1 gap-6">
