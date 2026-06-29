@@ -258,8 +258,9 @@ function Home() {
               variants={fadeUp}
               className="mx-auto mt-6 max-w-2xl text-lg leading-snug text-white/90 md:text-xl"
             >
-              We operate at the cultural edge of media and music, using fan-built tech to
-              authentically pair artists with the right collaborators.
+              We operate at the cultural edge of media and music, connecting artists and brands
+              who genuinely vibe - not for the sake of it, but because they share audiences.
+              No vanity deals. No bailing after the intro. Just fan-first partnerships that actually perform.
             </motion.p>
 
             <motion.div variants={fadeUp} className="mt-10 flex justify-center">
