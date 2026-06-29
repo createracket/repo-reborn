@@ -314,7 +314,7 @@ function Home() {
                 <EcosystemCard
                   icon={<Users />}
                   title="CO-CREATE"
-                  body="Build your own roster - connect with verified partners who are on the same wavelength.&nbsp;"
+                  body="Build your own roster and brief verified partners who are on the same wavelength.&nbsp;"
                   bg="bg-pink-accent text-[#2b2b2b]"
                 />
               </div>
