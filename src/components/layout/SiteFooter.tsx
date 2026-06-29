@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import racketLogo from "@/assets/CR-Logo-Half-Colour.png.asset.json";
+import racketLogo from "@/assets/logo/CR-Logo-Full-White.svg";
 import { Instagram, Linkedin, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,7 +22,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="lg:col-span-6">
             <Link to="/" className="inline-block">
-              <img src={racketLogo.url} alt="Racket" className="h-11 w-auto" />
+              <img src={racketLogo} alt="Racket" className="h-11 w-auto" />
             </Link>
             <p className="mt-4 max-w-md text-base text-[#2b2b2b]/80">
               Create Racket acknowledges the Traditional Owners of Country throughout Australia. We
@@ -80,7 +80,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[#2b2b2b]/20 pt-6 text-xs text-[#2b2b2b]/70 sm:flex-row">
-          <span>© {new Date().getFullYear()} Create Racket. Made loud.</span>
+          <span>© {new Date().getFullYear()} Create Racket. Cool collabs</span>
           <nav className="flex items-center gap-4">
             <Link to="/terms" className="hover:text-purple">
               Terms
