@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Wordmark } from "@/components/brand/Wordmark";
+import racketNavLogo from "@/assets/racket-nav-logo.png.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
