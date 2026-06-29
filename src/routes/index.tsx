@@ -300,10 +300,10 @@ function Home() {
 
               <div className="mx-auto grid w-full max-w-md grid-cols-1 gap-6">
                 <EcosystemCard
-                  icon={<Users />}
-                  title="CO-CREATE"
-                  body="Build your own roster - connect with verified partners who are on the same wavelength.&nbsp;"
-                  bg="bg-pink-accent text-[#2b2b2b]"
+                  icon={<Link2 />}
+                  title="CONNECT"
+                  body="Find the right partners to help fuel your next campaign or media activation - globally.&nbsp;"
+                  bg="bg-primary text-primary-foreground"
                 />
                 <EcosystemCard
                   icon={<Handshake />}
@@ -312,10 +312,10 @@ function Home() {
                   bg="bg-purple text-white"
                 />
                 <EcosystemCard
-                  icon={<Link2 />}
-                  title="CONNECT"
-                  body="Find the right partners to help fuel your next campaign or media activation - globally.&nbsp;"
-                  bg="bg-primary text-primary-foreground"
+                  icon={<Users />}
+                  title="CO-CREATE"
+                  body="Build your own roster - connect with verified partners who are on the same wavelength.&nbsp;"
+                  bg="bg-pink-accent text-[#2b2b2b]"
                 />
               </div>
             </motion.div>
