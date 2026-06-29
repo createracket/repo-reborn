@@ -5,7 +5,8 @@ import { Users, Handshake, Link2, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { Wordmark } from "@/components/brand/Wordmark";
+import racketLogoHalf from "@/assets/CR-Logo-Half-Colour.png.asset.json";
+import racketLogoIcon from "@/assets/CR-Logo-Icon-Colour.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -225,7 +226,7 @@ function Home() {
       <div className="voicenotes-gradient">
         <header className="container mx-auto flex items-center justify-between px-4 pt-6">
           <Link to="/">
-            <Wordmark variant="half-colour" className="h-9 w-auto" alt="Racket" />
+            <img src={racketLogoHalf.url} alt="Racket" className="h-9 w-auto" />
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex" />
           <HeroAuthButton />
@@ -240,7 +241,7 @@ function Home() {
             animate="visible"
           >
             <motion.div variants={fadeUp} className="mb-10">
-              <Wordmark variant="half-colour" className="mx-auto h-44 w-auto md:h-56" />
+              <img src={racketLogoIcon.url} alt="Racket" className="mx-auto h-44 w-auto md:h-56" />
             </motion.div>
 
             <motion.h1

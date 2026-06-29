@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Wordmark } from "@/components/brand/Wordmark";
+import racketLogo from "@/assets/CR-Logo-Half-Colour.png.asset.json";
 import { Instagram, Linkedin, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,7 +22,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="lg:col-span-6">
             <Link to="/" className="inline-block">
-              <Wordmark variant="half-colour" className="h-11 w-auto" alt="Racket" />
+              <img src={racketLogo.url} alt="Racket" className="h-11 w-auto" />
             </Link>
             <p className="mt-4 max-w-md text-base text-[#2b2b2b]/80">
               Create Racket acknowledges the Traditional Owners of Country throughout Australia. We
