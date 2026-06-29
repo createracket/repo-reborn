@@ -57,7 +57,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center">
-          <Wordmark variant="colour" className="h-8 w-auto" />
+          <Wordmark variant="half-colour" className="h-8 w-auto" alt="Racket" />
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
           {!signedIn && (

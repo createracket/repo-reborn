@@ -22,7 +22,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="lg:col-span-6">
             <Link to="/" className="inline-block">
-              <Wordmark variant="dark" className="h-11 w-auto" />
+              <Wordmark variant="half-colour" className="h-11 w-auto" alt="Racket" />
             </Link>
             <p className="mt-4 max-w-md text-base text-[#2b2b2b]/80">
               Create Racket acknowledges the Traditional Owners of Country throughout Australia. We
