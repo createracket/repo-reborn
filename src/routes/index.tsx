@@ -178,7 +178,7 @@ const testimonials = [
   },
   {
     id: 2,
-    name: "Dale Tanner",
+    name: "Dale",
     title: "Artist, AU",
     quote:
       "As an artist, it's great to know these legends are on our side, connecting us with paying opportunities and making the process as easy-going as possible.",
