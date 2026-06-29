@@ -597,7 +597,23 @@ function AdminPage() {
                       <CardTitle className="text-lg">{m.name}</CardTitle>
                       <CardDescription>{m.email}</CardDescription>
                     </div>
-                    <Meta date={m.created_at} status={m.handled ? "handled" : "new"} />
+                    <div className="flex items-center gap-2">
+                      <Meta date={m.created_at} status={m.handled ? "handled" : "new"} />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-destructive hover:text-destructive"
+                        onClick={async () => {
+                          if (!confirm(`Delete message from ${m.email}?`)) return;
+                          const { error } = await supabase.from("contact_messages").delete().eq("id", m.id);
+                          if (error) { toast.error(error.message); return; }
+                          setContacts((rows) => rows.filter((r) => r.id !== m.id));
+                          toast.success("Message removed");
+                        }}
+                      >
+                        <Trash2 className="size-3.5" /> Remove
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="text-sm">
