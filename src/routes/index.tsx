@@ -20,20 +20,6 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 
-import video1 from "@/assets/videos/video-1.mp4.asset.json";
-import video2 from "@/assets/videos/video-2.mp4.asset.json";
-import video3 from "@/assets/videos/video-3.mp4.asset.json";
-import video4 from "@/assets/videos/video-4.mp4.asset.json";
-import video5 from "@/assets/videos/video-5.mp4.asset.json";
-import video6 from "@/assets/videos/video-6.mp4.asset.json";
-import video7 from "@/assets/videos/video-7.mp4.asset.json";
-import video8 from "@/assets/videos/video-8.mp4.asset.json";
-import video9 from "@/assets/videos/video-9.mp4.asset.json";
-import video10 from "@/assets/videos/video-10.mp4.asset.json";
-import video11 from "@/assets/videos/video-11.mp4.asset.json";
-import video12 from "@/assets/videos/video-12.mp4.asset.json";
-
-const homeVideos = [video1, video2, video3, video4, video5, video6, video7, video8, video9, video10, video11, video12];
 
 import trustedLogos from "@/assets/home/trusted-logos.png.asset.json";
 import communityMap from "@/assets/home/community-map.svg.asset.json";
@@ -293,12 +279,6 @@ function Home() {
 
       {/* Curve into dark section */}
       <div className="-mt-12 rounded-t-[3rem] bg-[#2b2b2b]">
-        {/* ── VIDEO MARQUEE ──────────────────────────────────────────── */}
-        <section className="relative z-10 overflow-hidden pt-16 pb-4">
-          <VideoMarquee />
-        </section>
-
-
         {/* ── ECOSYSTEM ──────────────────────────────────────────────── */}
         <section id="ecosystem" className="relative z-10 py-20">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -500,59 +480,6 @@ function EcosystemCard({
   );
 }
 
-function VideoMarquee() {
-  const [hovered, setHovered] = useState<number | null>(null);
-  const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
-  const items = [...homeVideos, ...homeVideos];
-
-  function handleEnter(i: number) {
-    setHovered(i);
-    videoRefs.current.forEach((v, idx) => {
-      if (!v) return;
-      if (idx === i) v.play().catch(() => {});
-      else v.pause();
-    });
-  }
-
-  function handleLeave() {
-    setHovered(null);
-    videoRefs.current.forEach((v) => v?.play().catch(() => {}));
-  }
-
-  return (
-    <div
-      className="flex w-max gap-4 animate-marquee"
-      style={{
-        animationDuration: "80s",
-        animationPlayState: hovered !== null ? "paused" : "running",
-      }}
-    >
-      {items.map((v, i) => (
-        <div
-          key={i}
-          onMouseEnter={() => handleEnter(i)}
-          onMouseLeave={handleLeave}
-          className="w-[200px] shrink-0 overflow-hidden rounded-2xl bg-black/40 shadow-lg sm:w-[240px] md:w-[280px]"
-        >
-          <div className="aspect-[9/16]">
-            <video
-              ref={(el) => {
-                videoRefs.current[i] = el;
-              }}
-              src={v.url}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              className="h-full w-full object-cover"
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function Divider() {
   return (
