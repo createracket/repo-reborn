@@ -293,6 +293,11 @@ function Home() {
 
       {/* Curve into dark section */}
       <div className="-mt-12 rounded-t-[3rem] bg-[#2b2b2b]">
+        {/* ── VIDEO MARQUEE ──────────────────────────────────────────── */}
+        <section className="relative z-10 overflow-hidden pt-16 pb-4">
+          <VideoMarquee />
+        </section>
+
         {/* ── ECOSYSTEM ──────────────────────────────────────────────── */}
         <section id="ecosystem" className="relative z-10 py-20">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
