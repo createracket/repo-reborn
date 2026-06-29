@@ -94,6 +94,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          is_published: boolean
           location: string | null
           socials: Json
           tagline: string | null
@@ -106,6 +107,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          is_published?: boolean
           location?: string | null
           socials?: Json
           tagline?: string | null
@@ -118,6 +120,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          is_published?: boolean
           location?: string | null
           socials?: Json
           tagline?: string | null
