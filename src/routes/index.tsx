@@ -315,7 +315,7 @@ function Home() {
                 <div className="text-lg text-white/85">
                   We genuinely believe in the power of cool content - our fan-built tech
                   gives artists the tools to out-perform traditional brand metrics.
-                  While connecting marketers to a proven network of diverse creators, helping to craft content that actually cuts through in culture.&nbsp;
+                  Connecting marketers to a proven network of diverse creators - trusted by real fans.
                 </div>
               </motion.div>
 
@@ -323,19 +323,19 @@ function Home() {
                 <EcosystemCard
                   icon={<Users />}
                   title="Co-create"
-                  body="Build your own roster — a verified network of like-minded partners to co-create with."
+                  body="Build your own roster - connect with verified partners who are on the same wavelength.&nbsp;"
                   bg="bg-pink-accent text-[#2b2b2b]"
                 />
                 <EcosystemCard
                   icon={<Handshake />}
                   title="Collaborate"
-                  body="Work directly with our team to put fans at the heart of your creative content."
+                  body="Put fans at the heart of your next project with bespoke content that cuts through the noise."
                   bg="bg-purple text-white"
                 />
                 <EcosystemCard
                   icon={<Link2 />}
                   title="Connect"
-                  body="Fuel your next campaign or media activation with the right creative partners."
+                  body="Find the right partners to help fuel your next campaign or media activation - globally.&nbsp;"
                   bg="bg-primary text-primary-foreground"
                 />
               </div>
