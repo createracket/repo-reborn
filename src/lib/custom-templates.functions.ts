@@ -109,24 +109,3 @@ export const deleteCustomTemplate = createServerFn({ method: 'POST' })
     return { ok: true }
   })
 
-const PreviewSchema = z.object({
-  subject: z.string().min(1).max(255),
-  body_markdown: z.string().max(50_000),
-  sample_data: z.record(z.string(), z.any()).default({}),
-})
-
-export const previewCustomTemplate = createServerFn({ method: 'POST' })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => PreviewSchema.parse(input))
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context)
-    const { renderCustomEmail, extractVariables } = await import(
-      '@/lib/email-templates/render-custom.server'
-    )
-    const variables = extractVariables(data.subject, data.body_markdown)
-    const rendered = await renderCustomEmail(
-      { subject: data.subject, bodyMarkdown: data.body_markdown },
-      data.sample_data,
-    )
-    return { ...rendered, variables }
-  })
