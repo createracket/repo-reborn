@@ -152,6 +152,45 @@ export type Database = {
         }
         Relationships: []
       }
+      email_custom_templates: {
+        Row: {
+          body_markdown: string
+          created_at: string
+          created_by: string | null
+          display_name: string
+          id: string
+          name: string
+          sample_data: Json
+          subject: string
+          updated_at: string
+          variables: string[]
+        }
+        Insert: {
+          body_markdown?: string
+          created_at?: string
+          created_by?: string | null
+          display_name: string
+          id?: string
+          name: string
+          sample_data?: Json
+          subject: string
+          updated_at?: string
+          variables?: string[]
+        }
+        Update: {
+          body_markdown?: string
+          created_at?: string
+          created_by?: string | null
+          display_name?: string
+          id?: string
+          name?: string
+          sample_data?: Json
+          subject?: string
+          updated_at?: string
+          variables?: string[]
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string

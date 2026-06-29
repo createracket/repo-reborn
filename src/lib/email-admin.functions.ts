@@ -121,19 +121,34 @@ export const getEmailTemplates = createServerFn({ method: 'POST' })
   .handler(async ({ context }) => {
     await assertAdmin(context)
     const { TEMPLATES } = await import('@/lib/email-templates/registry')
-    return {
-      templates: Object.entries(TEMPLATES).map(([name, entry]) => ({
-        name,
-        displayName: entry.displayName ?? name,
-        subject: typeof entry.subject === 'string' ? entry.subject : '(dynamic)',
-        hasPreviewData: !!entry.previewData,
-      })),
-    }
+    const builtins = Object.entries(TEMPLATES).map(([name, entry]) => ({
+      name,
+      displayName: entry.displayName ?? name,
+      subject: typeof entry.subject === 'string' ? entry.subject : '(dynamic)',
+      hasPreviewData: !!entry.previewData,
+      kind: 'builtin' as const,
+      id: null as string | null,
+    }))
+    const { data: customs, error } = await context.supabase
+      .from('email_custom_templates')
+      .select('id, name, display_name, subject, sample_data')
+      .order('display_name', { ascending: true })
+    if (error) throw new Error(error.message)
+    const customRows = (customs ?? []).map((c: any) => ({
+      name: c.name,
+      displayName: c.display_name,
+      subject: c.subject,
+      hasPreviewData: !!c.sample_data && Object.keys(c.sample_data).length > 0,
+      kind: 'custom' as const,
+      id: c.id as string,
+    }))
+    return { templates: [...customRows, ...builtins] }
   })
 
 const SendTestSchema = z.object({
   templateName: z.string().min(1).max(120),
   recipientEmail: z.string().email().max(255),
+  sampleData: z.record(z.string(), z.any()).optional(),
 })
 
 export const sendTestEmail = createServerFn({ method: 'POST' })
@@ -143,13 +158,31 @@ export const sendTestEmail = createServerFn({ method: 'POST' })
     await assertAdmin(context)
     const { enqueueTransactionalEmail } = await import('@/lib/email/send.server')
     const { TEMPLATES } = await import('@/lib/email-templates/registry')
-    const entry = TEMPLATES[data.templateName]
-    if (!entry) throw new Error('Template not found')
+
+    let templateData: Record<string, any> = data.sampleData ?? {}
+    const builtin = TEMPLATES[data.templateName]
+    if (builtin) {
+      if (!data.sampleData) templateData = builtin.previewData ?? {}
+    } else {
+      // Custom template — pull sample_data if caller didn't provide one
+      if (!data.sampleData) {
+        const { data: row, error } = await context.supabase
+          .from('email_custom_templates')
+          .select('sample_data')
+          .eq('name', data.templateName)
+          .maybeSingle()
+        if (error) throw new Error(error.message)
+        if (!row) throw new Error('Template not found')
+        templateData = (row.sample_data as Record<string, any>) ?? {}
+      }
+    }
+
     const result = await enqueueTransactionalEmail({
       templateName: data.templateName,
       recipientEmail: data.recipientEmail,
-      templateData: entry.previewData ?? {},
+      templateData,
       idempotencyKey: `test-${data.templateName}-${Date.now()}`,
     })
     return result
   })
+

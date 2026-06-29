@@ -1,8 +1,6 @@
-import * as React from 'react'
-import { render } from '@react-email/render'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
-import { TEMPLATES } from '@/lib/email-templates/registry'
+import { resolveRenderedEmail, TEMPLATES } from '@/lib/email-templates/registry'
 
 // Configuration baked in at scaffold time
 const SITE_NAME = "racketvibes"
@@ -88,23 +86,28 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           )
         }
 
-        // 1. Look up template from registry (early — needed to resolve recipient)
-        const template = TEMPLATES[templateName]
-
-        if (!template) {
-          console.error('Template not found in registry', { templateName })
-          return Response.json(
-            {
-              error: `Template '${templateName}' not found. Available: ${Object.keys(TEMPLATES).join(', ')}`,
-            },
-            { status: 404 }
+        // 1. Look up template — built-in registry first, then custom DB templates.
+        const builtin = TEMPLATES[templateName]
+        let customExists = false
+        if (!builtin) {
+          const { fetchCustomTemplateByName } = await import(
+            '@/lib/email-templates/custom-store.server'
           )
+          customExists = !!(await fetchCustomTemplateByName(templateName))
+          if (!customExists) {
+            console.error('Template not found', { templateName })
+            return Response.json(
+              {
+                error: `Template '${templateName}' not found. Built-in: ${Object.keys(TEMPLATES).join(', ')}`,
+              },
+              { status: 404 }
+            )
+          }
         }
 
-        // Resolve effective recipient: template-level `to` takes precedence over
-        // the caller-provided recipientEmail. This allows notification templates
-        // to always send to a fixed address (e.g., site owner from env var).
-        const effectiveRecipient = template.to || recipientEmail
+        // Resolve effective recipient: built-in `to` takes precedence over caller.
+        // Custom templates always use the caller-provided recipient.
+        const effectiveRecipient = builtin?.to || recipientEmail
 
         if (!effectiveRecipient) {
           return Response.json(
@@ -114,6 +117,7 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
             { status: 400 }
           )
         }
+
 
         // 2. Check suppression list (fail-closed: if we can't verify, don't send)
         const { data: suppressed, error: suppressionError } = await supabase
@@ -251,16 +255,20 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           return Response.json({ success: false, reason: 'email_suppressed' })
         }
 
-        // 4. Render React Email template to HTML and plain text
-        const element = React.createElement(template.component, templateData)
-        const html = await render(element)
-        const plainText = await render(element, { plainText: true })
+        // 4. Render the email (built-in React Email component or custom DB template).
+        const rendered = await resolveRenderedEmail(templateName, templateData)
+        if (!rendered) {
+          await supabase.from('email_send_log').insert({
+            message_id: messageId,
+            template_name: templateName,
+            recipient_email: effectiveRecipient,
+            status: 'failed',
+            error_message: 'Template missing at render time',
+          })
+          return Response.json({ error: 'Template not found' }, { status: 404 })
+        }
+        const { subject: resolvedSubject, html, text: plainText } = rendered
 
-        // Resolve subject — supports static string or dynamic function
-        const resolvedSubject =
-          typeof template.subject === 'function'
-            ? template.subject(templateData)
-            : template.subject
 
         // 5. Enqueue the pre-rendered email for async processing by the dispatcher.
         // The dispatcher (process-email-queue) handles sending, retries, and rate-limit backoff.

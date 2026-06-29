@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Mail, RefreshCw, Send, AlertCircle, CheckCircle2, Clock, Ban } from "lucide-react";
+import { Mail, RefreshCw, Send, AlertCircle, CheckCircle2, Clock, Ban, Plus, Pencil } from "lucide-react";
+import { CustomEmailEditor } from "./CustomEmailEditor";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,9 +62,11 @@ export function EmailsAdmin() {
   const [logs, setLogs] = useState<any[]>([]);
   const [logsTotal, setLogsTotal] = useState(0);
   const [stats, setStats] = useState({ total: 0, sent: 0, failed: 0, suppressed: 0, pending: 0 });
-  const [templates, setTemplates] = useState<{ name: string; displayName: string; subject: string; hasPreviewData: boolean }[]>([]);
+  const [templates, setTemplates] = useState<{ name: string; displayName: string; subject: string; hasPreviewData: boolean; kind: "builtin" | "custom"; id: string | null }[]>([]);
   const [templateNames, setTemplateNames] = useState<string[]>([]);
   const [suppressed, setSuppressed] = useState<any[]>([]);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [testOpen, setTestOpen] = useState(false);
@@ -101,11 +104,19 @@ export function EmailsAdmin() {
     }
   }
 
+  async function loadTemplates() {
+    try {
+      const r = await fetchTemplates();
+      setTemplates(r.templates as any);
+    } catch {
+      /* ignore */
+    }
+  }
+
   useEffect(() => {
-    fetchTemplates()
-      .then((r) => setTemplates(r.templates))
-      .catch(() => {});
-  }, [fetchTemplates]);
+    loadTemplates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     loadAll();
@@ -232,31 +243,57 @@ export function EmailsAdmin() {
           )}
         </TabsContent>
 
-        <TabsContent value="templates" className="mt-4">
+        <TabsContent value="templates" className="mt-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Custom templates appear first. Built-in templates are wired into app events in code.
+            </p>
+            <Button size="sm" onClick={() => { setEditingId(null); setEditorOpen(true); }}>
+              <Plus className="size-4" /> New template
+            </Button>
+          </div>
           <div className="grid gap-3 sm:grid-cols-2">
             {templates.map((t) => (
-              <Card key={t.name}>
+              <Card key={`${t.kind}:${t.name}`}>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">{t.displayName}</CardTitle>
-                  <p className="text-xs text-muted-foreground font-mono">{t.name}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <CardTitle className="text-base truncate">{t.displayName}</CardTitle>
+                      <p className="text-xs text-muted-foreground font-mono truncate">{t.name}</p>
+                    </div>
+                    <Badge variant="outline" className={t.kind === "custom" ? "bg-primary/10 text-primary border-primary/30" : ""}>
+                      {t.kind === "custom" ? "Custom" : "Built-in"}
+                    </Badge>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <p className="text-sm"><span className="text-muted-foreground">Subject:</span> {t.subject}</p>
-                  <Button
-                    size="sm" variant="outline"
-                    onClick={() => { setTestTemplate(t.name); setTestOpen(true); }}
-                  >
-                    <Send className="size-3.5" /> Send test
-                  </Button>
+                  <p className="text-sm line-clamp-2"><span className="text-muted-foreground">Subject:</span> {t.subject}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {t.kind === "custom" && t.id && (
+                      <Button
+                        size="sm" variant="outline"
+                        onClick={() => { setEditingId(t.id!); setEditorOpen(true); }}
+                      >
+                        <Pencil className="size-3.5" /> Edit
+                      </Button>
+                    )}
+                    <Button
+                      size="sm" variant="outline"
+                      onClick={() => { setTestTemplate(t.name); setTestOpen(true); }}
+                    >
+                      <Send className="size-3.5" /> Send test
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
-            {templates.length === 0 && <p className="text-sm text-muted-foreground">No templates registered.</p>}
+            {templates.length === 0 && <p className="text-sm text-muted-foreground">No templates yet. Click "New template" to create one.</p>}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">
-            Templates are React Email files under <code className="font-mono">src/lib/email-templates/</code>. Edit & register new ones in <code className="font-mono">registry.ts</code>.
+            Custom templates are stored in the database — edit them right here. Built-in templates live as React components and are used for system flows (signup, contact form, etc.).
           </p>
         </TabsContent>
+
 
         <TabsContent value="suppressed" className="mt-4">
           <Card>
@@ -314,9 +351,17 @@ export function EmailsAdmin() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <CustomEmailEditor
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        initialId={editingId}
+        onSaved={() => { loadTemplates(); loadAll(); }}
+      />
     </div>
   );
 }
+
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
