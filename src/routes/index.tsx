@@ -248,10 +248,10 @@ function Home() {
               className="font-headline text-4xl leading-tight tracking-tighter md:text-6xl"
             >
               <span className="text-white">Where </span>
-              <span className="text-pink-accent">creative</span>
+              <span className="text-pink-accent">cool collabs</span>
               <br />
-              <span className="text-pink-accent">partners </span>
-              <span className="text-white">connect</span>
+              <span className="text-pink-accent"></span>
+              <span className="text-white">make real noise</span>
             </motion.h1>
 
             <motion.p
