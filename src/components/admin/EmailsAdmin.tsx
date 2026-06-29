@@ -351,9 +351,17 @@ export function EmailsAdmin() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <CustomEmailEditor
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        initialId={editingId}
+        onSaved={() => { loadTemplates(); loadAll(); }}
+      />
     </div>
   );
 }
+
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
   return (
