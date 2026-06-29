@@ -226,7 +226,7 @@ function Home() {
       <div className="voicenotes-gradient">
         <header className="container mx-auto flex items-center justify-between px-4 pt-6">
           <Link to="/">
-            <img src={racketLogoHalf.url} alt="Racket" className="h-9 w-auto" />
+            <img src={racketLogoIconLight.url} alt="Racket" className="h-9 w-auto" />
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex" />
           <HeroAuthButton />
