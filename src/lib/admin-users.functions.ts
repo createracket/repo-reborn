@@ -35,3 +35,21 @@ export const adminCreateUser = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { id: created.user?.id, email: created.user?.email };
   });
+
+const DeleteUserSchema = z.object({ user_id: z.string().uuid() });
+
+export const adminDeleteUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => DeleteUserSchema.parse(input))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { data: roleRow, error: roleErr } = await supabase
+      .from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
+    if (roleErr) throw new Error(roleErr.message);
+    if (!roleRow) throw new Error("Forbidden");
+    if (data.user_id === userId) throw new Error("You cannot delete your own account");
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
-import { adminCreateUser } from "@/lib/admin-users.functions";
+import { adminCreateUser, adminDeleteUser } from "@/lib/admin-users.functions";
 import { ACCESS_CODE } from "@/routes/login";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
@@ -523,7 +523,7 @@ function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <Table headers={["Display name", "Email", "Profile type", "Slug", "Joined", "Featured"]}>
+                <Table headers={["Display name", "Email", "Profile type", "Slug", "Joined", "Featured", ""]}>
                   {profiles.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
@@ -561,6 +561,25 @@ function AdminPage() {
                           }}
                         />
                       </td>
+                      <td className="p-3 text-right">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-destructive hover:text-destructive"
+                          onClick={async () => {
+                            if (!confirm(`Permanently delete user ${p.email ?? p.display_name ?? p.id}? This cannot be undone.`)) return;
+                            try {
+                              await adminDeleteUser({ data: { user_id: p.id } });
+                              setProfiles((rows) => rows.filter((r) => r.id !== p.id));
+                              toast.success("User removed");
+                            } catch (e: any) {
+                              toast.error(e?.message ?? "Failed to remove user");
+                            }
+                          }}
+                        >
+                          <Trash2 className="size-3.5" /> Remove
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </Table>
@@ -578,7 +597,23 @@ function AdminPage() {
                       <CardTitle className="text-lg">{m.name}</CardTitle>
                       <CardDescription>{m.email}</CardDescription>
                     </div>
-                    <Meta date={m.created_at} status={m.handled ? "handled" : "new"} />
+                    <div className="flex items-center gap-2">
+                      <Meta date={m.created_at} status={m.handled ? "handled" : "new"} />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-destructive hover:text-destructive"
+                        onClick={async () => {
+                          if (!confirm(`Delete message from ${m.email}?`)) return;
+                          const { error } = await supabase.from("contact_messages").delete().eq("id", m.id);
+                          if (error) { toast.error(error.message); return; }
+                          setContacts((rows) => rows.filter((r) => r.id !== m.id));
+                          toast.success("Message removed");
+                        }}
+                      >
+                        <Trash2 className="size-3.5" /> Remove
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="text-sm">
