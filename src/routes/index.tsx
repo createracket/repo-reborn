@@ -171,7 +171,7 @@ const stagger = {
 const testimonials = [
   {
     id: 1,
-    name: "Jenna Oberstein",
+    name: "Jenna",
     title: "Agency Partner, AU",
     quote:
       "Racket\u00A0went above and beyond to find the perfect talent for my client, all while maintaining incredibly quick response times. A smooth, efficient, genuinely enjoyable process.",
