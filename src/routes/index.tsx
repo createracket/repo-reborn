@@ -171,23 +171,23 @@ const testimonials = [
   {
     id: 1,
     name: "Jenna Oberstein",
-    title: "AU Agency Partner",
+    title: "Agency Partner, AU",
     quote:
-      "They went above and beyond to find the perfect talent for my client, all while maintaining incredibly quick response times. A smooth, efficient, genuinely enjoyable process.",
+      "Racket\u00A0went above and beyond to find the perfect talent for my client, all while maintaining incredibly quick response times. A smooth, efficient, genuinely enjoyable process.",
   },
   {
     id: 2,
     name: "Dale Tanner",
-    title: "AU Artist",
+    title: "Artist, AU",
     quote:
       "As an artist, it's great to know these legends are on our side, connecting us with paying opportunities and making the process as easy-going as possible.",
   },
   {
     id: 3,
-    name: "Grace Taylor",
-    title: "UK Artist Manager",
+    name: "Grace",
+    title: "Artist Manager, UK",
     quote:
-      "Create Racket made it a breeze for BEX to create branded content that still resonated with her fans — easy!",
+      "Racket made it a breeze to create branded content that still resonated with real fans - it was easy!",
   },
 ];
 
@@ -445,11 +445,11 @@ function Home() {
             >
               <div className="text-center">
                 <motion.p variants={fadeUp} className="mb-6 text-lg font-bold md:text-xl">
-                  Unlocking brand new revenue streams for musicians at every stage of their
+                  Unlocking sustainable revenue streams for musicians at every stage of their
                   careers.
                 </motion.p>
                 <motion.p variants={fadeUp} className="mt-4 text-lg font-light text-[#2b2b2b]/80 md:text-xl">
-                  We've already converted over $300k to artists, that's over
+                  Racket has helped brands to invest in music, shifting
                 </motion.p>
                 <motion.h2
                   variants={fadeUp}
