@@ -447,7 +447,7 @@ function Home() {
                   careers.
                 </motion.p>
                 <motion.p variants={fadeUp} className="mt-4 text-lg font-light text-[#2b2b2b]/80 md:text-xl">
-                  Racket helps brands to actively invest in music, already shifting
+                  Racket helps brands to actively invest in culture, already shifting
                 </motion.p>
                 <motion.h2
                   variants={fadeUp}
