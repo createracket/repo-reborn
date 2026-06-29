@@ -365,7 +365,7 @@ function Home() {
                 variants={fadeUp}
                 className="mx-auto mt-4 max-w-2xl text-lg text-white/80"
               >
-                Racket fosters creativity and drives audience growth for artists and brands across the globe, connecting likeminded collaborators and empowering authentic partnerships that resonate with real fans.
+                Racket removes the barrier to audience development - connecting musicians, media partners, publishers, and brand marketers across the globe.
               </motion.p>
               <motion.div
                 className="mt-10"
