@@ -21,6 +21,7 @@ import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
 import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
 import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
+import { TrafficAdmin } from "@/components/admin/TrafficAdmin";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -184,6 +185,7 @@ function AdminPage() {
 
         <Tabs defaultValue="leads">
           <TabsList className="flex flex-wrap">
+            <TabsTrigger value="traffic">Traffic</TabsTrigger>
             <TabsTrigger value="leads">Lead briefs ({leadBriefs.length})</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign briefs ({campaigns.length})</TabsTrigger>
             <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
@@ -195,6 +197,10 @@ function AdminPage() {
             <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="emails">Emails</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="traffic" className="mt-6">
+            <TrafficAdmin />
+          </TabsContent>
 
           <TabsContent value="leads" className="mt-6 space-y-3">
             {leadBriefs.length === 0 ? <Empty /> : leadBriefs.map((b) => (
