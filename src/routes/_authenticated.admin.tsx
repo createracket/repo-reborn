@@ -183,19 +183,19 @@ function AdminPage() {
           <p className="mt-2 text-muted-foreground">Backend records across the platform.</p>
         </div>
 
-        <Tabs defaultValue="leads">
+        <Tabs defaultValue="traffic">
           <TabsList className="flex flex-wrap">
             <TabsTrigger value="traffic">Traffic</TabsTrigger>
+            <TabsTrigger value="emails">Emails</TabsTrigger>
+            <TabsTrigger value="contact">Contact ({contacts.length})</TabsTrigger>
+            <TabsTrigger value="community">Community</TabsTrigger>
+            <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
+            <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
             <TabsTrigger value="leads">Lead briefs ({leadBriefs.length})</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign briefs ({campaigns.length})</TabsTrigger>
+            <TabsTrigger value="brief-form">Brief Form</TabsTrigger>
             <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
-            <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
-            <TabsTrigger value="contact">Contact ({contacts.length})</TabsTrigger>
-            <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
-            <TabsTrigger value="brief-form">Brief form</TabsTrigger>
-            <TabsTrigger value="community">Community</TabsTrigger>
-            <TabsTrigger value="emails">Emails</TabsTrigger>
           </TabsList>
 
           <TabsContent value="traffic" className="mt-6">
