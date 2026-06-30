@@ -35,7 +35,7 @@ export function SiteFooter() {
             <ul className="space-y-2 text-sm">
               {!signedIn && (
                 <li>
-                  <Link to="/fan-signup" className="hover:text-purple">
+                  <Link to="/signup" className="hover:text-purple">
                     Join the mailing list
                   </Link>
                 </li>

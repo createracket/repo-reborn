@@ -184,12 +184,12 @@ function LoginPage() {
     if (mode !== "signup") return true;
     if (brandPaused) {
       toast.error("Brand sign-ups are paused. Join the waitlist to be first in.");
-      navigate({ to: "/fan-signup" });
+      navigate({ to: "/signup" });
       return false;
     }
     if (accessCodeOk) return true;
     toast.error("That access code isn't valid. Join the waitlist to get notified.");
-    navigate({ to: "/fan-signup" });
+    navigate({ to: "/signup" });
     return false;
   }
 
@@ -274,7 +274,7 @@ function LoginPage() {
                   />
                   <p className="text-xs text-muted-foreground">
                     We're loading in. No code?{" "}
-                    <Link to="/fan-signup" className="font-medium text-primary hover:underline">
+                    <Link to="/signup" className="font-medium text-primary hover:underline">
                       Join the waitlist
                     </Link>
                     .
@@ -320,7 +320,7 @@ function LoginPage() {
                   brand sign-ups go live.
                 </p>
                 <Button asChild className="w-full">
-                  <Link to="/fan-signup">Join the brand waitlist</Link>
+                  <Link to="/signup">Join the brand waitlist</Link>
                 </Button>
               </div>
             )}
