@@ -495,6 +495,7 @@ function RosterDetailView({
   shares,
   community,
   profiles,
+  briefs,
   onChanged,
 }: {
   roster: Roster;
@@ -502,6 +503,7 @@ function RosterDetailView({
   shares: Share[];
   community: CommunityRow[];
   profiles: ProfileRow[];
+  briefs: Brief[];
   onChanged: () => void;
 }) {
   const [title, setTitle] = useState(roster.title);
@@ -512,6 +514,8 @@ function RosterDetailView({
     setTitle(roster.title);
     setDescription(roster.description ?? "");
   }, [roster.id, roster.title, roster.description]);
+
+  const linkedBrief = roster.brief_id ? briefs.find((b) => b.id === roster.brief_id) ?? null : null;
 
   async function saveMeta() {
     setSavingMeta(true);
@@ -528,6 +532,19 @@ function RosterDetailView({
     onChanged();
   }
 
+  async function setLinkedBrief(briefId: string | null) {
+    const { error } = await supabase
+      .from("rosters")
+      .update({ brief_id: briefId })
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(briefId ? "Brief linked" : "Brief unlinked");
+    onChanged();
+  }
+
   async function removeItem(id: string) {
     const { error } = await supabase.from("roster_items").delete().eq("id", id);
     if (error) {
@@ -537,14 +554,71 @@ function RosterDetailView({
     onChanged();
   }
 
+  // Briefs available to link: this roster's current brief + any brief not linked to another roster.
+  // We don't have access to the rosters list here, so allow any brief; admins can re-link as needed.
+  const linkableBriefs = briefs;
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <div className="space-y-6">
-        {/* Brief */}
+        {/* Linked brief */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-xl">Campaign brief</CardTitle>
-            <CardDescription>Title + brief sent to shared users alongside the roster.</CardDescription>
+            <CardTitle className="font-display text-xl">Linked brief</CardTitle>
+            <CardDescription>
+              The submitted campaign brief this roster is built for.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {linkedBrief ? (
+              <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-medium">{linkedBrief.title}</div>
+                    <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">
+                      {linkedBrief.description}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                      {linkedBrief.contact_email && <span>{linkedBrief.contact_email}</span>}
+                      {linkedBrief.budget != null && <span>£{linkedBrief.budget}</span>}
+                      <span>Status: {linkedBrief.status}</span>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => setLinkedBrief(null)}>
+                    Unlink
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Link a submitted brief</Label>
+                <Select
+                  value="none"
+                  onValueChange={(v) => setLinkedBrief(v === "none" ? null : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a brief…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No brief</SelectItem>
+                    {linkableBriefs.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.title}
+                        {b.contact_email ? ` — ${b.contact_email}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Roster meta */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-display text-xl">Roster details</CardTitle>
+            <CardDescription>Internal title + notes for this roster.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-2">
@@ -552,7 +626,7 @@ function RosterDetailView({
               <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
             </div>
             <div className="space-y-2">
-              <Label>Description</Label>
+              <Label>Notes</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -567,6 +641,7 @@ function RosterDetailView({
             </div>
           </CardContent>
         </Card>
+
 
         {/* Roster items */}
         <Card>
