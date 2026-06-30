@@ -10,5 +10,8 @@ Disallow: /admin
 Disallow: /api/
 Disallow: /lovable/
 Disallow: /email/
+Disallow: /roster/
+Disallow: /roster-builder
+Disallow: /spotlight/
 
 Sitemap: https://createracket.com/sitemap.xml
