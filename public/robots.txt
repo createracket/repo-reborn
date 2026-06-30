@@ -1,2 +1,16 @@
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /login
+Disallow: /signup
+Disallow: /fan-signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /results
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /admin
+Disallow: /api/
+Disallow: /lovable/
+Disallow: /email/
+
+Sitemap: https://createracket.com/sitemap.xml
