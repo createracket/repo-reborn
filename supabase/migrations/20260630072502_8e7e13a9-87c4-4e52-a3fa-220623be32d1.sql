@@ -1,0 +1,1 @@
+ALTER TABLE public.roster_items ADD COLUMN status text NOT NULL DEFAULT 'in_review';
