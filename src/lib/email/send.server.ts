@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { resolveRenderedEmail, TEMPLATES } from '@/lib/email-templates/registry'
 import { fetchCustomTemplateByName } from '@/lib/email-templates/custom-store.server'
 
-const SITE_NAME = 'racketvibes'
+const SITE_NAME = 'Racket'
 const SENDER_DOMAIN = 'tech.createracket.com'
 const FROM_DOMAIN = 'createracket.com'
 
