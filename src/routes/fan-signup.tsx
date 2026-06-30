@@ -78,7 +78,7 @@ function FanSignup() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={busy}>
-                  {busy ? "..." : "Sign me up"}
+                  {busy ? "..." : "Sign up"}
                 </Button>
                 <p className="text-xs text-muted-foreground">
                   By subscribing you agree to our{" "}
