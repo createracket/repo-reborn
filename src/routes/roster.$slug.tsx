@@ -176,17 +176,25 @@ function PublicRosterPage() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-display text-xl">{it.name}</h3>
-                          {it.kind === "profile" ? (
-                            <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
-                              <BadgeCheck className="size-3" /> Verified
-                            </Badge>
-                          ) : (
-                            <Badge className="border-transparent bg-purple text-white text-[10px] uppercase">
-                              Prospect
-                            </Badge>
-                          )}
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-display text-xl">{it.name}</h3>
+                            {it.kind === "profile" ? (
+                              <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
+                                <BadgeCheck className="size-3" /> Verified
+                              </Badge>
+                            ) : (
+                              <Badge className="border-transparent bg-purple text-white text-[10px] uppercase">
+                                Prospect
+                              </Badge>
+                            )}
+                          </div>
+                          <Badge
+                            variant="outline"
+                            className="border-border/70 bg-muted/40 text-[10px] uppercase tracking-wider"
+                          >
+                            {STATUS_LABEL[it.status] ?? "In Review"}
+                          </Badge>
                         </div>
                         {it.vibe && (
                           <p className="mt-2 text-sm italic text-foreground/80">
