@@ -11,7 +11,12 @@ import {
   ExternalLink,
   UserPlus,
   Search,
+  Globe,
+  Copy,
+  Check,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { normalizeSlug } from "@/lib/slugs";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
