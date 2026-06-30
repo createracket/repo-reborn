@@ -96,7 +96,22 @@ type RosterItem = {
   example_video_url: string | null;
   bio_page_url: string | null;
   position: number;
+  status: string;
 };
+
+const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: "in_review", label: "In Review" },
+  { value: "approved", label: "Approved" },
+  { value: "confirmed", label: "Confirmed" },
+  { value: "in_production", label: "In Production" },
+  { value: "briefed", label: "Briefed" },
+  { value: "contracting", label: "Contracting" },
+  { value: "live", label: "Live" },
+];
+
+const STATUS_LABEL: Record<string, string> = Object.fromEntries(
+  STATUS_OPTIONS.map((s) => [s.value, s.label]),
+);
 
 type Share = {
   id: string;
