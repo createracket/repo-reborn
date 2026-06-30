@@ -42,6 +42,20 @@ export async function resolveRenderedEmail(
   name: string,
   data: Record<string, any>,
 ): Promise<ResolvedEmail | null> {
+  // DB override takes priority — admins can edit built-ins by saving an
+  // override row with the same name.
+  const { fetchCustomTemplateByName } = await import('./custom-store.server')
+  const row = await fetchCustomTemplateByName(name)
+  if (row) {
+    const { renderCustomEmail } = await import('./render-custom.server')
+    const rendered = await renderCustomEmail(
+      { subject: row.subject, bodyMarkdown: row.body_markdown },
+      data,
+    )
+    const builtin = TEMPLATES[name]
+    return { ...rendered, to: builtin?.to, source: 'custom' }
+  }
+
   const builtin = TEMPLATES[name]
   if (builtin) {
     const React = await import('react')
@@ -54,14 +68,5 @@ export async function resolveRenderedEmail(
     return { subject, html, text, to: builtin.to, source: 'builtin' }
   }
 
-  // Custom (DB-stored) template fallback
-  const { fetchCustomTemplateByName } = await import('./custom-store.server')
-  const row = await fetchCustomTemplateByName(name)
-  if (!row) return null
-  const { renderCustomEmail } = await import('./render-custom.server')
-  const rendered = await renderCustomEmail(
-    { subject: row.subject, bodyMarkdown: row.body_markdown },
-    data,
-  )
-  return { ...rendered, source: 'custom' }
+  return null
 }

@@ -59,12 +59,9 @@ export const upsertCustomTemplate = createServerFn({ method: 'POST' })
     await assertAdmin(context)
     const { extractVariables } = await import('@/lib/email-templates/render-custom.server')
     const variables = extractVariables(data.subject, data.body_markdown)
-
-    // Reject collisions with built-in template names.
-    const { TEMPLATES } = await import('@/lib/email-templates/registry')
-    if (TEMPLATES[data.name]) {
-      throw new Error(`'${data.name}' is reserved by a built-in template — pick another name`)
-    }
+    // Built-in name collisions are allowed: saving with a built-in name
+    // creates an override that the send pipeline prefers over the React
+    // component template.
 
     const payload = {
       name: data.name,
@@ -107,5 +104,57 @@ export const deleteCustomTemplate = createServerFn({ method: 'POST' })
       .eq('id', data.id)
     if (error) throw new Error(error.message)
     return { ok: true }
+  })
+
+/**
+ * Open a built-in template for editing. If an override row already exists
+ * for this name, return its id. Otherwise seed one from the built-in's
+ * markdown defaults and return the new id.
+ */
+export const getOrCreateBuiltinOverride = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ name: NameSchema }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { BUILTIN_DEFAULTS } = await import('@/lib/email-templates/builtin-defaults')
+    const { TEMPLATES } = await import('@/lib/email-templates/registry')
+
+    const builtin = TEMPLATES[data.name]
+    if (!builtin) throw new Error(`'${data.name}' is not a built-in template`)
+    const seed = BUILTIN_DEFAULTS[data.name]
+    if (!seed) {
+      throw new Error(
+        `No editable defaults available for '${data.name}' — add an entry to builtin-defaults.ts`,
+      )
+    }
+
+    const { data: existing, error: selErr } = await context.supabase
+      .from('email_custom_templates')
+      .select('id')
+      .eq('name', data.name)
+      .maybeSingle()
+    if (selErr) throw new Error(selErr.message)
+    if (existing) return { id: existing.id as string, created: false }
+
+    const { extractVariables } = await import('@/lib/email-templates/render-custom.server')
+    const variables = extractVariables(seed.subject, seed.body_markdown)
+
+    const { data: row, error } = await context.supabase
+      .from('email_custom_templates')
+      .insert({
+        name: data.name,
+        display_name: seed.display_name,
+        subject: seed.subject,
+        body_markdown: seed.body_markdown,
+        variables,
+        sample_data: seed.sample_data,
+        created_by: context.userId,
+      })
+      .select('id')
+      .single()
+    if (error) throw new Error(error.message)
+    return { id: row.id as string, created: true }
   })
 
