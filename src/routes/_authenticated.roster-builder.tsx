@@ -689,6 +689,7 @@ function RosterDetailView({
           onAdded={onChanged}
         />
         <AddProspectCard rosterId={roster.id} nextPosition={items.length} onAdded={onChanged} />
+        <PublishPanel roster={roster} onChanged={onChanged} />
         <SharePanel
           rosterId={roster.id}
           shares={shares}
