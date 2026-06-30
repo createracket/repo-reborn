@@ -177,10 +177,15 @@ function AdminPage() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <main className="container mx-auto px-4 py-12">
-        <div className="mb-8">
-          <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
-          <h1 className="mt-1 font-display text-4xl md:text-5xl">Dev view</h1>
-          <p className="mt-2 text-muted-foreground">Backend records across the platform.</p>
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
+            <h1 className="mt-1 font-display text-4xl md:text-5xl">Dev view</h1>
+            <p className="mt-2 text-muted-foreground">Backend records across the platform.</p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/roster-builder">Roster Builder →</Link>
+          </Button>
         </div>
 
         <Tabs defaultValue="traffic">

@@ -29,6 +29,7 @@ import { Route as USlugRouteImport } from './routes/u.$slug'
 import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
+import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authenticated.roster-builder'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
@@ -141,6 +142,12 @@ const BrandsHowItWorksRoute = BrandsHowItWorksRouteImport.update({
   path: '/brands/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRosterBuilderRoute =
+  AuthenticatedRosterBuilderRouteImport.update({
+    id: '/roster-builder',
+    path: '/roster-builder',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -221,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
@@ -254,6 +262,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
@@ -289,6 +298,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/profile'
+    | '/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
     | '/spotlight/$slug'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/profile'
+    | '/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
     | '/spotlight/$slug'
@@ -391,6 +403,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/profile'
+    | '/_authenticated/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
     | '/spotlight/$slug'
@@ -583,6 +596,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrandsHowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/roster-builder': {
+      id: '/_authenticated/roster-builder'
+      path: '/roster-builder'
+      fullPath: '/roster-builder'
+      preLoaderRoute: typeof AuthenticatedRosterBuilderRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -674,12 +694,14 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedRosterBuilderRoute: typeof AuthenticatedRosterBuilderRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedRosterBuilderRoute: AuthenticatedRosterBuilderRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
