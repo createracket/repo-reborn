@@ -14,6 +14,8 @@ import {
   Globe,
   Copy,
   Check,
+  Pencil,
+  BadgeCheck,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
