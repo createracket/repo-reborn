@@ -25,10 +25,11 @@ export const CustomEmail = ({ subject, bodyHtml, preview }: Props) => (
     <Preview>{preview || subject}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section
+        <div
           // bodyHtml is sanitized server-side via DOMPurify before this point.
           dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
+
       </Container>
     </Body>
   </Html>
