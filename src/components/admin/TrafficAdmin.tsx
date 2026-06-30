@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { getTrafficStats, type TrafficRange, type TrafficStats } from "@/lib/traffic-admin.functions";
+import { getTrafficStats, type TrafficRange, type TrafficFilter, type TrafficStats } from "@/lib/traffic-admin.functions";
 
 const RANGES: { value: TrafficRange; label: string }[] = [
   { value: "7d", label: "7 days" },
@@ -10,9 +9,29 @@ const RANGES: { value: TrafficRange; label: string }[] = [
   { value: "90d", label: "90 days" },
 ];
 
+const FILTERS: { value: TrafficFilter; label: string; hint: string }[] = [
+  { value: "humans", label: "Humans", hint: "Real visitors only" },
+  { value: "bots", label: "Bots", hint: "Crawlers & scrapers" },
+  { value: "all", label: "All", hint: "Everything" },
+];
+
+const COUNTRY_NAMES: Record<string, string> = {
+  US: "United States", GB: "United Kingdom", AU: "Australia", CN: "China",
+  DE: "Germany", FR: "France", NL: "Netherlands", CA: "Canada", IN: "India",
+  JP: "Japan", BR: "Brazil", MX: "Mexico", IE: "Ireland", ES: "Spain",
+  IT: "Italy", SE: "Sweden", NO: "Norway", DK: "Denmark", FI: "Finland",
+  PL: "Poland", RU: "Russia", SG: "Singapore", HK: "Hong Kong", KR: "South Korea",
+};
+
+function countryLabel(code: string) {
+  if (code === "Unknown") return "Unknown";
+  return `${code} · ${COUNTRY_NAMES[code] ?? code}`;
+}
+
 export function TrafficAdmin() {
   const fetchStats = useServerFn(getTrafficStats);
   const [range, setRange] = useState<TrafficRange>("7d");
+  const [filter, setFilter] = useState<TrafficFilter>("humans");
   const [stats, setStats] = useState<TrafficStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,50 +40,55 @@ export function TrafficAdmin() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetchStats({ data: { range } })
-      .then((res) => {
-        if (!cancelled) setStats(res);
-      })
-      .catch((e) => {
-        if (!cancelled) setError(e?.message ?? "Failed to load traffic stats");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [range, fetchStats]);
+    fetchStats({ data: { range, filter } })
+      .then((res) => { if (!cancelled) setStats(res); })
+      .catch((e) => { if (!cancelled) setError(e?.message ?? "Failed to load traffic stats"); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [range, filter, fetchStats]);
+
+  const totalAll = stats ? stats.totals.humanPageviews + stats.totals.botPageviews : 0;
+  const botShare = totalAll > 0 && stats ? Math.round((stats.totals.botPageviews / totalAll) * 100) : 0;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl">Traffic</h2>
           <p className="text-sm text-muted-foreground">
-            First-party pageviews. No cookies, no third-party scripts. A "visitor" is a unique browser session.
+            First-party pageviews. No cookies, no third-party scripts. Bots flagged server-side via user-agent.
           </p>
         </div>
-        <div className="inline-flex rounded-md border border-border bg-background p-1">
-          {RANGES.map((r) => (
-            <button
-              key={r.value}
-              type="button"
-              onClick={() => setRange(r.value)}
-              className={`rounded px-3 py-1 text-sm transition ${
-                range === r.value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
+        <div className="flex flex-wrap gap-2">
+          <SegmentedControl<TrafficFilter>
+            value={filter}
+            onChange={setFilter}
+            options={FILTERS.map((f) => ({ value: f.value, label: f.label, title: f.hint }))}
+          />
+          <SegmentedControl<TrafficRange>
+            value={range}
+            onChange={setRange}
+            options={RANGES.map((r) => ({ value: r.value, label: r.label }))}
+          />
         </div>
       </div>
 
-      {error && (
-        <Card>
-          <CardContent className="py-4 text-sm text-destructive">{error}</CardContent>
+      {stats && (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+            <span className="text-muted-foreground">
+              In this period: <strong className="text-foreground">{stats.totals.humanPageviews.toLocaleString()}</strong> human ·{" "}
+              <strong className="text-foreground">{stats.totals.botPageviews.toLocaleString()}</strong> bot pageviews ({botShare}% bots)
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Showing: <strong className="text-foreground">{FILTERS.find((f) => f.value === filter)?.label}</strong>
+            </span>
+          </CardContent>
         </Card>
+      )}
+
+      {error && (
+        <Card><CardContent className="py-4 text-sm text-destructive">{error}</CardContent></Card>
       )}
 
       {loading && !stats ? (
@@ -74,21 +98,14 @@ export function TrafficAdmin() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <Stat label="Pageviews" value={stats.totals.pageviews.toLocaleString()} />
             <Stat label="Visitors" value={stats.totals.visitors.toLocaleString()} />
-            <Stat
-              label="Bounce rate"
-              value={`${Math.round(stats.totals.bounceRate * 100)}%`}
-              hint="Sessions with only one pageview"
-            />
-            <Stat
-              label="Pages / session"
-              value={stats.totals.avgPagesPerSession.toFixed(2)}
-            />
+            <Stat label="Bounce rate" value={`${Math.round(stats.totals.bounceRate * 100)}%`} hint="Sessions with only one pageview" />
+            <Stat label="Pages / session" value={stats.totals.avgPagesPerSession.toFixed(2)} />
           </div>
 
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Daily activity</CardTitle>
-              <CardDescription>Pageviews (bar) and visitors (line) per day.</CardDescription>
+              <CardDescription>Pageviews per day for the selected filter.</CardDescription>
             </CardHeader>
             <CardContent>
               <DailyChart data={stats.daily} />
@@ -98,30 +115,95 @@ export function TrafficAdmin() {
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Top pages</CardTitle>
+                <CardTitle className="text-base">Countries</CardTitle>
+                <CardDescription>Where traffic comes from (via edge headers). Human vs bot split shown.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {stats.topCountries.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No country data yet. New pageviews will be tagged from now on.</p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {stats.topCountries.map((c) => {
+                      const max = Math.max(...stats.topCountries.map((x) => x.views), 1);
+                      const suspicious = c.bots > c.humans && c.views > 3;
+                      return (
+                        <li key={c.country} className="relative overflow-hidden rounded-md border border-border/60 bg-muted/30">
+                          <div className="absolute inset-y-0 left-0 bg-primary/15" style={{ width: `${(c.views / max) * 100}%` }} />
+                          <div className="relative flex items-center justify-between gap-3 px-2.5 py-1.5 text-sm">
+                            <span className="truncate">
+                              {countryLabel(c.country)}
+                              {suspicious && (
+                                <span className="ml-2 rounded bg-destructive/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-destructive">
+                                  Mostly bots
+                                </span>
+                              )}
+                            </span>
+                            <span className="shrink-0 tabular-nums text-xs text-muted-foreground">
+                              {c.humans}h · {c.bots}b
+                            </span>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Bot sources</CardTitle>
+                <CardDescription>What the flagged bots actually are. Most are harmless crawlers.</CardDescription>
               </CardHeader>
               <CardContent>
                 <RankedList
-                  rows={stats.topPages.map((r) => ({ label: r.path, value: r.views }))}
-                  empty="No pageviews recorded yet."
+                  rows={stats.topBotReasons.map((r) => ({ label: r.reason, value: r.views }))}
+                  empty={filter === "humans" ? "Switch the filter to Bots or All to see bot sources." : "No bot traffic in this period."}
                 />
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">Top pages</CardTitle></CardHeader>
+              <CardContent>
+                <RankedList rows={stats.topPages.map((r) => ({ label: r.path, value: r.views }))} empty="No pageviews recorded yet." />
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Top referrers</CardTitle>
-                <CardDescription>Where visitors came from (direct traffic excluded).</CardDescription>
+                <CardDescription>Where visitors came from (direct excluded).</CardDescription>
               </CardHeader>
               <CardContent>
-                <RankedList
-                  rows={stats.topReferrers.map((r) => ({ label: r.referrer, value: r.views }))}
-                  empty="No external referrers yet."
-                />
+                <RankedList rows={stats.topReferrers.map((r) => ({ label: r.referrer, value: r.views }))} empty="No external referrers yet." />
               </CardContent>
             </Card>
           </div>
         </>
       ) : null}
+    </div>
+  );
+}
+
+function SegmentedControl<T extends string>({
+  value, onChange, options,
+}: { value: T; onChange: (v: T) => void; options: { value: T; label: string; title?: string }[] }) {
+  return (
+    <div className="inline-flex rounded-md border border-border bg-background p-1">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          title={o.title}
+          onClick={() => onChange(o.value)}
+          className={`rounded px-3 py-1 text-sm transition ${
+            value === o.value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
     </div>
   );
 }
@@ -145,10 +227,7 @@ function RankedList({ rows, empty }: { rows: { label: string; value: number }[];
     <ul className="space-y-1.5">
       {rows.map((r) => (
         <li key={r.label} className="relative overflow-hidden rounded-md border border-border/60 bg-muted/30">
-          <div
-            className="absolute inset-y-0 left-0 bg-primary/15"
-            style={{ width: `${(r.value / max) * 100}%` }}
-          />
+          <div className="absolute inset-y-0 left-0 bg-primary/15" style={{ width: `${(r.value / max) * 100}%` }} />
           <div className="relative flex items-center justify-between gap-3 px-2.5 py-1.5 text-sm">
             <span className="truncate font-mono text-xs">{r.label}</span>
             <span className="shrink-0 tabular-nums text-muted-foreground">{r.value}</span>
@@ -162,8 +241,6 @@ function RankedList({ rows, empty }: { rows: { label: string; value: number }[];
 function DailyChart({ data }: { data: TrafficStats["daily"] }) {
   if (data.length === 0) return <p className="text-sm text-muted-foreground">No data.</p>;
   const max = Math.max(...data.map((d) => d.pageviews), 1);
-  const visMax = Math.max(...data.map((d) => d.visitors), 1);
-
   return (
     <div className="space-y-2">
       <div className="flex h-40 items-end gap-1">
@@ -172,11 +249,7 @@ function DailyChart({ data }: { data: TrafficStats["daily"] }) {
             <div
               className="w-full rounded-t bg-primary/70 transition group-hover:bg-primary"
               style={{ height: `${(d.pageviews / max) * 100}%` }}
-              title={`${d.date} · ${d.pageviews} views · ${d.visitors} visitors`}
-            />
-            <div
-              className="absolute bottom-0 h-1 w-full rounded-full bg-accent-foreground/60"
-              style={{ bottom: `${(d.visitors / visMax) * 100}%` }}
+              title={`${d.date} · ${d.pageviews} views · ${d.visitors} visitors · ${d.bots} bot`}
             />
           </div>
         ))}

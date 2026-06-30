@@ -2,42 +2,46 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export type TrafficRange = "7d" | "30d" | "90d";
+export type TrafficFilter = "humans" | "bots" | "all";
 
 export type TrafficStats = {
   range: TrafficRange;
+  filter: TrafficFilter;
   since: string;
   totals: {
     pageviews: number;
     visitors: number;
     sessions: number;
-    bounceRate: number; // 0..1
+    bounceRate: number;
     avgPagesPerSession: number;
+    humanPageviews: number;
+    botPageviews: number;
   };
-  daily: Array<{ date: string; pageviews: number; visitors: number }>;
+  daily: Array<{ date: string; pageviews: number; visitors: number; bots: number }>;
   topPages: Array<{ path: string; views: number }>;
   topReferrers: Array<{ referrer: string; views: number }>;
+  topCountries: Array<{ country: string; views: number; humans: number; bots: number }>;
+  topBotReasons: Array<{ reason: string; views: number }>;
 };
 
 const RANGE_DAYS: Record<TrafficRange, number> = { "7d": 7, "30d": 30, "90d": 90 };
 
 export const getTrafficStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { range?: TrafficRange }) => ({
+  .inputValidator((data: { range?: TrafficRange; filter?: TrafficFilter }) => ({
     range: (data?.range ?? "7d") as TrafficRange,
+    filter: (data?.filter ?? "humans") as TrafficFilter,
   }))
   .handler(async ({ data, context }): Promise<TrafficStats> => {
     const { supabase, userId } = context;
 
-    // Verify admin role server-side
     const { data: roleRow } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
       .eq("role", "admin")
       .maybeSingle();
-    if (!roleRow) {
-      throw new Error("Forbidden");
-    }
+    if (!roleRow) throw new Error("Forbidden");
 
     const days = RANGE_DAYS[data.range] ?? 7;
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -45,26 +49,42 @@ export const getTrafficStats = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabase
       .from("page_views" as any)
-      .select("session_id, path, referrer, created_at")
+      .select("session_id, path, referrer, created_at, is_bot, bot_reason, country")
       .gte("created_at", sinceIso)
       .order("created_at", { ascending: true })
       .limit(50000);
 
     if (error) throw new Error(error.message);
 
-    type Row = { session_id: string; path: string; referrer: string | null; created_at: string };
-    const list = (rows as unknown as Row[] | null) ?? [];
+    type Row = {
+      session_id: string;
+      path: string;
+      referrer: string | null;
+      created_at: string;
+      is_bot: boolean | null;
+      bot_reason: string | null;
+      country: string | null;
+    };
+    const all = (rows as unknown as Row[] | null) ?? [];
+
+    const humanPageviews = all.filter((r) => !r.is_bot).length;
+    const botPageviews = all.length - humanPageviews;
+
+    const list =
+      data.filter === "humans" ? all.filter((r) => !r.is_bot)
+      : data.filter === "bots" ? all.filter((r) => r.is_bot)
+      : all;
 
     const sessionCounts = new Map<string, number>();
     const pageCounts = new Map<string, number>();
     const refCounts = new Map<string, number>();
-    const dayMap = new Map<string, { pageviews: number; visitors: Set<string> }>();
+    const reasonCounts = new Map<string, number>();
+    const countryMap = new Map<string, { views: number; humans: number; bots: number }>();
+    const dayMap = new Map<string, { pageviews: number; visitors: Set<string>; bots: number }>();
 
-    // Seed all days so the chart has zeros where needed
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      const key = d.toISOString().slice(0, 10);
-      dayMap.set(key, { pageviews: 0, visitors: new Set() });
+      dayMap.set(d.toISOString().slice(0, 10), { pageviews: 0, visitors: new Set(), bots: 0 });
     }
 
     for (const r of list) {
@@ -73,44 +93,55 @@ export const getTrafficStats = createServerFn({ method: "POST" })
       const refHost = normaliseReferrer(r.referrer);
       if (refHost) refCounts.set(refHost, (refCounts.get(refHost) ?? 0) + 1);
 
+      const country = r.country || "Unknown";
+      const c = countryMap.get(country) ?? { views: 0, humans: 0, bots: 0 };
+      c.views++;
+      if (r.is_bot) c.bots++; else c.humans++;
+      countryMap.set(country, c);
+
+      if (r.is_bot) {
+        const reason = r.bot_reason || "Unknown";
+        reasonCounts.set(reason, (reasonCounts.get(reason) ?? 0) + 1);
+      }
+
       const dayKey = r.created_at.slice(0, 10);
       const bucket = dayMap.get(dayKey);
       if (bucket) {
         bucket.pageviews++;
         bucket.visitors.add(r.session_id);
+        if (r.is_bot) bucket.bots++;
       }
     }
 
     const sessions = sessionCounts.size;
     const pageviews = list.length;
     let bounced = 0;
-    sessionCounts.forEach((count) => {
-      if (count <= 1) bounced++;
-    });
+    sessionCounts.forEach((count) => { if (count <= 1) bounced++; });
 
     return {
       range: data.range,
+      filter: data.filter,
       since: sinceIso,
       totals: {
         pageviews,
-        visitors: sessions, // session ≈ unique visitor (no cross-session id)
+        visitors: sessions,
         sessions,
         bounceRate: sessions === 0 ? 0 : bounced / sessions,
         avgPagesPerSession: sessions === 0 ? 0 : pageviews / sessions,
+        humanPageviews,
+        botPageviews,
       },
       daily: Array.from(dayMap.entries()).map(([date, v]) => ({
-        date,
-        pageviews: v.pageviews,
-        visitors: v.visitors.size,
+        date, pageviews: v.pageviews, visitors: v.visitors.size, bots: v.bots,
       })),
-      topPages: Array.from(pageCounts.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 15)
+      topPages: Array.from(pageCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 15)
         .map(([path, views]) => ({ path, views })),
-      topReferrers: Array.from(refCounts.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 15)
+      topReferrers: Array.from(refCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 15)
         .map(([referrer, views]) => ({ referrer, views })),
+      topCountries: Array.from(countryMap.entries()).sort((a, b) => b[1].views - a[1].views).slice(0, 20)
+        .map(([country, v]) => ({ country, ...v })),
+      topBotReasons: Array.from(reasonCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 15)
+        .map(([reason, views]) => ({ reason, views })),
     };
   });
 
