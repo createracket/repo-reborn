@@ -47,6 +47,11 @@ export function SiteFooter() {
             <h3 className="mb-3 font-headline text-sm">Contact</h3>
             <ul className="space-y-2 text-sm">
               <li>
+                <Link to="/contact" className="hover:text-purple">
+                  Get in touch
+                </Link>
+              </li>
+              <li>
                 <a
                   href={`mailto:${contactEmail}`}
                   className="inline-flex items-center gap-2 hover:text-purple"

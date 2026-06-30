@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
@@ -17,7 +18,11 @@ export const Route = createFileRoute("/contact")({
     meta: [
       { title: "Contact — Create Racket" },
       { name: "description", content: "Get in touch with the Create Racket team." },
+      { property: "og:title", content: "Contact — Create Racket" },
+      { property: "og:description", content: "Questions, collabs, hot takes — get in touch with Create Racket." },
+      { property: "og:url", content: "https://createracket.com/contact" },
     ],
+    links: [{ rel: "canonical", href: "https://createracket.com/contact" }],
   }),
   component: ContactPage,
 });
@@ -28,6 +33,16 @@ function ContactPage() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [subscribe, setSubscribe] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setSignedIn(!!session);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,7 +55,12 @@ function ContactPage() {
       const res = await fetch("/api/public/contact-submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message }),
+        body: JSON.stringify({
+          name,
+          email,
+          message,
+          subscribe: signedIn ? false : subscribe,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -55,6 +75,8 @@ function ContactPage() {
       setBusy(false);
     }
   }
+
+  const showOptIn = signedIn === false;
 
   return (
     <div className="min-h-screen bg-background">
@@ -106,9 +128,35 @@ function ContactPage() {
                     onChange={(e) => setMessage(e.target.value)}
                   />
                 </div>
+
+                {showOptIn && (
+                  <div className="flex items-start gap-2 pt-1">
+                    <Checkbox
+                      id="subscribe"
+                      checked={subscribe}
+                      onCheckedChange={(v) => setSubscribe(v === true)}
+                    />
+                    <Label htmlFor="subscribe" className="text-sm font-normal leading-snug">
+                      Also add me to the Create Racket mailing list for occasional updates.
+                    </Label>
+                  </div>
+                )}
+
                 <Button type="submit" className="w-full" disabled={busy}>
                   {busy ? "Sending..." : "Send message"}
                 </Button>
+
+                {showOptIn && (
+                  <p className="text-xs text-muted-foreground">
+                    By submitting you agree to our{" "}
+                    <Link to="/terms" className="underline hover:text-primary">Terms</Link>
+                    {" "}and{" "}
+                    <Link to="/privacy" className="underline hover:text-primary">Privacy Policy</Link>
+                    {subscribe
+                      ? ", and to receive emails from Create Racket. Unsubscribe anytime."
+                      : "."}
+                  </p>
+                )}
               </form>
             )}
           </CardContent>
