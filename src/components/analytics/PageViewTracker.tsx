@@ -1,9 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
 
 const SESSION_KEY = "cr_pv_sid";
-const BOT_RE = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|preview|lighthouse|headless|monitor|axios|curl|wget/i;
 
 function getSessionId(): string {
   if (typeof window === "undefined") return "";
@@ -38,26 +36,22 @@ export function PageViewTracker() {
       return;
     }
 
-    const ua = navigator.userAgent || "";
-    if (BOT_RE.test(ua)) return;
-
     lastSent.current = pathname;
     const sid = getSessionId();
     const ref = document.referrer && !document.referrer.startsWith(window.location.origin)
       ? document.referrer.slice(0, 1024)
       : null;
 
-    (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      // Fire and forget — never block UI on analytics failures
-      void supabase.from("page_views" as any).insert({
-        session_id: sid,
-        path: pathname.slice(0, 512),
-        referrer: ref,
-        user_agent: ua.slice(0, 512),
-        user_id: u.user?.id ?? null,
-      });
-    })().catch(() => {});
+    // Fire and forget. Server handles bot detection + country via edge headers.
+    try {
+      const payload = JSON.stringify({ session_id: sid, path: pathname.slice(0, 512), referrer: ref });
+      fetch("/api/public/track-pageview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
   }, [pathname]);
 
   return null;

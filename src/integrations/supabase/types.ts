@@ -361,6 +361,8 @@ export type Database = {
       }
       page_views: {
         Row: {
+          bot_reason: string | null
+          country: string | null
           created_at: string
           id: number
           is_bot: boolean
@@ -371,6 +373,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          bot_reason?: string | null
+          country?: string | null
           created_at?: string
           id?: number
           is_bot?: boolean
@@ -381,6 +385,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          bot_reason?: string | null
+          country?: string | null
           created_at?: string
           id?: number
           is_bot?: boolean
