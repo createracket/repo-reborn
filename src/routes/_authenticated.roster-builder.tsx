@@ -1232,13 +1232,13 @@ function PublishPanel({
   onChanged: () => void;
 }) {
   const defaultSlug =
-    roster.slug ?? normalizeSlug(roster.title).slice(0, 60) || "roster";
+    roster.slug ?? (normalizeSlug(roster.title).slice(0, 60) || "roster");
   const [slug, setSlug] = useState(defaultSlug);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setSlug(roster.slug ?? normalizeSlug(roster.title).slice(0, 60) || "roster");
+    setSlug(roster.slug ?? (normalizeSlug(roster.title).slice(0, 60) || "roster"));
   }, [roster.id, roster.slug, roster.title]);
 
   const origin =
