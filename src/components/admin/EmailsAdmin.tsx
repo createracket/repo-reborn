@@ -27,6 +27,18 @@ import { getOrCreateBuiltinOverride } from "@/lib/custom-templates.functions";
 
 type Range = "24h" | "7d" | "30d" | "all";
 
+type TemplateListItem = {
+  name: string;
+  displayName: string;
+  subject: string;
+  hasPreviewData: boolean;
+  kind: "builtin" | "custom";
+  id: string | null;
+  overrideId?: string | null;
+  edited?: boolean;
+  sampleData?: Record<string, any>;
+};
+
 function rangeToFrom(range: Range): string | undefined {
   if (range === "all") return undefined;
   const now = new Date();
@@ -48,6 +60,14 @@ function StatusBadge({ status }: { status: string }) {
   return <Badge variant="outline" className={m.cls}>{m.label}</Badge>;
 }
 
+function formatSampleData(sampleData?: Record<string, any>): string {
+  const entries = Object.entries(sampleData ?? {})
+    .filter(([, value]) => value !== null && value !== undefined && String(value).trim() !== "")
+    .slice(0, 4);
+
+  return entries.map(([key, value]) => `${key}: ${String(value)}`).join(" · ");
+}
+
 export function EmailsAdmin() {
   const fetchLogs = useServerFn(getEmailLogs);
   const fetchStats = useServerFn(getEmailStats);
@@ -64,7 +84,7 @@ export function EmailsAdmin() {
   const [logs, setLogs] = useState<any[]>([]);
   const [logsTotal, setLogsTotal] = useState(0);
   const [stats, setStats] = useState({ total: 0, sent: 0, failed: 0, suppressed: 0, pending: 0 });
-  const [templates, setTemplates] = useState<{ name: string; displayName: string; subject: string; hasPreviewData: boolean; kind: "builtin" | "custom"; id: string | null; overrideId?: string | null; edited?: boolean }[]>([]);
+  const [templates, setTemplates] = useState<TemplateListItem[]>([]);
   const [templateNames, setTemplateNames] = useState<string[]>([]);
   const [suppressed, setSuppressed] = useState<any[]>([]);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -255,7 +275,10 @@ export function EmailsAdmin() {
             </Button>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {templates.map((t) => (
+            {templates.map((t) => {
+              const sampleSummary = formatSampleData(t.sampleData);
+
+              return (
               <Card key={`${t.kind}:${t.name}`}>
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between gap-2">
@@ -270,6 +293,11 @@ export function EmailsAdmin() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm line-clamp-2"><span className="text-muted-foreground">Subject:</span> {t.subject}</p>
+                  {sampleSummary && (
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      Sample tags: <span className="font-mono text-foreground">{sampleSummary}</span>
+                    </p>
+                  )}
                   <div className="flex flex-wrap gap-2">
                     {t.kind === "custom" && t.id && (
                       <Button
@@ -304,7 +332,8 @@ export function EmailsAdmin() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
             {templates.length === 0 && <p className="text-sm text-muted-foreground">No templates yet. Click "New template" to create one.</p>}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">

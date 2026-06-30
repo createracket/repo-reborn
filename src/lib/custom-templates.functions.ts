@@ -78,7 +78,7 @@ export const upsertCustomTemplate = createServerFn({ method: 'POST' })
         .from('email_custom_templates')
         .update(payload)
         .eq('id', data.id)
-        .select('id, name')
+        .select('id, name, display_name, subject, body_markdown, variables, sample_data, updated_at')
         .single()
       if (error) throw new Error(error.message)
       return row
@@ -86,7 +86,7 @@ export const upsertCustomTemplate = createServerFn({ method: 'POST' })
       const { data: row, error } = await context.supabase
         .from('email_custom_templates')
         .insert(payload)
-        .select('id, name')
+        .select('id, name, display_name, subject, body_markdown, variables, sample_data, updated_at')
         .single()
       if (error) throw new Error(error.message)
       return row
