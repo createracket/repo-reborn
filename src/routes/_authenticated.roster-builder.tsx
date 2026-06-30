@@ -778,6 +778,18 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
                   key={label}
                   className="rounded-md border border-border/60 bg-muted/30 px-2 py-0.5"
                 >
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+            {totalReach > 0 && (
+              <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
+                Total reach {formatCount(totalReach)}
+              </span>
+            )}
+            {stats.map(([label, count, url]) =>
+              count != null || url ? (
+                <span
+                  key={label}
+                  className="rounded-md border border-border/60 bg-muted/30 px-2 py-0.5"
+                >
                   {label}
                   {count != null ? ` ${formatCount(count)}` : ""}
                   {url ? (
