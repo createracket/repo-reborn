@@ -113,6 +113,7 @@ function RosterBuilderPage() {
   const [shares, setShares] = useState<Share[]>([]);
   const [community, setCommunity] = useState<CommunityRow[]>([]);
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
+  const [briefs, setBriefs] = useState<Brief[]>([]);
 
   // bootstrap: verify admin + load rosters
   useEffect(() => {
@@ -135,7 +136,7 @@ function RosterBuilderPage() {
       }
       setIsAdmin(true);
       await loadRosters();
-      const [{ data: cm }, { data: pr }] = await Promise.all([
+      const [{ data: cm }, { data: pr }, { data: cb }] = await Promise.all([
         supabase
           .from("community_profiles")
           .select("id, display_name, account_type, tagline, avatar_url")
@@ -144,9 +145,14 @@ function RosterBuilderPage() {
           .from("profiles")
           .select("id, email, display_name, avatar_url")
           .order("display_name"),
+        supabase
+          .from("campaign_briefs")
+          .select("id, title, description, contact_email, budget, status, created_at")
+          .order("created_at", { ascending: false }),
       ]);
       setCommunity((cm as CommunityRow[]) ?? []);
       setProfiles((pr as ProfileRow[]) ?? []);
+      setBriefs((cb as Brief[]) ?? []);
       setChecking(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
