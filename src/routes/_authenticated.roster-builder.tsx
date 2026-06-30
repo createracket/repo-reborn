@@ -58,6 +58,9 @@ type Roster = {
   description: string | null;
   owner_id: string;
   brief_id: string | null;
+  slug: string | null;
+  published: boolean;
+  published_at: string | null;
   created_at: string;
   updated_at: string;
 };
