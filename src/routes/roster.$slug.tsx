@@ -22,6 +22,8 @@ type PublicItem = {
   id: string;
   kind: "profile" | "prospect";
   name: string;
+  avatar_url: string | null;
+  vibe: string | null;
   instagram_url: string | null;
   instagram_followers: number | null;
   tiktok_url: string | null;
