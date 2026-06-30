@@ -14,6 +14,8 @@ import {
   Globe,
   Copy,
   Check,
+  Pencil,
+  BadgeCheck,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
@@ -706,6 +708,8 @@ function RosterDetailView({
 function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => void }) {
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const isVerified = item.kind === "profile";
 
   useEffect(() => {
     setVibe(item.vibe ?? "");
@@ -750,11 +754,17 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium">{item.name}</span>
-            <Badge variant="outline" className="text-[10px] uppercase">
-              {item.kind === "profile" ? "Profile" : "Prospect"}
-            </Badge>
+            {isVerified ? (
+              <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] hover:bg-pink-accent/90 text-[10px] uppercase">
+                <BadgeCheck className="size-3" /> Verified
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-[10px] uppercase">
+                Prospect
+              </Badge>
+            )}
           </div>
           <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
             {stats.map(([label, count, url]) =>
@@ -817,14 +827,140 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               disabled={savingVibe}
             />
           </div>
+          {editing && !isVerified && (
+            <EditProspectPanel
+              item={item}
+              onClose={() => setEditing(false)}
+            />
+          )}
         </div>
-        <Button size="icon" variant="ghost" onClick={onRemove}>
-          <Trash2 className="size-4" />
-        </Button>
+        <div className="flex flex-col gap-1">
+          {!isVerified && (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setEditing((v) => !v)}
+              title="Edit metrics & photo"
+            >
+              <Pencil className="size-4" />
+            </Button>
+          )}
+          <Button size="icon" variant="ghost" onClick={onRemove}>
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
       </div>
     </li>
   );
 }
+
+function EditProspectPanel({
+  item,
+  onClose,
+}: {
+  item: RosterItem;
+  onClose: () => void;
+}) {
+  const [form, setForm] = useState({
+    name: item.name,
+    avatar_url: item.avatar_url ?? "",
+    instagram_url: item.instagram_url ?? "",
+    instagram_followers: item.instagram_followers?.toString() ?? "",
+    tiktok_url: item.tiktok_url ?? "",
+    tiktok_followers: item.tiktok_followers?.toString() ?? "",
+    youtube_url: item.youtube_url ?? "",
+    youtube_subscribers: item.youtube_subscribers?.toString() ?? "",
+    spotify_url: item.spotify_url ?? "",
+    spotify_monthly_listens: item.spotify_monthly_listens?.toString() ?? "",
+    example_video_url: item.example_video_url ?? "",
+    bio_page_url: item.bio_page_url ?? "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const upd = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  function toNum(v: string): number | null {
+    if (!v.trim()) return null;
+    const n = Number(v.replace(/[,\s]/g, ""));
+    return Number.isFinite(n) ? n : null;
+  }
+
+  async function save() {
+    if (!form.name.trim()) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("roster_items")
+      .update({
+        name: form.name.trim(),
+        avatar_url: form.avatar_url.trim() || null,
+        instagram_url: form.instagram_url.trim() || null,
+        instagram_followers: toNum(form.instagram_followers),
+        tiktok_url: form.tiktok_url.trim() || null,
+        tiktok_followers: toNum(form.tiktok_followers),
+        youtube_url: form.youtube_url.trim() || null,
+        youtube_subscribers: toNum(form.youtube_subscribers),
+        spotify_url: form.spotify_url.trim() || null,
+        spotify_monthly_listens: toNum(form.spotify_monthly_listens),
+        example_video_url: form.example_video_url.trim() || null,
+        bio_page_url: form.bio_page_url.trim() || null,
+      } as never)
+      .eq("id", item.id);
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Updated");
+    onClose();
+  }
+
+  const fld = (
+    label: string,
+    key: keyof typeof form,
+    placeholder?: string,
+  ) => (
+    <div className="space-y-1">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </Label>
+      <Input
+        value={form[key]}
+        onChange={(e) => upd(key, e.target.value)}
+        placeholder={placeholder}
+        className="text-sm"
+      />
+    </div>
+  );
+
+  return (
+    <div className="mt-4 space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+      <div className="grid gap-3 sm:grid-cols-2">
+        {fld("Name", "name")}
+        {fld("Photo URL", "avatar_url", "https://…")}
+        {fld("Instagram URL", "instagram_url")}
+        {fld("IG followers", "instagram_followers", "12500")}
+        {fld("TikTok URL", "tiktok_url")}
+        {fld("TT followers", "tiktok_followers")}
+        {fld("YouTube URL", "youtube_url")}
+        {fld("YT subscribers", "youtube_subscribers")}
+        {fld("Spotify URL", "spotify_url")}
+        {fld("Monthly listeners", "spotify_monthly_listens")}
+        {fld("Example video URL", "example_video_url")}
+        {fld("Bio page URL", "bio_page_url")}
+      </div>
+      <div className="flex justify-end gap-2">
+        <Button size="sm" variant="ghost" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button size="sm" onClick={save} disabled={saving || !form.name.trim()}>
+          Save changes
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 
 function formatCount(n: number) {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
