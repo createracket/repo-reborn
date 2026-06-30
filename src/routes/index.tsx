@@ -48,11 +48,11 @@ export const Route = createFileRoute("/")({
           "We operate at the cultural edge of media and music, connecting artists and brands who genuinely vibe - not for the sake of it, but because they share audiences. No vanity deals. No bailing after the intro. Just fan-first partnerships that actually perform.",
       },
       { property: "og:title", content: "Create Racket" },
-      {
-        property: "og:description",
-        content: "Where cool collabs make real noise.",
-      },
+      { property: "og:description", content: "Where cool collabs make real noise." },
+      { property: "og:url", content: "https://createracket.com/" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://createracket.com/" }],
   }),
   component: Home,
 });
