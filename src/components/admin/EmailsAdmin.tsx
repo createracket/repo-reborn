@@ -23,6 +23,7 @@ import {
 import {
   getEmailLogs, getEmailStats, getEmailTemplates, getSuppressedEmails, sendTestEmail,
 } from "@/lib/email-admin.functions";
+import { getOrCreateBuiltinOverride } from "@/lib/custom-templates.functions";
 
 type Range = "24h" | "7d" | "30d" | "all";
 
@@ -53,6 +54,7 @@ export function EmailsAdmin() {
   const fetchTemplates = useServerFn(getEmailTemplates);
   const fetchSuppressed = useServerFn(getSuppressedEmails);
   const triggerTest = useServerFn(sendTestEmail);
+  const openBuiltinOverride = useServerFn(getOrCreateBuiltinOverride);
 
   const [range, setRange] = useState<Range>("7d");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -62,7 +64,7 @@ export function EmailsAdmin() {
   const [logs, setLogs] = useState<any[]>([]);
   const [logsTotal, setLogsTotal] = useState(0);
   const [stats, setStats] = useState({ total: 0, sent: 0, failed: 0, suppressed: 0, pending: 0 });
-  const [templates, setTemplates] = useState<{ name: string; displayName: string; subject: string; hasPreviewData: boolean; kind: "builtin" | "custom"; id: string | null }[]>([]);
+  const [templates, setTemplates] = useState<{ name: string; displayName: string; subject: string; hasPreviewData: boolean; kind: "builtin" | "custom"; id: string | null; overrideId?: string | null; edited?: boolean }[]>([]);
   const [templateNames, setTemplateNames] = useState<string[]>([]);
   const [suppressed, setSuppressed] = useState<any[]>([]);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -261,8 +263,8 @@ export function EmailsAdmin() {
                       <CardTitle className="text-base truncate">{t.displayName}</CardTitle>
                       <p className="text-xs text-muted-foreground font-mono truncate">{t.name}</p>
                     </div>
-                    <Badge variant="outline" className={t.kind === "custom" ? "bg-primary/10 text-primary border-primary/30" : ""}>
-                      {t.kind === "custom" ? "Custom" : "Built-in"}
+                    <Badge variant="outline" className={t.kind === "custom" ? "bg-primary/10 text-primary border-primary/30" : t.edited ? "bg-amber-500/10 text-amber-500 border-amber-500/30" : ""}>
+                      {t.kind === "custom" ? "Custom" : t.edited ? "Built-in (edited)" : "Built-in"}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -273,6 +275,22 @@ export function EmailsAdmin() {
                       <Button
                         size="sm" variant="outline"
                         onClick={() => { setEditingId(t.id!); setEditorOpen(true); }}
+                      >
+                        <Pencil className="size-3.5" /> Edit
+                      </Button>
+                    )}
+                    {t.kind === "builtin" && (
+                      <Button
+                        size="sm" variant="outline"
+                        onClick={async () => {
+                          try {
+                            const res: any = await openBuiltinOverride({ data: { name: t.name } });
+                            setEditingId(res.id);
+                            setEditorOpen(true);
+                          } catch (e: any) {
+                            toast.error(e?.message ?? "Couldn't open template");
+                          }
+                        }}
                       >
                         <Pencil className="size-3.5" /> Edit
                       </Button>
@@ -290,7 +308,7 @@ export function EmailsAdmin() {
             {templates.length === 0 && <p className="text-sm text-muted-foreground">No templates yet. Click "New template" to create one.</p>}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">
-            Custom templates are stored in the database — edit them right here. Built-in templates live as React components and are used for system flows (signup, contact form, etc.).
+            Edits to built-in templates are stored as overrides and used in place of the code defaults. Delete the override from the editor to revert to the built-in.
           </p>
         </TabsContent>
 
