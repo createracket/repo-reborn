@@ -81,6 +81,8 @@ type RosterItem = {
   kind: "profile" | "prospect";
   profile_id: string | null;
   name: string;
+  avatar_url: string | null;
+  vibe: string | null;
   instagram_url: string | null;
   instagram_followers: number | null;
   tiktok_url: string | null;
