@@ -1,7 +1,6 @@
-import * as React from 'react'
-import { render } from '@react-email/render'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { TEMPLATES } from '@/lib/email-templates/registry'
+import { resolveRenderedEmail, TEMPLATES } from '@/lib/email-templates/registry'
+import { fetchCustomTemplateByName } from '@/lib/email-templates/custom-store.server'
 
 const SITE_NAME = 'racketvibes'
 const SENDER_DOMAIN = 'tech.createracket.com'
@@ -44,12 +43,17 @@ export async function enqueueTransactionalEmail(
   opts: SendOptions,
 ): Promise<SendResult> {
   const { templateName, templateData = {} } = opts
-  const template = TEMPLATES[templateName]
-  if (!template) {
-    return { success: false, error: `Template '${templateName}' not found`, status: 404 }
+  const builtin = TEMPLATES[templateName]
+  // Custom templates (DB-stored) are also supported; check both.
+  if (!builtin) {
+    const custom = await fetchCustomTemplateByName(templateName)
+    if (!custom) {
+      return { success: false, error: `Template '${templateName}' not found`, status: 404 }
+    }
   }
 
-  const effectiveRecipient = template.to || opts.recipientEmail
+  // Built-in `to` overrides caller; custom templates always use caller recipient.
+  const effectiveRecipient = builtin?.to || opts.recipientEmail
   if (!effectiveRecipient) {
     return { success: false, error: 'recipientEmail is required', status: 400 }
   }
@@ -143,14 +147,19 @@ export async function enqueueTransactionalEmail(
     return { success: false, reason: 'email_suppressed' }
   }
 
-  // Render
-  const element = React.createElement(template.component, templateData)
-  const html = await render(element)
-  const plainText = await render(element, { plainText: true })
-  const resolvedSubject =
-    typeof template.subject === 'function'
-      ? template.subject(templateData)
-      : template.subject
+  // Render — resolver handles built-ins, custom DB templates, and built-in overrides.
+  const rendered = await resolveRenderedEmail(templateName, templateData)
+  if (!rendered) {
+    await supabase.from('email_send_log').insert({
+      message_id: messageId,
+      template_name: templateName,
+      recipient_email: effectiveRecipient,
+      status: 'failed',
+      error_message: 'Template missing at render time',
+    })
+    return { success: false, error: 'Template not found', status: 404 }
+  }
+  const { subject: resolvedSubject, html, text: plainText } = rendered
 
   // Log pending then enqueue
   await supabase.from('email_send_log').insert({
