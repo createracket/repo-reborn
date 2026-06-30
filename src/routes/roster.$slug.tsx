@@ -141,6 +141,11 @@ function PublicRosterPage() {
                 ["YouTube", it.youtube_subscribers, it.youtube_url],
                 ["Spotify", it.spotify_monthly_listens, it.spotify_url],
               ];
+              const totalReach =
+                (it.instagram_followers ?? 0) +
+                (it.tiktok_followers ?? 0) +
+                (it.youtube_subscribers ?? 0) +
+                (it.spotify_monthly_listens ?? 0);
               const initials = it.name
                 .split(/\s+/)
                 .map((s) => s[0])
@@ -178,6 +183,11 @@ function PublicRosterPage() {
                           </p>
                         )}
                         <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                          {totalReach > 0 && (
+                            <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
+                              Total reach {formatCount(totalReach)}
+                            </span>
+                          )}
                           {stats.map(([label, count, url]) =>
                             count != null || url ? (
                               <span

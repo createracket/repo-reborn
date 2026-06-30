@@ -736,6 +736,11 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
     ["YT", item.youtube_subscribers, item.youtube_url],
     ["Spotify", item.spotify_monthly_listens, item.spotify_url],
   ];
+  const totalReach =
+    (item.instagram_followers ?? 0) +
+    (item.tiktok_followers ?? 0) +
+    (item.youtube_subscribers ?? 0) +
+    (item.spotify_monthly_listens ?? 0);
   const initials = item.name
     .split(/\s+/)
     .map((s) => s[0])
@@ -767,6 +772,11 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
             )}
           </div>
           <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+            {totalReach > 0 && (
+              <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
+                Total reach {formatCount(totalReach)}
+              </span>
+            )}
             {stats.map(([label, count, url]) =>
               count != null || url ? (
                 <span
@@ -827,7 +837,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               disabled={savingVibe}
             />
           </div>
-          {editing && !isVerified && (
+          {editing && (
             <EditProspectPanel
               item={item}
               onClose={() => setEditing(false)}
@@ -835,16 +845,14 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
           )}
         </div>
         <div className="flex flex-col gap-1">
-          {!isVerified && (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setEditing((v) => !v)}
-              title="Edit metrics & photo"
-            >
-              <Pencil className="size-4" />
-            </Button>
-          )}
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setEditing((v) => !v)}
+            title="Edit metrics & photo"
+          >
+            <Pencil className="size-4" />
+          </Button>
           <Button size="icon" variant="ghost" onClick={onRemove}>
             <Trash2 className="size-4" />
           </Button>
