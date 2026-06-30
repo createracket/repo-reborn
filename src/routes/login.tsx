@@ -28,6 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
 export const ACCESS_CODE = "VERIFIEDFAN";
+export const ACCESS_CODES = ["VERIFIEDFAN", "RACKETISCOOL"] as const;
 
 const ACCOUNT_TYPES = [
   { value: "artist", label: "Artist" },
