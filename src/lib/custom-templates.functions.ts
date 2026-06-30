@@ -59,12 +59,9 @@ export const upsertCustomTemplate = createServerFn({ method: 'POST' })
     await assertAdmin(context)
     const { extractVariables } = await import('@/lib/email-templates/render-custom.server')
     const variables = extractVariables(data.subject, data.body_markdown)
-
-    // Reject collisions with built-in template names.
-    const { TEMPLATES } = await import('@/lib/email-templates/registry')
-    if (TEMPLATES[data.name]) {
-      throw new Error(`'${data.name}' is reserved by a built-in template — pick another name`)
-    }
+    // Built-in name collisions are allowed: saving with a built-in name
+    // creates an override that the send pipeline prefers over the React
+    // component template.
 
     const payload = {
       name: data.name,
