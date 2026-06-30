@@ -859,18 +859,41 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
             />
           )}
         </div>
-        <div className="flex flex-col gap-1">
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => setEditing((v) => !v)}
-            title="Edit metrics & photo"
+        <div className="flex flex-col items-end gap-1">
+          <Select
+            value={item.status ?? "in_review"}
+            onValueChange={async (v) => {
+              const { error } = await supabase
+                .from("roster_items")
+                .update({ status: v } as never)
+                .eq("id", item.id);
+              if (error) toast.error(error.message);
+            }}
           >
-            <Pencil className="size-4" />
-          </Button>
-          <Button size="icon" variant="ghost" onClick={onRemove}>
-            <Trash2 className="size-4" />
-          </Button>
+            <SelectTrigger className="h-8 w-[150px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((s) => (
+                <SelectItem key={s.value} value={s.value} className="text-xs">
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="flex gap-1">
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setEditing((v) => !v)}
+              title="Edit metrics & photo"
+            >
+              <Pencil className="size-4" />
+            </Button>
+            <Button size="icon" variant="ghost" onClick={onRemove}>
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </li>
