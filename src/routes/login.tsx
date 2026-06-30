@@ -254,7 +254,7 @@ function LoginPage() {
             <CardDescription>
               {mode === "signin"
                 ? "Log in to save your Vibe Check and access your dashboard."
-                : "Create an account to save your results and start matching."}
+                : "Artist accounts are opening soon - sign up for first dibs on your profile."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
