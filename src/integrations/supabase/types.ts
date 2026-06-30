@@ -551,6 +551,84 @@ export type Database = {
         }
         Relationships: []
       }
+      roster_items: {
+        Row: {
+          bio_page_url: string | null
+          created_at: string
+          example_video_url: string | null
+          id: string
+          instagram_followers: number | null
+          instagram_url: string | null
+          kind: string
+          name: string
+          position: number
+          profile_id: string | null
+          roster_id: string
+          spotify_monthly_listens: number | null
+          spotify_url: string | null
+          tiktok_followers: number | null
+          tiktok_url: string | null
+          updated_at: string
+          youtube_subscribers: number | null
+          youtube_url: string | null
+        }
+        Insert: {
+          bio_page_url?: string | null
+          created_at?: string
+          example_video_url?: string | null
+          id?: string
+          instagram_followers?: number | null
+          instagram_url?: string | null
+          kind: string
+          name: string
+          position?: number
+          profile_id?: string | null
+          roster_id: string
+          spotify_monthly_listens?: number | null
+          spotify_url?: string | null
+          tiktok_followers?: number | null
+          tiktok_url?: string | null
+          updated_at?: string
+          youtube_subscribers?: number | null
+          youtube_url?: string | null
+        }
+        Update: {
+          bio_page_url?: string | null
+          created_at?: string
+          example_video_url?: string | null
+          id?: string
+          instagram_followers?: number | null
+          instagram_url?: string | null
+          kind?: string
+          name?: string
+          position?: number
+          profile_id?: string | null
+          roster_id?: string
+          spotify_monthly_listens?: number | null
+          spotify_url?: string | null
+          tiktok_followers?: number | null
+          tiktok_url?: string | null
+          updated_at?: string
+          youtube_subscribers?: number | null
+          youtube_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roster_items_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "community_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roster_items_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
+            referencedRelation: "rosters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roster_members: {
         Row: {
           created_at: string
@@ -569,6 +647,62 @@ export type Database = {
           id?: string
           member_id?: string
           owner_id?: string
+        }
+        Relationships: []
+      }
+      roster_shares: {
+        Row: {
+          created_at: string
+          id: string
+          roster_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          roster_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          roster_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roster_shares_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
+            referencedRelation: "rosters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rosters: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          owner_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
