@@ -837,7 +837,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               disabled={savingVibe}
             />
           </div>
-          {editing && !isVerified && (
+          {editing && (
             <EditProspectPanel
               item={item}
               onClose={() => setEditing(false)}
@@ -845,16 +845,14 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
           )}
         </div>
         <div className="flex flex-col gap-1">
-          {!isVerified && (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => setEditing((v) => !v)}
-              title="Edit metrics & photo"
-            >
-              <Pencil className="size-4" />
-            </Button>
-          )}
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setEditing((v) => !v)}
+            title="Edit metrics & photo"
+          >
+            <Pencil className="size-4" />
+          </Button>
           <Button size="icon" variant="ghost" onClick={onRemove}>
             <Trash2 className="size-4" />
           </Button>
