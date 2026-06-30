@@ -681,6 +681,7 @@ export type Database = {
       }
       rosters: {
         Row: {
+          brief_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -689,6 +690,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brief_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -697,6 +699,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brief_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -704,7 +707,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "rosters_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_briefs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       spotlight_interests: {
         Row: {
