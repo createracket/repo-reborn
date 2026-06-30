@@ -28,6 +28,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/roster-builder")({
@@ -45,8 +52,19 @@ type Roster = {
   title: string;
   description: string | null;
   owner_id: string;
+  brief_id: string | null;
   created_at: string;
   updated_at: string;
+};
+
+type Brief = {
+  id: string;
+  title: string;
+  description: string;
+  contact_email: string | null;
+  budget: number | null;
+  status: string;
+  created_at: string;
 };
 
 type RosterItem = {
@@ -102,6 +120,7 @@ function RosterBuilderPage() {
   const [shares, setShares] = useState<Share[]>([]);
   const [community, setCommunity] = useState<CommunityRow[]>([]);
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
+  const [briefs, setBriefs] = useState<Brief[]>([]);
 
   // bootstrap: verify admin + load rosters
   useEffect(() => {
@@ -124,7 +143,7 @@ function RosterBuilderPage() {
       }
       setIsAdmin(true);
       await loadRosters();
-      const [{ data: cm }, { data: pr }] = await Promise.all([
+      const [{ data: cm }, { data: pr }, { data: cb }] = await Promise.all([
         supabase
           .from("community_profiles")
           .select("id, display_name, account_type, tagline, avatar_url")
@@ -133,9 +152,14 @@ function RosterBuilderPage() {
           .from("profiles")
           .select("id, email, display_name, avatar_url")
           .order("display_name"),
+        supabase
+          .from("campaign_briefs")
+          .select("id, title, description, contact_email, budget, status, created_at")
+          .order("created_at", { ascending: false }),
       ]);
       setCommunity((cm as CommunityRow[]) ?? []);
       setProfiles((pr as ProfileRow[]) ?? []);
+      setBriefs((cb as Brief[]) ?? []);
       setChecking(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -235,6 +259,7 @@ function RosterBuilderPage() {
         {!selected ? (
           <RosterListView
             rosters={rosters}
+            briefs={briefs}
             userId={userId}
             onCreated={async (id) => {
               await loadRosters();
@@ -252,6 +277,7 @@ function RosterBuilderPage() {
             shares={shares}
             community={community}
             profiles={profiles}
+            briefs={briefs}
             onChanged={async () => {
               await Promise.all([loadDetail(selected.id), loadRosters()]);
             }}
@@ -267,12 +293,14 @@ function RosterBuilderPage() {
 
 function RosterListView({
   rosters,
+  briefs,
   userId,
   onCreated,
   onSelect,
   onDeleted,
 }: {
   rosters: Roster[];
+  briefs: Brief[];
   userId: string | null;
   onCreated: (id: string) => void;
   onSelect: (id: string) => void;
@@ -280,7 +308,20 @@ function RosterListView({
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [briefId, setBriefId] = useState<string>("");
   const [creating, setCreating] = useState(false);
+
+  const briefById = useMemo(() => new Map(briefs.map((b) => [b.id, b])), [briefs]);
+
+  function pickBrief(id: string) {
+    setBriefId(id);
+    if (id === "" || id === "none") return;
+    const b = briefById.get(id);
+    if (!b) return;
+    // Prefill if fields are empty
+    if (!title.trim()) setTitle(`Roster — ${b.title}`);
+    if (!description.trim()) setDescription(b.description);
+  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -292,6 +333,7 @@ function RosterListView({
         title: title.trim(),
         description: description.trim() || null,
         owner_id: userId,
+        brief_id: briefId && briefId !== "none" ? briefId : null,
       })
       .select("id")
       .single();
@@ -302,6 +344,7 @@ function RosterListView({
     }
     setTitle("");
     setDescription("");
+    setBriefId("");
     toast.success("Roster created");
     onCreated((data as { id: string }).id);
   }
@@ -317,43 +360,61 @@ function RosterListView({
     onDeleted();
   }
 
+  // Briefs that don't yet have a roster
+  const rosterBriefIds = new Set(rosters.map((r) => r.brief_id).filter(Boolean) as string[]);
+  const unusedBriefs = briefs.filter((b) => !rosterBriefIds.has(b.id));
+
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <Card>
         <CardHeader>
           <CardTitle className="font-display text-2xl">Rosters</CardTitle>
-          <CardDescription>Each roster is one campaign plan.</CardDescription>
+          <CardDescription>Each roster plans one campaign brief.</CardDescription>
         </CardHeader>
         <CardContent>
           {rosters.length === 0 ? (
             <p className="text-sm text-muted-foreground">No rosters yet. Create one to get started.</p>
           ) : (
             <ul className="space-y-2">
-              {rosters.map((r) => (
-                <li
-                  key={r.id}
-                  className="flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
-                >
-                  <button
-                    type="button"
-                    onClick={() => onSelect(r.id)}
-                    className="flex-1 text-left"
+              {rosters.map((r) => {
+                const linked = r.brief_id ? briefById.get(r.brief_id) : null;
+                return (
+                  <li
+                    key={r.id}
+                    className="flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
                   >
-                    <div className="font-medium">{r.title}</div>
-                    {r.description && (
-                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                        {r.description}
+                    <button
+                      type="button"
+                      onClick={() => onSelect(r.id)}
+                      className="flex-1 text-left"
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">{r.title}</span>
+                        {linked ? (
+                          <Badge variant="outline" className="text-[10px] uppercase">
+                            Brief · {linked.title}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] uppercase text-muted-foreground">
+                            No brief
+                          </Badge>
+                        )}
+                      </div>
+                      {r.description && (
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                          {r.description}
+                        </p>
+                      )}
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Updated {new Date(r.updated_at).toLocaleDateString()}
                       </p>
-                    )}
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Updated {new Date(r.updated_at).toLocaleDateString()}
-                    </p>
-                  </button>
-                  <Button size="icon" variant="ghost" onClick={() => handleDelete(r.id)}>
-                    <Trash2 className="size-4" />
-                  </Button>
-                </li>
-              ))}
+                    </button>
+                    <Button size="icon" variant="ghost" onClick={() => handleDelete(r.id)}>
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardContent>
@@ -362,10 +423,38 @@ function RosterListView({
       <Card>
         <CardHeader>
           <CardTitle className="font-display text-xl">New roster</CardTitle>
-          <CardDescription>Start a fresh campaign plan.</CardDescription>
+          <CardDescription>
+            Start from a submitted brief, or create a blank roster.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-3" onSubmit={handleCreate}>
+            <div className="space-y-2">
+              <Label htmlFor="brief-pick">Link to brief</Label>
+              <Select value={briefId || "none"} onValueChange={pickBrief}>
+                <SelectTrigger id="brief-pick">
+                  <SelectValue placeholder="No brief — start blank" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No brief — start blank</SelectItem>
+                  {unusedBriefs.length === 0 ? (
+                    <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                      No unlinked briefs available.
+                    </div>
+                  ) : (
+                    unusedBriefs.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.title}
+                        {b.contact_email ? ` — ${b.contact_email}` : ""}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Selecting a brief prefills the title and description.
+              </p>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="roster-title">Title</Label>
               <Input
@@ -378,14 +467,14 @@ function RosterListView({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="roster-desc">Brief (optional)</Label>
+              <Label htmlFor="roster-desc">Description</Label>
               <Textarea
                 id="roster-desc"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="What's this roster for?"
                 rows={3}
-                maxLength={1000}
+                maxLength={2000}
               />
             </div>
             <Button type="submit" disabled={creating || !title.trim()} className="w-full">
@@ -406,6 +495,7 @@ function RosterDetailView({
   shares,
   community,
   profiles,
+  briefs,
   onChanged,
 }: {
   roster: Roster;
@@ -413,6 +503,7 @@ function RosterDetailView({
   shares: Share[];
   community: CommunityRow[];
   profiles: ProfileRow[];
+  briefs: Brief[];
   onChanged: () => void;
 }) {
   const [title, setTitle] = useState(roster.title);
@@ -423,6 +514,8 @@ function RosterDetailView({
     setTitle(roster.title);
     setDescription(roster.description ?? "");
   }, [roster.id, roster.title, roster.description]);
+
+  const linkedBrief = roster.brief_id ? briefs.find((b) => b.id === roster.brief_id) ?? null : null;
 
   async function saveMeta() {
     setSavingMeta(true);
@@ -439,6 +532,19 @@ function RosterDetailView({
     onChanged();
   }
 
+  async function setLinkedBrief(briefId: string | null) {
+    const { error } = await supabase
+      .from("rosters")
+      .update({ brief_id: briefId })
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(briefId ? "Brief linked" : "Brief unlinked");
+    onChanged();
+  }
+
   async function removeItem(id: string) {
     const { error } = await supabase.from("roster_items").delete().eq("id", id);
     if (error) {
@@ -448,14 +554,71 @@ function RosterDetailView({
     onChanged();
   }
 
+  // Briefs available to link: this roster's current brief + any brief not linked to another roster.
+  // We don't have access to the rosters list here, so allow any brief; admins can re-link as needed.
+  const linkableBriefs = briefs;
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       <div className="space-y-6">
-        {/* Brief */}
+        {/* Linked brief */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-xl">Campaign brief</CardTitle>
-            <CardDescription>Title + brief sent to shared users alongside the roster.</CardDescription>
+            <CardTitle className="font-display text-xl">Linked brief</CardTitle>
+            <CardDescription>
+              The submitted campaign brief this roster is built for.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {linkedBrief ? (
+              <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-medium">{linkedBrief.title}</div>
+                    <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">
+                      {linkedBrief.description}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                      {linkedBrief.contact_email && <span>{linkedBrief.contact_email}</span>}
+                      {linkedBrief.budget != null && <span>£{linkedBrief.budget}</span>}
+                      <span>Status: {linkedBrief.status}</span>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => setLinkedBrief(null)}>
+                    Unlink
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Link a submitted brief</Label>
+                <Select
+                  value="none"
+                  onValueChange={(v) => setLinkedBrief(v === "none" ? null : v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a brief…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No brief</SelectItem>
+                    {linkableBriefs.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.title}
+                        {b.contact_email ? ` — ${b.contact_email}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Roster meta */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-display text-xl">Roster details</CardTitle>
+            <CardDescription>Internal title + notes for this roster.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-2">
@@ -463,7 +626,7 @@ function RosterDetailView({
               <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
             </div>
             <div className="space-y-2">
-              <Label>Description</Label>
+              <Label>Notes</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -478,6 +641,7 @@ function RosterDetailView({
             </div>
           </CardContent>
         </Card>
+
 
         {/* Roster items */}
         <Card>
