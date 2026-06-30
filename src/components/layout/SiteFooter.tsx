@@ -31,7 +31,6 @@ export function SiteFooter() {
           </div>
 
           <div className="lg:col-span-3">
-            <h3 className="mb-3 font-headline text-sm">Explore</h3>
             <ul className="space-y-2 text-sm">
               {!signedIn && (
                 <li>
