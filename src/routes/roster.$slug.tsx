@@ -141,62 +141,85 @@ function PublicRosterPage() {
                 ["YouTube", it.youtube_subscribers, it.youtube_url],
                 ["Spotify", it.spotify_monthly_listens, it.spotify_url],
               ];
+              const initials = it.name
+                .split(/\s+/)
+                .map((s) => s[0])
+                .filter(Boolean)
+                .slice(0, 2)
+                .join("")
+                .toUpperCase();
               return (
                 <Card key={it.id}>
                   <CardContent className="p-5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-display text-xl">{it.name}</h3>
-                      <Badge variant="outline" className="text-[10px] uppercase">
-                        {it.kind === "profile" ? "Community" : "Prospect"}
-                      </Badge>
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      {stats.map(([label, count, url]) =>
-                        count != null || url ? (
-                          <span
-                            key={label}
-                            className="rounded-md border border-border/60 bg-muted/30 px-2 py-0.5"
-                          >
-                            {label}
-                            {count != null ? ` ${formatCount(count)}` : ""}
-                            {url ? (
-                              <a
-                                href={url}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                                className="ml-1 inline-flex items-center text-primary hover:underline"
-                              >
-                                <ExternalLink className="size-3" />
-                              </a>
-                            ) : null}
-                          </span>
-                        ) : null,
-                      )}
-                    </div>
-                    {(it.example_video_url || it.bio_page_url) && (
-                      <div className="mt-3 flex flex-wrap gap-3 text-xs">
-                        {it.example_video_url && (
-                          <a
-                            href={it.example_video_url}
-                            target="_blank"
-                            rel="noreferrer noopener"
-                            className="text-primary hover:underline"
-                          >
-                            Example video
-                          </a>
-                        )}
-                        {it.bio_page_url && (
-                          <a
-                            href={it.bio_page_url}
-                            target="_blank"
-                            rel="noreferrer noopener"
-                            className="text-primary hover:underline"
-                          >
-                            Bio page
-                          </a>
+                    <div className="flex items-start gap-4">
+                      <div className="size-16 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-base font-medium text-muted-foreground">
+                        {it.avatar_url ? (
+                          <img src={it.avatar_url} alt="" className="size-full object-cover" />
+                        ) : (
+                          <span>{initials || "?"}</span>
                         )}
                       </div>
-                    )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-display text-xl">{it.name}</h3>
+                          <Badge variant="outline" className="text-[10px] uppercase">
+                            {it.kind === "profile" ? "Community" : "Prospect"}
+                          </Badge>
+                        </div>
+                        {it.vibe && (
+                          <p className="mt-2 text-sm italic text-foreground/80">
+                            "{it.vibe}"
+                          </p>
+                        )}
+                        <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                          {stats.map(([label, count, url]) =>
+                            count != null || url ? (
+                              <span
+                                key={label}
+                                className="rounded-md border border-border/60 bg-muted/30 px-2 py-0.5"
+                              >
+                                {label}
+                                {count != null ? ` ${formatCount(count)}` : ""}
+                                {url ? (
+                                  <a
+                                    href={url}
+                                    target="_blank"
+                                    rel="noreferrer noopener"
+                                    className="ml-1 inline-flex items-center text-primary hover:underline"
+                                  >
+                                    <ExternalLink className="size-3" />
+                                  </a>
+                                ) : null}
+                              </span>
+                            ) : null,
+                          )}
+                        </div>
+                        {(it.example_video_url || it.bio_page_url) && (
+                          <div className="mt-3 flex flex-wrap gap-3 text-xs">
+                            {it.example_video_url && (
+                              <a
+                                href={it.example_video_url}
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                className="text-primary hover:underline"
+                              >
+                                Example video
+                              </a>
+                            )}
+                            {it.bio_page_url && (
+                              <a
+                                href={it.bio_page_url}
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                className="text-primary hover:underline"
+                              >
+                                Bio page
+                              </a>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               );
