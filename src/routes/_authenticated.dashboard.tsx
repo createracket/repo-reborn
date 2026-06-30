@@ -16,7 +16,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
-    meta: [{ title: "Dashboard — Create Racket" }],
+    meta: [{ title: "Dashboard — Create Racket" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: DashboardPage,
   errorComponent: ({ error }) => (

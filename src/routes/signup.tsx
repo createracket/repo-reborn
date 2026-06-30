@@ -13,7 +13,10 @@ import { findProfanityIn } from "@/lib/profanity";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
-    meta: [{ title: "Join the mailing list — Create Racket" }],
+    meta: [
+      { title: "Join the mailing list — Create Racket" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
   }),
   component: FanSignup,
 });
