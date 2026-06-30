@@ -188,6 +188,7 @@ function PublicRosterPage() {
                               Total reach {formatCount(totalReach)}
                             </span>
                           )}
+                          {stats.map(([label, count, url]) =>
                             count != null || url ? (
                               <span
                                 key={label}
