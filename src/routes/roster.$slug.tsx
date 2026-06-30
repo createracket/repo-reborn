@@ -183,7 +183,11 @@ function PublicRosterPage() {
                           </p>
                         )}
                         <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                          {stats.map(([label, count, url]) =>
+                          {totalReach > 0 && (
+                            <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
+                              Total reach {formatCount(totalReach)}
+                            </span>
+                          )}
                             count != null || url ? (
                               <span
                                 key={label}
