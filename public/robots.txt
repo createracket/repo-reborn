@@ -13,6 +13,5 @@ Disallow: /email/
 Disallow: /roster/
 Disallow: /roster-builder
 Disallow: /spotlight/
-Disallow: /connect
 
 Sitemap: https://createracket.com/sitemap.xml
