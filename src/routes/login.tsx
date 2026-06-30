@@ -86,7 +86,7 @@ function LoginPage() {
   const [showVibeNudge, setShowVibeNudge] = useState(false);
   const nudgeShownRef = useRef(false);
 
-  const accessCodeOk = accessCode.trim().toUpperCase() === ACCESS_CODE;
+  const accessCodeOk = (ACCESS_CODES as readonly string[]).includes(accessCode.trim().toUpperCase());
   const brandPaused = mode === "signup" && accountType === "brand";
 
 
