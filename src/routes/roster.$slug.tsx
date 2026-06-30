@@ -35,6 +35,17 @@ type PublicItem = {
   example_video_url: string | null;
   bio_page_url: string | null;
   position: number;
+  status: string;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  in_review: "In Review",
+  approved: "Approved",
+  confirmed: "Confirmed",
+  in_production: "In Production",
+  briefed: "Briefed",
+  contracting: "Contracting",
+  live: "Live",
 };
 
 export const Route = createFileRoute("/roster/$slug")({
