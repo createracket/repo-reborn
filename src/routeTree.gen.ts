@@ -27,6 +27,7 @@ import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.music
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as USlugRouteImport } from './routes/u.$slug'
 import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
+import { Route as RosterSlugRouteImport } from './routes/roster.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
 import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authenticated.roster-builder'
@@ -132,6 +133,11 @@ const SpotlightSlugRoute = SpotlightSlugRouteImport.update({
   path: '/spotlight/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RosterSlugRoute = RosterSlugRouteImport.update({
+  id: '/roster/$slug',
+  path: '/roster/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
@@ -231,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -265,6 +272,7 @@ export interface FileRoutesByTo {
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -301,6 +309,7 @@ export interface FileRoutesById {
   '/_authenticated/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
+    | '/roster/$slug'
     | '/spotlight/$slug'
     | '/u/$slug'
     | '/vibe-check/brand'
@@ -371,6 +381,7 @@ export interface FileRouteTypes {
     | '/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
+    | '/roster/$slug'
     | '/spotlight/$slug'
     | '/u/$slug'
     | '/vibe-check/brand'
@@ -406,6 +417,7 @@ export interface FileRouteTypes {
     | '/_authenticated/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
+    | '/roster/$slug'
     | '/spotlight/$slug'
     | '/u/$slug'
     | '/vibe-check/brand'
@@ -438,6 +450,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   BrandsHowItWorksRoute: typeof BrandsHowItWorksRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  RosterSlugRoute: typeof RosterSlugRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
   USlugRoute: typeof USlugRoute
   VibeCheckBrandRoute: typeof VibeCheckBrandRoute
@@ -582,6 +595,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SpotlightSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/roster/$slug': {
+      id: '/roster/$slug'
+      path: '/roster/$slug'
+      fullPath: '/roster/$slug'
+      preLoaderRoute: typeof RosterSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
       path: '/email/unsubscribe'
@@ -724,6 +744,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   BrandsHowItWorksRoute: BrandsHowItWorksRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  RosterSlugRoute: RosterSlugRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
   USlugRoute: USlugRoute,
   VibeCheckBrandRoute: VibeCheckBrandRoute,

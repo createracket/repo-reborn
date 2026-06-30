@@ -11,7 +11,12 @@ import {
   ExternalLink,
   UserPlus,
   Search,
+  Globe,
+  Copy,
+  Check,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { normalizeSlug } from "@/lib/slugs";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -53,6 +58,9 @@ type Roster = {
   description: string | null;
   owner_id: string;
   brief_id: string | null;
+  slug: string | null;
+  published: boolean;
+  published_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -681,6 +689,7 @@ function RosterDetailView({
           onAdded={onChanged}
         />
         <AddProspectCard rosterId={roster.id} nextPosition={items.length} onAdded={onChanged} />
+        <PublishPanel roster={roster} onChanged={onChanged} />
         <SharePanel
           rosterId={roster.id}
           shares={shares}
@@ -1208,6 +1217,183 @@ function SharePanel({
             </ul>
           )}
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/* -------------------------------- Publish ------------------------------- */
+
+function PublishPanel({
+  roster,
+  onChanged,
+}: {
+  roster: Roster;
+  onChanged: () => void;
+}) {
+  const defaultSlug =
+    roster.slug ?? (normalizeSlug(roster.title).slice(0, 60) || "roster");
+  const [slug, setSlug] = useState(defaultSlug);
+  const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setSlug(roster.slug ?? (normalizeSlug(roster.title).slice(0, 60) || "roster"));
+  }, [roster.id, roster.slug, roster.title]);
+
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : "";
+  const publicUrl = `${origin}/roster/${slug}`;
+
+  async function publish() {
+    const cleaned = normalizeSlug(slug);
+    if (cleaned.length < 2) {
+      toast.error("Slug must be at least 2 characters (letters, numbers, hyphens).");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("rosters")
+      .update({
+        slug: cleaned,
+        published: true,
+        published_at: new Date().toISOString(),
+      } as never)
+      .eq("id", roster.id);
+    setSaving(false);
+    if (error) {
+      toast.error(
+        error.message.toLowerCase().includes("duplicate")
+          ? "That URL is taken — try another."
+          : error.message,
+      );
+      return;
+    }
+    toast.success("Roster published");
+    onChanged();
+  }
+
+  async function unpublish() {
+    setSaving(true);
+    const { error } = await supabase
+      .from("rosters")
+      .update({ published: false } as never)
+      .eq("id", roster.id);
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Roster unpublished");
+    onChanged();
+  }
+
+  async function saveSlug() {
+    const cleaned = normalizeSlug(slug);
+    if (cleaned.length < 2) {
+      toast.error("Slug must be at least 2 characters.");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("rosters")
+      .update({ slug: cleaned } as never)
+      .eq("id", roster.id);
+    setSaving(false);
+    if (error) {
+      toast.error(
+        error.message.toLowerCase().includes("duplicate")
+          ? "That URL is taken — try another."
+          : error.message,
+      );
+      return;
+    }
+    toast.success("URL updated");
+    onChanged();
+  }
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("Couldn't copy link");
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 font-display text-lg">
+          <Globe className="size-4" /> Publish as page
+        </CardTitle>
+        <CardDescription>
+          Publish this roster as a public page anyone with the link can view.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3">
+          <div className="min-w-0">
+            <div className="text-sm font-medium">
+              {roster.published ? "Public" : "Private"}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {roster.published
+                ? "Anyone with the link can view this roster."
+                : "Only admins and shared users can see it."}
+            </div>
+          </div>
+          <Switch
+            checked={roster.published}
+            disabled={saving}
+            onCheckedChange={(v) => (v ? publish() : unpublish())}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="roster-slug" className="text-xs">
+            Custom URL
+          </Label>
+          <div className="flex items-center gap-2">
+            <span className="shrink-0 text-xs text-muted-foreground">
+              /roster/
+            </span>
+            <Input
+              id="roster-slug"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              onBlur={() => setSlug((s) => normalizeSlug(s))}
+              placeholder="summer-launch"
+              maxLength={60}
+            />
+          </div>
+          {roster.published && roster.slug && roster.slug !== normalizeSlug(slug) && (
+            <Button size="sm" variant="outline" onClick={saveSlug} disabled={saving}>
+              Update URL
+            </Button>
+          )}
+        </div>
+
+        {roster.published && roster.slug && (
+          <div className="space-y-2 rounded-lg bg-muted/30 p-3">
+            <div className="truncate text-xs text-muted-foreground">{publicUrl}</div>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={copyLink}>
+                {copied ? (
+                  <><Check className="mr-1.5 size-3.5" /> Copied</>
+                ) : (
+                  <><Copy className="mr-1.5 size-3.5" /> Copy link</>
+                )}
+              </Button>
+              <Button size="sm" variant="outline" asChild>
+                <a href={`/roster/${roster.slug}`} target="_blank" rel="noreferrer">
+                  <ExternalLink className="mr-1.5 size-3.5" /> Open page
+                </a>
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

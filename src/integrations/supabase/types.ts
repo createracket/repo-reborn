@@ -686,6 +686,9 @@ export type Database = {
           description: string | null
           id: string
           owner_id: string
+          published: boolean
+          published_at: string | null
+          slug: string | null
           title: string
           updated_at: string
         }
@@ -695,6 +698,9 @@ export type Database = {
           description?: string | null
           id?: string
           owner_id: string
+          published?: boolean
+          published_at?: string | null
+          slug?: string | null
           title: string
           updated_at?: string
         }
@@ -704,6 +710,9 @@ export type Database = {
           description?: string | null
           id?: string
           owner_id?: string
+          published?: boolean
+          published_at?: string | null
+          slug?: string | null
           title?: string
           updated_at?: string
         }
