@@ -162,9 +162,15 @@ function PublicRosterPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-display text-xl">{it.name}</h3>
-                          <Badge variant="outline" className="text-[10px] uppercase">
-                            {it.kind === "profile" ? "Community" : "Prospect"}
-                          </Badge>
+                          {it.kind === "profile" ? (
+                            <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
+                              <BadgeCheck className="size-3" /> Verified
+                            </Badge>
+                          ) : (
+                            <Badge className="border-transparent bg-purple text-white text-[10px] uppercase">
+                              Prospect
+                            </Badge>
+                          )}
                         </div>
                         {it.vibe && (
                           <p className="mt-2 text-sm italic text-foreground/80">
