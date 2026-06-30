@@ -70,6 +70,9 @@ export function SiteHeader() {
               <Link to="/admin" className="text-primary hover:text-foreground transition-colors">
                 Admin
               </Link>
+              <Link to="/roster-builder" className="hover:text-foreground transition-colors">
+                Roster Builder
+              </Link>
               <Link to="/connect" className="hover:text-foreground transition-colors">
                 Connect
               </Link>
