@@ -35,6 +35,17 @@ type PublicItem = {
   example_video_url: string | null;
   bio_page_url: string | null;
   position: number;
+  status: string;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  in_review: "In Review",
+  approved: "Approved",
+  confirmed: "Confirmed",
+  in_production: "In Production",
+  briefed: "Briefed",
+  contracting: "Contracting",
+  live: "Live",
 };
 
 export const Route = createFileRoute("/roster/$slug")({
@@ -76,7 +87,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
@@ -165,17 +176,25 @@ function PublicRosterPage() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-display text-xl">{it.name}</h3>
-                          {it.kind === "profile" ? (
-                            <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
-                              <BadgeCheck className="size-3" /> Verified
-                            </Badge>
-                          ) : (
-                            <Badge className="border-transparent bg-purple text-white text-[10px] uppercase">
-                              Prospect
-                            </Badge>
-                          )}
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-display text-xl">{it.name}</h3>
+                            {it.kind === "profile" ? (
+                              <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
+                                <BadgeCheck className="size-3" /> Verified
+                              </Badge>
+                            ) : (
+                              <Badge className="border-transparent bg-purple text-white text-[10px] uppercase">
+                                Prospect
+                              </Badge>
+                            )}
+                          </div>
+                          <Badge
+                            variant="outline"
+                            className="border-border/70 bg-muted/40 text-[10px] uppercase tracking-wider"
+                          >
+                            {STATUS_LABEL[it.status] ?? "In Review"}
+                          </Badge>
                         </div>
                         {it.vibe && (
                           <p className="mt-2 text-sm italic text-foreground/80">

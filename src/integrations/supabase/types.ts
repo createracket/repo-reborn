@@ -567,6 +567,7 @@ export type Database = {
           roster_id: string
           spotify_monthly_listens: number | null
           spotify_url: string | null
+          status: string
           tiktok_followers: number | null
           tiktok_url: string | null
           updated_at: string
@@ -589,6 +590,7 @@ export type Database = {
           roster_id: string
           spotify_monthly_listens?: number | null
           spotify_url?: string | null
+          status?: string
           tiktok_followers?: number | null
           tiktok_url?: string | null
           updated_at?: string
@@ -611,6 +613,7 @@ export type Database = {
           roster_id?: string
           spotify_monthly_listens?: number | null
           spotify_url?: string | null
+          status?: string
           tiktok_followers?: number | null
           tiktok_url?: string | null
           updated_at?: string
