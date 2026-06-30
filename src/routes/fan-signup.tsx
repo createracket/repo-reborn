@@ -48,7 +48,7 @@ function FanSignup() {
       <main className="container mx-auto flex max-w-md flex-col px-4 py-16">
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-3xl">JOIN RACKET'S STREET TEAM</CardTitle>
+            <CardTitle className="font-display text-3xl">JOIN RACKET'S WAITLIST</CardTitle>
             <CardDescription>
               It's free to subscribe to our newsletter - made for fans, future partners, and folks who just want to follow along for now. No spam - just the good stuff.
             </CardDescription>
