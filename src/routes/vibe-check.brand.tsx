@@ -39,7 +39,7 @@ function BrandComingSoon() {
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Button asChild>
-            <Link to="/fan-signup">Join the waitlist</Link>
+            <Link to="/signup">Join the waitlist</Link>
           </Button>
           <Button asChild variant="outline">
             <Link to="/vibe-check">Back to Vibe Check</Link>

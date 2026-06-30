@@ -61,7 +61,7 @@ export function SiteHeader() {
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
           {!signedIn && (
-            <Link to="/fan-signup" className="hover:text-foreground transition-colors">
+            <Link to="/signup" className="hover:text-foreground transition-colors">
               Mailing list
             </Link>
           )}
