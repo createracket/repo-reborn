@@ -553,6 +553,7 @@ export type Database = {
       }
       roster_items: {
         Row: {
+          avatar_url: string | null
           bio_page_url: string | null
           created_at: string
           example_video_url: string | null
@@ -569,10 +570,12 @@ export type Database = {
           tiktok_followers: number | null
           tiktok_url: string | null
           updated_at: string
+          vibe: string | null
           youtube_subscribers: number | null
           youtube_url: string | null
         }
         Insert: {
+          avatar_url?: string | null
           bio_page_url?: string | null
           created_at?: string
           example_video_url?: string | null
@@ -589,10 +592,12 @@ export type Database = {
           tiktok_followers?: number | null
           tiktok_url?: string | null
           updated_at?: string
+          vibe?: string | null
           youtube_subscribers?: number | null
           youtube_url?: string | null
         }
         Update: {
+          avatar_url?: string | null
           bio_page_url?: string | null
           created_at?: string
           example_video_url?: string | null
@@ -609,6 +614,7 @@ export type Database = {
           tiktok_followers?: number | null
           tiktok_url?: string | null
           updated_at?: string
+          vibe?: string | null
           youtube_subscribers?: number | null
           youtube_url?: string | null
         }
