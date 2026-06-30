@@ -45,8 +45,19 @@ type Roster = {
   title: string;
   description: string | null;
   owner_id: string;
+  brief_id: string | null;
   created_at: string;
   updated_at: string;
+};
+
+type Brief = {
+  id: string;
+  title: string;
+  description: string;
+  contact_email: string | null;
+  budget: number | null;
+  status: string;
+  created_at: string;
 };
 
 type RosterItem = {
