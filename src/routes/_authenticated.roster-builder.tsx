@@ -817,8 +817,9 @@ function AddCommunityCard({
       kind: "profile",
       profile_id: c.id,
       name: c.display_name,
+      avatar_url: c.avatar_url,
       position: nextPosition,
-    });
+    } as never);
     if (error) {
       toast.error(error.message);
       return;
