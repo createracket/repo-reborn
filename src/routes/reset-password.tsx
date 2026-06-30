@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Set a new password — Create Racket" }] }),
+  head: () => ({ meta: [{ title: "Set a new password — Create Racket" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: ResetPasswordPage,
 });
 

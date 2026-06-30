@@ -17,7 +17,7 @@ import { Check, Loader2, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
-    meta: [{ title: "Edit profile — Create Racket" }],
+    meta: [{ title: "Edit profile — Create Racket" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: EditProfilePage,
 });

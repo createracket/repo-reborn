@@ -46,7 +46,10 @@ export const Route = createFileRoute("/login")({
     next: typeof search.next === "string" ? search.next : undefined,
   }),
   head: () => ({
-    meta: [{ title: "Get Started — Create Racket" }],
+    meta: [
+      { title: "Get Started — Create Racket" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
   }),
   component: LoginPage,
 });
