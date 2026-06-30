@@ -249,7 +249,7 @@ function LoginPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-display text-3xl">
-              {mode === "signin" ? "WELCOME BACK" : "JOIN THE RACKET"}
+              {mode === "signin" ? "WELCOME BACK" : "JOIN RACKET"}
             </CardTitle>
             <CardDescription>
               {mode === "signin"
