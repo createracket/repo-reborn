@@ -128,10 +128,15 @@ export const getEmailTemplates = createServerFn({ method: 'POST' })
     if (error) throw new Error(error.message)
     const customRows = customs ?? []
     const builtinNames = new Set(Object.keys(TEMPLATES))
-    const overrideByName = new Map<string, { id: string; subject: string; display_name: string }>()
+    const overrideByName = new Map<string, { id: string; subject: string; display_name: string; sample_data: Record<string, any> | null }>()
     for (const c of customRows) {
       if (builtinNames.has(c.name)) {
-        overrideByName.set(c.name, { id: c.id as string, subject: c.subject, display_name: c.display_name })
+        overrideByName.set(c.name, {
+          id: c.id as string,
+          subject: c.subject,
+          display_name: c.display_name,
+          sample_data: (c.sample_data as Record<string, any> | null) ?? null,
+        })
       }
     }
 
@@ -146,6 +151,7 @@ export const getEmailTemplates = createServerFn({ method: 'POST' })
         id: null as string | null,
         overrideId: override?.id ?? null,
         edited: !!override,
+        sampleData: override?.sample_data ?? entry.previewData ?? {},
       }
     })
     const customOnly = customRows
@@ -159,6 +165,7 @@ export const getEmailTemplates = createServerFn({ method: 'POST' })
         id: c.id as string,
         overrideId: null as string | null,
         edited: false,
+        sampleData: (c.sample_data as Record<string, any>) ?? {},
       }))
     return { templates: [...customOnly, ...builtins] }
   })
