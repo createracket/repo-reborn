@@ -141,6 +141,11 @@ function PublicRosterPage() {
                 ["YouTube", it.youtube_subscribers, it.youtube_url],
                 ["Spotify", it.spotify_monthly_listens, it.spotify_url],
               ];
+              const totalReach =
+                (it.instagram_followers ?? 0) +
+                (it.tiktok_followers ?? 0) +
+                (it.youtube_subscribers ?? 0) +
+                (it.spotify_monthly_listens ?? 0);
               const initials = it.name
                 .split(/\s+/)
                 .map((s) => s[0])
