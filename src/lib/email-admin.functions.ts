@@ -121,28 +121,46 @@ export const getEmailTemplates = createServerFn({ method: 'POST' })
   .handler(async ({ context }) => {
     await assertAdmin(context)
     const { TEMPLATES } = await import('@/lib/email-templates/registry')
-    const builtins = Object.entries(TEMPLATES).map(([name, entry]) => ({
-      name,
-      displayName: entry.displayName ?? name,
-      subject: typeof entry.subject === 'string' ? entry.subject : '(dynamic)',
-      hasPreviewData: !!entry.previewData,
-      kind: 'builtin' as const,
-      id: null as string | null,
-    }))
     const { data: customs, error } = await context.supabase
       .from('email_custom_templates')
       .select('id, name, display_name, subject, sample_data')
       .order('display_name', { ascending: true })
     if (error) throw new Error(error.message)
-    const customRows = (customs ?? []).map((c: any) => ({
-      name: c.name,
-      displayName: c.display_name,
-      subject: c.subject,
-      hasPreviewData: !!c.sample_data && Object.keys(c.sample_data).length > 0,
-      kind: 'custom' as const,
-      id: c.id as string,
-    }))
-    return { templates: [...customRows, ...builtins] }
+    const customRows = customs ?? []
+    const builtinNames = new Set(Object.keys(TEMPLATES))
+    const overrideByName = new Map<string, { id: string; subject: string; display_name: string }>()
+    for (const c of customRows) {
+      if (builtinNames.has(c.name)) {
+        overrideByName.set(c.name, { id: c.id as string, subject: c.subject, display_name: c.display_name })
+      }
+    }
+
+    const builtins = Object.entries(TEMPLATES).map(([name, entry]) => {
+      const override = overrideByName.get(name)
+      return {
+        name,
+        displayName: override?.display_name ?? entry.displayName ?? name,
+        subject: override?.subject ?? (typeof entry.subject === 'string' ? entry.subject : '(dynamic)'),
+        hasPreviewData: !!entry.previewData,
+        kind: 'builtin' as const,
+        id: null as string | null,
+        overrideId: override?.id ?? null,
+        edited: !!override,
+      }
+    })
+    const customOnly = customRows
+      .filter((c: any) => !builtinNames.has(c.name))
+      .map((c: any) => ({
+        name: c.name,
+        displayName: c.display_name,
+        subject: c.subject,
+        hasPreviewData: !!c.sample_data && Object.keys(c.sample_data).length > 0,
+        kind: 'custom' as const,
+        id: c.id as string,
+        overrideId: null as string | null,
+        edited: false,
+      }))
+    return { templates: [...customOnly, ...builtins] }
   })
 
 const SendTestSchema = z.object({
