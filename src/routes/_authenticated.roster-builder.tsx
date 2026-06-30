@@ -736,6 +736,11 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
     ["YT", item.youtube_subscribers, item.youtube_url],
     ["Spotify", item.spotify_monthly_listens, item.spotify_url],
   ];
+  const totalReach =
+    (item.instagram_followers ?? 0) +
+    (item.tiktok_followers ?? 0) +
+    (item.youtube_subscribers ?? 0) +
+    (item.spotify_monthly_listens ?? 0);
   const initials = item.name
     .split(/\s+/)
     .map((s) => s[0])
