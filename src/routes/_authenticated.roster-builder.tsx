@@ -252,6 +252,7 @@ function RosterBuilderPage() {
         {!selected ? (
           <RosterListView
             rosters={rosters}
+            briefs={briefs}
             userId={userId}
             onCreated={async (id) => {
               await loadRosters();
@@ -269,6 +270,7 @@ function RosterBuilderPage() {
             shares={shares}
             community={community}
             profiles={profiles}
+            briefs={briefs}
             onChanged={async () => {
               await Promise.all([loadDetail(selected.id), loadRosters()]);
             }}
