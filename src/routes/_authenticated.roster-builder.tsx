@@ -704,15 +704,51 @@ function RosterDetailView({
 }
 
 function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => void }) {
+  const [vibe, setVibe] = useState(item.vibe ?? "");
+  const [savingVibe, setSavingVibe] = useState(false);
+
+  useEffect(() => {
+    setVibe(item.vibe ?? "");
+  }, [item.id, item.vibe]);
+
+  async function saveVibe() {
+    const next = vibe.trim();
+    if ((item.vibe ?? "") === next) return;
+    setSavingVibe(true);
+    const { error } = await supabase
+      .from("roster_items")
+      .update({ vibe: next || null } as never)
+      .eq("id", item.id);
+    setSavingVibe(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+  }
+
   const stats: Array<[string, number | null, string | null]> = [
     ["IG", item.instagram_followers, item.instagram_url],
     ["TT", item.tiktok_followers, item.tiktok_url],
     ["YT", item.youtube_subscribers, item.youtube_url],
     ["Spotify", item.spotify_monthly_listens, item.spotify_url],
   ];
+  const initials = item.name
+    .split(/\s+/)
+    .map((s) => s[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
   return (
     <li className="rounded-xl border border-border/60 bg-card p-4">
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3">
+        <div className="size-14 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
+          {item.avatar_url ? (
+            <img src={item.avatar_url} alt="" className="size-full object-cover" />
+          ) : (
+            <span>{initials || "?"}</span>
+          )}
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="font-medium">{item.name}</span>
@@ -767,6 +803,20 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               )}
             </div>
           )}
+          <div className="mt-3">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Vibe — why they're on this roster
+            </Label>
+            <Input
+              value={vibe}
+              onChange={(e) => setVibe(e.target.value)}
+              onBlur={saveVibe}
+              placeholder="One sentence on why this creator fits the brief…"
+              maxLength={240}
+              className="mt-1 text-sm"
+              disabled={savingVibe}
+            />
+          </div>
         </div>
         <Button size="icon" variant="ghost" onClick={onRemove}>
           <Trash2 className="size-4" />
