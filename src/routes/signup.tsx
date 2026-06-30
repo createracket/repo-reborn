@@ -15,8 +15,12 @@ export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
       { title: "Join the mailing list — Create Racket" },
-      { name: "robots", content: "noindex, nofollow" },
+      { name: "description", content: "Join the Create Racket mailing list for early access to fan-first artist and brand partnerships." },
+      { property: "og:title", content: "Join the mailing list — Create Racket" },
+      { property: "og:description", content: "Get first dibs on Create Racket artist and brand drops." },
+      { property: "og:url", content: "https://createracket.com/signup" },
     ],
+    links: [{ rel: "canonical", href: "https://createracket.com/signup" }],
   }),
   component: FanSignup,
 });

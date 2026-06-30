@@ -47,9 +47,13 @@ export const Route = createFileRoute("/login")({
   }),
   head: () => ({
     meta: [
-      { title: "Get Started — Create Racket" },
-      { name: "robots", content: "noindex, nofollow" },
+      { title: "Sign in or Get Started — Create Racket" },
+      { name: "description", content: "Sign in to Create Racket or join the waitlist for fan-first artist and brand partnerships." },
+      { property: "og:title", content: "Sign in or Get Started — Create Racket" },
+      { property: "og:description", content: "Sign in to Create Racket or join the waitlist." },
+      { property: "og:url", content: "https://createracket.com/login" },
     ],
+    links: [{ rel: "canonical", href: "https://createracket.com/login" }],
   }),
   component: LoginPage,
 });
