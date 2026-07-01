@@ -154,30 +154,6 @@ async function scrapeInstagram(url: string): Promise<ScrapeResult> {
   }
 }
 
-async function scrapeTikTok(url: string): Promise<ScrapeResult> {
-  const token = process.env.APIFY_API_TOKEN;
-  if (!token)
-    return {
-      ok: false,
-      error: "APIFY_API_TOKEN not configured. Add it to enable TikTok auto-fetch.",
-    };
-  try {
-    const results = (await runApifyActor(
-      "clockworks~free-tiktok-scraper",
-      { postURLs: [url], resultsPerPage: 1, shouldDownloadVideos: false },
-      token,
-    )) as Array<{
-      playCount?: number;
-      diggCount?: number;
-      commentCount?: number;
-      shareCount?: number;
-      collectCount?: number;
-      text?: string;
-      videoMeta?: { coverUrl?: string };
-      createTimeISO?: string;
-      hashtags?: Array<{ name?: string }>;
-      authorMeta?: { fans?: number };
-    }>;
 
 async function scrapeTikTok(url: string): Promise<ScrapeResult> {
   const token = process.env.APIFY_API_TOKEN;
