@@ -255,6 +255,16 @@ function PublicRosterPage() {
                           </div>
                         </div>
 
+                        {it.vibe && (
+                          <div className="mt-3">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                              Vibe — why they&apos;re on this roster
+                            </p>
+                            <p className="mt-1 rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-sm text-foreground">
+                              {it.vibe}
+                            </p>
+                          </div>
+                        )}
                         <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
                           {totalReach > 0 && (
                             <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
