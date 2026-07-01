@@ -707,7 +707,7 @@ function RosterDetailView({
         <Card>
           <CardHeader>
             <CardTitle className="font-display text-xl">Roster details</CardTitle>
-            <CardDescription>Internal title + notes for this roster.</CardDescription>
+            <CardDescription>Title, notes, header image, and assigned client/brand.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-2">
@@ -721,6 +721,57 @@ function RosterDetailView({
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 maxLength={2000}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Header image URL</Label>
+              <Input
+                value={headerImageUrl}
+                onChange={(e) => setHeaderImageUrl(e.target.value)}
+                placeholder="https://…"
+              />
+              {headerImageUrl && (
+                <div
+                  className="mt-2 overflow-hidden rounded-lg border border-border/60"
+                  style={{ aspectRatio: "16 / 9" }}
+                >
+                  <img src={headerImageUrl} alt="" className="size-full object-cover" />
+                </div>
+              )}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Client email</Label>
+                <Input
+                  type="email"
+                  value={clientEmail}
+                  onChange={(e) => setClientEmail(e.target.value)}
+                  placeholder="client@example.com"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Brand email</Label>
+                <Input
+                  type="email"
+                  value={brandEmail}
+                  onChange={(e) => setBrandEmail(e.target.value)}
+                  placeholder="brand@example.com"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Assigned client/brand emails will see this roster on their dashboard once they sign in with that email.
+            </p>
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Hide prospect tags</div>
+                <div className="text-xs text-muted-foreground">
+                  Hides the "Prospect" badge on the public roster page.
+                </div>
+              </div>
+              <Switch
+                checked={roster.hide_prospect_tags}
+                onCheckedChange={toggleHideProspects}
               />
             </div>
             <div className="flex justify-end">
@@ -738,23 +789,26 @@ function RosterDetailView({
             <div className="flex items-center justify-between gap-3">
               <div>
                 <CardTitle className="font-display text-xl">
-                  Roster ({items.length})
+                  Roster ({orderedItems.length})
                 </CardTitle>
-                <CardDescription>Creators and prospective partners in this campaign.</CardDescription>
+                <CardDescription>
+                  Drag to reorder. Combined reach {formatCount(totalFollowers)}
+                  {totalBudget > 0 ? ` · Total budget £${totalBudget.toLocaleString()}` : ""}.
+                </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            {items.length === 0 ? (
+            {orderedItems.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Roster is empty. Add a community profile or a prospective creator from the right.
               </p>
             ) : (
-              <ul className="space-y-3">
-                {items.map((it) => (
-                  <RosterItemRow key={it.id} item={it} onRemove={() => removeItem(it.id)} />
-                ))}
-              </ul>
+              <DraggableRosterList
+                items={orderedItems}
+                onReorder={persistOrder}
+                onRemove={removeItem}
+              />
             )}
           </CardContent>
         </Card>
