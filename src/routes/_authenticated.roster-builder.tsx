@@ -1180,9 +1180,39 @@ function EditProspectPanel({
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [fetching, setFetching] = useState<string | null>(null);
+  const scrapeProfile = useServerFn(scrapeProfileFollowers);
 
   const upd = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  async function fetchFollowers(
+    platform: "instagram" | "tiktok" | "youtube",
+    urlKey: keyof typeof form,
+    followersKey: keyof typeof form,
+  ) {
+    const url = String(form[urlKey] || "").trim();
+    if (!url) {
+      toast.error(`Enter a ${platform} URL first`);
+      return;
+    }
+    setFetching(platform);
+    try {
+      const r = await scrapeProfile({ data: { url } });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      if (r.followers != null) {
+        upd(followersKey, String(r.followers) as never);
+        toast.success(`Fetched ${r.followers.toLocaleString()} followers`);
+      } else {
+        toast.error("No follower count returned");
+      }
+    } finally {
+      setFetching(null);
+    }
+  }
 
   function toNum(v: string): number | null {
     if (!v.trim()) return null;
