@@ -1089,6 +1089,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
           comments: numOrNull(patch.comments),
           shares: numOrNull(patch.shares),
           saves: numOrNull(patch.saves),
+          followers: numOrNull(patch.followers),
           hashtags: patch.hashtags
             .split(/\s+/)
             .map((h) => h.replace(/^#/, "").trim())
