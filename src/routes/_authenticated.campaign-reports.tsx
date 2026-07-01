@@ -1150,10 +1150,11 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-5">
+      <div className="grid gap-3 md:grid-cols-4">
         <NumField label="Views" v={form.views} on={(x) => set("views", x)} />
         <NumField label="Likes" v={form.likes} on={(x) => set("likes", x)} />
         <NumField label="Comments" v={form.comments} on={(x) => set("comments", x)} />
+        <NumField label="Followers" v={form.followers} on={(x) => set("followers", x)} />
       </div>
 
       <button
