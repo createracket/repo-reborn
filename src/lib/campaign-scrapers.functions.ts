@@ -217,3 +217,171 @@ export const scrapePostMetrics = createServerFn({ method: "POST" })
     if (platform === "instagram") return scrapeInstagram(data.url);
     return scrapeTikTok(data.url);
   });
+
+// ============================================================
+// Profile-level scraping (for roster / profile pages)
+// ============================================================
+
+type ProfileResult =
+  | {
+      ok: true;
+      platform: "instagram" | "tiktok" | "youtube";
+      followers: number | null;
+      avatar_url?: string | null;
+      handle?: string | null;
+    }
+  | { ok: false; error: string };
+
+function detectProfilePlatform(url: string): "instagram" | "tiktok" | "youtube" | null {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    if (host.includes("instagram.com")) return "instagram";
+    if (host.includes("tiktok.com")) return "tiktok";
+    if (host === "youtu.be" || host.includes("youtube.com")) return "youtube";
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function extractInstagramHandle(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const seg = u.pathname.split("/").filter(Boolean);
+    if (!seg.length) return null;
+    if (["p", "reel", "reels", "tv", "explore", "stories"].includes(seg[0])) return null;
+    return seg[0].replace(/^@/, "");
+  } catch {
+    return url.replace(/^@/, "").trim() || null;
+  }
+}
+
+function extractTikTokHandle(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const seg = u.pathname.split("/").filter(Boolean);
+    const first = seg[0] ?? "";
+    if (first.startsWith("@")) return first.slice(1);
+    return null;
+  } catch {
+    const t = url.trim().replace(/^@/, "");
+    return t || null;
+  }
+}
+
+async function scrapeInstagramProfile(url: string): Promise<ProfileResult> {
+  const token = process.env.APIFY_API_TOKEN;
+  if (!token) return { ok: false, error: "APIFY_API_TOKEN not configured." };
+  const handle = extractInstagramHandle(url);
+  if (!handle) return { ok: false, error: "Couldn't parse Instagram username from URL." };
+  try {
+    const results = (await runApifyActor(
+      "apify~instagram-profile-scraper",
+      { usernames: [handle] },
+      token,
+    )) as Array<{
+      followersCount?: number;
+      followers?: number;
+      profilePicUrlHD?: string;
+      profilePicUrl?: string;
+      username?: string;
+    }>;
+    const p = results[0];
+    if (!p) return { ok: false, error: "No Instagram profile returned." };
+    return {
+      ok: true,
+      platform: "instagram",
+      followers: p.followersCount ?? p.followers ?? null,
+      avatar_url: p.profilePicUrlHD ?? p.profilePicUrl ?? null,
+      handle: p.username ?? handle,
+    };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+async function scrapeTikTokProfile(url: string): Promise<ProfileResult> {
+  const token = process.env.APIFY_API_TOKEN;
+  if (!token) return { ok: false, error: "APIFY_API_TOKEN not configured." };
+  const handle = extractTikTokHandle(url);
+  if (!handle) return { ok: false, error: "Couldn't parse TikTok handle from URL." };
+  try {
+    const results = (await runApifyActor(
+      "clockworks~tiktok-profile-scraper",
+      { profiles: [handle], resultsPerPage: 1, shouldDownloadVideos: false },
+      token,
+    )) as Array<{
+      authorMeta?: { fans?: number; avatar?: string; name?: string };
+      fans?: number;
+      followerCount?: number;
+    }>;
+    const p = results[0];
+    if (!p) return { ok: false, error: "No TikTok profile returned." };
+    return {
+      ok: true,
+      platform: "tiktok",
+      followers: p.authorMeta?.fans ?? p.fans ?? p.followerCount ?? null,
+      avatar_url: p.authorMeta?.avatar ?? null,
+      handle: p.authorMeta?.name ?? handle,
+    };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+async function scrapeYouTubeChannel(url: string): Promise<ProfileResult> {
+  const key = process.env.GOOGLE_API_KEY;
+  if (!key) return { ok: false, error: "GOOGLE_API_KEY not configured." };
+  let param: string | null = null;
+  try {
+    const u = new URL(url);
+    const seg = u.pathname.split("/").filter(Boolean);
+    if (seg[0]?.startsWith("@")) param = `forHandle=${encodeURIComponent(seg[0])}`;
+    else if (seg[0] === "channel" && seg[1]) param = `id=${encodeURIComponent(seg[1])}`;
+    else if (seg[0] === "user" && seg[1]) param = `forUsername=${encodeURIComponent(seg[1])}`;
+    else if (seg[0] === "c" && seg[1]) param = `forHandle=@${encodeURIComponent(seg[1])}`;
+    else if (seg[0]) param = `forHandle=@${encodeURIComponent(seg[0].replace(/^@/, ""))}`;
+  } catch {
+    return { ok: false, error: "Invalid YouTube URL." };
+  }
+  if (!param) return { ok: false, error: "Couldn't parse YouTube channel from URL." };
+  const api = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&${param}&key=${key}`;
+  const res = await fetch(api);
+  if (!res.ok) return { ok: false, error: `YouTube API error ${res.status}` };
+  const json = (await res.json()) as {
+    items?: Array<{
+      snippet?: {
+        title?: string;
+        thumbnails?: { high?: { url?: string }; default?: { url?: string } };
+      };
+      statistics?: { subscriberCount?: string };
+    }>;
+  };
+  const item = json.items?.[0];
+  if (!item) return { ok: false, error: "Channel not found." };
+  const sub = item.statistics?.subscriberCount;
+  return {
+    ok: true,
+    platform: "youtube",
+    followers: sub ? Number(sub) : null,
+    avatar_url:
+      item.snippet?.thumbnails?.high?.url ?? item.snippet?.thumbnails?.default?.url ?? null,
+    handle: item.snippet?.title ?? null,
+  };
+}
+
+/**
+ * Scrape follower count (and avatar) for a single profile URL.
+ * Auth-gated. Used by roster + profile pages.
+ */
+export const scrapeProfileFollowers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ url: z.string().min(1) }).parse)
+  .handler(async ({ data }): Promise<ProfileResult> => {
+    const platform = detectProfilePlatform(data.url);
+    if (!platform)
+      return { ok: false, error: "Unrecognised URL — must be Instagram, TikTok, or YouTube." };
+    if (platform === "instagram") return scrapeInstagramProfile(data.url);
+    if (platform === "tiktok") return scrapeTikTokProfile(data.url);
+    return scrapeYouTubeChannel(data.url);
+  });
