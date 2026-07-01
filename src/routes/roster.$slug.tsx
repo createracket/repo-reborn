@@ -65,9 +65,6 @@ function formatCount(n: number) {
   return String(n);
 }
 
-function formatBudget(n: number) {
-  return `£${n.toLocaleString()}`;
-}
 
 function PublicRosterPage() {
   const { slug } = Route.useParams();
