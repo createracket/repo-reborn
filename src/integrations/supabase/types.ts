@@ -636,6 +636,13 @@ export type Database = {
             foreignKeyName: "roster_items_roster_id_fkey"
             columns: ["roster_id"]
             isOneToOne: false
+            referencedRelation: "public_rosters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roster_items_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
             referencedRelation: "rosters"
             referencedColumns: ["id"]
           },
@@ -682,6 +689,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "roster_shares_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
+            referencedRelation: "public_rosters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "roster_shares_roster_id_fkey"
             columns: ["roster_id"]
@@ -940,6 +954,84 @@ export type Database = {
           total_followers?: number | null
           total_streams?: number | null
           values?: string[] | null
+        }
+        Relationships: []
+      }
+      public_roster_items: {
+        Row: {
+          avatar_url: string | null
+          bio_page_url: string | null
+          created_at: string | null
+          example_video_url: string | null
+          id: string | null
+          instagram_followers: number | null
+          instagram_url: string | null
+          kind: string | null
+          name: string | null
+          position: number | null
+          roster_id: string | null
+          spotify_monthly_listens: number | null
+          spotify_url: string | null
+          status: string | null
+          tiktok_followers: number | null
+          tiktok_url: string | null
+          updated_at: string | null
+          youtube_subscribers: number | null
+          youtube_url: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roster_items_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
+            referencedRelation: "public_rosters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roster_items_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
+            referencedRelation: "rosters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_rosters: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          header_image_url: string | null
+          hide_prospect_tags: boolean | null
+          id: string | null
+          published: boolean | null
+          published_at: string | null
+          slug: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          header_image_url?: string | null
+          hide_prospect_tags?: boolean | null
+          id?: string | null
+          published?: boolean | null
+          published_at?: string | null
+          slug?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          header_image_url?: string | null
+          hide_prospect_tags?: boolean | null
+          id?: string | null
+          published?: boolean | null
+          published_at?: string | null
+          slug?: string | null
+          title?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
