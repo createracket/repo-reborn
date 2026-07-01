@@ -121,6 +121,7 @@ type Post = {
   comments: number | null;
   shares: number | null;
   saves: number | null;
+  followers: number | null;
   reach_pct: number | null;
   engagement_rate_pct: number | null;
   interaction_pct: number | null;
@@ -964,6 +965,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
     comments: post.comments?.toString() ?? "",
     shares: post.shares?.toString() ?? "",
     saves: post.saves?.toString() ?? "",
+    followers: post.followers?.toString() ?? "",
     reach_pct: post.reach_pct?.toString() ?? "",
     engagement_rate_pct: post.engagement_rate_pct?.toString() ?? "",
     interaction_pct: post.interaction_pct?.toString() ?? "",
@@ -986,6 +988,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
       comments: post.comments?.toString() ?? "",
       shares: post.shares?.toString() ?? "",
       saves: post.saves?.toString() ?? "",
+      followers: post.followers?.toString() ?? "",
       reach_pct: post.reach_pct?.toString() ?? "",
       engagement_rate_pct: post.engagement_rate_pct?.toString() ?? "",
       interaction_pct: post.interaction_pct?.toString() ?? "",
@@ -1016,6 +1019,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         comments: numOrNull(form.comments),
         shares: numOrNull(form.shares),
         saves: numOrNull(form.saves),
+        followers: numOrNull(form.followers),
         reach_pct: numOrNull(form.reach_pct),
         engagement_rate_pct: numOrNull(form.engagement_rate_pct),
         interaction_pct: numOrNull(form.interaction_pct),
@@ -1067,6 +1071,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         comments: m.comments != null ? String(m.comments) : form.comments,
         shares: m.shares != null ? String(m.shares) : form.shares,
         saves: m.saves != null ? String(m.saves) : form.saves,
+        followers: m.followers != null ? String(m.followers) : form.followers,
         hashtags: (m.hashtags ?? []).length > 0 ? (m.hashtags ?? []).join(" ") : form.hashtags,
       };
       setForm((f) => ({ ...f, ...patch }));
@@ -1084,6 +1089,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
           comments: numOrNull(patch.comments),
           shares: numOrNull(patch.shares),
           saves: numOrNull(patch.saves),
+          followers: numOrNull(patch.followers),
           hashtags: patch.hashtags
             .split(/\s+/)
             .map((h) => h.replace(/^#/, "").trim())
@@ -1144,10 +1150,11 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-5">
+      <div className="grid gap-3 md:grid-cols-4">
         <NumField label="Views" v={form.views} on={(x) => set("views", x)} />
         <NumField label="Likes" v={form.likes} on={(x) => set("likes", x)} />
         <NumField label="Comments" v={form.comments} on={(x) => set("comments", x)} />
+        <NumField label="Followers" v={form.followers} on={(x) => set("followers", x)} />
       </div>
 
       <button

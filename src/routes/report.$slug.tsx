@@ -40,6 +40,7 @@ type PublicPost = {
   comments: number | null;
   shares: number | null;
   saves: number | null;
+  followers: number | null;
   reach_pct: number | null;
   engagement_rate_pct: number | null;
   interaction_pct: number | null;
@@ -168,10 +169,13 @@ function PublicReportPage() {
       comments: acc.comments + (p.comments ?? 0),
       shares: acc.shares + (p.shares ?? 0),
       saves: acc.saves + (p.saves ?? 0),
+      followers: acc.followers + (p.followers ?? 0),
     }),
-    { views: 0, likes: 0, comments: 0, shares: 0, saves: 0 },
+    { views: 0, likes: 0, comments: 0, shares: 0, saves: 0, followers: 0 },
   );
   const totalEngagement = totals.likes + totals.comments + totals.shares + totals.saves;
+  const estEngagementPct =
+    totals.followers > 0 ? (totalEngagement / totals.followers) * 0.4 * 100 : null;
   const latestUpdate = (() => {
     const dates: Date[] = [];
     if (report.published_at) dates.push(new Date(report.published_at));
@@ -218,7 +222,10 @@ function PublicReportPage() {
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <TotalStat label="Total views" value={formatCount(totals.views)} />
             <TotalStat label="Est. reach" value={formatCount(Math.round(totals.views * 0.8))} />
-            <TotalStat label="Total engagement" value={formatCount(totalEngagement)} />
+            <TotalStat
+              label="Est. engagement"
+              value={estEngagementPct != null ? `${estEngagementPct.toFixed(2)}%` : "—"}
+            />
             <TotalStat label="Total creators" value={String(creators.length)} />
             <TotalStat label="Live posts" value={String(allPosts.length)} />
           </div>

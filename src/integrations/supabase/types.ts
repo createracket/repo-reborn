@@ -136,6 +136,7 @@ export type Database = {
           creator_id: string
           engagement_rate_pct: number | null
           featured_comments: Json
+          followers: number | null
           hashtags: string[]
           id: string
           interaction_pct: number | null
@@ -162,6 +163,7 @@ export type Database = {
           creator_id: string
           engagement_rate_pct?: number | null
           featured_comments?: Json
+          followers?: number | null
           hashtags?: string[]
           id?: string
           interaction_pct?: number | null
@@ -188,6 +190,7 @@ export type Database = {
           creator_id?: string
           engagement_rate_pct?: number | null
           featured_comments?: Json
+          followers?: number | null
           hashtags?: string[]
           id?: string
           interaction_pct?: number | null

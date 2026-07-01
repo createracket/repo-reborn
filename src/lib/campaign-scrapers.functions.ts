@@ -9,6 +9,7 @@ type ScrapedMetrics = {
   comments?: number | null;
   shares?: number | null;
   saves?: number | null;
+  followers?: number | null;
   caption?: string | null;
   thumbnail_url?: string | null;
   posted_at?: string | null;
@@ -37,6 +38,7 @@ async function scrapeYouTube(url: string): Promise<ScrapeResult> {
         title?: string;
         description?: string;
         publishedAt?: string;
+        channelId?: string;
         thumbnails?: { high?: { url?: string }; maxres?: { url?: string } };
         tags?: string[];
       };
@@ -51,6 +53,26 @@ async function scrapeYouTube(url: string): Promise<ScrapeResult> {
   if (!item) return { ok: false, error: "Video not found or is private." };
   const s = item.statistics ?? {};
   const sn = item.snippet ?? {};
+
+  // Fetch channel subscriber count for follower estimate
+  let followers: number | null = null;
+  if (sn.channelId) {
+    try {
+      const chRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${sn.channelId}&key=${key}`,
+      );
+      if (chRes.ok) {
+        const chJson = (await chRes.json()) as {
+          items?: Array<{ statistics?: { subscriberCount?: string } }>;
+        };
+        const sc = chJson.items?.[0]?.statistics?.subscriberCount;
+        if (sc) followers = Number(sc);
+      }
+    } catch {
+      // ignore; leave followers null
+    }
+  }
+
   return {
     ok: true,
     platform: "youtube",
@@ -58,6 +80,7 @@ async function scrapeYouTube(url: string): Promise<ScrapeResult> {
       views: s.viewCount ? Number(s.viewCount) : null,
       likes: s.likeCount ? Number(s.likeCount) : null,
       comments: s.commentCount ? Number(s.commentCount) : null,
+      followers,
       caption: sn.description ?? sn.title ?? null,
       thumbnail_url: sn.thumbnails?.maxres?.url ?? sn.thumbnails?.high?.url ?? null,
       posted_at: sn.publishedAt ?? null,
@@ -102,9 +125,16 @@ async function scrapeInstagram(url: string): Promise<ScrapeResult> {
       displayUrl?: string;
       timestamp?: string;
       hashtags?: string[];
+      ownerFollowersCount?: number;
+      owner?: { followersCount?: number; edge_followed_by?: { count?: number } };
     }>;
     const p = results[0];
     if (!p) return { ok: false, error: "No Instagram post returned." };
+    const followers =
+      p.ownerFollowersCount ??
+      p.owner?.followersCount ??
+      p.owner?.edge_followed_by?.count ??
+      null;
     return {
       ok: true,
       platform: "instagram",
@@ -112,6 +142,7 @@ async function scrapeInstagram(url: string): Promise<ScrapeResult> {
         views: p.videoPlayCount ?? p.videoViewCount ?? null,
         likes: p.likesCount ?? null,
         comments: p.commentsCount ?? null,
+        followers,
         caption: p.caption ?? null,
         thumbnail_url: p.displayUrl ?? null,
         posted_at: p.timestamp ?? null,
@@ -122,6 +153,7 @@ async function scrapeInstagram(url: string): Promise<ScrapeResult> {
     return { ok: false, error: (e as Error).message };
   }
 }
+
 
 async function scrapeTikTok(url: string): Promise<ScrapeResult> {
   const token = process.env.APIFY_API_TOKEN;
@@ -145,6 +177,7 @@ async function scrapeTikTok(url: string): Promise<ScrapeResult> {
       videoMeta?: { coverUrl?: string };
       createTimeISO?: string;
       hashtags?: Array<{ name?: string }>;
+      authorMeta?: { fans?: number };
     }>;
     const p = results[0];
     if (!p) return { ok: false, error: "No TikTok post returned." };
@@ -157,6 +190,7 @@ async function scrapeTikTok(url: string): Promise<ScrapeResult> {
         comments: p.commentCount ?? null,
         shares: p.shareCount ?? null,
         saves: p.collectCount ?? null,
+        followers: p.authorMeta?.fans ?? null,
         caption: p.text ?? null,
         thumbnail_url: p.videoMeta?.coverUrl ?? null,
         posted_at: p.createTimeISO ?? null,
