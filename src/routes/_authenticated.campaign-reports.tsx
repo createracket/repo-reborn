@@ -944,8 +944,6 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         <NumField label="Views" v={form.views} on={(x) => set("views", x)} />
         <NumField label="Likes" v={form.likes} on={(x) => set("likes", x)} />
         <NumField label="Comments" v={form.comments} on={(x) => set("comments", x)} />
-        <NumField label="Shares" v={form.shares} on={(x) => set("shares", x)} />
-        <NumField label="Saves" v={form.saves} on={(x) => set("saves", x)} />
       </div>
 
       <button
@@ -953,17 +951,22 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         onClick={() => setExpanded((x) => !x)}
         className="text-xs text-muted-foreground underline-offset-2 hover:underline"
       >
-        {expanded ? "Hide" : "Show"} advanced fields (sentiment, ER %, watch time, comments)
+        {expanded ? "Hide" : "Show"} advanced fields (shares, saves, sentiment, ER %, watch time, reach)
       </button>
 
       {expanded && (
         <div className="space-y-3 border-t border-border/60 pt-3">
+          <div className="grid gap-3 md:grid-cols-2">
+            <NumField label="Shares" v={form.shares} on={(x) => set("shares", x)} />
+            <NumField label="Saves" v={form.saves} on={(x) => set("saves", x)} />
+          </div>
           <div className="grid gap-3 md:grid-cols-4">
             <NumField label="Reach %" v={form.reach_pct} on={(x) => set("reach_pct", x)} />
             <NumField label="ER %" v={form.engagement_rate_pct} on={(x) => set("engagement_rate_pct", x)} />
             <NumField label="Interaction %" v={form.interaction_pct} on={(x) => set("interaction_pct", x)} />
             <NumField label="Watch time (h)" v={form.watch_time_hours} on={(x) => set("watch_time_hours", x)} />
           </div>
+
 
           <div className="space-y-2">
             <Label className="text-xs">Sentiment ({form.sentiment_score}/100)</Label>
