@@ -541,12 +541,34 @@ function RosterDetailView({
 }) {
   const [title, setTitle] = useState(roster.title);
   const [description, setDescription] = useState(roster.description ?? "");
+  const [headerImageUrl, setHeaderImageUrl] = useState(roster.header_image_url ?? "");
+  const [clientEmail, setClientEmail] = useState(roster.client_email ?? "");
+  const [brandEmail, setBrandEmail] = useState(roster.brand_email ?? "");
   const [savingMeta, setSavingMeta] = useState(false);
+  const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
 
   useEffect(() => {
     setTitle(roster.title);
     setDescription(roster.description ?? "");
-  }, [roster.id, roster.title, roster.description]);
+    setHeaderImageUrl(roster.header_image_url ?? "");
+    setClientEmail(roster.client_email ?? "");
+    setBrandEmail(roster.brand_email ?? "");
+  }, [roster.id, roster.title, roster.description, roster.header_image_url, roster.client_email, roster.brand_email]);
+
+  useEffect(() => {
+    setOrderedItems(items);
+  }, [items]);
+
+  const totalFollowers = orderedItems.reduce(
+    (a, it) =>
+      a +
+      (it.instagram_followers ?? 0) +
+      (it.tiktok_followers ?? 0) +
+      (it.youtube_subscribers ?? 0) +
+      (it.spotify_monthly_listens ?? 0),
+    0,
+  );
+  const totalBudget = orderedItems.reduce((a, it) => a + (it.budget ?? 0), 0);
 
   const linkedBrief = roster.brief_id ? briefs.find((b) => b.id === roster.brief_id) ?? null : null;
 
@@ -554,7 +576,13 @@ function RosterDetailView({
     setSavingMeta(true);
     const { error } = await supabase
       .from("rosters")
-      .update({ title: title.trim(), description: description.trim() || null })
+      .update({
+        title: title.trim(),
+        description: description.trim() || null,
+        header_image_url: headerImageUrl.trim() || null,
+        client_email: clientEmail.trim().toLowerCase() || null,
+        brand_email: brandEmail.trim().toLowerCase() || null,
+      } as never)
       .eq("id", roster.id);
     setSavingMeta(false);
     if (error) {
@@ -563,6 +591,34 @@ function RosterDetailView({
     }
     toast.success("Saved");
     onChanged();
+  }
+
+  async function toggleHideProspects(hide: boolean) {
+    const { error } = await supabase
+      .from("rosters")
+      .update({ hide_prospect_tags: hide } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
+  async function persistOrder(next: RosterItem[]) {
+    setOrderedItems(next);
+    const updates = next.map((it, idx) =>
+      supabase
+        .from("roster_items")
+        .update({ position: idx } as never)
+        .eq("id", it.id),
+    );
+    const results = await Promise.all(updates);
+    const err = results.find((r) => r.error);
+    if (err?.error) {
+      toast.error(err.error.message);
+      onChanged();
+    }
   }
 
   async function setLinkedBrief(briefId: string | null) {
