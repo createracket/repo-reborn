@@ -402,12 +402,7 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
                 Post date: {new Date(post.posted_at).toLocaleDateString()}
               </p>
             )}
-            {post.caption && (
-              <div>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">Caption</p>
-                <p className="mt-1 whitespace-pre-wrap font-medium">{post.caption}</p>
-              </div>
-            )}
+            {post.caption && <ExpandableCaption caption={post.caption} />}
             {post.hashtags && post.hashtags.length > 0 && (
               <p className="text-sm text-muted-foreground">
                 {post.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)).join(" ")}
