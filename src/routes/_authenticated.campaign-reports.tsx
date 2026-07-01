@@ -14,7 +14,9 @@ import {
   GripVertical,
   ChevronDown,
   ChevronRight,
+  ImagePlus,
 } from "lucide-react";
+import { resizeImageFile } from "@/lib/image-resize";
 import { useServerFn } from "@tanstack/react-start";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
