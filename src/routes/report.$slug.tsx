@@ -168,12 +168,9 @@ function PublicReportPage() {
       comments: acc.comments + (p.comments ?? 0),
       shares: acc.shares + (p.shares ?? 0),
       saves: acc.saves + (p.saves ?? 0),
-      erSum: acc.erSum + (p.engagement_rate_pct ?? 0),
-      erCount: acc.erCount + (p.engagement_rate_pct != null ? 1 : 0),
     }),
-    { views: 0, likes: 0, comments: 0, shares: 0, saves: 0, erSum: 0, erCount: 0 },
+    { views: 0, likes: 0, comments: 0, shares: 0, saves: 0 },
   );
-  const avgER = totals.erCount ? totals.erSum / totals.erCount : null;
   const totalEngagement = totals.likes + totals.comments + totals.shares + totals.saves;
   const latestUpdate = (() => {
     const dates: Date[] = [];
