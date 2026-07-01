@@ -1091,7 +1091,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               if (error) toast.error(error.message);
             }}
           >
-            <SelectTrigger className="h-8 w-[150px] text-xs">
+            <SelectTrigger className={`h-8 w-[150px] text-xs ${STATUS_BADGE[item.status ?? "in_review"]}`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
