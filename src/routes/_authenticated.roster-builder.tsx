@@ -103,6 +103,8 @@ type RosterItem = {
   position: number;
   status: string;
   budget: number | null;
+  category: "musician" | "ugc" | "egc" | "music_fan" | null;
+  metrics_month: string | null;
 };
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
@@ -118,6 +120,21 @@ const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
 const STATUS_LABEL: Record<string, string> = Object.fromEntries(
   STATUS_OPTIONS.map((s) => [s.value, s.label]),
 );
+
+type CategoryValue = "musician" | "ugc" | "egc" | "music_fan";
+const CATEGORY_OPTIONS: Array<{ value: CategoryValue; label: string; badge: string }> = [
+  { value: "musician", label: "Musician", badge: "bg-pink-accent text-[#2b2b2b]" },
+  { value: "ugc", label: "UGC", badge: "bg-purple text-white" },
+  { value: "egc", label: "EGC", badge: "bg-sky-500 text-white" },
+  { value: "music_fan", label: "Music Fan", badge: "bg-emerald-500 text-white" },
+];
+const CATEGORY_LABEL: Record<CategoryValue, string> = Object.fromEntries(
+  CATEGORY_OPTIONS.map((c) => [c.value, c.label]),
+) as Record<CategoryValue, string>;
+const CATEGORY_BADGE: Record<CategoryValue, string> = Object.fromEntries(
+  CATEGORY_OPTIONS.map((c) => [c.value, c.badge]),
+) as Record<CategoryValue, string>;
+
 
 type Share = {
   id: string;
@@ -962,20 +979,27 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium">{item.name}</span>
-            {isVerified ? (
+            {isVerified && (
               <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] hover:bg-pink-accent/90 text-[10px] uppercase">
                 <BadgeCheck className="size-3" /> Verified
               </Badge>
-            ) : (
-              <Badge variant="outline" className="text-[10px] uppercase">
-                Prospect
+            )}
+            {item.category && (
+              <Badge className={`border-transparent text-[10px] uppercase ${CATEGORY_BADGE[item.category]}`}>
+                {CATEGORY_LABEL[item.category]}
               </Badge>
             )}
+
           </div>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             {totalReach > 0 && (
               <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
                 Total reach {formatCount(totalReach)}
+              </span>
+            )}
+            {item.metrics_month && (
+              <span className="rounded-md border border-border/60 bg-muted/30 px-2 py-0.5 uppercase tracking-wider">
+                {formatMetricsMonth(item.metrics_month)}
               </span>
             )}
             {stats.map(([label, count, url]) =>
@@ -1000,6 +1024,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               ) : null,
             )}
           </div>
+
           {(item.example_video_url || item.bio_page_url) && (
             <div className="mt-2 flex flex-wrap gap-3 text-xs">
               {item.example_video_url && (
@@ -1067,6 +1092,29 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               ))}
             </SelectContent>
           </Select>
+          <Select
+            value={item.category ?? "none"}
+            onValueChange={async (v) => {
+              const next = v === "none" ? null : v;
+              const { error } = await supabase
+                .from("roster_items")
+                .update({ category: next } as never)
+                .eq("id", item.id);
+              if (error) toast.error(error.message);
+            }}
+          >
+            <SelectTrigger className="h-8 w-[150px] text-xs">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none" className="text-xs">No category</SelectItem>
+              {CATEGORY_OPTIONS.map((c) => (
+                <SelectItem key={c.value} value={c.value} className="text-xs">
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {item.budget != null && item.budget > 0 && (
             <Badge
               variant="outline"
@@ -1115,8 +1163,10 @@ function EditProspectPanel({
     example_video_url: item.example_video_url ?? "",
     bio_page_url: item.bio_page_url ?? "",
     budget: item.budget?.toString() ?? "",
+    metrics_month: item.metrics_month ?? "",
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const upd = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -1125,6 +1175,38 @@ function EditProspectPanel({
     if (!v.trim()) return null;
     const n = Number(v.replace(/[,\s]/g, ""));
     return Number.isFinite(n) ? n : null;
+  }
+
+  async function handleFilePick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      toast.error("Image must be under 12MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const { resizeImageFile } = await import("@/lib/image-resize");
+      const resized = await resizeImageFile(file, 1080, 0.85);
+      const path = `roster/${item.id}/${crypto.randomUUID()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
+      if (upErr) {
+        toast.error(`Upload failed: ${upErr.message}`);
+        return;
+      }
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      upd("avatar_url", data.publicUrl);
+      toast.success("Photo uploaded — click Save to apply");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function save() {
@@ -1146,6 +1228,7 @@ function EditProspectPanel({
         example_video_url: form.example_video_url.trim() || null,
         bio_page_url: form.bio_page_url.trim() || null,
         budget: toNum(form.budget),
+        metrics_month: form.metrics_month.trim() || null,
       } as never)
       .eq("id", item.id);
     setSaving(false);
@@ -1161,12 +1244,14 @@ function EditProspectPanel({
     label: string,
     key: keyof typeof form,
     placeholder?: string,
+    type?: string,
   ) => (
     <div className="space-y-1">
       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
         {label}
       </Label>
       <Input
+        type={type}
         value={form[key]}
         onChange={(e) => upd(key, e.target.value)}
         placeholder={placeholder}
@@ -1177,9 +1262,35 @@ function EditProspectPanel({
 
   return (
     <div className="mt-4 space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+      <div className="space-y-1">
+        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          Photo
+        </Label>
+        <div className="flex items-center gap-3">
+          <div className="size-14 shrink-0 overflow-hidden rounded-full bg-muted">
+            {form.avatar_url ? (
+              <img src={form.avatar_url} alt="" className="size-full object-cover" />
+            ) : null}
+          </div>
+          <div className="flex flex-col gap-1">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleFilePick}
+              disabled={uploading}
+              className="text-sm"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              Auto-resized to max 1080×1080. JPG output.
+            </p>
+          </div>
+        </div>
+      </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {fld("Name", "name")}
-        {fld("Photo URL", "avatar_url", "https://…")}
+        {fld("Photo URL (or use upload above)", "avatar_url", "https://…")}
+        {fld("Metrics month", "metrics_month", "e.g. 2026-06", "month")}
+        {fld("Budget (£)", "budget", "5000")}
         {fld("Instagram URL", "instagram_url")}
         {fld("IG followers", "instagram_followers", "12500")}
         {fld("TikTok URL", "tiktok_url")}
@@ -1190,19 +1301,29 @@ function EditProspectPanel({
         {fld("Monthly listeners", "spotify_monthly_listens")}
         {fld("Example video URL", "example_video_url")}
         {fld("Bio page URL", "bio_page_url")}
-        {fld("Budget (£)", "budget", "5000")}
       </div>
       <div className="flex justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={onClose}>
           Cancel
         </Button>
-        <Button size="sm" onClick={save} disabled={saving || !form.name.trim()}>
-          Save changes
+        <Button size="sm" onClick={save} disabled={saving || uploading || !form.name.trim()}>
+          {saving ? "Saving…" : "Save changes"}
         </Button>
       </div>
     </div>
   );
 }
+
+function formatMetricsMonth(value: string): string {
+  // Accept YYYY-MM or YYYY-MM-DD; render as "Jun 2026". Fallback to raw string.
+  const m = /^(\d{4})-(\d{2})/.exec(value);
+  if (!m) return value;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, 1);
+  if (isNaN(d.getTime())) return value;
+  return d.toLocaleDateString(undefined, { month: "short", year: "numeric" });
+}
+
+
 
 
 function formatCount(n: number) {
