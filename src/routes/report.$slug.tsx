@@ -216,29 +216,32 @@ function PublicReportPage() {
             <p className="text-sm text-muted-foreground">No creators on this report yet.</p>
           ) : (
             creators.map((c) => (
-              <div key={c.id} className="space-y-5">
-                <div className="flex items-center gap-3">
-                  <div className="size-12 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
-                    {c.avatar_url ? (
-                      <img src={c.avatar_url} alt="" className="size-full object-cover" />
-                    ) : (
-                      c.name.slice(0, 2).toUpperCase()
-                    )}
-                  </div>
-                  <div>
-                    <h2 className="font-display text-2xl">{c.name}</h2>
-                    {c.handle && (
-                      <p className="text-sm text-muted-foreground">{c.handle}</p>
-                    )}
-                  </div>
-                </div>
+              <div key={c.id} className="space-y-4">
                 {c.posts.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No posts yet.</p>
+                  <Card>
+                    <CardContent className="flex items-center gap-3 p-5">
+                      <div className="size-12 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
+                        {c.avatar_url ? (
+                          <img src={c.avatar_url} alt="" className="size-full object-cover" />
+                        ) : (
+                          c.name.slice(0, 2).toUpperCase()
+                        )}
+                      </div>
+                      <div>
+                        <h2 className="font-display text-xl">{c.name}</h2>
+                        {c.handle && (
+                          <p className="text-sm text-muted-foreground">{c.handle}</p>
+                        )}
+                      </div>
+                      <p className="ml-auto text-sm text-muted-foreground">No posts yet.</p>
+                    </CardContent>
+                  </Card>
                 ) : (
                   c.posts.map((p) => <PostCard key={p.id} post={p} creator={c} />)
                 )}
               </div>
             ))
+
           )}
         </section>
       </main>
