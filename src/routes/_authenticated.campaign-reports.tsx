@@ -490,6 +490,7 @@ function ReportDetailView({
   const [clientEmail, setClientEmail] = useState(report.client_email ?? "");
   const [brandEmail, setBrandEmail] = useState(report.brand_email ?? "");
   const [copied, setCopied] = useState(false);
+  const [uploadingHeader, setUploadingHeader] = useState(false);
 
   useEffect(() => {
     setTitle(report.title);
