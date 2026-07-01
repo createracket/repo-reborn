@@ -25,6 +25,7 @@ type PublicItem = {
   kind: "profile" | "prospect";
   name: string;
   avatar_url: string | null;
+  vibe: string | null;
   instagram_url: string | null;
   instagram_followers: number | null;
   tiktok_url: string | null;
@@ -37,6 +38,7 @@ type PublicItem = {
   bio_page_url: string | null;
   position: number;
   status: string;
+  category: string | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -101,7 +103,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status, category",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
@@ -253,6 +255,16 @@ function PublicRosterPage() {
                           </div>
                         </div>
 
+                        {it.vibe && (
+                          <div className="mt-3">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                              Vibe — why they&apos;re on this roster
+                            </p>
+                            <p className="mt-1 rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-sm text-foreground">
+                              {it.vibe}
+                            </p>
+                          </div>
+                        )}
                         <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
                           {totalReach > 0 && (
                             <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
