@@ -1071,6 +1071,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         comments: m.comments != null ? String(m.comments) : form.comments,
         shares: m.shares != null ? String(m.shares) : form.shares,
         saves: m.saves != null ? String(m.saves) : form.saves,
+        followers: m.followers != null ? String(m.followers) : form.followers,
         hashtags: (m.hashtags ?? []).length > 0 ? (m.hashtags ?? []).join(" ") : form.hashtags,
       };
       setForm((f) => ({ ...f, ...patch }));
