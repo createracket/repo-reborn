@@ -135,18 +135,9 @@ function DashboardPage() {
       setOpportunities((opps as Opportunity[]) ?? []);
 
       if (u.user.email) {
-        const emailLower = u.user.email.toLowerCase();
-        const { data: assigned } = await supabase
-          .from("rosters")
-          .select("id, title, slug, published, updated_at, client_email, brand_email")
-          .or(`client_email.eq.${emailLower},brand_email.eq.${emailLower}`)
-          .order("updated_at", { ascending: false });
+        const { data: assigned } = await (supabase as any).rpc("get_assigned_rosters");
         setAssignedRosters(((assigned as any[]) ?? []) as any);
-        const { data: assignedRep } = await (supabase as any)
-          .from("campaign_reports")
-          .select("id, title, slug, published, updated_at, client_email, brand_email")
-          .or(`client_email.eq.${emailLower},brand_email.eq.${emailLower}`)
-          .order("updated_at", { ascending: false });
+        const { data: assignedRep } = await (supabase as any).rpc("get_assigned_campaign_reports");
         setAssignedReports(((assignedRep as any[]) ?? []) as any);
       }
 
