@@ -121,6 +121,7 @@ type Post = {
   comments: number | null;
   shares: number | null;
   saves: number | null;
+  followers: number | null;
   reach_pct: number | null;
   engagement_rate_pct: number | null;
   interaction_pct: number | null;
