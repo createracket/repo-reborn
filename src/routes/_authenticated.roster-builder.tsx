@@ -979,15 +979,17 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium">{item.name}</span>
-            {isVerified ? (
+            {isVerified && (
               <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] hover:bg-pink-accent/90 text-[10px] uppercase">
                 <BadgeCheck className="size-3" /> Verified
               </Badge>
-            ) : (
-              <Badge variant="outline" className="text-[10px] uppercase">
-                Prospect
+            )}
+            {item.category && (
+              <Badge className={`border-transparent text-[10px] uppercase ${CATEGORY_BADGE[item.category]}`}>
+                {CATEGORY_LABEL[item.category]}
               </Badge>
             )}
+
           </div>
           <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
             {totalReach > 0 && (
