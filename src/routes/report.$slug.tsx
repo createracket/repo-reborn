@@ -175,6 +175,15 @@ function PublicReportPage() {
   );
   const avgER = totals.erCount ? totals.erSum / totals.erCount : null;
   const totalEngagement = totals.likes + totals.comments + totals.shares + totals.saves;
+  const latestUpdate = (() => {
+    const dates: Date[] = [];
+    if (report.published_at) dates.push(new Date(report.published_at));
+    allPosts.forEach((p) => {
+      if (p.updated_at) dates.push(new Date(p.updated_at));
+    });
+    if (dates.length === 0) return null;
+    return new Date(Math.max(...dates.map((d) => d.getTime())));
+  })();
 
   return (
     <div className="min-h-screen bg-background">
