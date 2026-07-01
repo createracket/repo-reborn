@@ -39,7 +39,11 @@ type PublicItem = {
   position: number;
   status: string;
   category: string | null;
+  location: string | null;
 };
+
+const LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺" };
+const LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia" };
 
 const STATUS_LABEL: Record<string, string> = {
   in_review: "In Review",
@@ -103,7 +107,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status, category",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status, category, location",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
@@ -193,6 +197,16 @@ function PublicRosterPage() {
                 </p>
               </CardContent>
             </Card>
+            <Card>
+              <CardContent className="p-5">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Est. reach
+                </p>
+                <p className="mt-1 font-display text-2xl">
+                  {formatCount(Math.round(totalFollowers * 0.4))}
+                </p>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -235,6 +249,15 @@ function PublicRosterPage() {
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="font-display text-xl">{it.name}</h3>
+                            {it.location && LOCATION_FLAG[it.location] && (
+                              <span
+                                className="text-lg leading-none"
+                                title={LOCATION_LABEL[it.location]}
+                                aria-label={LOCATION_LABEL[it.location]}
+                              >
+                                {LOCATION_FLAG[it.location]}
+                              </span>
+                            )}
                             {it.kind === "profile" ? (
                               <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
                                 <BadgeCheck className="size-3" /> Verified

@@ -752,6 +752,7 @@ export type Database = {
           instagram_followers: number | null
           instagram_url: string | null
           kind: string
+          location: string | null
           metrics_month: string | null
           name: string
           position: number
@@ -778,6 +779,7 @@ export type Database = {
           instagram_followers?: number | null
           instagram_url?: string | null
           kind: string
+          location?: string | null
           metrics_month?: string | null
           name: string
           position?: number
@@ -804,6 +806,7 @@ export type Database = {
           instagram_followers?: number | null
           instagram_url?: string | null
           kind?: string
+          location?: string | null
           metrics_month?: string | null
           name?: string
           position?: number
