@@ -172,32 +172,18 @@ function PublicRosterPage() {
           </p>
         )}
 
-        {(totalFollowers > 0 || totalBudget > 0) && (
+        {totalFollowers > 0 && (
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {totalFollowers > 0 && (
-              <Card>
-                <CardContent className="p-5">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    Total followers
-                  </p>
-                  <p className="mt-1 font-display text-2xl">
-                    {formatCount(totalFollowers)}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-            {totalBudget > 0 && (
-              <Card>
-                <CardContent className="p-5">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    Total budget
-                  </p>
-                  <p className="mt-1 font-display text-2xl">
-                    {formatBudget(totalBudget)}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+            <Card>
+              <CardContent className="p-5">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Total followers
+                </p>
+                <p className="mt-1 font-display text-2xl">
+                  {formatCount(totalFollowers)}
+                </p>
+              </CardContent>
+            </Card>
           </div>
         )}
 
