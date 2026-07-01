@@ -1701,11 +1701,14 @@ function AddProspectCard({
                 />
               </Field>
               <Field label="YouTube URL">
-                <Input
-                  value={form.youtube_url}
-                  onChange={(e) => update("youtube_url", e.target.value)}
-                  placeholder="https://youtube.com/…"
-                />
+                <div className="flex gap-1">
+                  <Input
+                    value={form.youtube_url}
+                    onChange={(e) => update("youtube_url", e.target.value)}
+                    placeholder="https://youtube.com/…"
+                  />
+                  <FetchBtn platform="youtube" urlKey="youtube_url" followersKey="youtube_subscribers" />
+                </div>
               </Field>
               <Field label="YT subscribers">
                 <Input
