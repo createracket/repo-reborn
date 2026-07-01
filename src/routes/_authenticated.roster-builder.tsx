@@ -1114,6 +1114,7 @@ function EditProspectPanel({
     spotify_monthly_listens: item.spotify_monthly_listens?.toString() ?? "",
     example_video_url: item.example_video_url ?? "",
     bio_page_url: item.bio_page_url ?? "",
+    budget: item.budget?.toString() ?? "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -1144,6 +1145,7 @@ function EditProspectPanel({
         spotify_monthly_listens: toNum(form.spotify_monthly_listens),
         example_video_url: form.example_video_url.trim() || null,
         bio_page_url: form.bio_page_url.trim() || null,
+        budget: toNum(form.budget),
       } as never)
       .eq("id", item.id);
     setSaving(false);
