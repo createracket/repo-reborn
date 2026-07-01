@@ -142,6 +142,12 @@ function DashboardPage() {
           .or(`client_email.eq.${emailLower},brand_email.eq.${emailLower}`)
           .order("updated_at", { ascending: false });
         setAssignedRosters(((assigned as any[]) ?? []) as any);
+        const { data: assignedRep } = await (supabase as any)
+          .from("campaign_reports")
+          .select("id, title, slug, published, updated_at, client_email, brand_email")
+          .or(`client_email.eq.${emailLower},brand_email.eq.${emailLower}`)
+          .order("updated_at", { ascending: false });
+        setAssignedReports(((assignedRep as any[]) ?? []) as any);
       }
 
       const featuredMembers: CommunityMember[] = ((featuredRows ?? []) as any[]).map((p) => ({
