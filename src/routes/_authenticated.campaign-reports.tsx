@@ -943,6 +943,16 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
   const [scraping, setScraping] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: post.id,
+  });
+  const dragStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+
   const [form, setForm] = useState({
     platform: post.platform,
     post_url: post.post_url ?? "",
