@@ -965,6 +965,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
     comments: post.comments?.toString() ?? "",
     shares: post.shares?.toString() ?? "",
     saves: post.saves?.toString() ?? "",
+    followers: post.followers?.toString() ?? "",
     reach_pct: post.reach_pct?.toString() ?? "",
     engagement_rate_pct: post.engagement_rate_pct?.toString() ?? "",
     interaction_pct: post.interaction_pct?.toString() ?? "",
