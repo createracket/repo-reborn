@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Public read access to spotlight-images" ON storage.objects;
