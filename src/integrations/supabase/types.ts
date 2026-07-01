@@ -742,12 +742,14 @@ export type Database = {
           avatar_url: string | null
           bio_page_url: string | null
           budget: number | null
+          category: string | null
           created_at: string
           example_video_url: string | null
           id: string
           instagram_followers: number | null
           instagram_url: string | null
           kind: string
+          metrics_month: string | null
           name: string
           position: number
           profile_id: string | null
@@ -766,12 +768,14 @@ export type Database = {
           avatar_url?: string | null
           bio_page_url?: string | null
           budget?: number | null
+          category?: string | null
           created_at?: string
           example_video_url?: string | null
           id?: string
           instagram_followers?: number | null
           instagram_url?: string | null
           kind: string
+          metrics_month?: string | null
           name: string
           position?: number
           profile_id?: string | null
@@ -790,12 +794,14 @@ export type Database = {
           avatar_url?: string | null
           bio_page_url?: string | null
           budget?: number | null
+          category?: string | null
           created_at?: string
           example_video_url?: string | null
           id?: string
           instagram_followers?: number | null
           instagram_url?: string | null
           kind?: string
+          metrics_month?: string | null
           name?: string
           position?: number
           profile_id?: string | null
