@@ -39,7 +39,11 @@ type PublicItem = {
   position: number;
   status: string;
   category: string | null;
+  location: string | null;
 };
+
+const LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺" };
+const LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia" };
 
 const STATUS_LABEL: Record<string, string> = {
   in_review: "In Review",
