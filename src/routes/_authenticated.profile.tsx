@@ -440,16 +440,31 @@ function EditProfilePage() {
                 <Textarea id="bio" rows={4} value={form.bio} onChange={(e) => set("bio", e.target.value)} />
               </div>
 
-              <div className="md:col-span-2 pt-2">
+              <div className="md:col-span-2 pt-2 flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Socials</p>
+                <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
+                  Sum fetched → Total followers
+                </Button>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="ig">Instagram</Label>
-                <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
+                <div className="flex gap-1.5">
+                  <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
+                  <Button type="button" size="sm" variant="outline" onClick={() => fetchSocialFollowers("instagram")} disabled={fetching === "instagram"} title="Fetch followers">
+                    <RefreshCw className={`size-3.5 ${fetching === "instagram" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                {fetchedCounts.instagram != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()}</p> : null}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="tt">TikTok</Label>
-                <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
+                <div className="flex gap-1.5">
+                  <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
+                  <Button type="button" size="sm" variant="outline" onClick={() => fetchSocialFollowers("tiktok")} disabled={fetching === "tiktok"} title="Fetch followers">
+                    <RefreshCw className={`size-3.5 ${fetching === "tiktok" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                {fetchedCounts.tiktok != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()}</p> : null}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="sp">Spotify</Label>
@@ -457,12 +472,19 @@ function EditProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="yt">YouTube</Label>
-                <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} />
+                <div className="flex gap-1.5">
+                  <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
+                  <Button type="button" size="sm" variant="outline" onClick={() => fetchSocialFollowers("youtube")} disabled={fetching === "youtube"} title="Fetch subscribers">
+                    <RefreshCw className={`size-3.5 ${fetching === "youtube" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                {fetchedCounts.youtube != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()}</p> : null}
               </div>
               <div className="space-y-1.5 md:col-span-2">
                 <Label htmlFor="web">Website</Label>
                 <Input id="web" value={form.socials.website ?? ""} onChange={(e) => setSocial("website", e.target.value)} placeholder="https://…" />
               </div>
+
 
               <div className="md:col-span-2 pt-2">
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics</p>
