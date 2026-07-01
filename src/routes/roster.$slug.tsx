@@ -16,6 +16,8 @@ type PublicRoster = {
   slug: string;
   published: boolean;
   published_at: string | null;
+  header_image_url: string | null;
+  hide_prospect_tags: boolean;
 };
 
 type PublicItem = {
@@ -36,6 +38,7 @@ type PublicItem = {
   bio_page_url: string | null;
   position: number;
   status: string;
+  budget: number | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -64,6 +67,10 @@ function formatCount(n: number) {
   return String(n);
 }
 
+function formatBudget(n: number) {
+  return `£${n.toLocaleString()}`;
+}
+
 function PublicRosterPage() {
   const { slug } = Route.useParams();
   const [roster, setRoster] = useState<PublicRoster | null>(null);
@@ -74,7 +81,9 @@ function PublicRosterPage() {
     (async () => {
       const { data: r } = await supabase
         .from("rosters")
-        .select("id, title, description, slug, published, published_at")
+        .select(
+          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags",
+        )
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
@@ -87,7 +96,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status, budget",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
@@ -125,10 +134,34 @@ function PublicRosterPage() {
     );
   }
 
+  const totalFollowers = items.reduce(
+    (acc, it) =>
+      acc +
+      (it.instagram_followers ?? 0) +
+      (it.tiktok_followers ?? 0) +
+      (it.youtube_subscribers ?? 0) +
+      (it.spotify_monthly_listens ?? 0),
+    0,
+  );
+  const totalBudget = items.reduce((acc, it) => acc + (it.budget ?? 0), 0);
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <main className="container mx-auto max-w-4xl px-4 py-12 md:py-20">
+        {roster.header_image_url ? (
+          <div
+            className="mb-10 overflow-hidden rounded-2xl border border-border/60"
+            style={{ aspectRatio: "16 / 9" }}
+          >
+            <img
+              src={roster.header_image_url}
+              alt={roster.title}
+              className="size-full object-cover"
+            />
+          </div>
+        ) : null}
+
         <Badge variant="outline" className="uppercase tracking-[0.2em]">
           <Users className="mr-1.5 size-3" /> Roster
         </Badge>
@@ -139,6 +172,35 @@ function PublicRosterPage() {
           <p className="mt-4 whitespace-pre-wrap text-lg text-muted-foreground">
             {roster.description}
           </p>
+        )}
+
+        {(totalFollowers > 0 || totalBudget > 0) && (
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {totalFollowers > 0 && (
+              <Card>
+                <CardContent className="p-5">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Total followers
+                  </p>
+                  <p className="mt-1 font-display text-2xl">
+                    {formatCount(totalFollowers)}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+            {totalBudget > 0 && (
+              <Card>
+                <CardContent className="p-5">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Total budget
+                  </p>
+                  <p className="mt-1 font-display text-2xl">
+                    {formatBudget(totalBudget)}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         )}
 
         <section className="mt-12 space-y-3">
@@ -164,6 +226,7 @@ function PublicRosterPage() {
                 .slice(0, 2)
                 .join("")
                 .toUpperCase();
+              const showProspect = it.kind === "prospect" && !roster.hide_prospect_tags;
               return (
                 <Card key={it.id}>
                   <CardContent className="p-5">
@@ -183,23 +246,31 @@ function PublicRosterPage() {
                               <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
                                 <BadgeCheck className="size-3" /> Verified
                               </Badge>
-                            ) : (
+                            ) : showProspect ? (
                               <Badge className="border-transparent bg-purple text-white text-[10px] uppercase">
                                 Prospect
                               </Badge>
+                            ) : null}
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <Badge
+                              variant="outline"
+                              className="border-border/70 bg-muted/40 text-[10px] uppercase tracking-wider"
+                            >
+                              {STATUS_LABEL[it.status] ?? "In Review"}
+                            </Badge>
+                            {it.budget != null && it.budget > 0 && (
+                              <Badge
+                                variant="outline"
+                                className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
+                              >
+                                {formatBudget(it.budget)}
+                              </Badge>
                             )}
                           </div>
-                          <Badge
-                            variant="outline"
-                            className="border-border/70 bg-muted/40 text-[10px] uppercase tracking-wider"
-                          >
-                            {STATUS_LABEL[it.status] ?? "In Review"}
-                          </Badge>
                         </div>
                         {it.vibe && (
-                          <p className="mt-2 text-sm italic text-foreground/80">
-                            "{it.vibe}"
-                          </p>
+                          <p className="mt-2 text-sm text-foreground/80">{it.vibe}</p>
                         )}
                         <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
                           {totalReach > 0 && (
