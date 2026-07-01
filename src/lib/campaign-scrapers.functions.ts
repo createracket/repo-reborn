@@ -20,11 +20,11 @@ type ScrapeResult =
   | { ok: false; error: string };
 
 async function scrapeYouTube(url: string): Promise<ScrapeResult> {
-  const key = process.env.YOUTUBE_DATA_API_KEY;
+  const key = process.env.GOOGLE_API_KEY;
   if (!key)
     return {
       ok: false,
-      error: "YOUTUBE_DATA_API_KEY not configured. Add it to enable YouTube auto-fetch.",
+      error: "GOOGLE_API_KEY not configured. Add it to enable YouTube auto-fetch.",
     };
   const id = extractYouTubeId(url);
   if (!id) return { ok: false, error: "Couldn't parse YouTube video ID from URL." };
