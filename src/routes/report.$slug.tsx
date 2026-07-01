@@ -348,20 +348,7 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
 
         <div className="min-w-0 space-y-5">
           <div className="flex items-start justify-end">
-            {post.post_url ? (
-              <a
-                href={post.post_url}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                title={PLATFORM_LABEL[post.platform]}
-              >
-                <Icon className="size-5" />
-                <ExternalLink className="size-3" />
-              </a>
-            ) : (
-              <Icon className="size-5 text-muted-foreground" />
-            )}
+            <PlatformBadge platform={post.platform} postUrl={post.post_url} />
           </div>
 
 
@@ -403,7 +390,7 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
 
           <div className="space-y-1.5 text-sm">
             {post.posted_at && (
-              <p className="text-xs font-semibold uppercase tracking-wider text-purple">
+              <p className="text-xs font-semibold uppercase tracking-wider text-pink-accent">
                 Post date: {new Date(post.posted_at).toLocaleDateString()}
               </p>
             )}
@@ -429,6 +416,44 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function PlatformBadge({
+  platform,
+  postUrl,
+}: {
+  platform: Platform;
+  postUrl: string | null;
+}) {
+  const Icon = PLATFORM_ICON[platform] ?? Instagram;
+  const label = PLATFORM_LABEL[platform];
+  const badgeClasses: Record<Platform, string> = {
+    instagram:
+      "border-purple/30 bg-purple/15 text-purple",
+    tiktok:
+      "border-pink-accent/30 bg-pink-accent/15 text-pink-accent",
+    youtube:
+      "border-destructive/30 bg-destructive/15 text-destructive",
+  };
+  const classes = `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${badgeClasses[platform]}`;
+  return postUrl ? (
+    <a
+      href={postUrl}
+      target="_blank"
+      rel="noreferrer noopener"
+      className={classes}
+      title={label}
+    >
+      <Icon className="size-4" />
+      {label}
+      <ExternalLink className="size-3 opacity-70" />
+    </a>
+  ) : (
+    <span className={classes}>
+      <Icon className="size-4" />
+      {label}
+    </span>
   );
 }
 
