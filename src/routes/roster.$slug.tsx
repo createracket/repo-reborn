@@ -249,6 +249,15 @@ function PublicRosterPage() {
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="font-display text-xl">{it.name}</h3>
+                            {it.location && LOCATION_FLAG[it.location] && (
+                              <span
+                                className="text-lg leading-none"
+                                title={LOCATION_LABEL[it.location]}
+                                aria-label={LOCATION_LABEL[it.location]}
+                              >
+                                {LOCATION_FLAG[it.location]}
+                              </span>
+                            )}
                             {it.kind === "profile" ? (
                               <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
                                 <BadgeCheck className="size-3" /> Verified
