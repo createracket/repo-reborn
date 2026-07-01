@@ -17,7 +17,10 @@ import {
   Pencil,
   BadgeCheck,
   GripVertical,
+  RefreshCw,
 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { scrapeProfileFollowers } from "@/lib/campaign-scrapers.functions";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
 
@@ -1177,9 +1180,39 @@ function EditProspectPanel({
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [fetching, setFetching] = useState<string | null>(null);
+  const scrapeProfile = useServerFn(scrapeProfileFollowers);
 
   const upd = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  async function fetchFollowers(
+    platform: "instagram" | "tiktok" | "youtube",
+    urlKey: keyof typeof form,
+    followersKey: keyof typeof form,
+  ) {
+    const url = String(form[urlKey] || "").trim();
+    if (!url) {
+      toast.error(`Enter a ${platform} URL first`);
+      return;
+    }
+    setFetching(platform);
+    try {
+      const r = await scrapeProfile({ data: { url } });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      if (r.followers != null) {
+        upd(followersKey, String(r.followers) as never);
+        toast.success(`Fetched ${r.followers.toLocaleString()} followers`);
+      } else {
+        toast.error("No follower count returned");
+      }
+    } finally {
+      setFetching(null);
+    }
+  }
 
   function toNum(v: string): number | null {
     if (!v.trim()) return null;
@@ -1270,6 +1303,39 @@ function EditProspectPanel({
     </div>
   );
 
+  const urlFld = (
+    label: string,
+    key: keyof typeof form,
+    platform: "instagram" | "tiktok" | "youtube",
+    followersKey: keyof typeof form,
+    placeholder?: string,
+  ) => (
+    <div className="space-y-1">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </Label>
+      <div className="flex gap-1">
+        <Input
+          value={form[key]}
+          onChange={(e) => upd(key, e.target.value)}
+          placeholder={placeholder}
+          className="text-sm"
+        />
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => fetchFollowers(platform, key, followersKey)}
+          disabled={fetching === platform}
+          className="shrink-0"
+          title="Fetch followers"
+        >
+          <RefreshCw className={`size-3.5 ${fetching === platform ? "animate-spin" : ""}`} />
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="mt-4 space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
       <div className="space-y-1">
@@ -1301,11 +1367,11 @@ function EditProspectPanel({
         {fld("Photo URL (or use upload above)", "avatar_url", "https://…")}
         {fld("Metrics month", "metrics_month", "e.g. 2026-06", "month")}
         {fld("Budget (£)", "budget", "5000")}
-        {fld("Instagram URL", "instagram_url")}
+        {urlFld("Instagram URL", "instagram_url", "instagram", "instagram_followers")}
         {fld("IG followers", "instagram_followers", "12500")}
-        {fld("TikTok URL", "tiktok_url")}
+        {urlFld("TikTok URL", "tiktok_url", "tiktok", "tiktok_followers")}
         {fld("TT followers", "tiktok_followers")}
-        {fld("YouTube URL", "youtube_url")}
+        {urlFld("YouTube URL", "youtube_url", "youtube", "youtube_subscribers")}
         {fld("YT subscribers", "youtube_subscribers")}
         {fld("Spotify URL", "spotify_url")}
         {fld("Monthly listeners", "spotify_monthly_listens")}
@@ -1471,6 +1537,53 @@ function AddProspectCard({
   const update = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const [fetching, setFetching] = useState<string | null>(null);
+
+  async function fetchFollowers(
+    platform: "instagram" | "tiktok" | "youtube",
+    urlKey: keyof typeof form,
+    followersKey: keyof typeof form,
+  ) {
+    const url = String(form[urlKey] || "").trim();
+    if (!url) {
+      toast.error(`Enter a ${platform} URL first`);
+      return;
+    }
+    setFetching(platform);
+    try {
+      const r = await scrapeProfile({ data: { url } });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      if (r.followers != null) {
+        update(followersKey, String(r.followers) as never);
+        toast.success(`Fetched ${r.followers.toLocaleString()} followers`);
+      } else {
+        toast.error("No follower count returned");
+      }
+    } finally {
+      setFetching(null);
+    }
+  }
+
+  function FetchBtn({ platform, urlKey, followersKey }: { platform: "instagram" | "tiktok" | "youtube"; urlKey: keyof typeof form; followersKey: keyof typeof form; }) {
+    return (
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        onClick={() => fetchFollowers(platform, urlKey, followersKey)}
+        disabled={fetching === platform}
+        className="shrink-0"
+        title="Fetch followers"
+      >
+        <RefreshCw className={`size-3.5 ${fetching === platform ? "animate-spin" : ""}`} />
+      </Button>
+    );
+  }
+
   function toNum(v: string): number | null {
     if (!v.trim()) return null;
     const n = Number(v.replace(/[,\s]/g, ""));
@@ -1552,11 +1665,14 @@ function AddProspectCard({
             </Field>
             <div className="grid grid-cols-2 gap-2">
               <Field label="Instagram URL">
-                <Input
-                  value={form.instagram_url}
-                  onChange={(e) => update("instagram_url", e.target.value)}
-                  placeholder="https://instagram.com/…"
-                />
+                <div className="flex gap-1">
+                  <Input
+                    value={form.instagram_url}
+                    onChange={(e) => update("instagram_url", e.target.value)}
+                    placeholder="https://instagram.com/…"
+                  />
+                  <FetchBtn platform="instagram" urlKey="instagram_url" followersKey="instagram_followers" />
+                </div>
               </Field>
               <Field label="IG followers">
                 <Input
@@ -1567,11 +1683,14 @@ function AddProspectCard({
                 />
               </Field>
               <Field label="TikTok URL">
-                <Input
-                  value={form.tiktok_url}
-                  onChange={(e) => update("tiktok_url", e.target.value)}
-                  placeholder="https://tiktok.com/@…"
-                />
+                <div className="flex gap-1">
+                  <Input
+                    value={form.tiktok_url}
+                    onChange={(e) => update("tiktok_url", e.target.value)}
+                    placeholder="https://tiktok.com/@…"
+                  />
+                  <FetchBtn platform="tiktok" urlKey="tiktok_url" followersKey="tiktok_followers" />
+                </div>
               </Field>
               <Field label="TT followers">
                 <Input
@@ -1582,11 +1701,14 @@ function AddProspectCard({
                 />
               </Field>
               <Field label="YouTube URL">
-                <Input
-                  value={form.youtube_url}
-                  onChange={(e) => update("youtube_url", e.target.value)}
-                  placeholder="https://youtube.com/…"
-                />
+                <div className="flex gap-1">
+                  <Input
+                    value={form.youtube_url}
+                    onChange={(e) => update("youtube_url", e.target.value)}
+                    placeholder="https://youtube.com/…"
+                  />
+                  <FetchBtn platform="youtube" urlKey="youtube_url" followersKey="youtube_subscribers" />
+                </div>
               </Field>
               <Field label="YT subscribers">
                 <Input

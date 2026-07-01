@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -13,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 import { validateSlug, normalizeSlug } from "@/lib/slugs";
+import { scrapeProfileFollowers } from "@/lib/campaign-scrapers.functions";
 import { Check, Loader2, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -131,6 +133,56 @@ function EditProfilePage() {
   function setSocial(k: keyof ProfileSocials, v: string) {
     setForm((f) => ({ ...f, socials: { ...f.socials, [k]: v } }));
   }
+
+  const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const [fetching, setFetching] = useState<string | null>(null);
+  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number }>({});
+
+  async function fetchSocialFollowers(platform: "instagram" | "tiktok" | "youtube") {
+    const url = (form.socials[platform] || "").trim();
+    if (!url) {
+      toast.error(`Enter a ${platform} handle or URL first`);
+      return;
+    }
+    // Convert bare handles to a URL the scraper understands.
+    let full = url;
+    if (!/^https?:\/\//i.test(full)) {
+      const h = full.replace(/^@/, "");
+      if (platform === "instagram") full = `https://instagram.com/${h}`;
+      else if (platform === "tiktok") full = `https://tiktok.com/@${h}`;
+      else full = `https://youtube.com/@${h}`;
+    }
+    setFetching(platform);
+    try {
+      const r = await scrapeProfile({ data: { url: full } });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      if (r.followers != null) {
+        setFetchedCounts((c) => ({ ...c, [platform]: r.followers ?? 0 }));
+        toast.success(`${platform}: ${r.followers.toLocaleString()} followers`);
+      } else {
+        toast.error("No follower count returned");
+      }
+    } finally {
+      setFetching(null);
+    }
+  }
+
+  function applyTotalFromFetched() {
+    const total =
+      (fetchedCounts.instagram ?? 0) +
+      (fetchedCounts.tiktok ?? 0) +
+      (fetchedCounts.youtube ?? 0);
+    if (total <= 0) {
+      toast.error("Fetch at least one social first");
+      return;
+    }
+    set("total_followers", String(total));
+    toast.success(`Total followers set to ${total.toLocaleString()}`);
+  }
+
 
   function handleAvatarPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -388,16 +440,31 @@ function EditProfilePage() {
                 <Textarea id="bio" rows={4} value={form.bio} onChange={(e) => set("bio", e.target.value)} />
               </div>
 
-              <div className="md:col-span-2 pt-2">
+              <div className="md:col-span-2 pt-2 flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Socials</p>
+                <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
+                  Sum fetched → Total followers
+                </Button>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="ig">Instagram</Label>
-                <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
+                <div className="flex gap-1.5">
+                  <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
+                  <Button type="button" size="sm" variant="outline" onClick={() => fetchSocialFollowers("instagram")} disabled={fetching === "instagram"} title="Fetch followers">
+                    <RefreshCw className={`size-3.5 ${fetching === "instagram" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                {fetchedCounts.instagram != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()}</p> : null}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="tt">TikTok</Label>
-                <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
+                <div className="flex gap-1.5">
+                  <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
+                  <Button type="button" size="sm" variant="outline" onClick={() => fetchSocialFollowers("tiktok")} disabled={fetching === "tiktok"} title="Fetch followers">
+                    <RefreshCw className={`size-3.5 ${fetching === "tiktok" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                {fetchedCounts.tiktok != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()}</p> : null}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="sp">Spotify</Label>
@@ -405,12 +472,19 @@ function EditProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="yt">YouTube</Label>
-                <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} />
+                <div className="flex gap-1.5">
+                  <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
+                  <Button type="button" size="sm" variant="outline" onClick={() => fetchSocialFollowers("youtube")} disabled={fetching === "youtube"} title="Fetch subscribers">
+                    <RefreshCw className={`size-3.5 ${fetching === "youtube" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                {fetchedCounts.youtube != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()}</p> : null}
               </div>
               <div className="space-y-1.5 md:col-span-2">
                 <Label htmlFor="web">Website</Label>
                 <Input id="web" value={form.socials.website ?? ""} onChange={(e) => setSocial("website", e.target.value)} placeholder="https://…" />
               </div>
+
 
               <div className="md:col-span-2 pt-2">
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics</p>
