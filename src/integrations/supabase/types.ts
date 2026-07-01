@@ -125,13 +125,6 @@ export type Database = {
             referencedRelation: "campaign_reports"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "campaign_report_creators_report_id_fkey"
-            columns: ["report_id"]
-            isOneToOne: false
-            referencedRelation: "campaign_reports_assigned"
-            referencedColumns: ["id"]
-          },
         ]
       }
       campaign_report_posts: {
@@ -275,13 +268,6 @@ export type Database = {
             columns: ["source_roster_id"]
             isOneToOne: false
             referencedRelation: "rosters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "campaign_reports_source_roster_id_fkey"
-            columns: ["source_roster_id"]
-            isOneToOne: false
-            referencedRelation: "rosters_assigned"
             referencedColumns: ["id"]
           },
         ]
@@ -845,13 +831,6 @@ export type Database = {
             referencedRelation: "rosters"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "roster_items_roster_id_fkey"
-            columns: ["roster_id"]
-            isOneToOne: false
-            referencedRelation: "rosters_assigned"
-            referencedColumns: ["id"]
-          },
         ]
       }
       roster_members: {
@@ -900,13 +879,6 @@ export type Database = {
             columns: ["roster_id"]
             isOneToOne: false
             referencedRelation: "rosters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "roster_shares_roster_id_fkey"
-            columns: ["roster_id"]
-            isOneToOne: false
-            referencedRelation: "rosters_assigned"
             referencedColumns: ["id"]
           },
         ]
@@ -1100,45 +1072,6 @@ export type Database = {
       }
     }
     Views: {
-      campaign_reports_assigned: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          header_image_url: string | null
-          id: string | null
-          owner_id: string | null
-          published: boolean | null
-          published_at: string | null
-          slug: string | null
-          title: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          header_image_url?: string | null
-          id?: string | null
-          owner_id?: string | null
-          published?: boolean | null
-          published_at?: string | null
-          slug?: string | null
-          title?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          header_image_url?: string | null
-          id?: string | null
-          owner_id?: string | null
-          published?: boolean | null
-          published_at?: string | null
-          slug?: string | null
-          title?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       public_profiles: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"] | null
@@ -1202,45 +1135,6 @@ export type Database = {
         }
         Relationships: []
       }
-      rosters_assigned: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          header_image_url: string | null
-          id: string | null
-          owner_id: string | null
-          published: boolean | null
-          published_at: string | null
-          slug: string | null
-          title: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          header_image_url?: string | null
-          id?: string | null
-          owner_id?: string | null
-          published?: boolean | null
-          published_at?: string | null
-          slug?: string | null
-          title?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          header_image_url?: string | null
-          id?: string | null
-          owner_id?: string | null
-          published?: boolean | null
-          published_at?: string | null
-          slug?: string | null
-          title?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
     }
     Functions: {
       delete_email: {
@@ -1251,6 +1145,36 @@ export type Database = {
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
         Returns: number
+      }
+      get_assigned_campaign_reports: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          header_image_url: string
+          id: string
+          owner_id: string
+          published: boolean
+          published_at: string
+          slug: string
+          title: string
+          updated_at: string
+        }[]
+      }
+      get_assigned_rosters: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          header_image_url: string
+          id: string
+          owner_id: string
+          published: boolean
+          published_at: string
+          slug: string
+          title: string
+          updated_at: string
+        }[]
       }
       has_role: {
         Args: {
