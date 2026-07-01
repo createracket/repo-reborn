@@ -588,7 +588,36 @@ function ReportDetailView({
     await onChanged();
   }
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  async function reorderCreators(orderedIds: string[]) {
+    try {
+      await Promise.all(
+        orderedIds.map((id, i) =>
+          sb.from("campaign_report_creators").update({ position: i }).eq("id", id),
+        ),
+      );
+      await onChanged();
+    } catch (e) {
+      toast.error((e as Error).message ?? "Reorder failed");
+    }
+  }
+
+  function onCreatorDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = creators.findIndex((c) => c.id === active.id);
+    const newIndex = creators.findIndex((c) => c.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const next = arrayMove(creators, oldIndex, newIndex);
+    void reorderCreators(next.map((c) => c.id));
+  }
+
   const publicUrl = typeof window !== "undefined" ? `${window.location.origin}/report/${report.slug}` : `/report/${report.slug}`;
+
 
   return (
     <div className="space-y-6">
