@@ -25,7 +25,6 @@ type PublicItem = {
   kind: "profile" | "prospect";
   name: string;
   avatar_url: string | null;
-  vibe: string | null;
   instagram_url: string | null;
   instagram_followers: number | null;
   tiktok_url: string | null;
@@ -38,7 +37,6 @@ type PublicItem = {
   bio_page_url: string | null;
   position: number;
   status: string;
-  budget: number | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -67,9 +65,6 @@ function formatCount(n: number) {
   return String(n);
 }
 
-function formatBudget(n: number) {
-  return `£${n.toLocaleString()}`;
-}
 
 function PublicRosterPage() {
   const { slug } = Route.useParams();
@@ -96,7 +91,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status, budget",
+          "id, kind, name, avatar_url, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
@@ -143,7 +138,7 @@ function PublicRosterPage() {
       (it.spotify_monthly_listens ?? 0),
     0,
   );
-  const totalBudget = items.reduce((acc, it) => acc + (it.budget ?? 0), 0);
+  
 
   return (
     <div className="min-h-screen bg-background">
@@ -174,32 +169,18 @@ function PublicRosterPage() {
           </p>
         )}
 
-        {(totalFollowers > 0 || totalBudget > 0) && (
+        {totalFollowers > 0 && (
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            {totalFollowers > 0 && (
-              <Card>
-                <CardContent className="p-5">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    Total followers
-                  </p>
-                  <p className="mt-1 font-display text-2xl">
-                    {formatCount(totalFollowers)}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-            {totalBudget > 0 && (
-              <Card>
-                <CardContent className="p-5">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    Total budget
-                  </p>
-                  <p className="mt-1 font-display text-2xl">
-                    {formatBudget(totalBudget)}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+            <Card>
+              <CardContent className="p-5">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Total followers
+                </p>
+                <p className="mt-1 font-display text-2xl">
+                  {formatCount(totalFollowers)}
+                </p>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -259,19 +240,9 @@ function PublicRosterPage() {
                             >
                               {STATUS_LABEL[it.status] ?? "In Review"}
                             </Badge>
-                            {it.budget != null && it.budget > 0 && (
-                              <Badge
-                                variant="outline"
-                                className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
-                              >
-                                {formatBudget(it.budget)}
-                              </Badge>
-                            )}
                           </div>
                         </div>
-                        {it.vibe && (
-                          <p className="mt-2 text-sm text-foreground/80">{it.vibe}</p>
-                        )}
+
                         <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
                           {totalReach > 0 && (
                             <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
