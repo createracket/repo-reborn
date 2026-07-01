@@ -1537,6 +1537,53 @@ function AddProspectCard({
   const update = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const [fetching, setFetching] = useState<string | null>(null);
+
+  async function fetchFollowers(
+    platform: "instagram" | "tiktok" | "youtube",
+    urlKey: keyof typeof form,
+    followersKey: keyof typeof form,
+  ) {
+    const url = String(form[urlKey] || "").trim();
+    if (!url) {
+      toast.error(`Enter a ${platform} URL first`);
+      return;
+    }
+    setFetching(platform);
+    try {
+      const r = await scrapeProfile({ data: { url } });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      if (r.followers != null) {
+        update(followersKey, String(r.followers) as never);
+        toast.success(`Fetched ${r.followers.toLocaleString()} followers`);
+      } else {
+        toast.error("No follower count returned");
+      }
+    } finally {
+      setFetching(null);
+    }
+  }
+
+  function FetchBtn({ platform, urlKey, followersKey }: { platform: "instagram" | "tiktok" | "youtube"; urlKey: keyof typeof form; followersKey: keyof typeof form; }) {
+    return (
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        onClick={() => fetchFollowers(platform, urlKey, followersKey)}
+        disabled={fetching === platform}
+        className="shrink-0"
+        title="Fetch followers"
+      >
+        <RefreshCw className={`size-3.5 ${fetching === platform ? "animate-spin" : ""}`} />
+      </Button>
+    );
+  }
+
   function toNum(v: string): number | null {
     if (!v.trim()) return null;
     const n = Number(v.replace(/[,\s]/g, ""));
