@@ -49,6 +49,7 @@ type PublicPost = {
   hashtags: string[];
   brand_tag: string | null;
   position: number;
+  updated_at: string | null;
 };
 
 type PublicCreator = {
@@ -115,7 +116,7 @@ function PublicReportPage() {
       const ids = creatorRows.map((c) => c.id);
       const { data: pr } = await (supabase as any)
         .from("campaign_report_posts")
-        .select("*")
+        .select("*, updated_at")
         .in("creator_id", ids)
         .order("position", { ascending: true });
       const posts = ((pr as any[]) ?? []) as PublicPost[];
@@ -174,6 +175,15 @@ function PublicReportPage() {
   );
   const avgER = totals.erCount ? totals.erSum / totals.erCount : null;
   const totalEngagement = totals.likes + totals.comments + totals.shares + totals.saves;
+  const latestUpdate = (() => {
+    const dates: Date[] = [];
+    if (report.published_at) dates.push(new Date(report.published_at));
+    allPosts.forEach((p) => {
+      if (p.updated_at) dates.push(new Date(p.updated_at));
+    });
+    if (dates.length === 0) return null;
+    return new Date(Math.max(...dates.map((d) => d.getTime())));
+  })();
 
   return (
     <div className="min-h-screen bg-background">
@@ -199,6 +209,11 @@ function PublicReportPage() {
         {report.description && (
           <p className="mt-4 whitespace-pre-wrap text-lg text-muted-foreground">
             {report.description}
+          </p>
+        )}
+        {latestUpdate && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Last updated: {latestUpdate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
           </p>
         )}
 
