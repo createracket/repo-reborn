@@ -17,7 +17,10 @@ import {
   Pencil,
   BadgeCheck,
   GripVertical,
+  RefreshCw,
 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { scrapeProfileFollowers } from "@/lib/campaign-scrapers.functions";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
 
