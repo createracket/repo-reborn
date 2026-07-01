@@ -620,11 +620,60 @@ function ReportDetailView({
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label>Header image URL</Label>
+            <Label>Header image</Label>
+            <div className="flex flex-wrap items-start gap-3">
+              {header && (
+                <div
+                  className="overflow-hidden rounded-md border border-border/60 bg-muted/40"
+                  style={{ width: 160, aspectRatio: "16 / 9" }}
+                >
+                  <img
+                    src={header}
+                    alt="Header preview"
+                    className="size-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    id="header-upload"
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={handleHeaderUpload}
+                    disabled={uploadingHeader}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={uploadingHeader}
+                    onClick={() => document.getElementById("header-upload")?.click()}
+                  >
+                    <ImagePlus className="mr-2 size-4" />
+                    {uploadingHeader ? "Uploading…" : "Upload image"}
+                  </Button>
+                  {header && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setHeader("")}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Recommended 1200×675 (16:9). Images are resized to a max of 1080px on the longest side.
+                </p>
+              </div>
+            </div>
             <Input
               value={header}
               onChange={(e) => setHeader(e.target.value)}
-              placeholder="https://…"
+              placeholder="Or paste an image URL"
             />
           </div>
           <div className="space-y-2">
