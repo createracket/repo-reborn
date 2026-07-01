@@ -281,6 +281,32 @@ function TotalStat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function ExpandableCaption({ caption }: { caption: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const lines = caption.split("\n").filter(Boolean);
+  const needsTruncate = lines.length > 2 || caption.length > 140;
+  return (
+    <div>
+      <p className="text-xs uppercase tracking-wider text-muted-foreground">Caption</p>
+      <div
+        className={`mt-1 font-medium whitespace-pre-wrap transition-all ${
+          expanded ? "" : "line-clamp-2"
+        }`}
+      >
+        {caption}
+      </div>
+      {needsTruncate && (
+        <button
+          onClick={() => setExpanded((s) => !s)}
+          className="mt-1 text-xs font-semibold text-pink-accent hover:underline"
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator }) {
   const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
   const sentiment = post.sentiment_score;
