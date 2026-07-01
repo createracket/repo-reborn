@@ -221,7 +221,7 @@ function PublicReportPage() {
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <TotalStat label="Total views" value={formatCount(totals.views)} />
             <TotalStat label="Total engagement" value={formatCount(totalEngagement)} />
-            <TotalStat label="Avg ER" value={formatPct(avgER)} />
+            <TotalStat label="Total creators" value={String(creators.length)} />
             <TotalStat label="Live posts" value={String(allPosts.length)} />
           </div>
         )}
