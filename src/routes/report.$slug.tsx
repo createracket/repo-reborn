@@ -169,10 +169,13 @@ function PublicReportPage() {
       comments: acc.comments + (p.comments ?? 0),
       shares: acc.shares + (p.shares ?? 0),
       saves: acc.saves + (p.saves ?? 0),
+      followers: acc.followers + (p.followers ?? 0),
     }),
-    { views: 0, likes: 0, comments: 0, shares: 0, saves: 0 },
+    { views: 0, likes: 0, comments: 0, shares: 0, saves: 0, followers: 0 },
   );
   const totalEngagement = totals.likes + totals.comments + totals.shares + totals.saves;
+  const estEngagementPct =
+    totals.followers > 0 ? (totalEngagement / totals.followers) * 0.4 * 100 : null;
   const latestUpdate = (() => {
     const dates: Date[] = [];
     if (report.published_at) dates.push(new Date(report.published_at));
