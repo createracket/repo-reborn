@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone } from "lucide-react";
+import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -67,6 +67,7 @@ function DashboardPage() {
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -131,6 +132,16 @@ function DashboardPage() {
       setProfileRow((profile as any) ?? null);
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
       setOpportunities((opps as Opportunity[]) ?? []);
+
+      if (u.user.email) {
+        const emailLower = u.user.email.toLowerCase();
+        const { data: assigned } = await supabase
+          .from("rosters")
+          .select("id, title, slug, published, updated_at, client_email, brand_email")
+          .or(`client_email.eq.${emailLower},brand_email.eq.${emailLower}`)
+          .order("updated_at", { ascending: false });
+        setAssignedRosters(((assigned as any[]) ?? []) as any);
+      }
 
       const featuredMembers: CommunityMember[] = ((featuredRows ?? []) as any[]).map((p) => ({
         id: p.id,
@@ -255,6 +266,48 @@ function DashboardPage() {
               </Button>
             </CardContent>
           </Card>
+
+          {assignedRosters.length > 0 && (
+            <div className="lg:col-span-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-display text-2xl flex items-center gap-2">
+                    <ListChecks className="size-5 text-primary" /> Your campaign rosters
+                  </CardTitle>
+                  <CardDescription>
+                    Rosters we've built for your campaigns. Click through to review the creators we've shortlisted.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="grid gap-3 md:grid-cols-2">
+                    {assignedRosters.map((r) => (
+                      <li
+                        key={r.id}
+                        className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-medium">{r.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            Updated {new Date(r.updated_at).toLocaleDateString()}
+                            {!r.published && " · Draft"}
+                          </div>
+                        </div>
+                        {r.published && r.slug ? (
+                          <Button asChild size="sm" variant="outline">
+                            <a href={`/roster/${r.slug}`} target="_blank" rel="noreferrer">
+                              View <ArrowRight className="ml-1 size-3" />
+                            </a>
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Not yet published</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* NEW OPPORTUNITIES (full width) */}
           <div className="lg:col-span-3">

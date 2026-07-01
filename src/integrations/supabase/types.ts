@@ -555,6 +555,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio_page_url: string | null
+          budget: number | null
           created_at: string
           example_video_url: string | null
           id: string
@@ -578,6 +579,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio_page_url?: string | null
+          budget?: number | null
           created_at?: string
           example_video_url?: string | null
           id?: string
@@ -601,6 +603,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio_page_url?: string | null
+          budget?: number | null
           created_at?: string
           example_video_url?: string | null
           id?: string
@@ -690,9 +693,13 @@ export type Database = {
       }
       rosters: {
         Row: {
+          brand_email: string | null
           brief_id: string | null
+          client_email: string | null
           created_at: string
           description: string | null
+          header_image_url: string | null
+          hide_prospect_tags: boolean
           id: string
           owner_id: string
           published: boolean
@@ -702,9 +709,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand_email?: string | null
           brief_id?: string | null
+          client_email?: string | null
           created_at?: string
           description?: string | null
+          header_image_url?: string | null
+          hide_prospect_tags?: boolean
           id?: string
           owner_id: string
           published?: boolean
@@ -714,9 +725,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand_email?: string | null
           brief_id?: string | null
+          client_email?: string | null
           created_at?: string
           description?: string | null
+          header_image_url?: string | null
+          hide_prospect_tags?: boolean
           id?: string
           owner_id?: string
           published?: boolean

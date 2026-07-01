@@ -16,6 +16,7 @@ import {
   Check,
   Pencil,
   BadgeCheck,
+  GripVertical,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
@@ -65,6 +66,10 @@ type Roster = {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  hide_prospect_tags: boolean;
+  header_image_url: string | null;
+  client_email: string | null;
+  brand_email: string | null;
 };
 
 type Brief = {
@@ -97,6 +102,7 @@ type RosterItem = {
   bio_page_url: string | null;
   position: number;
   status: string;
+  budget: number | null;
 };
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
@@ -535,12 +541,34 @@ function RosterDetailView({
 }) {
   const [title, setTitle] = useState(roster.title);
   const [description, setDescription] = useState(roster.description ?? "");
+  const [headerImageUrl, setHeaderImageUrl] = useState(roster.header_image_url ?? "");
+  const [clientEmail, setClientEmail] = useState(roster.client_email ?? "");
+  const [brandEmail, setBrandEmail] = useState(roster.brand_email ?? "");
   const [savingMeta, setSavingMeta] = useState(false);
+  const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
 
   useEffect(() => {
     setTitle(roster.title);
     setDescription(roster.description ?? "");
-  }, [roster.id, roster.title, roster.description]);
+    setHeaderImageUrl(roster.header_image_url ?? "");
+    setClientEmail(roster.client_email ?? "");
+    setBrandEmail(roster.brand_email ?? "");
+  }, [roster.id, roster.title, roster.description, roster.header_image_url, roster.client_email, roster.brand_email]);
+
+  useEffect(() => {
+    setOrderedItems(items);
+  }, [items]);
+
+  const totalFollowers = orderedItems.reduce(
+    (a, it) =>
+      a +
+      (it.instagram_followers ?? 0) +
+      (it.tiktok_followers ?? 0) +
+      (it.youtube_subscribers ?? 0) +
+      (it.spotify_monthly_listens ?? 0),
+    0,
+  );
+  const totalBudget = orderedItems.reduce((a, it) => a + (it.budget ?? 0), 0);
 
   const linkedBrief = roster.brief_id ? briefs.find((b) => b.id === roster.brief_id) ?? null : null;
 
@@ -548,7 +576,13 @@ function RosterDetailView({
     setSavingMeta(true);
     const { error } = await supabase
       .from("rosters")
-      .update({ title: title.trim(), description: description.trim() || null })
+      .update({
+        title: title.trim(),
+        description: description.trim() || null,
+        header_image_url: headerImageUrl.trim() || null,
+        client_email: clientEmail.trim().toLowerCase() || null,
+        brand_email: brandEmail.trim().toLowerCase() || null,
+      } as never)
       .eq("id", roster.id);
     setSavingMeta(false);
     if (error) {
@@ -557,6 +591,34 @@ function RosterDetailView({
     }
     toast.success("Saved");
     onChanged();
+  }
+
+  async function toggleHideProspects(hide: boolean) {
+    const { error } = await supabase
+      .from("rosters")
+      .update({ hide_prospect_tags: hide } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
+  async function persistOrder(next: RosterItem[]) {
+    setOrderedItems(next);
+    const updates = next.map((it, idx) =>
+      supabase
+        .from("roster_items")
+        .update({ position: idx } as never)
+        .eq("id", it.id),
+    );
+    const results = await Promise.all(updates);
+    const err = results.find((r) => r.error);
+    if (err?.error) {
+      toast.error(err.error.message);
+      onChanged();
+    }
   }
 
   async function setLinkedBrief(briefId: string | null) {
@@ -645,7 +707,7 @@ function RosterDetailView({
         <Card>
           <CardHeader>
             <CardTitle className="font-display text-xl">Roster details</CardTitle>
-            <CardDescription>Internal title + notes for this roster.</CardDescription>
+            <CardDescription>Title, notes, header image, and assigned client/brand.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-2">
@@ -659,6 +721,57 @@ function RosterDetailView({
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 maxLength={2000}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Header image URL</Label>
+              <Input
+                value={headerImageUrl}
+                onChange={(e) => setHeaderImageUrl(e.target.value)}
+                placeholder="https://…"
+              />
+              {headerImageUrl && (
+                <div
+                  className="mt-2 overflow-hidden rounded-lg border border-border/60"
+                  style={{ aspectRatio: "16 / 9" }}
+                >
+                  <img src={headerImageUrl} alt="" className="size-full object-cover" />
+                </div>
+              )}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Client email</Label>
+                <Input
+                  type="email"
+                  value={clientEmail}
+                  onChange={(e) => setClientEmail(e.target.value)}
+                  placeholder="client@example.com"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Brand email</Label>
+                <Input
+                  type="email"
+                  value={brandEmail}
+                  onChange={(e) => setBrandEmail(e.target.value)}
+                  placeholder="brand@example.com"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Assigned client/brand emails will see this roster on their dashboard once they sign in with that email.
+            </p>
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Hide prospect tags</div>
+                <div className="text-xs text-muted-foreground">
+                  Hides the "Prospect" badge on the public roster page.
+                </div>
+              </div>
+              <Switch
+                checked={roster.hide_prospect_tags}
+                onCheckedChange={toggleHideProspects}
               />
             </div>
             <div className="flex justify-end">
@@ -676,23 +789,26 @@ function RosterDetailView({
             <div className="flex items-center justify-between gap-3">
               <div>
                 <CardTitle className="font-display text-xl">
-                  Roster ({items.length})
+                  Roster ({orderedItems.length})
                 </CardTitle>
-                <CardDescription>Creators and prospective partners in this campaign.</CardDescription>
+                <CardDescription>
+                  Drag to reorder. Combined reach {formatCount(totalFollowers)}
+                  {totalBudget > 0 ? ` · Total budget £${totalBudget.toLocaleString()}` : ""}.
+                </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            {items.length === 0 ? (
+            {orderedItems.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Roster is empty. Add a community profile or a prospective creator from the right.
               </p>
             ) : (
-              <ul className="space-y-3">
-                {items.map((it) => (
-                  <RosterItemRow key={it.id} item={it} onRemove={() => removeItem(it.id)} />
-                ))}
-              </ul>
+              <DraggableRosterList
+                items={orderedItems}
+                onReorder={persistOrder}
+                onRemove={removeItem}
+              />
             )}
           </CardContent>
         </Card>
@@ -717,6 +833,68 @@ function RosterDetailView({
         />
       </div>
     </div>
+  );
+}
+
+function DraggableRosterList({
+  items,
+  onReorder,
+  onRemove,
+}: {
+  items: RosterItem[];
+  onReorder: (next: RosterItem[]) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+
+  function onDrop(targetId: string) {
+    if (!dragId || dragId === targetId) {
+      setDragId(null);
+      setOverId(null);
+      return;
+    }
+    const from = items.findIndex((i) => i.id === dragId);
+    const to = items.findIndex((i) => i.id === targetId);
+    if (from < 0 || to < 0) return;
+    const next = items.slice();
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setDragId(null);
+    setOverId(null);
+    onReorder(next);
+  }
+
+  return (
+    <ul className="space-y-3">
+      {items.map((it) => (
+        <li
+          key={it.id}
+          draggable
+          onDragStart={() => setDragId(it.id)}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setOverId(it.id);
+          }}
+          onDragLeave={() => setOverId((v) => (v === it.id ? null : v))}
+          onDrop={(e) => {
+            e.preventDefault();
+            onDrop(it.id);
+          }}
+          onDragEnd={() => {
+            setDragId(null);
+            setOverId(null);
+          }}
+          className={
+            overId === it.id && dragId !== it.id
+              ? "rounded-xl outline outline-2 outline-primary/50"
+              : ""
+          }
+        >
+          <RosterItemRow item={it} onRemove={() => onRemove(it.id)} />
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -764,8 +942,16 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
     .join("")
     .toUpperCase();
   return (
-    <li className="rounded-xl border border-border/60 bg-card p-4">
+    <div className="rounded-xl border border-border/60 bg-card p-4">
       <div className="flex items-start gap-3">
+        <button
+          type="button"
+          className="mt-1 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+          title="Drag to reorder"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="size-4" />
+        </button>
         <div className="size-14 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
           {item.avatar_url ? (
             <img src={item.avatar_url} alt="" className="size-full object-cover" />
@@ -881,12 +1067,20 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               ))}
             </SelectContent>
           </Select>
+          {item.budget != null && item.budget > 0 && (
+            <Badge
+              variant="outline"
+              className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
+            >
+              £{item.budget.toLocaleString()}
+            </Badge>
+          )}
           <div className="flex gap-1">
             <Button
               size="icon"
               variant="ghost"
               onClick={() => setEditing((v) => !v)}
-              title="Edit metrics & photo"
+              title="Edit metrics, budget & photo"
             >
               <Pencil className="size-4" />
             </Button>
@@ -896,7 +1090,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
           </div>
         </div>
       </div>
-    </li>
+    </div>
   );
 }
 
@@ -920,6 +1114,7 @@ function EditProspectPanel({
     spotify_monthly_listens: item.spotify_monthly_listens?.toString() ?? "",
     example_video_url: item.example_video_url ?? "",
     bio_page_url: item.bio_page_url ?? "",
+    budget: item.budget?.toString() ?? "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -950,6 +1145,7 @@ function EditProspectPanel({
         spotify_monthly_listens: toNum(form.spotify_monthly_listens),
         example_video_url: form.example_video_url.trim() || null,
         bio_page_url: form.bio_page_url.trim() || null,
+        budget: toNum(form.budget),
       } as never)
       .eq("id", item.id);
     setSaving(false);
@@ -994,6 +1190,7 @@ function EditProspectPanel({
         {fld("Monthly listeners", "spotify_monthly_listens")}
         {fld("Example video URL", "example_video_url")}
         {fld("Bio page URL", "bio_page_url")}
+        {fld("Budget (£)", "budget", "5000")}
       </div>
       <div className="flex justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={onClose}>
