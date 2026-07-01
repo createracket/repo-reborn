@@ -836,6 +836,68 @@ function RosterDetailView({
   );
 }
 
+function DraggableRosterList({
+  items,
+  onReorder,
+  onRemove,
+}: {
+  items: RosterItem[];
+  onReorder: (next: RosterItem[]) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+
+  function onDrop(targetId: string) {
+    if (!dragId || dragId === targetId) {
+      setDragId(null);
+      setOverId(null);
+      return;
+    }
+    const from = items.findIndex((i) => i.id === dragId);
+    const to = items.findIndex((i) => i.id === targetId);
+    if (from < 0 || to < 0) return;
+    const next = items.slice();
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setDragId(null);
+    setOverId(null);
+    onReorder(next);
+  }
+
+  return (
+    <ul className="space-y-3">
+      {items.map((it) => (
+        <li
+          key={it.id}
+          draggable
+          onDragStart={() => setDragId(it.id)}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setOverId(it.id);
+          }}
+          onDragLeave={() => setOverId((v) => (v === it.id ? null : v))}
+          onDrop={(e) => {
+            e.preventDefault();
+            onDrop(it.id);
+          }}
+          onDragEnd={() => {
+            setDragId(null);
+            setOverId(null);
+          }}
+          className={
+            overId === it.id && dragId !== it.id
+              ? "rounded-xl outline outline-2 outline-primary/50"
+              : ""
+          }
+        >
+          <RosterItemRow item={it} onRemove={() => onRemove(it.id)} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => void }) {
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
@@ -880,8 +942,16 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
     .join("")
     .toUpperCase();
   return (
-    <li className="rounded-xl border border-border/60 bg-card p-4">
+    <div className="rounded-xl border border-border/60 bg-card p-4">
       <div className="flex items-start gap-3">
+        <button
+          type="button"
+          className="mt-1 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+          title="Drag to reorder"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="size-4" />
+        </button>
         <div className="size-14 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
           {item.avatar_url ? (
             <img src={item.avatar_url} alt="" className="size-full object-cover" />
@@ -997,12 +1067,20 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               ))}
             </SelectContent>
           </Select>
+          {item.budget != null && item.budget > 0 && (
+            <Badge
+              variant="outline"
+              className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
+            >
+              £{item.budget.toLocaleString()}
+            </Badge>
+          )}
           <div className="flex gap-1">
             <Button
               size="icon"
               variant="ghost"
               onClick={() => setEditing((v) => !v)}
-              title="Edit metrics & photo"
+              title="Edit metrics, budget & photo"
             >
               <Pencil className="size-4" />
             </Button>
@@ -1012,7 +1090,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
           </div>
         </div>
       </div>
-    </li>
+    </div>
   );
 }
 
