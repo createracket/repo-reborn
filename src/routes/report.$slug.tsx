@@ -419,6 +419,44 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
   );
 }
 
+function PlatformBadge({
+  platform,
+  postUrl,
+}: {
+  platform: Platform;
+  postUrl: string | null;
+}) {
+  const Icon = PLATFORM_ICON[platform] ?? Instagram;
+  const label = PLATFORM_LABEL[platform];
+  const badgeClasses: Record<Platform, string> = {
+    instagram:
+      "border-purple/30 bg-purple/15 text-purple",
+    tiktok:
+      "border-pink-accent/30 bg-pink-accent/15 text-pink-accent",
+    youtube:
+      "border-destructive/30 bg-destructive/15 text-destructive",
+  };
+  const classes = `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${badgeClasses[platform]}`;
+  return postUrl ? (
+    <a
+      href={postUrl}
+      target="_blank"
+      rel="noreferrer noopener"
+      className={classes}
+      title={label}
+    >
+      <Icon className="size-4" />
+      {label}
+      <ExternalLink className="size-3 opacity-70" />
+    </a>
+  ) : (
+    <span className={classes}>
+      <Icon className="size-4" />
+      {label}
+    </span>
+  );
+}
+
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
