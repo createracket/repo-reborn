@@ -189,10 +189,6 @@ function PublicRosterPage() {
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <Card>
               <CardContent className="p-5">
-        {totalFollowers > 0 && (
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <Card>
-              <CardContent className="p-5">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">
                   Total followers
                 </p>
