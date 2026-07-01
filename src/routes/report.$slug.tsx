@@ -430,7 +430,7 @@ function PlatformBadge({
   const label = PLATFORM_LABEL[platform];
   const badgeClasses: Record<Platform, string> = {
     instagram:
-      "border-purple/30 bg-purple/15 text-purple",
+      "border-primary/30 bg-primary/15 text-primary",
     tiktok:
       "border-pink-accent/30 bg-pink-accent/15 text-pink-accent",
     youtube:
