@@ -1190,6 +1190,7 @@ function EditProspectPanel({
         {fld("Monthly listeners", "spotify_monthly_listens")}
         {fld("Example video URL", "example_video_url")}
         {fld("Bio page URL", "bio_page_url")}
+        {fld("Budget (£)", "budget", "5000")}
       </div>
       <div className="flex justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={onClose}>
