@@ -1092,7 +1092,30 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               ))}
             </SelectContent>
           </Select>
-          {item.budget != null && item.budget > 0 && (
+          <Select
+            value={item.category ?? "none"}
+            onValueChange={async (v) => {
+              const next = v === "none" ? null : v;
+              const { error } = await supabase
+                .from("roster_items")
+                .update({ category: next } as never)
+                .eq("id", item.id);
+              if (error) toast.error(error.message);
+            }}
+          >
+            <SelectTrigger className="h-8 w-[150px] text-xs">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none" className="text-xs">No category</SelectItem>
+              {CATEGORY_OPTIONS.map((c) => (
+                <SelectItem key={c.value} value={c.value} className="text-xs">
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
             <Badge
               variant="outline"
               className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
