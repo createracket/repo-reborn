@@ -134,6 +134,56 @@ function EditProfilePage() {
     setForm((f) => ({ ...f, socials: { ...f.socials, [k]: v } }));
   }
 
+  const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const [fetching, setFetching] = useState<string | null>(null);
+  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number }>({});
+
+  async function fetchSocialFollowers(platform: "instagram" | "tiktok" | "youtube") {
+    const url = (form.socials[platform] || "").trim();
+    if (!url) {
+      toast.error(`Enter a ${platform} handle or URL first`);
+      return;
+    }
+    // Convert bare handles to a URL the scraper understands.
+    let full = url;
+    if (!/^https?:\/\//i.test(full)) {
+      const h = full.replace(/^@/, "");
+      if (platform === "instagram") full = `https://instagram.com/${h}`;
+      else if (platform === "tiktok") full = `https://tiktok.com/@${h}`;
+      else full = `https://youtube.com/@${h}`;
+    }
+    setFetching(platform);
+    try {
+      const r = await scrapeProfile({ data: { url: full } });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      if (r.followers != null) {
+        setFetchedCounts((c) => ({ ...c, [platform]: r.followers ?? 0 }));
+        toast.success(`${platform}: ${r.followers.toLocaleString()} followers`);
+      } else {
+        toast.error("No follower count returned");
+      }
+    } finally {
+      setFetching(null);
+    }
+  }
+
+  function applyTotalFromFetched() {
+    const total =
+      (fetchedCounts.instagram ?? 0) +
+      (fetchedCounts.tiktok ?? 0) +
+      (fetchedCounts.youtube ?? 0);
+    if (total <= 0) {
+      toast.error("Fetch at least one social first");
+      return;
+    }
+    set("total_followers", String(total));
+    toast.success(`Total followers set to ${total.toLocaleString()}`);
+  }
+
+
   function handleAvatarPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
