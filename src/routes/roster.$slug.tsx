@@ -103,7 +103,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status, category",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
