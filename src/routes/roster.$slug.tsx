@@ -141,7 +141,7 @@ function PublicRosterPage() {
       (it.spotify_monthly_listens ?? 0),
     0,
   );
-  const totalBudget = items.reduce((acc, it) => acc + (it.budget ?? 0), 0);
+  
 
   return (
     <div className="min-h-screen bg-background">
