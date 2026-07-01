@@ -211,6 +211,11 @@ function PublicReportPage() {
             {report.description}
           </p>
         )}
+        {latestUpdate && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Last updated: {latestUpdate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+          </p>
+        )}
 
         {allPosts.length > 0 && (
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
