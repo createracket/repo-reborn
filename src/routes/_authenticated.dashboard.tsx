@@ -267,6 +267,48 @@ function DashboardPage() {
             </CardContent>
           </Card>
 
+          {assignedRosters.length > 0 && (
+            <div className="lg:col-span-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-display text-2xl flex items-center gap-2">
+                    <ListChecks className="size-5 text-primary" /> Your campaign rosters
+                  </CardTitle>
+                  <CardDescription>
+                    Rosters we've built for your campaigns. Click through to review the creators we've shortlisted.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="grid gap-3 md:grid-cols-2">
+                    {assignedRosters.map((r) => (
+                      <li
+                        key={r.id}
+                        className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-medium">{r.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            Updated {new Date(r.updated_at).toLocaleDateString()}
+                            {!r.published && " · Draft"}
+                          </div>
+                        </div>
+                        {r.published && r.slug ? (
+                          <Button asChild size="sm" variant="outline">
+                            <a href={`/roster/${r.slug}`} target="_blank" rel="noreferrer">
+                              View <ArrowRight className="ml-1 size-3" />
+                            </a>
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Not yet published</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* NEW OPPORTUNITIES (full width) */}
           <div className="lg:col-span-3">
             <Card>
