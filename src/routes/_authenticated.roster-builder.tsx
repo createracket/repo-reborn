@@ -106,7 +106,7 @@ type RosterItem = {
   position: number;
   status: string;
   budget: number | null;
-  category: "musician" | "ugc" | "egc" | "music_fan" | null;
+  category: "musician" | "ugc" | "egc" | "music_fan" | "editorial" | null;
   metrics_month: string | null;
 };
 
