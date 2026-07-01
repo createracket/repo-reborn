@@ -1367,11 +1367,11 @@ function EditProspectPanel({
         {fld("Photo URL (or use upload above)", "avatar_url", "https://…")}
         {fld("Metrics month", "metrics_month", "e.g. 2026-06", "month")}
         {fld("Budget (£)", "budget", "5000")}
-        {fld("Instagram URL", "instagram_url")}
+        {urlFld("Instagram URL", "instagram_url", "instagram", "instagram_followers")}
         {fld("IG followers", "instagram_followers", "12500")}
-        {fld("TikTok URL", "tiktok_url")}
+        {urlFld("TikTok URL", "tiktok_url", "tiktok", "tiktok_followers")}
         {fld("TT followers", "tiktok_followers")}
-        {fld("YouTube URL", "youtube_url")}
+        {urlFld("YouTube URL", "youtube_url", "youtube", "youtube_subscribers")}
         {fld("YT subscribers", "youtube_subscribers")}
         {fld("Spotify URL", "spotify_url")}
         {fld("Monthly listeners", "spotify_monthly_listens")}
