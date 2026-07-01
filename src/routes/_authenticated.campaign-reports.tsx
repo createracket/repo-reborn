@@ -525,6 +525,32 @@ function ReportDetailView({
     await onChanged();
   }
 
+  async function handleHeaderUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingHeader(true);
+    try {
+      const resized = await resizeImageFile(file, 1080);
+      const path = `report-headers/${report.id}/${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("spotlight-images")
+        .upload(path, resized, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: resized.type,
+        });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+      setHeader(urlData.publicUrl);
+      toast.success("Header uploaded");
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setUploadingHeader(false);
+      e.target.value = "";
+    }
+  }
+
   async function togglePublished(next: boolean) {
     const { error } = await sb
       .from("campaign_reports")
