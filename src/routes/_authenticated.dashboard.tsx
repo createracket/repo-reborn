@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone } from "lucide-react";
+import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -67,6 +67,7 @@ function DashboardPage() {
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [loading, setLoading] = useState(true);
 
 
