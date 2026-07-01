@@ -49,6 +49,7 @@ type PublicPost = {
   hashtags: string[];
   brand_tag: string | null;
   position: number;
+  updated_at: string | null;
 };
 
 type PublicCreator = {
