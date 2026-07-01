@@ -103,6 +103,8 @@ type RosterItem = {
   position: number;
   status: string;
   budget: number | null;
+  category: "musician" | "ugc" | "egc" | "music_fan" | null;
+  metrics_month: string | null;
 };
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
