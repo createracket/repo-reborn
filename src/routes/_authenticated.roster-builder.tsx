@@ -1665,11 +1665,14 @@ function AddProspectCard({
             </Field>
             <div className="grid grid-cols-2 gap-2">
               <Field label="Instagram URL">
-                <Input
-                  value={form.instagram_url}
-                  onChange={(e) => update("instagram_url", e.target.value)}
-                  placeholder="https://instagram.com/…"
-                />
+                <div className="flex gap-1">
+                  <Input
+                    value={form.instagram_url}
+                    onChange={(e) => update("instagram_url", e.target.value)}
+                    placeholder="https://instagram.com/…"
+                  />
+                  <FetchBtn platform="instagram" urlKey="instagram_url" followersKey="instagram_followers" />
+                </div>
               </Field>
               <Field label="IG followers">
                 <Input
