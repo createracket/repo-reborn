@@ -108,7 +108,16 @@ type RosterItem = {
   budget: number | null;
   category: "musician" | "ugc" | "egc" | "music_fan" | "editorial" | null;
   metrics_month: string | null;
+  location: "GB" | "US" | "NZ" | "AU" | null;
 };
+
+const LOCATION_CYCLE: Array<"GB" | "US" | "NZ" | "AU" | null> = [null, "GB", "US", "NZ", "AU"];
+const LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺" };
+const LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia" };
+function nextLocation(current: "GB" | "US" | "NZ" | "AU" | null) {
+  const idx = LOCATION_CYCLE.indexOf(current);
+  return LOCATION_CYCLE[(idx + 1) % LOCATION_CYCLE.length];
+}
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "in_review", label: "In Review" },
