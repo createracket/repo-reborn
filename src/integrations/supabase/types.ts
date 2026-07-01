@@ -1146,6 +1146,36 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_assigned_campaign_reports: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          header_image_url: string
+          id: string
+          owner_id: string
+          published: boolean
+          published_at: string
+          slug: string
+          title: string
+          updated_at: string
+        }[]
+      }
+      get_assigned_rosters: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          header_image_url: string
+          id: string
+          owner_id: string
+          published: boolean
+          published_at: string
+          slug: string
+          title: string
+          updated_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
