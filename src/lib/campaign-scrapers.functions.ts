@@ -125,9 +125,16 @@ async function scrapeInstagram(url: string): Promise<ScrapeResult> {
       displayUrl?: string;
       timestamp?: string;
       hashtags?: string[];
+      ownerFollowersCount?: number;
+      owner?: { followersCount?: number; edge_followed_by?: { count?: number } };
     }>;
     const p = results[0];
     if (!p) return { ok: false, error: "No Instagram post returned." };
+    const followers =
+      p.ownerFollowersCount ??
+      p.owner?.followersCount ??
+      p.owner?.edge_followed_by?.count ??
+      null;
     return {
       ok: true,
       platform: "instagram",
@@ -135,6 +142,7 @@ async function scrapeInstagram(url: string): Promise<ScrapeResult> {
         views: p.videoPlayCount ?? p.videoViewCount ?? null,
         likes: p.likesCount ?? null,
         comments: p.commentsCount ?? null,
+        followers,
         caption: p.caption ?? null,
         thumbnail_url: p.displayUrl ?? null,
         posted_at: p.timestamp ?? null,
@@ -145,6 +153,31 @@ async function scrapeInstagram(url: string): Promise<ScrapeResult> {
     return { ok: false, error: (e as Error).message };
   }
 }
+
+async function scrapeTikTok(url: string): Promise<ScrapeResult> {
+  const token = process.env.APIFY_API_TOKEN;
+  if (!token)
+    return {
+      ok: false,
+      error: "APIFY_API_TOKEN not configured. Add it to enable TikTok auto-fetch.",
+    };
+  try {
+    const results = (await runApifyActor(
+      "clockworks~free-tiktok-scraper",
+      { postURLs: [url], resultsPerPage: 1, shouldDownloadVideos: false },
+      token,
+    )) as Array<{
+      playCount?: number;
+      diggCount?: number;
+      commentCount?: number;
+      shareCount?: number;
+      collectCount?: number;
+      text?: string;
+      videoMeta?: { coverUrl?: string };
+      createTimeISO?: string;
+      hashtags?: Array<{ name?: string }>;
+      authorMeta?: { fans?: number };
+    }>;
 
 async function scrapeTikTok(url: string): Promise<ScrapeResult> {
   const token = process.env.APIFY_API_TOKEN;
