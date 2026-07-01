@@ -28,6 +28,7 @@ import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as USlugRouteImport } from './routes/u.$slug'
 import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
 import { Route as RosterSlugRouteImport } from './routes/roster.$slug'
+import { Route as ReportSlugRouteImport } from './routes/report.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
 import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authenticated.roster-builder'
@@ -138,6 +139,11 @@ const RosterSlugRoute = RosterSlugRouteImport.update({
   path: '/roster/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReportSlugRoute = ReportSlugRouteImport.update({
+  id: '/report/$slug',
+  path: '/report/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
@@ -237,6 +243,7 @@ export interface FileRoutesByFullPath {
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/report/$slug': typeof ReportSlugRoute
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
@@ -272,6 +279,7 @@ export interface FileRoutesByTo {
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/report/$slug': typeof ReportSlugRoute
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
@@ -309,6 +317,7 @@ export interface FileRoutesById {
   '/_authenticated/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/report/$slug': typeof ReportSlugRoute
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
@@ -346,6 +355,7 @@ export interface FileRouteTypes {
     | '/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
+    | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
     | '/u/$slug'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
+    | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
     | '/u/$slug'
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | '/_authenticated/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
+    | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
     | '/u/$slug'
@@ -450,6 +462,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   BrandsHowItWorksRoute: typeof BrandsHowItWorksRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  ReportSlugRoute: typeof ReportSlugRoute
   RosterSlugRoute: typeof RosterSlugRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
   USlugRoute: typeof USlugRoute
@@ -602,6 +615,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RosterSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/report/$slug': {
+      id: '/report/$slug'
+      path: '/report/$slug'
+      fullPath: '/report/$slug'
+      preLoaderRoute: typeof ReportSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
       path: '/email/unsubscribe'
@@ -744,6 +764,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   BrandsHowItWorksRoute: BrandsHowItWorksRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  ReportSlugRoute: ReportSlugRoute,
   RosterSlugRoute: RosterSlugRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
   USlugRoute: USlugRoute,
