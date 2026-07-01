@@ -115,7 +115,7 @@ function PublicReportPage() {
       const ids = creatorRows.map((c) => c.id);
       const { data: pr } = await (supabase as any)
         .from("campaign_report_posts")
-        .select("*")
+        .select("*, updated_at")
         .in("creator_id", ids)
         .order("position", { ascending: true });
       const posts = ((pr as any[]) ?? []) as PublicPost[];
