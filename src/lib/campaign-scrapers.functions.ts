@@ -38,6 +38,7 @@ async function scrapeYouTube(url: string): Promise<ScrapeResult> {
         title?: string;
         description?: string;
         publishedAt?: string;
+        channelId?: string;
         thumbnails?: { high?: { url?: string }; maxres?: { url?: string } };
         tags?: string[];
       };
@@ -52,6 +53,26 @@ async function scrapeYouTube(url: string): Promise<ScrapeResult> {
   if (!item) return { ok: false, error: "Video not found or is private." };
   const s = item.statistics ?? {};
   const sn = item.snippet ?? {};
+
+  // Fetch channel subscriber count for follower estimate
+  let followers: number | null = null;
+  if (sn.channelId) {
+    try {
+      const chRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${sn.channelId}&key=${key}`,
+      );
+      if (chRes.ok) {
+        const chJson = (await chRes.json()) as {
+          items?: Array<{ statistics?: { subscriberCount?: string } }>;
+        };
+        const sc = chJson.items?.[0]?.statistics?.subscriberCount;
+        if (sc) followers = Number(sc);
+      }
+    } catch {
+      // ignore; leave followers null
+    }
+  }
+
   return {
     ok: true,
     platform: "youtube",
@@ -59,6 +80,7 @@ async function scrapeYouTube(url: string): Promise<ScrapeResult> {
       views: s.viewCount ? Number(s.viewCount) : null,
       likes: s.likeCount ? Number(s.likeCount) : null,
       comments: s.commentCount ? Number(s.commentCount) : null,
+      followers,
       caption: sn.description ?? sn.title ?? null,
       thumbnail_url: sn.thumbnails?.maxres?.url ?? sn.thumbnails?.high?.url ?? null,
       posted_at: sn.publishedAt ?? null,
