@@ -1101,8 +1101,17 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
   }
 
   return (
-    <div className="rounded-lg border border-border/60 bg-background/40 p-4 space-y-3">
+    <div ref={setNodeRef} style={dragStyle} className="rounded-lg border border-border/60 bg-background/40 p-4 space-y-3">
       <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          className="cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+          aria-label="Drag to reorder post"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="size-4" />
+        </button>
         <Select value={form.platform} onValueChange={(v) => set("platform", v as Post["platform"])}>
           <SelectTrigger className="w-[140px]">
             <SelectValue />
