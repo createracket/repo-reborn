@@ -25,7 +25,6 @@ type PublicItem = {
   kind: "profile" | "prospect";
   name: string;
   avatar_url: string | null;
-  vibe: string | null;
   instagram_url: string | null;
   instagram_followers: number | null;
   tiktok_url: string | null;
@@ -38,7 +37,6 @@ type PublicItem = {
   bio_page_url: string | null;
   position: number;
   status: string;
-  budget: number | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
