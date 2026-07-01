@@ -1138,6 +1138,22 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               ))}
             </SelectContent>
           </Select>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 px-2 text-base"
+            title={item.location ? `Location: ${LOCATION_LABEL[item.location]} (click to change)` : "Set location"}
+            onClick={async () => {
+              const next = nextLocation(item.location);
+              const { error } = await supabase
+                .from("roster_items")
+                .update({ location: next } as never)
+                .eq("id", item.id);
+              if (error) toast.error(error.message);
+            }}
+          >
+            {item.location ? LOCATION_FLAG[item.location] : <span className="text-xs text-muted-foreground">🌐 Location</span>}
+          </Button>
           {item.budget != null && item.budget > 0 && (
             <Badge
               variant="outline"
