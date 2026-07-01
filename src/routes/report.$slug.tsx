@@ -348,20 +348,7 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
 
         <div className="min-w-0 space-y-5">
           <div className="flex items-start justify-end">
-            {post.post_url ? (
-              <a
-                href={post.post_url}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                title={PLATFORM_LABEL[post.platform]}
-              >
-                <Icon className="size-5" />
-                <ExternalLink className="size-3" />
-              </a>
-            ) : (
-              <Icon className="size-5 text-muted-foreground" />
-            )}
+            <PlatformBadge platform={post.platform} postUrl={post.post_url} />
           </div>
 
 
