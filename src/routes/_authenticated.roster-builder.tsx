@@ -16,6 +16,7 @@ import {
   Check,
   Pencil,
   BadgeCheck,
+  GripVertical,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
@@ -65,6 +66,10 @@ type Roster = {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  hide_prospect_tags: boolean;
+  header_image_url: string | null;
+  client_email: string | null;
+  brand_email: string | null;
 };
 
 type Brief = {
@@ -97,6 +102,7 @@ type RosterItem = {
   bio_page_url: string | null;
   position: number;
   status: string;
+  budget: number | null;
 };
 
 const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
