@@ -1019,6 +1019,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         comments: numOrNull(form.comments),
         shares: numOrNull(form.shares),
         saves: numOrNull(form.saves),
+        followers: numOrNull(form.followers),
         reach_pct: numOrNull(form.reach_pct),
         engagement_rate_pct: numOrNull(form.engagement_rate_pct),
         interaction_pct: numOrNull(form.interaction_pct),
