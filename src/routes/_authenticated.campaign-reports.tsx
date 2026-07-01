@@ -795,6 +795,20 @@ function CreatorRow({
   const [handle, setHandle] = useState(creator.handle ?? "");
   const [avatar, setAvatar] = useState(creator.avatar_url ?? "");
 
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: creator.id,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  const postSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
   useEffect(() => {
     setName(creator.name);
     setHandle(creator.handle ?? "");
@@ -834,15 +848,47 @@ function CreatorRow({
     await onChanged();
   }
 
+  async function reorderPosts(orderedIds: string[]) {
+    try {
+      await Promise.all(
+        orderedIds.map((id, i) =>
+          sb.from("campaign_report_posts").update({ position: i }).eq("id", id),
+        ),
+      );
+      await onChanged();
+    } catch (e) {
+      toast.error((e as Error).message ?? "Reorder failed");
+    }
+  }
+
+  function onPostDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = posts.findIndex((p) => p.id === active.id);
+    const newIndex = posts.findIndex((p) => p.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const next = arrayMove(posts, oldIndex, newIndex);
+    void reorderPosts(next.map((p) => p.id));
+  }
+
   return (
-    <div className="rounded-xl border border-border/60 bg-card">
+    <div ref={setNodeRef} style={style} className="rounded-xl border border-border/60 bg-card">
       <div className="flex flex-wrap items-center gap-3 p-4">
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground"
+          aria-label={open ? "Collapse" : "Expand"}
         >
           {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+        </button>
+        <button
+          type="button"
+          className="cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+          aria-label="Drag to reorder creator"
+          {...attributes}
+          {...listeners}
+        >
           <GripVertical className="size-4" />
         </button>
         <div className="min-w-0 flex-1 grid gap-2 md:grid-cols-[1fr_1fr_1fr_auto]">
@@ -862,7 +908,15 @@ function CreatorRow({
           {posts.length === 0 ? (
             <p className="text-sm text-muted-foreground">No live posts yet.</p>
           ) : (
-            posts.map((p) => <PostEditor key={p.id} post={p} onChanged={onChanged} />)
+            <DndContext sensors={postSensors} collisionDetection={closestCenter} onDragEnd={onPostDragEnd}>
+              <SortableContext items={posts.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-3">
+                  {posts.map((p) => (
+                    <PostEditor key={p.id} post={p} onChanged={onChanged} />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
           <Button variant="outline" size="sm" onClick={addPost}>
             <Plus className="mr-2 size-4" /> Add live post
@@ -872,6 +926,7 @@ function CreatorRow({
     </div>
   );
 }
+
 
 /* ------------------------------ Post editor ------------------------------ */
 
