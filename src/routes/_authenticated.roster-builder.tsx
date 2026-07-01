@@ -1115,7 +1115,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
               ))}
             </SelectContent>
           </Select>
-
+          {item.budget != null && item.budget > 0 && (
             <Badge
               variant="outline"
               className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
