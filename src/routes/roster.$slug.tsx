@@ -49,6 +49,16 @@ const STATUS_LABEL: Record<string, string> = {
   live: "Live",
 };
 
+const STATUS_BADGE: Record<string, string> = {
+  in_review: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
+  approved: "border-primary/40 bg-primary/10 text-primary",
+  confirmed: "border-primary/40 bg-primary/10 text-primary",
+  in_production: "border-chart-4/40 bg-chart-4/10 text-chart-4",
+  briefed: "border-chart-5/40 bg-chart-5/10 text-chart-5",
+  contracting: "border-purple/40 bg-purple/10 text-purple",
+  live: "border-pink-accent/40 bg-pink-accent/10 text-pink-accent",
+};
+
 export const Route = createFileRoute("/roster/$slug")({
   head: ({ params }) => ({
     meta: [
