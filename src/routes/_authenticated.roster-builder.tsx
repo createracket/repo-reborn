@@ -1683,11 +1683,14 @@ function AddProspectCard({
                 />
               </Field>
               <Field label="TikTok URL">
-                <Input
-                  value={form.tiktok_url}
-                  onChange={(e) => update("tiktok_url", e.target.value)}
-                  placeholder="https://tiktok.com/@…"
-                />
+                <div className="flex gap-1">
+                  <Input
+                    value={form.tiktok_url}
+                    onChange={(e) => update("tiktok_url", e.target.value)}
+                    placeholder="https://tiktok.com/@…"
+                  />
+                  <FetchBtn platform="tiktok" urlKey="tiktok_url" followersKey="tiktok_followers" />
+                </div>
               </Field>
               <Field label="TT followers">
                 <Input
