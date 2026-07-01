@@ -1324,9 +1324,6 @@ function formatMetricsMonth(value: string): string {
 }
 
 
-    </div>
-  );
-}
 
 
 function formatCount(n: number) {
