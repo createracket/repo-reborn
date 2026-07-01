@@ -86,6 +86,192 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_report_creators: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          handle: string | null
+          id: string
+          name: string
+          position: number
+          report_id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          handle?: string | null
+          id?: string
+          name?: string
+          position?: number
+          report_id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          handle?: string | null
+          id?: string
+          name?: string
+          position?: number
+          report_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_report_creators_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_report_posts: {
+        Row: {
+          brand_tag: string | null
+          caption: string | null
+          comments: number | null
+          created_at: string
+          creator_id: string
+          engagement_rate_pct: number | null
+          featured_comments: Json
+          hashtags: string[]
+          id: string
+          interaction_pct: number | null
+          likes: number | null
+          metrics_updated_at: string | null
+          platform: string
+          position: number
+          post_url: string | null
+          posted_at: string | null
+          reach_pct: number | null
+          saves: number | null
+          sentiment_score: number | null
+          shares: number | null
+          thumbnail_url: string | null
+          updated_at: string
+          views: number | null
+          watch_time_hours: number | null
+        }
+        Insert: {
+          brand_tag?: string | null
+          caption?: string | null
+          comments?: number | null
+          created_at?: string
+          creator_id: string
+          engagement_rate_pct?: number | null
+          featured_comments?: Json
+          hashtags?: string[]
+          id?: string
+          interaction_pct?: number | null
+          likes?: number | null
+          metrics_updated_at?: string | null
+          platform?: string
+          position?: number
+          post_url?: string | null
+          posted_at?: string | null
+          reach_pct?: number | null
+          saves?: number | null
+          sentiment_score?: number | null
+          shares?: number | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          views?: number | null
+          watch_time_hours?: number | null
+        }
+        Update: {
+          brand_tag?: string | null
+          caption?: string | null
+          comments?: number | null
+          created_at?: string
+          creator_id?: string
+          engagement_rate_pct?: number | null
+          featured_comments?: Json
+          hashtags?: string[]
+          id?: string
+          interaction_pct?: number | null
+          likes?: number | null
+          metrics_updated_at?: string | null
+          platform?: string
+          position?: number
+          post_url?: string | null
+          posted_at?: string | null
+          reach_pct?: number | null
+          saves?: number | null
+          sentiment_score?: number | null
+          shares?: number | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          views?: number | null
+          watch_time_hours?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_report_posts_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_report_creators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_reports: {
+        Row: {
+          brand_email: string | null
+          client_email: string | null
+          created_at: string
+          description: string | null
+          header_image_url: string | null
+          id: string
+          owner_id: string
+          published: boolean
+          published_at: string | null
+          slug: string
+          source_roster_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          brand_email?: string | null
+          client_email?: string | null
+          created_at?: string
+          description?: string | null
+          header_image_url?: string | null
+          id?: string
+          owner_id: string
+          published?: boolean
+          published_at?: string | null
+          slug: string
+          source_roster_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          brand_email?: string | null
+          client_email?: string | null
+          created_at?: string
+          description?: string | null
+          header_image_url?: string | null
+          id?: string
+          owner_id?: string
+          published?: boolean
+          published_at?: string | null
+          slug?: string
+          source_roster_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_reports_source_roster_id_fkey"
+            columns: ["source_roster_id"]
+            isOneToOne: false
+            referencedRelation: "rosters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_profiles: {
         Row: {
           account_type: string

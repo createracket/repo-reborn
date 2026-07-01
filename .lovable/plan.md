@@ -1,54 +1,118 @@
-# In-dashboard email builder
 
-Let admins create, edit, preview, and test-send email templates from Admin → Emails, without writing `.tsx` files.
+## Overview
 
-## What you'll be able to do
+Add a "Campaign Reports" feature that mirrors the roster-builder pattern. Reports live at `/campaign-reports` (builder, auth-only) and `/report/:slug` (public shareable page). Each report has creators, each creator has one or more "live posts" (IG / TT / YT URLs) with rich metrics that can be pasted in manually **or** auto-scraped via a third-party API.
 
-- Click **New template** in the Templates tab and fill in name, subject, and body in a simple editor (Markdown + a few merge tags like `{{name}}`).
-- See a live preview rendered exactly as it will arrive in the inbox.
-- Send a test to any address with sample values for the merge tags.
-- Edit or delete custom templates later. The existing code-defined templates (contact-confirmation, waitlist-confirmation, auth emails) keep working and show up alongside.
-- Trigger a custom template from anywhere in the app by its name, the same way code templates are triggered today.
+## Third-party plugin required
 
-## How it works
+To auto-pull metrics from arbitrary Instagram / TikTok / YouTube URLs (without every creator connecting their account via OAuth), we need a paid scraper. My recommendation:
 
-1. **Storage** — new `email_custom_templates` table: `name` (slug, unique), `display_name`, `subject`, `body_markdown`, `variables` (string[]), timestamps, `created_by`. Admin-only RLS via `has_role(..., 'admin')`. Reads/writes go through new admin server functions.
+**Apify** — pay-as-you-go (~$5-49/mo depending on volume), single API key, and they maintain actively-updated actors for all three platforms:
+- `apify/instagram-post-scraper` — Reels/posts (views, likes, comments, caption, hashtags, top comments)
+- `clockworks/free-tiktok-scraper` — TikTok videos (plays, likes, comments, shares, saves, caption)
+- YouTube — we use the free official **YouTube Data API v3** (Google API key, free 10k units/day) since it's fully public and more reliable than any scraper
 
-2. **Rendering** — a single React Email wrapper component, `CustomEmail`, takes `{ subject, bodyHtml, siteName, unsubscribeUrl }` and renders a branded shell (matches existing templates' look: white body, brand container, footer). Markdown → HTML happens server-side with `marked` + `dompurify` (sanitized, safe subset). Merge tags `{{var}}` are replaced before markdown parsing using the supplied `templateData`.
+Alternative if you'd rather one vendor: **EnsembleData** (~$30/mo, unified API across IG/TT/YT). Let me know if you prefer that — same architecture, just different endpoint calls.
 
-3. **Registry integration** — `registry.ts` gains a runtime resolver: when the send route looks up a template by name and it's not in the static `TEMPLATES` map, it queries `email_custom_templates`. The existing send route (`/lovable/email/transactional/send`) needs a small change to await an async lookup, but the public API stays identical.
+You'd need to sign up at apify.com and console.cloud.google.com to grab the two API keys. I'll request them via secure prompts when we're at that step.
 
-4. **Preview** — new admin server fn `previewCustomTemplate({ id | draft, sampleData })` returns rendered HTML + resolved subject. Dashboard shows it in an iframe (sandboxed) inside the editor dialog.
+**What scrapers can NOT get** (must stay manual on your side):
+- Reach %, ER %, interaction %, watch time — these come from the creator's own analytics dashboard, never public
+- Sentiment score — you'll set this via slider
 
-5. **Test send** — reuses the existing `sendTestEmail` server fn; it now accepts custom templates too and passes `sampleData` as `templateData`.
+## Data model
 
-6. **UI** — Templates tab gets a **New template** button. Each custom template card shows Edit / Preview / Send test / Delete. Code templates remain read-only (Send test only) and are tagged "Built-in".
+**`campaign_reports`** — mirrors `rosters`
+- `title`, `description`, `slug` (unique), `published`, `published_at`
+- `header_image_url`, `client_email`, `brand_email`
+- `source_roster_id` (nullable FK → seeds creators from a roster)
+- `owner_id` (auth.uid)
 
-## Editor details
+**`campaign_report_creators`** — one row per creator on the report
+- `report_id` FK, `name`, `handle`, `avatar_url`, `position`
 
-- Fields: Internal name (slug, auto-generated from display name, editable), Display name, Subject (supports `{{var}}`), Body (Markdown textarea with toolbar for bold/italic/link/heading/list/button), Variables (auto-detected from `{{...}}` usage in subject + body, shown as chips with sample-value inputs).
-- Live preview pane next to the editor, debounced 300 ms, calls `previewCustomTemplate` with the current draft.
-- "Send test" button at the bottom of the editor opens the existing test dialog pre-filled with this template.
+**`campaign_report_posts`** — one row per live post (a creator can have many)
+- `creator_id` FK, `platform` (ig/tt/yt), `post_url`, `thumbnail_url`, `caption`, `posted_at`
+- Auto-scrapable: `views`, `likes`, `comments`, `shares`, `saves`
+- Manual: `reach_pct`, `engagement_rate_pct`, `interaction_pct`, `watch_time_hours`
+- Manual: `sentiment_score` (0-100), `featured_comments` (jsonb array of {handle, avatar, text, meta})
+- Manual: `brand_tag`, `hashtags` (text[])
+- `metrics_updated_at`, `position`
+
+RLS: owner-only writes; public SELECT on published reports (excludes email columns), same pattern as rosters. Anon-safe columns only.
+
+## Scraper backend
+
+Three server functions in `src/lib/campaign-scrapers.functions.ts`:
+
+- `scrapeInstagramPost(url)` — calls Apify sync API, maps response to our schema
+- `scrapeTikTokPost(url)` — calls Apify sync API
+- `scrapeYouTubeVideo(url)` — extracts video ID, calls YouTube Data API v3 `videos?part=statistics,snippet`
+- `refreshPostMetrics({ post_id })` — dispatches to the right scraper based on `platform`, updates the row, returns fresh values
+
+All three are auth-gated (`requireSupabaseAuth`). API keys read from `process.env` inside handlers. Errors are caught and returned as `{ ok: false, error }` so the UI can show "couldn't fetch, enter manually".
+
+## UI: `/campaign-reports` (builder, `_authenticated`)
+
+- List of reports on the left, editor on the right (same shape as roster-builder)
+- Report details card: title, description, slug, header image, client/brand email, publish toggle, "Seed from roster" dropdown
+- Creators list: drag-to-reorder, each creator expands to show their posts
+- Per-post editor panel modeled on your screenshot:
+  - Post URL input + platform auto-detected + "🔄 Refresh metrics" button (calls scraper)
+  - Thumbnail preview
+  - Core metrics grid (views/likes/comments/shares/saves) — editable, auto-filled by scraper
+  - Advanced metrics grid (reach %, ER %, interaction %, watch time) — manual
+  - Sentiment slider 0-100
+  - Featured comments repeater (up to 3, with handle, avatar URL, text, meta)
+  - Caption, post date, hashtags (comma-separated), brand tag
+- Sticky totals footer: aggregate views / likes / comments / total engagement across all posts
+
+## UI: `/report/$slug` (public)
+
+- Header image (16:9) + report title + description
+- Campaign totals card at top: total views, total engagement, avg ER%, post count
+- Per-post cards laid out like your mockup:
+  - Left column: thumbnail + featured comments strip
+  - Right column: @handle + platform icon + link out, 3×3 metric grid, sentiment bar, caption/date/hashtags/brand tag
+- Uses only anon-safe columns (no emails, no owner_id)
+
+## Dashboard integration
+
+Extend `_authenticated.dashboard.tsx`'s "assigned rosters" section to also show reports assigned to the user's email via `client_email` / `brand_email`.
+
+## Files
+
+Migrations:
+- 1× migration for `campaign_reports`, `campaign_report_creators`, `campaign_report_posts` + RLS + GRANTs
+
+New files:
+- `src/lib/campaign-scrapers.functions.ts` — scraper server fns
+- `src/lib/youtube-utils.ts` — video ID extraction, count formatting
+- `src/routes/_authenticated.campaign-reports.tsx` — builder
+- `src/routes/report.$slug.tsx` — public page
+
+Edited files:
+- `src/routes/_authenticated.dashboard.tsx` — show assigned reports
+- `src/components/layout/SiteHeader.tsx` — nav link to `/campaign-reports` (if roster-builder is linked there)
 
 ## Technical notes
 
-- New files:
-  - `supabase/migrations/<ts>_email_custom_templates.sql` — table + GRANTs + RLS + admin policies.
-  - `src/lib/email-templates/custom-email.tsx` — shared React Email shell.
-  - `src/lib/email-templates/render-custom.server.ts` — markdown→sanitized HTML + merge-tag resolver + React Email render.
-  - `src/lib/custom-templates.functions.ts` — admin CRUD + preview server fns (all behind `requireSupabaseAuth` + admin role check).
-  - `src/components/admin/CustomEmailEditor.tsx` — editor dialog with live preview.
-- Edited files:
-  - `src/lib/email-templates/registry.ts` — async `resolveTemplate(name)` helper used by send + test routes.
-  - `src/routes/lovable/email/transactional/send.ts` — call `resolveTemplate` instead of indexing `TEMPLATES`.
-  - `src/lib/email-admin.functions.ts` — `getEmailTemplates` merges built-in + custom; `sendTestEmail` accepts `sampleData`.
-  - `src/components/admin/EmailsAdmin.tsx` — wire in editor, list custom templates, Edit/Delete actions.
-- Packages to add: `marked`, `isomorphic-dompurify` (Worker-compatible).
-- Security: only `'admin'` role can list/create/edit/delete/preview/send-test custom templates. Markdown is sanitized; no `<script>`, `<iframe>`, inline event handlers, or `javascript:` URLs survive. Merge-tag substitution escapes HTML before insertion.
+- Scraper calls go through Apify's "run-sync-get-dataset-items" endpoint (returns results in-process, no polling required for single-URL runs, ~10-30s response time)
+- Show a spinner on the "Refresh" button while scraping; toast on success/failure
+- Cache scraper results implicitly via `metrics_updated_at` — user decides when to re-fetch
+- YouTube Data API is quota-limited (10k units/day free, ~1 unit per video lookup) — plenty for normal use
 
-## Not in scope
+## Secrets required (I'll prompt when ready)
 
-- WYSIWYG rich-text editor (Markdown is faster to ship and safer to sanitize; we can swap in TipTap later).
-- Image upload (links to hosted images work; uploads can be added later via the `spotlight-images` bucket pattern).
-- Versioning / drafts / scheduled sends.
-- Marketing/bulk sends — system stays single-recipient transactional only.
+- `APIFY_API_TOKEN` — from apify.com console
+- `YOUTUBE_DATA_API_KEY` — from Google Cloud Console (enable YouTube Data API v3)
+
+## Rough scope
+
+- Migration + RLS: small
+- Scraper server fns: medium
+- Builder page: large (biggest piece — lots of per-post fields)
+- Public page: medium
+- Dashboard tweak: tiny
+
+Suggest building in this order: migration → public page skeleton with dummy data → builder → scrapers last (so the UI works fully with manual entry even before API keys are added).

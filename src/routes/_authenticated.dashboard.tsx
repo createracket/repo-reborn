@@ -68,6 +68,7 @@ function DashboardPage() {
   const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
+  const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -141,6 +142,12 @@ function DashboardPage() {
           .or(`client_email.eq.${emailLower},brand_email.eq.${emailLower}`)
           .order("updated_at", { ascending: false });
         setAssignedRosters(((assigned as any[]) ?? []) as any);
+        const { data: assignedRep } = await (supabase as any)
+          .from("campaign_reports")
+          .select("id, title, slug, published, updated_at, client_email, brand_email")
+          .or(`client_email.eq.${emailLower},brand_email.eq.${emailLower}`)
+          .order("updated_at", { ascending: false });
+        setAssignedReports(((assignedRep as any[]) ?? []) as any);
       }
 
       const featuredMembers: CommunityMember[] = ((featuredRows ?? []) as any[]).map((p) => ({
@@ -308,6 +315,49 @@ function DashboardPage() {
               </Card>
             </div>
           )}
+
+          {assignedReports.length > 0 && (
+            <div className="lg:col-span-3">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="font-display text-2xl flex items-center gap-2">
+                    <Megaphone className="size-5 text-primary" /> Your campaign reports
+                  </CardTitle>
+                  <CardDescription>
+                    Live performance reports for your campaigns.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="grid gap-3 md:grid-cols-2">
+                    {assignedReports.map((r) => (
+                      <li
+                        key={r.id}
+                        className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-medium">{r.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            Updated {new Date(r.updated_at).toLocaleDateString()}
+                            {!r.published && " · Draft"}
+                          </div>
+                        </div>
+                        {r.published && r.slug ? (
+                          <Button asChild size="sm" variant="outline">
+                            <a href={`/report/${r.slug}`} target="_blank" rel="noreferrer">
+                              View <ArrowRight className="ml-1 size-3" />
+                            </a>
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Not yet published</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
 
           {/* NEW OPPORTUNITIES (full width) */}
           <div className="lg:col-span-3">

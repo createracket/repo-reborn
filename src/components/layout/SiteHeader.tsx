@@ -73,6 +73,9 @@ export function SiteHeader() {
               <Link to="/roster-builder" className="hover:text-foreground transition-colors">
                 Roster Builder
               </Link>
+              <Link to="/campaign-reports" className="hover:text-foreground transition-colors">
+                Campaign Reports
+              </Link>
               <Link to="/connect" className="hover:text-foreground transition-colors">
                 Connect
               </Link>
