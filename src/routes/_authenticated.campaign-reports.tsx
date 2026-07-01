@@ -758,14 +758,20 @@ function ReportDetailView({
           {creators.length === 0 ? (
             <p className="text-sm text-muted-foreground">No creators yet.</p>
           ) : (
-            creators.map((c) => (
-              <CreatorRow
-                key={c.id}
-                creator={c}
-                posts={posts.filter((p) => p.creator_id === c.id)}
-                onChanged={onChanged}
-              />
-            ))
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onCreatorDragEnd}>
+              <SortableContext items={creators.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-4">
+                  {creators.map((c) => (
+                    <CreatorRow
+                      key={c.id}
+                      creator={c}
+                      posts={posts.filter((p) => p.creator_id === c.id)}
+                      onChanged={onChanged}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
         </CardContent>
       </Card>
