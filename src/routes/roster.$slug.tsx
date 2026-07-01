@@ -246,7 +246,7 @@ function PublicRosterPage() {
                           <div className="flex flex-col items-end gap-1">
                             <Badge
                               variant="outline"
-                              className="border-border/70 bg-muted/40 text-[10px] uppercase tracking-wider"
+                              className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE[it.status] ?? "border-border/70 bg-muted/40 text-muted-foreground"}`}
                             >
                               {STATUS_LABEL[it.status] ?? "In Review"}
                             </Badge>
