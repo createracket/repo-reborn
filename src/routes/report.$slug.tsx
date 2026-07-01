@@ -403,7 +403,7 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
 
           <div className="space-y-1.5 text-sm">
             {post.posted_at && (
-              <p className="text-xs font-semibold uppercase tracking-wider text-purple">
+              <p className="text-xs font-semibold uppercase tracking-wider text-pink-accent">
                 Post date: {new Date(post.posted_at).toLocaleDateString()}
               </p>
             )}
