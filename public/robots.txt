@@ -11,6 +11,7 @@ Disallow: /api/
 Disallow: /lovable/
 Disallow: /email/
 Disallow: /roster/
+Disallow: /report/
 Disallow: /roster-builder
 Disallow: /spotlight/
 
