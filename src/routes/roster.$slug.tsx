@@ -189,11 +189,25 @@ function PublicRosterPage() {
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <Card>
               <CardContent className="p-5">
+        {totalFollowers > 0 && (
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <Card>
+              <CardContent className="p-5">
                 <p className="text-xs uppercase tracking-wider text-muted-foreground">
                   Total followers
                 </p>
                 <p className="mt-1 font-display text-2xl">
                   {formatCount(totalFollowers)}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Est. reach
+                </p>
+                <p className="mt-1 font-display text-2xl">
+                  {formatCount(Math.round(totalFollowers * 0.4))}
                 </p>
               </CardContent>
             </Card>
