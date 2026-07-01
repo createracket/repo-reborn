@@ -46,6 +46,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { normalizeSlug, validateSlug } from "@/lib/slugs";
 import { detectPlatform, formatCount } from "@/lib/youtube-utils";
 import { scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const sb = supabase as any;
 
