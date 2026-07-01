@@ -268,6 +268,21 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
     <Card>
       <CardContent className="grid gap-6 p-6 md:grid-cols-[minmax(0,280px)_1fr]">
         <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="size-11 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground">
+              {creator.avatar_url ? (
+                <img src={creator.avatar_url} alt="" className="size-full object-cover" />
+              ) : (
+                creator.name.slice(0, 2).toUpperCase()
+              )}
+            </div>
+            <div className="min-w-0">
+              <h3 className="truncate font-display text-lg leading-tight">{creator.name}</h3>
+              {creator.handle && (
+                <p className="truncate text-xs text-muted-foreground">{creator.handle}</p>
+              )}
+            </div>
+          </div>
           <div
             className="overflow-hidden rounded-xl bg-muted"
             style={{ aspectRatio: "4 / 5" }}
@@ -320,10 +335,7 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
         </div>
 
         <div className="min-w-0 space-y-5">
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="font-display text-3xl underline decoration-2 underline-offset-4">
-              {creator.handle || creator.name}
-            </h3>
+          <div className="flex items-start justify-end">
             {post.post_url ? (
               <a
                 href={post.post_url}
@@ -339,6 +351,7 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
               <Icon className="size-5 text-muted-foreground" />
             )}
           </div>
+
 
           <div className="grid grid-cols-3 gap-y-4 gap-x-6 border-b border-border/60 pb-4">
             <Metric label="Video Views" value={formatCount(post.views)} />
