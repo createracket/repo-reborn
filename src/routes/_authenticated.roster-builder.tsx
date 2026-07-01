@@ -1303,6 +1303,39 @@ function EditProspectPanel({
     </div>
   );
 
+  const urlFld = (
+    label: string,
+    key: keyof typeof form,
+    platform: "instagram" | "tiktok" | "youtube",
+    followersKey: keyof typeof form,
+    placeholder?: string,
+  ) => (
+    <div className="space-y-1">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </Label>
+      <div className="flex gap-1">
+        <Input
+          value={form[key]}
+          onChange={(e) => upd(key, e.target.value)}
+          placeholder={placeholder}
+          className="text-sm"
+        />
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => fetchFollowers(platform, key, followersKey)}
+          disabled={fetching === platform}
+          className="shrink-0"
+          title="Fetch followers"
+        >
+          <RefreshCw className={`size-3.5 ${fetching === platform ? "animate-spin" : ""}`} />
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="mt-4 space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
       <div className="space-y-1">
