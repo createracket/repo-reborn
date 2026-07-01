@@ -133,6 +133,16 @@ function DashboardPage() {
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
       setOpportunities((opps as Opportunity[]) ?? []);
 
+      if (u.user.email) {
+        const emailLower = u.user.email.toLowerCase();
+        const { data: assigned } = await supabase
+          .from("rosters")
+          .select("id, title, slug, published, updated_at, client_email, brand_email")
+          .or(`client_email.eq.${emailLower},brand_email.eq.${emailLower}`)
+          .order("updated_at", { ascending: false });
+        setAssignedRosters(((assigned as any[]) ?? []) as any);
+      }
+
       const featuredMembers: CommunityMember[] = ((featuredRows ?? []) as any[]).map((p) => ({
         id: p.id,
         display_name: p.artist_name || p.display_name || "Member",
