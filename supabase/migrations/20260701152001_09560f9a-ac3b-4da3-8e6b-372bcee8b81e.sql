@@ -1,0 +1,2 @@
+ALTER TABLE public.roster_items ADD COLUMN IF NOT EXISTS location text;
+ALTER TABLE public.roster_items ADD CONSTRAINT roster_items_location_check CHECK (location IS NULL OR location = ANY (ARRAY['GB','US','NZ','AU']));
