@@ -177,6 +177,7 @@ async function scrapeTikTok(url: string): Promise<ScrapeResult> {
       videoMeta?: { coverUrl?: string };
       createTimeISO?: string;
       hashtags?: Array<{ name?: string }>;
+      authorMeta?: { fans?: number };
     }>;
     const p = results[0];
     if (!p) return { ok: false, error: "No TikTok post returned." };
@@ -189,6 +190,7 @@ async function scrapeTikTok(url: string): Promise<ScrapeResult> {
         comments: p.commentCount ?? null,
         shares: p.shareCount ?? null,
         saves: p.collectCount ?? null,
+        followers: p.authorMeta?.fans ?? null,
         caption: p.text ?? null,
         thumbnail_url: p.videoMeta?.coverUrl ?? null,
         posted_at: p.createTimeISO ?? null,
