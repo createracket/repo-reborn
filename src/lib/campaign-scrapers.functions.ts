@@ -9,6 +9,7 @@ type ScrapedMetrics = {
   comments?: number | null;
   shares?: number | null;
   saves?: number | null;
+  followers?: number | null;
   caption?: string | null;
   thumbnail_url?: string | null;
   posted_at?: string | null;
