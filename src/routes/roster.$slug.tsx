@@ -243,19 +243,9 @@ function PublicRosterPage() {
                             >
                               {STATUS_LABEL[it.status] ?? "In Review"}
                             </Badge>
-                            {it.budget != null && it.budget > 0 && (
-                              <Badge
-                                variant="outline"
-                                className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
-                              >
-                                {formatBudget(it.budget)}
-                              </Badge>
-                            )}
                           </div>
                         </div>
-                        {it.vibe && (
-                          <p className="mt-2 text-sm text-foreground/80">{it.vibe}</p>
-                        )}
+
                         <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
                           {totalReach > 0 && (
                             <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
