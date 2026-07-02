@@ -1134,7 +1134,42 @@ function SpotlightForm({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="instagram">Instagram URL</Label>
-            <Input id="instagram" value={form.instagram} onChange={(e) => set("instagram", e.target.value)} />
+            <div className="flex gap-2">
+              <Input id="instagram" value={form.instagram} onChange={(e) => set("instagram", e.target.value)} placeholder="https://instagram.com/handle" />
+              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("instagram")} disabled={syncing !== null}>
+                <RefreshCw className={`size-3 ${syncing === "instagram" ? "animate-spin" : ""}`} />
+                <span className="ml-1">Sync</span>
+              </Button>
+            </div>
+            {fetchedCounts.instagram != null && (
+              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()} followers</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="tiktok">TikTok URL</Label>
+            <div className="flex gap-2">
+              <Input id="tiktok" value={form.tiktok} onChange={(e) => set("tiktok", e.target.value)} placeholder="https://tiktok.com/@handle" />
+              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("tiktok")} disabled={syncing !== null}>
+                <RefreshCw className={`size-3 ${syncing === "tiktok" ? "animate-spin" : ""}`} />
+                <span className="ml-1">Sync</span>
+              </Button>
+            </div>
+            {fetchedCounts.tiktok != null && (
+              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()} followers</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="youtube">YouTube URL</Label>
+            <div className="flex gap-2">
+              <Input id="youtube" value={form.youtube} onChange={(e) => set("youtube", e.target.value)} placeholder="https://youtube.com/@handle" />
+              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("youtube")} disabled={syncing !== null}>
+                <RefreshCw className={`size-3 ${syncing === "youtube" ? "animate-spin" : ""}`} />
+                <span className="ml-1">Sync</span>
+              </Button>
+            </div>
+            {fetchedCounts.youtube != null && (
+              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()} subscribers</p>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="spotify">Spotify URL</Label>
