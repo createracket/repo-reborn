@@ -1333,9 +1333,14 @@ function EditProspectPanel({
     }
     setUploading(true);
     try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) {
+        toast.error("Sign in required");
+        return;
+      }
       const { resizeImageFile } = await import("@/lib/image-resize");
       const resized = await resizeImageFile(file, 1080, 0.85);
-      const path = `roster/${item.id}/${crypto.randomUUID()}.jpg`;
+      const path = `${u.user.id}/roster/${item.id}/${crypto.randomUUID()}.jpg`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
         .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
