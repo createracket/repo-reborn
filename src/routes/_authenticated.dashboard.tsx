@@ -131,6 +131,15 @@ function DashboardPage() {
           .limit(6),
       ]);
 
+      // Briefs the current user submitted (Project Planner)
+      const { data: mineBriefs } = await supabase
+        .from("campaign_briefs")
+        .select("id, title, created_at, status, budget")
+        .eq("user_id", u.user.id)
+        .order("created_at", { ascending: false });
+      setMyBriefs((mineBriefs as any[]) ?? []);
+
+
       setDisplayName(profile?.display_name ?? null);
       setProfileRow((profile as any) ?? null);
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
