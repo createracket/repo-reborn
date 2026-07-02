@@ -103,10 +103,11 @@ type RosterItem = {
   spotify_monthly_listens: number | null;
   example_video_url: string | null;
   bio_page_url: string | null;
+  content_review_url: string | null;
   position: number;
   status: string;
   budget: number | null;
-  category: "musician" | "ugc" | "egc" | "music_fan" | "editorial" | null;
+  category: "musician" | "ugc" | "egc" | "music_fan" | "editorial" | "artist_exchange" | null;
   metrics_month: string | null;
   location: "GB" | "US" | "NZ" | "AU" | null;
 };
@@ -143,13 +144,14 @@ const STATUS_BADGE: Record<string, string> = {
   live: "border-pink-accent/40 bg-pink-accent/10 text-pink-accent",
 };
 
-type CategoryValue = "musician" | "ugc" | "egc" | "music_fan" | "editorial";
+type CategoryValue = "musician" | "ugc" | "egc" | "music_fan" | "editorial" | "artist_exchange";
 const CATEGORY_OPTIONS: Array<{ value: CategoryValue; label: string; badge: string }> = [
   { value: "musician", label: "Musician", badge: "bg-pink-accent text-[#2b2b2b]" },
   { value: "ugc", label: "UGC", badge: "bg-purple text-white" },
   { value: "egc", label: "EGC", badge: "bg-sky-500 text-white" },
   { value: "music_fan", label: "Music Fan", badge: "bg-emerald-500 text-white" },
   { value: "editorial", label: "Editorial", badge: "bg-amber-500 text-white" },
+  { value: "artist_exchange", label: "Artist Exchange", badge: "bg-rose-500 text-white" },
 ];
 const CATEGORY_LABEL: Record<CategoryValue, string> = Object.fromEntries(
   CATEGORY_OPTIONS.map((c) => [c.value, c.label]),
@@ -1048,7 +1050,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
             )}
           </div>
 
-          {(item.example_video_url || item.bio_page_url) && (
+          {(item.example_video_url || item.bio_page_url || item.content_review_url) && (
             <div className="mt-2 flex flex-wrap gap-3 text-xs">
               {item.example_video_url && (
                 <a
@@ -1058,6 +1060,16 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
                   className="text-primary hover:underline"
                 >
                   Example video
+                </a>
+              )}
+              {item.content_review_url && (
+                <a
+                  href={item.content_review_url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="text-primary hover:underline"
+                >
+                  Content to review
                 </a>
               )}
               {item.bio_page_url && (
@@ -1201,6 +1213,7 @@ function EditProspectPanel({
     spotify_monthly_listens: item.spotify_monthly_listens?.toString() ?? "",
     example_video_url: item.example_video_url ?? "",
     bio_page_url: item.bio_page_url ?? "",
+    content_review_url: item.content_review_url ?? "",
     budget: item.budget?.toString() ?? "",
     metrics_month: item.metrics_month ?? "",
   });
@@ -1296,6 +1309,7 @@ function EditProspectPanel({
         spotify_monthly_listens: toNum(form.spotify_monthly_listens),
         example_video_url: form.example_video_url.trim() || null,
         bio_page_url: form.bio_page_url.trim() || null,
+        content_review_url: form.content_review_url.trim() || null,
         budget: toNum(form.budget),
         metrics_month: form.metrics_month.trim() || null,
       } as never)
@@ -1402,6 +1416,7 @@ function EditProspectPanel({
         {fld("Spotify URL", "spotify_url")}
         {fld("Monthly listeners", "spotify_monthly_listens")}
         {fld("Example video URL", "example_video_url")}
+        {fld("Content to review URL (e.g. Frame.io)", "content_review_url")}
         {fld("Bio page URL", "bio_page_url")}
       </div>
       <div className="flex justify-end gap-2">
@@ -1558,6 +1573,7 @@ function AddProspectCard({
     example_video_url: "",
     has_bio: false,
     bio_page_url: "",
+    content_review_url: "",
   });
 
   const update = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
@@ -1635,6 +1651,7 @@ function AddProspectCard({
       spotify_monthly_listens: toNum(form.spotify_monthly_listens),
       example_video_url: form.example_video_url.trim() || null,
       bio_page_url: form.has_bio ? form.bio_page_url.trim() || null : null,
+      content_review_url: form.content_review_url.trim() || null,
       position: nextPosition,
     });
     setSubmitting(false);
@@ -1656,6 +1673,7 @@ function AddProspectCard({
       example_video_url: "",
       has_bio: false,
       bio_page_url: "",
+      content_review_url: "",
     });
     setOpen(false);
     onAdded();
@@ -1765,6 +1783,13 @@ function AddProspectCard({
                 value={form.example_video_url}
                 onChange={(e) => update("example_video_url", e.target.value)}
                 placeholder="https://…"
+              />
+            </Field>
+            <Field label="Content to review link (e.g. Frame.io)">
+              <Input
+                value={form.content_review_url}
+                onChange={(e) => update("content_review_url", e.target.value)}
+                placeholder="https://f.io/…"
               />
             </Field>
             <div className="flex items-center gap-2">

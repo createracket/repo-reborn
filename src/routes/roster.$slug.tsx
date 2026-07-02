@@ -36,6 +36,7 @@ type PublicItem = {
   spotify_monthly_listens: number | null;
   example_video_url: string | null;
   bio_page_url: string | null;
+  content_review_url: string | null;
   position: number;
   status: string;
   category: string | null;
@@ -107,7 +108,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, position, status, category, location",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, content_review_url, position, status, category, location",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
@@ -316,7 +317,7 @@ function PublicRosterPage() {
                             ) : null,
                           )}
                         </div>
-                        {(it.example_video_url || it.bio_page_url) && (
+                        {(it.example_video_url || it.bio_page_url || it.content_review_url) && (
                           <div className="mt-3 flex flex-wrap gap-3 text-xs">
                             {it.example_video_url && (
                               <a
@@ -326,6 +327,16 @@ function PublicRosterPage() {
                                 className="text-primary hover:underline"
                               >
                                 Example video
+                              </a>
+                            )}
+                            {it.content_review_url && (
+                              <a
+                                href={it.content_review_url}
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                className="text-primary hover:underline"
+                              >
+                                Content to review
                               </a>
                             )}
                             {it.bio_page_url && (
