@@ -61,12 +61,14 @@ function ConnectPage() {
   const [values, setValues] = useState<string[]>([]);
   const [types, setTypes] = useState<string[]>([]);
   const [config, setConfig] = useState<BriefFormConfig>(DEFAULT_BRIEF_FORM_CONFIG);
-  const [submitted, setSubmitted] = useState<{ email: string; name: string } | null>(null);
+  const [submitted, setSubmitted] = useState<{ email: string; name: string; asUser: boolean } | null>(null);
   const [subscribing, setSubscribing] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [authedUserId, setAuthedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     loadBriefFormConfig().then(setConfig).catch(() => setConfig(DEFAULT_BRIEF_FORM_CONFIG));
+    supabase.auth.getUser().then(({ data }) => setAuthedUserId(data.user?.id ?? null));
   }, []);
 
   function toggle(list: string[], setList: (v: string[]) => void, item: string, max?: number) {
