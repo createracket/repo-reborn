@@ -214,33 +214,48 @@ function ConnectPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="rounded-lg border border-border/60 bg-muted/30 p-6 text-center">
-                <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
-                  While you wait
-                </p>
-                <h2 className="mt-2 font-display text-2xl">Join the Create Racket waitlist</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Be first to access the platform, early-bird pricing, and curated artist
-                  partnerships when we launch.
-                </p>
-                <Button
-                  className="mt-5"
-                  size="lg"
-                  onClick={handleSubscribe}
-                  disabled={subscribing || subscribed}
-                >
-                  {subscribed ? (
-                    <><Check className="mr-2 size-4" /> You're on the list</>
-                  ) : subscribing ? (
-                    <><Loader2 className="mr-2 size-4 animate-spin" /> Adding you…</>
-                  ) : (
-                    <>Subscribe with {submitted.email}</>
-                  )}
-                </Button>
-              </div>
+              {submitted.asUser ? (
+                <div className="rounded-lg border border-primary/40 bg-primary/5 p-6 text-center">
+                  <h2 className="font-display text-2xl">Track it in your Project Planner</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Your brief is now in your dashboard. We'll update the status as it moves through
+                    review, roster and reporting.
+                  </p>
+                  <Button asChild className="mt-5" size="lg">
+                    <Link to="/dashboard">Go to dashboard</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-border/60 bg-muted/30 p-6 text-center">
+                  <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
+                    While you wait
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl">Join the Create Racket waitlist</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Be first to access the platform, early-bird pricing, and curated artist
+                    partnerships when we launch.
+                  </p>
+                  <Button
+                    className="mt-5"
+                    size="lg"
+                    onClick={handleSubscribe}
+                    disabled={subscribing || subscribed}
+                  >
+                    {subscribed ? (
+                      <><Check className="mr-2 size-4" /> You're on the list</>
+                    ) : subscribing ? (
+                      <><Loader2 className="mr-2 size-4 animate-spin" /> Adding you…</>
+                    ) : (
+                      <>Subscribe with {submitted.email}</>
+                    )}
+                  </Button>
+                </div>
+              )}
               <div className="text-center">
                 <Button asChild variant="ghost">
-                  <Link to="/">Back to home</Link>
+                  <Link to={submitted.asUser ? "/dashboard" : "/"}>
+                    {submitted.asUser ? "Back to dashboard" : "Back to home"}
+                  </Link>
                 </Button>
               </div>
             </CardContent>
