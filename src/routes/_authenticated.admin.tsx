@@ -919,6 +919,8 @@ function SpotlightForm({
     eoi_opportunities: (editData?.eoi_opportunities ?? []).join("\n"),
     audience_segments: (editData?.audience_segments ?? []).join("\n"),
     instagram: editData?.links?.instagram ?? "",
+    tiktok: editData?.links?.tiktok ?? "",
+    youtube: editData?.links?.youtube ?? "",
     spotify: editData?.links?.spotify ?? "",
     spotifyEmbed: editData?.links?.spotifyEmbed ?? "",
     contact: editData?.links?.contact ?? "",
