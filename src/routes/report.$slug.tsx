@@ -327,7 +327,18 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
               )}
             </div>
             <div className="min-w-0">
-              <h3 className="truncate font-display text-lg leading-tight">{creator.name}</h3>
+              <div className="flex items-center gap-1.5">
+                <h3 className="truncate font-display text-lg leading-tight">{creator.name}</h3>
+                {creator.location && REPORT_LOCATION_FLAG[creator.location] && (
+                  <span
+                    className="text-base leading-none"
+                    title={REPORT_LOCATION_LABEL[creator.location]}
+                    aria-label={REPORT_LOCATION_LABEL[creator.location]}
+                  >
+                    {REPORT_LOCATION_FLAG[creator.location]}
+                  </span>
+                )}
+              </div>
               {creator.handle && (
                 <p className="truncate text-xs text-muted-foreground">{creator.handle}</p>
               )}
