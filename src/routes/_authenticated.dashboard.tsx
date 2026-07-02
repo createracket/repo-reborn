@@ -313,6 +313,66 @@ function DashboardPage() {
             </CardContent>
           </Card>
 
+          {/* PROJECT PLANNER */}
+          <div className="lg:col-span-3">
+            <Card>
+              <CardHeader>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <CardTitle className="font-display text-2xl flex items-center gap-2">
+                      <Rocket className="size-5 text-primary" /> Project planner
+                    </CardTitle>
+                    <CardDescription>
+                      Kick off a campaign by submitting a brief. We'll take it from review through to
+                      roster and reporting — track every step here.
+                    </CardDescription>
+                  </div>
+                  <Button asChild size="sm">
+                    <Link to="/connect">
+                      <ClipboardList className="mr-2 size-4" />
+                      {myBriefs.length === 0 ? "Submit a brief" : "Submit another brief"}
+                    </Link>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <p className="text-sm text-muted-foreground">Loading…</p>
+                ) : myBriefs.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
+                    <p className="text-muted-foreground">
+                      You haven't submitted a brief yet. Start your first project — it takes a couple
+                      of minutes.
+                    </p>
+                    <Button asChild className="mt-4">
+                      <Link to="/connect">Submit a brief</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <ul className="grid gap-3 md:grid-cols-2">
+                    {myBriefs.map((b) => (
+                      <li
+                        key={b.id}
+                        className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h3 className="font-medium leading-tight truncate">{b.title}</h3>
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              Submitted {new Date(b.created_at).toLocaleDateString()}
+                              {b.budget ? ` · £${b.budget}` : ""}
+                            </div>
+                          </div>
+                          <BriefStatusBadge status={b.status} />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
           {assignedRosters.length > 0 && (
             <div className="lg:col-span-3">
               <Card>
