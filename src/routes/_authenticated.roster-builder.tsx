@@ -1213,6 +1213,7 @@ function EditProspectPanel({
     spotify_monthly_listens: item.spotify_monthly_listens?.toString() ?? "",
     example_video_url: item.example_video_url ?? "",
     bio_page_url: item.bio_page_url ?? "",
+    content_review_url: item.content_review_url ?? "",
     budget: item.budget?.toString() ?? "",
     metrics_month: item.metrics_month ?? "",
   });
