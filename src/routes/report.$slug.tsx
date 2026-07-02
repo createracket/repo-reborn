@@ -59,8 +59,12 @@ type PublicCreator = {
   handle: string | null;
   avatar_url: string | null;
   position: number;
+  location: string | null;
   posts: PublicPost[];
 };
+
+const REPORT_LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺" };
+const REPORT_LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia" };
 
 const PLATFORM_ICON: Record<Platform, typeof Instagram> = {
   instagram: Instagram,
@@ -105,7 +109,7 @@ function PublicReportPage() {
       setReport(r as PublicReport);
       const { data: cr } = await (supabase as any)
         .from("campaign_report_creators")
-        .select("id, name, handle, avatar_url, position")
+        .select("id, name, handle, avatar_url, position, location")
         .eq("report_id", (r as PublicReport).id)
         .order("position", { ascending: true });
       const creatorRows = ((cr as any[]) ?? []) as Omit<PublicCreator, "posts">[];
@@ -323,7 +327,18 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
               )}
             </div>
             <div className="min-w-0">
-              <h3 className="truncate font-display text-lg leading-tight">{creator.name}</h3>
+              <div className="flex items-center gap-1.5">
+                <h3 className="truncate font-display text-lg leading-tight">{creator.name}</h3>
+                {creator.location && REPORT_LOCATION_FLAG[creator.location] && (
+                  <span
+                    className="text-base leading-none"
+                    title={REPORT_LOCATION_LABEL[creator.location]}
+                    aria-label={REPORT_LOCATION_LABEL[creator.location]}
+                  >
+                    {REPORT_LOCATION_FLAG[creator.location]}
+                  </span>
+                )}
+              </div>
               {creator.handle && (
                 <p className="truncate text-xs text-muted-foreground">{creator.handle}</p>
               )}

@@ -850,6 +850,7 @@ function RosterDetailView({
                 items={orderedItems}
                 onReorder={persistOrder}
                 onRemove={removeItem}
+                onChanged={onChanged}
               />
             )}
           </CardContent>
@@ -882,10 +883,12 @@ function DraggableRosterList({
   items,
   onReorder,
   onRemove,
+  onChanged,
 }: {
   items: RosterItem[];
   onReorder: (next: RosterItem[]) => void;
   onRemove: (id: string) => void;
+  onChanged: () => void;
 }) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
@@ -933,14 +936,14 @@ function DraggableRosterList({
               : ""
           }
         >
-          <RosterItemRow item={it} onRemove={() => onRemove(it.id)} />
+          <RosterItemRow item={it} onRemove={() => onRemove(it.id)} onChanged={onChanged} />
         </li>
       ))}
     </ul>
   );
 }
 
-function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => void }) {
+function RosterItemRow({ item, onRemove, onChanged }: { item: RosterItem; onRemove: () => void; onChanged: () => void }) {
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -1004,6 +1007,11 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium">{item.name}</span>
+            {item.location && LOCATION_FLAG[item.location] && (
+              <span className="text-base leading-none" title={LOCATION_LABEL[item.location]} aria-label={LOCATION_LABEL[item.location]}>
+                {LOCATION_FLAG[item.location]}
+              </span>
+            )}
             {isVerified && (
               <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] hover:bg-pink-accent/90 text-[10px] uppercase">
                 <BadgeCheck className="size-3" /> Verified
@@ -1114,6 +1122,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
                 .update({ status: v } as never)
                 .eq("id", item.id);
               if (error) toast.error(error.message);
+              else onChanged();
             }}
           >
             <SelectTrigger className={`h-8 w-[150px] text-xs ${STATUS_BADGE[item.status ?? "in_review"]}`}>
@@ -1136,6 +1145,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
                 .update({ category: next } as never)
                 .eq("id", item.id);
               if (error) toast.error(error.message);
+              else onChanged();
             }}
           >
             <SelectTrigger className="h-8 w-[150px] text-xs">
@@ -1153,8 +1163,8 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
           <Button
             size="sm"
             variant="outline"
-            className="h-8 px-2 text-base"
-            title={item.location ? `Location: ${LOCATION_LABEL[item.location]} (click to change)` : "Set location"}
+            className="h-8 w-[150px] justify-center gap-1.5 px-2 text-sm"
+            title={item.location ? `Location: ${LOCATION_LABEL[item.location]} (click to cycle)` : "Set location (click to cycle)"}
             onClick={async () => {
               const next = nextLocation(item.location);
               const { error } = await supabase
@@ -1162,9 +1172,17 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
                 .update({ location: next } as never)
                 .eq("id", item.id);
               if (error) toast.error(error.message);
+              else onChanged();
             }}
           >
-            {item.location ? LOCATION_FLAG[item.location] : <span className="text-xs text-muted-foreground">🌐 Location</span>}
+            {item.location ? (
+              <>
+                <span className="text-base leading-none">{LOCATION_FLAG[item.location]}</span>
+                <span className="text-[10px] uppercase tracking-wider">{LOCATION_LABEL[item.location]}</span>
+              </>
+            ) : (
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">🌐 Set location</span>
+            )}
           </Button>
           {item.budget != null && item.budget > 0 && (
             <Badge
