@@ -59,8 +59,12 @@ type PublicCreator = {
   handle: string | null;
   avatar_url: string | null;
   position: number;
+  location: string | null;
   posts: PublicPost[];
 };
+
+const REPORT_LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺" };
+const REPORT_LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia" };
 
 const PLATFORM_ICON: Record<Platform, typeof Instagram> = {
   instagram: Instagram,
