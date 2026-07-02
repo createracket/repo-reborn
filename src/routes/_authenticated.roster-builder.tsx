@@ -1030,6 +1030,7 @@ function RosterItemRow({ item, onRemove, onChanged, dragHandleProps }: { item: R
       <div className="flex items-start gap-3">
         <button
           type="button"
+          {...(dragHandleProps ?? {})}
           className="mt-1 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
           title="Drag to reorder"
           aria-label="Drag to reorder"
