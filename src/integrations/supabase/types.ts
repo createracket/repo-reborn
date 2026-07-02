@@ -92,6 +92,7 @@ export type Database = {
           created_at: string
           handle: string | null
           id: string
+          location: string | null
           name: string
           position: number
           report_id: string
@@ -102,6 +103,7 @@ export type Database = {
           created_at?: string
           handle?: string | null
           id?: string
+          location?: string | null
           name?: string
           position?: number
           report_id: string
@@ -112,6 +114,7 @@ export type Database = {
           created_at?: string
           handle?: string | null
           id?: string
+          location?: string | null
           name?: string
           position?: number
           report_id?: string
