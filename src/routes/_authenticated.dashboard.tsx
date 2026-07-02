@@ -173,8 +173,9 @@ function DashboardPage() {
         .select("id, title, slug, published")
         .order("updated_at", { ascending: false });
       const sharedList = (sharedRosters ?? []) as Array<{ id: string; title: string; slug: string | null; published: boolean }>;
-      const ownedIds = new Set(((rosterRows as any[]) ?? []).map(() => null)); // placeholder to keep types
-      // Filter out rosters the user owns (roster_shares only shares with others, but RLS may include owned)
+      // Only list rosters owned by others (RLS returns shared + owned; hide owned to avoid duplication)
+      const { data: mine } = await supabase.from("rosters").select("id").eq("owner_id", u.user.id);
+      const ownedIds = new Set(((mine ?? []) as Array<{ id: string }>).map((r) => r.id));
       const sharedOnly = sharedList.filter((r) => !ownedIds.has(r.id));
       if (sharedOnly.length) {
         const rosterIds = sharedOnly.map((r) => r.id);
