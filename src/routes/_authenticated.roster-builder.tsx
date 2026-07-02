@@ -1309,6 +1309,7 @@ function EditProspectPanel({
         spotify_monthly_listens: toNum(form.spotify_monthly_listens),
         example_video_url: form.example_video_url.trim() || null,
         bio_page_url: form.bio_page_url.trim() || null,
+        content_review_url: form.content_review_url.trim() || null,
         budget: toNum(form.budget),
         metrics_month: form.metrics_month.trim() || null,
       } as never)
