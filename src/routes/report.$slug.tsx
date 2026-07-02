@@ -109,7 +109,7 @@ function PublicReportPage() {
       setReport(r as PublicReport);
       const { data: cr } = await (supabase as any)
         .from("campaign_report_creators")
-        .select("id, name, handle, avatar_url, position")
+        .select("id, name, handle, avatar_url, position, location")
         .eq("report_id", (r as PublicReport).id)
         .order("position", { ascending: true });
       const creatorRows = ((cr as any[]) ?? []) as Omit<PublicCreator, "posts">[];
