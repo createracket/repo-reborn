@@ -584,8 +584,8 @@ function RosterDetailView({
   const [title, setTitle] = useState(roster.title);
   const [description, setDescription] = useState(roster.description ?? "");
   const [headerImageUrl, setHeaderImageUrl] = useState(roster.header_image_url ?? "");
-  const [clientEmail, setClientEmail] = useState(roster.client_email ?? "");
-  const [brandEmail, setBrandEmail] = useState(roster.brand_email ?? "");
+  const [clientEmail, setClientEmail] = useState("");
+  const [brandEmail, setBrandEmail] = useState("");
   const [savingMeta, setSavingMeta] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
 
@@ -593,9 +593,22 @@ function RosterDetailView({
     setTitle(roster.title);
     setDescription(roster.description ?? "");
     setHeaderImageUrl(roster.header_image_url ?? "");
-    setClientEmail(roster.client_email ?? "");
-    setBrandEmail(roster.brand_email ?? "");
-  }, [roster.id, roster.title, roster.description, roster.header_image_url, roster.client_email, roster.brand_email]);
+    // brand_email/client_email are not selectable on the base table by the
+    // client for security; fetch them via the owner/admin-only RPC.
+    setClientEmail("");
+    setBrandEmail("");
+    (async () => {
+      const { data, error } = await (supabase as unknown as {
+        rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: Array<{ client_email: string | null; brand_email: string | null }> | null; error: unknown }>;
+      }).rpc("get_roster_assignment", { _roster_id: roster.id });
+      if (error) return;
+      const row = data?.[0];
+      if (row) {
+        setClientEmail(row.client_email ?? "");
+        setBrandEmail(row.brand_email ?? "");
+      }
+    })();
+  }, [roster.id, roster.title, roster.description, roster.header_image_url]);
 
   useEffect(() => {
     setOrderedItems(items);
