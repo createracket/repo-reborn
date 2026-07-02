@@ -920,58 +920,67 @@ function DraggableRosterList({
   onRemove: (id: string) => void;
   onChanged: () => void;
 }) {
-  const [dragId, setDragId] = useState<string | null>(null);
-  const [overId, setOverId] = useState<string | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
-  function onDrop(targetId: string) {
-    if (!dragId || dragId === targetId) {
-      setDragId(null);
-      setOverId(null);
-      return;
-    }
-    const from = items.findIndex((i) => i.id === dragId);
-    const to = items.findIndex((i) => i.id === targetId);
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = items.findIndex((i) => i.id === active.id);
+    const to = items.findIndex((i) => i.id === over.id);
     if (from < 0 || to < 0) return;
-    const next = items.slice();
-    const [moved] = next.splice(from, 1);
-    next.splice(to, 0, moved);
-    setDragId(null);
-    setOverId(null);
-    onReorder(next);
+    onReorder(arrayMove(items, from, to));
   }
 
   return (
-    <ul className="space-y-3">
-      {items.map((it) => (
-        <li
-          key={it.id}
-          draggable
-          onDragStart={() => setDragId(it.id)}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setOverId(it.id);
-          }}
-          onDragLeave={() => setOverId((v) => (v === it.id ? null : v))}
-          onDrop={(e) => {
-            e.preventDefault();
-            onDrop(it.id);
-          }}
-          onDragEnd={() => {
-            setDragId(null);
-            setOverId(null);
-          }}
-          className={
-            overId === it.id && dragId !== it.id
-              ? "rounded-xl outline outline-2 outline-primary/50"
-              : ""
-          }
-        >
-          <RosterItemRow item={it} onRemove={() => onRemove(it.id)} onChanged={onChanged} />
-        </li>
-      ))}
-    </ul>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+        <ul className="space-y-3">
+          {items.map((it) => (
+            <SortableRosterRow
+              key={it.id}
+              item={it}
+              onRemove={() => onRemove(it.id)}
+              onChanged={onChanged}
+            />
+          ))}
+        </ul>
+      </SortableContext>
+    </DndContext>
   );
 }
+
+function SortableRosterRow({
+  item,
+  onRemove,
+  onChanged,
+}: {
+  item: RosterItem;
+  onRemove: () => void;
+  onChanged: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  };
+  return (
+    <li ref={setNodeRef} style={style}>
+      <RosterItemRow
+        item={item}
+        onRemove={onRemove}
+        onChanged={onChanged}
+        dragHandleProps={{ ...attributes, ...listeners }}
+      />
+    </li>
+  );
+}
+
 
 function RosterItemRow({ item, onRemove, onChanged }: { item: RosterItem; onRemove: () => void; onChanged: () => void }) {
   const [vibe, setVibe] = useState(item.vibe ?? "");
