@@ -512,6 +512,33 @@ function DashboardPage() {
                         </Button>
                       </li>
                     ))}
+                    {taggedCreators.map((c) => (
+                      <li
+                        key={`tag-${c.id}`}
+                        className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
+                            {c.avatar_url ? (
+                              <img src={c.avatar_url} alt="" className="size-full object-cover" />
+                            ) : null}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">{c.name ?? "Creator"}</div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              From {c.roster_title}
+                            </div>
+                          </div>
+                        </div>
+                        {c.roster_published && c.roster_slug ? (
+                          <Button asChild size="sm" variant="ghost">
+                            <a href={`/roster/${c.roster_slug}`} target="_blank" rel="noreferrer">
+                              View
+                            </a>
+                          </Button>
+                        ) : null}
+                      </li>
+                    ))}
                   </ul>
                 )}
               </CardContent>
