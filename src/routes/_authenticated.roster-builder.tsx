@@ -1106,9 +1106,11 @@ function RosterItemRow({ item, onRemove, onChanged }: { item: RosterItem; onRemo
             </div>
           )}
           <div className="mt-3">
-            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              Vibe — why they're on this roster
-            </Label>
+            {!vibe.trim() && (
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Vibe — why they're on this roster
+              </Label>
+            )}
             <Input
               value={vibe}
               onChange={(e) => setVibe(e.target.value)}
