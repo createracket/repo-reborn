@@ -166,6 +166,41 @@ function DashboardPage() {
       } else {
         setRoster([]);
       }
+
+      // Rosters the user has been tagged on → surface those creators here
+      const { data: sharedRosters } = await supabase
+        .from("rosters")
+        .select("id, title, slug, published")
+        .order("updated_at", { ascending: false });
+      const sharedList = (sharedRosters ?? []) as Array<{ id: string; title: string; slug: string | null; published: boolean }>;
+      const ownedIds = new Set(((rosterRows as any[]) ?? []).map(() => null)); // placeholder to keep types
+      // Filter out rosters the user owns (roster_shares only shares with others, but RLS may include owned)
+      const sharedOnly = sharedList.filter((r) => !ownedIds.has(r.id));
+      if (sharedOnly.length) {
+        const rosterIds = sharedOnly.map((r) => r.id);
+        const { data: items } = await supabase
+          .from("roster_items")
+          .select("id, name, avatar_url, roster_id")
+          .in("roster_id", rosterIds)
+          .order("position", { ascending: true });
+        const byRoster = new Map(sharedOnly.map((r) => [r.id, r]));
+        setTaggedCreators(
+          ((items ?? []) as any[]).map((it) => {
+            const r = byRoster.get(it.roster_id)!;
+            return {
+              id: it.id,
+              name: it.name,
+              avatar_url: it.avatar_url,
+              roster_id: it.roster_id,
+              roster_title: r.title,
+              roster_slug: r.slug,
+              roster_published: r.published,
+            };
+          }),
+        );
+      } else {
+        setTaggedCreators([]);
+      }
       setLoading(false);
     })();
   }, []);
