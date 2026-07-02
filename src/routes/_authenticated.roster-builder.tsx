@@ -1007,6 +1007,11 @@ function RosterItemRow({ item, onRemove, onChanged }: { item: RosterItem; onRemo
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-medium">{item.name}</span>
+            {item.location && LOCATION_FLAG[item.location] && (
+              <span className="text-base leading-none" title={LOCATION_LABEL[item.location]} aria-label={LOCATION_LABEL[item.location]}>
+                {LOCATION_FLAG[item.location]}
+              </span>
+            )}
             {isVerified && (
               <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] hover:bg-pink-accent/90 text-[10px] uppercase">
                 <BadgeCheck className="size-3" /> Verified
