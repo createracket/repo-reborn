@@ -36,6 +36,7 @@ type PublicItem = {
   spotify_monthly_listens: number | null;
   example_video_url: string | null;
   bio_page_url: string | null;
+  content_review_url: string | null;
   position: number;
   status: string;
   category: string | null;
