@@ -850,6 +850,7 @@ function RosterDetailView({
                 items={orderedItems}
                 onReorder={persistOrder}
                 onRemove={removeItem}
+                onChanged={onChanged}
               />
             )}
           </CardContent>
