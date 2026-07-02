@@ -970,6 +970,8 @@ function SpotlightForm({
         .split("\n").map((s: string) => s.trim()).filter(Boolean),
       links: {
         instagram: form.instagram,
+        tiktok: form.tiktok,
+        youtube: form.youtube,
         spotify: form.spotify,
         spotifyEmbed: form.spotifyEmbed,
         contact: form.contact,
