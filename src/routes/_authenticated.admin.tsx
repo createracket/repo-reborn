@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp } from "lucide-react";
+import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { scrapeProfileFollowers } from "@/lib/campaign-scrapers.functions";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -917,6 +919,8 @@ function SpotlightForm({
     eoi_opportunities: (editData?.eoi_opportunities ?? []).join("\n"),
     audience_segments: (editData?.audience_segments ?? []).join("\n"),
     instagram: editData?.links?.instagram ?? "",
+    tiktok: editData?.links?.tiktok ?? "",
+    youtube: editData?.links?.youtube ?? "",
     spotify: editData?.links?.spotify ?? "",
     spotifyEmbed: editData?.links?.spotifyEmbed ?? "",
     contact: editData?.links?.contact ?? "",
@@ -944,6 +948,54 @@ function SpotlightForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube">(null);
+  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number }>({});
+
+  async function syncSocial(platform: "instagram" | "tiktok" | "youtube") {
+    const raw = String(form[platform] || "").trim();
+    if (!raw) {
+      toast.error(`Enter a ${platform} URL first`);
+      return;
+    }
+    let full = raw;
+    if (!/^https?:\/\//i.test(full)) {
+      const h = full.replace(/^@/, "");
+      if (platform === "instagram") full = `https://instagram.com/${h}`;
+      else if (platform === "tiktok") full = `https://tiktok.com/@${h}`;
+      else full = `https://youtube.com/@${h}`;
+    }
+    setSyncing(platform);
+    try {
+      const r = await scrapeProfile({ data: { url: full } });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      if (r.followers != null) {
+        setFetchedCounts((c) => ({ ...c, [platform]: r.followers ?? 0 }));
+        toast.success(`${platform}: ${r.followers.toLocaleString()} followers`);
+      } else {
+        toast.error("No follower count returned");
+      }
+    } finally {
+      setSyncing(null);
+    }
+  }
+
+  function applyTotalFollowers() {
+    const total =
+      (fetchedCounts.instagram ?? 0) +
+      (fetchedCounts.tiktok ?? 0) +
+      (fetchedCounts.youtube ?? 0);
+    if (total <= 0) {
+      toast.error("Sync at least one social first");
+      return;
+    }
+    set("total_followers", String(total));
+    toast.success(`Total followers set to ${total.toLocaleString()}`);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.slug || !form.headline) {
@@ -966,6 +1018,8 @@ function SpotlightForm({
         .split("\n").map((s: string) => s.trim()).filter(Boolean),
       links: {
         instagram: form.instagram,
+        tiktok: form.tiktok,
+        youtube: form.youtube,
         spotify: form.spotify,
         spotifyEmbed: form.spotifyEmbed,
         contact: form.contact,
@@ -1011,7 +1065,7 @@ function SpotlightForm({
       setForm({
         slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
-        instagram: "", spotify: "", spotifyEmbed: "", contact: "",
+        instagram: "", tiktok: "", youtube: "", spotify: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "",
         header_image_url: "", profile_image_url: "", published: false,
         total_followers: "", total_streams: "", monthly_streams: "",
@@ -1080,7 +1134,42 @@ function SpotlightForm({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="instagram">Instagram URL</Label>
-            <Input id="instagram" value={form.instagram} onChange={(e) => set("instagram", e.target.value)} />
+            <div className="flex gap-2">
+              <Input id="instagram" value={form.instagram} onChange={(e) => set("instagram", e.target.value)} placeholder="https://instagram.com/handle" />
+              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("instagram")} disabled={syncing !== null}>
+                <RefreshCw className={`size-3 ${syncing === "instagram" ? "animate-spin" : ""}`} />
+                <span className="ml-1">Sync</span>
+              </Button>
+            </div>
+            {fetchedCounts.instagram != null && (
+              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()} followers</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="tiktok">TikTok URL</Label>
+            <div className="flex gap-2">
+              <Input id="tiktok" value={form.tiktok} onChange={(e) => set("tiktok", e.target.value)} placeholder="https://tiktok.com/@handle" />
+              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("tiktok")} disabled={syncing !== null}>
+                <RefreshCw className={`size-3 ${syncing === "tiktok" ? "animate-spin" : ""}`} />
+                <span className="ml-1">Sync</span>
+              </Button>
+            </div>
+            {fetchedCounts.tiktok != null && (
+              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()} followers</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="youtube">YouTube URL</Label>
+            <div className="flex gap-2">
+              <Input id="youtube" value={form.youtube} onChange={(e) => set("youtube", e.target.value)} placeholder="https://youtube.com/@handle" />
+              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("youtube")} disabled={syncing !== null}>
+                <RefreshCw className={`size-3 ${syncing === "youtube" ? "animate-spin" : ""}`} />
+                <span className="ml-1">Sync</span>
+              </Button>
+            </div>
+            {fetchedCounts.youtube != null && (
+              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()} subscribers</p>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="spotify">Spotify URL</Label>
@@ -1115,7 +1204,12 @@ function SpotlightForm({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="sp-tf">Total followers</Label>
-            <Input id="sp-tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
+            <div className="flex gap-2">
+              <Input id="sp-tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
+              <Button type="button" variant="outline" size="sm" onClick={applyTotalFollowers} disabled={!fetchedCounts.instagram && !fetchedCounts.tiktok && !fetchedCounts.youtube}>
+                Apply sum
+              </Button>
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="sp-ts">Total streams</Label>
