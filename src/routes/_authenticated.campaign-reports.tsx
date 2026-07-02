@@ -514,8 +514,8 @@ function ReportDetailView({
   const [description, setDescription] = useState(report.description ?? "");
   const [slug, setSlug] = useState(report.slug);
   const [header, setHeader] = useState(report.header_image_url ?? "");
-  const [clientEmail, setClientEmail] = useState(report.client_email ?? "");
-  const [brandEmail, setBrandEmail] = useState(report.brand_email ?? "");
+  const [clientEmail, setClientEmail] = useState("");
+  const [brandEmail, setBrandEmail] = useState("");
   const [copied, setCopied] = useState(false);
   const [uploadingHeader, setUploadingHeader] = useState(false);
 
@@ -524,8 +524,21 @@ function ReportDetailView({
     setDescription(report.description ?? "");
     setSlug(report.slug);
     setHeader(report.header_image_url ?? "");
-    setClientEmail(report.client_email ?? "");
-    setBrandEmail(report.brand_email ?? "");
+    // brand_email/client_email are hidden from base-table SELECT; fetch via
+    // the owner/admin-only RPC.
+    setClientEmail("");
+    setBrandEmail("");
+    (async () => {
+      const { data, error } = await (sb as unknown as {
+        rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: Array<{ client_email: string | null; brand_email: string | null }> | null; error: unknown }>;
+      }).rpc("get_campaign_report_assignment", { _report_id: report.id });
+      if (error) return;
+      const row = data?.[0];
+      if (row) {
+        setClientEmail(row.client_email ?? "");
+        setBrandEmail(row.brand_email ?? "");
+      }
+    })();
   }, [report.id]);
 
   async function saveMeta() {
