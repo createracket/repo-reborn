@@ -1050,7 +1050,7 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
             )}
           </div>
 
-          {(item.example_video_url || item.bio_page_url) && (
+          {(item.example_video_url || item.bio_page_url || item.content_review_url) && (
             <div className="mt-2 flex flex-wrap gap-3 text-xs">
               {item.example_video_url && (
                 <a
@@ -1060,6 +1060,16 @@ function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => v
                   className="text-primary hover:underline"
                 >
                   Example video
+                </a>
+              )}
+              {item.content_review_url && (
+                <a
+                  href={item.content_review_url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="text-primary hover:underline"
+                >
+                  Content to review
                 </a>
               )}
               {item.bio_page_url && (
