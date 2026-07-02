@@ -13,6 +13,7 @@ import {
   calculateBrandVibe,
   getArtistArchetypeDescription,
 } from "@/lib/vibe-check";
+import { BriefStatusBadge } from "@/components/briefs/BriefStatusBadge";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
