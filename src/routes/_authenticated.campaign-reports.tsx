@@ -906,6 +906,30 @@ function CreatorRow({
           <Input placeholder="@handle" value={handle} onChange={(e) => setHandle(e.target.value)} />
           <Input placeholder="Avatar URL" value={avatar} onChange={(e) => setAvatar(e.target.value)} />
           <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 px-2"
+              title={creator.location ? `Location: ${CREATOR_LOCATION_LABEL[creator.location]} (click to cycle)` : "Set location (click to cycle)"}
+              onClick={async () => {
+                const next = nextCreatorLocation(creator.location);
+                const { error } = await sb
+                  .from("campaign_report_creators")
+                  .update({ location: next })
+                  .eq("id", creator.id);
+                if (error) return toast.error(error.message);
+                await onChanged();
+              }}
+            >
+              {creator.location ? (
+                <>
+                  <span className="text-base leading-none">{CREATOR_LOCATION_FLAG[creator.location]}</span>
+                  <span className="text-[10px] uppercase tracking-wider">{CREATOR_LOCATION_LABEL[creator.location]}</span>
+                </>
+              ) : (
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">🌐 Location</span>
+              )}
+            </Button>
             <Button size="sm" onClick={saveCreator}>Save</Button>
             <Button size="icon" variant="ghost" onClick={deleteCreator}>
               <Trash2 className="size-4" />
