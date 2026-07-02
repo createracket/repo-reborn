@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks } from "lucide-react";
+import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks, Rocket } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -13,6 +13,7 @@ import {
   calculateBrandVibe,
   getArtistArchetypeDescription,
 } from "@/lib/vibe-check";
+import { BriefStatusBadge } from "@/components/briefs/BriefStatusBadge";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -70,6 +71,7 @@ function DashboardPage() {
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
+  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null }>>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -129,6 +131,15 @@ function DashboardPage() {
           .order("published_at", { ascending: false })
           .limit(6),
       ]);
+
+      // Briefs the current user submitted (Project Planner)
+      const { data: mineBriefs } = await supabase
+        .from("campaign_briefs")
+        .select("id, title, created_at, status, budget")
+        .eq("user_id", u.user.id)
+        .order("created_at", { ascending: false });
+      setMyBriefs((mineBriefs as any[]) ?? []);
+
 
       setDisplayName(profile?.display_name ?? null);
       setProfileRow((profile as any) ?? null);
@@ -301,6 +312,66 @@ function DashboardPage() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* PROJECT PLANNER */}
+          <div className="lg:col-span-3">
+            <Card>
+              <CardHeader>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <CardTitle className="font-display text-2xl flex items-center gap-2">
+                      <Rocket className="size-5 text-primary" /> Project planner
+                    </CardTitle>
+                    <CardDescription>
+                      Kick off a campaign by submitting a brief. We'll take it from review through to
+                      roster and reporting — track every step here.
+                    </CardDescription>
+                  </div>
+                  <Button asChild size="sm">
+                    <Link to="/connect">
+                      <ClipboardList className="mr-2 size-4" />
+                      {myBriefs.length === 0 ? "Submit a brief" : "Submit another brief"}
+                    </Link>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <p className="text-sm text-muted-foreground">Loading…</p>
+                ) : myBriefs.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
+                    <p className="text-muted-foreground">
+                      You haven't submitted a brief yet. Start your first project — it takes a couple
+                      of minutes.
+                    </p>
+                    <Button asChild className="mt-4">
+                      <Link to="/connect">Submit a brief</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <ul className="grid gap-3 md:grid-cols-2">
+                    {myBriefs.map((b) => (
+                      <li
+                        key={b.id}
+                        className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h3 className="font-medium leading-tight truncate">{b.title}</h3>
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              Submitted {new Date(b.created_at).toLocaleDateString()}
+                              {b.budget ? ` · £${b.budget}` : ""}
+                            </div>
+                          </div>
+                          <BriefStatusBadge status={b.status} />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
           {assignedRosters.length > 0 && (
             <div className="lg:col-span-3">

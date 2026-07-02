@@ -61,12 +61,14 @@ function ConnectPage() {
   const [values, setValues] = useState<string[]>([]);
   const [types, setTypes] = useState<string[]>([]);
   const [config, setConfig] = useState<BriefFormConfig>(DEFAULT_BRIEF_FORM_CONFIG);
-  const [submitted, setSubmitted] = useState<{ email: string; name: string } | null>(null);
+  const [submitted, setSubmitted] = useState<{ email: string; name: string; asUser: boolean } | null>(null);
   const [subscribing, setSubscribing] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [authedUserId, setAuthedUserId] = useState<string | null>(null);
 
   useEffect(() => {
     loadBriefFormConfig().then(setConfig).catch(() => setConfig(DEFAULT_BRIEF_FORM_CONFIG));
+    supabase.auth.getUser().then(({ data }) => setAuthedUserId(data.user?.id ?? null));
   }, []);
 
   function toggle(list: string[], setList: (v: string[]) => void, item: string, max?: number) {
@@ -117,21 +119,41 @@ function ConnectPage() {
 
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("lead_briefs").insert({
-        title: parsed.data.title,
-        description: parsed.data.description,
-        budget: parsed.data.budget ?? null,
-        timeline: parsed.data.timeline ?? null,
-        target_audience: parsed.data.target_audience ?? null,
-        contact_email: parsed.data.contact_email,
-        contact_name: parsed.data.contact_name,
-        company: parsed.data.company ?? null,
-        collaboration_types: parsed.data.collaboration_types,
-        core_values: parsed.data.core_values,
-        additional_info: parsed.data.additional_info ?? null,
-      } as any);
-      if (error) throw error;
-      setSubmitted({ email: parsed.data.contact_email, name: parsed.data.contact_name });
+      if (authedUserId) {
+        const { error } = await supabase.from("campaign_briefs").insert({
+          user_id: authedUserId,
+          title: parsed.data.title,
+          description: parsed.data.description,
+          budget: parsed.data.budget ?? null,
+          timeline: parsed.data.timeline ?? null,
+          target_audience: parsed.data.target_audience ?? null,
+          contact_email: parsed.data.contact_email,
+          collaboration_types: parsed.data.collaboration_types,
+          core_values: parsed.data.core_values,
+          status: "submitted",
+        } as any);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("lead_briefs").insert({
+          title: parsed.data.title,
+          description: parsed.data.description,
+          budget: parsed.data.budget ?? null,
+          timeline: parsed.data.timeline ?? null,
+          target_audience: parsed.data.target_audience ?? null,
+          contact_email: parsed.data.contact_email,
+          contact_name: parsed.data.contact_name,
+          company: parsed.data.company ?? null,
+          collaboration_types: parsed.data.collaboration_types,
+          core_values: parsed.data.core_values,
+          additional_info: parsed.data.additional_info ?? null,
+        } as any);
+        if (error) throw error;
+      }
+      setSubmitted({
+        email: parsed.data.contact_email,
+        name: parsed.data.contact_name,
+        asUser: Boolean(authedUserId),
+      });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
       toast.error(err.message ?? "Something went wrong");
@@ -192,33 +214,48 @@ function ConnectPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="rounded-lg border border-border/60 bg-muted/30 p-6 text-center">
-                <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
-                  While you wait
-                </p>
-                <h2 className="mt-2 font-display text-2xl">Join the Create Racket waitlist</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Be first to access the platform, early-bird pricing, and curated artist
-                  partnerships when we launch.
-                </p>
-                <Button
-                  className="mt-5"
-                  size="lg"
-                  onClick={handleSubscribe}
-                  disabled={subscribing || subscribed}
-                >
-                  {subscribed ? (
-                    <><Check className="mr-2 size-4" /> You're on the list</>
-                  ) : subscribing ? (
-                    <><Loader2 className="mr-2 size-4 animate-spin" /> Adding you…</>
-                  ) : (
-                    <>Subscribe with {submitted.email}</>
-                  )}
-                </Button>
-              </div>
+              {submitted.asUser ? (
+                <div className="rounded-lg border border-primary/40 bg-primary/5 p-6 text-center">
+                  <h2 className="font-display text-2xl">Track it in your Project Planner</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Your brief is now in your dashboard. We'll update the status as it moves through
+                    review, roster and reporting.
+                  </p>
+                  <Button asChild className="mt-5" size="lg">
+                    <Link to="/dashboard">Go to dashboard</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-border/60 bg-muted/30 p-6 text-center">
+                  <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
+                    While you wait
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl">Join the Create Racket waitlist</h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Be first to access the platform, early-bird pricing, and curated artist
+                    partnerships when we launch.
+                  </p>
+                  <Button
+                    className="mt-5"
+                    size="lg"
+                    onClick={handleSubscribe}
+                    disabled={subscribing || subscribed}
+                  >
+                    {subscribed ? (
+                      <><Check className="mr-2 size-4" /> You're on the list</>
+                    ) : subscribing ? (
+                      <><Loader2 className="mr-2 size-4 animate-spin" /> Adding you…</>
+                    ) : (
+                      <>Subscribe with {submitted.email}</>
+                    )}
+                  </Button>
+                </div>
+              )}
               <div className="text-center">
                 <Button asChild variant="ghost">
-                  <Link to="/">Back to home</Link>
+                  <Link to={submitted.asUser ? "/dashboard" : "/"}>
+                    {submitted.asUser ? "Back to dashboard" : "Back to home"}
+                  </Link>
                 </Button>
               </div>
             </CardContent>
