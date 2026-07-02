@@ -69,6 +69,7 @@ function DashboardPage() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
+  const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [loading, setLoading] = useState(true);
 
 
