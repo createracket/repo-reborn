@@ -1651,6 +1651,7 @@ function AddProspectCard({
       spotify_monthly_listens: toNum(form.spotify_monthly_listens),
       example_video_url: form.example_video_url.trim() || null,
       bio_page_url: form.has_bio ? form.bio_page_url.trim() || null : null,
+      content_review_url: form.content_review_url.trim() || null,
       position: nextPosition,
     });
     setSubmitting(false);
@@ -1672,6 +1673,7 @@ function AddProspectCard({
       example_video_url: "",
       has_bio: false,
       bio_page_url: "",
+      content_review_url: "",
     });
     setOpen(false);
     onAdded();
