@@ -197,8 +197,7 @@ function AdminPage() {
             <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
             <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
-            <TabsTrigger value="leads">Lead briefs ({leadBriefs.length})</TabsTrigger>
-            <TabsTrigger value="campaigns">Campaign briefs ({campaigns.length})</TabsTrigger>
+            <TabsTrigger value="briefs">Briefs ({leadBriefs.length + campaigns.length})</TabsTrigger>
             <TabsTrigger value="brief-form">Brief Form</TabsTrigger>
             <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
