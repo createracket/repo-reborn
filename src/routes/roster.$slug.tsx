@@ -317,7 +317,7 @@ function PublicRosterPage() {
                             ) : null,
                           )}
                         </div>
-                        {(it.example_video_url || it.bio_page_url) && (
+                        {(it.example_video_url || it.bio_page_url || it.content_review_url) && (
                           <div className="mt-3 flex flex-wrap gap-3 text-xs">
                             {it.example_video_url && (
                               <a
@@ -327,6 +327,16 @@ function PublicRosterPage() {
                                 className="text-primary hover:underline"
                               >
                                 Example video
+                              </a>
+                            )}
+                            {it.content_review_url && (
+                              <a
+                                href={it.content_review_url}
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                className="text-primary hover:underline"
+                              >
+                                Content to review
                               </a>
                             )}
                             {it.bio_page_url && (
