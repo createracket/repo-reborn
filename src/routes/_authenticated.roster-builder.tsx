@@ -796,11 +796,74 @@ function RosterDetailView({
               />
             </div>
             <div className="space-y-2">
-              <Label>Header image URL</Label>
+              <Label>Header image</Label>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  id={`header-upload-${roster.id}`}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!file) return;
+                    if (!file.type.startsWith("image/")) {
+                      toast.error("Please choose an image file");
+                      return;
+                    }
+                    if (file.size > 12 * 1024 * 1024) {
+                      toast.error("Image must be under 12MB");
+                      return;
+                    }
+                    setSavingMeta(true);
+                    try {
+                      const { data: u } = await supabase.auth.getUser();
+                      if (!u.user) {
+                        toast.error("Sign in required");
+                        return;
+                      }
+                      const { resizeImageFile } = await import("@/lib/image-resize");
+                      const resized = await resizeImageFile(file, 1600, 0.85);
+                      const path = `${u.user.id}/roster/${roster.id}/header-${crypto.randomUUID()}.jpg`;
+                      const { error: upErr } = await supabase.storage
+                        .from("avatars")
+                        .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
+                      if (upErr) {
+                        toast.error(`Upload failed: ${upErr.message}`);
+                        return;
+                      }
+                      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+                      setHeaderImageUrl(data.publicUrl);
+                      toast.success("Header uploaded — click Save to apply");
+                    } finally {
+                      setSavingMeta(false);
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById(`header-upload-${roster.id}`)?.click()}
+                  disabled={savingMeta}
+                >
+                  {headerImageUrl ? "Replace image" : "Upload image"}
+                </Button>
+                {headerImageUrl && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setHeaderImageUrl("")}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
               <Input
                 value={headerImageUrl}
                 onChange={(e) => setHeaderImageUrl(e.target.value)}
-                placeholder="https://…"
+                placeholder="…or paste an image URL"
               />
               {headerImageUrl && (
                 <div
@@ -1333,9 +1396,14 @@ function EditProspectPanel({
     }
     setUploading(true);
     try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) {
+        toast.error("Sign in required");
+        return;
+      }
       const { resizeImageFile } = await import("@/lib/image-resize");
       const resized = await resizeImageFile(file, 1080, 0.85);
-      const path = `roster/${item.id}/${crypto.randomUUID()}.jpg`;
+      const path = `${u.user.id}/roster/${item.id}/${crypto.randomUUID()}.jpg`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
         .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
