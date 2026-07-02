@@ -1785,6 +1785,13 @@ function AddProspectCard({
                 placeholder="https://…"
               />
             </Field>
+            <Field label="Content to review link (e.g. Frame.io)">
+              <Input
+                value={form.content_review_url}
+                onChange={(e) => update("content_review_url", e.target.value)}
+                placeholder="https://f.io/…"
+              />
+            </Field>
             <div className="flex items-center gap-2">
               <Checkbox
                 id="has-bio"
