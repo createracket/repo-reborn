@@ -936,14 +936,14 @@ function DraggableRosterList({
               : ""
           }
         >
-          <RosterItemRow item={it} onRemove={() => onRemove(it.id)} />
+          <RosterItemRow item={it} onRemove={() => onRemove(it.id)} onChanged={onChanged} />
         </li>
       ))}
     </ul>
   );
 }
 
-function RosterItemRow({ item, onRemove }: { item: RosterItem; onRemove: () => void }) {
+function RosterItemRow({ item, onRemove, onChanged }: { item: RosterItem; onRemove: () => void; onChanged: () => void }) {
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
