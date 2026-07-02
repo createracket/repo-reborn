@@ -883,10 +883,12 @@ function DraggableRosterList({
   items,
   onReorder,
   onRemove,
+  onChanged,
 }: {
   items: RosterItem[];
   onReorder: (next: RosterItem[]) => void;
   onRemove: (id: string) => void;
+  onChanged: () => void;
 }) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
