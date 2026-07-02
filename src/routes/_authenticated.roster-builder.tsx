@@ -1573,6 +1573,7 @@ function AddProspectCard({
     example_video_url: "",
     has_bio: false,
     bio_page_url: "",
+    content_review_url: "",
   });
 
   const update = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
