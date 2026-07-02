@@ -982,7 +982,7 @@ function SortableRosterRow({
 }
 
 
-function RosterItemRow({ item, onRemove, onChanged }: { item: RosterItem; onRemove: () => void; onChanged: () => void }) {
+function RosterItemRow({ item, onRemove, onChanged, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; dragHandleProps?: Record<string, unknown> }) {
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
