@@ -1015,7 +1015,7 @@ function SpotlightForm({
       setForm({
         slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
-        instagram: "", spotify: "", spotifyEmbed: "", contact: "",
+        instagram: "", tiktok: "", youtube: "", spotify: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "",
         header_image_url: "", profile_image_url: "", published: false,
         total_followers: "", total_streams: "", monthly_streams: "",
