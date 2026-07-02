@@ -746,6 +746,7 @@ export type Database = {
           bio_page_url: string | null
           budget: number | null
           category: string | null
+          content_review_url: string | null
           created_at: string
           example_video_url: string | null
           id: string
@@ -773,6 +774,7 @@ export type Database = {
           bio_page_url?: string | null
           budget?: number | null
           category?: string | null
+          content_review_url?: string | null
           created_at?: string
           example_video_url?: string | null
           id?: string
@@ -800,6 +802,7 @@ export type Database = {
           bio_page_url?: string | null
           budget?: number | null
           category?: string | null
+          content_review_url?: string | null
           created_at?: string
           example_video_url?: string | null
           id?: string
