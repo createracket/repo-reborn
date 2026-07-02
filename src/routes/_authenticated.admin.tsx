@@ -948,6 +948,54 @@ function SpotlightForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube">(null);
+  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number }>({});
+
+  async function syncSocial(platform: "instagram" | "tiktok" | "youtube") {
+    const raw = String(form[platform] || "").trim();
+    if (!raw) {
+      toast.error(`Enter a ${platform} URL first`);
+      return;
+    }
+    let full = raw;
+    if (!/^https?:\/\//i.test(full)) {
+      const h = full.replace(/^@/, "");
+      if (platform === "instagram") full = `https://instagram.com/${h}`;
+      else if (platform === "tiktok") full = `https://tiktok.com/@${h}`;
+      else full = `https://youtube.com/@${h}`;
+    }
+    setSyncing(platform);
+    try {
+      const r = await scrapeProfile({ data: { url: full } });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      if (r.followers != null) {
+        setFetchedCounts((c) => ({ ...c, [platform]: r.followers ?? 0 }));
+        toast.success(`${platform}: ${r.followers.toLocaleString()} followers`);
+      } else {
+        toast.error("No follower count returned");
+      }
+    } finally {
+      setSyncing(null);
+    }
+  }
+
+  function applyTotalFollowers() {
+    const total =
+      (fetchedCounts.instagram ?? 0) +
+      (fetchedCounts.tiktok ?? 0) +
+      (fetchedCounts.youtube ?? 0);
+    if (total <= 0) {
+      toast.error("Sync at least one social first");
+      return;
+    }
+    set("total_followers", String(total));
+    toast.success(`Total followers set to ${total.toLocaleString()}`);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.slug || !form.headline) {
