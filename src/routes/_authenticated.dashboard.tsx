@@ -459,7 +459,7 @@ function DashboardPage() {
               <CardContent>
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : roster.length === 0 ? (
+                ) : roster.length === 0 && taggedCreators.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
                     {latestVibe ? (
                       <p className="text-muted-foreground">
