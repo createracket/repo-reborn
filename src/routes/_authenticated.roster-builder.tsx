@@ -1416,6 +1416,7 @@ function EditProspectPanel({
         {fld("Spotify URL", "spotify_url")}
         {fld("Monthly listeners", "spotify_monthly_listens")}
         {fld("Example video URL", "example_video_url")}
+        {fld("Content to review URL (e.g. Frame.io)", "content_review_url")}
         {fld("Bio page URL", "bio_page_url")}
       </div>
       <div className="flex justify-end gap-2">
