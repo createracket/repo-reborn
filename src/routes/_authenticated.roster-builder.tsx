@@ -1922,10 +1922,11 @@ function SharePanel({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-display text-lg">
-          <Share2 className="size-4" /> Share roster
+          <Share2 className="size-4" /> Tag users on this roster
         </CardTitle>
         <CardDescription>
-          Only people you add here can view this roster. They'll see it at <code>/roster-builder</code>.
+          Tag one or more users to give them access to this roster. The creators on it will also
+          appear in their <strong>Your roster</strong> section on the dashboard.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">

@@ -69,6 +69,7 @@ function DashboardPage() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
+  const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -164,6 +165,42 @@ function DashboardPage() {
         );
       } else {
         setRoster([]);
+      }
+
+      // Rosters the user has been tagged on → surface those creators here
+      const { data: sharedRosters } = await supabase
+        .from("rosters")
+        .select("id, title, slug, published")
+        .order("updated_at", { ascending: false });
+      const sharedList = (sharedRosters ?? []) as Array<{ id: string; title: string; slug: string | null; published: boolean }>;
+      // Only list rosters owned by others (RLS returns shared + owned; hide owned to avoid duplication)
+      const { data: mine } = await supabase.from("rosters").select("id").eq("owner_id", u.user.id);
+      const ownedIds = new Set(((mine ?? []) as Array<{ id: string }>).map((r) => r.id));
+      const sharedOnly = sharedList.filter((r) => !ownedIds.has(r.id));
+      if (sharedOnly.length) {
+        const rosterIds = sharedOnly.map((r) => r.id);
+        const { data: items } = await supabase
+          .from("roster_items")
+          .select("id, name, avatar_url, roster_id")
+          .in("roster_id", rosterIds)
+          .order("position", { ascending: true });
+        const byRoster = new Map(sharedOnly.map((r) => [r.id, r]));
+        setTaggedCreators(
+          ((items ?? []) as any[]).map((it) => {
+            const r = byRoster.get(it.roster_id)!;
+            return {
+              id: it.id,
+              name: it.name,
+              avatar_url: it.avatar_url,
+              roster_id: it.roster_id,
+              roster_title: r.title,
+              roster_slug: r.slug,
+              roster_published: r.published,
+            };
+          }),
+        );
+      } else {
+        setTaggedCreators([]);
       }
       setLoading(false);
     })();
@@ -422,7 +459,7 @@ function DashboardPage() {
               <CardContent>
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : roster.length === 0 ? (
+                ) : roster.length === 0 && taggedCreators.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
                     {latestVibe ? (
                       <p className="text-muted-foreground">
