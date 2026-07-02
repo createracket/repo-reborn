@@ -1188,6 +1188,20 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_campaign_report_assignment: {
+        Args: { _report_id: string }
+        Returns: {
+          brand_email: string
+          client_email: string
+        }[]
+      }
+      get_roster_assignment: {
+        Args: { _roster_id: string }
+        Returns: {
+          brand_email: string
+          client_email: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
