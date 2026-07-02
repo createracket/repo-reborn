@@ -1122,6 +1122,7 @@ function RosterItemRow({ item, onRemove, onChanged }: { item: RosterItem; onRemo
                 .update({ status: v } as never)
                 .eq("id", item.id);
               if (error) toast.error(error.message);
+              else onChanged();
             }}
           >
             <SelectTrigger className={`h-8 w-[150px] text-xs ${STATUS_BADGE[item.status ?? "in_review"]}`}>
@@ -1144,6 +1145,7 @@ function RosterItemRow({ item, onRemove, onChanged }: { item: RosterItem; onRemo
                 .update({ category: next } as never)
                 .eq("id", item.id);
               if (error) toast.error(error.message);
+              else onChanged();
             }}
           >
             <SelectTrigger className="h-8 w-[150px] text-xs">
@@ -1161,8 +1163,8 @@ function RosterItemRow({ item, onRemove, onChanged }: { item: RosterItem; onRemo
           <Button
             size="sm"
             variant="outline"
-            className="h-8 px-2 text-base"
-            title={item.location ? `Location: ${LOCATION_LABEL[item.location]} (click to change)` : "Set location"}
+            className="h-8 w-[150px] justify-center gap-1.5 px-2 text-sm"
+            title={item.location ? `Location: ${LOCATION_LABEL[item.location]} (click to cycle)` : "Set location (click to cycle)"}
             onClick={async () => {
               const next = nextLocation(item.location);
               const { error } = await supabase
@@ -1170,9 +1172,17 @@ function RosterItemRow({ item, onRemove, onChanged }: { item: RosterItem; onRemo
                 .update({ location: next } as never)
                 .eq("id", item.id);
               if (error) toast.error(error.message);
+              else onChanged();
             }}
           >
-            {item.location ? LOCATION_FLAG[item.location] : <span className="text-xs text-muted-foreground">🌐 Location</span>}
+            {item.location ? (
+              <>
+                <span className="text-base leading-none">{LOCATION_FLAG[item.location]}</span>
+                <span className="text-[10px] uppercase tracking-wider">{LOCATION_LABEL[item.location]}</span>
+              </>
+            ) : (
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">🌐 Set location</span>
+            )}
           </Button>
           {item.budget != null && item.budget > 0 && (
             <Badge
