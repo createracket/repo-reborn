@@ -144,13 +144,14 @@ const STATUS_BADGE: Record<string, string> = {
   live: "border-pink-accent/40 bg-pink-accent/10 text-pink-accent",
 };
 
-type CategoryValue = "musician" | "ugc" | "egc" | "music_fan" | "editorial";
+type CategoryValue = "musician" | "ugc" | "egc" | "music_fan" | "editorial" | "artist_exchange";
 const CATEGORY_OPTIONS: Array<{ value: CategoryValue; label: string; badge: string }> = [
   { value: "musician", label: "Musician", badge: "bg-pink-accent text-[#2b2b2b]" },
   { value: "ugc", label: "UGC", badge: "bg-purple text-white" },
   { value: "egc", label: "EGC", badge: "bg-sky-500 text-white" },
   { value: "music_fan", label: "Music Fan", badge: "bg-emerald-500 text-white" },
   { value: "editorial", label: "Editorial", badge: "bg-amber-500 text-white" },
+  { value: "artist_exchange", label: "Artist Exchange", badge: "bg-rose-500 text-white" },
 ];
 const CATEGORY_LABEL: Record<CategoryValue, string> = Object.fromEntries(
   CATEGORY_OPTIONS.map((c) => [c.value, c.label]),
