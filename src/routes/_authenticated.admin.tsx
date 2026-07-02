@@ -207,36 +207,7 @@ function AdminPage() {
             <TrafficAdmin />
           </TabsContent>
 
-          <TabsContent value="leads" className="mt-6 space-y-3">
-            {leadBriefs.length === 0 ? <Empty /> : leadBriefs.map((b) => (
-              <Card key={b.id}>
-                <CardHeader>
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <CardTitle className="text-lg">{b.title}</CardTitle>
-                      <CardDescription>
-                        {b.contact_name ?? "—"} · {b.contact_email} {b.company ? `· ${b.company}` : ""}
-                      </CardDescription>
-                      <div className="mt-1">
-                        <ProfileChip profile={lookupProfile(b.contact_email)} fallbackEmail={b.contact_email} />
-                      </div>
-                    </div>
-                    <Meta date={b.created_at} status={b.status} />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
-                  <KV k="Budget" v={b.budget ? `£${b.budget}` : "—"} />
-                  <KV k="Timeline" v={b.timeline ?? "—"} />
-                  <KV k="Audience" v={b.target_audience ?? "—"} />
-                  <KV k="Values" v={b.core_values?.join(", ") || "—"} />
-                  <KV k="Collab" v={b.collaboration_types?.join(", ") || "—"} />
-                </CardContent>
-              </Card>
-            ))}
-          </TabsContent>
-
-          <TabsContent value="campaigns" className="mt-6 space-y-6">
+          <TabsContent value="briefs" className="mt-6 space-y-6">
             <NewCampaignBriefForm
               onCreated={async () => {
                 const { data } = await supabase
@@ -247,69 +218,30 @@ function AdminPage() {
               }}
             />
             <p className="text-xs text-muted-foreground">
-              Toggle <span className="font-medium text-foreground">Publish as opportunity</span> to surface a brief on every signed-in artist's dashboard.
+              One place for every project. Briefs from signed-in users and leads (no login yet) both
+              appear here. Change the status to keep the user's Project Planner in sync. Toggle{" "}
+              <span className="font-medium text-foreground">Publish as opportunity</span> to surface a
+              user brief on every signed-in artist's dashboard.
             </p>
-            {campaigns.length === 0 ? <Empty /> : campaigns.map((b) => (
-              <Card key={b.id}>
-                <CardHeader>
-                  <div className="flex justify-between gap-2">
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        {b.title}
-                        {b.published ? (
-                          <Badge className="bg-primary/15 text-primary border-primary/30">Live opportunity</Badge>
-                        ) : null}
-                      </CardTitle>
-                      <CardDescription>{b.contact_email ?? b.user_id}</CardDescription>
-                      <div className="mt-1">
-                        <ProfileChip
-                          profile={lookupProfile(b.contact_email) ?? profiles.find((p) => p.id === b.user_id) ?? null}
-                          fallbackEmail={b.contact_email}
-                        />
-                      </div>
-                    </div>
-                    <Meta date={b.created_at} status={b.status} />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
-                  <KV k="Budget" v={b.budget ? `£${b.budget}` : "—"} />
-                  <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-                    <div>
-                      <Label htmlFor={`pub-${b.id}`} className="text-sm font-medium">
-                        Publish as opportunity
-                      </Label>
-                      <p className="text-xs text-muted-foreground">
-                        {b.published
-                          ? `Visible to artists${b.published_at ? ` since ${new Date(b.published_at).toLocaleDateString()}` : ""}.`
-                          : "Hidden — only admins can see this brief."}
-                      </p>
-                    </div>
-                    <Switch
-                      id={`pub-${b.id}`}
-                      checked={b.published}
-                      onCheckedChange={async (checked) => {
-                        const nextPublishedAt = checked ? new Date().toISOString() : null;
-                        // optimistic
-                        setCampaigns((cs) => cs.map((c) => c.id === b.id ? { ...c, published: checked, published_at: nextPublishedAt } : c));
-                        const { error } = await supabase
-                          .from("campaign_briefs")
-                          .update({ published: checked, published_at: nextPublishedAt })
-                          .eq("id", b.id);
-                        if (error) {
-                          // revert
-                          setCampaigns((cs) => cs.map((c) => c.id === b.id ? { ...c, published: b.published, published_at: b.published_at } : c));
-                          toast.error(error.message);
-                        } else {
-                          toast.success(checked ? "Published to artist dashboards" : "Unpublished");
-                        }
-                      }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <UnifiedBriefs
+              leads={leadBriefs}
+              campaigns={campaigns}
+              lookupProfile={lookupProfile}
+              profiles={profiles}
+              onLeadStatusChanged={(id, next) =>
+                setLeadBriefs((rows) => rows.map((r) => (r.id === id ? { ...r, status: next } : r)))
+              }
+              onCampaignStatusChanged={(id, next) =>
+                setCampaigns((rows) => rows.map((r) => (r.id === id ? { ...r, status: next } : r)))
+              }
+              onCampaignPublishChanged={(id, published, published_at) =>
+                setCampaigns((rows) =>
+                  rows.map((r) => (r.id === id ? { ...r, published, published_at } : r)),
+                )
+              }
+            />
           </TabsContent>
+
 
 
 
