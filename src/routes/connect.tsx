@@ -119,21 +119,41 @@ function ConnectPage() {
 
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("lead_briefs").insert({
-        title: parsed.data.title,
-        description: parsed.data.description,
-        budget: parsed.data.budget ?? null,
-        timeline: parsed.data.timeline ?? null,
-        target_audience: parsed.data.target_audience ?? null,
-        contact_email: parsed.data.contact_email,
-        contact_name: parsed.data.contact_name,
-        company: parsed.data.company ?? null,
-        collaboration_types: parsed.data.collaboration_types,
-        core_values: parsed.data.core_values,
-        additional_info: parsed.data.additional_info ?? null,
-      } as any);
-      if (error) throw error;
-      setSubmitted({ email: parsed.data.contact_email, name: parsed.data.contact_name });
+      if (authedUserId) {
+        const { error } = await supabase.from("campaign_briefs").insert({
+          user_id: authedUserId,
+          title: parsed.data.title,
+          description: parsed.data.description,
+          budget: parsed.data.budget ?? null,
+          timeline: parsed.data.timeline ?? null,
+          target_audience: parsed.data.target_audience ?? null,
+          contact_email: parsed.data.contact_email,
+          collaboration_types: parsed.data.collaboration_types,
+          core_values: parsed.data.core_values,
+          status: "submitted",
+        } as any);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("lead_briefs").insert({
+          title: parsed.data.title,
+          description: parsed.data.description,
+          budget: parsed.data.budget ?? null,
+          timeline: parsed.data.timeline ?? null,
+          target_audience: parsed.data.target_audience ?? null,
+          contact_email: parsed.data.contact_email,
+          contact_name: parsed.data.contact_name,
+          company: parsed.data.company ?? null,
+          collaboration_types: parsed.data.collaboration_types,
+          core_values: parsed.data.core_values,
+          additional_info: parsed.data.additional_info ?? null,
+        } as any);
+        if (error) throw error;
+      }
+      setSubmitted({
+        email: parsed.data.contact_email,
+        name: parsed.data.contact_name,
+        asUser: Boolean(authedUserId),
+      });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
       toast.error(err.message ?? "Something went wrong");
