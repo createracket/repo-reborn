@@ -105,21 +105,54 @@ function DashboardPage() {
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null }>>([]);
   const [loading, setLoading] = useState(true);
-  const [rosterFilter, setRosterFilter] = useState<string>("all");
+  const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminOwners, setAdminOwners] = useState<Array<{ id: string; name: string }>>([]);
+  const [otherRoster, setOtherRoster] = useState<RosterRow[]>([]);
 
-  const rosterOptions = useMemo(() => {
-    const map = new Map<string, string>();
-    taggedCreators.forEach((c) => {
-      if (!map.has(c.roster_id)) map.set(c.roster_id, c.roster_title);
-    });
-    return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
-  }, [taggedCreators]);
+  const isMineView = rosterFilter === "mine";
+  const displayedRoster = isMineView ? roster : otherRoster;
 
-  const showMine = rosterFilter === "all" || rosterFilter === "mine";
-  const filteredTagged = rosterFilter === "all" || rosterFilter === "mine"
-    ? (rosterFilter === "mine" ? [] : taggedCreators)
-    : taggedCreators.filter((c) => c.roster_id === rosterFilter);
+  useEffect(() => {
+    if (isMineView || !isAdmin) {
+      setOtherRoster([]);
+      return;
+    }
+    (async () => {
+      const { data: rows } = await supabase
+        .from("roster_members")
+        .select("id, member_id, created_at")
+        .eq("owner_id", rosterFilter)
+        .order("created_at", { ascending: false });
+      const memberIds = ((rows ?? []) as any[]).map((r) => r.member_id);
+      if (!memberIds.length) return setOtherRoster([]);
+      const { data: profilesData } = await (supabase as any)
+        .from("public_profiles")
+        .select("id, display_name, avatar_url, account_type")
+        .in("id", memberIds);
+      const byId = new Map((profilesData ?? []).map((p: any) => [p.id, p]));
+      setOtherRoster(((rows ?? []) as any[]).map((r) => ({ ...r, member: byId.get(r.member_id) ?? null })));
+    })();
+  }, [rosterFilter, isAdmin, isMineView]);
+
+  useEffect(() => {
+    if (!isAdmin) { setAdminOwners([]); return; }
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      const { data: rows } = await supabase
+        .from("roster_members")
+        .select("owner_id");
+      const uniqueIds = Array.from(new Set(((rows ?? []) as any[]).map((r) => r.owner_id))).filter((id) => id !== u.user?.id);
+      if (!uniqueIds.length) return setAdminOwners([]);
+      const { data: profs } = await (supabase as any)
+        .from("public_profiles")
+        .select("id, display_name")
+        .in("id", uniqueIds);
+      const byId = new Map(((profs ?? []) as any[]).map((p) => [p.id, p.display_name]));
+      setAdminOwners(uniqueIds.map((id) => ({ id, name: (byId.get(id) as string) || "Unnamed user" })).sort((a, b) => a.name.localeCompare(b.name)));
+    })();
+  }, [isAdmin]);
+
 
 
   useEffect(() => {
@@ -618,10 +651,9 @@ function DashboardPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All rosters</SelectItem>
                         <SelectItem value="mine">My saved roster</SelectItem>
-                        {rosterOptions.map((o) => (
-                          <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>
+                        {adminOwners.map((o) => (
+                          <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -629,7 +661,7 @@ function DashboardPage() {
                 )}
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : (showMine ? roster.length : 0) === 0 && filteredTagged.length === 0 ? (
+                ) : displayedRoster.length === 0 && (!isMineView ? true : taggedCreators.length === 0) ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
                     {latestVibe ? (
                       <p className="text-muted-foreground">
@@ -649,7 +681,7 @@ function DashboardPage() {
                   </div>
                 ) : (
                   <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {showMine && roster.map((r) => (
+                    {displayedRoster.map((r) => (
                       <li
                         key={r.id}
                         className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
@@ -674,16 +706,18 @@ function DashboardPage() {
                             </div>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFromRoster(r.id)}
-                        >
-                          Remove
-                        </Button>
+                        {isMineView && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFromRoster(r.id)}
+                          >
+                            Remove
+                          </Button>
+                        )}
                       </li>
                     ))}
-                    {filteredTagged.map((c) => (
+                    {isMineView && taggedCreators.map((c) => (
                       <li
                         key={`tag-${c.id}`}
                         className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
