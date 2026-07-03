@@ -105,53 +105,51 @@ function DashboardPage() {
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null }>>([]);
   const [loading, setLoading] = useState(true);
-  const [rosterFilter, setRosterFilter] = useState<string>("mine");
+  const [rosterFilter, setRosterFilter] = useState<string>("all");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminOwners, setAdminOwners] = useState<Array<{ id: string; name: string }>>([]);
-  const [otherRoster, setOtherRoster] = useState<RosterRow[]>([]);
+  const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
+  const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
 
+  const isAllView = rosterFilter === "all";
   const isMineView = rosterFilter === "mine";
-  const displayedRoster = isMineView ? roster : otherRoster;
+  const isRosterView = !isAllView && !isMineView;
+  // Saved-member rows show on "All" and "My saved roster"; hidden on individual roster view
+  const displayedRoster = isRosterView ? [] : roster;
 
+  // Load current user's owned rosters for the toggle
   useEffect(() => {
-    if (isMineView || !isAdmin) {
-      setOtherRoster([]);
-      return;
-    }
-    (async () => {
-      const { data: rows } = await supabase
-        .from("roster_members")
-        .select("id, member_id, created_at")
-        .eq("owner_id", rosterFilter)
-        .order("created_at", { ascending: false });
-      const memberIds = ((rows ?? []) as any[]).map((r) => r.member_id);
-      if (!memberIds.length) return setOtherRoster([]);
-      const { data: profilesData } = await (supabase as any)
-        .from("public_profiles")
-        .select("id, display_name, avatar_url, account_type")
-        .in("id", memberIds);
-      const byId = new Map((profilesData ?? []).map((p: any) => [p.id, p]));
-      setOtherRoster(((rows ?? []) as any[]).map((r) => ({ ...r, member: byId.get(r.member_id) ?? null })));
-    })();
-  }, [rosterFilter, isAdmin, isMineView]);
-
-  useEffect(() => {
-    if (!isAdmin) { setAdminOwners([]); return; }
     (async () => {
       const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
       const { data: rows } = await supabase
-        .from("roster_members")
-        .select("owner_id");
-      const uniqueIds = Array.from(new Set(((rows ?? []) as any[]).map((r) => r.owner_id))).filter((id) => id !== u.user?.id);
-      if (!uniqueIds.length) return setAdminOwners([]);
-      const { data: profs } = await (supabase as any)
-        .from("public_profiles")
-        .select("id, display_name")
-        .in("id", uniqueIds);
-      const byId = new Map(((profs ?? []) as any[]).map((p) => [p.id, p.display_name]));
-      setAdminOwners(uniqueIds.map((id) => ({ id, name: (byId.get(id) as string) || "Unnamed user" })).sort((a, b) => a.name.localeCompare(b.name)));
+        .from("rosters")
+        .select("id, title")
+        .eq("owner_id", u.user.id)
+        .order("updated_at", { ascending: false });
+      setMyRosters(((rows ?? []) as any[]).map((r: any) => ({ id: r.id, title: r.title })));
     })();
-  }, [isAdmin]);
+  }, []);
+
+  // Load items for a specific owned roster when selected
+  useEffect(() => {
+    if (!isRosterView) { setRosterItems([]); return; }
+    (async () => {
+      const selected = myRosters.find((r) => r.id === rosterFilter);
+      const { data: items } = await (supabase as any)
+        .from("roster_items")
+        .select("id, name, avatar_url, category, roster_id, sort_order")
+        .eq("roster_id", rosterFilter)
+        .order("sort_order", { ascending: true });
+      setRosterItems(((items ?? []) as any[]).map((it) => ({
+        id: it.id,
+        name: it.name,
+        avatar_url: it.avatar_url,
+        category: it.category,
+        roster_id: it.roster_id,
+        roster_title: selected?.title ?? "",
+      })));
+    })();
+  }, [rosterFilter, isRosterView, myRosters]);
 
 
 
@@ -641,7 +639,7 @@ function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {!loading && isAdmin && (
+                {!loading && (
                   <div className="mb-4 flex flex-wrap items-center gap-2">
                     <Label htmlFor="dash-roster-filter" className="text-xs uppercase tracking-wide text-muted-foreground">
                       View
@@ -651,9 +649,10 @@ function DashboardPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="all">All rosters</SelectItem>
                         <SelectItem value="mine">My saved roster</SelectItem>
-                        {adminOwners.map((o) => (
-                          <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                        {myRosters.map((r) => (
+                          <SelectItem key={r.id} value={r.id}>{r.title}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -661,93 +660,132 @@ function DashboardPage() {
                 )}
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : displayedRoster.length === 0 && (!isMineView ? true : taggedCreators.length === 0) ? (
-                  <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
-                    {latestVibe ? (
-                      <p className="text-muted-foreground">
-                        Your roster is empty. Community browsing is coming soon — we'll start
-                        surfacing matches based on your Vibe Check results here.
-                      </p>
-                    ) : (
-                      <>
-                        <p className="text-muted-foreground">
-                          Your roster is empty. Take the Vibe Check to start surfacing matches.
-                        </p>
-                        <Button asChild className="mt-4">
-                          <Link to="/vibe-check">Take the Vibe Check</Link>
-                        </Button>
-                      </>
-                    )}
-                  </div>
                 ) : (
-                  <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {displayedRoster.map((r) => (
-                      <li
-                        key={r.id}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="size-10 overflow-hidden rounded-full bg-muted">
-                            {r.member?.avatar_url ? (
-                              <img
-                                src={r.member.avatar_url}
-                                alt=""
-                                className="size-full object-cover"
-                              />
-                            ) : null}
-                          </div>
-                          <div>
-                            <div className="font-medium flex items-center gap-2 flex-wrap">
-                              <span>{r.member?.display_name ?? "Member"}</span>
-                              <TypeTag tag={r.member?.account_type ? ACCOUNT_TYPE_TAG[r.member.account_type] : undefined} />
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              Added {new Date(r.created_at).toLocaleDateString()}
-                            </div>
-                          </div>
+                  (() => {
+                    const showSaved = isAllView || isMineView;
+                    const showTagged = isAllView;
+                    const showItems = isRosterView;
+                    const isEmpty =
+                      (!showSaved || displayedRoster.length === 0) &&
+                      (!showTagged || taggedCreators.length === 0) &&
+                      (!showItems || rosterItems.length === 0);
+                    if (isEmpty) {
+                      return (
+                        <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
+                          {isRosterView ? (
+                            <p className="text-muted-foreground">
+                              This roster doesn't have any creators yet.
+                            </p>
+                          ) : latestVibe ? (
+                            <p className="text-muted-foreground">
+                              Your roster is empty. Community browsing is coming soon — we'll start
+                              surfacing matches based on your Vibe Check results here.
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-muted-foreground">
+                                Your roster is empty. Take the Vibe Check to start surfacing matches.
+                              </p>
+                              <Button asChild className="mt-4">
+                                <Link to="/vibe-check">Take the Vibe Check</Link>
+                              </Button>
+                            </>
+                          )}
                         </div>
-                        {isMineView && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFromRoster(r.id)}
+                      );
+                    }
+                    return (
+                      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {showSaved && displayedRoster.map((r) => (
+                          <li
+                            key={r.id}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
                           >
-                            Remove
-                          </Button>
-                        )}
-                      </li>
-                    ))}
-                    {isMineView && taggedCreators.map((c) => (
-                      <li
-                        key={`tag-${c.id}`}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
-                            {c.avatar_url ? (
-                              <img src={c.avatar_url} alt="" className="size-full object-cover" />
+                            <div className="flex items-center gap-3">
+                              <div className="size-10 overflow-hidden rounded-full bg-muted">
+                                {r.member?.avatar_url ? (
+                                  <img
+                                    src={r.member.avatar_url}
+                                    alt=""
+                                    className="size-full object-cover"
+                                  />
+                                ) : null}
+                              </div>
+                              <div>
+                                <div className="font-medium flex items-center gap-2 flex-wrap">
+                                  <span>{r.member?.display_name ?? "Member"}</span>
+                                  <TypeTag tag={r.member?.account_type ? ACCOUNT_TYPE_TAG[r.member.account_type] : undefined} />
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  Added {new Date(r.created_at).toLocaleDateString()}
+                                </div>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeFromRoster(r.id)}
+                            >
+                              Remove
+                            </Button>
+                          </li>
+                        ))}
+                        {showTagged && taggedCreators.map((c) => (
+                          <li
+                            key={`tag-${c.id}`}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
+                                {c.avatar_url ? (
+                                  <img src={c.avatar_url} alt="" className="size-full object-cover" />
+                                ) : null}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-medium truncate flex items-center gap-2">
+                                  <span className="truncate">{c.name ?? "Creator"}</span>
+                                  <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
+                                </div>
+                                <div className="text-xs text-muted-foreground truncate">
+                                  From {c.roster_title}
+                                </div>
+                              </div>
+                            </div>
+                            {c.roster_published && c.roster_slug ? (
+                              <Button asChild size="sm" variant="ghost">
+                                <a href={`/roster/${c.roster_slug}`} target="_blank" rel="noreferrer">
+                                  View
+                                </a>
+                              </Button>
                             ) : null}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-medium truncate flex items-center gap-2">
-                              <span className="truncate">{c.name ?? "Creator"}</span>
-                              <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
+                          </li>
+                        ))}
+                        {showItems && rosterItems.map((c) => (
+                          <li
+                            key={`item-${c.id}`}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
+                                {c.avatar_url ? (
+                                  <img src={c.avatar_url} alt="" className="size-full object-cover" />
+                                ) : null}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-medium truncate flex items-center gap-2">
+                                  <span className="truncate">{c.name ?? "Creator"}</span>
+                                  <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
+                                </div>
+                                <div className="text-xs text-muted-foreground truncate">
+                                  From {c.roster_title}
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-xs text-muted-foreground truncate">
-                              From {c.roster_title}
-                            </div>
-                          </div>
-                        </div>
-                        {c.roster_published && c.roster_slug ? (
-                          <Button asChild size="sm" variant="ghost">
-                            <a href={`/roster/${c.roster_slug}`} target="_blank" rel="noreferrer">
-                              View
-                            </a>
-                          </Button>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  })()
                 )}
 
 
