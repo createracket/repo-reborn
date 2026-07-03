@@ -97,7 +97,7 @@ function PublicReportPage() {
   useEffect(() => {
     (async () => {
       const { data: r } = await (supabase as any)
-        .from("campaign_reports")
+        .from("public_campaign_reports")
         .select("id, title, description, slug, published, published_at, header_image_url")
         .eq("slug", slug)
         .eq("published", true)
