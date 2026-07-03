@@ -200,7 +200,7 @@ function AdminPage() {
             <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
             <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
-            <TabsTrigger value="briefs">Briefs ({leadBriefs.length + campaigns.length})</TabsTrigger>
+            
             <TabsTrigger value="brief-form">Brief Form</TabsTrigger>
             <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
@@ -210,49 +210,6 @@ function AdminPage() {
             <TrafficAdmin />
           </TabsContent>
 
-          <TabsContent value="briefs" className="mt-6 space-y-6">
-            <NewCampaignBriefForm
-              onCreated={async () => {
-                const { data } = await supabase
-                  .from("campaign_briefs")
-                  .select("id, created_at, title, description, user_id, budget, status, contact_email, published, published_at")
-                  .order("created_at", { ascending: false });
-                setCampaigns((data as CampaignBrief[]) ?? []);
-              }}
-            />
-            <p className="text-xs text-muted-foreground">
-              One place for every project. Briefs from signed-in users and leads (no login yet) both
-              appear here. Change the status to keep the user's Project Planner in sync. Toggle{" "}
-              <span className="font-medium text-foreground">Publish as opportunity</span> to surface a
-              user brief on every signed-in artist's dashboard.
-            </p>
-            <UnifiedBriefs
-              leads={leadBriefs}
-              campaigns={campaigns}
-              lookupProfile={lookupProfile}
-              profiles={profiles}
-              onLeadStatusChanged={(id, next) =>
-                setLeadBriefs((rows) => rows.map((r) => (r.id === id ? { ...r, status: next } : r)))
-              }
-              onCampaignStatusChanged={(id, next) =>
-                setCampaigns((rows) => rows.map((r) => (r.id === id ? { ...r, status: next } : r)))
-              }
-              onCampaignPublishChanged={(id, published, published_at) =>
-                setCampaigns((rows) =>
-                  rows.map((r) => (r.id === id ? { ...r, published, published_at } : r)),
-                )
-              }
-              onLeadUpdated={(id, patch) =>
-                setLeadBriefs((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } as LeadBrief : r)))
-              }
-              onCampaignUpdated={(id, patch) =>
-                setCampaigns((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } as CampaignBrief : r)))
-              }
-              onLeadDeleted={(id) => setLeadBriefs((rows) => rows.filter((r) => r.id !== id))}
-              onCampaignDeleted={(id) => setCampaigns((rows) => rows.filter((r) => r.id !== id))}
-            />
-
-          </TabsContent>
 
 
 
