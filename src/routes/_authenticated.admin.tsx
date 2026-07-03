@@ -24,6 +24,7 @@ import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
 import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
 import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
 import { TrafficAdmin } from "@/components/admin/TrafficAdmin";
+import { ExampleOpportunitiesAdmin } from "@/components/admin/ExampleOpportunitiesAdmin";
 import { BriefStatusBadge, BriefStatusSelect, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
@@ -204,6 +205,7 @@ function AdminPage() {
             
             <TabsTrigger value="brief-form">Brief Form</TabsTrigger>
             <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
+            <TabsTrigger value="example-opps">Example opportunities</TabsTrigger>
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
           </TabsList>
 
@@ -599,6 +601,10 @@ function AdminPage() {
 
           <TabsContent value="emails" className="mt-6">
             <EmailsAdmin />
+          </TabsContent>
+
+          <TabsContent value="example-opps" className="mt-6">
+            <ExampleOpportunitiesAdmin />
           </TabsContent>
         </Tabs>
       </main>
