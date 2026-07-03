@@ -311,7 +311,7 @@ function DashboardPage() {
       setExamples(((exOpps as any[]) ?? []) as any);
 
       // Spotlights: live-for-all + privately shared to this user (via RLS)
-      const [{ data: liveSpotlights }, { data: sharedRows }] = await Promise.all([
+      const [{ data: liveSpotlights }, { data: spotlightShareRows }] = await Promise.all([
         (supabase as any)
           .from("partner_pages")
           .select("id, slug, headline, subtitle, type, header_image_url")
@@ -322,7 +322,7 @@ function DashboardPage() {
           .from("partner_page_shares")
           .select("partner_page_id"),
       ]);
-      const sharedIds = Array.from(new Set(((sharedRows ?? []) as any[]).map((r) => r.partner_page_id as string)));
+      const sharedIds = Array.from(new Set(((spotlightShareRows ?? []) as any[]).map((r) => r.partner_page_id as string)));
       let sharedSpotlights: any[] = [];
       if (sharedIds.length) {
         const { data } = await (supabase as any)
