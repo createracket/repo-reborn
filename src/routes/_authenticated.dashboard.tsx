@@ -599,7 +599,7 @@ function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {rosterOptions.length > 0 && !loading && (
+                {!loading && (
                   <div className="mb-4 flex flex-wrap items-center gap-2">
                     <Label htmlFor="dash-roster-filter" className="text-xs uppercase tracking-wide text-muted-foreground">
                       View
