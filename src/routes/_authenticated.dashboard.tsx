@@ -105,6 +105,20 @@ function DashboardPage() {
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null }>>([]);
   const [loading, setLoading] = useState(true);
+  const [rosterFilter, setRosterFilter] = useState<string>("all");
+
+  const rosterOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    taggedCreators.forEach((c) => {
+      if (!map.has(c.roster_id)) map.set(c.roster_id, c.roster_title);
+    });
+    return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
+  }, [taggedCreators]);
+
+  const showMine = rosterFilter === "all" || rosterFilter === "mine";
+  const filteredTagged = rosterFilter === "all" || rosterFilter === "mine"
+    ? (rosterFilter === "mine" ? [] : taggedCreators)
+    : taggedCreators.filter((c) => c.roster_id === rosterFilter);
 
 
   useEffect(() => {
