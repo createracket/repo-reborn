@@ -13,7 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
-import { BriefStatusBadge, BriefStatusSelect, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
+import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
+import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
 import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS, transparencyLabel } from "@/lib/brief-currency";
 
