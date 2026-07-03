@@ -432,13 +432,37 @@ function EditBriefDialog({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Budget (£)</Label>
-              <Input type="number" value={form.budget ?? ""} onChange={(e) => setForm({ ...form, budget: e.target.value })} />
+              <Label>Budget</Label>
+              <div className="flex gap-2">
+                <select
+                  value={form.currency ?? "GBP"}
+                  onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                  className="rounded-md border border-input bg-background px-2 py-2 text-sm"
+                >
+                  {BRIEF_CURRENCIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <Input type="number" value={form.budget ?? ""} onChange={(e) => setForm({ ...form, budget: e.target.value })} />
+              </div>
             </div>
             <div>
               <Label>Contact email</Label>
               <Input value={form.contact_email ?? ""} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} />
             </div>
+          </div>
+          <div>
+            <Label>Transparency</Label>
+            <select
+              value={form.transparency ?? ""}
+              onChange={(e) => setForm({ ...form, transparency: e.target.value })}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">—</option>
+              {TRANSPARENCY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
           </div>
           {!isUser ? (
             <>
