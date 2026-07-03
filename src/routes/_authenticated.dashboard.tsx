@@ -712,11 +712,11 @@ function DashboardPage() {
               <CardContent className="space-y-6">
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : opportunities.length === 0 ? (
+                ) : opportunities.length === 0 && spotlightOpps.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
                     No open opportunities right now — here are the types of briefs we surface.
                   </div>
-                ) : (
+                ) : opportunities.length === 0 ? null : (
                   <ul className="grid gap-3 md:grid-cols-2">
                     {opportunities.map((o) => (
                       <li
