@@ -65,7 +65,7 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email, published, published_at").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, contact_email, published, published_at").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
     ]);
     setLeadBriefs((lb.data as LeadBrief[]) ?? []);
