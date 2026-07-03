@@ -118,6 +118,8 @@ type RosterItem = {
   youtube_subscribers: number | null;
   spotify_url: string | null;
   spotify_monthly_listens: number | null;
+  apple_music_url: string | null;
+  apple_music_followers: number | null;
   example_video_url: string | null;
   bio_page_url: string | null;
   content_review_url: string | null;
@@ -1358,6 +1360,8 @@ function EditProspectPanel({
     youtube_subscribers: item.youtube_subscribers?.toString() ?? "",
     spotify_url: item.spotify_url ?? "",
     spotify_monthly_listens: item.spotify_monthly_listens?.toString() ?? "",
+    apple_music_url: item.apple_music_url ?? "",
+    apple_music_followers: item.apple_music_followers?.toString() ?? "",
     example_video_url: item.example_video_url ?? "",
     bio_page_url: item.bio_page_url ?? "",
     content_review_url: item.content_review_url ?? "",
@@ -1459,6 +1463,8 @@ function EditProspectPanel({
         youtube_subscribers: toNum(form.youtube_subscribers),
         spotify_url: form.spotify_url.trim() || null,
         spotify_monthly_listens: toNum(form.spotify_monthly_listens),
+        apple_music_url: form.apple_music_url.trim() || null,
+        apple_music_followers: toNum(form.apple_music_followers),
         example_video_url: form.example_video_url.trim() || null,
         bio_page_url: form.bio_page_url.trim() || null,
         content_review_url: form.content_review_url.trim() || null,
@@ -1567,6 +1573,8 @@ function EditProspectPanel({
         {fld("YT subscribers", "youtube_subscribers")}
         {fld("Spotify URL", "spotify_url")}
         {fld("Monthly listeners", "spotify_monthly_listens")}
+        {fld("Apple Music URL", "apple_music_url")}
+        {fld("Apple followers", "apple_music_followers")}
         {fld("Example video URL", "example_video_url")}
         {fld("Content to review URL (e.g. Frame.io)", "content_review_url")}
         {fld("Bio page URL", "bio_page_url")}
@@ -1722,6 +1730,8 @@ function AddProspectCard({
     youtube_subscribers: "",
     spotify_url: "",
     spotify_monthly_listens: "",
+    apple_music_url: "",
+    apple_music_followers: "",
     example_video_url: "",
     has_bio: false,
     bio_page_url: "",
@@ -1801,6 +1811,8 @@ function AddProspectCard({
       youtube_subscribers: toNum(form.youtube_subscribers),
       spotify_url: form.spotify_url.trim() || null,
       spotify_monthly_listens: toNum(form.spotify_monthly_listens),
+      apple_music_url: form.apple_music_url.trim() || null,
+      apple_music_followers: toNum(form.apple_music_followers),
       example_video_url: form.example_video_url.trim() || null,
       bio_page_url: form.has_bio ? form.bio_page_url.trim() || null : null,
       content_review_url: form.content_review_url.trim() || null,
@@ -1822,6 +1834,8 @@ function AddProspectCard({
       youtube_subscribers: "",
       spotify_url: "",
       spotify_monthly_listens: "",
+      apple_music_url: "",
+      apple_music_followers: "",
       example_video_url: "",
       has_bio: false,
       bio_page_url: "",
@@ -1927,6 +1941,21 @@ function AddProspectCard({
                   value={form.spotify_monthly_listens}
                   onChange={(e) => update("spotify_monthly_listens", e.target.value)}
                   placeholder="1000000"
+                />
+              </Field>
+              <Field label="Apple Music URL">
+                <Input
+                  value={form.apple_music_url}
+                  onChange={(e) => update("apple_music_url", e.target.value)}
+                  placeholder="https://music.apple.com/…/artist/…"
+                />
+              </Field>
+              <Field label="Apple followers">
+                <Input
+                  inputMode="numeric"
+                  value={form.apple_music_followers}
+                  onChange={(e) => update("apple_music_followers", e.target.value)}
+                  placeholder="50000"
                 />
               </Field>
             </div>

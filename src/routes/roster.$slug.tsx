@@ -34,6 +34,8 @@ type PublicItem = {
   youtube_subscribers: number | null;
   spotify_url: string | null;
   spotify_monthly_listens: number | null;
+  apple_music_url: string | null;
+  apple_music_followers: number | null;
   example_video_url: string | null;
   bio_page_url: string | null;
   content_review_url: string | null;
@@ -108,7 +110,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, example_video_url, bio_page_url, content_review_url, position, status, category, location",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, position, status, category, location",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
@@ -152,7 +154,8 @@ function PublicRosterPage() {
       (it.instagram_followers ?? 0) +
       (it.tiktok_followers ?? 0) +
       (it.youtube_subscribers ?? 0) +
-      (it.spotify_monthly_listens ?? 0),
+      (it.spotify_monthly_listens ?? 0) +
+      (it.apple_music_followers ?? 0),
     0,
   );
   
@@ -221,12 +224,14 @@ function PublicRosterPage() {
                 ["TT", it.tiktok_followers, it.tiktok_url],
                 ["YT", it.youtube_subscribers, it.youtube_url],
                 ["Spotify", it.spotify_monthly_listens, it.spotify_url],
+                ["Apple", it.apple_music_followers, it.apple_music_url],
               ];
               const totalReach =
                 (it.instagram_followers ?? 0) +
                 (it.tiktok_followers ?? 0) +
                 (it.youtube_subscribers ?? 0) +
-                (it.spotify_monthly_listens ?? 0);
+                (it.spotify_monthly_listens ?? 0) +
+                (it.apple_music_followers ?? 0);
               const initials = it.name
                 .split(/\s+/)
                 .map((s) => s[0])

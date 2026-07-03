@@ -787,6 +787,8 @@ export type Database = {
       }
       roster_items: {
         Row: {
+          apple_music_followers: number | null
+          apple_music_url: string | null
           avatar_url: string | null
           bio_page_url: string | null
           budget: number | null
@@ -815,6 +817,8 @@ export type Database = {
           youtube_url: string | null
         }
         Insert: {
+          apple_music_followers?: number | null
+          apple_music_url?: string | null
           avatar_url?: string | null
           bio_page_url?: string | null
           budget?: number | null
@@ -843,6 +847,8 @@ export type Database = {
           youtube_url?: string | null
         }
         Update: {
+          apple_music_followers?: number | null
+          apple_music_url?: string | null
           avatar_url?: string | null
           bio_page_url?: string | null
           budget?: number | null
