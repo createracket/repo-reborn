@@ -537,6 +537,7 @@ function ProfileChip({ profile, fallbackEmail }: {
 }
 
 function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [values, setValues] = useState<string[]>([]);
   const [types, setTypes] = useState<string[]>([]);
