@@ -135,6 +135,24 @@ function DashboardPage() {
     })();
   }, [rosterFilter, isAdmin, isMineView]);
 
+  useEffect(() => {
+    if (!isAdmin) { setAdminOwners([]); return; }
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      const { data: rows } = await supabase
+        .from("roster_members")
+        .select("owner_id");
+      const uniqueIds = Array.from(new Set(((rows ?? []) as any[]).map((r) => r.owner_id))).filter((id) => id !== u.user?.id);
+      if (!uniqueIds.length) return setAdminOwners([]);
+      const { data: profs } = await (supabase as any)
+        .from("public_profiles")
+        .select("id, display_name")
+        .in("id", uniqueIds);
+      const byId = new Map(((profs ?? []) as any[]).map((p) => [p.id, p.display_name]));
+      setAdminOwners(uniqueIds.map((id) => ({ id, name: (byId.get(id) as string) || "Unnamed user" })).sort((a, b) => a.name.localeCompare(b.name)));
+    })();
+  }, [isAdmin]);
+
 
 
   useEffect(() => {
