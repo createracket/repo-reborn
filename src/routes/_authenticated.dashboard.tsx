@@ -101,7 +101,7 @@ function DashboardPage() {
   const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [examples, setExamples] = useState<Array<{ id: string; title: string; description: string | null; location: string | null; image_url: string | null }>>([]);
-  const [spotlightOpps, setSpotlightOpps] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null }>>([]);
+  const [spotlightOpps, setSpotlightOpps] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null }>>([]);
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
@@ -343,7 +343,7 @@ function DashboardPage() {
       const [{ data: liveSpotlights }, { data: spotlightShareRows }] = await Promise.all([
         (supabase as any)
           .from("partner_pages")
-          .select("id, slug, headline, subtitle, type, header_image_url")
+          .select("id, slug, headline, subtitle, type, header_image_url, profile_image_url")
           .eq("published", true)
           .eq("dashboard_visible", true)
           .order("updated_at", { ascending: false }),
@@ -356,7 +356,7 @@ function DashboardPage() {
       if (sharedIds.length) {
         const { data } = await (supabase as any)
           .from("partner_pages")
-          .select("id, slug, headline, subtitle, type, header_image_url")
+          .select("id, slug, headline, subtitle, type, header_image_url, profile_image_url")
           .eq("published", true)
           .in("id", sharedIds);
         sharedSpotlights = (data ?? []) as any[];
@@ -760,40 +760,43 @@ function DashboardPage() {
                       Featured spotlights
                     </div>
                     <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                      {spotlightOpps.map((sp) => (
-                        <li
-                          key={sp.id}
-                          className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
-                        >
-                          <Link
-                            to="/spotlight/$slug"
-                            params={{ slug: sp.slug }}
-                            className="group flex flex-col gap-2"
+                      {spotlightOpps.map((sp) => {
+                        const thumb = sp.header_image_url || sp.profile_image_url || null;
+                        return (
+                          <li
+                            key={sp.id}
+                            className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
                           >
-                            <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
-                              {sp.header_image_url ? (
-                                <img src={sp.header_image_url} alt="" className="size-full object-cover transition group-hover:scale-[1.02]" />
-                              ) : (
-                                <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
-                                  Spotlight
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex items-start justify-between gap-2">
+                            <Link
+                              to="/spotlight/$slug"
+                              params={{ slug: sp.slug }}
+                              className="group flex flex-1 flex-col gap-2"
+                            >
+                              <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
+                                {thumb ? (
+                                  <img src={thumb} alt="" className="size-full object-cover transition group-hover:scale-[1.02]" />
+                                ) : (
+                                  <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
+                                    Spotlight
+                                  </div>
+                                )}
+                              </div>
                               <h3 className="truncate text-sm font-medium leading-tight group-hover:text-primary">{sp.headline}</h3>
-                              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
-                                Spotlight
-                              </span>
-                            </div>
-                            {sp.subtitle ? (
-                              <p className="text-sm text-muted-foreground line-clamp-2">{sp.subtitle}</p>
-                            ) : null}
-                            {sp.type ? (
-                              <p className="text-xs text-muted-foreground">· {sp.type}</p>
-                            ) : null}
-                          </Link>
-                        </li>
-                      ))}
+                              {sp.subtitle ? (
+                                <p className="text-sm text-muted-foreground line-clamp-2">{sp.subtitle}</p>
+                              ) : null}
+                              <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                                <p className="truncate text-xs text-muted-foreground">
+                                  {sp.type ? `· ${sp.type}` : ""}
+                                </p>
+                                <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
+                                  Spotlight
+                                </span>
+                              </div>
+                            </Link>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 ) : null}
@@ -825,9 +828,14 @@ function DashboardPage() {
                               {ex.description}
                             </p>
                           ) : null}
-                          {ex.location ? (
-                            <p className="text-xs text-muted-foreground">📍 {ex.location}</p>
-                          ) : null}
+                          <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                            <p className="truncate text-xs text-muted-foreground">
+                              {ex.location ? `📍 ${ex.location}` : ""}
+                            </p>
+                            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
+                              Example
+                            </span>
+                          </div>
                         </li>
                       ))}
                     </ul>

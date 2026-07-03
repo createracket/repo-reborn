@@ -1455,6 +1455,13 @@ export type Database = {
       }
     }
     Functions: {
+      admin_campaign_brief_emails: {
+        Args: never
+        Returns: {
+          contact_email: string
+          id: string
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1493,6 +1500,10 @@ export type Database = {
           title: string
           updated_at: string
         }[]
+      }
+      get_campaign_brief_contact_email: {
+        Args: { _brief_id: string }
+        Returns: string
       }
       get_campaign_report_assignment: {
         Args: { _report_id: string }
