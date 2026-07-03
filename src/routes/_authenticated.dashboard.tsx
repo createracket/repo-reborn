@@ -513,7 +513,7 @@ function DashboardPage() {
               <CardTitle className="font-display text-2xl">Quick actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button asChild className="w-full justify-start">
+              <Button asChild className="w-full justify-start bg-pink-accent text-primary-foreground hover:bg-pink-accent/90">
                 <Link to="/profile">
                   <UserCircle2 className="mr-2 size-4" /> Edit your profile
                 </Link>
