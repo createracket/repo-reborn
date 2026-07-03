@@ -1724,6 +1724,8 @@ function AddProspectCard({
     youtube_subscribers: "",
     spotify_url: "",
     spotify_monthly_listens: "",
+    apple_music_url: "",
+    apple_music_followers: "",
     example_video_url: "",
     has_bio: false,
     bio_page_url: "",
