@@ -55,71 +55,73 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center">
-          <img src={racketNavLogo.url} alt="Racket" className="h-8 w-auto" />
-        </Link>
-        <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          {!signedIn && (
-            <Link to="/signup" className="hover:text-foreground transition-colors">
-              Mailing list
-            </Link>
-          )}
-          {isAdmin && (
-            <>
-              <Link to="/admin" className="text-primary hover:text-foreground transition-colors">
-                Admin
+    <>
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <Link to="/" className="flex items-center">
+            <img src={racketNavLogo.url} alt="Racket" className="h-8 w-auto" />
+          </Link>
+          <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+            {!signedIn && (
+              <Link to="/signup" className="hover:text-foreground transition-colors">
+                Mailing list
               </Link>
-              <Link to="/roster-builder" className="hover:text-foreground transition-colors">
-                Roster Builder
-              </Link>
-              <Link to="/campaign-reports" className="hover:text-foreground transition-colors">
-                Campaign Reports
-              </Link>
-              <Link to="/campaign-builder" className="hover:text-foreground transition-colors">
-                Campaign Builder
-              </Link>
-              <Link to="/connect" className="hover:text-foreground transition-colors">
-                Connect
-              </Link>
-            </>
-          )}
-        </nav>
-        <div className="flex items-center gap-2">
-          {signedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" variant="default" className="gap-1">
-                  <LayoutDashboard className="size-4" />
-                  Dashboard
-                  <ChevronDown className="size-3 opacity-60" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+            )}
+            {isAdmin && (
+              <>
+                <Link to="/admin" className="text-primary hover:text-foreground transition-colors">
+                  Admin
+                </Link>
+                <Link to="/roster-builder" className="hover:text-foreground transition-colors">
+                  Roster Builder
+                </Link>
+                <Link to="/campaign-reports" className="hover:text-foreground transition-colors">
+                  Campaign Reports
+                </Link>
+                <Link to="/campaign-builder" className="hover:text-foreground transition-colors">
+                  Campaign Builder
+                </Link>
+                <Link to="/connect" className="hover:text-foreground transition-colors">
+                  Connect
+                </Link>
+              </>
+            )}
+          </nav>
+          <div className="flex items-center gap-2">
+            {signedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="default" className="gap-1">
                     <LayoutDashboard className="size-4" />
                     Dashboard
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
-                  <LogOut className="size-4" />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <>
-              <Button asChild size="sm" variant="ghost" className="hidden sm:inline-flex">
-                <Link to="/login">Log in</Link>
-              </Button>
-            </>
-          )}
+                    <ChevronDown className="size-3 opacity-60" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                      <LayoutDashboard className="size-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
+                    <LogOut className="size-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button asChild size="sm" variant="ghost" className="hidden sm:inline-flex">
+                  <Link to="/login">Log in</Link>
+                </Button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
-    <PageBreadcrumbs />
+      </header>
+      <PageBreadcrumbs />
+    </>
   );
 }
