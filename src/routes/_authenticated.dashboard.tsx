@@ -524,7 +524,8 @@ function DashboardPage() {
               </Button>
               <Button asChild className="w-full justify-start" variant="outline">
                 <Link to="/vibe-check">
-                  <Sparkles className="mr-2 size-4" /> Retake the Vibe Check
+                  <Sparkles className="mr-2 size-4" />
+                  {latestVibe ? "Retake the Vibe Check" : "Take the Vibe Check"}
                 </Link>
               </Button>
               <Button asChild className="w-full justify-start" variant="outline">
