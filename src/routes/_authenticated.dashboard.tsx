@@ -128,7 +128,7 @@ function DashboardPage() {
           .single(),
         supabase
           .from("campaign_briefs")
-          .select("id, title, description, budget, published_at, created_at")
+          .select("id, title, description, budget, currency, transparency, published_at, created_at")
           .eq("published", true)
           .order("published_at", { ascending: false })
           .limit(6),
