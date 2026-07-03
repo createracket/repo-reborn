@@ -180,15 +180,27 @@ export function ExampleOpportunitiesAdmin() {
   );
 }
 
-async function resizeImage(file: File, max: number): Promise<Blob> {
+async function resizeImage(file: File, maxHeight: number): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
-  const w = Math.round(bitmap.width * scale);
-  const h = Math.round(bitmap.height * scale);
+  // Center-crop to 9:16
+  const targetRatio = 9 / 16;
+  const srcRatio = bitmap.width / bitmap.height;
+  let sx = 0, sy = 0, sw = bitmap.width, sh = bitmap.height;
+  if (srcRatio > targetRatio) {
+    // too wide — crop sides
+    sw = bitmap.height * targetRatio;
+    sx = (bitmap.width - sw) / 2;
+  } else if (srcRatio < targetRatio) {
+    // too tall — crop top/bottom
+    sh = bitmap.width / targetRatio;
+    sy = (bitmap.height - sh) / 2;
+  }
+  const h = Math.min(maxHeight, sh);
+  const w = Math.round(h * targetRatio);
   const canvas = document.createElement("canvas");
-  canvas.width = w; canvas.height = h;
+  canvas.width = w; canvas.height = Math.round(h);
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(bitmap, 0, 0, w, h);
+  ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, w, Math.round(h));
   return await new Promise<Blob>((resolve) =>
     canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85)
   );
