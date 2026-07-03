@@ -28,9 +28,11 @@ type ProfileSocials = {
   instagram?: string;
   tiktok?: string;
   spotify?: string;
+  apple_music?: string;
   youtube?: string;
   website?: string;
 };
+
 
 const emptyForm = {
   slug: "",
@@ -39,7 +41,7 @@ const emptyForm = {
   location: "",
   bio: "",
   avatar_url: "",
-  socials: { instagram: "", tiktok: "", spotify: "", youtube: "", website: "" } as ProfileSocials,
+  socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", website: "" } as ProfileSocials,
   total_followers: "",
   total_streams: "",
   monthly_streams: "",
@@ -48,6 +50,7 @@ const emptyForm = {
   top_audience_location: "",
 };
 
+
 function EditProfilePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -55,6 +58,8 @@ function EditProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [accountType, setAccountType] = useState<string | null>(null);
+
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -106,6 +111,8 @@ function EditProfilePage() {
       if (data) {
         const d = data as any;
         setOriginalSlug(d.slug ?? "");
+        setAccountType(d.account_type ?? null);
+
         setForm({
           slug: d.slug ?? "",
           display_name: d.display_name ?? "",
@@ -113,7 +120,7 @@ function EditProfilePage() {
           location: d.location ?? "",
           bio: d.bio ?? "",
           avatar_url: d.avatar_url ?? "",
-          socials: { instagram: "", tiktok: "", spotify: "", youtube: "", website: "", ...(d.socials ?? {}) },
+          socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", website: "", ...(d.socials ?? {}) },
           total_followers: d.total_followers?.toString() ?? "",
           total_streams: d.total_streams?.toString() ?? "",
           monthly_streams: d.monthly_streams?.toString() ?? "",
@@ -435,17 +442,26 @@ function EditProfilePage() {
                 <Label htmlFor="topaud">Top audience location</Label>
                 <Input id="topaud" value={form.top_audience_location} onChange={(e) => set("top_audience_location", e.target.value)} placeholder="London, UK" />
               </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="acctype">Account type</Label>
+                <Input
+                  id="acctype"
+                  value={accountType ? accountType.charAt(0).toUpperCase() + accountType.slice(1) : "—"}
+                  readOnly
+                  disabled
+                  title="Set at sign up — contact support to change"
+                />
+              </div>
+
               <div className="space-y-1.5 md:col-span-2">
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea id="bio" rows={4} value={form.bio} onChange={(e) => set("bio", e.target.value)} />
               </div>
 
-              <div className="md:col-span-2 pt-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="md:col-span-2 pt-2">
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Socials</p>
-                <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
-                  Sum fetched → Total followers
-                </Button>
               </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="ig">Instagram</Label>
                 <div className="flex gap-1.5">
@@ -471,6 +487,10 @@ function EditProfilePage() {
                 <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
               </div>
               <div className="space-y-1.5">
+                <Label htmlFor="am">Apple Music</Label>
+                <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+              </div>
+              <div className="space-y-1.5">
                 <Label htmlFor="yt">YouTube</Label>
                 <div className="flex gap-1.5">
                   <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
@@ -484,6 +504,13 @@ function EditProfilePage() {
                 <Label htmlFor="web">Website</Label>
                 <Input id="web" value={form.socials.website ?? ""} onChange={(e) => setSocial("website", e.target.value)} placeholder="https://…" />
               </div>
+              <div className="md:col-span-2">
+                <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
+                  Auto calculate your followers
+                </Button>
+                <p className="mt-1 text-xs text-muted-foreground">Sums fetched Instagram, TikTok and YouTube counts into Total followers below.</p>
+              </div>
+
 
 
               <div className="md:col-span-2 pt-2">
