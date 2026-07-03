@@ -1808,7 +1808,42 @@ function AddProspectCard({
     setForm((f) => ({ ...f, [k]: v }));
 
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
+  const scrapeApple = useServerFn(scrapeAppleMusicArtist);
   const [fetching, setFetching] = useState<string | null>(null);
+  const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
+  const [flagState, setFlagState] = useState<{ flagged: boolean; reason: string | null }>({ flagged: false, reason: null });
+
+  async function syncSpotify() {
+    const url = String(form.spotify_url || "").trim();
+    if (!url) { toast.error("Enter a Spotify URL first"); return; }
+    setFetching("spotify");
+    try {
+      const r = await scrapeSpotify({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.monthly_listeners != null) update("spotify_monthly_listens", String(r.monthly_listeners) as never);
+      if (r.name && !isNameMatch(r.name, [form.name])) {
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason: `Spotify artist "${r.name}" does not match "${form.name}".` });
+      } else if (r.name) setMismatchWarning(null);
+      toast.success(r.monthly_listeners != null ? `${r.monthly_listeners.toLocaleString()} monthly listeners` : "Spotify synced");
+    } finally { setFetching(null); }
+  }
+
+  async function syncApple() {
+    const url = String(form.apple_music_url || "").trim();
+    if (!url) { toast.error("Enter an Apple Music URL first"); return; }
+    setFetching("apple");
+    try {
+      const r = await scrapeApple({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.name && !isNameMatch(r.name, [form.name])) {
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason: `Apple Music artist "${r.name}" does not match "${form.name}".` });
+      } else if (r.name) setMismatchWarning(null);
+      toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
+    } finally { setFetching(null); }
+  }
 
   async function fetchFollowers(
     platform: "instagram" | "tiktok" | "youtube",
