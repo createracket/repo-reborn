@@ -67,13 +67,17 @@ export function BriefsManager() {
   const [loading, setLoading] = useState(true);
 
   async function loadAll() {
-    const [lb, cb, pr] = await Promise.all([
+    const [lb, cb, pr, emailRes] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, contact_email, published, published_at, linked_roster_id").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
+      (supabase as any).rpc("admin_campaign_brief_emails"),
     ]);
+    const emailById = new Map<string, string | null>();
+    ((emailRes.data as any[] | null) ?? []).forEach((r: any) => emailById.set(r.id, r.contact_email ?? null));
+    const campaignRows = ((cb.data as any[]) ?? []).map((c) => ({ ...c, contact_email: emailById.get(c.id) ?? null })) as CampaignBrief[];
     setLeadBriefs((lb.data as LeadBrief[]) ?? []);
-    setCampaigns((cb.data as CampaignBrief[]) ?? []);
+    setCampaigns(campaignRows);
     setProfiles((pr.data as Profile[]) ?? []);
     setLoading(false);
   }
