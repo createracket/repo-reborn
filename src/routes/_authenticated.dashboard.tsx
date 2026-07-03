@@ -794,31 +794,48 @@ function DashboardPage() {
                         {showTagged && taggedCreators.map((c) => (
                           <li
                             key={`tag-${c.id}`}
-                            className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
+                            className={`rounded-xl border border-border/60 bg-card p-4 ${c.roster_published && c.roster_slug ? "hover:bg-muted/50 transition-colors cursor-pointer" : ""}`}
                           >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
-                                {c.avatar_url ? (
-                                  <img src={c.avatar_url} alt="" className="size-full object-cover" />
-                                ) : null}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-medium truncate flex items-center gap-2">
-                                  <span className="truncate">{c.name ?? "Creator"}</span>
-                                  <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
-                                </div>
-                                <div className="text-xs text-muted-foreground truncate">
-                                  From {c.roster_title}
-                                </div>
-                              </div>
-                            </div>
                             {c.roster_published && c.roster_slug ? (
-                              <Button asChild size="sm" variant="ghost">
-                                <a href={`/roster/${c.roster_slug}`} target="_blank" rel="noreferrer">
-                                  View
-                                </a>
-                              </Button>
-                            ) : null}
+                              <Link to={`/roster/${c.roster_slug}`} className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
+                                    {c.avatar_url ? (
+                                      <img src={c.avatar_url} alt="" className="size-full object-cover" />
+                                    ) : null}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="font-medium truncate flex items-center gap-2">
+                                      <span className="truncate">{c.name ?? "Creator"}</span>
+                                      <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
+                                    </div>
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      From {c.roster_title}
+                                    </div>
+                                  </div>
+                                </div>
+                                <ArrowRight className="size-4 text-muted-foreground" />
+                              </Link>
+                            ) : (
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
+                                    {c.avatar_url ? (
+                                      <img src={c.avatar_url} alt="" className="size-full object-cover" />
+                                    ) : null}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="font-medium truncate flex items-center gap-2">
+                                      <span className="truncate">{c.name ?? "Creator"}</span>
+                                      <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
+                                    </div>
+                                    <div className="text-xs text-muted-foreground truncate">
+                                      From {c.roster_title}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </li>
                         ))}
                         {showItems && rosterItems.map((c) => (
