@@ -370,9 +370,6 @@ function DashboardPage() {
                       You haven't submitted a brief yet. Start your first project — it takes a couple
                       of minutes.
                     </p>
-                    <Button asChild className="mt-4">
-                      <Link to="/connect">Submit a brief</Link>
-                    </Button>
                   </div>
                 ) : (
                   <ul className="grid gap-3 md:grid-cols-2">
