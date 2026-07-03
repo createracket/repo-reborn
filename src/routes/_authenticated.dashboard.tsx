@@ -651,7 +651,10 @@ function DashboardPage() {
                             ) : null}
                           </div>
                           <div className="min-w-0">
-                            <div className="font-medium truncate">{c.name ?? "Creator"}</div>
+                            <div className="font-medium truncate flex items-center gap-2">
+                              <span className="truncate">{c.name ?? "Creator"}</span>
+                              <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
+                            </div>
                             <div className="text-xs text-muted-foreground truncate">
                               From {c.roster_title}
                             </div>
