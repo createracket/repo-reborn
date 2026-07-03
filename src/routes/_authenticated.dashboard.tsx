@@ -621,8 +621,9 @@ function DashboardPage() {
                             ) : null}
                           </div>
                           <div>
-                            <div className="font-medium">
-                              {r.member?.display_name ?? "Member"}
+                            <div className="font-medium flex items-center gap-2 flex-wrap">
+                              <span>{r.member?.display_name ?? "Member"}</span>
+                              <TypeTag tag={r.member?.account_type ? ACCOUNT_TYPE_TAG[r.member.account_type] : undefined} />
                             </div>
                             <div className="text-xs text-muted-foreground">
                               Added {new Date(r.created_at).toLocaleDateString()}
