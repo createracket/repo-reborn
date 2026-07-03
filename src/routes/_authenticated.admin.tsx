@@ -469,23 +469,32 @@ function AdminPage() {
                         />
                       </td>
                       <td className="p-3 text-right">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                          onClick={async () => {
-                            if (!confirm(`Permanently delete user ${p.email ?? p.display_name ?? p.id}? This cannot be undone.`)) return;
-                            try {
-                              await adminDeleteUser({ data: { user_id: p.id } });
-                              setProfiles((rows) => rows.filter((r) => r.id !== p.id));
-                              toast.success("User removed");
-                            } catch (e: any) {
-                              toast.error(e?.message ?? "Failed to remove user");
-                            }
-                          }}
-                        >
-                          <Trash2 className="size-3.5" /> Remove
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setEditingProfile(p)}
+                          >
+                            <Pencil className="size-3.5" /> Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            onClick={async () => {
+                              if (!confirm(`Permanently delete user ${p.email ?? p.display_name ?? p.id}? This cannot be undone.`)) return;
+                              try {
+                                await adminDeleteUser({ data: { user_id: p.id } });
+                                setProfiles((rows) => rows.filter((r) => r.id !== p.id));
+                                toast.success("User removed");
+                              } catch (e: any) {
+                                toast.error(e?.message ?? "Failed to remove user");
+                              }
+                            }}
+                          >
+                            <Trash2 className="size-3.5" /> Remove
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
