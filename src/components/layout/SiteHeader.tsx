@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import racketNavLogo from "@/assets/CR-Logo-Icon-Light.png.asset.json";
+import racketNavLogo from "@/assets/logo-singleR-transparent.jpg.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
