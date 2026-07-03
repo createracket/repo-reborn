@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks, Rocket } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks, Rocket, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -110,6 +110,7 @@ function DashboardPage() {
   const [rosterFilter, setRosterFilter] = useState<string>("all");
   const [isAdmin, setIsAdmin] = useState(false);
   const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
 
   const isAllView = rosterFilter === "all";
@@ -755,91 +756,118 @@ function DashboardPage() {
                   </ul>
                 )}
 
-                {!loading && spotlightOpps.length > 0 ? (
+                {/* Combined spotlights & examples carousel */}
+                {!loading && (spotlightOpps.length > 0 || examples.length > 0) ? (
                   <div>
-                    <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-                      Featured spotlights
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                        Featured spotlights & examples
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-full"
+                          onClick={() => {
+                            const el = carouselRef.current;
+                            if (!el || !el.firstElementChild) return;
+                            const tileWidth = (el.firstElementChild as HTMLElement).offsetWidth + 12;
+                            el.scrollBy({ left: -tileWidth, behavior: 'smooth' });
+                          }}
+                        >
+                          <ChevronLeft className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-full"
+                          onClick={() => {
+                            const el = carouselRef.current;
+                            if (!el || !el.firstElementChild) return;
+                            const tileWidth = (el.firstElementChild as HTMLElement).offsetWidth + 12;
+                            el.scrollBy({ left: tileWidth, behavior: 'smooth' });
+                          }}
+                        >
+                          <ChevronRight className="size-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <div
+                      ref={carouselRef}
+                      className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
+                    >
                       {spotlightOpps.map((sp) => {
                         const thumb = sp.header_image_url || sp.profile_image_url || null;
                         return (
-                          <li
+                          <div
                             key={sp.id}
-                            className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
+                            className="snap-start shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.333%-8px)] lg:w-[calc(25%-9px)]"
                           >
-                            <Link
-                              to="/spotlight/$slug"
-                              params={{ slug: sp.slug }}
-                              className="group flex flex-1 flex-col gap-2"
-                            >
-                              <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
-                                {thumb ? (
-                                  <img src={thumb} alt="" className="size-full object-cover object-top grayscale transition group-hover:scale-[1.02]" />
-                                ) : (
-                                  <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
+                            <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 h-full">
+                              <Link
+                                to="/spotlight/$slug"
+                                params={{ slug: sp.slug }}
+                                className="group flex flex-1 flex-col gap-2"
+                              >
+                                <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
+                                  {thumb ? (
+                                    <img src={thumb} alt="" className="size-full object-cover object-top transition group-hover:scale-[1.02]" />
+                                  ) : (
+                                    <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
+                                      Spotlight
+                                    </div>
+                                  )}
+                                </div>
+                                <h3 className="truncate text-sm font-medium leading-tight group-hover:text-primary">{sp.headline}</h3>
+                                {sp.subtitle ? (
+                                  <p className="text-sm text-muted-foreground line-clamp-2">{sp.subtitle}</p>
+                                ) : null}
+                                <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                                  <p className="truncate text-xs text-muted-foreground">
+                                    {sp.type ? `· ${sp.type}` : ""}
+                                  </p>
+                                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
                                     Spotlight
-                                  </div>
-                                )}
-                              </div>
-                              <h3 className="truncate text-sm font-medium leading-tight group-hover:text-primary">{sp.headline}</h3>
-                              {sp.subtitle ? (
-                                <p className="text-sm text-muted-foreground line-clamp-2">{sp.subtitle}</p>
-                              ) : null}
-                              <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-                                <p className="truncate text-xs text-muted-foreground">
-                                  {sp.type ? `· ${sp.type}` : ""}
-                                </p>
-                                <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
-                                  Spotlight
-                                </span>
-                              </div>
-                            </Link>
-                          </li>
+                                  </span>
+                                </div>
+                              </Link>
+                            </div>
+                          </div>
                         );
                       })}
-                    </ul>
-                  </div>
-                ) : null}
-
-
-                {!loading && examples.length > 0 ? (
-                  <div>
-                    <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-                      Example opportunities
-                    </div>
-                    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                      {examples.slice(0, 4).map((ex) => (
-                        <li
+                      {examples.map((ex) => (
+                        <div
                           key={ex.id}
-                          className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
+                          className="snap-start shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.333%-8px)] lg:w-[calc(25%-9px)]"
                         >
-                          <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
-                            {ex.image_url ? (
-                              <img src={ex.image_url} alt="" className="size-full object-cover" />
-                            ) : (
-                              <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
-                                Thumb
-                              </div>
-                            )}
+                          <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 h-full">
+                            <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
+                              {ex.image_url ? (
+                                <img src={ex.image_url} alt="" className="size-full object-cover" />
+                              ) : (
+                                <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
+                                  Thumb
+                                </div>
+                              )}
+                            </div>
+                            <h3 className="truncate text-sm font-medium leading-tight">{ex.title}</h3>
+                            {ex.description ? (
+                              <p className="text-sm text-muted-foreground line-clamp-2">
+                                {ex.description}
+                              </p>
+                            ) : null}
+                            <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                              <p className="truncate text-xs text-muted-foreground">
+                                {ex.location ? ex.location : ""}
+                              </p>
+                              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
+                                Example
+                              </span>
+                            </div>
                           </div>
-                          <h3 className="truncate text-sm font-medium leading-tight">{ex.title}</h3>
-                          {ex.description ? (
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                              {ex.description}
-                            </p>
-                          ) : null}
-                          <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-                            <p className="truncate text-xs text-muted-foreground">
-                              {ex.location ? ex.location : ""}
-                            </p>
-                            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
-                              Example
-                            </span>
-                          </div>
-                        </li>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 ) : null}
               </CardContent>
