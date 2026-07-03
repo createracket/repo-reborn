@@ -15,7 +15,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 import { validateSlug, normalizeSlug } from "@/lib/slugs";
 import { scrapeProfileFollowers } from "@/lib/campaign-scrapers.functions";
+import { COUNTRIES } from "@/lib/countries";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Loader2, X } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
