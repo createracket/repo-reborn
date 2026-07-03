@@ -815,7 +815,7 @@ function DashboardPage() {
                         >
                           <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
                             {ex.image_url ? (
-                              <img src={ex.image_url} alt="" className="size-full object-cover grayscale" />
+                              <img src={ex.image_url} alt="" className="size-full object-cover" />
                             ) : (
                               <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
                                 Thumb
