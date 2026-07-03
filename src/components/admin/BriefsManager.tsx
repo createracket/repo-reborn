@@ -269,6 +269,17 @@ function UnifiedBriefs({
                     value={b.status}
                     onChange={(next) => updateStatus(b, next)}
                   />
+                  {normalizeStatus(b.status) === "review_your_roster" ? (
+                    <BriefRosterLink
+                      briefSource={b.source}
+                      briefId={b.id}
+                      linkedRosterId={b.linked_roster_id}
+                      onChange={(nextId) => {
+                        if (b.source === "user") onCampaignUpdated(b.id, { linked_roster_id: nextId } as Partial<CampaignBrief>);
+                        else onLeadUpdated(b.id, { linked_roster_id: nextId } as Partial<LeadBrief>);
+                      }}
+                    />
+                  ) : null}
                   <Button size="sm" variant="outline" onClick={() => setEditing(b)}>
                     <Pencil className="mr-1 h-3 w-3" /> Edit
                   </Button>
