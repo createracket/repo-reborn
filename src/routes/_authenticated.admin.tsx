@@ -1232,6 +1232,31 @@ function SpotlightForm({
       }
       if (updates.length === 0) toast.error("No Spotify metrics returned");
       else toast.success(`Spotify: ${updates.join(" · ")}`);
+      if (r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason: `Spotify artist "${r.name}" does not match "${form.headline}".` });
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+    } finally {
+      setSyncing(null);
+    }
+  }
+
+  async function syncApple() {
+    const raw = String(form.apple_music || "").trim();
+    if (!raw) { toast.error("Enter an Apple Music artist URL first"); return; }
+    setSyncing("apple");
+    try {
+      const r = await scrapeApple({ data: { url: raw } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason: `Apple Music artist "${r.name}" does not match "${form.headline}".` });
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+      toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
     } finally {
       setSyncing(null);
     }
