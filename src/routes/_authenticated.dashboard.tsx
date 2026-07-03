@@ -14,6 +14,8 @@ import {
   getArtistArchetypeDescription,
 } from "@/lib/vibe-check";
 import { BriefStatusBadge } from "@/components/briefs/BriefStatusBadge";
+import { formatBriefBudget, transparencyLabel } from "@/lib/brief-currency";
+import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
