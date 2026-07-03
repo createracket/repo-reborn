@@ -23,7 +23,7 @@ export const BRIEF_STATUS_LABEL: Record<BriefStatus, string> = {
 const STATUS_CLASSES: Record<BriefStatus, string> = {
   submitted: "bg-muted text-foreground border-border",
   in_review: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
-  in_progress: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/30",
+  in_progress: "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/30",
   review_your_roster: "bg-primary/15 text-primary border-primary/30",
   review_your_report: "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/30",
 };
