@@ -626,9 +626,34 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
               onChange={(e) => setForm((f) => ({ ...f, contact_email: e.target.value }))} />
           </div>
           <div>
-            <Label htmlFor="cb-budget">Estimated budget ($)</Label>
-            <Input id="cb-budget" type="number" min={0} value={form.budget}
-              onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} />
+            <Label htmlFor="cb-budget">Estimated budget</Label>
+            <div className="flex gap-2">
+              <select
+                value={form.currency}
+                onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))}
+                className="rounded-md border border-input bg-background px-2 py-2 text-sm"
+              >
+                {BRIEF_CURRENCIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <Input id="cb-budget" type="number" min={0} value={form.budget}
+                onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="cb-transparency">Transparency</Label>
+            <select
+              id="cb-transparency"
+              value={form.transparency}
+              onChange={(e) => setForm((f) => ({ ...f, transparency: e.target.value }))}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">—</option>
+              {TRANSPARENCY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
           </div>
           <div>
             <Label htmlFor="cb-timeline">Timeline</Label>
