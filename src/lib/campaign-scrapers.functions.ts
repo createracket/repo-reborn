@@ -530,3 +530,121 @@ export const scrapeSpotifyArtist = createServerFn({ method: "POST" })
     };
   });
 
+// ============================================================
+// Apple Music artist scraping
+// ============================================================
+
+type AppleMusicArtistResult =
+  | {
+      ok: true;
+      artist_id: string;
+      name: string | null;
+      followers: number | null; // Apple doesn't publish follower counts publicly
+      monthly_listeners: number | null; // ditto
+      avatar_url: string | null;
+    }
+  | { ok: false; error: string };
+
+function extractAppleMusicArtistId(url: string): string | null {
+  const raw = url.trim();
+  if (/^\d{4,}$/.test(raw)) return raw;
+  try {
+    const u = new URL(raw);
+    const seg = u.pathname.split("/").filter(Boolean);
+    const i = seg.indexOf("artist");
+    if (i >= 0 && seg[i + 2]) {
+      // /{storefront}/artist/{name-slug}/{id}
+      const id = seg[i + 2].split("?")[0];
+      if (/^\d{4,}$/.test(id)) return id;
+    }
+    // Fallback: last numeric segment
+    for (let k = seg.length - 1; k >= 0; k--) {
+      const s = seg[k].split("?")[0];
+      if (/^\d{4,}$/.test(s)) return s;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function extractAppleMusicStorefront(url: string): string {
+  try {
+    const u = new URL(url.trim());
+    const seg = u.pathname.split("/").filter(Boolean);
+    // First segment is usually the storefront code (e.g. "gb", "us")
+    if (seg[0] && /^[a-z]{2}$/i.test(seg[0])) return seg[0].toLowerCase();
+  } catch {
+    // ignore
+  }
+  return "us";
+}
+
+/**
+ * Scrape Apple Music artist metadata (name, artwork). Apple's public site
+ * does not expose follower or monthly-listener numbers, so those are returned
+ * as null; the fetched name is what we use for the mismatch check.
+ */
+export const scrapeAppleMusicArtist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ url: z.string().min(1) }).parse)
+  .handler(async ({ data }): Promise<AppleMusicArtistResult> => {
+    const artistId = extractAppleMusicArtistId(data.url);
+    if (!artistId)
+      return { ok: false, error: "Couldn't parse Apple Music artist ID from URL." };
+    const storefront = extractAppleMusicStorefront(data.url);
+
+    // iTunes Lookup API is public and returns artist name reliably.
+    try {
+      const r = await fetch(
+        `https://itunes.apple.com/lookup?id=${artistId}&country=${storefront}&entity=musicArtist`,
+        { headers: { "User-Agent": "Mozilla/5.0 (compatible; RacketBot/1.0)" } },
+      );
+      let name: string | null = null;
+      if (r.ok) {
+        const j = (await r.json()) as {
+          results?: Array<{ artistName?: string; wrapperType?: string }>;
+        };
+        const hit = j.results?.find((x) => x.wrapperType === "artist") ?? j.results?.[0];
+        name = hit?.artistName ?? null;
+      }
+
+      // Try to pull artwork from the public artist page's og:image
+      let avatar_url: string | null = null;
+      try {
+        const page = await fetch(
+          `https://music.apple.com/${storefront}/artist/${artistId}`,
+          {
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+              "Accept-Language": "en-US,en;q=0.9",
+            },
+          },
+        );
+        if (page.ok) {
+          const html = await page.text();
+          const m = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
+          if (m) avatar_url = m[1];
+        }
+      } catch {
+        // best-effort; ignore
+      }
+
+      return {
+        ok: true,
+        artist_id: artistId,
+        name,
+        followers: null,
+        monthly_listeners: null,
+        avatar_url,
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        error: e instanceof Error ? e.message : "Failed to reach Apple Music.",
+      };
+    }
+  });
+
+
