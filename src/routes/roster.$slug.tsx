@@ -93,8 +93,8 @@ function PublicRosterPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: r } = await supabase
-        .from("rosters")
+      const { data: r } = await (supabase as any)
+        .from("public_rosters")
         .select(
           "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags",
         )
