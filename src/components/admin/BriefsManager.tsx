@@ -712,8 +712,10 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
           <div className="md:col-span-2">
             <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Add brief"}</Button>
           </div>
-        </form>
-      </CardContent>
+            </form>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
