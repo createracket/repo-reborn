@@ -126,7 +126,7 @@ export function ExampleOpportunitiesAdmin() {
                       }}
                       className="text-xs"
                     />
-                    <p className="text-[10px] text-muted-foreground">Max 1080×1080</p>
+                    <p className="text-[10px] text-muted-foreground">Cropped to 9:16</p>
                   </div>
                   <div className="flex-1 min-w-[240px] space-y-2">
                     <div>
