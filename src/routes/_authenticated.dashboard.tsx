@@ -154,10 +154,10 @@ function DashboardPage() {
       const shareLeadIds = ((shares ?? []) as any[]).filter((s) => s.brief_source === "lead").map((s) => s.brief_id as string);
       const [sharedUser, sharedLead] = await Promise.all([
         shareUserIds.length
-          ? supabase.from("campaign_briefs").select("id, title, description, budget, published_at, created_at").in("id", shareUserIds)
+          ? supabase.from("campaign_briefs").select("id, title, description, budget, currency, transparency, published_at, created_at").in("id", shareUserIds)
           : Promise.resolve({ data: [] as any[] }),
         shareLeadIds.length
-          ? supabase.from("lead_briefs").select("id, title, description, budget, created_at").in("id", shareLeadIds)
+          ? supabase.from("lead_briefs").select("id, title, description, budget, currency, transparency, created_at").in("id", shareLeadIds)
           : Promise.resolve({ data: [] as any[] }),
       ]);
       const publishedRows = ((opps as any[]) ?? []) as Opportunity[];
