@@ -65,6 +65,7 @@ function ConnectPage() {
   const [submitting, setSubmitting] = useState(false);
   const [values, setValues] = useState<string[]>([]);
   const [types, setTypes] = useState<string[]>([]);
+  const [otherType, setOtherType] = useState("");
   const [config, setConfig] = useState<BriefFormConfig>(DEFAULT_BRIEF_FORM_CONFIG);
   const [submitted, setSubmitted] = useState<{ email: string; name: string; asUser: boolean } | null>(null);
   const [subscribing, setSubscribing] = useState(false);
@@ -93,6 +94,13 @@ function ConnectPage() {
     const fd = new FormData(e.currentTarget);
     const budgetRaw = fd.get("budget")?.toString().trim();
 
+    const finalTypes = types.includes("Something else")
+      ? [
+          ...types.filter((t) => t !== "Something else"),
+          otherType.trim() ? `Something else: ${otherType.trim()}` : "Something else",
+        ]
+      : types;
+
     const parsed = briefSchema.safeParse({
       title: fd.get("title")?.toString() ?? "",
       description: fd.get("description")?.toString() ?? "",
@@ -104,7 +112,7 @@ function ConnectPage() {
       contact_name: fd.get("contact_name")?.toString() ?? "",
       company: fd.get("company")?.toString() || undefined,
       contact_email: fd.get("contact_email")?.toString() ?? "",
-      collaboration_types: types,
+      collaboration_types: finalTypes,
       core_values: values,
       additional_info: fd.get("additional_info")?.toString() || undefined,
     });
@@ -411,7 +419,7 @@ function ConnectPage() {
                     <div className="space-y-2">
                       <Label>{config.collaborationTypesLabel}</Label>
                       <div className="grid grid-cols-1 gap-3 pt-2 md:grid-cols-2">
-                        {config.collaborationTypes.map((type) => (
+                        {[...config.collaborationTypes, "Something else"].map((type) => (
                           <label
                             key={type}
                             className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40"
@@ -424,6 +432,14 @@ function ConnectPage() {
                           </label>
                         ))}
                       </div>
+                      {types.includes("Something else") && (
+                        <Input
+                          value={otherType}
+                          onChange={(e) => setOtherType(e.target.value)}
+                          placeholder="Tell us what you have in mind"
+                          maxLength={200}
+                        />
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="target_audience">{f.target_audience.label}</Label>
