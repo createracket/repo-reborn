@@ -137,7 +137,7 @@ function DashboardPage() {
       // Briefs the current user submitted (Project Planner)
       const { data: mineBriefs } = await supabase
         .from("campaign_briefs")
-        .select("id, title, created_at, status, budget")
+        .select("id, title, created_at, status, budget, currency")
         .eq("user_id", u.user.id)
         .order("created_at", { ascending: false });
       setMyBriefs((mineBriefs as any[]) ?? []);
