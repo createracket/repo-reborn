@@ -128,6 +128,14 @@ function DashboardPage() {
       setEmail(u.user?.email ?? null);
       if (!u.user) return;
 
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", u.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!!roleRow);
+
       // Auto-enrol new accounts into the mailing list
       if (u.user.email) {
         const { data: existing } = await supabase
