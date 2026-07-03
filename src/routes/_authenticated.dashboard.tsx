@@ -582,7 +582,14 @@ function DashboardPage() {
                               {b.budget ? ` · ${formatBriefBudget(b.budget, b.currency)}` : ""}
                             </div>
                           </div>
-                          <BriefStatusBadge status={b.status} />
+                          <BriefStatusBadge
+                            status={b.status}
+                            href={
+                              b.status === "review_your_roster" && b.linked_roster_slug && b.linked_roster_published
+                                ? `/roster/${b.linked_roster_slug}`
+                                : null
+                            }
+                          />
                         </div>
                       </li>
                     ))}
