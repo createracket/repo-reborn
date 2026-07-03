@@ -105,53 +105,51 @@ function DashboardPage() {
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null }>>([]);
   const [loading, setLoading] = useState(true);
-  const [rosterFilter, setRosterFilter] = useState<string>("mine");
+  const [rosterFilter, setRosterFilter] = useState<string>("all");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminOwners, setAdminOwners] = useState<Array<{ id: string; name: string }>>([]);
-  const [otherRoster, setOtherRoster] = useState<RosterRow[]>([]);
+  const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
+  const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
 
+  const isAllView = rosterFilter === "all";
   const isMineView = rosterFilter === "mine";
-  const displayedRoster = isMineView ? roster : otherRoster;
+  const isRosterView = !isAllView && !isMineView;
+  // Saved-member rows show on "All" and "My saved roster"; hidden on individual roster view
+  const displayedRoster = isRosterView ? [] : roster;
 
+  // Load current user's owned rosters for the toggle
   useEffect(() => {
-    if (isMineView || !isAdmin) {
-      setOtherRoster([]);
-      return;
-    }
-    (async () => {
-      const { data: rows } = await supabase
-        .from("roster_members")
-        .select("id, member_id, created_at")
-        .eq("owner_id", rosterFilter)
-        .order("created_at", { ascending: false });
-      const memberIds = ((rows ?? []) as any[]).map((r) => r.member_id);
-      if (!memberIds.length) return setOtherRoster([]);
-      const { data: profilesData } = await (supabase as any)
-        .from("public_profiles")
-        .select("id, display_name, avatar_url, account_type")
-        .in("id", memberIds);
-      const byId = new Map((profilesData ?? []).map((p: any) => [p.id, p]));
-      setOtherRoster(((rows ?? []) as any[]).map((r) => ({ ...r, member: byId.get(r.member_id) ?? null })));
-    })();
-  }, [rosterFilter, isAdmin, isMineView]);
-
-  useEffect(() => {
-    if (!isAdmin) { setAdminOwners([]); return; }
     (async () => {
       const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
       const { data: rows } = await supabase
-        .from("roster_members")
-        .select("owner_id");
-      const uniqueIds = Array.from(new Set(((rows ?? []) as any[]).map((r) => r.owner_id))).filter((id) => id !== u.user?.id);
-      if (!uniqueIds.length) return setAdminOwners([]);
-      const { data: profs } = await (supabase as any)
-        .from("public_profiles")
-        .select("id, display_name")
-        .in("id", uniqueIds);
-      const byId = new Map(((profs ?? []) as any[]).map((p) => [p.id, p.display_name]));
-      setAdminOwners(uniqueIds.map((id) => ({ id, name: (byId.get(id) as string) || "Unnamed user" })).sort((a, b) => a.name.localeCompare(b.name)));
+        .from("rosters")
+        .select("id, title")
+        .eq("owner_id", u.user.id)
+        .order("updated_at", { ascending: false });
+      setMyRosters(((rows ?? []) as any[]).map((r: any) => ({ id: r.id, title: r.title })));
     })();
-  }, [isAdmin]);
+  }, []);
+
+  // Load items for a specific owned roster when selected
+  useEffect(() => {
+    if (!isRosterView) { setRosterItems([]); return; }
+    (async () => {
+      const selected = myRosters.find((r) => r.id === rosterFilter);
+      const { data: items } = await (supabase as any)
+        .from("roster_items")
+        .select("id, name, avatar_url, category, roster_id, sort_order")
+        .eq("roster_id", rosterFilter)
+        .order("sort_order", { ascending: true });
+      setRosterItems(((items ?? []) as any[]).map((it) => ({
+        id: it.id,
+        name: it.name,
+        avatar_url: it.avatar_url,
+        category: it.category,
+        roster_id: it.roster_id,
+        roster_title: selected?.title ?? "",
+      })));
+    })();
+  }, [rosterFilter, isRosterView, myRosters]);
 
 
 
