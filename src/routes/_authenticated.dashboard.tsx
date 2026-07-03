@@ -116,34 +116,67 @@ function DashboardPage() {
   // Saved-member rows show on "All" and "My saved roster"; hidden on individual roster view
   const displayedRoster = isRosterView ? [] : roster;
 
-  // Load rosters available for the toggle — own rosters for everyone; all rosters for admins
+  // Load rosters available for the toggle — own rosters + rosters shared with the user; admins see all
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      let query = (supabase as any)
-        .from("rosters")
-        .select("id, title, owner_id")
-        .order("updated_at", { ascending: false });
-      if (!isAdmin) query = query.eq("owner_id", u.user.id);
-      const { data: rows } = await query;
-      const ownerIds = Array.from(new Set(((rows ?? []) as any[]).map((r) => r.owner_id).filter((id) => id && id !== u.user!.id)));
+
+      let rows: any[] = [];
+      if (isAdmin) {
+        const { data } = await (supabase as any)
+          .from("rosters")
+          .select("id, title, owner_id")
+          .order("updated_at", { ascending: false });
+        rows = (data ?? []) as any[];
+      } else {
+        // Own rosters
+        const { data: own } = await (supabase as any)
+          .from("rosters")
+          .select("id, title, owner_id")
+          .eq("owner_id", u.user.id)
+          .order("updated_at", { ascending: false });
+        // Rosters shared with the user via roster_shares (tagged)
+        const { data: shares } = await (supabase as any)
+          .from("roster_shares")
+          .select("roster_id")
+          .eq("user_id", u.user.id);
+        const sharedIds = Array.from(new Set(((shares ?? []) as any[]).map((s) => s.roster_id)));
+        let shared: any[] = [];
+        if (sharedIds.length) {
+          const { data } = await (supabase as any)
+            .from("rosters")
+            .select("id, title, owner_id")
+            .in("id", sharedIds)
+            .order("updated_at", { ascending: false });
+          shared = (data ?? []) as any[];
+        }
+        const seen = new Set<string>();
+        rows = [...(own ?? []), ...shared].filter((r: any) => {
+          if (seen.has(r.id)) return false;
+          seen.add(r.id);
+          return true;
+        });
+      }
+
+      const otherOwnerIds = Array.from(new Set(rows.map((r) => r.owner_id).filter((id) => id && id !== u.user!.id)));
       let ownerNames = new Map<string, string>();
-      if (isAdmin && ownerIds.length) {
+      if (otherOwnerIds.length) {
         const { data: profs } = await (supabase as any)
           .from("public_profiles")
           .select("id, display_name")
-          .in("id", ownerIds);
+          .in("id", otherOwnerIds);
         ownerNames = new Map(((profs ?? []) as any[]).map((p) => [p.id, p.display_name]));
       }
-      setMyRosters(((rows ?? []) as any[]).map((r: any) => ({
+      setMyRosters(rows.map((r: any) => ({
         id: r.id,
-        title: isAdmin && r.owner_id !== u.user!.id
-          ? `${r.title} — ${ownerNames.get(r.owner_id) ?? "Unnamed"}`
+        title: r.owner_id !== u.user!.id
+          ? `${r.title} — ${ownerNames.get(r.owner_id) ?? "Shared"}`
           : r.title,
       })));
     })();
   }, [isAdmin]);
+
 
 
   // Load items for a specific owned roster when selected
