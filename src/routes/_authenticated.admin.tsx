@@ -25,6 +25,7 @@ import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
 import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
 import { TrafficAdmin } from "@/components/admin/TrafficAdmin";
 import { ExampleOpportunitiesAdmin } from "@/components/admin/ExampleOpportunitiesAdmin";
+import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
 import { BriefStatusBadge, BriefStatusSelect, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
@@ -53,7 +54,7 @@ type CampaignBrief = { id: string; created_at: string; title: string; descriptio
 
 type Spotlight = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
-  published: boolean; created_at: string; links?: Record<string, string> | null;
+  published: boolean; dashboard_visible: boolean; created_at: string; links?: Record<string, string> | null;
 };
 
 type SpotlightInterest = {
@@ -341,6 +342,38 @@ function AdminPage() {
                         </div>
                       </div>
                     </CardHeader>
+                    <CardContent className="space-y-3 border-t border-border/60 pt-4">
+                      <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+                        <div>
+                          <Label htmlFor={`sp-live-${s.id}`} className="text-sm font-medium">
+                            Live on all dashboards
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {s.dashboard_visible
+                              ? "Showing in every signed-in user's opportunities feed."
+                              : "Hidden from the general opportunities feed."}
+                          </p>
+                        </div>
+                        <Switch
+                          id={`sp-live-${s.id}`}
+                          checked={s.dashboard_visible}
+                          onCheckedChange={async (checked) => {
+                            setSpotlights((rows) => rows.map((r) => r.id === s.id ? { ...r, dashboard_visible: checked } : r));
+                            const { error } = await supabase
+                              .from("partner_pages" as any)
+                              .update({ dashboard_visible: checked } as any)
+                              .eq("id", s.id);
+                            if (error) {
+                              setSpotlights((rows) => rows.map((r) => r.id === s.id ? { ...r, dashboard_visible: !checked } : r));
+                              toast.error(error.message);
+                            } else {
+                              toast.success(checked ? "Live on all dashboards" : "Hidden from all dashboards");
+                            }
+                          }}
+                        />
+                      </div>
+                      <PartnerPageShares partnerPageId={s.id} profiles={profiles} />
+                    </CardContent>
                     {(() => {
                       const rows = interests.filter((i) => i.partner_page_id === s.id);
                       if (rows.length === 0) return null;
