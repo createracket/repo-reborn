@@ -648,6 +648,8 @@ function UnifiedBriefs({
   onCampaignPublishChanged,
   onLeadUpdated,
   onCampaignUpdated,
+  onLeadDeleted,
+  onCampaignDeleted,
 }: {
   leads: LeadBrief[];
   campaigns: CampaignBrief[];
@@ -658,6 +660,8 @@ function UnifiedBriefs({
   onCampaignPublishChanged: (id: string, published: boolean, published_at: string | null) => void;
   onLeadUpdated: (id: string, patch: Partial<LeadBrief>) => void;
   onCampaignUpdated: (id: string, patch: Partial<CampaignBrief>) => void;
+  onLeadDeleted: (id: string) => void;
+  onCampaignDeleted: (id: string) => void;
 }) {
   const [editing, setEditing] = useState<UnifiedBrief | null>(null);
   const rows: UnifiedBrief[] = useMemo(() => {
@@ -668,6 +672,7 @@ function UnifiedBriefs({
     list.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
     return list;
   }, [leads, campaigns]);
+
 
   if (rows.length === 0) return <Empty />;
 
