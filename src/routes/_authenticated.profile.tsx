@@ -458,12 +458,10 @@ function EditProfilePage() {
                 <Textarea id="bio" rows={4} value={form.bio} onChange={(e) => set("bio", e.target.value)} />
               </div>
 
-              <div className="md:col-span-2 pt-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="md:col-span-2 pt-2">
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Socials</p>
-                <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
-                  Sum fetched → Total followers
-                </Button>
               </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="ig">Instagram</Label>
                 <div className="flex gap-1.5">
