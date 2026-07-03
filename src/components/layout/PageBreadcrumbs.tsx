@@ -35,7 +35,7 @@ function getPageLabel(pathname: string): string | null {
 export function PageBreadcrumbs() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  if (pathname === "/") return null;
+  if (pathname === "/" || pathname === "/dashboard") return null;
 
   const label = getPageLabel(pathname);
 
