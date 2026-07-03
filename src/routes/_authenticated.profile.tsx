@@ -439,12 +439,48 @@ function EditProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="loc">Location</Label>
-                <Input id="loc" value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="London, UK" />
+                <Select value={form.location || "__none"} onValueChange={(v) => set("location", v === "__none" ? "" : v)}>
+                  <SelectTrigger id="loc"><SelectValue placeholder="Select a country" /></SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    <SelectItem value="__none">— None —</SelectItem>
+                    {COUNTRIES.map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="topaud">Top audience location</Label>
-                <Input id="topaud" value={form.top_audience_location} onChange={(e) => set("top_audience_location", e.target.value)} placeholder="London, UK" />
+                <Label>Top audience locations (up to 3 countries)</Label>
+                {(() => {
+                  const parts = form.top_audience_location
+                    ? form.top_audience_location.split(",").map((s) => s.trim()).filter(Boolean)
+                    : [];
+                  const slots: string[] = [parts[0] ?? "", parts[1] ?? "", parts[2] ?? ""];
+                  const updateSlot = (i: number, v: string) => {
+                    const next = [...slots];
+                    next[i] = v === "__none" ? "" : v;
+                    const joined = next.filter(Boolean).join(", ");
+                    set("top_audience_location", joined);
+                  };
+                  return (
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                      {slots.map((val, i) => (
+                        <Select key={i} value={val || "__none"} onValueChange={(v) => updateSlot(i, v)}>
+                          <SelectTrigger><SelectValue placeholder={`Country ${i + 1}`} /></SelectTrigger>
+                          <SelectContent className="max-h-72">
+                            <SelectItem value="__none">— None —</SelectItem>
+                            {COUNTRIES.map((c) => (
+                              <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ))}
+                    </div>
+                  );
+                })()}
+                <p className="text-xs text-muted-foreground">City-level data coming soon — pick the countries your audience is strongest in for now.</p>
               </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="acctype">Account type</Label>
                 <Input
