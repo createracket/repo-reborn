@@ -58,7 +58,7 @@ export function SiteHeader() {
     <>
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="flex items-center">
+          <Link to={signedIn ? "/dashboard" : "/"} className="flex items-center">
             <img src={racketNavLogo.url} alt="Racket" className="h-8 w-auto" />
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
