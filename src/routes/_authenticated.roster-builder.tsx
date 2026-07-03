@@ -1463,6 +1463,8 @@ function EditProspectPanel({
         youtube_subscribers: toNum(form.youtube_subscribers),
         spotify_url: form.spotify_url.trim() || null,
         spotify_monthly_listens: toNum(form.spotify_monthly_listens),
+        apple_music_url: form.apple_music_url.trim() || null,
+        apple_music_followers: toNum(form.apple_music_followers),
         example_video_url: form.example_video_url.trim() || null,
         bio_page_url: form.bio_page_url.trim() || null,
         content_review_url: form.content_review_url.trim() || null,
