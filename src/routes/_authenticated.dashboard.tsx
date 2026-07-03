@@ -40,8 +40,34 @@ type RosterRow = {
   id: string;
   member_id: string;
   created_at: string;
-  member?: { id: string; display_name: string | null; avatar_url: string | null } | null;
+  member?: { id: string; display_name: string | null; avatar_url: string | null; account_type: string | null } | null;
 };
+
+const CATEGORY_TAG: Record<string, { label: string; badge: string }> = {
+  musician: { label: "Musician", badge: "bg-pink-accent text-[#2b2b2b]" },
+  ugc: { label: "UGC", badge: "bg-purple text-white" },
+  egc: { label: "EGC", badge: "bg-sky-500 text-white" },
+  music_fan: { label: "Music Fan", badge: "bg-emerald-500 text-white" },
+  editorial: { label: "Editorial", badge: "bg-amber-500 text-white" },
+  artist_exchange: { label: "Artist Exchange", badge: "bg-rose-500 text-white" },
+};
+
+const ACCOUNT_TYPE_TAG: Record<string, { label: string; badge: string }> = {
+  artist: { label: "Artist", badge: "bg-pink-accent text-[#2b2b2b]" },
+  brand: { label: "Brand", badge: "bg-purple text-white" },
+  fan: { label: "Fan", badge: "bg-emerald-500 text-white" },
+  crew: { label: "Crew", badge: "bg-sky-500 text-white" },
+  creative: { label: "Creative", badge: "bg-amber-500 text-white" },
+};
+
+function TypeTag({ tag }: { tag: { label: string; badge: string } | undefined }) {
+  if (!tag) return null;
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${tag.badge}`}>
+      {tag.label}
+    </span>
+  );
+}
 
 type CommunityMember = {
   id: string;
