@@ -72,8 +72,8 @@ export function ExampleOpportunitiesAdmin() {
 
   async function handleImage(row: ExampleOpportunity, file: File) {
     if (file.size > 8 * 1024 * 1024) { toast.error("Max 8MB"); return; }
-    // Resize to max 1080x1080
-    const resized = await resizeImage(file, 1080);
+    // Center-crop to 9:16, max 1600px tall
+    const resized = await resizeImage(file, 1600);
     const ext = "jpg";
     const path = `example-opps/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage.from("spotlight-images").upload(path, resized, {
