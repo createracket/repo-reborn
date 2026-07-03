@@ -385,3 +385,148 @@ export const scrapeProfileFollowers = createServerFn({ method: "POST" })
     if (platform === "tiktok") return scrapeTikTokProfile(data.url);
     return scrapeYouTubeChannel(data.url);
   });
+
+// ============================================================
+// Spotify artist scraping
+// ============================================================
+
+type SpotifyArtistResult =
+  | {
+      ok: true;
+      artist_id: string;
+      name?: string | null;
+      followers: number | null;
+      monthly_listeners: number | null;
+      total_streams: number | null;
+      avatar_url?: string | null;
+    }
+  | { ok: false; error: string };
+
+function extractSpotifyArtistId(url: string): string | null {
+  const raw = url.trim();
+  // Bare 22-char base62 id
+  if (/^[A-Za-z0-9]{22}$/.test(raw)) return raw;
+  try {
+    const u = new URL(raw);
+    const seg = u.pathname.split("/").filter(Boolean);
+    const i = seg.indexOf("artist");
+    if (i >= 0 && seg[i + 1]) return seg[i + 1].split("?")[0];
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function getSpotifyToken(): Promise<string | null> {
+  const id = process.env.SPOTIFY_CLIENT_ID;
+  const secret = process.env.SPOTIFY_CLIENT_SECRET;
+  if (!id || !secret) return null;
+  const res = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${Buffer.from(`${id}:${secret}`).toString("base64")}`,
+    },
+    body: "grant_type=client_credentials",
+  });
+  if (!res.ok) return null;
+  const j = (await res.json()) as { access_token?: string };
+  return j.access_token ?? null;
+}
+
+async function fetchMonthlyListeners(artistId: string): Promise<number | null> {
+  // Scrape the public artist page — Spotify inlines monthly listeners in HTML.
+  try {
+    const res = await fetch(`https://open.spotify.com/artist/${artistId}`, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    // Try meta description first: "Artist · 1,234,567 monthly listeners."
+    const m1 = html.match(/([\d,\.]+)\s+monthly listeners/i);
+    if (m1) {
+      const n = Number(m1[1].replace(/[,\.]/g, ""));
+      if (Number.isFinite(n)) return n;
+    }
+    // Fallback: JSON-embedded "monthlyListeners":N
+    const m2 = html.match(/"monthlyListeners"\s*:\s*(\d+)/);
+    if (m2) return Number(m2[1]);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchKworbTotalStreams(artistId: string): Promise<number | null> {
+  // Kworb aggregates per-track streams; "Total" row on the artist page.
+  try {
+    const res = await fetch(`https://kworb.net/spotify/artist/${artistId}_songs.html`, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; RacketBot/1.0)" },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    // Row: <td>Total</td><td>1,234,567,890</td>...
+    const m = html.match(/<td[^>]*>\s*Total\s*<\/td>\s*<td[^>]*>\s*([\d,]+)/i);
+    if (m) {
+      const n = Number(m[1].replace(/,/g, ""));
+      if (Number.isFinite(n)) return n;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Scrape Spotify artist metrics: followers (Web API), monthly listeners
+ * (open.spotify.com), and estimated total streams (Kworb).
+ */
+export const scrapeSpotifyArtist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ url: z.string().min(1) }).parse)
+  .handler(async ({ data }): Promise<SpotifyArtistResult> => {
+    const artistId = extractSpotifyArtistId(data.url);
+    if (!artistId)
+      return { ok: false, error: "Couldn't parse Spotify artist ID from URL." };
+
+    const token = await getSpotifyToken();
+    let name: string | null = null;
+    let followers: number | null = null;
+    let avatar_url: string | null = null;
+
+    if (token) {
+      const r = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (r.ok) {
+        const j = (await r.json()) as {
+          name?: string;
+          followers?: { total?: number };
+          images?: Array<{ url?: string }>;
+        };
+        name = j.name ?? null;
+        followers = j.followers?.total ?? null;
+        avatar_url = j.images?.[0]?.url ?? null;
+      }
+    }
+
+    const [monthly_listeners, total_streams] = await Promise.all([
+      fetchMonthlyListeners(artistId),
+      fetchKworbTotalStreams(artistId),
+    ]);
+
+    return {
+      ok: true,
+      artist_id: artistId,
+      name,
+      followers,
+      monthly_listeners,
+      total_streams,
+      avatar_url,
+    };
+  });
+

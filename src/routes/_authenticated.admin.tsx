@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { scrapeProfileFollowers } from "@/lib/campaign-scrapers.functions";
+import { scrapeProfileFollowers, scrapeSpotifyArtist } from "@/lib/campaign-scrapers.functions";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -949,8 +949,9 @@ function SpotlightForm({
   }
 
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
-  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube">(null);
-  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number }>({});
+  const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
+  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube" | "spotify">(null);
+  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number; spotify?: number }>({});
 
   async function syncSocial(platform: "instagram" | "tiktok" | "youtube") {
     const raw = String(form[platform] || "").trim();
@@ -978,6 +979,40 @@ function SpotlightForm({
       } else {
         toast.error("No follower count returned");
       }
+    } finally {
+      setSyncing(null);
+    }
+  }
+
+  async function syncSpotify() {
+    const raw = String(form.spotify || "").trim();
+    if (!raw) {
+      toast.error("Enter a Spotify artist URL first");
+      return;
+    }
+    setSyncing("spotify");
+    try {
+      const r = await scrapeSpotify({ data: { url: raw } });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      const updates: string[] = [];
+      if (r.followers != null) {
+        setFetchedCounts((c) => ({ ...c, spotify: r.followers ?? 0 }));
+        set("total_followers", String(r.followers));
+        updates.push(`${r.followers.toLocaleString()} followers`);
+      }
+      if (r.monthly_listeners != null) {
+        set("monthly_streams", String(r.monthly_listeners));
+        updates.push(`${r.monthly_listeners.toLocaleString()} monthly listeners`);
+      }
+      if (r.total_streams != null) {
+        set("total_streams", String(r.total_streams));
+        updates.push(`${r.total_streams.toLocaleString()} total streams`);
+      }
+      if (updates.length === 0) toast.error("No Spotify metrics returned");
+      else toast.success(`Spotify: ${updates.join(" · ")}`);
     } finally {
       setSyncing(null);
     }
@@ -1172,8 +1207,15 @@ function SpotlightForm({
             )}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="spotify">Spotify URL</Label>
-            <Input id="spotify" value={form.spotify} onChange={(e) => set("spotify", e.target.value)} />
+            <Label htmlFor="spotify">Spotify artist URL</Label>
+            <div className="flex gap-2">
+              <Input id="spotify" value={form.spotify} onChange={(e) => set("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/..." />
+              <Button type="button" variant="outline" size="sm" onClick={syncSpotify} disabled={syncing !== null}>
+                <RefreshCw className={`size-3 ${syncing === "spotify" ? "animate-spin" : ""}`} />
+                <span className="ml-1">Sync</span>
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">Fetches followers + monthly listeners (Spotify) and estimated total streams (Kworb).</p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="spotifyEmbed">Spotify embed URL</Label>
