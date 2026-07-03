@@ -862,7 +862,7 @@ function EditBriefDialog({
       patch.timeline = form.timeline || null;
       patch.target_audience = form.target_audience || null;
     }
-    const { error } = await supabase.from(table).update(patch).eq("id", brief.id);
+    const { error } = await supabase.from(table).update(patch as any).eq("id", brief.id);
     setSaving(false);
     if (error) {
       toast.error(error.message);
