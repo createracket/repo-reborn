@@ -13,7 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
-import { BriefStatusBadge, BriefStatusSelect, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
+import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
+import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
 import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS, transparencyLabel } from "@/lib/brief-currency";
 
@@ -24,12 +25,14 @@ export type LeadBrief = {
   collaboration_types: string[]; target_audience: string | null;
   contact_email: string; contact_name: string | null; company: string | null;
   status: string;
+  linked_roster_id: string | null;
 };
 export type CampaignBrief = {
   id: string; created_at: string; title: string; description: string;
   user_id: string; budget: number | null; currency: string | null; transparency: string | null;
   status: string;
   contact_email: string | null; published: boolean; published_at: string | null;
+  linked_roster_id: string | null;
 };
 export type Profile = {
   id: string; email: string | null; display_name: string | null;
@@ -66,7 +69,7 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, contact_email, published, published_at").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, contact_email, published, published_at, linked_roster_id").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
     ]);
     setLeadBriefs((lb.data as LeadBrief[]) ?? []);
@@ -266,6 +269,17 @@ function UnifiedBriefs({
                     value={b.status}
                     onChange={(next) => updateStatus(b, next)}
                   />
+                  {normalizeStatus(b.status) === "review_your_roster" ? (
+                    <BriefRosterLink
+                      briefSource={b.source}
+                      briefId={b.id}
+                      linkedRosterId={b.linked_roster_id}
+                      onChange={(nextId) => {
+                        if (b.source === "user") onCampaignUpdated(b.id, { linked_roster_id: nextId } as Partial<CampaignBrief>);
+                        else onLeadUpdated(b.id, { linked_roster_id: nextId } as Partial<LeadBrief>);
+                      }}
+                    />
+                  ) : null}
                   <Button size="sm" variant="outline" onClick={() => setEditing(b)}>
                     <Pencil className="mr-1 h-3 w-3" /> Edit
                   </Button>

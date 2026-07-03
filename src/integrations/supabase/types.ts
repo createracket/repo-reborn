@@ -75,6 +75,7 @@ export type Database = {
           currency: string | null
           description: string
           id: string
+          linked_roster_id: string | null
           published: boolean
           published_at: string | null
           status: string
@@ -93,6 +94,7 @@ export type Database = {
           currency?: string | null
           description?: string
           id?: string
+          linked_roster_id?: string | null
           published?: boolean
           published_at?: string | null
           status?: string
@@ -111,6 +113,7 @@ export type Database = {
           currency?: string | null
           description?: string
           id?: string
+          linked_roster_id?: string | null
           published?: boolean
           published_at?: string | null
           status?: string
@@ -120,7 +123,22 @@ export type Database = {
           transparency?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "campaign_briefs_linked_roster_id_fkey"
+            columns: ["linked_roster_id"]
+            isOneToOne: false
+            referencedRelation: "public_rosters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_briefs_linked_roster_id_fkey"
+            columns: ["linked_roster_id"]
+            isOneToOne: false
+            referencedRelation: "rosters"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       campaign_report_creators: {
         Row: {
@@ -569,6 +587,7 @@ export type Database = {
           currency: string | null
           description: string
           id: string
+          linked_roster_id: string | null
           status: string
           target_audience: string | null
           timeline: string | null
@@ -587,6 +606,7 @@ export type Database = {
           currency?: string | null
           description?: string
           id?: string
+          linked_roster_id?: string | null
           status?: string
           target_audience?: string | null
           timeline?: string | null
@@ -605,13 +625,29 @@ export type Database = {
           currency?: string | null
           description?: string
           id?: string
+          linked_roster_id?: string | null
           status?: string
           target_audience?: string | null
           timeline?: string | null
           title?: string
           transparency?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lead_briefs_linked_roster_id_fkey"
+            columns: ["linked_roster_id"]
+            isOneToOne: false
+            referencedRelation: "public_rosters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_briefs_linked_roster_id_fkey"
+            columns: ["linked_roster_id"]
+            isOneToOne: false
+            referencedRelation: "rosters"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mailing_list_subscribers: {
         Row: {

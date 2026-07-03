@@ -37,16 +37,35 @@ export function normalizeStatus(value: string | null | undefined): BriefStatus {
 export function BriefStatusBadge({
   status,
   className,
+  href,
 }: {
   status: string | null | undefined;
   className?: string;
+  /** When provided, the badge renders as a link (used for "Review your roster" → roster page). */
+  href?: string | null;
 }) {
   const s = normalizeStatus(status);
-  return (
-    <Badge variant="outline" className={cn("font-medium", STATUS_CLASSES[s], className)}>
+  const badge = (
+    <Badge
+      variant="outline"
+      className={cn(
+        "font-medium",
+        STATUS_CLASSES[s],
+        href ? "cursor-pointer hover:brightness-110 hover:underline" : "",
+        className,
+      )}
+    >
       {BRIEF_STATUS_LABEL[s]}
     </Badge>
   );
+  if (href) {
+    return (
+      <a href={href} className="inline-flex">
+        {badge}
+      </a>
+    );
+  }
+  return badge;
 }
 
 export function BriefStatusSelect({
