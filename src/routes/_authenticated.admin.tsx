@@ -205,6 +205,7 @@ function AdminPage() {
             
             <TabsTrigger value="brief-form">Brief Form</TabsTrigger>
             <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
+            <TabsTrigger value="example-opps">Example opportunities</TabsTrigger>
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
           </TabsList>
 
