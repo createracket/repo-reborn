@@ -116,7 +116,7 @@ function EditProfilePage() {
           location: d.location ?? "",
           bio: d.bio ?? "",
           avatar_url: d.avatar_url ?? "",
-          socials: { instagram: "", tiktok: "", spotify: "", youtube: "", website: "", ...(d.socials ?? {}) },
+          socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", website: "", ...(d.socials ?? {}) },
           total_followers: d.total_followers?.toString() ?? "",
           total_streams: d.total_streams?.toString() ?? "",
           monthly_streams: d.monthly_streams?.toString() ?? "",
