@@ -681,7 +681,7 @@ function DashboardPage() {
                   </div>
                 ) : (
                   <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {showMine && roster.map((r) => (
+                    {displayedRoster.map((r) => (
                       <li
                         key={r.id}
                         className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
