@@ -310,7 +310,13 @@ function UnifiedBriefs({
                   />
                 </div>
               ) : null}
+              <BriefShares
+                briefSource={isUser ? "user" : "lead"}
+                briefId={b.id}
+                profiles={profiles}
+              />
             </CardContent>
+
           </Card>
         );
       })}
