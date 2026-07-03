@@ -162,6 +162,14 @@ function UnifiedBriefs({
   onCampaignDeleted: (id: string) => void;
 }) {
   const [editing, setEditing] = useState<UnifiedBrief | null>(null);
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const toggleOpen = (key: string) =>
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
   const rows: UnifiedBrief[] = useMemo(() => {
     const list: UnifiedBrief[] = [
       ...campaigns.map((c) => ({ source: "user" as const, ...c })),
