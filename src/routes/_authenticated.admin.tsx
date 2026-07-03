@@ -752,9 +752,29 @@ function UnifiedBriefs({
                   <Button size="sm" variant="outline" onClick={() => setEditing(b)}>
                     <Pencil className="mr-1 h-3 w-3" /> Edit
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-destructive hover:text-destructive"
+                    onClick={async () => {
+                      if (!confirm(`Delete brief "${b.title}"? This cannot be undone.`)) return;
+                      const table = b.source === "user" ? "campaign_briefs" : "lead_briefs";
+                      const { error } = await supabase.from(table).delete().eq("id", b.id);
+                      if (error) {
+                        toast.error(error.message);
+                        return;
+                      }
+                      if (b.source === "user") onCampaignDeleted(b.id);
+                      else onLeadDeleted(b.id);
+                      toast.success("Brief deleted");
+                    }}
+                  >
+                    <Trash2 className="mr-1 h-3 w-3" /> Delete
+                  </Button>
                 </div>
               </div>
             </CardHeader>
+
             <CardContent className="space-y-3 text-sm">
               <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
               <KV k="Budget" v={b.budget ? `£${b.budget}` : "—"} />
