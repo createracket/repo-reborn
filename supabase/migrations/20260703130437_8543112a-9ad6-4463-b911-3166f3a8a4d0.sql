@@ -1,0 +1,2 @@
+INSERT INTO public.example_opportunities (title, description, location, position) VALUES
+  ('Indie label — curated compilation slots', 'UK-based indie label seeking 4 emerging artists for a Spotify compilation feature. Includes press support, playlist pitching, and co-branded social assets.', 'UK', 3);
