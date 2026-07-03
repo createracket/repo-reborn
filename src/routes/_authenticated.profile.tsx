@@ -133,6 +133,8 @@ function EditProfilePage() {
           avg_reach: d.avg_reach?.toString() ?? "",
           avg_engagement: d.avg_engagement?.toString() ?? "",
           top_audience_location: d.top_audience_location ?? "",
+          flagged_streaming_mismatch: d.flagged_streaming_mismatch ?? false,
+          flagged_streaming_reason: d.flagged_streaming_reason ?? "",
         });
       }
       setLoading(false);
