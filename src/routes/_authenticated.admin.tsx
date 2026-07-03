@@ -984,6 +984,40 @@ function SpotlightForm({
     }
   }
 
+  async function syncSpotify() {
+    const raw = String(form.spotify || "").trim();
+    if (!raw) {
+      toast.error("Enter a Spotify artist URL first");
+      return;
+    }
+    setSyncing("spotify");
+    try {
+      const r = await scrapeSpotify({ data: { url: raw } });
+      if (!r.ok) {
+        toast.error(r.error);
+        return;
+      }
+      const updates: string[] = [];
+      if (r.followers != null) {
+        setFetchedCounts((c) => ({ ...c, spotify: r.followers ?? 0 }));
+        set("total_followers", String(r.followers));
+        updates.push(`${r.followers.toLocaleString()} followers`);
+      }
+      if (r.monthly_listeners != null) {
+        set("monthly_streams", String(r.monthly_listeners));
+        updates.push(`${r.monthly_listeners.toLocaleString()} monthly listeners`);
+      }
+      if (r.total_streams != null) {
+        set("total_streams", String(r.total_streams));
+        updates.push(`${r.total_streams.toLocaleString()} total streams`);
+      }
+      if (updates.length === 0) toast.error("No Spotify metrics returned");
+      else toast.success(`Spotify: ${updates.join(" · ")}`);
+    } finally {
+      setSyncing(null);
+    }
+  }
+
   function applyTotalFollowers() {
     const total =
       (fetchedCounts.instagram ?? 0) +
