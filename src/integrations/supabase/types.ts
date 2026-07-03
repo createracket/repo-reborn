@@ -164,6 +164,13 @@ export type Database = {
             referencedRelation: "campaign_reports"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "campaign_report_creators_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "public_campaign_reports"
+            referencedColumns: ["id"]
+          },
         ]
       }
       campaign_report_posts: {
@@ -305,6 +312,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "campaign_reports_source_roster_id_fkey"
+            columns: ["source_roster_id"]
+            isOneToOne: false
+            referencedRelation: "public_rosters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "campaign_reports_source_roster_id_fkey"
             columns: ["source_roster_id"]
@@ -921,6 +935,13 @@ export type Database = {
             foreignKeyName: "roster_items_roster_id_fkey"
             columns: ["roster_id"]
             isOneToOne: false
+            referencedRelation: "public_rosters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roster_items_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
             referencedRelation: "rosters"
             referencedColumns: ["id"]
           },
@@ -967,6 +988,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "roster_shares_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
+            referencedRelation: "public_rosters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "roster_shares_roster_id_fkey"
             columns: ["roster_id"]
@@ -1165,6 +1193,90 @@ export type Database = {
       }
     }
     Views: {
+      lead_briefs_shared: {
+        Row: {
+          budget: number | null
+          company: string | null
+          contact_name: string | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          id: string | null
+          status: string | null
+          target_audience: string | null
+          timeline: string | null
+          title: string | null
+          transparency: string | null
+        }
+        Insert: {
+          budget?: number | null
+          company?: string | null
+          contact_name?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string | null
+          status?: string | null
+          target_audience?: string | null
+          timeline?: string | null
+          title?: string | null
+          transparency?: string | null
+        }
+        Update: {
+          budget?: number | null
+          company?: string | null
+          contact_name?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string | null
+          status?: string | null
+          target_audience?: string | null
+          timeline?: string | null
+          title?: string | null
+          transparency?: string | null
+        }
+        Relationships: []
+      }
+      public_campaign_reports: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          header_image_url: string | null
+          id: string | null
+          owner_id: string | null
+          published: boolean | null
+          published_at: string | null
+          slug: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          header_image_url?: string | null
+          id?: string | null
+          owner_id?: string | null
+          published?: boolean | null
+          published_at?: string | null
+          slug?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          header_image_url?: string | null
+          id?: string | null
+          owner_id?: string | null
+          published?: boolean | null
+          published_at?: string | null
+          slug?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       public_profiles: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"] | null
@@ -1225,6 +1337,48 @@ export type Database = {
           total_followers?: number | null
           total_streams?: number | null
           values?: string[] | null
+        }
+        Relationships: []
+      }
+      public_rosters: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          header_image_url: string | null
+          hide_prospect_tags: boolean | null
+          id: string | null
+          owner_id: string | null
+          published: boolean | null
+          published_at: string | null
+          slug: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          header_image_url?: string | null
+          hide_prospect_tags?: boolean | null
+          id?: string | null
+          owner_id?: string | null
+          published?: boolean | null
+          published_at?: string | null
+          slug?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          header_image_url?: string | null
+          hide_prospect_tags?: boolean | null
+          id?: string | null
+          owner_id?: string | null
+          published?: boolean | null
+          published_at?: string | null
+          slug?: string | null
+          title?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
