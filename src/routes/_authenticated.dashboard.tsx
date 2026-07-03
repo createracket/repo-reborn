@@ -639,7 +639,7 @@ function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {!loading && isAdmin && (
+                {!loading && (
                   <div className="mb-4 flex flex-wrap items-center gap-2">
                     <Label htmlFor="dash-roster-filter" className="text-xs uppercase tracking-wide text-muted-foreground">
                       View
@@ -649,9 +649,10 @@ function DashboardPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="all">All rosters</SelectItem>
                         <SelectItem value="mine">My saved roster</SelectItem>
-                        {adminOwners.map((o) => (
-                          <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
+                        {myRosters.map((r) => (
+                          <SelectItem key={r.id} value={r.id}>{r.title}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -659,93 +660,132 @@ function DashboardPage() {
                 )}
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : displayedRoster.length === 0 && (!isMineView ? true : taggedCreators.length === 0) ? (
-                  <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
-                    {latestVibe ? (
-                      <p className="text-muted-foreground">
-                        Your roster is empty. Community browsing is coming soon — we'll start
-                        surfacing matches based on your Vibe Check results here.
-                      </p>
-                    ) : (
-                      <>
-                        <p className="text-muted-foreground">
-                          Your roster is empty. Take the Vibe Check to start surfacing matches.
-                        </p>
-                        <Button asChild className="mt-4">
-                          <Link to="/vibe-check">Take the Vibe Check</Link>
-                        </Button>
-                      </>
-                    )}
-                  </div>
                 ) : (
-                  <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {displayedRoster.map((r) => (
-                      <li
-                        key={r.id}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="size-10 overflow-hidden rounded-full bg-muted">
-                            {r.member?.avatar_url ? (
-                              <img
-                                src={r.member.avatar_url}
-                                alt=""
-                                className="size-full object-cover"
-                              />
-                            ) : null}
-                          </div>
-                          <div>
-                            <div className="font-medium flex items-center gap-2 flex-wrap">
-                              <span>{r.member?.display_name ?? "Member"}</span>
-                              <TypeTag tag={r.member?.account_type ? ACCOUNT_TYPE_TAG[r.member.account_type] : undefined} />
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              Added {new Date(r.created_at).toLocaleDateString()}
-                            </div>
-                          </div>
+                  (() => {
+                    const showSaved = isAllView || isMineView;
+                    const showTagged = isAllView;
+                    const showItems = isRosterView;
+                    const isEmpty =
+                      (!showSaved || displayedRoster.length === 0) &&
+                      (!showTagged || taggedCreators.length === 0) &&
+                      (!showItems || rosterItems.length === 0);
+                    if (isEmpty) {
+                      return (
+                        <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
+                          {isRosterView ? (
+                            <p className="text-muted-foreground">
+                              This roster doesn't have any creators yet.
+                            </p>
+                          ) : latestVibe ? (
+                            <p className="text-muted-foreground">
+                              Your roster is empty. Community browsing is coming soon — we'll start
+                              surfacing matches based on your Vibe Check results here.
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-muted-foreground">
+                                Your roster is empty. Take the Vibe Check to start surfacing matches.
+                              </p>
+                              <Button asChild className="mt-4">
+                                <Link to="/vibe-check">Take the Vibe Check</Link>
+                              </Button>
+                            </>
+                          )}
                         </div>
-                        {isMineView && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeFromRoster(r.id)}
+                      );
+                    }
+                    return (
+                      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {showSaved && displayedRoster.map((r) => (
+                          <li
+                            key={r.id}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
                           >
-                            Remove
-                          </Button>
-                        )}
-                      </li>
-                    ))}
-                    {isMineView && taggedCreators.map((c) => (
-                      <li
-                        key={`tag-${c.id}`}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
-                            {c.avatar_url ? (
-                              <img src={c.avatar_url} alt="" className="size-full object-cover" />
+                            <div className="flex items-center gap-3">
+                              <div className="size-10 overflow-hidden rounded-full bg-muted">
+                                {r.member?.avatar_url ? (
+                                  <img
+                                    src={r.member.avatar_url}
+                                    alt=""
+                                    className="size-full object-cover"
+                                  />
+                                ) : null}
+                              </div>
+                              <div>
+                                <div className="font-medium flex items-center gap-2 flex-wrap">
+                                  <span>{r.member?.display_name ?? "Member"}</span>
+                                  <TypeTag tag={r.member?.account_type ? ACCOUNT_TYPE_TAG[r.member.account_type] : undefined} />
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  Added {new Date(r.created_at).toLocaleDateString()}
+                                </div>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeFromRoster(r.id)}
+                            >
+                              Remove
+                            </Button>
+                          </li>
+                        ))}
+                        {showTagged && taggedCreators.map((c) => (
+                          <li
+                            key={`tag-${c.id}`}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
+                                {c.avatar_url ? (
+                                  <img src={c.avatar_url} alt="" className="size-full object-cover" />
+                                ) : null}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-medium truncate flex items-center gap-2">
+                                  <span className="truncate">{c.name ?? "Creator"}</span>
+                                  <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
+                                </div>
+                                <div className="text-xs text-muted-foreground truncate">
+                                  From {c.roster_title}
+                                </div>
+                              </div>
+                            </div>
+                            {c.roster_published && c.roster_slug ? (
+                              <Button asChild size="sm" variant="ghost">
+                                <a href={`/roster/${c.roster_slug}`} target="_blank" rel="noreferrer">
+                                  View
+                                </a>
+                              </Button>
                             ) : null}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="font-medium truncate flex items-center gap-2">
-                              <span className="truncate">{c.name ?? "Creator"}</span>
-                              <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
+                          </li>
+                        ))}
+                        {showItems && rosterItems.map((c) => (
+                          <li
+                            key={`item-${c.id}`}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
+                                {c.avatar_url ? (
+                                  <img src={c.avatar_url} alt="" className="size-full object-cover" />
+                                ) : null}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-medium truncate flex items-center gap-2">
+                                  <span className="truncate">{c.name ?? "Creator"}</span>
+                                  <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
+                                </div>
+                                <div className="text-xs text-muted-foreground truncate">
+                                  From {c.roster_title}
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-xs text-muted-foreground truncate">
-                              From {c.roster_title}
-                            </div>
-                          </div>
-                        </div>
-                        {c.roster_published && c.roster_slug ? (
-                          <Button asChild size="sm" variant="ghost">
-                            <a href={`/roster/${c.roster_slug}`} target="_blank" rel="noreferrer">
-                              View
-                            </a>
-                          </Button>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  })()
                 )}
 
 
