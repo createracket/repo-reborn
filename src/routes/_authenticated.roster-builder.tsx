@@ -1918,6 +1918,9 @@ function AddProspectCard({
       bio_page_url: form.has_bio ? form.bio_page_url.trim() || null : null,
       content_review_url: form.content_review_url.trim() || null,
       position: nextPosition,
+      ...(flagState.flagged
+        ? { flagged_streaming_mismatch: true, flagged_streaming_reason: flagState.reason }
+        : {}),
     });
     setSubmitting(false);
     if (error) {
