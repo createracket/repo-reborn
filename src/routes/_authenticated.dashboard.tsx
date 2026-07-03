@@ -106,6 +106,7 @@ function DashboardPage() {
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null }>>([]);
   const [loading, setLoading] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("all");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const rosterOptions = useMemo(() => {
     const map = new Map<string, string>();
