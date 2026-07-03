@@ -65,6 +65,7 @@ function ConnectPage() {
   const [submitting, setSubmitting] = useState(false);
   const [values, setValues] = useState<string[]>([]);
   const [types, setTypes] = useState<string[]>([]);
+  const [otherType, setOtherType] = useState("");
   const [config, setConfig] = useState<BriefFormConfig>(DEFAULT_BRIEF_FORM_CONFIG);
   const [submitted, setSubmitted] = useState<{ email: string; name: string; asUser: boolean } | null>(null);
   const [subscribing, setSubscribing] = useState(false);
