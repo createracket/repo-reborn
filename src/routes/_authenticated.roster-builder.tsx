@@ -1409,6 +1409,43 @@ function EditProspectPanel({
     }
   }
 
+  async function syncSpotify() {
+    const url = String(form.spotify_url || "").trim();
+    if (!url) { toast.error("Enter a Spotify URL first"); return; }
+    setFetching("spotify");
+    try {
+      const r = await scrapeSpotify({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.monthly_listeners != null) upd("spotify_monthly_listens", String(r.monthly_listeners) as never);
+      if (r.name && !isNameMatch(r.name, [form.name])) {
+        const reason = `Spotify artist "${r.name}" does not match "${form.name}".`;
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason });
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+      toast.success(r.monthly_listeners != null ? `${r.monthly_listeners.toLocaleString()} monthly listeners` : "Spotify synced");
+    } finally { setFetching(null); }
+  }
+
+  async function syncApple() {
+    const url = String(form.apple_music_url || "").trim();
+    if (!url) { toast.error("Enter an Apple Music URL first"); return; }
+    setFetching("apple");
+    try {
+      const r = await scrapeApple({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.name && !isNameMatch(r.name, [form.name])) {
+        const reason = `Apple Music artist "${r.name}" does not match "${form.name}".`;
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason });
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+      toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
+    } finally { setFetching(null); }
+  }
+
   function toNum(v: string): number | null {
     if (!v.trim()) return null;
     const n = Number(v.replace(/[,\s]/g, ""));
