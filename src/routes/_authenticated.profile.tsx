@@ -28,9 +28,11 @@ type ProfileSocials = {
   instagram?: string;
   tiktok?: string;
   spotify?: string;
+  apple_music?: string;
   youtube?: string;
   website?: string;
 };
+
 
 const emptyForm = {
   slug: "",
