@@ -94,6 +94,13 @@ function ConnectPage() {
     const fd = new FormData(e.currentTarget);
     const budgetRaw = fd.get("budget")?.toString().trim();
 
+    const finalTypes = types.includes("Something else")
+      ? [
+          ...types.filter((t) => t !== "Something else"),
+          otherType.trim() ? `Something else: ${otherType.trim()}` : "Something else",
+        ]
+      : types;
+
     const parsed = briefSchema.safeParse({
       title: fd.get("title")?.toString() ?? "",
       description: fd.get("description")?.toString() ?? "",
@@ -105,7 +112,7 @@ function ConnectPage() {
       contact_name: fd.get("contact_name")?.toString() ?? "",
       company: fd.get("company")?.toString() || undefined,
       contact_email: fd.get("contact_email")?.toString() ?? "",
-      collaboration_types: types,
+      collaboration_types: finalTypes,
       core_values: values,
       additional_info: fd.get("additional_info")?.toString() || undefined,
     });
