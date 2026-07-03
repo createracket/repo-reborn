@@ -579,12 +579,29 @@ function EditProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="sp">Spotify</Label>
-                <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
+                <div className="flex gap-1.5">
+                  <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
+                  <Button type="button" size="sm" variant="outline" onClick={syncSpotify} disabled={fetching === "spotify"} title="Auto-sync streaming numbers">
+                    <RefreshCw className={`size-3.5 ${fetching === "spotify" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">Auto-syncs followers, monthly listeners and total streams.</p>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="am">Apple Music</Label>
-                <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+                <div className="flex gap-1.5">
+                  <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+                  <Button type="button" size="sm" variant="outline" onClick={syncApple} disabled={fetching === "apple"} title="Auto-sync Apple Music artist">
+                    <RefreshCw className={`size-3.5 ${fetching === "apple" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">Verifies the artist name against your profile.</p>
               </div>
+              {mismatchWarning ? (
+                <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+                  {mismatchWarning}
+                </div>
+              ) : null}
               <div className="space-y-1.5">
                 <Label htmlFor="yt">YouTube</Label>
                 <div className="flex gap-1.5">
