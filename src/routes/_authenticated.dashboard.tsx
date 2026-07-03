@@ -774,7 +774,7 @@ function DashboardPage() {
                             >
                               <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
                                 {thumb ? (
-                                  <img src={thumb} alt="" className="size-full object-cover transition group-hover:scale-[1.02]" />
+                                  <img src={thumb} alt="" className="size-full object-cover object-top transition group-hover:scale-[1.02]" />
                                 ) : (
                                   <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
                                     Spotlight
