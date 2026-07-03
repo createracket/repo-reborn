@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
