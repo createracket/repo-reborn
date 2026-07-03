@@ -217,9 +217,9 @@ function PublicRosterPage() {
           ) : (
             items.map((it) => {
               const stats: Array<[string, number | null, string | null]> = [
-                ["Instagram", it.instagram_followers, it.instagram_url],
-                ["TikTok", it.tiktok_followers, it.tiktok_url],
-                ["YouTube", it.youtube_subscribers, it.youtube_url],
+                ["IG", it.instagram_followers, it.instagram_url],
+                ["TT", it.tiktok_followers, it.tiktok_url],
+                ["YT", it.youtube_subscribers, it.youtube_url],
                 ["Spotify", it.spotify_monthly_listens, it.spotify_url],
               ];
               const totalReach =
