@@ -111,6 +111,8 @@ function EditProfilePage() {
       if (data) {
         const d = data as any;
         setOriginalSlug(d.slug ?? "");
+        setAccountType(d.account_type ?? null);
+
         setForm({
           slug: d.slug ?? "",
           display_name: d.display_name ?? "",
