@@ -251,8 +251,15 @@ function UnifiedBriefs({
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(b.created_at).toLocaleString()}
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(b.created_at).toLocaleString()}
+                    </div>
+                    <CollapsibleTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" aria-label={isOpen ? "Collapse" : "Expand"}>
+                        {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </Button>
+                    </CollapsibleTrigger>
                   </div>
                   <BriefStatusBadge status={b.status} />
                   <BriefStatusSelect
