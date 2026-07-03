@@ -16,6 +16,8 @@ import {
 import { BriefStatusBadge } from "@/components/briefs/BriefStatusBadge";
 import { formatBriefBudget, transparencyLabel } from "@/lib/brief-currency";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
