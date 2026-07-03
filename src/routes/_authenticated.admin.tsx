@@ -1207,8 +1207,15 @@ function SpotlightForm({
             )}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="spotify">Spotify URL</Label>
-            <Input id="spotify" value={form.spotify} onChange={(e) => set("spotify", e.target.value)} />
+            <Label htmlFor="spotify">Spotify artist URL</Label>
+            <div className="flex gap-2">
+              <Input id="spotify" value={form.spotify} onChange={(e) => set("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/..." />
+              <Button type="button" variant="outline" size="sm" onClick={syncSpotify} disabled={syncing !== null}>
+                <RefreshCw className={`size-3 ${syncing === "spotify" ? "animate-spin" : ""}`} />
+                <span className="ml-1">Sync</span>
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">Fetches followers + monthly listeners (Spotify) and estimated total streams (Kworb).</p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="spotifyEmbed">Spotify embed URL</Label>
