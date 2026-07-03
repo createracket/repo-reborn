@@ -353,6 +353,7 @@ function RosterBuilderPage() {
             rosters={rosters}
             briefs={briefs}
             userId={userId}
+            profiles={profiles}
             onCreated={async (id) => {
               await loadRosters();
               setSelectedId(id);
@@ -362,6 +363,7 @@ function RosterBuilderPage() {
               await loadRosters();
             }}
           />
+
         ) : (
           <RosterDetailView
             roster={selected}
