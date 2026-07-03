@@ -515,10 +515,15 @@ function DashboardPage() {
                           <h3 className="font-medium leading-tight">{o.title}</h3>
                           {o.budget ? (
                             <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                              £{o.budget}
+                              <BudgetDisplay amount={o.budget} currency={o.currency} />
                             </span>
                           ) : null}
                         </div>
+                        {o.transparency ? (
+                          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                            {transparencyLabel(o.transparency)}
+                          </div>
+                        ) : null}
                         <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">
                           {o.description}
                         </p>
