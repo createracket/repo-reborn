@@ -406,29 +406,13 @@ function RosterListView({
   const [description, setDescription] = useState("");
   const [briefId, setBriefId] = useState<string>("");
   const [creating, setCreating] = useState(false);
-  const [ownerFilter, setOwnerFilter] = useState<string>("mine");
 
   const briefById = useMemo(() => new Map(briefs.map((b) => [b.id, b])), [briefs]);
   const profileById = useMemo(() => new Map(profiles.map((p) => [p.id, p])), [profiles]);
 
-  const ownerOptions = useMemo(() => {
-    const ids = Array.from(new Set(rosters.map((r) => r.owner_id)));
-    return ids
-      .map((id) => {
-        const p = profileById.get(id);
-        return {
-          id,
-          label: p?.display_name || p?.email || id.slice(0, 8),
-        };
-      })
-      .sort((a, b) => a.label.localeCompare(b.label));
-  }, [rosters, profileById]);
+  const visibleRosters = rosters;
 
-  const visibleRosters = useMemo(() => {
-    if (ownerFilter === "all") return rosters;
-    if (ownerFilter === "mine") return rosters.filter((r) => r.owner_id === userId);
-    return rosters.filter((r) => r.owner_id === ownerFilter);
-  }, [rosters, ownerFilter, userId]);
+
 
 
   function pickBrief(id: string) {
