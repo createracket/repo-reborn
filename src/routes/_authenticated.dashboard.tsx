@@ -646,12 +646,12 @@ function DashboardPage() {
                   and we'll make the intro.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
                 ) : opportunities.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
-                    No open opportunities right now. We'll surface new briefs here as brands post them.
+                    No open opportunities right now — here are the types of briefs we surface.
                   </div>
                 ) : (
                   <ul className="grid gap-3 md:grid-cols-2">
@@ -690,6 +690,42 @@ function DashboardPage() {
                     ))}
                   </ul>
                 )}
+
+                {!loading && examples.length > 0 ? (
+                  <div>
+                    <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+                      Example opportunities
+                    </div>
+                    <ul className="grid gap-3 md:grid-cols-3">
+                      {examples.map((ex) => (
+                        <li
+                          key={ex.id}
+                          className="flex flex-col gap-2 rounded-xl border border-dashed border-border/60 bg-muted/30 p-4 opacity-90"
+                        >
+                          {ex.image_url ? (
+                            <div className="aspect-square w-full overflow-hidden rounded-md bg-muted">
+                              <img src={ex.image_url} alt="" className="size-full object-cover" />
+                            </div>
+                          ) : null}
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="font-medium leading-tight">{ex.title}</h3>
+                            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                              Example
+                            </span>
+                          </div>
+                          {ex.description ? (
+                            <p className="text-sm text-muted-foreground line-clamp-3">
+                              {ex.description}
+                            </p>
+                          ) : null}
+                          {ex.location ? (
+                            <div className="text-xs text-muted-foreground">📍 {ex.location}</div>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           </div>
