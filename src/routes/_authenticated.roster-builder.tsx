@@ -1616,14 +1616,35 @@ function EditProspectPanel({
         {fld("TT followers", "tiktok_followers")}
         {urlFld("YouTube URL", "youtube_url", "youtube", "youtube_subscribers")}
         {fld("YT subscribers", "youtube_subscribers")}
-        {fld("Spotify URL", "spotify_url")}
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Spotify URL</Label>
+          <div className="flex gap-1">
+            <Input value={form.spotify_url} onChange={(e) => upd("spotify_url", e.target.value)} className="text-sm" />
+            <Button type="button" size="sm" variant="outline" onClick={syncSpotify} disabled={fetching === "spotify"} className="shrink-0" title="Auto-sync Spotify">
+              <RefreshCw className={`size-3.5 ${fetching === "spotify" ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
+        </div>
         {fld("Monthly listeners", "spotify_monthly_listens")}
-        {fld("Apple Music URL", "apple_music_url")}
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Apple Music URL</Label>
+          <div className="flex gap-1">
+            <Input value={form.apple_music_url} onChange={(e) => upd("apple_music_url", e.target.value)} className="text-sm" />
+            <Button type="button" size="sm" variant="outline" onClick={syncApple} disabled={fetching === "apple"} className="shrink-0" title="Auto-sync Apple Music">
+              <RefreshCw className={`size-3.5 ${fetching === "apple" ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
+        </div>
         {fld("Apple followers", "apple_music_followers")}
         {fld("Example video URL", "example_video_url")}
         {fld("Content to review URL (e.g. Frame.io)", "content_review_url")}
         {fld("Bio page URL", "bio_page_url")}
       </div>
+      {mismatchWarning ? (
+        <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-300">
+          {mismatchWarning}
+        </div>
+      ) : null}
       <div className="flex justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={onClose}>
           Cancel
