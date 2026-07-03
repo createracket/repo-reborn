@@ -35,6 +35,36 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_brief_shares: {
+        Row: {
+          brief_id: string
+          brief_source: string
+          created_at: string
+          created_by: string | null
+          id: string
+          target_email: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          brief_id: string
+          brief_source: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          target_email?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          brief_id?: string
+          brief_source?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          target_email?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       campaign_briefs: {
         Row: {
           budget: number | null
