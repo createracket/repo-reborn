@@ -273,7 +273,13 @@ function UnifiedBriefs({
 
             <CardContent className="space-y-3 text-sm">
               <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
-              <KV k="Budget" v={b.budget ? `£${b.budget}` : "—"} />
+              <div className="text-xs">
+                <span className="uppercase tracking-wider text-muted-foreground">Budget:</span>{" "}
+                <BudgetDisplay amount={b.budget} currency={b.currency} />
+              </div>
+              {b.transparency ? (
+                <KV k="Transparency" v={transparencyLabel(b.transparency) ?? b.transparency} />
+              ) : null}
               {!isUser ? (
                 <>
                   <KV k="Timeline" v={lead!.timeline ?? "—"} />
