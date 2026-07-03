@@ -651,10 +651,9 @@ function DashboardPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All rosters</SelectItem>
                         <SelectItem value="mine">My saved roster</SelectItem>
-                        {rosterOptions.map((o) => (
-                          <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>
+                        {adminOwners.map((o) => (
+                          <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
