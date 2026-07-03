@@ -40,8 +40,34 @@ type RosterRow = {
   id: string;
   member_id: string;
   created_at: string;
-  member?: { id: string; display_name: string | null; avatar_url: string | null } | null;
+  member?: { id: string; display_name: string | null; avatar_url: string | null; account_type: string | null } | null;
 };
+
+const CATEGORY_TAG: Record<string, { label: string; badge: string }> = {
+  musician: { label: "Musician", badge: "bg-pink-accent text-[#2b2b2b]" },
+  ugc: { label: "UGC", badge: "bg-purple text-white" },
+  egc: { label: "EGC", badge: "bg-sky-500 text-white" },
+  music_fan: { label: "Music Fan", badge: "bg-emerald-500 text-white" },
+  editorial: { label: "Editorial", badge: "bg-amber-500 text-white" },
+  artist_exchange: { label: "Artist Exchange", badge: "bg-rose-500 text-white" },
+};
+
+const ACCOUNT_TYPE_TAG: Record<string, { label: string; badge: string }> = {
+  artist: { label: "Artist", badge: "bg-pink-accent text-[#2b2b2b]" },
+  brand: { label: "Brand", badge: "bg-purple text-white" },
+  fan: { label: "Fan", badge: "bg-emerald-500 text-white" },
+  crew: { label: "Crew", badge: "bg-sky-500 text-white" },
+  creative: { label: "Creative", badge: "bg-amber-500 text-white" },
+};
+
+function TypeTag({ tag }: { tag: { label: string; badge: string } | undefined }) {
+  if (!tag) return null;
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${tag.badge}`}>
+      {tag.label}
+    </span>
+  );
+}
 
 type CommunityMember = {
   id: string;
@@ -74,7 +100,7 @@ function DashboardPage() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
-  const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
+  const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null }>>([]);
   const [loading, setLoading] = useState(true);
 
@@ -193,9 +219,9 @@ function DashboardPage() {
         const memberIds = rosterRows.map((r) => r.member_id);
         const { data: profilesData } = await (supabase as any)
           .from("public_profiles")
-          .select("id, display_name, avatar_url")
+          .select("id, display_name, avatar_url, account_type")
           .in("id", memberIds);
-        const profiles = (profilesData ?? []) as Array<{ id: string; display_name: string | null; avatar_url: string | null }>;
+        const profiles = (profilesData ?? []) as Array<{ id: string; display_name: string | null; avatar_url: string | null; account_type: string | null }>;
         const byId = new Map(profiles.map((p) => [p.id, p]));
         setRoster(
           rosterRows.map((r) => ({ ...r, member: byId.get(r.member_id) ?? null }))
@@ -218,7 +244,7 @@ function DashboardPage() {
         const rosterIds = sharedOnly.map((r) => r.id);
         const { data: items } = await supabase
           .from("roster_items")
-          .select("id, name, avatar_url, roster_id")
+          .select("id, name, avatar_url, roster_id, category")
           .in("roster_id", rosterIds)
           .order("position", { ascending: true });
         const byRoster = new Map(sharedOnly.map((r) => [r.id, r]));
@@ -229,6 +255,7 @@ function DashboardPage() {
               id: it.id,
               name: it.name,
               avatar_url: it.avatar_url,
+              category: it.category ?? null,
               roster_id: it.roster_id,
               roster_title: r.title,
               roster_slug: r.slug,
@@ -594,8 +621,9 @@ function DashboardPage() {
                             ) : null}
                           </div>
                           <div>
-                            <div className="font-medium">
-                              {r.member?.display_name ?? "Member"}
+                            <div className="font-medium flex items-center gap-2 flex-wrap">
+                              <span>{r.member?.display_name ?? "Member"}</span>
+                              <TypeTag tag={r.member?.account_type ? ACCOUNT_TYPE_TAG[r.member.account_type] : undefined} />
                             </div>
                             <div className="text-xs text-muted-foreground">
                               Added {new Date(r.created_at).toLocaleDateString()}
@@ -623,7 +651,10 @@ function DashboardPage() {
                             ) : null}
                           </div>
                           <div className="min-w-0">
-                            <div className="font-medium truncate">{c.name ?? "Creator"}</div>
+                            <div className="font-medium truncate flex items-center gap-2">
+                              <span className="truncate">{c.name ?? "Creator"}</span>
+                              <TypeTag tag={c.category ? CATEGORY_TAG[c.category] : undefined} />
+                            </div>
                             <div className="text-xs text-muted-foreground truncate">
                               From {c.roster_title}
                             </div>
