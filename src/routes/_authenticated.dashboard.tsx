@@ -592,23 +592,29 @@ function DashboardPage() {
                     {assignedReports.map((r) => (
                       <li
                         key={r.id}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
+                        className={`rounded-xl border border-border/60 bg-card p-4 ${r.published && r.slug ? "hover:bg-muted/50 transition-colors" : ""}`}
                       >
-                        <div className="min-w-0">
-                          <div className="font-medium">{r.title}</div>
-                          <div className="text-xs text-muted-foreground">
-                            Updated {new Date(r.updated_at).toLocaleDateString()}
-                            {!r.published && " · Draft"}
-                          </div>
-                        </div>
                         {r.published && r.slug ? (
-                          <Button asChild size="sm" variant="outline">
-                            <a href={`/report/${r.slug}`} target="_blank" rel="noreferrer">
-                              View <ArrowRight className="ml-1 size-3" />
-                            </a>
-                          </Button>
+                          <Link to={`/report/${r.slug}`} className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="font-medium">{r.title}</div>
+                              <div className="text-xs text-muted-foreground">
+                                Updated {new Date(r.updated_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                            <ArrowRight className="size-4 text-muted-foreground" />
+                          </Link>
                         ) : (
-                          <span className="text-xs text-muted-foreground">Not yet published</span>
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="font-medium">{r.title}</div>
+                              <div className="text-xs text-muted-foreground">
+                                Updated {new Date(r.updated_at).toLocaleDateString()}
+                                {" · Draft"}
+                              </div>
+                            </div>
+                            <span className="text-xs text-muted-foreground">Not yet published</span>
+                          </div>
                         )}
                       </li>
                     ))}
