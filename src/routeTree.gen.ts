@@ -35,6 +35,7 @@ import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authen
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedCampaignReportsRouteImport } from './routes/_authenticated.campaign-reports'
+import { Route as AuthenticatedCampaignBuilderRouteImport } from './routes/_authenticated.campaign-builder'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
@@ -177,6 +178,12 @@ const AuthenticatedCampaignReportsRoute =
     path: '/campaign-reports',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedCampaignBuilderRoute =
+  AuthenticatedCampaignBuilderRouteImport.update({
+    id: '/campaign-builder',
+    path: '/campaign-builder',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -245,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -282,6 +290,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -321,6 +330,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/_authenticated/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -360,6 +370,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/admin'
+    | '/campaign-builder'
     | '/campaign-reports'
     | '/dashboard'
     | '/profile'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/admin'
+    | '/campaign-builder'
     | '/campaign-reports'
     | '/dashboard'
     | '/profile'
@@ -435,6 +447,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/_authenticated/admin'
+    | '/_authenticated/campaign-builder'
     | '/_authenticated/campaign-reports'
     | '/_authenticated/dashboard'
     | '/_authenticated/profile'
@@ -677,6 +690,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCampaignReportsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/campaign-builder': {
+      id: '/_authenticated/campaign-builder'
+      path: '/campaign-builder'
+      fullPath: '/campaign-builder'
+      preLoaderRoute: typeof AuthenticatedCampaignBuilderRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -752,6 +772,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedCampaignBuilderRoute: typeof AuthenticatedCampaignBuilderRoute
   AuthenticatedCampaignReportsRoute: typeof AuthenticatedCampaignReportsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -760,6 +781,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedCampaignBuilderRoute: AuthenticatedCampaignBuilderRoute,
   AuthenticatedCampaignReportsRoute: AuthenticatedCampaignReportsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
