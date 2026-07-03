@@ -244,7 +244,7 @@ function DashboardPage() {
         const rosterIds = sharedOnly.map((r) => r.id);
         const { data: items } = await supabase
           .from("roster_items")
-          .select("id, name, avatar_url, roster_id")
+          .select("id, name, avatar_url, roster_id, category")
           .in("roster_id", rosterIds)
           .order("position", { ascending: true });
         const byRoster = new Map(sharedOnly.map((r) => [r.id, r]));
@@ -255,6 +255,7 @@ function DashboardPage() {
               id: it.id,
               name: it.name,
               avatar_url: it.avatar_url,
+              category: it.category ?? null,
               roster_id: it.roster_id,
               roster_title: r.title,
               roster_slug: r.slug,
