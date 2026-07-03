@@ -661,7 +661,7 @@ function DashboardPage() {
                 )}
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : (showMine ? roster.length : 0) === 0 && filteredTagged.length === 0 ? (
+                ) : displayedRoster.length === 0 && (!isMineView ? true : taggedCreators.length === 0) ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
                     {latestVibe ? (
                       <p className="text-muted-foreground">
