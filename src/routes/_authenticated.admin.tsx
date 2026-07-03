@@ -1466,6 +1466,22 @@ function SpotlightForm({
             <p className="text-xs text-muted-foreground">Fetches followers + monthly listeners (Spotify) and estimated total streams (Kworb).</p>
           </div>
           <div className="space-y-1.5">
+            <Label htmlFor="apple_music">Apple Music artist URL</Label>
+            <div className="flex gap-2">
+              <Input id="apple_music" value={form.apple_music} onChange={(e) => set("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+              <Button type="button" variant="outline" size="sm" onClick={syncApple} disabled={syncing !== null}>
+                <RefreshCw className={`size-3 ${syncing === "apple" ? "animate-spin" : ""}`} />
+                <span className="ml-1">Sync</span>
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">Verifies the artist name against the spotlight headline.</p>
+          </div>
+          {mismatchWarning ? (
+            <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+              {mismatchWarning}
+            </div>
+          ) : null}
+          <div className="space-y-1.5">
             <Label htmlFor="spotifyEmbed">Spotify embed URL</Label>
             <Input id="spotifyEmbed" value={form.spotifyEmbed} onChange={(e) => set("spotifyEmbed", e.target.value)} placeholder="https://open.spotify.com/embed/show/..." />
           </div>
