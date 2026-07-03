@@ -154,7 +154,8 @@ function PublicRosterPage() {
       (it.instagram_followers ?? 0) +
       (it.tiktok_followers ?? 0) +
       (it.youtube_subscribers ?? 0) +
-      (it.spotify_monthly_listens ?? 0),
+      (it.spotify_monthly_listens ?? 0) +
+      (it.apple_music_followers ?? 0),
     0,
   );
   
