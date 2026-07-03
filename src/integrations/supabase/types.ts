@@ -679,12 +679,45 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_page_shares: {
+        Row: {
+          created_at: string
+          id: string
+          partner_page_id: string
+          target_email: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          partner_page_id: string
+          target_email?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          partner_page_id?: string
+          target_email?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_page_shares_partner_page_id_fkey"
+            columns: ["partner_page_id"]
+            isOneToOne: false
+            referencedRelation: "partner_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_pages: {
         Row: {
           audience_segments: string[]
           avg_engagement: number | null
           avg_reach: number | null
           created_at: string
+          dashboard_visible: boolean
           eoi_opportunities: string[]
           header_image_url: string | null
           headline: string
@@ -708,6 +741,7 @@ export type Database = {
           avg_engagement?: number | null
           avg_reach?: number | null
           created_at?: string
+          dashboard_visible?: boolean
           eoi_opportunities?: string[]
           header_image_url?: string | null
           headline: string
@@ -731,6 +765,7 @@ export type Database = {
           avg_engagement?: number | null
           avg_reach?: number | null
           created_at?: string
+          dashboard_visible?: boolean
           eoi_opportunities?: string[]
           header_image_url?: string | null
           headline?: string
