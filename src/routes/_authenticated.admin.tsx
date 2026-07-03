@@ -25,6 +25,7 @@ import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
 import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
 import { TrafficAdmin } from "@/components/admin/TrafficAdmin";
 import { BriefStatusBadge, BriefStatusSelect, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
