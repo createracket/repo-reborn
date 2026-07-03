@@ -363,6 +363,8 @@ function EditBriefDialog({
         title: brief.title,
         description: brief.description,
         budget: brief.budget ?? "",
+        currency: brief.currency ?? "GBP",
+        transparency: brief.transparency ?? "",
         contact_email: brief.contact_email ?? "",
       });
     } else {
@@ -370,6 +372,8 @@ function EditBriefDialog({
         title: brief.title,
         description: brief.description,
         budget: brief.budget ?? "",
+        currency: brief.currency ?? "GBP",
+        transparency: brief.transparency ?? "",
         contact_email: brief.contact_email ?? "",
         contact_name: brief.contact_name ?? "",
         company: brief.company ?? "",
@@ -390,6 +394,8 @@ function EditBriefDialog({
       title: form.title,
       description: form.description,
       budget: form.budget === "" || form.budget == null ? null : Number(form.budget),
+      currency: form.currency || "GBP",
+      transparency: form.transparency || null,
       contact_email: form.contact_email || null,
     };
     if (!isUser) {
