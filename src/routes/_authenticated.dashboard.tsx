@@ -702,7 +702,7 @@ function DashboardPage() {
                           key={ex.id}
                           className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
                         >
-                          <div className="aspect-[9/16] w-full overflow-hidden rounded-lg bg-muted">
+                          <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
                             {ex.image_url ? (
                               <img src={ex.image_url} alt="" className="size-full object-cover" />
                             ) : (

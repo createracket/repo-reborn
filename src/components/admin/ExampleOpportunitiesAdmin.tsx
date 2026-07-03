@@ -72,7 +72,7 @@ export function ExampleOpportunitiesAdmin() {
 
   async function handleImage(row: ExampleOpportunity, file: File) {
     if (file.size > 8 * 1024 * 1024) { toast.error("Max 8MB"); return; }
-    // Center-crop to 9:16, max 1600px tall
+    // Center-crop to 16:9, max 1600px wide
     const resized = await resizeImage(file, 1600);
     const ext = "jpg";
     const path = `example-opps/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -106,7 +106,7 @@ export function ExampleOpportunitiesAdmin() {
                   <div className="w-32 shrink-0 space-y-2">
                     <div
                       className="overflow-hidden rounded-md border border-border/60 bg-muted/40"
-                      style={{ width: 128, aspectRatio: "9 / 16" }}
+                      style={{ width: 160, aspectRatio: "16 / 9" }}
                     >
                       {row.image_url ? (
                         <img src={row.image_url} alt="" className="size-full object-cover" />
@@ -126,7 +126,7 @@ export function ExampleOpportunitiesAdmin() {
                       }}
                       className="text-xs"
                     />
-                    <p className="text-[10px] text-muted-foreground">Cropped to 9:16</p>
+                    <p className="text-[10px] text-muted-foreground">Cropped to 16:9</p>
                   </div>
                   <div className="flex-1 min-w-[240px] space-y-2">
                     <div>
@@ -180,10 +180,10 @@ export function ExampleOpportunitiesAdmin() {
   );
 }
 
-async function resizeImage(file: File, maxHeight: number): Promise<Blob> {
+async function resizeImage(file: File, maxWidth: number): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
-  // Center-crop to 9:16
-  const targetRatio = 9 / 16;
+  // Center-crop to 16:9
+  const targetRatio = 16 / 9;
   const srcRatio = bitmap.width / bitmap.height;
   let sx = 0, sy = 0, sw = bitmap.width, sh = bitmap.height;
   if (srcRatio > targetRatio) {
@@ -195,12 +195,12 @@ async function resizeImage(file: File, maxHeight: number): Promise<Blob> {
     sh = bitmap.width / targetRatio;
     sy = (bitmap.height - sh) / 2;
   }
-  const h = Math.min(maxHeight, sh);
-  const w = Math.round(h * targetRatio);
+  const w = Math.min(maxWidth, sw);
+  const h = Math.round(w / targetRatio);
   const canvas = document.createElement("canvas");
-  canvas.width = w; canvas.height = Math.round(h);
+  canvas.width = Math.round(w); canvas.height = h;
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, w, Math.round(h));
+  ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, Math.round(w), h);
   return await new Promise<Blob>((resolve) =>
     canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85)
   );
