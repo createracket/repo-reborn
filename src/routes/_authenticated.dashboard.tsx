@@ -105,21 +105,36 @@ function DashboardPage() {
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null }>>([]);
   const [loading, setLoading] = useState(true);
-  const [rosterFilter, setRosterFilter] = useState<string>("all");
+  const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminOwners, setAdminOwners] = useState<Array<{ id: string; name: string }>>([]);
+  const [otherRoster, setOtherRoster] = useState<RosterRow[]>([]);
 
-  const rosterOptions = useMemo(() => {
-    const map = new Map<string, string>();
-    taggedCreators.forEach((c) => {
-      if (!map.has(c.roster_id)) map.set(c.roster_id, c.roster_title);
-    });
-    return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
-  }, [taggedCreators]);
+  const isMineView = rosterFilter === "mine";
+  const displayedRoster = isMineView ? roster : otherRoster;
 
-  const showMine = rosterFilter === "all" || rosterFilter === "mine";
-  const filteredTagged = rosterFilter === "all" || rosterFilter === "mine"
-    ? (rosterFilter === "mine" ? [] : taggedCreators)
-    : taggedCreators.filter((c) => c.roster_id === rosterFilter);
+  useEffect(() => {
+    if (isMineView || !isAdmin) {
+      setOtherRoster([]);
+      return;
+    }
+    (async () => {
+      const { data: rows } = await supabase
+        .from("roster_members")
+        .select("id, member_id, created_at")
+        .eq("owner_id", rosterFilter)
+        .order("created_at", { ascending: false });
+      const memberIds = ((rows ?? []) as any[]).map((r) => r.member_id);
+      if (!memberIds.length) return setOtherRoster([]);
+      const { data: profilesData } = await (supabase as any)
+        .from("public_profiles")
+        .select("id, display_name, avatar_url, account_type")
+        .in("id", memberIds);
+      const byId = new Map((profilesData ?? []).map((p: any) => [p.id, p]));
+      setOtherRoster(((rows ?? []) as any[]).map((r) => ({ ...r, member: byId.get(r.member_id) ?? null })));
+    })();
+  }, [rosterFilter, isAdmin, isMineView]);
+
 
 
   useEffect(() => {
