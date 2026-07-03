@@ -442,6 +442,17 @@ function EditProfilePage() {
                 <Label htmlFor="topaud">Top audience location</Label>
                 <Input id="topaud" value={form.top_audience_location} onChange={(e) => set("top_audience_location", e.target.value)} placeholder="London, UK" />
               </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="acctype">Account type</Label>
+                <Input
+                  id="acctype"
+                  value={accountType ? accountType.charAt(0).toUpperCase() + accountType.slice(1) : "—"}
+                  readOnly
+                  disabled
+                  title="Set at sign up — contact support to change"
+                />
+              </div>
+
               <div className="space-y-1.5 md:col-span-2">
                 <Label htmlFor="bio">Bio</Label>
                 <Textarea id="bio" rows={4} value={form.bio} onChange={(e) => set("bio", e.target.value)} />
