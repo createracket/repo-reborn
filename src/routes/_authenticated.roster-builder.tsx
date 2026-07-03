@@ -1937,6 +1937,21 @@ function AddProspectCard({
                   placeholder="1000000"
                 />
               </Field>
+              <Field label="Apple Music URL">
+                <Input
+                  value={form.apple_music_url}
+                  onChange={(e) => update("apple_music_url", e.target.value)}
+                  placeholder="https://music.apple.com/…/artist/…"
+                />
+              </Field>
+              <Field label="Apple followers">
+                <Input
+                  inputMode="numeric"
+                  value={form.apple_music_followers}
+                  onChange={(e) => update("apple_music_followers", e.target.value)}
+                  placeholder="50000"
+                />
+              </Field>
             </div>
             <Field label="Example video link (9:16)">
               <Input
