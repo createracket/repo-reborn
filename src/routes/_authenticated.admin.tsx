@@ -1134,6 +1134,7 @@ function SpotlightForm({
     tiktok: editData?.links?.tiktok ?? "",
     youtube: editData?.links?.youtube ?? "",
     spotify: editData?.links?.spotify ?? "",
+    apple_music: editData?.links?.apple_music ?? "",
     spotifyEmbed: editData?.links?.spotifyEmbed ?? "",
     contact: editData?.links?.contact ?? "",
     video1: editData?.links?.video1 ?? "",
