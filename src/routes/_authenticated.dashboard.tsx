@@ -828,9 +828,14 @@ function DashboardPage() {
                               {ex.description}
                             </p>
                           ) : null}
-                          {ex.location ? (
-                            <p className="text-xs text-muted-foreground">📍 {ex.location}</p>
-                          ) : null}
+                          <div className="mt-auto flex items-center justify-between gap-2 pt-1">
+                            <p className="truncate text-xs text-muted-foreground">
+                              {ex.location ? `📍 ${ex.location}` : ""}
+                            </p>
+                            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
+                              Example
+                            </span>
+                          </div>
                         </li>
                       ))}
                     </ul>
