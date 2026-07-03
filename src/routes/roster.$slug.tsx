@@ -281,14 +281,16 @@ function PublicRosterPage() {
                             >
                               {STATUS_LABEL[it.status] ?? "In Review"}
                             </Badge>
+                            {it.category && (
+                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                                {it.category}
+                              </span>
+                            )}
                           </div>
                         </div>
 
                         {it.vibe && (
                           <div className="mt-3">
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                              Vibe — why they&apos;re on this roster
-                            </p>
                             <p className="mt-1 rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-sm text-foreground">
                               {it.vibe}
                             </p>
