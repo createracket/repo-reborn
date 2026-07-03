@@ -637,6 +637,8 @@ function UnifiedBriefs({
   onLeadStatusChanged,
   onCampaignStatusChanged,
   onCampaignPublishChanged,
+  onLeadUpdated,
+  onCampaignUpdated,
 }: {
   leads: LeadBrief[];
   campaigns: CampaignBrief[];
@@ -645,7 +647,10 @@ function UnifiedBriefs({
   onLeadStatusChanged: (id: string, next: string) => void;
   onCampaignStatusChanged: (id: string, next: string) => void;
   onCampaignPublishChanged: (id: string, published: boolean, published_at: string | null) => void;
+  onLeadUpdated: (id: string, patch: Partial<LeadBrief>) => void;
+  onCampaignUpdated: (id: string, patch: Partial<CampaignBrief>) => void;
 }) {
+  const [editing, setEditing] = useState<UnifiedBrief | null>(null);
   const rows: UnifiedBrief[] = useMemo(() => {
     const list: UnifiedBrief[] = [
       ...campaigns.map((c) => ({ source: "user" as const, ...c })),
@@ -702,7 +707,13 @@ function UnifiedBriefs({
                       </Badge>
                     ) : null}
                   </div>
-                  <CardTitle className="text-lg">{b.title}</CardTitle>
+                  <button
+                    type="button"
+                    onClick={() => setEditing(b)}
+                    className="text-left hover:underline"
+                  >
+                    <CardTitle className="text-lg">{b.title}</CardTitle>
+                  </button>
                   <CardDescription>
                     {isUser
                       ? camp!.contact_email ?? camp!.user_id
@@ -724,6 +735,9 @@ function UnifiedBriefs({
                     value={b.status}
                     onChange={(next) => updateStatus(b, next)}
                   />
+                  <Button size="sm" variant="outline" onClick={() => setEditing(b)}>
+                    <Pencil className="mr-1 h-3 w-3" /> Edit
+                  </Button>
                 </div>
               </div>
             </CardHeader>
@@ -774,9 +788,142 @@ function UnifiedBriefs({
           </Card>
         );
       })}
+      <EditBriefDialog
+        brief={editing}
+        onClose={() => setEditing(null)}
+        onSaved={(patch) => {
+          if (!editing) return;
+          if (editing.source === "user") onCampaignUpdated(editing.id, patch as Partial<CampaignBrief>);
+          else onLeadUpdated(editing.id, patch as Partial<LeadBrief>);
+          setEditing(null);
+        }}
+      />
     </div>
   );
 }
+
+function EditBriefDialog({
+  brief,
+  onClose,
+  onSaved,
+}: {
+  brief: UnifiedBrief | null;
+  onClose: () => void;
+  onSaved: (patch: Record<string, any>) => void;
+}) {
+  const [form, setForm] = useState<Record<string, any>>({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!brief) return;
+    if (brief.source === "user") {
+      setForm({
+        title: brief.title,
+        description: brief.description,
+        budget: brief.budget ?? "",
+        contact_email: brief.contact_email ?? "",
+      });
+    } else {
+      setForm({
+        title: brief.title,
+        description: brief.description,
+        budget: brief.budget ?? "",
+        contact_email: brief.contact_email ?? "",
+        contact_name: brief.contact_name ?? "",
+        company: brief.company ?? "",
+        timeline: brief.timeline ?? "",
+        target_audience: brief.target_audience ?? "",
+      });
+    }
+  }, [brief]);
+
+  if (!brief) return null;
+  const isUser = brief.source === "user";
+
+  async function save() {
+    if (!brief) return;
+    setSaving(true);
+    const table = brief.source === "user" ? "campaign_briefs" : "lead_briefs";
+    const patch: Record<string, any> = {
+      title: form.title,
+      description: form.description,
+      budget: form.budget === "" || form.budget == null ? null : Number(form.budget),
+      contact_email: form.contact_email || null,
+    };
+    if (!isUser) {
+      patch.contact_name = form.contact_name || null;
+      patch.company = form.company || null;
+      patch.timeline = form.timeline || null;
+      patch.target_audience = form.target_audience || null;
+    }
+    const { error } = await supabase.from(table).update(patch).eq("id", brief.id);
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Brief updated");
+    onSaved(patch);
+  }
+
+  return (
+    <Dialog open={!!brief} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Edit brief</DialogTitle>
+          <DialogDescription>Update the brief details below.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <Label>Title</Label>
+            <Input value={form.title ?? ""} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          </div>
+          <div>
+            <Label>Description</Label>
+            <Textarea rows={5} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Budget (£)</Label>
+              <Input type="number" value={form.budget ?? ""} onChange={(e) => setForm({ ...form, budget: e.target.value })} />
+            </div>
+            <div>
+              <Label>Contact email</Label>
+              <Input value={form.contact_email ?? ""} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} />
+            </div>
+          </div>
+          {!isUser ? (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Contact name</Label>
+                  <Input value={form.contact_name ?? ""} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Company</Label>
+                  <Input value={form.company ?? ""} onChange={(e) => setForm({ ...form, company: e.target.value })} />
+                </div>
+              </div>
+              <div>
+                <Label>Timeline</Label>
+                <Input value={form.timeline ?? ""} onChange={(e) => setForm({ ...form, timeline: e.target.value })} />
+              </div>
+              <div>
+                <Label>Target audience</Label>
+                <Textarea rows={2} value={form.target_audience ?? ""} onChange={(e) => setForm({ ...form, target_audience: e.target.value })} />
+              </div>
+            </>
+          ) : null}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button onClick={save} disabled={saving}>{saving ? "Saving…" : "Save"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 function Empty() {
   return <p className="text-sm text-muted-foreground">No records yet.</p>;
