@@ -949,8 +949,9 @@ function SpotlightForm({
   }
 
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
-  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube">(null);
-  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number }>({});
+  const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
+  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube" | "spotify">(null);
+  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number; spotify?: number }>({});
 
   async function syncSocial(platform: "instagram" | "tiktok" | "youtube") {
     const raw = String(form[platform] || "").trim();
