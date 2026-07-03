@@ -224,12 +224,14 @@ function PublicRosterPage() {
                 ["TT", it.tiktok_followers, it.tiktok_url],
                 ["YT", it.youtube_subscribers, it.youtube_url],
                 ["Spotify", it.spotify_monthly_listens, it.spotify_url],
+                ["Apple", it.apple_music_followers, it.apple_music_url],
               ];
               const totalReach =
                 (it.instagram_followers ?? 0) +
                 (it.tiktok_followers ?? 0) +
                 (it.youtube_subscribers ?? 0) +
-                (it.spotify_monthly_listens ?? 0);
+                (it.spotify_monthly_listens ?? 0) +
+                (it.apple_music_followers ?? 0);
               const initials = it.name
                 .split(/\s+/)
                 .map((s) => s[0])
