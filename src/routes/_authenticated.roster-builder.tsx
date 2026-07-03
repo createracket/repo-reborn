@@ -1373,6 +1373,10 @@ function EditProspectPanel({
   const [uploading, setUploading] = useState(false);
   const [fetching, setFetching] = useState<string | null>(null);
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
+  const scrapeApple = useServerFn(scrapeAppleMusicArtist);
+  const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
+  const [flagState, setFlagState] = useState<{ flagged: boolean; reason: string | null }>({ flagged: false, reason: null });
 
   const upd = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
