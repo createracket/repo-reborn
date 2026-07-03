@@ -55,6 +55,8 @@ type Opportunity = {
   title: string;
   description: string;
   budget: number | null;
+  currency?: string | null;
+  transparency?: string | null;
   published_at: string | null;
   created_at: string;
 };
