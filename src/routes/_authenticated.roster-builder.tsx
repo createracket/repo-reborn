@@ -20,7 +20,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { scrapeProfileFollowers } from "@/lib/campaign-scrapers.functions";
+import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
+import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
 
@@ -1372,6 +1373,10 @@ function EditProspectPanel({
   const [uploading, setUploading] = useState(false);
   const [fetching, setFetching] = useState<string | null>(null);
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
+  const scrapeApple = useServerFn(scrapeAppleMusicArtist);
+  const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
+  const [flagState, setFlagState] = useState<{ flagged: boolean; reason: string | null }>({ flagged: false, reason: null });
 
   const upd = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -1402,6 +1407,43 @@ function EditProspectPanel({
     } finally {
       setFetching(null);
     }
+  }
+
+  async function syncSpotify() {
+    const url = String(form.spotify_url || "").trim();
+    if (!url) { toast.error("Enter a Spotify URL first"); return; }
+    setFetching("spotify");
+    try {
+      const r = await scrapeSpotify({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.monthly_listeners != null) upd("spotify_monthly_listens", String(r.monthly_listeners) as never);
+      if (r.name && !isNameMatch(r.name, [form.name])) {
+        const reason = `Spotify artist "${r.name}" does not match "${form.name}".`;
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason });
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+      toast.success(r.monthly_listeners != null ? `${r.monthly_listeners.toLocaleString()} monthly listeners` : "Spotify synced");
+    } finally { setFetching(null); }
+  }
+
+  async function syncApple() {
+    const url = String(form.apple_music_url || "").trim();
+    if (!url) { toast.error("Enter an Apple Music URL first"); return; }
+    setFetching("apple");
+    try {
+      const r = await scrapeApple({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.name && !isNameMatch(r.name, [form.name])) {
+        const reason = `Apple Music artist "${r.name}" does not match "${form.name}".`;
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason });
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+      toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
+    } finally { setFetching(null); }
   }
 
   function toNum(v: string): number | null {
@@ -1470,6 +1512,9 @@ function EditProspectPanel({
         content_review_url: form.content_review_url.trim() || null,
         budget: toNum(form.budget),
         metrics_month: form.metrics_month.trim() || null,
+        ...(flagState.flagged
+          ? { flagged_streaming_mismatch: true, flagged_streaming_reason: flagState.reason }
+          : {}),
       } as never)
       .eq("id", item.id);
     setSaving(false);
@@ -1571,14 +1616,35 @@ function EditProspectPanel({
         {fld("TT followers", "tiktok_followers")}
         {urlFld("YouTube URL", "youtube_url", "youtube", "youtube_subscribers")}
         {fld("YT subscribers", "youtube_subscribers")}
-        {fld("Spotify URL", "spotify_url")}
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Spotify URL</Label>
+          <div className="flex gap-1">
+            <Input value={form.spotify_url} onChange={(e) => upd("spotify_url", e.target.value)} className="text-sm" />
+            <Button type="button" size="sm" variant="outline" onClick={syncSpotify} disabled={fetching === "spotify"} className="shrink-0" title="Auto-sync Spotify">
+              <RefreshCw className={`size-3.5 ${fetching === "spotify" ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
+        </div>
         {fld("Monthly listeners", "spotify_monthly_listens")}
-        {fld("Apple Music URL", "apple_music_url")}
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Apple Music URL</Label>
+          <div className="flex gap-1">
+            <Input value={form.apple_music_url} onChange={(e) => upd("apple_music_url", e.target.value)} className="text-sm" />
+            <Button type="button" size="sm" variant="outline" onClick={syncApple} disabled={fetching === "apple"} className="shrink-0" title="Auto-sync Apple Music">
+              <RefreshCw className={`size-3.5 ${fetching === "apple" ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
+        </div>
         {fld("Apple followers", "apple_music_followers")}
         {fld("Example video URL", "example_video_url")}
         {fld("Content to review URL (e.g. Frame.io)", "content_review_url")}
         {fld("Bio page URL", "bio_page_url")}
       </div>
+      {mismatchWarning ? (
+        <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-300">
+          {mismatchWarning}
+        </div>
+      ) : null}
       <div className="flex justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={onClose}>
           Cancel
@@ -1742,7 +1808,42 @@ function AddProspectCard({
     setForm((f) => ({ ...f, [k]: v }));
 
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
+  const scrapeApple = useServerFn(scrapeAppleMusicArtist);
   const [fetching, setFetching] = useState<string | null>(null);
+  const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
+  const [flagState, setFlagState] = useState<{ flagged: boolean; reason: string | null }>({ flagged: false, reason: null });
+
+  async function syncSpotify() {
+    const url = String(form.spotify_url || "").trim();
+    if (!url) { toast.error("Enter a Spotify URL first"); return; }
+    setFetching("spotify");
+    try {
+      const r = await scrapeSpotify({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.monthly_listeners != null) update("spotify_monthly_listens", String(r.monthly_listeners) as never);
+      if (r.name && !isNameMatch(r.name, [form.name])) {
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason: `Spotify artist "${r.name}" does not match "${form.name}".` });
+      } else if (r.name) setMismatchWarning(null);
+      toast.success(r.monthly_listeners != null ? `${r.monthly_listeners.toLocaleString()} monthly listeners` : "Spotify synced");
+    } finally { setFetching(null); }
+  }
+
+  async function syncApple() {
+    const url = String(form.apple_music_url || "").trim();
+    if (!url) { toast.error("Enter an Apple Music URL first"); return; }
+    setFetching("apple");
+    try {
+      const r = await scrapeApple({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.name && !isNameMatch(r.name, [form.name])) {
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason: `Apple Music artist "${r.name}" does not match "${form.name}".` });
+      } else if (r.name) setMismatchWarning(null);
+      toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
+    } finally { setFetching(null); }
+  }
 
   async function fetchFollowers(
     platform: "instagram" | "tiktok" | "youtube",
@@ -1817,6 +1918,9 @@ function AddProspectCard({
       bio_page_url: form.has_bio ? form.bio_page_url.trim() || null : null,
       content_review_url: form.content_review_url.trim() || null,
       position: nextPosition,
+      ...(flagState.flagged
+        ? { flagged_streaming_mismatch: true, flagged_streaming_reason: flagState.reason }
+        : {}),
     });
     setSubmitting(false);
     if (error) {
@@ -1929,11 +2033,16 @@ function AddProspectCard({
                 />
               </Field>
               <Field label="Spotify URL">
-                <Input
-                  value={form.spotify_url}
-                  onChange={(e) => update("spotify_url", e.target.value)}
-                  placeholder="https://open.spotify.com/…"
-                />
+                <div className="flex gap-1">
+                  <Input
+                    value={form.spotify_url}
+                    onChange={(e) => update("spotify_url", e.target.value)}
+                    placeholder="https://open.spotify.com/…"
+                  />
+                  <Button type="button" size="sm" variant="outline" onClick={syncSpotify} disabled={fetching === "spotify"} className="shrink-0" title="Auto-sync Spotify">
+                    <RefreshCw className={`size-3.5 ${fetching === "spotify" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
               </Field>
               <Field label="Monthly listens">
                 <Input
@@ -1944,11 +2053,16 @@ function AddProspectCard({
                 />
               </Field>
               <Field label="Apple Music URL">
-                <Input
-                  value={form.apple_music_url}
-                  onChange={(e) => update("apple_music_url", e.target.value)}
-                  placeholder="https://music.apple.com/…/artist/…"
-                />
+                <div className="flex gap-1">
+                  <Input
+                    value={form.apple_music_url}
+                    onChange={(e) => update("apple_music_url", e.target.value)}
+                    placeholder="https://music.apple.com/…/artist/…"
+                  />
+                  <Button type="button" size="sm" variant="outline" onClick={syncApple} disabled={fetching === "apple"} className="shrink-0" title="Auto-sync Apple Music">
+                    <RefreshCw className={`size-3.5 ${fetching === "apple" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
               </Field>
               <Field label="Apple followers">
                 <Input
@@ -1959,6 +2073,11 @@ function AddProspectCard({
                 />
               </Field>
             </div>
+            {mismatchWarning ? (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-300">
+                {mismatchWarning}
+              </div>
+            ) : null}
             <Field label="Example video link (9:16)">
               <Input
                 value={form.example_video_url}

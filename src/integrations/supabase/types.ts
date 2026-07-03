@@ -755,6 +755,8 @@ export type Database = {
           created_at: string
           dashboard_visible: boolean
           eoi_opportunities: string[]
+          flagged_streaming_mismatch: boolean
+          flagged_streaming_reason: string | null
           header_image_url: string | null
           headline: string
           host_bio: string | null
@@ -779,6 +781,8 @@ export type Database = {
           created_at?: string
           dashboard_visible?: boolean
           eoi_opportunities?: string[]
+          flagged_streaming_mismatch?: boolean
+          flagged_streaming_reason?: string | null
           header_image_url?: string | null
           headline: string
           host_bio?: string | null
@@ -803,6 +807,8 @@ export type Database = {
           created_at?: string
           dashboard_visible?: boolean
           eoi_opportunities?: string[]
+          flagged_streaming_mismatch?: boolean
+          flagged_streaming_reason?: string | null
           header_image_url?: string | null
           headline?: string
           host_bio?: string | null
@@ -833,6 +839,8 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string | null
+          flagged_streaming_mismatch: boolean
+          flagged_streaming_reason: string | null
           id: string
           is_featured: boolean
           location: string | null
@@ -859,6 +867,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          flagged_streaming_mismatch?: boolean
+          flagged_streaming_reason?: string | null
           id: string
           is_featured?: boolean
           location?: string | null
@@ -885,6 +895,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          flagged_streaming_mismatch?: boolean
+          flagged_streaming_reason?: string | null
           id?: string
           is_featured?: boolean
           location?: string | null
@@ -914,6 +926,8 @@ export type Database = {
           content_review_url: string | null
           created_at: string
           example_video_url: string | null
+          flagged_streaming_mismatch: boolean
+          flagged_streaming_reason: string | null
           id: string
           instagram_followers: number | null
           instagram_url: string | null
@@ -944,6 +958,8 @@ export type Database = {
           content_review_url?: string | null
           created_at?: string
           example_video_url?: string | null
+          flagged_streaming_mismatch?: boolean
+          flagged_streaming_reason?: string | null
           id?: string
           instagram_followers?: number | null
           instagram_url?: string | null
@@ -974,6 +990,8 @@ export type Database = {
           content_review_url?: string | null
           created_at?: string
           example_video_url?: string | null
+          flagged_streaming_mismatch?: boolean
+          flagged_streaming_reason?: string | null
           id?: string
           instagram_followers?: number | null
           instagram_url?: string | null

@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { scrapeProfileFollowers, scrapeSpotifyArtist } from "@/lib/campaign-scrapers.functions";
+import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
+import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -1133,6 +1134,7 @@ function SpotlightForm({
     tiktok: editData?.links?.tiktok ?? "",
     youtube: editData?.links?.youtube ?? "",
     spotify: editData?.links?.spotify ?? "",
+    apple_music: editData?.links?.apple_music ?? "",
     spotifyEmbed: editData?.links?.spotifyEmbed ?? "",
     contact: editData?.links?.contact ?? "",
     video1: editData?.links?.video1 ?? "",
@@ -1161,8 +1163,14 @@ function SpotlightForm({
 
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
   const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
-  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube" | "spotify">(null);
+  const scrapeApple = useServerFn(scrapeAppleMusicArtist);
+  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube" | "spotify" | "apple">(null);
   const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number; spotify?: number }>({});
+  const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
+  const [flagState, setFlagState] = useState<{ flagged: boolean; reason: string | null }>(() => ({
+    flagged: !!editData?.flagged_streaming_mismatch,
+    reason: editData?.flagged_streaming_reason ?? null,
+  }));
 
   async function syncSocial(platform: "instagram" | "tiktok" | "youtube") {
     const raw = String(form[platform] || "").trim();
@@ -1224,6 +1232,31 @@ function SpotlightForm({
       }
       if (updates.length === 0) toast.error("No Spotify metrics returned");
       else toast.success(`Spotify: ${updates.join(" · ")}`);
+      if (r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason: `Spotify artist "${r.name}" does not match "${form.headline}".` });
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+    } finally {
+      setSyncing(null);
+    }
+  }
+
+  async function syncApple() {
+    const raw = String(form.apple_music || "").trim();
+    if (!raw) { toast.error("Enter an Apple Music artist URL first"); return; }
+    setSyncing("apple");
+    try {
+      const r = await scrapeApple({ data: { url: raw } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
+        setMismatchWarning(MISMATCH_MESSAGE);
+        setFlagState({ flagged: true, reason: `Apple Music artist "${r.name}" does not match "${form.headline}".` });
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+      toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
     } finally {
       setSyncing(null);
     }
@@ -1267,6 +1300,7 @@ function SpotlightForm({
         tiktok: form.tiktok,
         youtube: form.youtube,
         spotify: form.spotify,
+        apple_music: form.apple_music,
         spotifyEmbed: form.spotifyEmbed,
         contact: form.contact,
         video1: form.video1,
@@ -1281,6 +1315,9 @@ function SpotlightForm({
       monthly_streams: numOrNull(form.monthly_streams),
       avg_reach: numOrNull(form.avg_reach),
       avg_engagement: numOrNull(form.avg_engagement),
+      ...(flagState.flagged
+        ? { flagged_streaming_mismatch: true, flagged_streaming_reason: flagState.reason }
+        : {}),
     };
 
     if (findProfanityIn(payload)) {
@@ -1311,7 +1348,7 @@ function SpotlightForm({
       setForm({
         slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
-        instagram: "", tiktok: "", youtube: "", spotify: "", spotifyEmbed: "", contact: "",
+        instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "",
         header_image_url: "", profile_image_url: "", published: false,
         total_followers: "", total_streams: "", monthly_streams: "",
@@ -1428,6 +1465,22 @@ function SpotlightForm({
             </div>
             <p className="text-xs text-muted-foreground">Fetches followers + monthly listeners (Spotify) and estimated total streams (Kworb).</p>
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="apple_music">Apple Music artist URL</Label>
+            <div className="flex gap-2">
+              <Input id="apple_music" value={form.apple_music} onChange={(e) => set("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+              <Button type="button" variant="outline" size="sm" onClick={syncApple} disabled={syncing !== null}>
+                <RefreshCw className={`size-3 ${syncing === "apple" ? "animate-spin" : ""}`} />
+                <span className="ml-1">Sync</span>
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">Verifies the artist name against the spotlight headline.</p>
+          </div>
+          {mismatchWarning ? (
+            <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+              {mismatchWarning}
+            </div>
+          ) : null}
           <div className="space-y-1.5">
             <Label htmlFor="spotifyEmbed">Spotify embed URL</Label>
             <Input id="spotifyEmbed" value={form.spotifyEmbed} onChange={(e) => set("spotifyEmbed", e.target.value)} placeholder="https://open.spotify.com/embed/show/..." />

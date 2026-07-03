@@ -14,7 +14,8 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 import { validateSlug, normalizeSlug } from "@/lib/slugs";
-import { scrapeProfileFollowers } from "@/lib/campaign-scrapers.functions";
+import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
+import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 import { COUNTRIES } from "@/lib/countries";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Loader2, X } from "lucide-react";
@@ -51,6 +52,8 @@ const emptyForm = {
   avg_reach: "",
   avg_engagement: "",
   top_audience_location: "",
+  flagged_streaming_mismatch: false,
+  flagged_streaming_reason: "" as string | null,
 };
 
 
@@ -130,6 +133,8 @@ function EditProfilePage() {
           avg_reach: d.avg_reach?.toString() ?? "",
           avg_engagement: d.avg_engagement?.toString() ?? "",
           top_audience_location: d.top_audience_location ?? "",
+          flagged_streaming_mismatch: d.flagged_streaming_mismatch ?? false,
+          flagged_streaming_reason: d.flagged_streaming_reason ?? "",
         });
       }
       setLoading(false);
@@ -145,8 +150,57 @@ function EditProfilePage() {
   }
 
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
+  const scrapeApple = useServerFn(scrapeAppleMusicArtist);
   const [fetching, setFetching] = useState<string | null>(null);
   const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number }>({});
+  const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
+
+  function candidateNames() {
+    return [form.display_name, form.artist_name, form.slug];
+  }
+
+  async function syncSpotify() {
+    const url = (form.socials.spotify || "").trim();
+    if (!url) { toast.error("Enter a Spotify artist URL first"); return; }
+    setFetching("spotify");
+    try {
+      const r = await scrapeSpotify({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      const parts: string[] = [];
+      if (r.followers != null) { setForm((f) => ({ ...f, total_followers: String(r.followers ?? "") })); parts.push(`${r.followers.toLocaleString()} followers`); }
+      if (r.monthly_listeners != null) { setForm((f) => ({ ...f, monthly_streams: String(r.monthly_listeners ?? "") })); parts.push(`${r.monthly_listeners.toLocaleString()} monthly listeners`); }
+      if (r.total_streams != null) { setForm((f) => ({ ...f, total_streams: String(r.total_streams ?? "") })); parts.push(`${r.total_streams.toLocaleString()} total streams`); }
+      // Mismatch check
+      if (r.name && !isNameMatch(r.name, candidateNames())) {
+        const reason = `Spotify artist "${r.name}" does not match profile name.`;
+        setForm((f) => ({ ...f, flagged_streaming_mismatch: true, flagged_streaming_reason: reason }));
+        setMismatchWarning(MISMATCH_MESSAGE);
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+      toast.success(parts.length ? `Spotify: ${parts.join(" · ")}` : "Spotify synced");
+    } finally { setFetching(null); }
+  }
+
+  async function syncApple() {
+    const url = (form.socials.apple_music || "").trim();
+    if (!url) { toast.error("Enter an Apple Music artist URL first"); return; }
+    setFetching("apple");
+    try {
+      const r = await scrapeApple({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.name && !isNameMatch(r.name, candidateNames())) {
+        const reason = `Apple Music artist "${r.name}" does not match profile name.`;
+        setForm((f) => ({ ...f, flagged_streaming_mismatch: true, flagged_streaming_reason: reason }));
+        setMismatchWarning(MISMATCH_MESSAGE);
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+      toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
+    } finally { setFetching(null); }
+  }
+
 
   async function fetchSocialFollowers(platform: "instagram" | "tiktok" | "youtube") {
     const url = (form.socials[platform] || "").trim();
@@ -302,6 +356,8 @@ function EditProfilePage() {
       avg_reach: num(form.avg_reach),
       avg_engagement: num(form.avg_engagement),
       top_audience_location: form.top_audience_location.trim() || null,
+      flagged_streaming_mismatch: form.flagged_streaming_mismatch,
+      flagged_streaming_reason: form.flagged_streaming_reason || null,
     };
     const bad = findProfanityIn(payload);
     if (bad) {
@@ -523,12 +579,29 @@ function EditProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="sp">Spotify</Label>
-                <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
+                <div className="flex gap-1.5">
+                  <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
+                  <Button type="button" size="sm" variant="outline" onClick={syncSpotify} disabled={fetching === "spotify"} title="Auto-sync streaming numbers">
+                    <RefreshCw className={`size-3.5 ${fetching === "spotify" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">Auto-syncs followers, monthly listeners and total streams.</p>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="am">Apple Music</Label>
-                <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+                <div className="flex gap-1.5">
+                  <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+                  <Button type="button" size="sm" variant="outline" onClick={syncApple} disabled={fetching === "apple"} title="Auto-sync Apple Music artist">
+                    <RefreshCw className={`size-3.5 ${fetching === "apple" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">Verifies the artist name against your profile.</p>
               </div>
+              {mismatchWarning ? (
+                <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+                  {mismatchWarning}
+                </div>
+              ) : null}
               <div className="space-y-1.5">
                 <Label htmlFor="yt">YouTube</Label>
                 <div className="flex gap-1.5">
