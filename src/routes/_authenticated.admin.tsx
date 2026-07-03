@@ -1315,6 +1315,9 @@ function SpotlightForm({
       monthly_streams: numOrNull(form.monthly_streams),
       avg_reach: numOrNull(form.avg_reach),
       avg_engagement: numOrNull(form.avg_engagement),
+      ...(flagState.flagged
+        ? { flagged_streaming_mismatch: true, flagged_streaming_reason: flagState.reason }
+        : {}),
     };
 
     if (findProfanityIn(payload)) {
