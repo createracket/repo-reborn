@@ -419,7 +419,7 @@ function ConnectPage() {
                     <div className="space-y-2">
                       <Label>{config.collaborationTypesLabel}</Label>
                       <div className="grid grid-cols-1 gap-3 pt-2 md:grid-cols-2">
-                        {config.collaborationTypes.map((type) => (
+                        {[...config.collaborationTypes, "Something else"].map((type) => (
                           <label
                             key={type}
                             className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40"
@@ -432,6 +432,14 @@ function ConnectPage() {
                           </label>
                         ))}
                       </div>
+                      {types.includes("Something else") && (
+                        <Input
+                          value={otherType}
+                          onChange={(e) => setOtherType(e.target.value)}
+                          placeholder="Tell us what you have in mind"
+                          maxLength={200}
+                        />
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="target_audience">{f.target_audience.label}</Label>
