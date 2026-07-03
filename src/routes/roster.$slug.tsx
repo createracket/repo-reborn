@@ -34,6 +34,8 @@ type PublicItem = {
   youtube_subscribers: number | null;
   spotify_url: string | null;
   spotify_monthly_listens: number | null;
+  apple_music_url: string | null;
+  apple_music_followers: number | null;
   example_video_url: string | null;
   bio_page_url: string | null;
   content_review_url: string | null;
