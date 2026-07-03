@@ -52,6 +52,8 @@ const emptyForm = {
   avg_reach: "",
   avg_engagement: "",
   top_audience_location: "",
+  flagged_streaming_mismatch: false,
+  flagged_streaming_reason: "" as string | null,
 };
 
 
