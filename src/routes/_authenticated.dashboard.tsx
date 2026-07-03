@@ -303,6 +303,13 @@ function DashboardPage() {
       [...publishedRows, ...sharedRows].forEach((o) => dedup.set(o.id, o));
       setOpportunities(Array.from(dedup.values()).sort((a, b) => (a.published_at ?? a.created_at) < (b.published_at ?? b.created_at) ? 1 : -1));
 
+      const { data: exOpps } = await supabase
+        .from("example_opportunities" as any)
+        .select("id, title, description, location, image_url")
+        .order("position", { ascending: true });
+      setExamples(((exOpps as any[]) ?? []) as any);
+
+
 
       if (u.user.email) {
         const { data: assigned } = await (supabase as any).rpc("get_assigned_rosters");
