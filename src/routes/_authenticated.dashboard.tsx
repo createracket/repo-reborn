@@ -704,9 +704,9 @@ function DashboardPage() {
                   <Megaphone className="size-5 text-pink-accent" /> New opportunities
                 </CardTitle>
                 <CardDescription>
-                  Live briefs from brands working with Racket. If something fits, reply via{" "}
-                  <Link to="/contact" className="text-primary hover:underline">contact</Link>{" "}
-                  and we'll make the intro.
+                  Live briefs from the Racket community. Click to review and express interest, or{" "}
+                  <Link to="/contact" className="text-primary hover:underline">contact us</Link>{" "}
+                  with any questions.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
