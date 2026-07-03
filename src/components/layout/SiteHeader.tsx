@@ -76,6 +76,9 @@ export function SiteHeader() {
               <Link to="/campaign-reports" className="hover:text-foreground transition-colors">
                 Campaign Reports
               </Link>
+              <Link to="/campaign-builder" className="hover:text-foreground transition-colors">
+                Campaign Builder
+              </Link>
               <Link to="/connect" className="hover:text-foreground transition-colors">
                 Connect
               </Link>

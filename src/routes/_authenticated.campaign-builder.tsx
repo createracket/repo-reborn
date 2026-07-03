@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { Footer } from "@/components/layout/Footer";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { BriefsManager } from "@/components/admin/BriefsManager";
 
@@ -45,7 +45,7 @@ function CampaignBuilderPage() {
           <BriefsManager />
         )}
       </main>
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }
