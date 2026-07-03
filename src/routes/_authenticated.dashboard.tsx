@@ -718,6 +718,51 @@ function DashboardPage() {
                   </ul>
                 )}
 
+                {!loading && spotlightOpps.length > 0 ? (
+                  <div>
+                    <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+                      Featured spotlights
+                    </div>
+                    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      {spotlightOpps.map((sp) => (
+                        <li
+                          key={sp.id}
+                          className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
+                        >
+                          <Link
+                            to="/spotlight/$slug"
+                            params={{ slug: sp.slug }}
+                            className="group flex flex-col gap-2"
+                          >
+                            <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
+                              {sp.header_image_url ? (
+                                <img src={sp.header_image_url} alt="" className="size-full object-cover transition group-hover:scale-[1.02]" />
+                              ) : (
+                                <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
+                                  Spotlight
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className="truncate text-sm font-medium leading-tight group-hover:text-primary">{sp.headline}</h3>
+                              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
+                                Spotlight
+                              </span>
+                            </div>
+                            {sp.subtitle ? (
+                              <p className="text-sm text-muted-foreground line-clamp-2">{sp.subtitle}</p>
+                            ) : null}
+                            {sp.type ? (
+                              <p className="text-xs text-muted-foreground">· {sp.type}</p>
+                            ) : null}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+
                 {!loading && examples.length > 0 ? (
                   <div>
                     <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
