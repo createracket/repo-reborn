@@ -186,9 +186,9 @@ function DashboardPage() {
       const selected = myRosters.find((r) => r.id === rosterFilter);
       const { data: items } = await (supabase as any)
         .from("roster_items")
-        .select("id, name, avatar_url, category, roster_id, sort_order")
+        .select("id, name, avatar_url, category, roster_id, position")
         .eq("roster_id", rosterFilter)
-        .order("sort_order", { ascending: true });
+        .order("position", { ascending: true });
       setRosterItems(((items ?? []) as any[]).map((it) => ({
         id: it.id,
         name: it.name,
