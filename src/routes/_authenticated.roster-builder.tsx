@@ -2033,11 +2033,16 @@ function AddProspectCard({
                 />
               </Field>
               <Field label="Spotify URL">
-                <Input
-                  value={form.spotify_url}
-                  onChange={(e) => update("spotify_url", e.target.value)}
-                  placeholder="https://open.spotify.com/…"
-                />
+                <div className="flex gap-1">
+                  <Input
+                    value={form.spotify_url}
+                    onChange={(e) => update("spotify_url", e.target.value)}
+                    placeholder="https://open.spotify.com/…"
+                  />
+                  <Button type="button" size="sm" variant="outline" onClick={syncSpotify} disabled={fetching === "spotify"} className="shrink-0" title="Auto-sync Spotify">
+                    <RefreshCw className={`size-3.5 ${fetching === "spotify" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
               </Field>
               <Field label="Monthly listens">
                 <Input
@@ -2048,11 +2053,16 @@ function AddProspectCard({
                 />
               </Field>
               <Field label="Apple Music URL">
-                <Input
-                  value={form.apple_music_url}
-                  onChange={(e) => update("apple_music_url", e.target.value)}
-                  placeholder="https://music.apple.com/…/artist/…"
-                />
+                <div className="flex gap-1">
+                  <Input
+                    value={form.apple_music_url}
+                    onChange={(e) => update("apple_music_url", e.target.value)}
+                    placeholder="https://music.apple.com/…/artist/…"
+                  />
+                  <Button type="button" size="sm" variant="outline" onClick={syncApple} disabled={fetching === "apple"} className="shrink-0" title="Auto-sync Apple Music">
+                    <RefreshCw className={`size-3.5 ${fetching === "apple" ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
               </Field>
               <Field label="Apple followers">
                 <Input
@@ -2063,6 +2073,11 @@ function AddProspectCard({
                 />
               </Field>
             </div>
+            {mismatchWarning ? (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-300">
+                {mismatchWarning}
+              </div>
+            ) : null}
             <Field label="Example video link (9:16)">
               <Input
                 value={form.example_video_url}
