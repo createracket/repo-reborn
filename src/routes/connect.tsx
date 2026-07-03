@@ -18,6 +18,7 @@ import {
   DEFAULT_BRIEF_FORM_CONFIG,
   type BriefFormConfig,
 } from "@/lib/brief-form-config";
+import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS } from "@/lib/brief-currency";
 import logo from "@/assets/CR-Logo-Half-Colour.png.asset.json";
 
 export const Route = createFileRoute("/connect")({
@@ -45,6 +46,10 @@ const briefSchema = z.object({
     .number({ invalid_type_error: "Enter a number" })
     .nonnegative("Must be 0 or more")
     .max(10_000_000)
+    .optional(),
+  currency: z.enum(["AUD", "GBP", "USD"]).default("GBP"),
+  transparency: z
+    .enum(["early_planning", "budget_pending", "locked_in", "live"])
     .optional(),
   timeline: z.string().trim().max(120).optional(),
   target_audience: z.string().trim().max(2000).optional(),
@@ -92,6 +97,8 @@ function ConnectPage() {
       title: fd.get("title")?.toString() ?? "",
       description: fd.get("description")?.toString() ?? "",
       budget: budgetRaw ? Number(budgetRaw) : undefined,
+      currency: (fd.get("currency")?.toString() as any) || "GBP",
+      transparency: (fd.get("transparency")?.toString() || undefined) as any,
       timeline: fd.get("timeline")?.toString() || undefined,
       target_audience: fd.get("target_audience")?.toString() || undefined,
       contact_name: fd.get("contact_name")?.toString() ?? "",
@@ -125,6 +132,8 @@ function ConnectPage() {
           title: parsed.data.title,
           description: parsed.data.description,
           budget: parsed.data.budget ?? null,
+          currency: parsed.data.currency,
+          transparency: parsed.data.transparency ?? null,
           timeline: parsed.data.timeline ?? null,
           target_audience: parsed.data.target_audience ?? null,
           contact_email: parsed.data.contact_email,
@@ -138,6 +147,8 @@ function ConnectPage() {
           title: parsed.data.title,
           description: parsed.data.description,
           budget: parsed.data.budget ?? null,
+          currency: parsed.data.currency,
+          transparency: parsed.data.transparency ?? null,
           timeline: parsed.data.timeline ?? null,
           target_audience: parsed.data.target_audience ?? null,
           contact_email: parsed.data.contact_email,
@@ -315,14 +326,28 @@ function ConnectPage() {
                       </div>
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="space-y-2">
+
                           <Label htmlFor="budget">{f.budget.label}</Label>
-                          <Input
-                            id="budget"
-                            name="budget"
-                            type="number"
-                            min={0}
-                            placeholder={f.budget.placeholder}
-                          />
+                          <div className="flex gap-2">
+                            <select
+                              id="currency"
+                              name="currency"
+                              defaultValue="GBP"
+                              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            >
+                              {BRIEF_CURRENCIES.map((c) => (
+                                <option key={c} value={c}>{c}</option>
+                              ))}
+                            </select>
+                            <Input
+                              id="budget"
+                              name="budget"
+                              type="number"
+                              min={0}
+                              placeholder={f.budget.placeholder}
+                              className="flex-1"
+                            />
+                          </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="timeline">{f.timeline.label}</Label>
@@ -332,6 +357,23 @@ function ConnectPage() {
                             placeholder={f.timeline.placeholder}
                             maxLength={120}
                           />
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="transparency">Project transparency</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Help us gauge how far along the project is.
+                          </p>
+                          <select
+                            id="transparency"
+                            name="transparency"
+                            defaultValue=""
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          >
+                            <option value="">Select a stage…</option>
+                            {TRANSPARENCY_OPTIONS.map((o) => (
+                              <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                     </div>

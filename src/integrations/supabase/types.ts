@@ -72,6 +72,7 @@ export type Database = {
           contact_email: string | null
           core_values: string[]
           created_at: string
+          currency: string | null
           description: string
           id: string
           published: boolean
@@ -80,6 +81,7 @@ export type Database = {
           target_audience: string | null
           timeline: string | null
           title: string
+          transparency: string | null
           user_id: string
         }
         Insert: {
@@ -88,6 +90,7 @@ export type Database = {
           contact_email?: string | null
           core_values?: string[]
           created_at?: string
+          currency?: string | null
           description?: string
           id?: string
           published?: boolean
@@ -96,6 +99,7 @@ export type Database = {
           target_audience?: string | null
           timeline?: string | null
           title: string
+          transparency?: string | null
           user_id: string
         }
         Update: {
@@ -104,6 +108,7 @@ export type Database = {
           contact_email?: string | null
           core_values?: string[]
           created_at?: string
+          currency?: string | null
           description?: string
           id?: string
           published?: boolean
@@ -112,6 +117,7 @@ export type Database = {
           target_audience?: string | null
           timeline?: string | null
           title?: string
+          transparency?: string | null
           user_id?: string
         }
         Relationships: []
@@ -513,12 +519,14 @@ export type Database = {
           contact_name: string | null
           core_values: string[]
           created_at: string
+          currency: string | null
           description: string
           id: string
           status: string
           target_audience: string | null
           timeline: string | null
           title: string
+          transparency: string | null
         }
         Insert: {
           additional_info?: string | null
@@ -529,12 +537,14 @@ export type Database = {
           contact_name?: string | null
           core_values?: string[]
           created_at?: string
+          currency?: string | null
           description?: string
           id?: string
           status?: string
           target_audience?: string | null
           timeline?: string | null
           title: string
+          transparency?: string | null
         }
         Update: {
           additional_info?: string | null
@@ -545,12 +555,14 @@ export type Database = {
           contact_name?: string | null
           core_values?: string[]
           created_at?: string
+          currency?: string | null
           description?: string
           id?: string
           status?: string
           target_audience?: string | null
           timeline?: string | null
           title?: string
+          transparency?: string | null
         }
         Relationships: []
       }

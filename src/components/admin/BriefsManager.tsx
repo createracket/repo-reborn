@@ -13,17 +13,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 import { BriefStatusBadge, BriefStatusSelect, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
+import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
+import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS, transparencyLabel } from "@/lib/brief-currency";
 
 export type LeadBrief = {
   id: string; created_at: string; title: string; description: string;
-  budget: number | null; timeline: string | null; core_values: string[];
+  budget: number | null; currency: string | null; transparency: string | null;
+  timeline: string | null; core_values: string[];
   collaboration_types: string[]; target_audience: string | null;
   contact_email: string; contact_name: string | null; company: string | null;
   status: string;
 };
 export type CampaignBrief = {
   id: string; created_at: string; title: string; description: string;
-  user_id: string; budget: number | null; status: string;
+  user_id: string; budget: number | null; currency: string | null; transparency: string | null;
+  status: string;
   contact_email: string | null; published: boolean; published_at: string | null;
 };
 export type Profile = {
@@ -61,7 +65,7 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email, published, published_at").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, contact_email, published, published_at").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
     ]);
     setLeadBriefs((lb.data as LeadBrief[]) ?? []);
@@ -269,7 +273,13 @@ function UnifiedBriefs({
 
             <CardContent className="space-y-3 text-sm">
               <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
-              <KV k="Budget" v={b.budget ? `£${b.budget}` : "—"} />
+              <div className="text-xs">
+                <span className="uppercase tracking-wider text-muted-foreground">Budget:</span>{" "}
+                <BudgetDisplay amount={b.budget} currency={b.currency} />
+              </div>
+              {b.transparency ? (
+                <KV k="Transparency" v={transparencyLabel(b.transparency) ?? b.transparency} />
+              ) : null}
               {!isUser ? (
                 <>
                   <KV k="Timeline" v={lead!.timeline ?? "—"} />
@@ -353,6 +363,8 @@ function EditBriefDialog({
         title: brief.title,
         description: brief.description,
         budget: brief.budget ?? "",
+        currency: brief.currency ?? "GBP",
+        transparency: brief.transparency ?? "",
         contact_email: brief.contact_email ?? "",
       });
     } else {
@@ -360,6 +372,8 @@ function EditBriefDialog({
         title: brief.title,
         description: brief.description,
         budget: brief.budget ?? "",
+        currency: brief.currency ?? "GBP",
+        transparency: brief.transparency ?? "",
         contact_email: brief.contact_email ?? "",
         contact_name: brief.contact_name ?? "",
         company: brief.company ?? "",
@@ -380,6 +394,8 @@ function EditBriefDialog({
       title: form.title,
       description: form.description,
       budget: form.budget === "" || form.budget == null ? null : Number(form.budget),
+      currency: form.currency || "GBP",
+      transparency: form.transparency || null,
       contact_email: form.contact_email || null,
     };
     if (!isUser) {
@@ -416,13 +432,37 @@ function EditBriefDialog({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Budget (£)</Label>
-              <Input type="number" value={form.budget ?? ""} onChange={(e) => setForm({ ...form, budget: e.target.value })} />
+              <Label>Budget</Label>
+              <div className="flex gap-2">
+                <select
+                  value={form.currency ?? "GBP"}
+                  onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                  className="rounded-md border border-input bg-background px-2 py-2 text-sm"
+                >
+                  {BRIEF_CURRENCIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <Input type="number" value={form.budget ?? ""} onChange={(e) => setForm({ ...form, budget: e.target.value })} />
+              </div>
             </div>
             <div>
               <Label>Contact email</Label>
               <Input value={form.contact_email ?? ""} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} />
             </div>
+          </div>
+          <div>
+            <Label>Transparency</Label>
+            <select
+              value={form.transparency ?? ""}
+              onChange={(e) => setForm({ ...form, transparency: e.target.value })}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">—</option>
+              {TRANSPARENCY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
           </div>
           {!isUser ? (
             <>
@@ -502,6 +542,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
     description: "",
     contact_email: "",
     budget: "",
+    currency: "GBP",
+    transparency: "",
     timeline: "",
     target_audience: "",
     status: "in_review",
@@ -539,15 +581,17 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
         description: form.description.trim(),
         contact_email: form.contact_email.trim() || null,
         budget: form.budget ? Number(form.budget) : null,
+        currency: form.currency || "GBP",
+        transparency: form.transparency || null,
         timeline: form.timeline.trim() || null,
         target_audience: form.target_audience.trim() || null,
         collaboration_types: types,
         core_values: values,
         status: form.status || "in_review",
-      });
+      } as any);
       if (error) throw error;
       toast.success("Campaign brief added");
-      setForm({ title: "", description: "", contact_email: "", budget: "", timeline: "", target_audience: "", status: "in_review" });
+      setForm({ title: "", description: "", contact_email: "", budget: "", currency: "GBP", transparency: "", timeline: "", target_audience: "", status: "in_review" });
       setValues([]);
       setTypes([]);
       onCreated();
@@ -582,9 +626,34 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
               onChange={(e) => setForm((f) => ({ ...f, contact_email: e.target.value }))} />
           </div>
           <div>
-            <Label htmlFor="cb-budget">Estimated budget ($)</Label>
-            <Input id="cb-budget" type="number" min={0} value={form.budget}
-              onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} />
+            <Label htmlFor="cb-budget">Estimated budget</Label>
+            <div className="flex gap-2">
+              <select
+                value={form.currency}
+                onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))}
+                className="rounded-md border border-input bg-background px-2 py-2 text-sm"
+              >
+                {BRIEF_CURRENCIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <Input id="cb-budget" type="number" min={0} value={form.budget}
+                onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value }))} />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="cb-transparency">Transparency</Label>
+            <select
+              id="cb-transparency"
+              value={form.transparency}
+              onChange={(e) => setForm((f) => ({ ...f, transparency: e.target.value }))}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">—</option>
+              {TRANSPARENCY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
           </div>
           <div>
             <Label htmlFor="cb-timeline">Timeline</Label>

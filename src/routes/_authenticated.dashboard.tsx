@@ -14,6 +14,8 @@ import {
   getArtistArchetypeDescription,
 } from "@/lib/vibe-check";
 import { BriefStatusBadge } from "@/components/briefs/BriefStatusBadge";
+import { formatBriefBudget, transparencyLabel } from "@/lib/brief-currency";
+import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -55,6 +57,8 @@ type Opportunity = {
   title: string;
   description: string;
   budget: number | null;
+  currency?: string | null;
+  transparency?: string | null;
   published_at: string | null;
   created_at: string;
 };
@@ -71,7 +75,7 @@ function DashboardPage() {
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
-  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null }>>([]);
+  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null }>>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -126,7 +130,7 @@ function DashboardPage() {
           .single(),
         supabase
           .from("campaign_briefs")
-          .select("id, title, description, budget, published_at, created_at")
+          .select("id, title, description, budget, currency, transparency, published_at, created_at")
           .eq("published", true)
           .order("published_at", { ascending: false })
           .limit(6),
@@ -135,7 +139,7 @@ function DashboardPage() {
       // Briefs the current user submitted (Project Planner)
       const { data: mineBriefs } = await supabase
         .from("campaign_briefs")
-        .select("id, title, created_at, status, budget")
+        .select("id, title, created_at, status, budget, currency")
         .eq("user_id", u.user.id)
         .order("created_at", { ascending: false });
       setMyBriefs((mineBriefs as any[]) ?? []);
@@ -152,10 +156,10 @@ function DashboardPage() {
       const shareLeadIds = ((shares ?? []) as any[]).filter((s) => s.brief_source === "lead").map((s) => s.brief_id as string);
       const [sharedUser, sharedLead] = await Promise.all([
         shareUserIds.length
-          ? supabase.from("campaign_briefs").select("id, title, description, budget, published_at, created_at").in("id", shareUserIds)
+          ? supabase.from("campaign_briefs").select("id, title, description, budget, currency, transparency, published_at, created_at").in("id", shareUserIds)
           : Promise.resolve({ data: [] as any[] }),
         shareLeadIds.length
-          ? supabase.from("lead_briefs").select("id, title, description, budget, created_at").in("id", shareLeadIds)
+          ? supabase.from("lead_briefs").select("id, title, description, budget, currency, transparency, created_at").in("id", shareLeadIds)
           : Promise.resolve({ data: [] as any[] }),
       ]);
       const publishedRows = ((opps as any[]) ?? []) as Opportunity[];
@@ -382,7 +386,7 @@ function DashboardPage() {
                             <h3 className="font-medium leading-tight truncate">{b.title}</h3>
                             <div className="mt-1 text-xs text-muted-foreground">
                               Submitted {new Date(b.created_at).toLocaleDateString()}
-                              {b.budget ? ` · £${b.budget}` : ""}
+                              {b.budget ? ` · ${formatBriefBudget(b.budget, b.currency)}` : ""}
                             </div>
                           </div>
                           <BriefStatusBadge status={b.status} />
@@ -511,10 +515,15 @@ function DashboardPage() {
                           <h3 className="font-medium leading-tight">{o.title}</h3>
                           {o.budget ? (
                             <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                              £{o.budget}
+                              <BudgetDisplay amount={o.budget} currency={o.currency} />
                             </span>
                           ) : null}
                         </div>
+                        {o.transparency ? (
+                          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                            {transparencyLabel(o.transparency)}
+                          </div>
+                        ) : null}
                         <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">
                           {o.description}
                         </p>
