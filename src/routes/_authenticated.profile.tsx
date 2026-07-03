@@ -487,6 +487,10 @@ function EditProfilePage() {
                 <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
               </div>
               <div className="space-y-1.5">
+                <Label htmlFor="am">Apple Music</Label>
+                <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+              </div>
+              <div className="space-y-1.5">
                 <Label htmlFor="yt">YouTube</Label>
                 <div className="flex gap-1.5">
                   <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
@@ -500,6 +504,13 @@ function EditProfilePage() {
                 <Label htmlFor="web">Website</Label>
                 <Input id="web" value={form.socials.website ?? ""} onChange={(e) => setSocial("website", e.target.value)} placeholder="https://…" />
               </div>
+              <div className="md:col-span-2">
+                <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
+                  Auto calculate your followers
+                </Button>
+                <p className="mt-1 text-xs text-muted-foreground">Sums fetched Instagram, TikTok and YouTube counts into Total followers below.</p>
+              </div>
+
 
 
               <div className="md:col-span-2 pt-2">
