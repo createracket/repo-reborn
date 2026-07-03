@@ -1360,6 +1360,8 @@ function EditProspectPanel({
     youtube_subscribers: item.youtube_subscribers?.toString() ?? "",
     spotify_url: item.spotify_url ?? "",
     spotify_monthly_listens: item.spotify_monthly_listens?.toString() ?? "",
+    apple_music_url: item.apple_music_url ?? "",
+    apple_music_followers: item.apple_music_followers?.toString() ?? "",
     example_video_url: item.example_video_url ?? "",
     bio_page_url: item.bio_page_url ?? "",
     content_review_url: item.content_review_url ?? "",
