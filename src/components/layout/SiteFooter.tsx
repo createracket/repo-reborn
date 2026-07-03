@@ -33,7 +33,13 @@ export function SiteFooter() {
 
           <div className="lg:col-span-3">
             <ul className="space-y-2 text-sm">
-              {!signedIn && (
+              {signedIn ? (
+                <li>
+                  <Link to="/" className="hover:text-purple">
+                    Home
+                  </Link>
+                </li>
+              ) : (
                 <li>
                   <Link to="/signup" className="hover:text-purple">
                     Join the mailing list
