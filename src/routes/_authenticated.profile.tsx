@@ -150,8 +150,57 @@ function EditProfilePage() {
   }
 
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
+  const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
+  const scrapeApple = useServerFn(scrapeAppleMusicArtist);
   const [fetching, setFetching] = useState<string | null>(null);
   const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number }>({});
+  const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
+
+  function candidateNames() {
+    return [form.display_name, form.artist_name, form.slug];
+  }
+
+  async function syncSpotify() {
+    const url = (form.socials.spotify || "").trim();
+    if (!url) { toast.error("Enter a Spotify artist URL first"); return; }
+    setFetching("spotify");
+    try {
+      const r = await scrapeSpotify({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      const parts: string[] = [];
+      if (r.followers != null) { setForm((f) => ({ ...f, total_followers: String(r.followers ?? "") })); parts.push(`${r.followers.toLocaleString()} followers`); }
+      if (r.monthly_listeners != null) { setForm((f) => ({ ...f, monthly_streams: String(r.monthly_listeners ?? "") })); parts.push(`${r.monthly_listeners.toLocaleString()} monthly listeners`); }
+      if (r.total_streams != null) { setForm((f) => ({ ...f, total_streams: String(r.total_streams ?? "") })); parts.push(`${r.total_streams.toLocaleString()} total streams`); }
+      // Mismatch check
+      if (r.name && !isNameMatch(r.name, candidateNames())) {
+        const reason = `Spotify artist "${r.name}" does not match profile name.`;
+        setForm((f) => ({ ...f, flagged_streaming_mismatch: true, flagged_streaming_reason: reason }));
+        setMismatchWarning(MISMATCH_MESSAGE);
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+      toast.success(parts.length ? `Spotify: ${parts.join(" · ")}` : "Spotify synced");
+    } finally { setFetching(null); }
+  }
+
+  async function syncApple() {
+    const url = (form.socials.apple_music || "").trim();
+    if (!url) { toast.error("Enter an Apple Music artist URL first"); return; }
+    setFetching("apple");
+    try {
+      const r = await scrapeApple({ data: { url } });
+      if (!r.ok) { toast.error(r.error); return; }
+      if (r.name && !isNameMatch(r.name, candidateNames())) {
+        const reason = `Apple Music artist "${r.name}" does not match profile name.`;
+        setForm((f) => ({ ...f, flagged_streaming_mismatch: true, flagged_streaming_reason: reason }));
+        setMismatchWarning(MISMATCH_MESSAGE);
+      } else if (r.name) {
+        setMismatchWarning(null);
+      }
+      toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
+    } finally { setFetching(null); }
+  }
+
 
   async function fetchSocialFollowers(platform: "instagram" | "tiktok" | "youtube") {
     const url = (form.socials[platform] || "").trim();
