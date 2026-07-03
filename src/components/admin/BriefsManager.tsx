@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -92,9 +93,11 @@ export function BriefsManager() {
         <h1 className="font-display text-3xl">Campaign Builder</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Manage every brief in one place — briefs from signed-in users and lead submissions
-          both appear here ({totalCount} total). Change the status to keep the user's Project
-          Planner in sync. Toggle <span className="font-medium text-foreground">Publish as
-          opportunity</span> to surface a user brief on every signed-in artist's dashboard.
+          both appear here (<span className="font-medium text-foreground">{totalCount}</span> in
+          total right now — no cap, every brief is shown). Change the status to keep the user's
+          Project Planner in sync. Toggle{" "}
+          <span className="font-medium text-foreground">Publish as opportunity</span> to surface
+          a user brief on every signed-in artist's dashboard.
         </p>
       </div>
 
@@ -159,6 +162,14 @@ function UnifiedBriefs({
   onCampaignDeleted: (id: string) => void;
 }) {
   const [editing, setEditing] = useState<UnifiedBrief | null>(null);
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const toggleOpen = (key: string) =>
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
   const rows: UnifiedBrief[] = useMemo(() => {
     const list: UnifiedBrief[] = [
       ...campaigns.map((c) => ({ source: "user" as const, ...c })),
@@ -196,8 +207,11 @@ function UnifiedBriefs({
         const profile = isUser
           ? lookupProfile(camp!.contact_email) ?? profiles.find((p) => p.id === camp!.user_id) ?? null
           : lookupProfile(lead!.contact_email);
+        const rowKey = `${b.source}-${b.id}`;
+        const isOpen = openIds.has(rowKey);
         return (
-          <Card key={`${b.source}-${b.id}`}>
+          <Card key={rowKey}>
+            <Collapsible open={isOpen} onOpenChange={() => toggleOpen(rowKey)}>
             <CardHeader>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -237,8 +251,15 @@ function UnifiedBriefs({
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(b.created_at).toLocaleString()}
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(b.created_at).toLocaleString()}
+                    </div>
+                    <CollapsibleTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0" aria-label={isOpen ? "Collapse" : "Expand"}>
+                        {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </Button>
+                    </CollapsibleTrigger>
                   </div>
                   <BriefStatusBadge status={b.status} />
                   <BriefStatusSelect
@@ -271,62 +292,64 @@ function UnifiedBriefs({
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-3 text-sm">
-              <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
-              <div className="text-xs">
-                <span className="uppercase tracking-wider text-muted-foreground">Budget:</span>{" "}
-                <BudgetDisplay amount={b.budget} currency={b.currency} />
-              </div>
-              {b.transparency ? (
-                <KV k="Transparency" v={transparencyLabel(b.transparency) ?? b.transparency} />
-              ) : null}
-              {!isUser ? (
-                <>
-                  <KV k="Timeline" v={lead!.timeline ?? "—"} />
-                  <KV k="Audience" v={lead!.target_audience ?? "—"} />
-                  <KV k="Values" v={lead!.core_values?.join(", ") || "—"} />
-                  <KV k="Collab" v={lead!.collaboration_types?.join(", ") || "—"} />
-                </>
-              ) : null}
-              {isUser ? (
-                <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-                  <div>
-                    <Label htmlFor={`pub-${b.id}`} className="text-sm font-medium">
-                      Publish as opportunity
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      {camp!.published
-                        ? `Visible to artists${camp!.published_at ? ` since ${new Date(camp!.published_at).toLocaleDateString()}` : ""}.`
-                        : "Hidden — only admins can see this brief."}
-                    </p>
-                  </div>
-                  <Switch
-                    id={`pub-${b.id}`}
-                    checked={camp!.published}
-                    onCheckedChange={async (checked) => {
-                      const nextPublishedAt = checked ? new Date().toISOString() : null;
-                      onCampaignPublishChanged(b.id, checked, nextPublishedAt);
-                      const { error } = await supabase
-                        .from("campaign_briefs")
-                        .update({ published: checked, published_at: nextPublishedAt })
-                        .eq("id", b.id);
-                      if (error) {
-                        onCampaignPublishChanged(b.id, camp!.published, camp!.published_at);
-                        toast.error(error.message);
-                      } else {
-                        toast.success(checked ? "Published to artist dashboards" : "Unpublished");
-                      }
-                    }}
-                  />
+            <CollapsibleContent>
+              <CardContent className="space-y-3 text-sm">
+                <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
+                <div className="text-xs">
+                  <span className="uppercase tracking-wider text-muted-foreground">Budget:</span>{" "}
+                  <BudgetDisplay amount={b.budget} currency={b.currency} />
                 </div>
-              ) : null}
-              <BriefShares
-                briefSource={isUser ? "user" : "lead"}
-                briefId={b.id}
-                profiles={profiles}
-              />
-            </CardContent>
-
+                {b.transparency ? (
+                  <KV k="Transparency" v={transparencyLabel(b.transparency) ?? b.transparency} />
+                ) : null}
+                {!isUser ? (
+                  <>
+                    <KV k="Timeline" v={lead!.timeline ?? "—"} />
+                    <KV k="Audience" v={lead!.target_audience ?? "—"} />
+                    <KV k="Values" v={lead!.core_values?.join(", ") || "—"} />
+                    <KV k="Collab" v={lead!.collaboration_types?.join(", ") || "—"} />
+                  </>
+                ) : null}
+                {isUser ? (
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+                    <div>
+                      <Label htmlFor={`pub-${b.id}`} className="text-sm font-medium">
+                        Publish as opportunity
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {camp!.published
+                          ? `Visible to artists${camp!.published_at ? ` since ${new Date(camp!.published_at).toLocaleDateString()}` : ""}.`
+                          : "Hidden — only admins can see this brief."}
+                      </p>
+                    </div>
+                    <Switch
+                      id={`pub-${b.id}`}
+                      checked={camp!.published}
+                      onCheckedChange={async (checked) => {
+                        const nextPublishedAt = checked ? new Date().toISOString() : null;
+                        onCampaignPublishChanged(b.id, checked, nextPublishedAt);
+                        const { error } = await supabase
+                          .from("campaign_briefs")
+                          .update({ published: checked, published_at: nextPublishedAt })
+                          .eq("id", b.id);
+                        if (error) {
+                          onCampaignPublishChanged(b.id, camp!.published, camp!.published_at);
+                          toast.error(error.message);
+                        } else {
+                          toast.success(checked ? "Published to artist dashboards" : "Unpublished");
+                        }
+                      }}
+                    />
+                  </div>
+                ) : null}
+                <BriefShares
+                  briefSource={isUser ? "user" : "lead"}
+                  briefId={b.id}
+                  profiles={profiles}
+                />
+              </CardContent>
+            </CollapsibleContent>
+            </Collapsible>
           </Card>
         );
       })}
@@ -534,6 +557,7 @@ function ProfileChip({ profile, fallbackEmail }: {
 }
 
 function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [values, setValues] = useState<string[]>([]);
   const [types, setTypes] = useState<string[]>([]);
@@ -604,12 +628,23 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="font-display text-2xl">Add a campaign brief</CardTitle>
-        <CardDescription>Manually create a brief using the same fields as the public submission form.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger asChild>
+          <button type="button" className="flex w-full items-center justify-between gap-3 p-6 text-left">
+            <div>
+              <CardTitle className="font-display text-2xl flex items-center gap-2">
+                <Plus className="h-5 w-5" /> Add a campaign brief
+              </CardTitle>
+              <CardDescription className="mt-1">
+                Manually create a brief using the same fields as the public submission form.
+              </CardDescription>
+            </div>
+            {open ? <ChevronDown className="h-5 w-5 shrink-0" /> : <ChevronRight className="h-5 w-5 shrink-0" />}
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
             <Label htmlFor="cb-title">Campaign title *</Label>
             <Input id="cb-title" value={form.title} maxLength={200}
@@ -697,8 +732,10 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
           <div className="md:col-span-2">
             <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Add brief"}</Button>
           </div>
-        </form>
-      </CardContent>
+            </form>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
