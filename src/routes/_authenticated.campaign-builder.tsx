@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -7,10 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { BriefsManager } from "@/components/admin/BriefsManager";
 
 export const Route = createFileRoute("/_authenticated/campaign-builder")({
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/login" });
-  },
   component: CampaignBuilderPage,
 });
 
@@ -21,7 +17,10 @@ function CampaignBuilderPage() {
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return setReady(true);
+      if (!u.user) {
+        setReady(true);
+        return;
+      }
       const { data: role } = await supabase
         .from("user_roles")
         .select("role")
