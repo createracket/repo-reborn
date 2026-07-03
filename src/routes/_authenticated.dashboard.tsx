@@ -343,7 +343,7 @@ function DashboardPage() {
       const [{ data: liveSpotlights }, { data: spotlightShareRows }] = await Promise.all([
         (supabase as any)
           .from("partner_pages")
-          .select("id, slug, headline, subtitle, type, header_image_url")
+          .select("id, slug, headline, subtitle, type, header_image_url, profile_image_url")
           .eq("published", true)
           .eq("dashboard_visible", true)
           .order("updated_at", { ascending: false }),
