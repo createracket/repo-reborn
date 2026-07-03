@@ -310,6 +310,32 @@ function DashboardPage() {
         .order("position", { ascending: true });
       setExamples(((exOpps as any[]) ?? []) as any);
 
+      // Spotlights: live-for-all + privately shared to this user (via RLS)
+      const [{ data: liveSpotlights }, { data: sharedRows }] = await Promise.all([
+        (supabase as any)
+          .from("partner_pages")
+          .select("id, slug, headline, subtitle, type, header_image_url")
+          .eq("published", true)
+          .eq("dashboard_visible", true)
+          .order("updated_at", { ascending: false }),
+        (supabase as any)
+          .from("partner_page_shares")
+          .select("partner_page_id"),
+      ]);
+      const sharedIds = Array.from(new Set(((sharedRows ?? []) as any[]).map((r) => r.partner_page_id as string)));
+      let sharedSpotlights: any[] = [];
+      if (sharedIds.length) {
+        const { data } = await (supabase as any)
+          .from("partner_pages")
+          .select("id, slug, headline, subtitle, type, header_image_url")
+          .eq("published", true)
+          .in("id", sharedIds);
+        sharedSpotlights = (data ?? []) as any[];
+      }
+      const dedupSp = new Map<string, any>();
+      [...((liveSpotlights ?? []) as any[]), ...sharedSpotlights].forEach((s) => dedupSp.set(s.id, s));
+      setSpotlightOpps(Array.from(dedupSp.values()));
+
 
 
       if (u.user.email) {
