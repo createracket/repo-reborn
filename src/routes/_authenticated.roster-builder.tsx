@@ -1512,6 +1512,9 @@ function EditProspectPanel({
         content_review_url: form.content_review_url.trim() || null,
         budget: toNum(form.budget),
         metrics_month: form.metrics_month.trim() || null,
+        ...(flagState.flagged
+          ? { flagged_streaming_mismatch: true, flagged_streaming_reason: flagState.reason }
+          : {}),
       } as never)
       .eq("id", item.id);
     setSaving(false);
