@@ -47,6 +47,10 @@ const briefSchema = z.object({
     .nonnegative("Must be 0 or more")
     .max(10_000_000)
     .optional(),
+  currency: z.enum(["AUD", "GBP", "USD"]).default("GBP"),
+  transparency: z
+    .enum(["early_planning", "budget_pending", "locked_in", "live"])
+    .optional(),
   timeline: z.string().trim().max(120).optional(),
   target_audience: z.string().trim().max(2000).optional(),
   contact_name: z.string().trim().min(2, "Add your name").max(120),
