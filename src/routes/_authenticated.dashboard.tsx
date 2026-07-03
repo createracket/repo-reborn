@@ -270,12 +270,41 @@ function DashboardPage() {
       ]);
 
       // Briefs the current user submitted (Project Planner)
-      const { data: mineBriefs } = await supabase
+      const { data: mineBriefs } = await (supabase as any)
         .from("campaign_briefs")
-        .select("id, title, created_at, status, budget, currency")
+        .select("id, title, created_at, status, budget, currency, linked_roster_id")
         .eq("user_id", u.user.id)
         .order("created_at", { ascending: false });
-      setMyBriefs((mineBriefs as any[]) ?? []);
+      const mineBriefRows = ((mineBriefs as any[]) ?? []);
+      const linkedRosterIds = Array.from(
+        new Set(mineBriefRows.map((r) => r.linked_roster_id).filter(Boolean) as string[]),
+      );
+      let rosterInfo = new Map<string, { slug: string | null; published: boolean }>();
+      if (linkedRosterIds.length) {
+        const { data: rosterRows } = await (supabase as any)
+          .from("rosters")
+          .select("id, slug, published")
+          .in("id", linkedRosterIds);
+        ((rosterRows ?? []) as any[]).forEach((r) =>
+          rosterInfo.set(r.id, { slug: r.slug ?? null, published: !!r.published }),
+        );
+      }
+      setMyBriefs(
+        mineBriefRows.map((r) => {
+          const info = r.linked_roster_id ? rosterInfo.get(r.linked_roster_id) : null;
+          return {
+            id: r.id,
+            title: r.title,
+            created_at: r.created_at,
+            status: r.status,
+            budget: r.budget,
+            currency: r.currency,
+            linked_roster_id: r.linked_roster_id ?? null,
+            linked_roster_slug: info?.slug ?? null,
+            linked_roster_published: !!info?.published,
+          };
+        }),
+      );
 
 
       setDisplayName(profile?.display_name ?? null);
