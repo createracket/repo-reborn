@@ -581,15 +581,17 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
         description: form.description.trim(),
         contact_email: form.contact_email.trim() || null,
         budget: form.budget ? Number(form.budget) : null,
+        currency: form.currency || "GBP",
+        transparency: form.transparency || null,
         timeline: form.timeline.trim() || null,
         target_audience: form.target_audience.trim() || null,
         collaboration_types: types,
         core_values: values,
         status: form.status || "in_review",
-      });
+      } as any);
       if (error) throw error;
       toast.success("Campaign brief added");
-      setForm({ title: "", description: "", contact_email: "", budget: "", timeline: "", target_audience: "", status: "in_review" });
+      setForm({ title: "", description: "", contact_email: "", budget: "", currency: "GBP", transparency: "", timeline: "", target_audience: "", status: "in_review" });
       setValues([]);
       setTypes([]);
       onCreated();
