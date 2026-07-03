@@ -501,6 +501,12 @@ function AdminPage() {
                 </Table>
               </CardContent>
             </Card>
+            <EditUserDialog
+              profile={editingProfile}
+              open={!!editingProfile}
+              onOpenChange={(v) => { if (!v) setEditingProfile(null); }}
+              onSaved={(u) => setProfiles((rows) => rows.map((r) => r.id === u.id ? { ...r, ...u } as Profile : r))}
+            />
           </TabsContent>
 
 
