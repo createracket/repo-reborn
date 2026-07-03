@@ -1,20 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { OnboardingForm } from "@/components/onboarding/OnboardingForm";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/vibe-check/musician")({
-  head: () => ({
-    meta: [
-      { title: "Musician Vibe Check — Create Racket" },
-      {
-        name: "description",
-        content:
-          "Find your artist archetype: Loyalist, Changemaker, Curator, Builder, Live Wire, Maker or Advocate.",
-      },
-    ],
-  }),
-  component: MusicianFlow,
+  beforeLoad: () => {
+    throw redirect({ to: "/" });
+  },
+  component: () => null,
 });
 
 function MusicianFlow() {
