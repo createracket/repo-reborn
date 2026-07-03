@@ -242,6 +242,12 @@ function AdminPage() {
                   rows.map((r) => (r.id === id ? { ...r, published, published_at } : r)),
                 )
               }
+              onLeadUpdated={(id, patch) =>
+                setLeadBriefs((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } as LeadBrief : r)))
+              }
+              onCampaignUpdated={(id, patch) =>
+                setCampaigns((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } as CampaignBrief : r)))
+              }
             />
           </TabsContent>
 
