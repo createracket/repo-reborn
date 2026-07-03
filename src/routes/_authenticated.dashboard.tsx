@@ -144,7 +144,29 @@ function DashboardPage() {
       setDisplayName(profile?.display_name ?? null);
       setProfileRow((profile as any) ?? null);
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
-      setOpportunities((opps as Opportunity[]) ?? []);
+      // Merge in privately shared briefs (both user + lead briefs)
+      const { data: shares } = await supabase
+        .from("campaign_brief_shares")
+        .select("brief_source, brief_id");
+      const shareUserIds = ((shares ?? []) as any[]).filter((s) => s.brief_source === "user").map((s) => s.brief_id as string);
+      const shareLeadIds = ((shares ?? []) as any[]).filter((s) => s.brief_source === "lead").map((s) => s.brief_id as string);
+      const [sharedUser, sharedLead] = await Promise.all([
+        shareUserIds.length
+          ? supabase.from("campaign_briefs").select("id, title, description, budget, published_at, created_at").in("id", shareUserIds)
+          : Promise.resolve({ data: [] as any[] }),
+        shareLeadIds.length
+          ? supabase.from("lead_briefs").select("id, title, description, budget, created_at").in("id", shareLeadIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const publishedRows = ((opps as any[]) ?? []) as Opportunity[];
+      const sharedRows: Opportunity[] = [
+        ...(((sharedUser as any).data ?? []) as any[]).map((r) => ({ ...r })),
+        ...(((sharedLead as any).data ?? []) as any[]).map((r) => ({ ...r, published_at: null })),
+      ];
+      const dedup = new Map<string, Opportunity>();
+      [...publishedRows, ...sharedRows].forEach((o) => dedup.set(o.id, o));
+      setOpportunities(Array.from(dedup.values()).sort((a, b) => (a.published_at ?? a.created_at) < (b.published_at ?? b.created_at) ? 1 : -1));
+
 
       if (u.user.email) {
         const { data: assigned } = await (supabase as any).rpc("get_assigned_rosters");
