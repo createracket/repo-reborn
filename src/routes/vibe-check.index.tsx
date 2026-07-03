@@ -5,17 +5,10 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 
 export const Route = createFileRoute("/vibe-check/")({
-  head: () => ({
-    meta: [
-      { title: "The Vibe Check — Create Racket" },
-      {
-        name: "description",
-        content:
-          "Pick your flow: musicians find their archetype, brands brief their dream collaboration. Takes about 5 minutes.",
-      },
-    ],
-  }),
-  component: VibeCheckLanding,
+  beforeLoad: () => {
+    throw redirect({ to: "/" });
+  },
+  component: () => null,
 });
 
 function VibeCheckLanding() {
