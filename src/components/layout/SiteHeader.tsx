@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageBreadcrumbs } from "./PageBreadcrumbs";
 import {
   DropdownMenu,
   DropdownMenuContent,
