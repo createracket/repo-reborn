@@ -1573,6 +1573,8 @@ function EditProspectPanel({
         {fld("YT subscribers", "youtube_subscribers")}
         {fld("Spotify URL", "spotify_url")}
         {fld("Monthly listeners", "spotify_monthly_listens")}
+        {fld("Apple Music URL", "apple_music_url")}
+        {fld("Apple followers", "apple_music_followers")}
         {fld("Example video URL", "example_video_url")}
         {fld("Content to review URL (e.g. Frame.io)", "content_review_url")}
         {fld("Bio page URL", "bio_page_url")}
