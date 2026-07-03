@@ -326,14 +326,29 @@ function ConnectPage() {
                       </div>
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <div className="space-y-2">
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div className="space-y-2">
                           <Label htmlFor="budget">{f.budget.label}</Label>
-                          <Input
-                            id="budget"
-                            name="budget"
-                            type="number"
-                            min={0}
-                            placeholder={f.budget.placeholder}
-                          />
+                          <div className="flex gap-2">
+                            <select
+                              id="currency"
+                              name="currency"
+                              defaultValue="GBP"
+                              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                            >
+                              {BRIEF_CURRENCIES.map((c) => (
+                                <option key={c} value={c}>{c}</option>
+                              ))}
+                            </select>
+                            <Input
+                              id="budget"
+                              name="budget"
+                              type="number"
+                              min={0}
+                              placeholder={f.budget.placeholder}
+                              className="flex-1"
+                            />
+                          </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="timeline">{f.timeline.label}</Label>
@@ -343,6 +358,23 @@ function ConnectPage() {
                             placeholder={f.timeline.placeholder}
                             maxLength={120}
                           />
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="transparency">Project transparency</Label>
+                          <p className="text-xs text-muted-foreground">
+                            Help us gauge how far along the project is.
+                          </p>
+                          <select
+                            id="transparency"
+                            name="transparency"
+                            defaultValue=""
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          >
+                            <option value="">Select a stage…</option>
+                            {TRANSPARENCY_OPTIONS.map((o) => (
+                              <option key={o.value} value={o.value}>{o.label}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                     </div>
