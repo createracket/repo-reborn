@@ -706,13 +706,15 @@ function DashboardPage() {
                             </div>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFromRoster(r.id)}
-                        >
-                          Remove
-                        </Button>
+                        {isMineView && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeFromRoster(r.id)}
+                          >
+                            Remove
+                          </Button>
+                        )}
                       </li>
                     ))}
                     {isMineView && taggedCreators.map((c) => (
