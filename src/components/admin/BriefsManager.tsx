@@ -292,62 +292,64 @@ function UnifiedBriefs({
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-3 text-sm">
-              <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
-              <div className="text-xs">
-                <span className="uppercase tracking-wider text-muted-foreground">Budget:</span>{" "}
-                <BudgetDisplay amount={b.budget} currency={b.currency} />
-              </div>
-              {b.transparency ? (
-                <KV k="Transparency" v={transparencyLabel(b.transparency) ?? b.transparency} />
-              ) : null}
-              {!isUser ? (
-                <>
-                  <KV k="Timeline" v={lead!.timeline ?? "—"} />
-                  <KV k="Audience" v={lead!.target_audience ?? "—"} />
-                  <KV k="Values" v={lead!.core_values?.join(", ") || "—"} />
-                  <KV k="Collab" v={lead!.collaboration_types?.join(", ") || "—"} />
-                </>
-              ) : null}
-              {isUser ? (
-                <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-                  <div>
-                    <Label htmlFor={`pub-${b.id}`} className="text-sm font-medium">
-                      Publish as opportunity
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      {camp!.published
-                        ? `Visible to artists${camp!.published_at ? ` since ${new Date(camp!.published_at).toLocaleDateString()}` : ""}.`
-                        : "Hidden — only admins can see this brief."}
-                    </p>
-                  </div>
-                  <Switch
-                    id={`pub-${b.id}`}
-                    checked={camp!.published}
-                    onCheckedChange={async (checked) => {
-                      const nextPublishedAt = checked ? new Date().toISOString() : null;
-                      onCampaignPublishChanged(b.id, checked, nextPublishedAt);
-                      const { error } = await supabase
-                        .from("campaign_briefs")
-                        .update({ published: checked, published_at: nextPublishedAt })
-                        .eq("id", b.id);
-                      if (error) {
-                        onCampaignPublishChanged(b.id, camp!.published, camp!.published_at);
-                        toast.error(error.message);
-                      } else {
-                        toast.success(checked ? "Published to artist dashboards" : "Unpublished");
-                      }
-                    }}
-                  />
+            <CollapsibleContent>
+              <CardContent className="space-y-3 text-sm">
+                <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
+                <div className="text-xs">
+                  <span className="uppercase tracking-wider text-muted-foreground">Budget:</span>{" "}
+                  <BudgetDisplay amount={b.budget} currency={b.currency} />
                 </div>
-              ) : null}
-              <BriefShares
-                briefSource={isUser ? "user" : "lead"}
-                briefId={b.id}
-                profiles={profiles}
-              />
-            </CardContent>
-
+                {b.transparency ? (
+                  <KV k="Transparency" v={transparencyLabel(b.transparency) ?? b.transparency} />
+                ) : null}
+                {!isUser ? (
+                  <>
+                    <KV k="Timeline" v={lead!.timeline ?? "—"} />
+                    <KV k="Audience" v={lead!.target_audience ?? "—"} />
+                    <KV k="Values" v={lead!.core_values?.join(", ") || "—"} />
+                    <KV k="Collab" v={lead!.collaboration_types?.join(", ") || "—"} />
+                  </>
+                ) : null}
+                {isUser ? (
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+                    <div>
+                      <Label htmlFor={`pub-${b.id}`} className="text-sm font-medium">
+                        Publish as opportunity
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {camp!.published
+                          ? `Visible to artists${camp!.published_at ? ` since ${new Date(camp!.published_at).toLocaleDateString()}` : ""}.`
+                          : "Hidden — only admins can see this brief."}
+                      </p>
+                    </div>
+                    <Switch
+                      id={`pub-${b.id}`}
+                      checked={camp!.published}
+                      onCheckedChange={async (checked) => {
+                        const nextPublishedAt = checked ? new Date().toISOString() : null;
+                        onCampaignPublishChanged(b.id, checked, nextPublishedAt);
+                        const { error } = await supabase
+                          .from("campaign_briefs")
+                          .update({ published: checked, published_at: nextPublishedAt })
+                          .eq("id", b.id);
+                        if (error) {
+                          onCampaignPublishChanged(b.id, camp!.published, camp!.published_at);
+                          toast.error(error.message);
+                        } else {
+                          toast.success(checked ? "Published to artist dashboards" : "Unpublished");
+                        }
+                      }}
+                    />
+                  </div>
+                ) : null}
+                <BriefShares
+                  briefSource={isUser ? "user" : "lead"}
+                  briefId={b.id}
+                  profiles={profiles}
+                />
+              </CardContent>
+            </CollapsibleContent>
+            </Collapsible>
           </Card>
         );
       })}
