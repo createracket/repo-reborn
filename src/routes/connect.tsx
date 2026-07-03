@@ -18,6 +18,7 @@ import {
   DEFAULT_BRIEF_FORM_CONFIG,
   type BriefFormConfig,
 } from "@/lib/brief-form-config";
+import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS } from "@/lib/brief-currency";
 import logo from "@/assets/CR-Logo-Half-Colour.png.asset.json";
 
 export const Route = createFileRoute("/connect")({
