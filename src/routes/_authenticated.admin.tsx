@@ -108,20 +108,24 @@ function AdminPage() {
       }
       setIsAdmin(true);
 
-      const [lb, cm, ml, pr, cb, sp, si] = await Promise.all([
+      const [lb, cm, ml, pr, cb, sp, si, ce] = await Promise.all([
         supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
-        supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, contact_email, published, published_at, linked_roster_id, currency, transparency").order("created_at", { ascending: false }),
+        supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, currency, transparency").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id").order("created_at", { ascending: false }),
+        (supabase as any).rpc("admin_campaign_brief_emails"),
       ]);
+      const emailById = new Map<string, string | null>();
+      (((ce as any).data as any[] | null) ?? []).forEach((r: any) => emailById.set(r.id, r.contact_email ?? null));
+      const campaignRows = (((cb as any).data as any[]) ?? []).map((c: any) => ({ ...c, contact_email: emailById.get(c.id) ?? null })) as CampaignBrief[];
       setLeadBriefs((lb.data as LeadBrief[]) ?? []);
       setContacts((cm.data as ContactMsg[]) ?? []);
       setSubs((ml.data as Subscriber[]) ?? []);
       setProfiles((pr.data as Profile[]) ?? []);
-      setCampaigns((cb.data as CampaignBrief[]) ?? []);
+      setCampaigns(campaignRows);
       setSpotlights((sp.data as unknown as Spotlight[]) ?? []);
 
       // Hydrate interests with profile info (display name + email)
