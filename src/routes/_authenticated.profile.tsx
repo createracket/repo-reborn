@@ -39,7 +39,7 @@ const emptyForm = {
   location: "",
   bio: "",
   avatar_url: "",
-  socials: { instagram: "", tiktok: "", spotify: "", youtube: "", website: "" } as ProfileSocials,
+  socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", website: "" } as ProfileSocials,
   total_followers: "",
   total_streams: "",
   monthly_streams: "",
@@ -47,6 +47,7 @@ const emptyForm = {
   avg_engagement: "",
   top_audience_location: "",
 };
+
 
 function EditProfilePage() {
   const navigate = useNavigate();
