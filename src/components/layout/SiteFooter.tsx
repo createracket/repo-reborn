@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import racketLogo from "@/assets/logo/racket-logo-july2026.svg";
+import racketLogoAsset from "@/assets/logo/racket-logo-white.svg.asset.json";
+const racketLogo = racketLogoAsset.url;
 import { Instagram, Linkedin, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
