@@ -1300,6 +1300,7 @@ function SpotlightForm({
         tiktok: form.tiktok,
         youtube: form.youtube,
         spotify: form.spotify,
+        apple_music: form.apple_music,
         spotifyEmbed: form.spotifyEmbed,
         contact: form.contact,
         video1: form.video1,
