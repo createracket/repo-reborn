@@ -386,7 +386,7 @@ function DashboardPage() {
                             <h3 className="font-medium leading-tight truncate">{b.title}</h3>
                             <div className="mt-1 text-xs text-muted-foreground">
                               Submitted {new Date(b.created_at).toLocaleDateString()}
-                              {b.budget ? ` · £${b.budget}` : ""}
+                              {b.budget ? ` · ${formatBriefBudget(b.budget, b.currency)}` : ""}
                             </div>
                           </div>
                           <BriefStatusBadge status={b.status} />
