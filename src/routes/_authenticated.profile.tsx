@@ -58,6 +58,8 @@ function EditProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [accountType, setAccountType] = useState<string | null>(null);
+
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
