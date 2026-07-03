@@ -72,8 +72,8 @@ export function ExampleOpportunitiesAdmin() {
 
   async function handleImage(row: ExampleOpportunity, file: File) {
     if (file.size > 8 * 1024 * 1024) { toast.error("Max 8MB"); return; }
-    // Resize to max 1080x1080
-    const resized = await resizeImage(file, 1080);
+    // Center-crop to 9:16, max 1600px tall
+    const resized = await resizeImage(file, 1600);
     const ext = "jpg";
     const path = `example-opps/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage.from("spotlight-images").upload(path, resized, {
@@ -106,7 +106,7 @@ export function ExampleOpportunitiesAdmin() {
                   <div className="w-32 shrink-0 space-y-2">
                     <div
                       className="overflow-hidden rounded-md border border-border/60 bg-muted/40"
-                      style={{ width: 128, aspectRatio: "1" }}
+                      style={{ width: 128, aspectRatio: "9 / 16" }}
                     >
                       {row.image_url ? (
                         <img src={row.image_url} alt="" className="size-full object-cover" />
@@ -126,7 +126,7 @@ export function ExampleOpportunitiesAdmin() {
                       }}
                       className="text-xs"
                     />
-                    <p className="text-[10px] text-muted-foreground">Max 1080×1080</p>
+                    <p className="text-[10px] text-muted-foreground">Cropped to 9:16</p>
                   </div>
                   <div className="flex-1 min-w-[240px] space-y-2">
                     <div>
@@ -180,15 +180,27 @@ export function ExampleOpportunitiesAdmin() {
   );
 }
 
-async function resizeImage(file: File, max: number): Promise<Blob> {
+async function resizeImage(file: File, maxHeight: number): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
-  const w = Math.round(bitmap.width * scale);
-  const h = Math.round(bitmap.height * scale);
+  // Center-crop to 9:16
+  const targetRatio = 9 / 16;
+  const srcRatio = bitmap.width / bitmap.height;
+  let sx = 0, sy = 0, sw = bitmap.width, sh = bitmap.height;
+  if (srcRatio > targetRatio) {
+    // too wide — crop sides
+    sw = bitmap.height * targetRatio;
+    sx = (bitmap.width - sw) / 2;
+  } else if (srcRatio < targetRatio) {
+    // too tall — crop top/bottom
+    sh = bitmap.width / targetRatio;
+    sy = (bitmap.height - sh) / 2;
+  }
+  const h = Math.min(maxHeight, sh);
+  const w = Math.round(h * targetRatio);
   const canvas = document.createElement("canvas");
-  canvas.width = w; canvas.height = h;
+  canvas.width = w; canvas.height = Math.round(h);
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(bitmap, 0, 0, w, h);
+  ctx.drawImage(bitmap, sx, sy, sw, sh, 0, 0, w, Math.round(h));
   return await new Promise<Blob>((resolve) =>
     canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85)
   );
