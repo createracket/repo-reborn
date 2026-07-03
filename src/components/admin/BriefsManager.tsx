@@ -18,14 +18,16 @@ import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS, transparencyLabel } from "@/lib
 
 export type LeadBrief = {
   id: string; created_at: string; title: string; description: string;
-  budget: number | null; timeline: string | null; core_values: string[];
+  budget: number | null; currency: string | null; transparency: string | null;
+  timeline: string | null; core_values: string[];
   collaboration_types: string[]; target_audience: string | null;
   contact_email: string; contact_name: string | null; company: string | null;
   status: string;
 };
 export type CampaignBrief = {
   id: string; created_at: string; title: string; description: string;
-  user_id: string; budget: number | null; status: string;
+  user_id: string; budget: number | null; currency: string | null; transparency: string | null;
+  status: string;
   contact_email: string | null; published: boolean; published_at: string | null;
 };
 export type Profile = {
