@@ -74,6 +74,7 @@ function AdminPage() {
   const [spotlightFormOpen, setSpotlightFormOpen] = useState(false);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
 
   const profileByEmail = useMemo(() => {
     const m = new Map<string, Profile>();
