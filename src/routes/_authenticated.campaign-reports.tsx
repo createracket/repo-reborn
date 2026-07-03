@@ -813,7 +813,7 @@ function CreatorRow({
   posts: Post[];
   onChanged: () => Promise<void>;
 }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState(creator.name);
   const [handle, setHandle] = useState(creator.handle ?? "");
   const [avatar, setAvatar] = useState(creator.avatar_url ?? "");
