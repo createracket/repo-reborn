@@ -715,7 +715,7 @@ function DashboardPage() {
                         </Button>
                       </li>
                     ))}
-                    {filteredTagged.map((c) => (
+                    {isMineView && taggedCreators.map((c) => (
                       <li
                         key={`tag-${c.id}`}
                         className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
