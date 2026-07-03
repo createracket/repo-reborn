@@ -602,6 +602,10 @@ function AdminPage() {
           <TabsContent value="emails" className="mt-6">
             <EmailsAdmin />
           </TabsContent>
+
+          <TabsContent value="example-opps" className="mt-6">
+            <ExampleOpportunitiesAdmin />
+          </TabsContent>
         </Tabs>
       </main>
       <SiteFooter />
