@@ -599,9 +599,28 @@ function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {rosterOptions.length > 0 && !loading && (
+                  <div className="mb-4 flex flex-wrap items-center gap-2">
+                    <Label htmlFor="dash-roster-filter" className="text-xs uppercase tracking-wide text-muted-foreground">
+                      View
+                    </Label>
+                    <Select value={rosterFilter} onValueChange={setRosterFilter}>
+                      <SelectTrigger id="dash-roster-filter" className="h-9 w-[260px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All rosters</SelectItem>
+                        <SelectItem value="mine">My saved roster</SelectItem>
+                        {rosterOptions.map((o) => (
+                          <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : roster.length === 0 && taggedCreators.length === 0 ? (
+                ) : (showMine ? roster.length : 0) === 0 && filteredTagged.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
                     {latestVibe ? (
                       <p className="text-muted-foreground">
@@ -621,7 +640,7 @@ function DashboardPage() {
                   </div>
                 ) : (
                   <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {roster.map((r) => (
+                    {showMine && roster.map((r) => (
                       <li
                         key={r.id}
                         className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
@@ -655,7 +674,7 @@ function DashboardPage() {
                         </Button>
                       </li>
                     ))}
-                    {taggedCreators.map((c) => (
+                    {filteredTagged.map((c) => (
                       <li
                         key={`tag-${c.id}`}
                         className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
@@ -687,6 +706,7 @@ function DashboardPage() {
                     ))}
                   </ul>
                 )}
+
 
                 {/* Suggested matches (merged in) */}
                 <div className="mt-8 border-t border-border/60 pt-6">
