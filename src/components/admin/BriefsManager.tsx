@@ -207,8 +207,11 @@ function UnifiedBriefs({
         const profile = isUser
           ? lookupProfile(camp!.contact_email) ?? profiles.find((p) => p.id === camp!.user_id) ?? null
           : lookupProfile(lead!.contact_email);
+        const rowKey = `${b.source}-${b.id}`;
+        const isOpen = openIds.has(rowKey);
         return (
-          <Card key={`${b.source}-${b.id}`}>
+          <Card key={rowKey}>
+            <Collapsible open={isOpen} onOpenChange={() => toggleOpen(rowKey)}>
             <CardHeader>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
