@@ -542,6 +542,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
     description: "",
     contact_email: "",
     budget: "",
+    currency: "GBP",
+    transparency: "",
     timeline: "",
     target_audience: "",
     status: "in_review",
