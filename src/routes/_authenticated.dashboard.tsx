@@ -356,7 +356,7 @@ function DashboardPage() {
       if (sharedIds.length) {
         const { data } = await (supabase as any)
           .from("partner_pages")
-          .select("id, slug, headline, subtitle, type, header_image_url")
+          .select("id, slug, headline, subtitle, type, header_image_url, profile_image_url")
           .eq("published", true)
           .in("id", sharedIds);
         sharedSpotlights = (data ?? []) as any[];
