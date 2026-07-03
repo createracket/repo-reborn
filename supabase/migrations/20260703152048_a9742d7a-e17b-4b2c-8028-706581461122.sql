@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.is_assigned_to_campaign_report(uuid) FROM anon, PUBLIC;
