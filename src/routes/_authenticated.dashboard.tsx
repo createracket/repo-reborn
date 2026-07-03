@@ -116,19 +116,35 @@ function DashboardPage() {
   // Saved-member rows show on "All" and "My saved roster"; hidden on individual roster view
   const displayedRoster = isRosterView ? [] : roster;
 
-  // Load current user's owned rosters for the toggle
+  // Load rosters available for the toggle — own rosters for everyone; all rosters for admins
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      const { data: rows } = await supabase
+      let query = (supabase as any)
         .from("rosters")
-        .select("id, title")
-        .eq("owner_id", u.user.id)
+        .select("id, title, owner_id")
         .order("updated_at", { ascending: false });
-      setMyRosters(((rows ?? []) as any[]).map((r: any) => ({ id: r.id, title: r.title })));
+      if (!isAdmin) query = query.eq("owner_id", u.user.id);
+      const { data: rows } = await query;
+      const ownerIds = Array.from(new Set(((rows ?? []) as any[]).map((r) => r.owner_id).filter((id) => id && id !== u.user!.id)));
+      let ownerNames = new Map<string, string>();
+      if (isAdmin && ownerIds.length) {
+        const { data: profs } = await (supabase as any)
+          .from("public_profiles")
+          .select("id, display_name")
+          .in("id", ownerIds);
+        ownerNames = new Map(((profs ?? []) as any[]).map((p) => [p.id, p.display_name]));
+      }
+      setMyRosters(((rows ?? []) as any[]).map((r: any) => ({
+        id: r.id,
+        title: isAdmin && r.owner_id !== u.user!.id
+          ? `${r.title} — ${ownerNames.get(r.owner_id) ?? "Unnamed"}`
+          : r.title,
+      })));
     })();
-  }, []);
+  }, [isAdmin]);
+
 
   // Load items for a specific owned roster when selected
   useEffect(() => {
