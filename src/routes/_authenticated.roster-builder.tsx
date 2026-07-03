@@ -406,29 +406,13 @@ function RosterListView({
   const [description, setDescription] = useState("");
   const [briefId, setBriefId] = useState<string>("");
   const [creating, setCreating] = useState(false);
-  const [ownerFilter, setOwnerFilter] = useState<string>("mine");
 
   const briefById = useMemo(() => new Map(briefs.map((b) => [b.id, b])), [briefs]);
   const profileById = useMemo(() => new Map(profiles.map((p) => [p.id, p])), [profiles]);
 
-  const ownerOptions = useMemo(() => {
-    const ids = Array.from(new Set(rosters.map((r) => r.owner_id)));
-    return ids
-      .map((id) => {
-        const p = profileById.get(id);
-        return {
-          id,
-          label: p?.display_name || p?.email || id.slice(0, 8),
-        };
-      })
-      .sort((a, b) => a.label.localeCompare(b.label));
-  }, [rosters, profileById]);
+  const visibleRosters = rosters;
 
-  const visibleRosters = useMemo(() => {
-    if (ownerFilter === "all") return rosters;
-    if (ownerFilter === "mine") return rosters.filter((r) => r.owner_id === userId);
-    return rosters.filter((r) => r.owner_id === ownerFilter);
-  }, [rosters, ownerFilter, userId]);
+
 
 
   function pickBrief(id: string) {
@@ -490,27 +474,6 @@ function RosterListView({
           <CardDescription>Each roster plans one campaign brief.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <Label htmlFor="owner-filter" className="text-xs uppercase tracking-wide text-muted-foreground">
-              View
-            </Label>
-            <Select value={ownerFilter} onValueChange={setOwnerFilter}>
-              <SelectTrigger id="owner-filter" className="h-9 w-[240px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="mine">My rosters</SelectItem>
-                <SelectItem value="all">All rosters</SelectItem>
-                {ownerOptions
-                  .filter((o) => o.id !== userId)
-                  .map((o) => (
-                    <SelectItem key={o.id} value={o.id}>
-                      {o.label}'s roster
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
           {visibleRosters.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {rosters.length === 0

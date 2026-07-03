@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks, Rocket } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,6 +16,8 @@ import {
 import { BriefStatusBadge } from "@/components/briefs/BriefStatusBadge";
 import { formatBriefBudget, transparencyLabel } from "@/lib/brief-currency";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -103,6 +105,20 @@ function DashboardPage() {
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null }>>([]);
   const [loading, setLoading] = useState(true);
+  const [rosterFilter, setRosterFilter] = useState<string>("all");
+
+  const rosterOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    taggedCreators.forEach((c) => {
+      if (!map.has(c.roster_id)) map.set(c.roster_id, c.roster_title);
+    });
+    return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
+  }, [taggedCreators]);
+
+  const showMine = rosterFilter === "all" || rosterFilter === "mine";
+  const filteredTagged = rosterFilter === "all" || rosterFilter === "mine"
+    ? (rosterFilter === "mine" ? [] : taggedCreators)
+    : taggedCreators.filter((c) => c.roster_id === rosterFilter);
 
 
   useEffect(() => {
@@ -583,9 +599,28 @@ function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {rosterOptions.length > 0 && !loading && (
+                  <div className="mb-4 flex flex-wrap items-center gap-2">
+                    <Label htmlFor="dash-roster-filter" className="text-xs uppercase tracking-wide text-muted-foreground">
+                      View
+                    </Label>
+                    <Select value={rosterFilter} onValueChange={setRosterFilter}>
+                      <SelectTrigger id="dash-roster-filter" className="h-9 w-[260px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All rosters</SelectItem>
+                        <SelectItem value="mine">My saved roster</SelectItem>
+                        {rosterOptions.map((o) => (
+                          <SelectItem key={o.id} value={o.id}>{o.title}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : roster.length === 0 && taggedCreators.length === 0 ? (
+                ) : (showMine ? roster.length : 0) === 0 && filteredTagged.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
                     {latestVibe ? (
                       <p className="text-muted-foreground">
@@ -605,7 +640,7 @@ function DashboardPage() {
                   </div>
                 ) : (
                   <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {roster.map((r) => (
+                    {showMine && roster.map((r) => (
                       <li
                         key={r.id}
                         className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
@@ -639,7 +674,7 @@ function DashboardPage() {
                         </Button>
                       </li>
                     ))}
-                    {taggedCreators.map((c) => (
+                    {filteredTagged.map((c) => (
                       <li
                         key={`tag-${c.id}`}
                         className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-card p-4"
@@ -671,6 +706,7 @@ function DashboardPage() {
                     ))}
                   </ul>
                 )}
+
 
                 {/* Suggested matches (merged in) */}
                 <div className="mt-8 border-t border-border/60 pt-6">
