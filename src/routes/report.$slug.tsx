@@ -313,7 +313,9 @@ function ExpandableCaption({ caption }: { caption: string }) {
 
 function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator }) {
   const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
-  const sentiment = post.sentiment_score;
+  // Only show sentiment if it was intentionally adjusted (default seed is 50).
+  const sentiment = post.sentiment_score != null && post.sentiment_score !== 50 ? post.sentiment_score : null;
+
   return (
     <Card>
       <CardContent className="grid gap-6 p-6 md:grid-cols-[minmax(0,280px)_1fr]">
