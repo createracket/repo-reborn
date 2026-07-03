@@ -92,9 +92,11 @@ export function BriefsManager() {
         <h1 className="font-display text-3xl">Campaign Builder</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Manage every brief in one place — briefs from signed-in users and lead submissions
-          both appear here ({totalCount} total). Change the status to keep the user's Project
-          Planner in sync. Toggle <span className="font-medium text-foreground">Publish as
-          opportunity</span> to surface a user brief on every signed-in artist's dashboard.
+          both appear here (<span className="font-medium text-foreground">{totalCount}</span> in
+          total right now — no cap, every brief is shown). Change the status to keep the user's
+          Project Planner in sync. Toggle{" "}
+          <span className="font-medium text-foreground">Publish as opportunity</span> to surface
+          a user brief on every signed-in artist's dashboard.
         </p>
       </div>
 
