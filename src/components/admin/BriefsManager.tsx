@@ -608,12 +608,23 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="font-display text-2xl">Add a campaign brief</CardTitle>
-        <CardDescription>Manually create a brief using the same fields as the public submission form.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger asChild>
+          <button type="button" className="flex w-full items-center justify-between gap-3 p-6 text-left">
+            <div>
+              <CardTitle className="font-display text-2xl flex items-center gap-2">
+                <Plus className="h-5 w-5" /> Add a campaign brief
+              </CardTitle>
+              <CardDescription className="mt-1">
+                Manually create a brief using the same fields as the public submission form.
+              </CardDescription>
+            </div>
+            {open ? <ChevronDown className="h-5 w-5 shrink-0" /> : <ChevronRight className="h-5 w-5 shrink-0" />}
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
             <Label htmlFor="cb-title">Campaign title *</Label>
             <Input id="cb-title" value={form.title} maxLength={200}
