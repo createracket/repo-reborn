@@ -1526,6 +1526,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_assigned_to_campaign_report: {
+        Args: { _report_id: string }
+        Returns: boolean
+      }
       is_assigned_to_roster: { Args: { _roster_id: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
