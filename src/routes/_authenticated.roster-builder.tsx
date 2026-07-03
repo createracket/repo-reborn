@@ -490,12 +490,40 @@ function RosterListView({
           <CardDescription>Each roster plans one campaign brief.</CardDescription>
         </CardHeader>
         <CardContent>
-          {rosters.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No rosters yet. Create one to get started.</p>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <Label htmlFor="owner-filter" className="text-xs uppercase tracking-wide text-muted-foreground">
+              View
+            </Label>
+            <Select value={ownerFilter} onValueChange={setOwnerFilter}>
+              <SelectTrigger id="owner-filter" className="h-9 w-[240px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mine">My rosters</SelectItem>
+                <SelectItem value="all">All rosters</SelectItem>
+                {ownerOptions
+                  .filter((o) => o.id !== userId)
+                  .map((o) => (
+                    <SelectItem key={o.id} value={o.id}>
+                      {o.label}'s roster
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {visibleRosters.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {rosters.length === 0
+                ? "No rosters yet. Create one to get started."
+                : "No rosters match this filter."}
+            </p>
           ) : (
             <ul className="space-y-2">
-              {rosters.map((r) => {
+              {visibleRosters.map((r) => {
                 const linked = r.brief_id ? briefById.get(r.brief_id) : null;
+                const isMine = r.owner_id === userId;
+                const owner = profileById.get(r.owner_id);
+                const ownerLabel = owner?.display_name || owner?.email || null;
                 return (
                   <li
                     key={r.id}
@@ -508,6 +536,11 @@ function RosterListView({
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium">{r.title}</span>
+                        {!isMine && ownerLabel && (
+                          <Badge variant="secondary" className="text-[10px] uppercase">
+                            {ownerLabel}
+                          </Badge>
+                        )}
                         {linked ? (
                           <Badge variant="outline" className="text-[10px] uppercase">
                             Brief · {linked.title}
@@ -537,6 +570,8 @@ function RosterListView({
           )}
         </CardContent>
       </Card>
+
+
 
       <Card>
         <CardHeader>
