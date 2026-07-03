@@ -356,6 +356,8 @@ function EditProfilePage() {
       avg_reach: num(form.avg_reach),
       avg_engagement: num(form.avg_engagement),
       top_audience_location: form.top_audience_location.trim() || null,
+      flagged_streaming_mismatch: form.flagged_streaming_mismatch,
+      flagged_streaming_reason: form.flagged_streaming_reason || null,
     };
     const bad = findProfanityIn(payload);
     if (bad) {
