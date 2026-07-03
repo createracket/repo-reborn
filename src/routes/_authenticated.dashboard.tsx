@@ -106,6 +106,7 @@ function DashboardPage() {
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null }>>([]);
   const [loading, setLoading] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("all");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const rosterOptions = useMemo(() => {
     const map = new Map<string, string>();
@@ -126,6 +127,14 @@ function DashboardPage() {
       const { data: u } = await supabase.auth.getUser();
       setEmail(u.user?.email ?? null);
       if (!u.user) return;
+
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", u.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!!roleRow);
 
       // Auto-enrol new accounts into the mailing list
       if (u.user.email) {
@@ -599,7 +608,7 @@ function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {!loading && (
+                {!loading && isAdmin && (
                   <div className="mb-4 flex flex-wrap items-center gap-2">
                     <Label htmlFor="dash-roster-filter" className="text-xs uppercase tracking-wide text-muted-foreground">
                       View
