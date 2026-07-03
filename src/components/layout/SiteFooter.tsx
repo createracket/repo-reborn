@@ -31,7 +31,7 @@ export function SiteFooter() {
             </p>
           </div>
 
-          <div className="lg:colle-span-3">
+          <div className="lg:col-span-3">
             <ul className="space-y-2 text-sm">
               {signedIn ? (
                 <li>
