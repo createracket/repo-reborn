@@ -696,31 +696,41 @@ function DashboardPage() {
                     <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
                       Example opportunities
                     </div>
-                    <ul className="grid gap-3 md:grid-cols-3">
+                    <ul className="flex flex-wrap gap-3">
                       {examples.map((ex) => (
                         <li
                           key={ex.id}
-                          className="flex flex-col gap-2 rounded-xl border border-dashed border-border/60 bg-muted/30 p-4 opacity-90"
+                          className="flex gap-3 rounded-xl border border-dashed border-border/60 bg-muted/30 p-3 opacity-90"
+                          style={{ width: 320 }}
                         >
-                          {ex.image_url ? (
-                            <div className="aspect-square w-full overflow-hidden rounded-md bg-muted">
+                          <div
+                            className="shrink-0 overflow-hidden rounded-md border border-border/40 bg-muted"
+                            style={{ width: 96, aspectRatio: "1" }}
+                          >
+                            {ex.image_url ? (
                               <img src={ex.image_url} alt="" className="size-full object-cover" />
-                            </div>
-                          ) : null}
-                          <div className="flex items-start justify-between gap-2">
-                            <h3 className="font-medium leading-tight">{ex.title}</h3>
-                            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                              Example
-                            </span>
+                            ) : (
+                              <div className="flex size-full items-center justify-center text-[9px] uppercase tracking-wider text-muted-foreground">
+                                Thumb
+                              </div>
+                            )}
                           </div>
-                          {ex.description ? (
-                            <p className="text-sm text-muted-foreground line-clamp-3">
-                              {ex.description}
-                            </p>
-                          ) : null}
-                          {ex.location ? (
-                            <div className="text-xs text-muted-foreground">📍 {ex.location}</div>
-                          ) : null}
+                          <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className="truncate text-sm font-medium leading-tight">{ex.title}</h3>
+                              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
+                                Example
+                              </span>
+                            </div>
+                            {ex.description ? (
+                              <p className="line-clamp-2 text-xs text-muted-foreground">
+                                {ex.description}
+                              </p>
+                            ) : null}
+                            {ex.location ? (
+                              <div className="text-[10px] text-muted-foreground">📍 {ex.location}</div>
+                            ) : null}
+                          </div>
                         </li>
                       ))}
                     </ul>
