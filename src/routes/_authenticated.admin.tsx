@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
-import { adminCreateUser, adminDeleteUser } from "@/lib/admin-users.functions";
+import { adminCreateUser, adminDeleteUser, adminUpdateUser } from "@/lib/admin-users.functions";
 import { ACCESS_CODE } from "@/routes/login";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
@@ -74,6 +74,7 @@ function AdminPage() {
   const [spotlightFormOpen, setSpotlightFormOpen] = useState(false);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
 
   const profileByEmail = useMemo(() => {
     const m = new Map<string, Profile>();
@@ -468,29 +469,44 @@ function AdminPage() {
                         />
                       </td>
                       <td className="p-3 text-right">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                          onClick={async () => {
-                            if (!confirm(`Permanently delete user ${p.email ?? p.display_name ?? p.id}? This cannot be undone.`)) return;
-                            try {
-                              await adminDeleteUser({ data: { user_id: p.id } });
-                              setProfiles((rows) => rows.filter((r) => r.id !== p.id));
-                              toast.success("User removed");
-                            } catch (e: any) {
-                              toast.error(e?.message ?? "Failed to remove user");
-                            }
-                          }}
-                        >
-                          <Trash2 className="size-3.5" /> Remove
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setEditingProfile(p)}
+                          >
+                            <Pencil className="size-3.5" /> Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            onClick={async () => {
+                              if (!confirm(`Permanently delete user ${p.email ?? p.display_name ?? p.id}? This cannot be undone.`)) return;
+                              try {
+                                await adminDeleteUser({ data: { user_id: p.id } });
+                                setProfiles((rows) => rows.filter((r) => r.id !== p.id));
+                                toast.success("User removed");
+                              } catch (e: any) {
+                                toast.error(e?.message ?? "Failed to remove user");
+                              }
+                            }}
+                          >
+                            <Trash2 className="size-3.5" /> Remove
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </Table>
               </CardContent>
             </Card>
+            <EditUserDialog
+              profile={editingProfile}
+              open={!!editingProfile}
+              onOpenChange={(v) => { if (!v) setEditingProfile(null); }}
+              onSaved={(u) => setProfiles((rows) => rows.map((r) => r.id === u.id ? { ...r, ...u } as Profile : r))}
+            />
           </TabsContent>
 
 
@@ -1424,6 +1440,14 @@ function SpotlightForm({
   );
 }
 
+const ACCOUNT_TYPE_OPTIONS = [
+  { value: "artist", label: "Artist" },
+  { value: "brand", label: "Brand" },
+  { value: "creative", label: "Creative" },
+  { value: "fan", label: "Fan" },
+  { value: "crew", label: "Crew" },
+] as const;
+
 function NewUserForm({ onCreated }: { onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -1431,6 +1455,7 @@ function NewUserForm({ onCreated }: { onCreated: () => void }) {
     password: "",
     display_name: "",
     email_confirm: true,
+    account_type: "" as "" | typeof ACCOUNT_TYPE_OPTIONS[number]["value"],
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -1447,10 +1472,11 @@ function NewUserForm({ onCreated }: { onCreated: () => void }) {
           password: form.password,
           display_name: form.display_name.trim() || undefined,
           email_confirm: form.email_confirm,
+          account_type: form.account_type || undefined,
         },
       });
       toast.success(`Created ${form.email}`);
-      setForm({ email: "", password: "", display_name: "", email_confirm: true });
+      setForm({ email: "", password: "", display_name: "", email_confirm: true, account_type: "" });
       onCreated();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to create user");
@@ -1482,6 +1508,20 @@ function NewUserForm({ onCreated }: { onCreated: () => void }) {
             <Input id="nu-password" type="text" autoComplete="off" minLength={8} value={form.password}
               onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} required />
           </div>
+          <div>
+            <Label htmlFor="nu-type">Account type</Label>
+            <select
+              id="nu-type"
+              value={form.account_type}
+              onChange={(e) => setForm((f) => ({ ...f, account_type: e.target.value as typeof f.account_type }))}
+              className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            >
+              <option value="">— none —</option>
+              {ACCOUNT_TYPE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
           <div className="flex items-center gap-3 pt-6">
             <Switch id="nu-confirm" checked={form.email_confirm}
               onCheckedChange={(v) => setForm((f) => ({ ...f, email_confirm: v }))} />
@@ -1493,6 +1533,127 @@ function NewUserForm({ onCreated }: { onCreated: () => void }) {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+function EditUserDialog({
+  profile,
+  open,
+  onOpenChange,
+  onSaved,
+}: {
+  profile: Profile | null;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onSaved: (updated: Partial<Profile> & { id: string; email?: string | null }) => void;
+}) {
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    email: "",
+    display_name: "",
+    account_type: "" as string,
+    slug: "",
+    password: "",
+  });
+
+  useEffect(() => {
+    if (profile) {
+      setForm({
+        email: profile.email ?? "",
+        display_name: profile.display_name ?? "",
+        account_type: profile.account_type ?? "",
+        slug: profile.slug ?? "",
+        password: "",
+      });
+    }
+  }, [profile]);
+
+  if (!profile) return null;
+
+  async function handleSave() {
+    if (!profile) return;
+    setSaving(true);
+    try {
+      const patch: any = { user_id: profile.id };
+      const trimmedEmail = form.email.trim();
+      if (trimmedEmail && trimmedEmail !== (profile.email ?? "")) patch.email = trimmedEmail;
+      if (form.display_name.trim() !== (profile.display_name ?? "")) patch.display_name = form.display_name.trim() || null;
+      if ((form.account_type || null) !== (profile.account_type ?? null)) patch.account_type = form.account_type || null;
+      if ((form.slug.trim() || null) !== (profile.slug ?? null)) patch.slug = form.slug.trim() || null;
+      if (form.password) patch.password = form.password;
+
+      if (Object.keys(patch).length === 1) {
+        toast.info("Nothing to update");
+        setSaving(false);
+        return;
+      }
+      await adminUpdateUser({ data: patch });
+      onSaved({
+        id: profile.id,
+        email: patch.email ?? profile.email,
+        display_name: patch.display_name ?? profile.display_name,
+        account_type: patch.account_type ?? profile.account_type,
+        slug: patch.slug ?? profile.slug,
+      });
+      toast.success("User updated");
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update user");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit user</DialogTitle>
+          <DialogDescription>Update profile details for this account.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3">
+          <div>
+            <Label htmlFor="eu-email">Email</Label>
+            <Input id="eu-email" type="email" value={form.email}
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="eu-name">Display name</Label>
+            <Input id="eu-name" value={form.display_name}
+              onChange={(e) => setForm((f) => ({ ...f, display_name: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="eu-type">Account type</Label>
+            <select
+              id="eu-type"
+              value={form.account_type}
+              onChange={(e) => setForm((f) => ({ ...f, account_type: e.target.value }))}
+              className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            >
+              <option value="">— none —</option>
+              {ACCOUNT_TYPE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="eu-slug">Public slug</Label>
+            <Input id="eu-slug" value={form.slug} placeholder="e.g. jane-doe"
+              onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="eu-password">New password (optional)</Label>
+            <Input id="eu-password" type="text" autoComplete="off" minLength={8} value={form.password}
+              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+              placeholder="Leave blank to keep existing" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving}>{saving ? "Saving…" : "Save changes"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
