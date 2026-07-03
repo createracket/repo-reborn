@@ -1,0 +1,1 @@
+CREATE POLICY "Admins can view all roster members" ON public.roster_members FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'));
