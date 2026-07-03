@@ -783,12 +783,7 @@ function DashboardPage() {
                               </div>
                             )}
                           </div>
-                          <div className="flex items-start justify-between gap-2">
-                            <h3 className="truncate text-sm font-medium leading-tight">{ex.title}</h3>
-                            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
-                              Example
-                            </span>
-                          </div>
+                          <h3 className="truncate text-sm font-medium leading-tight">{ex.title}</h3>
                           {ex.description ? (
                             <p className="text-sm text-muted-foreground line-clamp-2">
                               {ex.description}
