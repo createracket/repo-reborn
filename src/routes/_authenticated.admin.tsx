@@ -248,7 +248,10 @@ function AdminPage() {
               onCampaignUpdated={(id, patch) =>
                 setCampaigns((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } as CampaignBrief : r)))
               }
+              onLeadDeleted={(id) => setLeadBriefs((rows) => rows.filter((r) => r.id !== id))}
+              onCampaignDeleted={(id) => setCampaigns((rows) => rows.filter((r) => r.id !== id))}
             />
+
           </TabsContent>
 
 
