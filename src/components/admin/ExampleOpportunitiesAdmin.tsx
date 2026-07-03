@@ -106,7 +106,7 @@ export function ExampleOpportunitiesAdmin() {
                   <div className="w-32 shrink-0 space-y-2">
                     <div
                       className="overflow-hidden rounded-md border border-border/60 bg-muted/40"
-                      style={{ width: 128, aspectRatio: "1" }}
+                      style={{ width: 128, aspectRatio: "9 / 16" }}
                     >
                       {row.image_url ? (
                         <img src={row.image_url} alt="" className="size-full object-cover" />
