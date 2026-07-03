@@ -47,11 +47,12 @@ type LeadBrief = {
   collaboration_types: string[]; target_audience: string | null;
   contact_email: string; contact_name: string | null; company: string | null;
   status: string;
+  linked_roster_id: string | null;
 };
 type ContactMsg = { id: string; created_at: string; name: string; email: string; message: string; handled: boolean };
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
 type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null };
-type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null; published: boolean; published_at: string | null };
+type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null; published: boolean; published_at: string | null; linked_roster_id: string | null };
 
 type Spotlight = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
