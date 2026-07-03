@@ -474,27 +474,6 @@ function RosterListView({
           <CardDescription>Each roster plans one campaign brief.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <Label htmlFor="owner-filter" className="text-xs uppercase tracking-wide text-muted-foreground">
-              View
-            </Label>
-            <Select value={ownerFilter} onValueChange={setOwnerFilter}>
-              <SelectTrigger id="owner-filter" className="h-9 w-[240px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="mine">My rosters</SelectItem>
-                <SelectItem value="all">All rosters</SelectItem>
-                {ownerOptions
-                  .filter((o) => o.id !== userId)
-                  .map((o) => (
-                    <SelectItem key={o.id} value={o.id}>
-                      {o.label}'s roster
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
           {visibleRosters.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {rosters.length === 0
