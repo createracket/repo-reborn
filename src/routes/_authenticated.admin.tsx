@@ -1163,8 +1163,14 @@ function SpotlightForm({
 
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
   const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
-  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube" | "spotify">(null);
+  const scrapeApple = useServerFn(scrapeAppleMusicArtist);
+  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube" | "spotify" | "apple">(null);
   const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number; spotify?: number }>({});
+  const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
+  const [flagState, setFlagState] = useState<{ flagged: boolean; reason: string | null }>(() => ({
+    flagged: !!editData?.flagged_streaming_mismatch,
+    reason: editData?.flagged_streaming_reason ?? null,
+  }));
 
   async function syncSocial(platform: "instagram" | "tiktok" | "youtube") {
     const raw = String(form[platform] || "").trim();
