@@ -107,7 +107,7 @@ function DashboardPage() {
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean }>>([]);
   const [loading, setLoading] = useState(true);
-  const [rosterFilter, setRosterFilter] = useState<string>("all");
+  const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
   const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -898,7 +898,7 @@ function DashboardPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All rosters</SelectItem>
+                        
                         <SelectItem value="mine">My saved roster</SelectItem>
                         {myRosters.map((r) => (
                           <SelectItem key={r.id} value={r.id}>{r.title}</SelectItem>
