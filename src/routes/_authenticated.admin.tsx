@@ -53,7 +53,7 @@ type CampaignBrief = { id: string; created_at: string; title: string; descriptio
 
 type Spotlight = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
-  published: boolean; created_at: string; links?: Record<string, string> | null;
+  published: boolean; dashboard_visible: boolean; created_at: string; links?: Record<string, string> | null;
 };
 
 type SpotlightInterest = {
