@@ -612,60 +612,58 @@ function DashboardPage() {
                     ))}
                   </ul>
                 )}
+
+                {/* Suggested matches (merged in) */}
+                <div className="mt-8 border-t border-border/60 pt-6">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="size-5 text-primary" />
+                    <h3 className="font-display text-xl">Suggested matches</h3>
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    A taste of who's on Create Racket — sample artists and brands to give you a feel
+                    for the kind of matches we'll surface as the community grows.
+                  </p>
+                  <div className="mt-4">
+                    {loading ? (
+                      <p className="text-sm text-muted-foreground">Loading…</p>
+                    ) : community.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No community members yet.</p>
+                    ) : (
+                      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        {community.map((m) => (
+                          <li
+                            key={m.id}
+                            className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="size-10 overflow-hidden rounded-full bg-muted">
+                                {m.avatar_url ? (
+                                  <img src={m.avatar_url} alt="" className="size-full object-cover" />
+                                ) : null}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="truncate font-medium">{m.display_name}</div>
+                                <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                                  {m.account_type}
+                                </div>
+                              </div>
+                            </div>
+                            {m.tagline ? (
+                              <p className="text-sm text-muted-foreground line-clamp-2">{m.tagline}</p>
+                            ) : null}
+                            {m.location ? (
+                              <p className="text-xs text-muted-foreground">{m.location}</p>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* SUGGESTED MATCHES (community) */}
-          <div className="lg:col-span-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-display text-2xl flex items-center gap-2">
-                  <Sparkles className="size-5 text-primary" /> Suggested matches
-                </CardTitle>
-                <CardDescription>
-                  A taste of who's on Create Racket — sample artists and brands to give you a feel
-                  for the kind of matches we'll surface as the community grows.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : community.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No community members yet.</p>
-                ) : (
-                  <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    {community.map((m) => (
-                      <li
-                        key={m.id}
-                        className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="size-10 overflow-hidden rounded-full bg-muted">
-                            {m.avatar_url ? (
-                              <img src={m.avatar_url} alt="" className="size-full object-cover" />
-                            ) : null}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="truncate font-medium">{m.display_name}</div>
-                            <div className="text-xs uppercase tracking-wider text-muted-foreground">
-                              {m.account_type}
-                            </div>
-                          </div>
-                        </div>
-                        {m.tagline ? (
-                          <p className="text-sm text-muted-foreground line-clamp-2">{m.tagline}</p>
-                        ) : null}
-                        {m.location ? (
-                          <p className="text-xs text-muted-foreground">{m.location}</p>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </main>
       <SiteFooter />
