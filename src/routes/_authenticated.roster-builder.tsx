@@ -640,6 +640,7 @@ function RosterDetailView({
   );
   const [savingMeta, setSavingMeta] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
+  const [categoryFilter, setCategoryFilter] = useState<"all" | CategoryValue>("all");
 
   useEffect(() => {
     setTitle(roster.title);
