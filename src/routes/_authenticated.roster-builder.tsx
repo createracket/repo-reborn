@@ -984,7 +984,8 @@ function RosterDetailView({
                 </CardTitle>
                 <CardDescription>
                   Drag to reorder. Combined reach {formatCount(totalFollowers)}
-                  {totalBudget > 0 ? ` · Total budget £${totalBudget.toLocaleString()}` : ""}.
+                  {roster.est_engagement_pct != null ? ` · Est. engagement ${roster.est_engagement_pct}%` : ""}
+                  {totalBudget > 0 ? ` · Total budget £${totalBudget.toLocaleString()}` : ""}. On-hold creators are excluded from totals.
                 </CardDescription>
               </div>
             </div>
