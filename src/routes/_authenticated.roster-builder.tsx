@@ -148,6 +148,7 @@ const STATUS_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "briefed", label: "Briefed" },
   { value: "contracting", label: "Contracting" },
   { value: "live", label: "Live" },
+  { value: "hold", label: "Hold" },
 ];
 
 const STATUS_LABEL: Record<string, string> = Object.fromEntries(
@@ -162,7 +163,9 @@ const STATUS_BADGE: Record<string, string> = {
   briefed: "border-chart-5/40 bg-chart-5/10 text-chart-5",
   contracting: "border-purple/40 bg-purple/10 text-purple",
   live: "border-pink-accent/40 bg-pink-accent/10 text-pink-accent",
+  hold: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
 };
+
 
 type CategoryValue = "musician" | "ugc" | "egc" | "music_fan" | "editorial" | "artist_exchange";
 const CATEGORY_OPTIONS: Array<{ value: CategoryValue; label: string; badge: string }> = [
