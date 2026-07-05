@@ -91,6 +91,7 @@ type Roster = {
   header_image_url: string | null;
   client_email: string | null;
   brand_email: string | null;
+  est_engagement_pct: number | null;
 };
 
 type Brief = {
@@ -633,6 +634,9 @@ function RosterDetailView({
   const [headerImageUrl, setHeaderImageUrl] = useState(roster.header_image_url ?? "");
   const [clientEmail, setClientEmail] = useState("");
   const [brandEmail, setBrandEmail] = useState("");
+  const [estEngagement, setEstEngagement] = useState(
+    roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
+  );
   const [savingMeta, setSavingMeta] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
 
@@ -640,6 +644,9 @@ function RosterDetailView({
     setTitle(roster.title);
     setDescription(roster.description ?? "");
     setHeaderImageUrl(roster.header_image_url ?? "");
+    setEstEngagement(
+      roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
+    );
     // brand_email/client_email are not selectable on the base table by the
     // client for security; fetch them via the owner/admin-only RPC.
     setClientEmail("");
@@ -655,13 +662,14 @@ function RosterDetailView({
         setBrandEmail(row.brand_email ?? "");
       }
     })();
-  }, [roster.id, roster.title, roster.description, roster.header_image_url]);
+  }, [roster.id, roster.title, roster.description, roster.header_image_url, roster.est_engagement_pct]);
 
   useEffect(() => {
     setOrderedItems(items);
   }, [items]);
 
-  const totalFollowers = orderedItems.reduce(
+  const activeOrdered = orderedItems.filter((it) => it.status !== "hold");
+  const totalFollowers = activeOrdered.reduce(
     (a, it) =>
       a +
       (it.instagram_followers ?? 0) +
@@ -670,12 +678,13 @@ function RosterDetailView({
       (it.spotify_monthly_listens ?? 0),
     0,
   );
-  const totalBudget = orderedItems.reduce((a, it) => a + (it.budget ?? 0), 0);
+  const totalBudget = activeOrdered.reduce((a, it) => a + (it.budget ?? 0), 0);
 
   const linkedBrief = roster.brief_id ? briefs.find((b) => b.id === roster.brief_id) ?? null : null;
 
   async function saveMeta() {
     setSavingMeta(true);
+    const engParsed = estEngagement.trim() === "" ? null : Number(estEngagement);
     const { error } = await supabase
       .from("rosters")
       .update({
@@ -684,6 +693,7 @@ function RosterDetailView({
         header_image_url: headerImageUrl.trim() || null,
         client_email: clientEmail.trim().toLowerCase() || null,
         brand_email: brandEmail.trim().toLowerCase() || null,
+        est_engagement_pct: engParsed != null && !Number.isNaN(engParsed) ? engParsed : null,
       } as never)
       .eq("id", roster.id);
     setSavingMeta(false);
@@ -927,6 +937,22 @@ function RosterDetailView({
             <p className="text-xs text-muted-foreground">
               Assigned client/brand emails will see this roster on their dashboard once they sign in with that email.
             </p>
+            <div className="space-y-2">
+              <Label>Est. engagement (%)</Label>
+              <Input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0"
+                max="100"
+                value={estEngagement}
+                onChange={(e) => setEstEngagement(e.target.value)}
+                placeholder="e.g. 3.5"
+              />
+              <p className="text-xs text-muted-foreground">
+                Manual value shown next to Total followers and Est. reach on the public roster page.
+              </p>
+            </div>
             <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
               <div>
                 <div className="text-sm font-medium">Hide prospect tags</div>
@@ -958,7 +984,8 @@ function RosterDetailView({
                 </CardTitle>
                 <CardDescription>
                   Drag to reorder. Combined reach {formatCount(totalFollowers)}
-                  {totalBudget > 0 ? ` · Total budget £${totalBudget.toLocaleString()}` : ""}.
+                  {roster.est_engagement_pct != null ? ` · Est. engagement ${roster.est_engagement_pct}%` : ""}
+                  {totalBudget > 0 ? ` · Total budget £${totalBudget.toLocaleString()}` : ""}. On-hold creators are excluded from totals.
                 </CardDescription>
               </div>
             </div>

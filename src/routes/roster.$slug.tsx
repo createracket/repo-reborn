@@ -18,6 +18,7 @@ type PublicRoster = {
   published_at: string | null;
   header_image_url: string | null;
   hide_prospect_tags: boolean;
+  est_engagement_pct: number | null;
 };
 
 type PublicItem = {
@@ -108,7 +109,7 @@ function PublicRosterPage() {
       const { data: r } = await (supabase as any)
         .from("public_rosters")
         .select(
-          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags",
+          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags, est_engagement_pct",
         )
         .eq("slug", slug)
         .eq("published", true)
@@ -160,16 +161,18 @@ function PublicRosterPage() {
     );
   }
 
-  const totalFollowers = items.reduce(
-    (acc, it) =>
-      acc +
-      (it.instagram_followers ?? 0) +
-      (it.tiktok_followers ?? 0) +
-      (it.youtube_subscribers ?? 0) +
-      (it.spotify_monthly_listens ?? 0) +
-      (it.apple_music_followers ?? 0),
-    0,
-  );
+  const totalFollowers = items
+    .filter((it) => it.status !== "hold")
+    .reduce(
+      (acc, it) =>
+        acc +
+        (it.instagram_followers ?? 0) +
+        (it.tiktok_followers ?? 0) +
+        (it.youtube_subscribers ?? 0) +
+        (it.spotify_monthly_listens ?? 0) +
+        (it.apple_music_followers ?? 0),
+      0,
+    );
   
 
   return (
@@ -201,28 +204,44 @@ function PublicRosterPage() {
           </p>
         )}
 
-        {totalFollowers > 0 && (
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <Card>
-              <CardContent className="p-5">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Total followers
-                </p>
-                <p className="mt-1 font-display text-2xl">
-                  {formatCount(totalFollowers)}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Est. reach
-                </p>
-                <p className="mt-1 font-display text-2xl">
-                  {formatCount(Math.round(totalFollowers * 0.4))}
-                </p>
-              </CardContent>
-            </Card>
+        {(totalFollowers > 0 || roster.est_engagement_pct != null) && (
+          <div className={`mt-6 grid gap-3 sm:grid-cols-2 ${roster.est_engagement_pct != null ? "lg:grid-cols-3" : ""}`}>
+            {totalFollowers > 0 && (
+              <>
+                <Card>
+                  <CardContent className="p-5">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Total followers
+                    </p>
+                    <p className="mt-1 font-display text-2xl">
+                      {formatCount(totalFollowers)}
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-5">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Est. reach
+                    </p>
+                    <p className="mt-1 font-display text-2xl">
+                      {formatCount(Math.round(totalFollowers * 0.4))}
+                    </p>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+            {roster.est_engagement_pct != null && (
+              <Card>
+                <CardContent className="p-5">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Est. engagement
+                  </p>
+                  <p className="mt-1 font-display text-2xl">
+                    {roster.est_engagement_pct}%
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 

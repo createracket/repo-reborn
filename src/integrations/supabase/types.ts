@@ -1124,6 +1124,7 @@ export type Database = {
           client_email: string | null
           created_at: string
           description: string | null
+          est_engagement_pct: number | null
           header_image_url: string | null
           hide_prospect_tags: boolean
           id: string
@@ -1140,6 +1141,7 @@ export type Database = {
           client_email?: string | null
           created_at?: string
           description?: string | null
+          est_engagement_pct?: number | null
           header_image_url?: string | null
           hide_prospect_tags?: boolean
           id?: string
@@ -1156,6 +1158,7 @@ export type Database = {
           client_email?: string | null
           created_at?: string
           description?: string | null
+          est_engagement_pct?: number | null
           header_image_url?: string | null
           hide_prospect_tags?: boolean
           id?: string
@@ -1457,6 +1460,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
+          est_engagement_pct: number | null
           header_image_url: string | null
           hide_prospect_tags: boolean | null
           id: string | null
@@ -1470,6 +1474,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
+          est_engagement_pct?: number | null
           header_image_url?: string | null
           hide_prospect_tags?: boolean | null
           id?: string | null
@@ -1483,6 +1488,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
+          est_engagement_pct?: number | null
           header_image_url?: string | null
           hide_prospect_tags?: boolean | null
           id?: string | null
