@@ -937,6 +937,22 @@ function RosterDetailView({
             <p className="text-xs text-muted-foreground">
               Assigned client/brand emails will see this roster on their dashboard once they sign in with that email.
             </p>
+            <div className="space-y-2">
+              <Label>Est. engagement (%)</Label>
+              <Input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0"
+                max="100"
+                value={estEngagement}
+                onChange={(e) => setEstEngagement(e.target.value)}
+                placeholder="e.g. 3.5"
+              />
+              <p className="text-xs text-muted-foreground">
+                Manual value shown next to Total followers and Est. reach on the public roster page.
+              </p>
+            </div>
             <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
               <div>
                 <div className="text-sm font-medium">Hide prospect tags</div>
