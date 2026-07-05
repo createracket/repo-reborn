@@ -161,16 +161,18 @@ function PublicRosterPage() {
     );
   }
 
-  const totalFollowers = items.reduce(
-    (acc, it) =>
-      acc +
-      (it.instagram_followers ?? 0) +
-      (it.tiktok_followers ?? 0) +
-      (it.youtube_subscribers ?? 0) +
-      (it.spotify_monthly_listens ?? 0) +
-      (it.apple_music_followers ?? 0),
-    0,
-  );
+  const totalFollowers = items
+    .filter((it) => it.status !== "hold")
+    .reduce(
+      (acc, it) =>
+        acc +
+        (it.instagram_followers ?? 0) +
+        (it.tiktok_followers ?? 0) +
+        (it.youtube_subscribers ?? 0) +
+        (it.spotify_monthly_listens ?? 0) +
+        (it.apple_music_followers ?? 0),
+      0,
+    );
   
 
   return (
