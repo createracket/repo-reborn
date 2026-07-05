@@ -644,6 +644,9 @@ function RosterDetailView({
     setTitle(roster.title);
     setDescription(roster.description ?? "");
     setHeaderImageUrl(roster.header_image_url ?? "");
+    setEstEngagement(
+      roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
+    );
     // brand_email/client_email are not selectable on the base table by the
     // client for security; fetch them via the owner/admin-only RPC.
     setClientEmail("");
