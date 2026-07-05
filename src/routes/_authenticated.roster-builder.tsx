@@ -1163,12 +1163,14 @@ function RosterItemRow({ item, onRemove, onChanged, dragHandleProps }: { item: R
     ["TT", item.tiktok_followers, item.tiktok_url],
     ["YT", item.youtube_subscribers, item.youtube_url],
     ["Spotify", item.spotify_monthly_listens, item.spotify_url],
+    ["Apple", item.apple_music_followers, item.apple_music_url],
   ];
   const totalReach =
     (item.instagram_followers ?? 0) +
     (item.tiktok_followers ?? 0) +
     (item.youtube_subscribers ?? 0) +
-    (item.spotify_monthly_listens ?? 0);
+    (item.spotify_monthly_listens ?? 0) +
+    (item.apple_music_followers ?? 0);
   const initials = item.name
     .split(/\s+/)
     .map((s) => s[0])
