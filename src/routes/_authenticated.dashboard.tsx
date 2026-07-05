@@ -1,12 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks, Rocket, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks, Rocket, ChevronLeft, ChevronRight, Check, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import {
   calculateVibeScore,
@@ -89,6 +97,7 @@ type Opportunity = {
   transparency?: string | null;
   published_at: string | null;
   created_at: string;
+  brief_source: "user" | "lead";
 };
 
 function DashboardPage() {
@@ -325,13 +334,13 @@ function DashboardPage() {
           ? (supabase as any).from("lead_briefs_shared").select("id, title, description, budget, currency, transparency, created_at").in("id", shareLeadIds)
           : Promise.resolve({ data: [] as any[] }),
       ]);
-      const publishedRows = ((opps as any[]) ?? []) as Opportunity[];
+      const publishedRows = (((opps as any[]) ?? []) as any[]).map((r) => ({ ...r, brief_source: "user" as const })) as Opportunity[];
       const sharedRows: Opportunity[] = [
-        ...(((sharedUser as any).data ?? []) as any[]).map((r) => ({ ...r })),
-        ...(((sharedLead as any).data ?? []) as any[]).map((r) => ({ ...r, published_at: null })),
+        ...(((sharedUser as any).data ?? []) as any[]).map((r) => ({ ...r, brief_source: "user" as const })),
+        ...(((sharedLead as any).data ?? []) as any[]).map((r) => ({ ...r, published_at: null, brief_source: "lead" as const })),
       ];
       const dedup = new Map<string, Opportunity>();
-      [...publishedRows, ...sharedRows].forEach((o) => dedup.set(o.id, o));
+      [...publishedRows, ...sharedRows].forEach((o) => dedup.set(`${o.brief_source}:${o.id}`, o));
       setOpportunities(Array.from(dedup.values()).sort((a, b) => (a.published_at ?? a.created_at) < (b.published_at ?? b.created_at) ? 1 : -1));
 
       const { data: exOpps } = await supabase
@@ -715,37 +724,7 @@ function DashboardPage() {
                 ) : opportunities.length === 0 ? null : (
                   <ul className="grid gap-3 md:grid-cols-2">
                     {opportunities.map((o) => (
-                      <li
-                        key={o.id}
-                        className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <h3 className="font-medium leading-tight">{o.title}</h3>
-                          {o.budget ? (
-                            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                              <BudgetDisplay amount={o.budget} currency={o.currency} />
-                            </span>
-                          ) : null}
-                        </div>
-                        {o.transparency ? (
-                          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                            {transparencyLabel(o.transparency)}
-                          </div>
-                        ) : null}
-                        <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">
-                          {o.description}
-                        </p>
-                        <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
-                          <span>
-                            Posted {new Date(o.published_at ?? o.created_at).toLocaleDateString()}
-                          </span>
-                          <Button asChild size="sm" variant="ghost" className="h-7 px-2">
-                            <Link to="/contact">
-                              Express interest <ArrowRight className="ml-1 size-3" />
-                            </Link>
-                          </Button>
-                        </div>
-                      </li>
+                      <OpportunityCard key={`${o.brief_source}:${o.id}`} opp={o} />
                     ))}
                   </ul>
                 )}
@@ -1238,5 +1217,138 @@ function SetupChecklist({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function OpportunityCard({ opp }: { opp: Opportunity }) {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    if (!open || checked) return;
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) {
+        setChecked(true);
+        return;
+      }
+      const { data } = await supabase
+        .from("brief_interests" as any)
+        .select("id")
+        .eq("brief_id", opp.id)
+        .eq("brief_source", opp.brief_source)
+        .eq("user_id", u.user.id)
+        .maybeSingle();
+      if (data) setRegistered(true);
+      setChecked(true);
+    })();
+  }, [open, checked, opp.id, opp.brief_source]);
+
+  async function handleRegister() {
+    setRegistering(true);
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) {
+      toast.info("Sign in to express interest");
+      navigate({ to: "/login" });
+      return;
+    }
+    const { error } = await (supabase as any)
+      .from("brief_interests")
+      .insert({ brief_id: opp.id, brief_source: opp.brief_source, user_id: u.user.id });
+    setRegistering(false);
+    if (error && !error.message?.toLowerCase().includes("duplicate")) {
+      toast.error(error.message);
+      return;
+    }
+    setRegistered(true);
+    toast.success("Interest registered — we'll be in touch.");
+  }
+
+  const posted = new Date(opp.published_at ?? opp.created_at).toLocaleDateString();
+
+  return (
+    <>
+      <li className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-medium leading-tight">{opp.title}</h3>
+          {opp.budget ? (
+            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+              <BudgetDisplay amount={opp.budget} currency={opp.currency} />
+            </span>
+          ) : null}
+        </div>
+        {opp.transparency ? (
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            {transparencyLabel(opp.transparency)}
+          </div>
+        ) : null}
+        <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">
+          {opp.description}
+        </p>
+        <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+          <span>Posted {posted}</span>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-7 px-3"
+            onClick={() => setOpen(true)}
+          >
+            <Eye className="mr-1 size-3" /> Suss the vibe
+          </Button>
+        </div>
+      </li>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl leading-tight pr-6">
+              {opp.title}
+            </DialogTitle>
+            <DialogDescription asChild>
+              <div className="flex flex-wrap items-center gap-2 pt-2">
+                {opp.budget ? (
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    <BudgetDisplay amount={opp.budget} currency={opp.currency} />
+                  </span>
+                ) : null}
+                {opp.transparency ? (
+                  <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {transparencyLabel(opp.transparency)}
+                  </span>
+                ) : null}
+                <span className="text-[11px] text-muted-foreground">Posted {posted}</span>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-2 space-y-3 text-sm">
+            <p className="whitespace-pre-wrap leading-relaxed text-foreground/90">
+              {opp.description}
+            </p>
+          </div>
+
+          <DialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={handleRegister}
+              disabled={registering || registered}
+            >
+              {registered ? (
+                <><Check className="mr-1.5 size-4" /> Interest registered</>
+              ) : registering ? (
+                "Registering…"
+              ) : (
+                "Express interest"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
