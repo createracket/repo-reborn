@@ -35,6 +35,30 @@ export type Database = {
         }
         Relationships: []
       }
+      brief_interests: {
+        Row: {
+          brief_id: string
+          brief_source: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          brief_id: string
+          brief_source: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          brief_id?: string
+          brief_source?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       campaign_brief_shares: {
         Row: {
           brief_id: string
