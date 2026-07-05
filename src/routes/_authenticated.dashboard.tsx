@@ -1219,3 +1219,136 @@ function SetupChecklist({
     </Card>
   );
 }
+
+function OpportunityCard({ opp }: { opp: Opportunity }) {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    if (!open || checked) return;
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) {
+        setChecked(true);
+        return;
+      }
+      const { data } = await supabase
+        .from("brief_interests" as any)
+        .select("id")
+        .eq("brief_id", opp.id)
+        .eq("brief_source", opp.brief_source)
+        .eq("user_id", u.user.id)
+        .maybeSingle();
+      if (data) setRegistered(true);
+      setChecked(true);
+    })();
+  }, [open, checked, opp.id, opp.brief_source]);
+
+  async function handleRegister() {
+    setRegistering(true);
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) {
+      toast.info("Sign in to express interest");
+      navigate({ to: "/login" });
+      return;
+    }
+    const { error } = await (supabase as any)
+      .from("brief_interests")
+      .insert({ brief_id: opp.id, brief_source: opp.brief_source, user_id: u.user.id });
+    setRegistering(false);
+    if (error && !error.message?.toLowerCase().includes("duplicate")) {
+      toast.error(error.message);
+      return;
+    }
+    setRegistered(true);
+    toast.success("Interest registered — we'll be in touch.");
+  }
+
+  const posted = new Date(opp.published_at ?? opp.created_at).toLocaleDateString();
+
+  return (
+    <>
+      <li className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-medium leading-tight">{opp.title}</h3>
+          {opp.budget ? (
+            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+              <BudgetDisplay amount={opp.budget} currency={opp.currency} />
+            </span>
+          ) : null}
+        </div>
+        {opp.transparency ? (
+          <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            {transparencyLabel(opp.transparency)}
+          </div>
+        ) : null}
+        <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">
+          {opp.description}
+        </p>
+        <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+          <span>Posted {posted}</span>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-7 px-3"
+            onClick={() => setOpen(true)}
+          >
+            <Eye className="mr-1 size-3" /> Suss the vibe
+          </Button>
+        </div>
+      </li>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl leading-tight pr-6">
+              {opp.title}
+            </DialogTitle>
+            <DialogDescription asChild>
+              <div className="flex flex-wrap items-center gap-2 pt-2">
+                {opp.budget ? (
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    <BudgetDisplay amount={opp.budget} currency={opp.currency} />
+                  </span>
+                ) : null}
+                {opp.transparency ? (
+                  <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {transparencyLabel(opp.transparency)}
+                  </span>
+                ) : null}
+                <span className="text-[11px] text-muted-foreground">Posted {posted}</span>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-2 space-y-3 text-sm">
+            <p className="whitespace-pre-wrap leading-relaxed text-foreground/90">
+              {opp.description}
+            </p>
+          </div>
+
+          <DialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={handleRegister}
+              disabled={registering || registered}
+            >
+              {registered ? (
+                <><Check className="mr-1.5 size-4" /> Interest registered</>
+              ) : registering ? (
+                "Registering…"
+              ) : (
+                "Express interest"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
