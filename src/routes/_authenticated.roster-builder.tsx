@@ -634,6 +634,9 @@ function RosterDetailView({
   const [headerImageUrl, setHeaderImageUrl] = useState(roster.header_image_url ?? "");
   const [clientEmail, setClientEmail] = useState("");
   const [brandEmail, setBrandEmail] = useState("");
+  const [estEngagement, setEstEngagement] = useState(
+    roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
+  );
   const [savingMeta, setSavingMeta] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
 
