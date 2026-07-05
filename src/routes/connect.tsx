@@ -122,6 +122,14 @@ function ConnectPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!accountKind) {
+      toast.error("Let us know if you're a brand or an artist");
+      return;
+    }
+    if (!campaignKind) {
+      toast.error("Pick the type of campaign you'd like to run");
+      return;
+    }
     const fd = new FormData(e.currentTarget);
     const budgetRaw = fd.get("budget")?.toString().trim();
 
@@ -131,6 +139,12 @@ function ConnectPage() {
           otherType.trim() ? `Something else: ${otherType.trim()}` : "Something else",
         ]
       : types;
+
+    const accountLabel = ACCOUNT_OPTIONS.find((o) => o.value === accountKind)?.label ?? accountKind;
+    const campaignLabel = CAMPAIGN_OPTIONS.find((o) => o.value === campaignKind)?.label ?? campaignKind;
+    const rawExtra = fd.get("additional_info")?.toString().trim() ?? "";
+    const preface = `Account type: ${accountLabel}\nCampaign type: ${campaignLabel}`;
+    const combinedExtra = rawExtra ? `${preface}\n\n${rawExtra}` : preface;
 
     const parsed = briefSchema.safeParse({
       title: fd.get("title")?.toString() ?? "",
@@ -145,7 +159,7 @@ function ConnectPage() {
       contact_email: fd.get("contact_email")?.toString() ?? "",
       collaboration_types: finalTypes,
       core_values: values,
-      additional_info: fd.get("additional_info")?.toString() || undefined,
+      additional_info: combinedExtra,
     });
 
     if (!parsed.success) {
