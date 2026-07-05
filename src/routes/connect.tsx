@@ -347,6 +347,87 @@ function ConnectPage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-8">
+                  {/* Section 0a — Who's asking */}
+                  <section className="space-y-4">
+                    <div>
+                      <h3 className="font-display text-lg">Who's asking?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Tell us which side of the table you're on so we can tailor the brief.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      {ACCOUNT_OPTIONS.map((opt) => {
+                        const active = accountKind === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setAccountKind(opt.value)}
+                            className={`rounded-lg border p-4 text-left transition ${
+                              active
+                                ? "border-primary bg-primary/10 ring-2 ring-primary/40"
+                                : "border-border/60 hover:bg-muted/40"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-display text-base">{opt.label}</span>
+                              {active && <Check className="size-4 text-primary" />}
+                            </div>
+                            <p className="mt-1 text-sm text-muted-foreground">{opt.desc}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  {/* Section 0b — Campaign type */}
+                  <section className="space-y-4">
+                    <div>
+                      <h3 className="font-display text-lg">What kind of campaign?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Pick the shape that fits best — you can refine the details below.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                      {CAMPAIGN_OPTIONS.map((opt) => {
+                        const active = campaignKind === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setCampaignKind(opt.value)}
+                            className={`rounded-lg border p-4 text-left transition ${
+                              active
+                                ? "border-primary bg-primary/10 ring-2 ring-primary/40"
+                                : "border-border/60 hover:bg-muted/40"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-display text-base">{opt.label}</span>
+                              {active ? (
+                                <Check className="size-4 text-primary" />
+                              ) : (
+                                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                                  {opt.tag}
+                                </span>
+                              )}
+                            </div>
+                            {active && (
+                              <span className="mt-1 block text-[10px] uppercase tracking-wider text-muted-foreground">
+                                {opt.tag}
+                              </span>
+                            )}
+                            <p className="mt-2 text-sm text-muted-foreground">{opt.desc}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+
+                  <Separator />
+
                   {/* Section 1 */}
                   <section className="space-y-6">
                     <div>
