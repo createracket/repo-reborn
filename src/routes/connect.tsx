@@ -65,7 +65,7 @@ type AccountKind = "brand" | "artist";
 type CampaignKind = "seed" | "endorse" | "partner";
 
 const ACCOUNT_OPTIONS: Array<{ value: AccountKind; label: string; desc: string }> = [
-  { value: "brand", label: "Brand", desc: "I'm planning a campaign and want to collab with cool creators, including musicians and fans." },
+  { value: "brand", label: "Brand", desc: "I'm planning a campaign and want to collab with cool creators, including musicians." },
   { value: "artist", label: "Artist", desc: "I'm an artist looking to partner with brands and/or engage more fans directly." },
 ];
 
