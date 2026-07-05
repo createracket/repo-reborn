@@ -266,8 +266,8 @@ function PublicRosterPage() {
         )}
 
         {(() => {
-          const activeItems = items.filter((it) => it.status !== "hold");
-          const archivedItems = items.filter((it) => it.status === "hold");
+          const activeItems = items.filter((it) => it.status !== "hold" && (categoryFilter === "all" || it.category === categoryFilter));
+          const archivedItems = items.filter((it) => it.status === "hold" && (categoryFilter === "all" || it.category === categoryFilter));
 
           const renderItem = (it: PublicItem) => {
             const stats: Array<[string, number | null, string | null]> = [
@@ -418,7 +418,25 @@ function PublicRosterPage() {
 
           return (
             <>
-              <section className="mt-12 space-y-3">
+              <div className="mt-10 flex items-center justify-end gap-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Filter className="size-4" />
+                  <span>Filter</span>
+                </div>
+                <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}>
+                  <SelectTrigger className="w-[180px] text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FILTER_OPTIONS.map((f) => (
+                      <SelectItem key={f.value} value={f.value}>
+                        {f.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <section className="mt-4 space-y-3">
                 {items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No creators on this roster yet.</p>
                 ) : activeItems.length === 0 ? (
