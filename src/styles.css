@@ -133,6 +133,14 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    /* Prevent accidental horizontal scroll on mobile */
+    overflow-x: hidden;
+  }
+
+  html {
+    /* Respect iOS safe areas + stop iOS text auto-inflation on rotate */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   .font-display, .font-headline {
