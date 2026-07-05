@@ -1,12 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks, Rocket, ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, Users, ClipboardList, UserCircle2, ArrowRight, Megaphone, ListChecks, Rocket, ChevronLeft, ChevronRight, Check, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import {
   calculateVibeScore,
