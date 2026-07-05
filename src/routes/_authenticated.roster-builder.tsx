@@ -18,6 +18,7 @@ import {
   BadgeCheck,
   GripVertical,
   RefreshCw,
+  Filter,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
