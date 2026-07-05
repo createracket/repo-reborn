@@ -295,7 +295,7 @@ function PublicRosterPage() {
                           </Badge>
                           {it.category && (
                             <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                              {it.category}
+                              {CATEGORY_LABEL[it.category] ?? it.category}
                             </span>
                           )}
                         </div>
