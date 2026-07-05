@@ -59,6 +59,15 @@ const STATUS_LABEL: Record<string, string> = {
   hold: "Hold",
 };
 
+const CATEGORY_LABEL: Record<string, string> = {
+  musician: "Musician",
+  ugc: "UGC",
+  egc: "EGC",
+  music_fan: "Music Fan",
+  editorial: "Editorial",
+  artist_exchange: "Artist Exchange",
+};
+
 const STATUS_BADGE: Record<string, string> = {
   in_review: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
   approved: "border-primary/40 bg-primary/10 text-primary",
