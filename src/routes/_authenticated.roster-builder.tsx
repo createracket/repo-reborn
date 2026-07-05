@@ -18,6 +18,7 @@ import {
   BadgeCheck,
   GripVertical,
   RefreshCw,
+  Filter,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
@@ -639,6 +640,7 @@ function RosterDetailView({
   );
   const [savingMeta, setSavingMeta] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
+  const [categoryFilter, setCategoryFilter] = useState<"all" | CategoryValue>("all");
 
   useEffect(() => {
     setTitle(roster.title);
@@ -988,6 +990,22 @@ function RosterDetailView({
                   {totalBudget > 0 ? ` · Total budget £${totalBudget.toLocaleString()}` : ""}. On-hold creators are excluded from totals.
                 </CardDescription>
               </div>
+              <div className="flex items-center gap-2">
+                <Filter className="size-4 text-muted-foreground" />
+                <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as "all" | CategoryValue)}>
+                  <SelectTrigger className="w-[160px] text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    {CATEGORY_OPTIONS.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -995,13 +1013,26 @@ function RosterDetailView({
               <p className="text-sm text-muted-foreground">
                 Roster is empty. Add a community profile or a prospective creator from the right.
               </p>
-            ) : (
+            ) : categoryFilter === "all" ? (
               <DraggableRosterList
                 items={orderedItems}
                 onReorder={persistOrder}
                 onRemove={removeItem}
                 onChanged={onChanged}
               />
+            ) : (
+              <ul className="space-y-3">
+                {orderedItems
+                  .filter((it) => it.category === categoryFilter)
+                  .map((it) => (
+                    <RosterItemRow
+                      key={it.id}
+                      item={it}
+                      onRemove={() => removeItem(it.id)}
+                      onChanged={onChanged}
+                    />
+                  ))}
+              </ul>
             )}
           </CardContent>
         </Card>

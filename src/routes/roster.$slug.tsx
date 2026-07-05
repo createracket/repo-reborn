@@ -1,12 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ExternalLink, Users, BadgeCheck, ChevronDown } from "lucide-react";
+import { ExternalLink, Users, BadgeCheck, ChevronDown, Filter } from "lucide-react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 
 type PublicRoster = {
@@ -98,11 +105,24 @@ function formatCount(n: number) {
 }
 
 
+type CategoryFilter = "all" | "musician" | "ugc" | "egc" | "music_fan" | "editorial" | "artist_exchange";
+
+const FILTER_OPTIONS: Array<{ value: CategoryFilter; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "musician", label: "Musician" },
+  { value: "ugc", label: "UGC" },
+  { value: "egc", label: "EGC" },
+  { value: "music_fan", label: "Music Fan" },
+  { value: "editorial", label: "Editorial" },
+  { value: "artist_exchange", label: "Artist Exchange" },
+];
+
 function PublicRosterPage() {
   const { slug } = Route.useParams();
   const [roster, setRoster] = useState<PublicRoster | null>(null);
   const [items, setItems] = useState<PublicItem[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
 
   useEffect(() => {
     (async () => {
@@ -246,8 +266,8 @@ function PublicRosterPage() {
         )}
 
         {(() => {
-          const activeItems = items.filter((it) => it.status !== "hold");
-          const archivedItems = items.filter((it) => it.status === "hold");
+          const activeItems = items.filter((it) => it.status !== "hold" && (categoryFilter === "all" || it.category === categoryFilter));
+          const archivedItems = items.filter((it) => it.status === "hold" && (categoryFilter === "all" || it.category === categoryFilter));
 
           const renderItem = (it: PublicItem) => {
             const stats: Array<[string, number | null, string | null]> = [
@@ -398,7 +418,25 @@ function PublicRosterPage() {
 
           return (
             <>
-              <section className="mt-12 space-y-3">
+              <div className="mt-10 flex items-center justify-end gap-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Filter className="size-4" />
+                  <span>Filter</span>
+                </div>
+                <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}>
+                  <SelectTrigger className="w-[180px] text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FILTER_OPTIONS.map((f) => (
+                      <SelectItem key={f.value} value={f.value}>
+                        {f.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <section className="mt-4 space-y-3">
                 {items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No creators on this roster yet.</p>
                 ) : activeItems.length === 0 ? (
