@@ -217,158 +217,188 @@ function PublicRosterPage() {
           </div>
         )}
 
-        <section className="mt-12 space-y-3">
-          {items.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No creators on this roster yet.</p>
-          ) : (
-            items.map((it) => {
-              const stats: Array<[string, number | null, string | null]> = [
-                ["IG", it.instagram_followers, it.instagram_url],
-                ["TT", it.tiktok_followers, it.tiktok_url],
-                ["YT", it.youtube_subscribers, it.youtube_url],
-                ["Spotify", it.spotify_monthly_listens, it.spotify_url],
-                ["Apple", it.apple_music_followers, it.apple_music_url],
-              ];
-              const totalReach =
-                (it.instagram_followers ?? 0) +
-                (it.tiktok_followers ?? 0) +
-                (it.youtube_subscribers ?? 0) +
-                (it.spotify_monthly_listens ?? 0) +
-                (it.apple_music_followers ?? 0);
-              const initials = it.name
-                .split(/\s+/)
-                .map((s) => s[0])
-                .filter(Boolean)
-                .slice(0, 2)
-                .join("")
-                .toUpperCase();
-              const showProspect = it.kind === "prospect" && !roster.hide_prospect_tags;
-              return (
-                <Card key={it.id}>
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className="size-16 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-base font-medium text-muted-foreground">
-                        {it.avatar_url ? (
-                          <img src={it.avatar_url} alt="" className="size-full object-cover" />
-                        ) : (
-                          <span>{initials || "?"}</span>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="font-display text-xl">{it.name}</h3>
-                            {it.location && LOCATION_FLAG[it.location] && (
-                              <span
-                                className="text-lg leading-none"
-                                title={LOCATION_LABEL[it.location]}
-                                aria-label={LOCATION_LABEL[it.location]}
-                              >
-                                {LOCATION_FLAG[it.location]}
-                              </span>
-                            )}
-                            {it.kind === "profile" ? (
-                              <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
-                                <BadgeCheck className="size-3" /> Verified
-                              </Badge>
-                            ) : showProspect ? (
-                              <Badge className="border-transparent bg-purple text-white text-[10px] uppercase">
-                                Prospect
-                              </Badge>
-                            ) : null}
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE[it.status] ?? "border-border/70 bg-muted/40 text-muted-foreground"}`}
-                            >
-                              {STATUS_LABEL[it.status] ?? "In Review"}
-                            </Badge>
-                            {it.category && (
-                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                                {it.category}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+        {(() => {
+          const activeItems = items.filter((it) => it.status !== "hold");
+          const archivedItems = items.filter((it) => it.status === "hold");
 
-                        {it.vibe && (
-                          <div className="mt-3">
-                            <p className="mt-1 rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-sm text-foreground">
-                              {it.vibe}
-                            </p>
-                          </div>
-                        )}
-                        <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                          {totalReach > 0 && (
-                            <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
-                              Total reach {formatCount(totalReach)}
+          const renderItem = (it: PublicItem) => {
+            const stats: Array<[string, number | null, string | null]> = [
+              ["IG", it.instagram_followers, it.instagram_url],
+              ["TT", it.tiktok_followers, it.tiktok_url],
+              ["YT", it.youtube_subscribers, it.youtube_url],
+              ["Spotify", it.spotify_monthly_listens, it.spotify_url],
+              ["Apple", it.apple_music_followers, it.apple_music_url],
+            ];
+            const totalReach =
+              (it.instagram_followers ?? 0) +
+              (it.tiktok_followers ?? 0) +
+              (it.youtube_subscribers ?? 0) +
+              (it.spotify_monthly_listens ?? 0) +
+              (it.apple_music_followers ?? 0);
+            const initials = it.name
+              .split(/\s+/)
+              .map((s) => s[0])
+              .filter(Boolean)
+              .slice(0, 2)
+              .join("")
+              .toUpperCase();
+            const showProspect = it.kind === "prospect" && !roster.hide_prospect_tags;
+            return (
+              <Card key={it.id}>
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="size-16 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-base font-medium text-muted-foreground">
+                      {it.avatar_url ? (
+                        <img src={it.avatar_url} alt="" className="size-full object-cover" />
+                      ) : (
+                        <span>{initials || "?"}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="font-display text-xl">{it.name}</h3>
+                          {it.location && LOCATION_FLAG[it.location] && (
+                            <span
+                              className="text-lg leading-none"
+                              title={LOCATION_LABEL[it.location]}
+                              aria-label={LOCATION_LABEL[it.location]}
+                            >
+                              {LOCATION_FLAG[it.location]}
                             </span>
                           )}
-                          {stats.map(([label, count, url]) =>
-                            count != null || url ? (
-                              <span
-                                key={label}
-                                className="rounded-md border border-border/60 bg-muted/30 px-2 py-0.5"
-                              >
-                                {label}
-                                {count != null ? ` ${formatCount(count)}` : ""}
-                                {url ? (
-                                  <a
-                                    href={url}
-                                    target="_blank"
-                                    rel="noreferrer noopener"
-                                    className="ml-1 inline-flex items-center text-primary hover:underline"
-                                  >
-                                    <ExternalLink className="size-3" />
-                                  </a>
-                                ) : null}
-                              </span>
-                            ) : null,
+                          {it.kind === "profile" ? (
+                            <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
+                              <BadgeCheck className="size-3" /> Verified
+                            </Badge>
+                          ) : showProspect ? (
+                            <Badge className="border-transparent bg-purple text-white text-[10px] uppercase">
+                              Prospect
+                            </Badge>
+                          ) : null}
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE[it.status] ?? "border-border/70 bg-muted/40 text-muted-foreground"}`}
+                          >
+                            {STATUS_LABEL[it.status] ?? "In Review"}
+                          </Badge>
+                          {it.category && (
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                              {it.category}
+                            </span>
                           )}
                         </div>
-                        {(it.example_video_url || it.bio_page_url || it.content_review_url) && (
-                          <div className="mt-3 flex flex-wrap gap-3 text-xs">
-                            {it.example_video_url && (
-                              <a
-                                href={it.example_video_url}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                                className="text-primary hover:underline"
-                              >
-                                Example video
-                              </a>
-                            )}
-                            {it.content_review_url && (
-                              <a
-                                href={it.content_review_url}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                                className="text-primary hover:underline"
-                              >
-                                Content to review
-                              </a>
-                            )}
-                            {it.bio_page_url && (
-                              <a
-                                href={it.bio_page_url}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                                className="text-primary hover:underline"
-                              >
-                                Bio page
-                              </a>
-                            )}
-                          </div>
+                      </div>
+
+                      {it.vibe && (
+                        <div className="mt-3">
+                          <p className="mt-1 rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-sm text-foreground">
+                            {it.vibe}
+                          </p>
+                        </div>
+                      )}
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                        {totalReach > 0 && (
+                          <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
+                            Total reach {formatCount(totalReach)}
+                          </span>
+                        )}
+                        {stats.map(([label, count, url]) =>
+                          count != null || url ? (
+                            <span
+                              key={label}
+                              className="rounded-md border border-border/60 bg-muted/30 px-2 py-0.5"
+                            >
+                              {label}
+                              {count != null ? ` ${formatCount(count)}` : ""}
+                              {url ? (
+                                <a
+                                  href={url}
+                                  target="_blank"
+                                  rel="noreferrer noopener"
+                                  className="ml-1 inline-flex items-center text-primary hover:underline"
+                                >
+                                  <ExternalLink className="size-3" />
+                                </a>
+                              ) : null}
+                            </span>
+                          ) : null,
                         )}
                       </div>
+                      {(it.example_video_url || it.bio_page_url || it.content_review_url) && (
+                        <div className="mt-3 flex flex-wrap gap-3 text-xs">
+                          {it.example_video_url && (
+                            <a
+                              href={it.example_video_url}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className="text-primary hover:underline"
+                            >
+                              Example video
+                            </a>
+                          )}
+                          {it.content_review_url && (
+                            <a
+                              href={it.content_review_url}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className="text-primary hover:underline"
+                            >
+                              Content to review
+                            </a>
+                          )}
+                          {it.bio_page_url && (
+                            <a
+                              href={it.bio_page_url}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className="text-primary hover:underline"
+                            >
+                              Bio page
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })
-          )}
-        </section>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          };
+
+          return (
+            <>
+              <section className="mt-12 space-y-3">
+                {items.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No creators on this roster yet.</p>
+                ) : activeItems.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No active creators on this roster.</p>
+                ) : (
+                  activeItems.map(renderItem)
+                )}
+              </section>
+
+              {archivedItems.length > 0 && (
+                <section className="mt-8">
+                  <details className="group rounded-2xl border border-border/60 bg-muted/20">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
+                      <span className="uppercase tracking-wider">
+                        Archive · {archivedItems.length}
+                      </span>
+                      <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="space-y-3 p-3 pt-0">
+                      {archivedItems.map(renderItem)}
+                    </div>
+                  </details>
+                </section>
+              )}
+            </>
+          );
+        })()}
+
       </main>
       <SiteFooter />
     </div>
