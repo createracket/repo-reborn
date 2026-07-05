@@ -72,7 +72,6 @@ const CATEGORY_LABEL: Record<string, string> = {
   ugc: "UGC",
   egc: "EGC",
   music_fan: "Music Fan",
-  editorial: "Editorial",
   artist_exchange: "Artist Exchange",
 };
 
@@ -105,7 +104,7 @@ function formatCount(n: number) {
 }
 
 
-type CategoryFilter = "all" | "musician" | "ugc" | "egc" | "music_fan" | "editorial" | "artist_exchange";
+type CategoryFilter = "all" | "musician" | "ugc" | "egc" | "music_fan" | "artist_exchange";
 
 const FILTER_OPTIONS: Array<{ value: CategoryFilter; label: string }> = [
   { value: "all", label: "All" },
@@ -113,7 +112,6 @@ const FILTER_OPTIONS: Array<{ value: CategoryFilter; label: string }> = [
   { value: "ugc", label: "UGC" },
   { value: "egc", label: "EGC" },
   { value: "music_fan", label: "Music Fan" },
-  { value: "editorial", label: "Editorial" },
   { value: "artist_exchange", label: "Artist Exchange" },
 ];
 
