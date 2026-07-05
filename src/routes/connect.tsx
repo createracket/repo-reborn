@@ -61,6 +61,35 @@ const briefSchema = z.object({
   additional_info: z.string().trim().max(5000).optional(),
 });
 
+type AccountKind = "brand" | "artist";
+type CampaignKind = "seed" | "endorse" | "partner";
+
+const ACCOUNT_OPTIONS: Array<{ value: AccountKind; label: string; desc: string }> = [
+  { value: "brand", label: "Brand", desc: "I'm running a campaign and want to work with artists." },
+  { value: "artist", label: "Artist", desc: "I'm an artist looking to partner with brands." },
+];
+
+const CAMPAIGN_OPTIONS: Array<{ value: CampaignKind; label: string; desc: string; tag: string }> = [
+  {
+    value: "seed",
+    label: "Seed",
+    tag: "From ~$500",
+    desc: "Product or campaign assets seeded with matched artists — opt-in, native posts when the fit is right.",
+  },
+  {
+    value: "endorse",
+    label: "Endorse",
+    tag: "Retainer + campaign costs",
+    desc: "Lightweight agreements with defined deliverables, plus affiliate attribution into your existing stack.",
+  },
+  {
+    value: "partner",
+    label: "Partner",
+    tag: "Bespoke",
+    desc: "Named ambassadorships or ongoing programmes — paid social, owned channels and retail negotiable.",
+  },
+];
+
 function ConnectPage() {
   const [submitting, setSubmitting] = useState(false);
   const [values, setValues] = useState<string[]>([]);
@@ -71,6 +100,8 @@ function ConnectPage() {
   const [subscribing, setSubscribing] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
+  const [accountKind, setAccountKind] = useState<AccountKind | null>(null);
+  const [campaignKind, setCampaignKind] = useState<CampaignKind | null>(null);
 
   useEffect(() => {
     loadBriefFormConfig().then(setConfig).catch(() => setConfig(DEFAULT_BRIEF_FORM_CONFIG));
