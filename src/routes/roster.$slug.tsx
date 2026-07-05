@@ -109,7 +109,7 @@ function PublicRosterPage() {
       const { data: r } = await (supabase as any)
         .from("public_rosters")
         .select(
-          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags",
+          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags, est_engagement_pct",
         )
         .eq("slug", slug)
         .eq("published", true)
