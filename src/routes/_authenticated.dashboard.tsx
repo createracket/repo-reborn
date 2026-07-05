@@ -326,13 +326,13 @@ function DashboardPage() {
           ? (supabase as any).from("lead_briefs_shared").select("id, title, description, budget, currency, transparency, created_at").in("id", shareLeadIds)
           : Promise.resolve({ data: [] as any[] }),
       ]);
-      const publishedRows = ((opps as any[]) ?? []) as Opportunity[];
+      const publishedRows = (((opps as any[]) ?? []) as any[]).map((r) => ({ ...r, brief_source: "user" as const })) as Opportunity[];
       const sharedRows: Opportunity[] = [
-        ...(((sharedUser as any).data ?? []) as any[]).map((r) => ({ ...r })),
-        ...(((sharedLead as any).data ?? []) as any[]).map((r) => ({ ...r, published_at: null })),
+        ...(((sharedUser as any).data ?? []) as any[]).map((r) => ({ ...r, brief_source: "user" as const })),
+        ...(((sharedLead as any).data ?? []) as any[]).map((r) => ({ ...r, published_at: null, brief_source: "lead" as const })),
       ];
       const dedup = new Map<string, Opportunity>();
-      [...publishedRows, ...sharedRows].forEach((o) => dedup.set(o.id, o));
+      [...publishedRows, ...sharedRows].forEach((o) => dedup.set(`${o.brief_source}:${o.id}`, o));
       setOpportunities(Array.from(dedup.values()).sort((a, b) => (a.published_at ?? a.created_at) < (b.published_at ?? b.created_at) ? 1 : -1));
 
       const { data: exOpps } = await supabase
