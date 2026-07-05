@@ -18,6 +18,7 @@ type PublicRoster = {
   published_at: string | null;
   header_image_url: string | null;
   hide_prospect_tags: boolean;
+  est_engagement_pct: number | null;
 };
 
 type PublicItem = {
