@@ -662,13 +662,14 @@ function RosterDetailView({
         setBrandEmail(row.brand_email ?? "");
       }
     })();
-  }, [roster.id, roster.title, roster.description, roster.header_image_url]);
+  }, [roster.id, roster.title, roster.description, roster.header_image_url, roster.est_engagement_pct]);
 
   useEffect(() => {
     setOrderedItems(items);
   }, [items]);
 
-  const totalFollowers = orderedItems.reduce(
+  const activeOrdered = orderedItems.filter((it) => it.status !== "hold");
+  const totalFollowers = activeOrdered.reduce(
     (a, it) =>
       a +
       (it.instagram_followers ?? 0) +
@@ -677,7 +678,7 @@ function RosterDetailView({
       (it.spotify_monthly_listens ?? 0),
     0,
   );
-  const totalBudget = orderedItems.reduce((a, it) => a + (it.budget ?? 0), 0);
+  const totalBudget = activeOrdered.reduce((a, it) => a + (it.budget ?? 0), 0);
 
   const linkedBrief = roster.brief_id ? briefs.find((b) => b.id === roster.brief_id) ?? null : null;
 
