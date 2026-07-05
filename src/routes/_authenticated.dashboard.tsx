@@ -89,6 +89,7 @@ type Opportunity = {
   transparency?: string | null;
   published_at: string | null;
   created_at: string;
+  brief_source: "user" | "lead";
 };
 
 function DashboardPage() {
