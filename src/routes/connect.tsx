@@ -66,7 +66,7 @@ type CampaignKind = "seed" | "endorse" | "partner";
 
 const ACCOUNT_OPTIONS: Array<{ value: AccountKind; label: string; desc: string }> = [
   { value: "brand", label: "Brand", desc: "I'm running a campaign and want to work with artists." },
-  { value: "artist", label: "Artist", desc: "I'm an artist looking to partner with brands." },
+  { value: "artist", label: "Artist", desc: "I'm an artist looking to partner with brands and/or engage more fans directly." },
 ];
 
 const CAMPAIGN_OPTIONS: Array<{ value: CampaignKind; label: string; desc: string; tag: string }> = [
@@ -74,19 +74,19 @@ const CAMPAIGN_OPTIONS: Array<{ value: CampaignKind; label: string; desc: string
     value: "seed",
     label: "Seed",
     tag: "From ~$500",
-    desc: "Product or campaign assets seeded with matched artists — opt-in, native posts when the fit is right.",
+    desc: "Gift product and seed new campaign assets with relevant creators - musicians, fans and cultural tastemakers.",
   },
   {
     value: "endorse",
     label: "Endorse",
     tag: "Retainer + campaign costs",
-    desc: "Lightweight agreements with defined deliverables, plus affiliate attribution into your existing stack.",
+    desc: "Build a bespoke roster for a one-off campaign or ongoing ambassador program - lightweight agreements with set deliverables.",
   },
   {
     value: "partner",
     label: "Partner",
     tag: "Bespoke",
-    desc: "Named ambassadorships or ongoing programmes — paid social, owned channels and retail negotiable.",
+    desc: "Custom collabs with tailored campaign tools and retained account management accounts - priority matching and paid media support.",
   },
 ];
 
