@@ -91,6 +91,7 @@ type Roster = {
   header_image_url: string | null;
   client_email: string | null;
   brand_email: string | null;
+  est_engagement_pct: number | null;
 };
 
 type Brief = {
