@@ -61,6 +61,35 @@ const briefSchema = z.object({
   additional_info: z.string().trim().max(5000).optional(),
 });
 
+type AccountKind = "brand" | "artist";
+type CampaignKind = "seed" | "endorse" | "partner";
+
+const ACCOUNT_OPTIONS: Array<{ value: AccountKind; label: string; desc: string }> = [
+  { value: "brand", label: "Brand", desc: "I'm running a campaign and want to work with artists." },
+  { value: "artist", label: "Artist", desc: "I'm an artist looking to partner with brands." },
+];
+
+const CAMPAIGN_OPTIONS: Array<{ value: CampaignKind; label: string; desc: string; tag: string }> = [
+  {
+    value: "seed",
+    label: "Seed",
+    tag: "From ~$500",
+    desc: "Product or campaign assets seeded with matched artists — opt-in, native posts when the fit is right.",
+  },
+  {
+    value: "endorse",
+    label: "Endorse",
+    tag: "Retainer + campaign costs",
+    desc: "Lightweight agreements with defined deliverables, plus affiliate attribution into your existing stack.",
+  },
+  {
+    value: "partner",
+    label: "Partner",
+    tag: "Bespoke",
+    desc: "Named ambassadorships or ongoing programmes — paid social, owned channels and retail negotiable.",
+  },
+];
+
 function ConnectPage() {
   const [submitting, setSubmitting] = useState(false);
   const [values, setValues] = useState<string[]>([]);
@@ -71,6 +100,8 @@ function ConnectPage() {
   const [subscribing, setSubscribing] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
+  const [accountKind, setAccountKind] = useState<AccountKind | null>(null);
+  const [campaignKind, setCampaignKind] = useState<CampaignKind | null>(null);
 
   useEffect(() => {
     loadBriefFormConfig().then(setConfig).catch(() => setConfig(DEFAULT_BRIEF_FORM_CONFIG));
@@ -91,6 +122,14 @@ function ConnectPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!accountKind) {
+      toast.error("Let us know if you're a brand or an artist");
+      return;
+    }
+    if (!campaignKind) {
+      toast.error("Pick the type of campaign you'd like to run");
+      return;
+    }
     const fd = new FormData(e.currentTarget);
     const budgetRaw = fd.get("budget")?.toString().trim();
 
@@ -100,6 +139,12 @@ function ConnectPage() {
           otherType.trim() ? `Something else: ${otherType.trim()}` : "Something else",
         ]
       : types;
+
+    const accountLabel = ACCOUNT_OPTIONS.find((o) => o.value === accountKind)?.label ?? accountKind;
+    const campaignLabel = CAMPAIGN_OPTIONS.find((o) => o.value === campaignKind)?.label ?? campaignKind;
+    const rawExtra = fd.get("additional_info")?.toString().trim() ?? "";
+    const preface = `Account type: ${accountLabel}\nCampaign type: ${campaignLabel}`;
+    const combinedExtra = rawExtra ? `${preface}\n\n${rawExtra}` : preface;
 
     const parsed = briefSchema.safeParse({
       title: fd.get("title")?.toString() ?? "",
@@ -114,7 +159,7 @@ function ConnectPage() {
       contact_email: fd.get("contact_email")?.toString() ?? "",
       collaboration_types: finalTypes,
       core_values: values,
-      additional_info: fd.get("additional_info")?.toString() || undefined,
+      additional_info: combinedExtra,
     });
 
     if (!parsed.success) {
@@ -302,6 +347,87 @@ function ConnectPage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-8">
+                  {/* Section 0a — Who's asking */}
+                  <section className="space-y-4">
+                    <div>
+                      <h3 className="font-display text-lg">Who's asking?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Tell us which side of the table you're on so we can tailor the brief.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      {ACCOUNT_OPTIONS.map((opt) => {
+                        const active = accountKind === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setAccountKind(opt.value)}
+                            className={`rounded-lg border p-4 text-left transition ${
+                              active
+                                ? "border-primary bg-primary/10 ring-2 ring-primary/40"
+                                : "border-border/60 hover:bg-muted/40"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-display text-base">{opt.label}</span>
+                              {active && <Check className="size-4 text-primary" />}
+                            </div>
+                            <p className="mt-1 text-sm text-muted-foreground">{opt.desc}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+
+                  <Separator />
+
+                  {/* Section 0b — Campaign type */}
+                  <section className="space-y-4">
+                    <div>
+                      <h3 className="font-display text-lg">What kind of campaign?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Pick the shape that fits best — you can refine the details below.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                      {CAMPAIGN_OPTIONS.map((opt) => {
+                        const active = campaignKind === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setCampaignKind(opt.value)}
+                            className={`rounded-lg border p-4 text-left transition ${
+                              active
+                                ? "border-primary bg-primary/10 ring-2 ring-primary/40"
+                                : "border-border/60 hover:bg-muted/40"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-display text-base">{opt.label}</span>
+                              {active ? (
+                                <Check className="size-4 text-primary" />
+                              ) : (
+                                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                                  {opt.tag}
+                                </span>
+                              )}
+                            </div>
+                            {active && (
+                              <span className="mt-1 block text-[10px] uppercase tracking-wider text-muted-foreground">
+                                {opt.tag}
+                              </span>
+                            )}
+                            <p className="mt-2 text-sm text-muted-foreground">{opt.desc}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+
+                  <Separator />
+
                   {/* Section 1 */}
                   <section className="space-y-6">
                     <div>
