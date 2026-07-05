@@ -56,6 +56,7 @@ const STATUS_LABEL: Record<string, string> = {
   briefed: "Briefed",
   contracting: "Contracting",
   live: "Live",
+  hold: "Hold",
 };
 
 const STATUS_BADGE: Record<string, string> = {
@@ -66,7 +67,9 @@ const STATUS_BADGE: Record<string, string> = {
   briefed: "border-chart-5/40 bg-chart-5/10 text-chart-5",
   contracting: "border-purple/40 bg-purple/10 text-purple",
   live: "border-pink-accent/40 bg-pink-accent/10 text-pink-accent",
+  hold: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
 };
+
 
 export const Route = createFileRoute("/roster/$slug")({
   head: ({ params }) => ({
