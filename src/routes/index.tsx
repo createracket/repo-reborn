@@ -101,6 +101,8 @@ function WaitlistForm({
         <Input
           type="email"
           required
+          autoComplete="email"
+          inputMode="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter your email"
@@ -264,16 +266,16 @@ function Home() {
               No vanity deals. No bailing after the intro. Just fan-first partnerships that actually perform.
             </motion.p>
 
-            <motion.div variants={fadeUp} className="mt-10 flex justify-center">
+            <motion.div variants={fadeUp} className="mt-10 flex justify-center px-2">
               {signedIn ? (
                 <Button asChild size="lg" className="h-14 rounded-full md:h-16 md:text-lg">
                   <Link to="/dashboard">Go to Dashboard</Link>
                 </Button>
               ) : (
                 <WaitlistForm
-                  className="mx-auto flex w-full max-w-3xl items-center gap-2 rounded-full bg-white py-2 pl-6 pr-2 transition-shadow duration-300 hover:shadow-[0_0_20px_5px_rgba(255,255,255,0.5)] focus-within:shadow-[0_0_20px_5px_rgba(255,255,255,0.5)]"
-                  inputClassName="h-14 flex-grow border-0 bg-transparent p-0 text-base text-[#2b2b2b] placeholder:text-[#2b2b2b]/70 focus-visible:ring-0 focus-visible:ring-offset-0 md:text-lg md:h-16"
-                  buttonClassName="h-14 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 md:h-16 md:text-lg"
+                  className="mx-auto flex w-full max-w-3xl flex-col gap-2 rounded-3xl bg-white p-2 transition-shadow duration-300 focus-within:shadow-[0_0_20px_5px_rgba(255,255,255,0.5)] hover:shadow-[0_0_20px_5px_rgba(255,255,255,0.5)] sm:flex-row sm:items-center sm:rounded-full sm:py-2 sm:pl-6 sm:pr-2"
+                  inputClassName="h-12 w-full min-w-0 flex-grow border-0 bg-transparent px-3 text-base text-[#2b2b2b] placeholder:text-[#2b2b2b]/70 focus-visible:ring-0 focus-visible:ring-offset-0 sm:h-14 sm:px-0 md:text-lg md:h-16"
+                  buttonClassName="h-12 w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 sm:h-14 sm:w-auto md:h-16 md:text-lg"
                 />
               )}
             </motion.div>
