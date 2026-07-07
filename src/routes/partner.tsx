@@ -55,16 +55,16 @@ function PartnerPage() {
     <main className="min-h-screen bg-background text-foreground">
       <section className="mx-auto max-w-5xl px-4 py-16 md:py-24">
         <h1 className="text-center font-display text-2xl font-bold text-primary md:text-3xl">
-          How to Create Racket
+          How Brands Create Racket
         </h1>
 
         <div className="mt-6 rounded-2xl border border-border/60 bg-card/40 p-6 md:p-8">
           <p className="text-center text-base leading-relaxed text-foreground md:text-lg">
             Racket is your creative partner, not another platform to figure out.
-            You bring a brief and a product — we match you with artists whose
-            audiences already trust them. Like, enough to buy from them. No
-            generic content, no compromising your messaging. Every campaign is
-            curated, contextual, and low-risk to get started.
+            You bring a brief and a product - we match you with artists whose
+            audiences already trust them. Enough to buy from them. No generic
+            content, no compromising your messaging. Every campaign is curated,
+            contextual, and low-risk to get started.
           </p>
         </div>
 
