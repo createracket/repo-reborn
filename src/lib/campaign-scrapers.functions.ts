@@ -645,7 +645,7 @@ export const scrapeAppleMusicArtist = createServerFn({ method: "POST" })
         name,
         followers: null,
         monthly_listeners: null,
-        avatar_url,
+        avatar_url: await mirrorOrKeep(avatar_url, "apple"),
       };
     } catch (e) {
       return {
