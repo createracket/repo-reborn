@@ -89,6 +89,7 @@ type Roster = {
   created_at: string;
   updated_at: string;
   hide_prospect_tags: boolean;
+  hide_statuses: boolean;
   header_image_url: string | null;
   client_email: string | null;
   brand_email: string | null;
@@ -719,6 +720,18 @@ function RosterDetailView({
     onChanged();
   }
 
+  async function toggleHideStatuses(hide: boolean) {
+    const { error } = await supabase
+      .from("rosters")
+      .update({ hide_statuses: hide } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
   async function persistOrder(next: RosterItem[]) {
     setOrderedItems(next);
     const updates = next.map((it, idx) =>
@@ -965,6 +978,18 @@ function RosterDetailView({
               <Switch
                 checked={roster.hide_prospect_tags}
                 onCheckedChange={toggleHideProspects}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Hide statuses</div>
+                <div className="text-xs text-muted-foreground">
+                  Hides the status badge (e.g. "In Review", "Live") on the public roster page.
+                </div>
+              </div>
+              <Switch
+                checked={roster.hide_statuses}
+                onCheckedChange={toggleHideStatuses}
               />
             </div>
             <div className="flex justify-end">

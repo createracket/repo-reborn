@@ -25,6 +25,7 @@ type PublicRoster = {
   published_at: string | null;
   header_image_url: string | null;
   hide_prospect_tags: boolean;
+  hide_statuses: boolean;
   est_engagement_pct: number | null;
 };
 
@@ -127,7 +128,7 @@ function PublicRosterPage() {
       const { data: r } = await (supabase as any)
         .from("public_rosters")
         .select(
-          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags, est_engagement_pct",
+          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags, hide_statuses, est_engagement_pct",
         )
         .eq("slug", slug)
         .eq("published", true)
@@ -324,12 +325,14 @@ function PublicRosterPage() {
                           ) : null}
                         </div>
                         <div className="flex flex-col items-end gap-1">
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE[it.status] ?? "border-border/70 bg-muted/40 text-muted-foreground"}`}
-                          >
-                            {STATUS_LABEL[it.status] ?? "In Review"}
-                          </Badge>
+                          {!roster.hide_statuses && (
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE[it.status] ?? "border-border/70 bg-muted/40 text-muted-foreground"}`}
+                            >
+                              {STATUS_LABEL[it.status] ?? "In Review"}
+                            </Badge>
+                          )}
                           {it.category && (
                             <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                               {CATEGORY_LABEL[it.category] ?? it.category}
