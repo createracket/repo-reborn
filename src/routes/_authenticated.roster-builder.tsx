@@ -1035,15 +1035,15 @@ function RosterDetailView({
               </div>
               <div className="flex items-center gap-2">
                 <Filter className="size-4 text-muted-foreground" />
-                <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as "all" | CategoryValue)}>
+                <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
                   <SelectTrigger className="w-[160px] text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    {CATEGORY_OPTIONS.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>
-                        {c.label}
+                    {filterCategoryOptions.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {categoryLabel(c)}
                       </SelectItem>
                     ))}
                   </SelectContent>
