@@ -68,7 +68,7 @@ function PartnerPage() {
         </h1>
 
         <div className="mt-6 rounded-2xl border border-border/60 bg-card/40 p-6 md:p-8">
-          <p className="text-center text-xs leading-relaxed text-foreground md:text-lg">
+          <p className="text-center text-sm leading-relaxed text-foreground md:text-base">
             Racket is your creative partner, not another platform to figure out. You bring a brief and a product - we
             match you with artists whose audiences already trust them. Enough to buy from them. No generic content, no
             compromising your messaging. Every campaign is curated, contextual, and low-risk to get started.
