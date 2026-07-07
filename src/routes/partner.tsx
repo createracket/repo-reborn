@@ -122,5 +122,7 @@ function PartnerPage() {
         </Link>
       </section>
     </main>
+    <SiteFooter />
+  </>
   );
 }
