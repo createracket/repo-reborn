@@ -412,24 +412,36 @@ function PublicRosterPage() {
 
           return (
             <>
-              <div className="mt-10 flex items-center justify-end gap-3">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Filter className="size-4" />
-                  <span>Filter</span>
-                </div>
-                <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}>
-                  <SelectTrigger className="w-[180px] text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FILTER_OPTIONS.map((f) => (
-                      <SelectItem key={f.value} value={f.value}>
-                        {f.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {(() => {
+                const filterValues = Array.from(
+                  new Set([
+                    ...(roster.categories ?? []),
+                    ...items.map((i) => i.category).filter((v): v is string => !!v),
+                  ]),
+                );
+                if (filterValues.length === 0) return null;
+                return (
+                  <div className="mt-10 flex items-center justify-end gap-3">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Filter className="size-4" />
+                      <span>Filter</span>
+                    </div>
+                    <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
+                      <SelectTrigger className="w-[180px] text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        {filterValues.map((v) => (
+                          <SelectItem key={v} value={v}>
+                            {categoryLabel(v)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              })()}
               <section className="mt-4 space-y-3">
                 {items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No creators on this roster yet.</p>
