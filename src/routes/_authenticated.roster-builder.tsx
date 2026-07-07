@@ -1062,6 +1062,7 @@ function RosterDetailView({
                 onReorder={persistOrder}
                 onRemove={removeItem}
                 onChanged={onChanged}
+                categories={rosterCategories}
               />
             ) : (
               <ul className="space-y-3">
@@ -1073,6 +1074,7 @@ function RosterDetailView({
                       item={it}
                       onRemove={() => removeItem(it.id)}
                       onChanged={onChanged}
+                      categories={rosterCategories}
                     />
                   ))}
               </ul>
