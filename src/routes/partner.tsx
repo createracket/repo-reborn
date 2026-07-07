@@ -82,7 +82,7 @@ function PartnerPage() {
           Choose your tier:
         </h2>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           {TIERS.map((t) => (
             <div key={t.label} className="flex flex-col gap-3">
               <div
@@ -98,34 +98,27 @@ function PartnerPage() {
                   {t.tagline}
                 </p>
               </div>
+              <div className="rounded-xl border border-border/60 bg-card/30 p-5">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="font-display text-xl font-bold text-foreground">
+                    {t.label}
+                  </span>
+                  {t.tag && (
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/60">
+                      {t.tag}
+                    </span>
+                  )}
+                </div>
+                {t.desc && (
+                  <p className="mt-3 text-sm leading-relaxed text-foreground/80">
+                    {t.desc}
+                  </p>
+                )}
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {TIERS.map((t) => (
-            <div
-              key={`${t.label}-detail`}
-              className="rounded-xl border border-border/60 bg-card/30 p-5"
-            >
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="font-display text-xl font-bold text-foreground">
-                  {t.label}
-                </span>
-                {t.tag && (
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/60">
-                    {t.tag}
-                  </span>
-                )}
-              </div>
-              {t.desc && (
-                <p className="mt-3 text-sm leading-relaxed text-foreground/80">
-                  {t.desc}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
 
 
 
