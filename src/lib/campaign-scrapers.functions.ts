@@ -2,6 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { extractYouTubeId, detectPlatform } from "./youtube-utils";
+import { mirrorExternalImage } from "./mirror-image.server";
+
+async function mirrorOrKeep(url: string | null | undefined, folder: string) {
+  if (!url) return null;
+  return (await mirrorExternalImage(url, folder)) ?? url;
+}
 
 type ScrapedMetrics = {
   views?: number | null;
@@ -292,7 +298,7 @@ async function scrapeInstagramProfile(url: string): Promise<ProfileResult> {
       ok: true,
       platform: "instagram",
       followers: p.followersCount ?? p.followers ?? null,
-      avatar_url: p.profilePicUrlHD ?? p.profilePicUrl ?? null,
+      avatar_url: await mirrorOrKeep(p.profilePicUrlHD ?? p.profilePicUrl ?? null, "ig"),
       handle: p.username ?? handle,
     };
   } catch (e) {
@@ -321,7 +327,7 @@ async function scrapeTikTokProfile(url: string): Promise<ProfileResult> {
       ok: true,
       platform: "tiktok",
       followers: p.authorMeta?.fans ?? p.fans ?? p.followerCount ?? null,
-      avatar_url: p.authorMeta?.avatar ?? null,
+      avatar_url: await mirrorOrKeep(p.authorMeta?.avatar ?? null, "tt"),
       handle: p.authorMeta?.name ?? handle,
     };
   } catch (e) {
@@ -364,8 +370,10 @@ async function scrapeYouTubeChannel(url: string): Promise<ProfileResult> {
     ok: true,
     platform: "youtube",
     followers: sub ? Number(sub) : null,
-    avatar_url:
+    avatar_url: await mirrorOrKeep(
       item.snippet?.thumbnails?.high?.url ?? item.snippet?.thumbnails?.default?.url ?? null,
+      "yt",
+    ),
     handle: item.snippet?.title ?? null,
   };
 }
@@ -526,7 +534,7 @@ export const scrapeSpotifyArtist = createServerFn({ method: "POST" })
       followers,
       monthly_listeners,
       total_streams,
-      avatar_url,
+      avatar_url: await mirrorOrKeep(avatar_url, "spotify"),
     };
   });
 
@@ -637,7 +645,7 @@ export const scrapeAppleMusicArtist = createServerFn({ method: "POST" })
         name,
         followers: null,
         monthly_listeners: null,
-        avatar_url,
+        avatar_url: await mirrorOrKeep(avatar_url, "apple"),
       };
     } catch (e) {
       return {
