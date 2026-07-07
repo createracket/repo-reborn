@@ -534,7 +534,7 @@ export const scrapeSpotifyArtist = createServerFn({ method: "POST" })
       followers,
       monthly_listeners,
       total_streams,
-      avatar_url,
+      avatar_url: await mirrorOrKeep(avatar_url, "spotify"),
     };
   });
 
