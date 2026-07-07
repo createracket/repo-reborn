@@ -1017,6 +1017,52 @@ function RosterDetailView({
                 Manual value shown next to Total followers and Est. reach on the public roster page.
               </p>
             </div>
+            <div className="space-y-2">
+              <Label>Categories</Label>
+              <p className="text-xs text-muted-foreground">
+                Tailor the category tags used on this roster's creators and public filter.
+              </p>
+              {rosterCategories.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {rosterCategories.map((c) => (
+                    <Badge
+                      key={c}
+                      variant="outline"
+                      className="gap-1 border-border/60 pl-2 pr-1 py-1 text-xs"
+                    >
+                      <span>{categoryLabel(c)}</span>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${c}`}
+                        className="ml-1 rounded-sm p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        onClick={() => removeCategory(c)}
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No categories yet — add one below.</p>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void addCategory();
+                    }
+                  }}
+                  placeholder="e.g. Musician, UGC, Skate"
+                  maxLength={40}
+                />
+                <Button type="button" variant="outline" onClick={addCategory} disabled={!newCategory.trim()}>
+                  Add
+                </Button>
+              </div>
+            </div>
             <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
               <div>
                 <div className="text-sm font-medium">Hide prospect tags</div>
