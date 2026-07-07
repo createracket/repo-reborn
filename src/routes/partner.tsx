@@ -12,8 +12,7 @@ export const Route = createFileRoute("/partner")({
       { property: "og:title", content: "Partner with Create Racket" },
       {
         property: "og:description",
-        content:
-          "Curated, contextual campaigns matching brands with artists whose audiences already trust them.",
+        content: "Curated, contextual campaigns matching brands with artists whose audiences already trust them.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -69,12 +68,10 @@ function PartnerPage() {
         </h1>
 
         <div className="mt-6 rounded-2xl border border-border/60 bg-card/40 p-6 md:p-8">
-          <p className="text-center text-base leading-relaxed text-foreground md:text-lg">
-            Racket is your creative partner, not another platform to figure out.
-            You bring a brief and a product - we match you with artists whose
-            audiences already trust them. Enough to buy from them. No generic
-            content, no compromising your messaging. Every campaign is curated,
-            contextual, and low-risk to get started.
+          <p className="text-center text-sm leading-relaxed text-foreground md:text-lg">
+            Racket is your creative partner, not another platform to figure out. You bring a brief and a product - we
+            match you with artists whose audiences already trust them. Enough to buy from them. No generic content, no
+            compromising your messaging. Every campaign is curated, contextual, and low-risk to get started.
           </p>
         </div>
 
@@ -89,45 +86,31 @@ function PartnerPage() {
                 className="flex h-32 items-center justify-center rounded-xl px-4 shadow-lg md:h-36"
                 style={{ background: t.gradient }}
               >
-                <span className="font-display text-3xl font-bold text-white drop-shadow-md md:text-4xl">
-                  {t.label}
-                </span>
+                <span className="font-display text-3xl font-bold text-white drop-shadow-md md:text-4xl">{t.label}</span>
               </div>
               <div className="min-h-[80px] rounded-xl border border-border/60 bg-card/30 p-4 text-center">
-                <p className="text-sm leading-snug text-foreground/90">
-                  {t.tagline}
-                </p>
+                <p className="text-sm leading-snug text-foreground/90">{t.tagline}</p>
               </div>
               <div className="rounded-xl border border-border/60 bg-card/30 p-5">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-display text-xl font-bold text-foreground">
-                    {t.label}
-                  </span>
+                  <span className="font-display text-xl font-bold text-foreground">{t.label}</span>
                   {t.tag && (
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/60">
                       {t.tag}
                     </span>
                   )}
                 </div>
-                {t.desc && (
-                  <p className="mt-3 text-sm leading-relaxed text-foreground/80">
-                    {t.desc}
-                  </p>
-                )}
+                {t.desc && <p className="mt-3 text-sm leading-relaxed text-foreground/80">{t.desc}</p>}
               </div>
             </div>
           ))}
         </div>
 
-
-
-
         <Link
           to="/login"
           className="mt-10 block rounded-full py-4 text-center font-display text-lg font-semibold text-foreground underline underline-offset-4 shadow-md transition hover:opacity-90"
           style={{
-            background:
-              "linear-gradient(90deg, #e8a998 0%, #f0c8b8 50%, #f8ecd8 100%)",
+            background: "linear-gradient(90deg, #e8a998 0%, #f0c8b8 50%, #f8ecd8 100%)",
             color: "#111",
           }}
         >
