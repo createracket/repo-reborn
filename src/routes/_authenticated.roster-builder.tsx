@@ -1254,8 +1254,8 @@ function RosterItemRow({ item, onRemove, onChanged, dragHandleProps }: { item: R
               </Badge>
             )}
             {item.category && (
-              <Badge className={`border-transparent text-[10px] uppercase ${CATEGORY_BADGE[item.category]}`}>
-                {CATEGORY_LABEL[item.category]}
+              <Badge className={`border-transparent text-[10px] uppercase ${categoryBadgeClass(item.category)}`}>
+                {categoryLabel(item.category)}
               </Badge>
             )}
 
