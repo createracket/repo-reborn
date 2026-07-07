@@ -370,8 +370,10 @@ async function scrapeYouTubeChannel(url: string): Promise<ProfileResult> {
     ok: true,
     platform: "youtube",
     followers: sub ? Number(sub) : null,
-    avatar_url:
+    avatar_url: await mirrorOrKeep(
       item.snippet?.thumbnails?.high?.url ?? item.snippet?.thumbnails?.default?.url ?? null,
+      "yt",
+    ),
     handle: item.snippet?.title ?? null,
   };
 }
