@@ -1464,6 +1464,7 @@ export type Database = {
       }
       public_rosters: {
         Row: {
+          categories: string[] | null
           created_at: string | null
           description: string | null
           est_engagement_pct: number | null
@@ -1479,6 +1480,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          categories?: string[] | null
           created_at?: string | null
           description?: string | null
           est_engagement_pct?: number | null
@@ -1494,6 +1496,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          categories?: string[] | null
           created_at?: string | null
           description?: string | null
           est_engagement_pct?: number | null
