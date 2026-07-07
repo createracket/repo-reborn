@@ -327,7 +327,7 @@ async function scrapeTikTokProfile(url: string): Promise<ProfileResult> {
       ok: true,
       platform: "tiktok",
       followers: p.authorMeta?.fans ?? p.fans ?? p.followerCount ?? null,
-      avatar_url: p.authorMeta?.avatar ?? null,
+      avatar_url: await mirrorOrKeep(p.authorMeta?.avatar ?? null, "tt"),
       handle: p.authorMeta?.name ?? handle,
     };
   } catch (e) {
