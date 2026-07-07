@@ -2,6 +2,12 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { extractYouTubeId, detectPlatform } from "./youtube-utils";
+import { mirrorExternalImage } from "./mirror-image.server";
+
+async function mirrorOrKeep(url: string | null | undefined, folder: string) {
+  if (!url) return null;
+  return (await mirrorExternalImage(url, folder)) ?? url;
+}
 
 type ScrapedMetrics = {
   views?: number | null;
