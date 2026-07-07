@@ -15,6 +15,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PartnerRouteImport } from './routes/partner'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FanSignupRouteImport } from './routes/fan-signup'
@@ -75,6 +76,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnerRoute = PartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -245,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/partner': typeof PartnerRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByTo {
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/partner': typeof PartnerRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -323,6 +331,7 @@ export interface FileRoutesById {
   '/fan-signup': typeof FanSignupRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/partner': typeof PartnerRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -363,6 +372,7 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/forgot-password'
     | '/login'
+    | '/partner'
     | '/privacy'
     | '/reset-password'
     | '/results'
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/forgot-password'
     | '/login'
+    | '/partner'
     | '/privacy'
     | '/reset-password'
     | '/results'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/fan-signup'
     | '/forgot-password'
     | '/login'
+    | '/partner'
     | '/privacy'
     | '/reset-password'
     | '/results'
@@ -480,6 +492,7 @@ export interface RootRouteChildren {
   FanSignupRoute: typeof FanSignupRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  PartnerRoute: typeof PartnerRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
@@ -548,6 +561,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partner': {
+      id: '/partner'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof PartnerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -800,6 +820,7 @@ const rootRouteChildren: RootRouteChildren = {
   FanSignupRoute: FanSignupRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  PartnerRoute: PartnerRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
