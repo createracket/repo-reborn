@@ -298,7 +298,7 @@ async function scrapeInstagramProfile(url: string): Promise<ProfileResult> {
       ok: true,
       platform: "instagram",
       followers: p.followersCount ?? p.followers ?? null,
-      avatar_url: p.profilePicUrlHD ?? p.profilePicUrl ?? null,
+      avatar_url: await mirrorOrKeep(p.profilePicUrlHD ?? p.profilePicUrl ?? null, "ig"),
       handle: p.username ?? handle,
     };
   } catch (e) {
