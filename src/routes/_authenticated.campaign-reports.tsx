@@ -1265,8 +1265,39 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
 
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-1">
-              <Label className="text-xs">Thumbnail URL</Label>
-              <Input value={form.thumbnail_url} onChange={(e) => set("thumbnail_url", e.target.value)} />
+              <Label className="text-xs">Thumbnail</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={form.thumbnail_url}
+                  onChange={(e) => set("thumbnail_url", e.target.value)}
+                  placeholder="Paste URL or upload"
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={uploadingThumb}
+                  onClick={() => document.getElementById(`thumb-upload-${post.id}`)?.click()}
+                >
+                  <ImagePlus className="mr-1 size-4" />
+                  {uploadingThumb ? "Uploading…" : "Upload"}
+                </Button>
+                <input
+                  id={`thumb-upload-${post.id}`}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleThumbUpload}
+                />
+              </div>
+              {form.thumbnail_url && (
+                <img
+                  src={form.thumbnail_url}
+                  alt=""
+                  className="mt-2 h-20 w-20 rounded-md object-cover border border-border/60"
+                />
+              )}
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Posted date</Label>
