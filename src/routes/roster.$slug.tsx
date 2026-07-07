@@ -272,7 +272,7 @@ function PublicRosterPage() {
               ["IG", it.instagram_followers, it.instagram_url],
               ["TT", it.tiktok_followers, it.tiktok_url],
               ["YT", it.youtube_subscribers, it.youtube_url],
-              ["Spotify", it.spotify_monthly_listens, it.spotify_url],
+              ["Spotify streams", it.spotify_monthly_listens, it.spotify_url],
               ["Apple", it.apple_music_followers, it.apple_music_url],
             ];
             const totalReach =

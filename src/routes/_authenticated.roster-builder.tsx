@@ -1162,7 +1162,7 @@ function RosterItemRow({ item, onRemove, onChanged, dragHandleProps }: { item: R
     ["IG", item.instagram_followers, item.instagram_url],
     ["TT", item.tiktok_followers, item.tiktok_url],
     ["YT", item.youtube_subscribers, item.youtube_url],
-    ["Spotify", item.spotify_monthly_listens, item.spotify_url],
+    ["Spotify streams", item.spotify_monthly_listens, item.spotify_url],
     ["Apple", item.apple_music_followers, item.apple_music_url],
   ];
   const totalReach =
