@@ -1,4 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 
 export const Route = createFileRoute("/partner")({
   head: () => ({
@@ -61,7 +63,9 @@ const TIERS: Tier[] = [
 
 function PartnerPage() {
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <>
+      <SiteHeader />
+      <main className="min-h-screen bg-background text-foreground">
       <section className="mx-auto max-w-5xl px-4 py-16 md:py-24">
         <h1 className="text-center font-display text-2xl font-bold text-primary md:text-3xl">
           How Brands Create Racket
@@ -118,5 +122,7 @@ function PartnerPage() {
         </Link>
       </section>
     </main>
+    <SiteFooter />
+  </>
   );
 }
