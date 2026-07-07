@@ -131,7 +131,7 @@ type RosterItem = {
   position: number;
   status: string;
   budget: number | null;
-  category: "musician" | "ugc" | "egc" | "music_fan" | "artist_exchange" | null;
+  category: string | null;
   metrics_month: string | null;
   location: "GB" | "US" | "NZ" | "AU" | null;
 };
