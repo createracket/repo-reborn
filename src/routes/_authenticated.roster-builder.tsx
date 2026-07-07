@@ -19,6 +19,7 @@ import {
   GripVertical,
   RefreshCw,
   Filter,
+  X,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
@@ -94,6 +95,7 @@ type Roster = {
   client_email: string | null;
   brand_email: string | null;
   est_engagement_pct: number | null;
+  categories: string[] | null;
 };
 
 type Brief = {
@@ -130,7 +132,7 @@ type RosterItem = {
   position: number;
   status: string;
   budget: number | null;
-  category: "musician" | "ugc" | "egc" | "music_fan" | "artist_exchange" | null;
+  category: string | null;
   metrics_month: string | null;
   location: "GB" | "US" | "NZ" | "AU" | null;
 };
@@ -170,20 +172,29 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 
-type CategoryValue = "musician" | "ugc" | "egc" | "music_fan" | "artist_exchange";
-const CATEGORY_OPTIONS: Array<{ value: CategoryValue; label: string; badge: string }> = [
+// Legacy built-in categories — retained only so existing rows keep pretty
+// labels/colors. Rosters now define their own `categories` list.
+type LegacyCategoryValue = "musician" | "ugc" | "egc" | "music_fan" | "artist_exchange";
+const LEGACY_CATEGORY_OPTIONS: Array<{ value: LegacyCategoryValue; label: string; badge: string }> = [
   { value: "musician", label: "Musician", badge: "bg-pink-accent text-[#2b2b2b]" },
   { value: "ugc", label: "UGC", badge: "bg-purple text-white" },
   { value: "egc", label: "EGC", badge: "bg-sky-500 text-white" },
   { value: "music_fan", label: "Music Fan", badge: "bg-emerald-500 text-white" },
   { value: "artist_exchange", label: "Artist Exchange", badge: "bg-rose-500 text-white" },
 ];
-const CATEGORY_LABEL: Record<CategoryValue, string> = Object.fromEntries(
-  CATEGORY_OPTIONS.map((c) => [c.value, c.label]),
-) as Record<CategoryValue, string>;
-const CATEGORY_BADGE: Record<CategoryValue, string> = Object.fromEntries(
-  CATEGORY_OPTIONS.map((c) => [c.value, c.badge]),
-) as Record<CategoryValue, string>;
+const LEGACY_CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
+  LEGACY_CATEGORY_OPTIONS.map((c) => [c.value, c.label]),
+);
+const LEGACY_CATEGORY_BADGE: Record<string, string> = Object.fromEntries(
+  LEGACY_CATEGORY_OPTIONS.map((c) => [c.value, c.badge]),
+);
+const DEFAULT_CATEGORY_BADGE = "bg-muted text-foreground";
+function categoryLabel(value: string) {
+  return LEGACY_CATEGORY_LABEL[value] ?? value;
+}
+function categoryBadgeClass(value: string) {
+  return LEGACY_CATEGORY_BADGE[value] ?? DEFAULT_CATEGORY_BADGE;
+}
 
 
 type Share = {
@@ -640,7 +651,15 @@ function RosterDetailView({
   );
   const [savingMeta, setSavingMeta] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
-  const [categoryFilter, setCategoryFilter] = useState<"all" | CategoryValue>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [newCategory, setNewCategory] = useState("");
+  const rosterCategories = roster.categories ?? [];
+  // Also surface any category value currently on items (e.g. legacy values) so
+  // it stays filterable and editable even if not in the roster's list.
+  const itemCategoryValues = Array.from(
+    new Set(items.map((it) => it.category).filter((v): v is string => !!v)),
+  );
+  const filterCategoryOptions = Array.from(new Set([...rosterCategories, ...itemCategoryValues]));
 
   useEffect(() => {
     setTitle(roster.title);
@@ -719,6 +738,37 @@ function RosterDetailView({
     }
     onChanged();
   }
+
+  async function saveCategories(next: string[]) {
+    const cleaned = Array.from(
+      new Set(next.map((c) => c.trim()).filter((c) => c.length > 0 && c.length <= 40)),
+    );
+    const { error } = await supabase
+      .from("rosters")
+      .update({ categories: cleaned } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
+  async function addCategory() {
+    const value = newCategory.trim();
+    if (!value) return;
+    if (rosterCategories.includes(value)) {
+      setNewCategory("");
+      return;
+    }
+    await saveCategories([...rosterCategories, value]);
+    setNewCategory("");
+  }
+
+  async function removeCategory(value: string) {
+    await saveCategories(rosterCategories.filter((c) => c !== value));
+  }
+
 
   async function toggleHideStatuses(hide: boolean) {
     const { error } = await supabase
@@ -968,6 +1018,52 @@ function RosterDetailView({
                 Manual value shown next to Total followers and Est. reach on the public roster page.
               </p>
             </div>
+            <div className="space-y-2">
+              <Label>Categories</Label>
+              <p className="text-xs text-muted-foreground">
+                Tailor the category tags used on this roster's creators and public filter.
+              </p>
+              {rosterCategories.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {rosterCategories.map((c) => (
+                    <Badge
+                      key={c}
+                      variant="outline"
+                      className="gap-1 border-border/60 pl-2 pr-1 py-1 text-xs"
+                    >
+                      <span>{categoryLabel(c)}</span>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${c}`}
+                        className="ml-1 rounded-sm p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        onClick={() => removeCategory(c)}
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No categories yet — add one below.</p>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void addCategory();
+                    }
+                  }}
+                  placeholder="e.g. Musician, UGC, Skate"
+                  maxLength={40}
+                />
+                <Button type="button" variant="outline" onClick={addCategory} disabled={!newCategory.trim()}>
+                  Add
+                </Button>
+              </div>
+            </div>
             <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
               <div>
                 <div className="text-sm font-medium">Hide prospect tags</div>
@@ -1017,15 +1113,15 @@ function RosterDetailView({
               </div>
               <div className="flex items-center gap-2">
                 <Filter className="size-4 text-muted-foreground" />
-                <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as "all" | CategoryValue)}>
+                <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
                   <SelectTrigger className="w-[160px] text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    {CATEGORY_OPTIONS.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>
-                        {c.label}
+                    {filterCategoryOptions.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {categoryLabel(c)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1044,6 +1140,7 @@ function RosterDetailView({
                 onReorder={persistOrder}
                 onRemove={removeItem}
                 onChanged={onChanged}
+                categories={rosterCategories}
               />
             ) : (
               <ul className="space-y-3">
@@ -1055,6 +1152,7 @@ function RosterDetailView({
                       item={it}
                       onRemove={() => removeItem(it.id)}
                       onChanged={onChanged}
+                      categories={rosterCategories}
                     />
                   ))}
               </ul>
@@ -1090,11 +1188,13 @@ function DraggableRosterList({
   onReorder,
   onRemove,
   onChanged,
+  categories,
 }: {
   items: RosterItem[];
   onReorder: (next: RosterItem[]) => void;
   onRemove: (id: string) => void;
   onChanged: () => void;
+  categories: string[];
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -1120,6 +1220,7 @@ function DraggableRosterList({
               item={it}
               onRemove={() => onRemove(it.id)}
               onChanged={onChanged}
+              categories={categories}
             />
           ))}
         </ul>
@@ -1132,10 +1233,12 @@ function SortableRosterRow({
   item,
   onRemove,
   onChanged,
+  categories,
 }: {
   item: RosterItem;
   onRemove: () => void;
   onChanged: () => void;
+  categories: string[];
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -1151,6 +1254,7 @@ function SortableRosterRow({
         item={item}
         onRemove={onRemove}
         onChanged={onChanged}
+        categories={categories}
         dragHandleProps={{ ...attributes, ...listeners }}
       />
     </li>
@@ -1158,7 +1262,7 @@ function SortableRosterRow({
 }
 
 
-function RosterItemRow({ item, onRemove, onChanged, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; dragHandleProps?: Record<string, unknown> }) {
+function RosterItemRow({ item, onRemove, onChanged, categories, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; categories: string[]; dragHandleProps?: Record<string, unknown> }) {
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -1236,8 +1340,8 @@ function RosterItemRow({ item, onRemove, onChanged, dragHandleProps }: { item: R
               </Badge>
             )}
             {item.category && (
-              <Badge className={`border-transparent text-[10px] uppercase ${CATEGORY_BADGE[item.category]}`}>
-                {CATEGORY_LABEL[item.category]}
+              <Badge className={`border-transparent text-[10px] uppercase ${categoryBadgeClass(item.category)}`}>
+                {categoryLabel(item.category)}
               </Badge>
             )}
 
@@ -1373,9 +1477,9 @@ function RosterItemRow({ item, onRemove, onChanged, dragHandleProps }: { item: R
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none" className="text-xs">No category</SelectItem>
-              {CATEGORY_OPTIONS.map((c) => (
-                <SelectItem key={c.value} value={c.value} className="text-xs">
-                  {c.label}
+              {Array.from(new Set([...(categories ?? []), ...(item.category ? [item.category] : [])])).map((c) => (
+                <SelectItem key={c} value={c} className="text-xs">
+                  {categoryLabel(c)}
                 </SelectItem>
               ))}
             </SelectContent>

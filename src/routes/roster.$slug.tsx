@@ -27,6 +27,7 @@ type PublicRoster = {
   hide_prospect_tags: boolean;
   hide_statuses: boolean;
   est_engagement_pct: number | null;
+  categories: string[] | null;
 };
 
 type PublicItem = {
@@ -75,6 +76,9 @@ const CATEGORY_LABEL: Record<string, string> = {
   music_fan: "Music Fan",
   artist_exchange: "Artist Exchange",
 };
+function categoryLabel(value: string) {
+  return CATEGORY_LABEL[value] ?? value;
+}
 
 const STATUS_BADGE: Record<string, string> = {
   in_review: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
@@ -105,30 +109,19 @@ function formatCount(n: number) {
 }
 
 
-type CategoryFilter = "all" | "musician" | "ugc" | "egc" | "music_fan" | "artist_exchange";
-
-const FILTER_OPTIONS: Array<{ value: CategoryFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "musician", label: "Musician" },
-  { value: "ugc", label: "UGC" },
-  { value: "egc", label: "EGC" },
-  { value: "music_fan", label: "Music Fan" },
-  { value: "artist_exchange", label: "Artist Exchange" },
-];
-
 function PublicRosterPage() {
   const { slug } = Route.useParams();
   const [roster, setRoster] = useState<PublicRoster | null>(null);
   const [items, setItems] = useState<PublicItem[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   useEffect(() => {
     (async () => {
       const { data: r } = await (supabase as any)
         .from("public_rosters")
         .select(
-          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags, hide_statuses, est_engagement_pct",
+          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags, hide_statuses, est_engagement_pct, categories",
         )
         .eq("slug", slug)
         .eq("published", true)
@@ -419,24 +412,36 @@ function PublicRosterPage() {
 
           return (
             <>
-              <div className="mt-10 flex items-center justify-end gap-3">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Filter className="size-4" />
-                  <span>Filter</span>
-                </div>
-                <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}>
-                  <SelectTrigger className="w-[180px] text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FILTER_OPTIONS.map((f) => (
-                      <SelectItem key={f.value} value={f.value}>
-                        {f.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {(() => {
+                const filterValues = Array.from(
+                  new Set([
+                    ...(roster.categories ?? []),
+                    ...items.map((i) => i.category).filter((v): v is string => !!v),
+                  ]),
+                );
+                if (filterValues.length === 0) return null;
+                return (
+                  <div className="mt-10 flex items-center justify-end gap-3">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Filter className="size-4" />
+                      <span>Filter</span>
+                    </div>
+                    <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
+                      <SelectTrigger className="w-[180px] text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All</SelectItem>
+                        {filterValues.map((v) => (
+                          <SelectItem key={v} value={v}>
+                            {categoryLabel(v)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              })()}
               <section className="mt-4 space-y-3">
                 {items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No creators on this roster yet.</p>

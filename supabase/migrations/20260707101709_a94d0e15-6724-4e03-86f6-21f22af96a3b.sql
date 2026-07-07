@@ -1,0 +1,1 @@
+ALTER TABLE public.rosters ADD COLUMN IF NOT EXISTS categories text[] NOT NULL DEFAULT '{}'::text[];
