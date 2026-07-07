@@ -27,6 +27,7 @@ type PublicRoster = {
   hide_prospect_tags: boolean;
   hide_statuses: boolean;
   est_engagement_pct: number | null;
+  categories: string[] | null;
 };
 
 type PublicItem = {
