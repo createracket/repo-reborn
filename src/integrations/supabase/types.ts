@@ -1121,6 +1121,7 @@ export type Database = {
         Row: {
           brand_email: string | null
           brief_id: string | null
+          categories: string[]
           client_email: string | null
           created_at: string
           description: string | null
@@ -1139,6 +1140,7 @@ export type Database = {
         Insert: {
           brand_email?: string | null
           brief_id?: string | null
+          categories?: string[]
           client_email?: string | null
           created_at?: string
           description?: string | null
@@ -1157,6 +1159,7 @@ export type Database = {
         Update: {
           brand_email?: string | null
           brief_id?: string | null
+          categories?: string[]
           client_email?: string | null
           created_at?: string
           description?: string | null
