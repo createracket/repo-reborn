@@ -109,30 +109,19 @@ function formatCount(n: number) {
 }
 
 
-type CategoryFilter = "all" | "musician" | "ugc" | "egc" | "music_fan" | "artist_exchange";
-
-const FILTER_OPTIONS: Array<{ value: CategoryFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "musician", label: "Musician" },
-  { value: "ugc", label: "UGC" },
-  { value: "egc", label: "EGC" },
-  { value: "music_fan", label: "Music Fan" },
-  { value: "artist_exchange", label: "Artist Exchange" },
-];
-
 function PublicRosterPage() {
   const { slug } = Route.useParams();
   const [roster, setRoster] = useState<PublicRoster | null>(null);
   const [items, setItems] = useState<PublicItem[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   useEffect(() => {
     (async () => {
       const { data: r } = await (supabase as any)
         .from("public_rosters")
         .select(
-          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags, hide_statuses, est_engagement_pct",
+          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags, hide_statuses, est_engagement_pct, categories",
         )
         .eq("slug", slug)
         .eq("published", true)
