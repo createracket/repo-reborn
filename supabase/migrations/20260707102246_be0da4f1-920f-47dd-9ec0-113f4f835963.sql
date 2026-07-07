@@ -1,0 +1,3 @@
+CREATE POLICY "Admins manage all campaign reports" ON public.campaign_reports FOR ALL USING (public.has_role(auth.uid(), 'admin')) WITH CHECK (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "Admins manage all campaign report creators" ON public.campaign_report_creators FOR ALL USING (public.has_role(auth.uid(), 'admin')) WITH CHECK (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "Admins manage all campaign report posts" ON public.campaign_report_posts FOR ALL USING (public.has_role(auth.uid(), 'admin')) WITH CHECK (public.has_role(auth.uid(), 'admin'));
