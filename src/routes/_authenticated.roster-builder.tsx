@@ -1391,9 +1391,9 @@ function RosterItemRow({ item, onRemove, onChanged, dragHandleProps }: { item: R
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none" className="text-xs">No category</SelectItem>
-              {CATEGORY_OPTIONS.map((c) => (
-                <SelectItem key={c.value} value={c.value} className="text-xs">
-                  {c.label}
+              {Array.from(new Set([...(categories ?? []), ...(item.category ? [item.category] : [])])).map((c) => (
+                <SelectItem key={c} value={c} className="text-xs">
+                  {categoryLabel(c)}
                 </SelectItem>
               ))}
             </SelectContent>
