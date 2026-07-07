@@ -102,6 +102,33 @@ function PartnerPage() {
           ))}
         </div>
 
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {TIERS.map((t) => (
+            <div
+              key={`${t.label}-detail`}
+              className="rounded-xl border border-border/60 bg-card/30 p-5"
+            >
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="font-display text-xl font-bold text-foreground">
+                  {t.label}
+                </span>
+                {t.tag && (
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/60">
+                    {t.tag}
+                  </span>
+                )}
+              </div>
+              {t.desc && (
+                <p className="mt-3 text-sm leading-relaxed text-foreground/80">
+                  {t.desc}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+
+
+
         <Link
           to="/connect"
           className="mt-10 block rounded-full py-4 text-center font-display text-lg font-semibold text-foreground underline underline-offset-4 shadow-md transition hover:opacity-90"
