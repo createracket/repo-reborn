@@ -123,7 +123,7 @@ function PartnerPage() {
 
 
         <Link
-          to="/connect"
+          to="/login"
           className="mt-10 block rounded-full py-4 text-center font-display text-lg font-semibold text-foreground underline underline-offset-4 shadow-md transition hover:opacity-90"
           style={{
             background:
