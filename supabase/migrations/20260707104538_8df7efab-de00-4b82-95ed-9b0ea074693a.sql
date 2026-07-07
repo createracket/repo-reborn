@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Authenticated users view published campaign reports" ON public.campaign_reports;
