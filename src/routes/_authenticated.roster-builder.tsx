@@ -1108,11 +1108,13 @@ function DraggableRosterList({
   onReorder,
   onRemove,
   onChanged,
+  categories,
 }: {
   items: RosterItem[];
   onReorder: (next: RosterItem[]) => void;
   onRemove: (id: string) => void;
   onChanged: () => void;
+  categories: string[];
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -1138,6 +1140,7 @@ function DraggableRosterList({
               item={it}
               onRemove={() => onRemove(it.id)}
               onChanged={onChanged}
+              categories={categories}
             />
           ))}
         </ul>
@@ -1150,10 +1153,12 @@ function SortableRosterRow({
   item,
   onRemove,
   onChanged,
+  categories,
 }: {
   item: RosterItem;
   onRemove: () => void;
   onChanged: () => void;
+  categories: string[];
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -1169,6 +1174,7 @@ function SortableRosterRow({
         item={item}
         onRemove={onRemove}
         onChanged={onChanged}
+        categories={categories}
         dragHandleProps={{ ...attributes, ...listeners }}
       />
     </li>
@@ -1176,7 +1182,7 @@ function SortableRosterRow({
 }
 
 
-function RosterItemRow({ item, onRemove, onChanged, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; dragHandleProps?: Record<string, unknown> }) {
+function RosterItemRow({ item, onRemove, onChanged, categories, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; categories: string[]; dragHandleProps?: Record<string, unknown> }) {
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
