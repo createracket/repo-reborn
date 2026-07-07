@@ -171,20 +171,29 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 
-type CategoryValue = "musician" | "ugc" | "egc" | "music_fan" | "artist_exchange";
-const CATEGORY_OPTIONS: Array<{ value: CategoryValue; label: string; badge: string }> = [
+// Legacy built-in categories — retained only so existing rows keep pretty
+// labels/colors. Rosters now define their own `categories` list.
+type LegacyCategoryValue = "musician" | "ugc" | "egc" | "music_fan" | "artist_exchange";
+const LEGACY_CATEGORY_OPTIONS: Array<{ value: LegacyCategoryValue; label: string; badge: string }> = [
   { value: "musician", label: "Musician", badge: "bg-pink-accent text-[#2b2b2b]" },
   { value: "ugc", label: "UGC", badge: "bg-purple text-white" },
   { value: "egc", label: "EGC", badge: "bg-sky-500 text-white" },
   { value: "music_fan", label: "Music Fan", badge: "bg-emerald-500 text-white" },
   { value: "artist_exchange", label: "Artist Exchange", badge: "bg-rose-500 text-white" },
 ];
-const CATEGORY_LABEL: Record<CategoryValue, string> = Object.fromEntries(
-  CATEGORY_OPTIONS.map((c) => [c.value, c.label]),
-) as Record<CategoryValue, string>;
-const CATEGORY_BADGE: Record<CategoryValue, string> = Object.fromEntries(
-  CATEGORY_OPTIONS.map((c) => [c.value, c.badge]),
-) as Record<CategoryValue, string>;
+const LEGACY_CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
+  LEGACY_CATEGORY_OPTIONS.map((c) => [c.value, c.label]),
+);
+const LEGACY_CATEGORY_BADGE: Record<string, string> = Object.fromEntries(
+  LEGACY_CATEGORY_OPTIONS.map((c) => [c.value, c.badge]),
+);
+const DEFAULT_CATEGORY_BADGE = "bg-muted text-foreground";
+function categoryLabel(value: string) {
+  return LEGACY_CATEGORY_LABEL[value] ?? value;
+}
+function categoryBadgeClass(value: string) {
+  return LEGACY_CATEGORY_BADGE[value] ?? DEFAULT_CATEGORY_BADGE;
+}
 
 
 type Share = {
