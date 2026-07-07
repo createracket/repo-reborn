@@ -650,7 +650,15 @@ function RosterDetailView({
   );
   const [savingMeta, setSavingMeta] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
-  const [categoryFilter, setCategoryFilter] = useState<"all" | CategoryValue>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [newCategory, setNewCategory] = useState("");
+  const rosterCategories = roster.categories ?? [];
+  // Also surface any category value currently on items (e.g. legacy values) so
+  // it stays filterable and editable even if not in the roster's list.
+  const itemCategoryValues = Array.from(
+    new Set(items.map((it) => it.category).filter((v): v is string => !!v)),
+  );
+  const filterCategoryOptions = Array.from(new Set([...rosterCategories, ...itemCategoryValues]));
 
   useEffect(() => {
     setTitle(roster.title);
