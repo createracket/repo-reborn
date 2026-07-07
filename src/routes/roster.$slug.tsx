@@ -76,6 +76,9 @@ const CATEGORY_LABEL: Record<string, string> = {
   music_fan: "Music Fan",
   artist_exchange: "Artist Exchange",
 };
+function categoryLabel(value: string) {
+  return CATEGORY_LABEL[value] ?? value;
+}
 
 const STATUS_BADGE: Record<string, string> = {
   in_review: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
