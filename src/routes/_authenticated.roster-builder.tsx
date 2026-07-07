@@ -738,6 +738,37 @@ function RosterDetailView({
     onChanged();
   }
 
+  async function saveCategories(next: string[]) {
+    const cleaned = Array.from(
+      new Set(next.map((c) => c.trim()).filter((c) => c.length > 0 && c.length <= 40)),
+    );
+    const { error } = await supabase
+      .from("rosters")
+      .update({ categories: cleaned } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
+  async function addCategory() {
+    const value = newCategory.trim();
+    if (!value) return;
+    if (rosterCategories.includes(value)) {
+      setNewCategory("");
+      return;
+    }
+    await saveCategories([...rosterCategories, value]);
+    setNewCategory("");
+  }
+
+  async function removeCategory(value: string) {
+    await saveCategories(rosterCategories.filter((c) => c !== value));
+  }
+
+
   async function toggleHideStatuses(hide: boolean) {
     const { error } = await supabase
       .from("rosters")
