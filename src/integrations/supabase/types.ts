@@ -1127,6 +1127,7 @@ export type Database = {
           est_engagement_pct: number | null
           header_image_url: string | null
           hide_prospect_tags: boolean
+          hide_statuses: boolean
           id: string
           owner_id: string
           published: boolean
@@ -1144,6 +1145,7 @@ export type Database = {
           est_engagement_pct?: number | null
           header_image_url?: string | null
           hide_prospect_tags?: boolean
+          hide_statuses?: boolean
           id?: string
           owner_id: string
           published?: boolean
@@ -1161,6 +1163,7 @@ export type Database = {
           est_engagement_pct?: number | null
           header_image_url?: string | null
           hide_prospect_tags?: boolean
+          hide_statuses?: boolean
           id?: string
           owner_id?: string
           published?: boolean
@@ -1463,6 +1466,7 @@ export type Database = {
           est_engagement_pct: number | null
           header_image_url: string | null
           hide_prospect_tags: boolean | null
+          hide_statuses: boolean | null
           id: string | null
           owner_id: string | null
           published: boolean | null
@@ -1477,6 +1481,7 @@ export type Database = {
           est_engagement_pct?: number | null
           header_image_url?: string | null
           hide_prospect_tags?: boolean | null
+          hide_statuses?: boolean | null
           id?: string | null
           owner_id?: string | null
           published?: boolean | null
@@ -1491,6 +1496,7 @@ export type Database = {
           est_engagement_pct?: number | null
           header_image_url?: string | null
           hide_prospect_tags?: boolean | null
+          hide_statuses?: boolean | null
           id?: string | null
           owner_id?: string | null
           published?: boolean | null
