@@ -1426,11 +1426,11 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
                 <BadgeCheck className="size-3" /> Verified
               </Badge>
             )}
-            {item.category && (
-              <Badge className={`border-transparent text-[10px] uppercase ${categoryBadgeClass(item.category)}`}>
-                {categoryLabel(item.category)}
+            {itemCategories(item).map((c) => (
+              <Badge key={c} className={`border-transparent text-[10px] uppercase ${categoryBadgeClass(c)}`}>
+                {categoryLabel(c)}
               </Badge>
-            )}
+            ))}
 
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
