@@ -1220,7 +1220,7 @@ function RosterDetailView({
                 onReorder={persistOrder}
                 onRemove={removeItem}
                 onChanged={onChanged}
-                categories={rosterCategories}
+                categories={filterCategoryOptions}
                 allowMulti={roster.allow_multi_category}
               />
             ) : (
@@ -1233,7 +1233,7 @@ function RosterDetailView({
                       item={it}
                       onRemove={() => removeItem(it.id)}
                       onChanged={onChanged}
-                      categories={rosterCategories}
+                      categories={filterCategoryOptions}
                       allowMulti={roster.allow_multi_category}
                     />
                   ))}
