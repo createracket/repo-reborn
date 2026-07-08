@@ -24,7 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
  * Header for inner pages (vibe-check, login, dashboard, etc).
  * The homepage has its own transparent header rendered inside the hero.
  */
-export function SiteHeader() {
+export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
   const [signedIn, setSignedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -78,104 +78,108 @@ export function SiteHeader() {
           >
             <img src={racketNavLogo.url} alt="Racket" className="h-8 w-auto" />
           </Link>
-          <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-            {!signedIn && (
-              <Link to="/signup" className="hover:text-foreground transition-colors">
-                Mailing list
-              </Link>
-            )}
-            {isAdmin && (
-              <>
-                <Link to="/admin" className="text-primary hover:text-foreground transition-colors">
-                  Admin
+          {!minimal && (
+            <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+              {!signedIn && (
+                <Link to="/signup" className="hover:text-foreground transition-colors">
+                  Mailing list
                 </Link>
-                <Link to="/roster-builder" className="hover:text-foreground transition-colors">
-                  Roster Builder
-                </Link>
-                <Link to="/campaign-reports" className="hover:text-foreground transition-colors">
-                  Campaign Reports
-                </Link>
-                <Link to="/campaign-builder" className="hover:text-foreground transition-colors">
-                  Campaign Builder
-                </Link>
-                <Link to="/connect" className="hover:text-foreground transition-colors">
-                  Connect
-                </Link>
-              </>
-            )}
-          </nav>
-          <div className="flex items-center gap-2">
-            {signedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="sm" variant="default" className="gap-1">
-                    <LayoutDashboard className="size-4" />
-                    <span className="hidden xs:inline sm:inline">Dashboard</span>
-                    <ChevronDown className="size-3 opacity-60" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+              )}
+              {isAdmin && (
+                <>
+                  <Link to="/admin" className="text-primary hover:text-foreground transition-colors">
+                    Admin
+                  </Link>
+                  <Link to="/roster-builder" className="hover:text-foreground transition-colors">
+                    Roster Builder
+                  </Link>
+                  <Link to="/campaign-reports" className="hover:text-foreground transition-colors">
+                    Campaign Reports
+                  </Link>
+                  <Link to="/campaign-builder" className="hover:text-foreground transition-colors">
+                    Campaign Builder
+                  </Link>
+                  <Link to="/connect" className="hover:text-foreground transition-colors">
+                    Connect
+                  </Link>
+                </>
+              )}
+            </nav>
+          )}
+          {!minimal && (
+            <div className="flex items-center gap-2">
+              {signedIn ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" variant="default" className="gap-1">
                       <LayoutDashboard className="size-4" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
-                    <LogOut className="size-4" />
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button asChild size="sm" variant="ghost" className="hidden sm:inline-flex">
-                <Link to="/login">Log in</Link>
-              </Button>
-            )}
+                      <span className="hidden xs:inline sm:inline">Dashboard</span>
+                      <ChevronDown className="size-3 opacity-60" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                        <LayoutDashboard className="size-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive">
+                      <LogOut className="size-4" />
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button asChild size="sm" variant="ghost" className="hidden sm:inline-flex">
+                  <Link to="/login">Log in</Link>
+                </Button>
+              )}
 
-            {hasMobileNav && (
-              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="md:hidden"
-                    aria-label="Open menu"
-                  >
-                    <Menu className="size-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-72 sm:w-80">
-                  <SheetHeader className="text-left">
-                    <SheetTitle>Menu</SheetTitle>
-                  </SheetHeader>
-                  <nav className="mt-6 flex flex-col gap-1 text-base">
-                    {!signedIn && (
-                      <>
-                        <MobileLink to="/login">Log in</MobileLink>
-                        <MobileLink to="/signup">Mailing list</MobileLink>
-                      </>
-                    )}
-                    {isAdmin && (
-                      <>
-                        <MobileLink to="/dashboard">Dashboard</MobileLink>
-                        <MobileLink to="/admin" highlight>Admin</MobileLink>
-                        <MobileLink to="/roster-builder">Roster Builder</MobileLink>
-                        <MobileLink to="/campaign-reports">Campaign Reports</MobileLink>
-                        <MobileLink to="/campaign-builder">Campaign Builder</MobileLink>
-                        <MobileLink to="/connect">Connect</MobileLink>
-                        <MobileLink to="/profile">Edit Profile</MobileLink>
-                      </>
-                    )}
-                  </nav>
-                </SheetContent>
-              </Sheet>
-            )}
-          </div>
+              {hasMobileNav && (
+                <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                  <SheetTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="md:hidden"
+                      aria-label="Open menu"
+                    >
+                      <Menu className="size-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-72 sm:w-80">
+                    <SheetHeader className="text-left">
+                      <SheetTitle>Menu</SheetTitle>
+                    </SheetHeader>
+                    <nav className="mt-6 flex flex-col gap-1 text-base">
+                      {!signedIn && (
+                        <>
+                          <MobileLink to="/login">Log in</MobileLink>
+                          <MobileLink to="/signup">Mailing list</MobileLink>
+                        </>
+                      )}
+                      {isAdmin && (
+                        <>
+                          <MobileLink to="/dashboard">Dashboard</MobileLink>
+                          <MobileLink to="/admin" highlight>Admin</MobileLink>
+                          <MobileLink to="/roster-builder">Roster Builder</MobileLink>
+                          <MobileLink to="/campaign-reports">Campaign Reports</MobileLink>
+                          <MobileLink to="/campaign-builder">Campaign Builder</MobileLink>
+                          <MobileLink to="/connect">Connect</MobileLink>
+                          <MobileLink to="/profile">Edit Profile</MobileLink>
+                        </>
+                      )}
+                    </nav>
+                  </SheetContent>
+                </Sheet>
+              )}
+            </div>
+          )}
         </div>
       </header>
-      <PageBreadcrumbs />
+      {!minimal && <PageBreadcrumbs />}
     </>
   );
 }
