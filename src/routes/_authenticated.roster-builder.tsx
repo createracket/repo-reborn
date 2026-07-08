@@ -1433,6 +1433,7 @@ function RosterItemRow({ item, onRemove, onChanged, categories, dragHandleProps 
           {editing && (
             <EditProspectPanel
               item={item}
+              onSaved={onChanged}
               onClose={() => setEditing(false)}
             />
           )}
