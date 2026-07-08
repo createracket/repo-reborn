@@ -54,8 +54,15 @@ type PublicItem = {
   position: number;
   status: string;
   category: string | null;
+  categories: string[] | null;
   location: string | null;
 };
+
+function itemCats(it: PublicItem): string[] {
+  const arr = Array.isArray(it.categories) ? it.categories.filter((c): c is string => !!c) : [];
+  if (arr.length > 0) return arr;
+  return it.category ? [it.category] : [];
+}
 
 const LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺" };
 const LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia" };
