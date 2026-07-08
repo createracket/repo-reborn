@@ -97,7 +97,14 @@ type Roster = {
   est_engagement_pct: number | null;
   categories: string[] | null;
   custom_links: Array<{ label: string; url: string }> | null;
+  allow_multi_category: boolean;
 };
+
+function itemCategories(item: { categories?: string[] | null; category: string | null }): string[] {
+  const arr = Array.isArray(item.categories) ? item.categories.filter((c): c is string => !!c) : [];
+  if (arr.length > 0) return arr;
+  return item.category ? [item.category] : [];
+}
 
 type Brief = {
   id: string;
