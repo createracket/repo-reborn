@@ -363,8 +363,8 @@ function PublicRosterPage() {
                             </Badge>
                           )}
                           {it.category && (
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                              {CATEGORY_LABEL[it.category] ?? it.category}
+                            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${categoryBadgeClass(it.category)}`}>
+                              {categoryLabel(it.category)}
                             </span>
                           )}
                         </div>
