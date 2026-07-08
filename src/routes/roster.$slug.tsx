@@ -54,8 +54,15 @@ type PublicItem = {
   position: number;
   status: string;
   category: string | null;
+  categories: string[] | null;
   location: string | null;
 };
+
+function itemCats(it: PublicItem): string[] {
+  const arr = Array.isArray(it.categories) ? it.categories.filter((c): c is string => !!c) : [];
+  if (arr.length > 0) return arr;
+  return it.category ? [it.category] : [];
+}
 
 const LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺" };
 const LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia" };
@@ -147,7 +154,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, position, status, category, location",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, position, status, category, categories, location",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
@@ -294,8 +301,8 @@ function PublicRosterPage() {
         )}
 
         {(() => {
-          const activeItems = items.filter((it) => it.status !== "hold" && (categoryFilter === "all" || it.category === categoryFilter));
-          const archivedItems = items.filter((it) => it.status === "hold" && (categoryFilter === "all" || it.category === categoryFilter));
+          const activeItems = items.filter((it) => it.status !== "hold" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
+          const archivedItems = items.filter((it) => it.status === "hold" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
 
           const renderItem = (it: PublicItem) => {
             const stats: Array<[string, number | null, string | null]> = [
@@ -362,11 +369,11 @@ function PublicRosterPage() {
                               {STATUS_LABEL[it.status] ?? "In Review"}
                             </Badge>
                           )}
-                          {it.category && (
-                            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${categoryBadgeClass(it.category)}`}>
-                              {categoryLabel(it.category)}
+                          {itemCats(it).map((c) => (
+                            <span key={c} className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${categoryBadgeClass(c)}`}>
+                              {categoryLabel(c)}
                             </span>
-                          )}
+                          ))}
                         </div>
                       </div>
 
@@ -452,7 +459,7 @@ function PublicRosterPage() {
                 const filterValues = Array.from(
                   new Set([
                     ...(roster.categories ?? []),
-                    ...items.map((i) => i.category).filter((v): v is string => !!v),
+                    ...items.flatMap((i) => itemCats(i)),
                   ]),
                 );
                 if (filterValues.length === 0) return null;

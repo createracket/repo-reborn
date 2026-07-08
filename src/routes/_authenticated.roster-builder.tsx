@@ -42,6 +42,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -97,7 +98,14 @@ type Roster = {
   est_engagement_pct: number | null;
   categories: string[] | null;
   custom_links: Array<{ label: string; url: string }> | null;
+  allow_multi_category: boolean;
 };
+
+function itemCategories(item: { categories?: string[] | null; category: string | null }): string[] {
+  const arr = Array.isArray(item.categories) ? item.categories.filter((c): c is string => !!c) : [];
+  if (arr.length > 0) return arr;
+  return item.category ? [item.category] : [];
+}
 
 type Brief = {
   id: string;
@@ -134,6 +142,7 @@ type RosterItem = {
   status: string;
   budget: number | null;
   category: string | null;
+  categories: string[];
   metrics_month: string | null;
   location: "GB" | "US" | "NZ" | "AU" | null;
 };
@@ -671,7 +680,7 @@ function RosterDetailView({
   // Also surface any category value currently on items (e.g. legacy values) so
   // it stays filterable and editable even if not in the roster's list.
   const itemCategoryValues = Array.from(
-    new Set(items.map((it) => it.category).filter((v): v is string => !!v)),
+    new Set(items.flatMap((it) => itemCategories(it))),
   );
   const filterCategoryOptions = Array.from(new Set([...rosterCategories, ...itemCategoryValues]));
 
@@ -806,6 +815,19 @@ function RosterDetailView({
     }
     onChanged();
   }
+
+  async function toggleAllowMultiCategory(allow: boolean) {
+    const { error } = await supabase
+      .from("rosters")
+      .update({ allow_multi_category: allow } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
 
   async function persistOrder(next: RosterItem[]) {
     setOrderedItems(next);
@@ -1134,6 +1156,18 @@ function RosterDetailView({
                 onCheckedChange={toggleHideStatuses}
               />
             </div>
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Allow multiple categories per creator</div>
+                <div className="text-xs text-muted-foreground">
+                  Turn on when a creator can belong to more than one category (e.g. Artist and Artist Exchange).
+                </div>
+              </div>
+              <Switch
+                checked={roster.allow_multi_category}
+                onCheckedChange={toggleAllowMultiCategory}
+              />
+            </div>
             <div className="flex justify-end">
               <Button onClick={saveMeta} disabled={savingMeta || !title.trim()}>
                 Save
@@ -1187,11 +1221,12 @@ function RosterDetailView({
                 onRemove={removeItem}
                 onChanged={onChanged}
                 categories={rosterCategories}
+                allowMulti={roster.allow_multi_category}
               />
             ) : (
               <ul className="space-y-3">
                 {orderedItems
-                  .filter((it) => it.category === categoryFilter)
+                  .filter((it) => itemCategories(it).includes(categoryFilter))
                   .map((it) => (
                     <RosterItemRow
                       key={it.id}
@@ -1199,6 +1234,7 @@ function RosterDetailView({
                       onRemove={() => removeItem(it.id)}
                       onChanged={onChanged}
                       categories={rosterCategories}
+                      allowMulti={roster.allow_multi_category}
                     />
                   ))}
               </ul>
@@ -1235,12 +1271,14 @@ function DraggableRosterList({
   onRemove,
   onChanged,
   categories,
+  allowMulti,
 }: {
   items: RosterItem[];
   onReorder: (next: RosterItem[]) => void;
   onRemove: (id: string) => void;
   onChanged: () => void;
   categories: string[];
+  allowMulti: boolean;
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -1267,6 +1305,7 @@ function DraggableRosterList({
               onRemove={() => onRemove(it.id)}
               onChanged={onChanged}
               categories={categories}
+              allowMulti={allowMulti}
             />
           ))}
         </ul>
@@ -1280,11 +1319,13 @@ function SortableRosterRow({
   onRemove,
   onChanged,
   categories,
+  allowMulti,
 }: {
   item: RosterItem;
   onRemove: () => void;
   onChanged: () => void;
   categories: string[];
+  allowMulti: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -1301,6 +1342,7 @@ function SortableRosterRow({
         onRemove={onRemove}
         onChanged={onChanged}
         categories={categories}
+        allowMulti={allowMulti}
         dragHandleProps={{ ...attributes, ...listeners }}
       />
     </li>
@@ -1308,7 +1350,7 @@ function SortableRosterRow({
 }
 
 
-function RosterItemRow({ item, onRemove, onChanged, categories, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; categories: string[]; dragHandleProps?: Record<string, unknown> }) {
+function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; categories: string[]; allowMulti: boolean; dragHandleProps?: Record<string, unknown> }) {
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -1385,11 +1427,11 @@ function RosterItemRow({ item, onRemove, onChanged, categories, dragHandleProps 
                 <BadgeCheck className="size-3" /> Verified
               </Badge>
             )}
-            {item.category && (
-              <Badge className={`border-transparent text-[10px] uppercase ${categoryBadgeClass(item.category)}`}>
-                {categoryLabel(item.category)}
+            {itemCategories(item).map((c) => (
+              <Badge key={c} className={`border-transparent text-[10px] uppercase ${categoryBadgeClass(c)}`}>
+                {categoryLabel(c)}
               </Badge>
-            )}
+            ))}
 
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -1507,30 +1549,46 @@ function RosterItemRow({ item, onRemove, onChanged, categories, dragHandleProps 
               ))}
             </SelectContent>
           </Select>
-          <Select
-            value={item.category ?? "none"}
-            onValueChange={async (v) => {
-              const next = v === "none" ? null : v;
-              const { error } = await supabase
-                .from("roster_items")
-                .update({ category: next } as never)
-                .eq("id", item.id);
-              if (error) toast.error(error.message);
-              else onChanged();
-            }}
-          >
-            <SelectTrigger className="h-8 w-[150px] text-xs">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none" className="text-xs">No category</SelectItem>
-              {Array.from(new Set([...(categories ?? []), ...(item.category ? [item.category] : [])])).map((c) => (
-                <SelectItem key={c} value={c} className="text-xs">
-                  {categoryLabel(c)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {allowMulti ? (
+            <MultiCategoryPicker
+              value={itemCategories(item)}
+              options={Array.from(new Set([...(categories ?? []), ...itemCategories(item)]))}
+              onChange={async (nextArr) => {
+                const { error } = await supabase
+                  .from("roster_items")
+                  .update({ categories: nextArr, category: nextArr[0] ?? null } as never)
+                  .eq("id", item.id);
+                if (error) toast.error(error.message);
+                else onChanged();
+              }}
+            />
+          ) : (
+            <Select
+              value={item.category ?? "none"}
+              onValueChange={async (v) => {
+                const next = v === "none" ? null : v;
+                const nextArr = next ? [next] : [];
+                const { error } = await supabase
+                  .from("roster_items")
+                  .update({ category: next, categories: nextArr } as never)
+                  .eq("id", item.id);
+                if (error) toast.error(error.message);
+                else onChanged();
+              }}
+            >
+              <SelectTrigger className="h-8 w-[150px] text-xs">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none" className="text-xs">No category</SelectItem>
+                {Array.from(new Set([...(categories ?? []), ...(item.category ? [item.category] : [])])).map((c) => (
+                  <SelectItem key={c} value={c} className="text-xs">
+                    {categoryLabel(c)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Button
             size="sm"
             variant="outline"
@@ -2675,5 +2733,56 @@ function PublishPanel({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function MultiCategoryPicker({
+  value,
+  options,
+  onChange,
+}: {
+  value: string[];
+  options: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const label = value.length === 0
+    ? "No categories"
+    : value.length === 1
+      ? categoryLabel(value[0])
+      : `${value.length} categories`;
+  function toggle(c: string) {
+    const set = new Set(value);
+    if (set.has(c)) set.delete(c);
+    else set.add(c);
+    onChange(Array.from(set));
+  }
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 w-[150px] justify-between px-2 text-xs font-normal">
+          <span className="truncate">{label}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-56 p-2">
+        {options.length === 0 ? (
+          <p className="p-2 text-xs text-muted-foreground">Add categories in the Meta card first.</p>
+        ) : (
+          <ul className="space-y-1">
+            {options.map((c) => {
+              const checked = value.includes(c);
+              return (
+                <li key={c}>
+                  <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-muted">
+                    <Checkbox checked={checked} onCheckedChange={() => toggle(c)} />
+                    <span>{categoryLabel(c)}</span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 }
