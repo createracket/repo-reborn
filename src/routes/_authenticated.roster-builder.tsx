@@ -1155,6 +1155,18 @@ function RosterDetailView({
                 onCheckedChange={toggleHideStatuses}
               />
             </div>
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Allow multiple categories per creator</div>
+                <div className="text-xs text-muted-foreground">
+                  Turn on when a creator can belong to more than one category (e.g. Artist and Artist Exchange).
+                </div>
+              </div>
+              <Switch
+                checked={roster.allow_multi_category}
+                onCheckedChange={toggleAllowMultiCategory}
+              />
+            </div>
             <div className="flex justify-end">
               <Button onClick={saveMeta} disabled={savingMeta || !title.trim()}>
                 Save
