@@ -1539,9 +1539,11 @@ function RosterItemRow({ item, onRemove, onChanged, categories, dragHandleProps 
 function EditProspectPanel({
   item,
   onClose,
+  onSaved,
 }: {
   item: RosterItem;
   onClose: () => void;
+  onSaved?: () => void;
 }) {
   const [form, setForm] = useState({
     name: item.name,
