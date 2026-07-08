@@ -2735,3 +2735,54 @@ function PublishPanel({
     </Card>
   );
 }
+
+function MultiCategoryPicker({
+  value,
+  options,
+  onChange,
+}: {
+  value: string[];
+  options: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const label = value.length === 0
+    ? "No categories"
+    : value.length === 1
+      ? categoryLabel(value[0])
+      : `${value.length} categories`;
+  function toggle(c: string) {
+    const set = new Set(value);
+    if (set.has(c)) set.delete(c);
+    else set.add(c);
+    onChange(Array.from(set));
+  }
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="h-8 w-[150px] justify-between px-2 text-xs font-normal">
+          <span className="truncate">{label}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-56 p-2">
+        {options.length === 0 ? (
+          <p className="p-2 text-xs text-muted-foreground">Add categories in the Meta card first.</p>
+        ) : (
+          <ul className="space-y-1">
+            {options.map((c) => {
+              const checked = value.includes(c);
+              return (
+                <li key={c}>
+                  <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-muted">
+                    <Checkbox checked={checked} onCheckedChange={() => toggle(c)} />
+                    <span>{categoryLabel(c)}</span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
