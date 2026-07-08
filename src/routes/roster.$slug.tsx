@@ -23,11 +23,13 @@ type PublicRoster = {
   slug: string;
   published: boolean;
   published_at: string | null;
+  updated_at: string | null;
   header_image_url: string | null;
   hide_prospect_tags: boolean;
   hide_statuses: boolean;
   est_engagement_pct: number | null;
   categories: string[] | null;
+  custom_links: Array<{ label: string; url: string }> | null;
 };
 
 type PublicItem = {
