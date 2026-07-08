@@ -1220,11 +1220,12 @@ function RosterDetailView({
                 onRemove={removeItem}
                 onChanged={onChanged}
                 categories={rosterCategories}
+                allowMulti={roster.allow_multi_category}
               />
             ) : (
               <ul className="space-y-3">
                 {orderedItems
-                  .filter((it) => it.category === categoryFilter)
+                  .filter((it) => itemCategories(it).includes(categoryFilter))
                   .map((it) => (
                     <RosterItemRow
                       key={it.id}
@@ -1232,6 +1233,7 @@ function RosterDetailView({
                       onRemove={() => removeItem(it.id)}
                       onChanged={onChanged}
                       categories={rosterCategories}
+                      allowMulti={roster.allow_multi_category}
                     />
                   ))}
               </ul>
