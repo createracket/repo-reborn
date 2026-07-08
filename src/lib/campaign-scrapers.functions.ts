@@ -566,10 +566,23 @@ export const scrapeSpotifyArtist = createServerFn({ method: "POST" })
       }
     }
 
-    const [monthly_listeners, total_streams] = await Promise.all([
+    let [monthly_listeners, total_streams] = await Promise.all([
       fetchMonthlyListeners(artistId),
       fetchKworbTotalStreams(artistId),
     ]);
+
+    // Spotify's public page often blocks server-side scrapers; if the Web API
+    // and direct scrape didn't fill everything, hit the Apify actor as a
+    // reliable fallback.
+    if (monthly_listeners == null || followers == null || !name || !avatar_url) {
+      const apify = await fetchSpotifyViaApify(artistId);
+      if (apify) {
+        if (monthly_listeners == null) monthly_listeners = apify.monthly_listeners ?? null;
+        if (followers == null) followers = apify.followers ?? null;
+        if (!name) name = apify.name ?? null;
+        if (!avatar_url) avatar_url = apify.avatar_url ?? null;
+      }
+    }
 
     return {
       ok: true,
