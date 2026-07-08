@@ -459,7 +459,7 @@ function PublicRosterPage() {
                 const filterValues = Array.from(
                   new Set([
                     ...(roster.categories ?? []),
-                    ...items.map((i) => i.category).filter((v): v is string => !!v),
+                    ...items.flatMap((i) => itemCats(i)),
                   ]),
                 );
                 if (filterValues.length === 0) return null;
