@@ -64,7 +64,7 @@ const TIERS: Tier[] = [
 function PartnerPage() {
   return (
     <>
-      <SiteHeader />
+      <SiteHeader minimal />
       <main className="min-h-screen bg-background text-foreground">
       <section className="mx-auto max-w-5xl px-4 py-16 md:py-24">
         <h1 className="text-center font-display text-2xl font-bold text-primary md:text-3xl">
