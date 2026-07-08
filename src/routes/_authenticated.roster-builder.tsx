@@ -682,6 +682,13 @@ function RosterDetailView({
     setEstEngagement(
       roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
     );
+    {
+      const src = roster.custom_links ?? [];
+      setCustomLinks([0, 1, 2].map((i) => ({
+        label: src[i]?.label ?? "",
+        url: src[i]?.url ?? "",
+      })));
+    }
     // brand_email/client_email are not selectable on the base table by the
     // client for security; fetch them via the owner/admin-only RPC.
     setClientEmail("");
