@@ -454,16 +454,60 @@ async function fetchMonthlyListeners(artistId: string): Promise<number | null> {
     });
     if (!res.ok) return null;
     const html = await res.text();
-    // Try meta description first: "Artist · 1,234,567 monthly listeners."
     const m1 = html.match(/([\d,\.]+)\s+monthly listeners/i);
     if (m1) {
       const n = Number(m1[1].replace(/[,\.]/g, ""));
       if (Number.isFinite(n)) return n;
     }
-    // Fallback: JSON-embedded "monthlyListeners":N
     const m2 = html.match(/"monthlyListeners"\s*:\s*(\d+)/);
     if (m2) return Number(m2[1]);
     return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reliable fallback for Spotify artist metrics via Apify. Spotify frequently
+ * gates its public page against server-side scrapers, so this actor picks up
+ * the slack for monthly listeners / followers / name / avatar.
+ */
+async function fetchSpotifyViaApify(artistId: string): Promise<{
+  name?: string | null;
+  followers?: number | null;
+  monthly_listeners?: number | null;
+  avatar_url?: string | null;
+} | null> {
+  const token = process.env.APIFY_API_TOKEN;
+  if (!token) return null;
+  try {
+    const res = await fetch(
+      `https://api.apify.com/v2/acts/automation-lab~spotify-scraper/run-sync-get-dataset-items?token=${token}&timeout=120`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          urls: [`https://open.spotify.com/artist/${artistId}`],
+        }),
+      },
+    );
+    if (!res.ok) return null;
+    const items = (await res.json()) as Array<{
+      type?: string;
+      name?: string;
+      monthlyListeners?: number;
+      followers?: number;
+      imageUrl?: string;
+    }>;
+    const a = items.find((i) => i.type === "artist") ?? items[0];
+    if (!a) return null;
+    return {
+      name: a.name ?? null,
+      followers: typeof a.followers === "number" ? a.followers : null,
+      monthly_listeners:
+        typeof a.monthlyListeners === "number" ? a.monthlyListeners : null,
+      avatar_url: a.imageUrl ?? null,
+    };
   } catch {
     return null;
   }
@@ -522,10 +566,23 @@ export const scrapeSpotifyArtist = createServerFn({ method: "POST" })
       }
     }
 
-    const [monthly_listeners, total_streams] = await Promise.all([
+    let [monthly_listeners, total_streams] = await Promise.all([
       fetchMonthlyListeners(artistId),
       fetchKworbTotalStreams(artistId),
     ]);
+
+    // Spotify's public page often blocks server-side scrapers; if the Web API
+    // and direct scrape didn't fill everything, hit the Apify actor as a
+    // reliable fallback.
+    if (monthly_listeners == null || followers == null || !name || !avatar_url) {
+      const apify = await fetchSpotifyViaApify(artistId);
+      if (apify) {
+        if (monthly_listeners == null) monthly_listeners = apify.monthly_listeners ?? null;
+        if (followers == null) followers = apify.followers ?? null;
+        if (!name) name = apify.name ?? null;
+        if (!avatar_url) avatar_url = apify.avatar_url ?? null;
+      }
+    }
 
     return {
       ok: true,
