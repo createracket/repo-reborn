@@ -369,11 +369,11 @@ function PublicRosterPage() {
                               {STATUS_LABEL[it.status] ?? "In Review"}
                             </Badge>
                           )}
-                          {it.category && (
-                            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${categoryBadgeClass(it.category)}`}>
-                              {categoryLabel(it.category)}
+                          {itemCats(it).map((c) => (
+                            <span key={c} className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${categoryBadgeClass(c)}`}>
+                              {categoryLabel(c)}
                             </span>
-                          )}
+                          ))}
                         </div>
                       </div>
 
