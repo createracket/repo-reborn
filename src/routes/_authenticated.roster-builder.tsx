@@ -96,6 +96,7 @@ type Roster = {
   brand_email: string | null;
   est_engagement_pct: number | null;
   categories: string[] | null;
+  custom_links: Array<{ label: string; url: string }> | null;
 };
 
 type Brief = {
