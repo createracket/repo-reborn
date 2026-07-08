@@ -1318,11 +1318,13 @@ function SortableRosterRow({
   onRemove,
   onChanged,
   categories,
+  allowMulti,
 }: {
   item: RosterItem;
   onRemove: () => void;
   onChanged: () => void;
   categories: string[];
+  allowMulti: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -1339,6 +1341,7 @@ function SortableRosterRow({
         onRemove={onRemove}
         onChanged={onChanged}
         categories={categories}
+        allowMulti={allowMulti}
         dragHandleProps={{ ...attributes, ...listeners }}
       />
     </li>
@@ -1346,7 +1349,7 @@ function SortableRosterRow({
 }
 
 
-function RosterItemRow({ item, onRemove, onChanged, categories, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; categories: string[]; dragHandleProps?: Record<string, unknown> }) {
+function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; categories: string[]; allowMulti: boolean; dragHandleProps?: Record<string, unknown> }) {
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
