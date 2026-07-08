@@ -815,6 +815,19 @@ function RosterDetailView({
     onChanged();
   }
 
+  async function toggleAllowMultiCategory(allow: boolean) {
+    const { error } = await supabase
+      .from("rosters")
+      .update({ allow_multi_category: allow } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
+
   async function persistOrder(next: RosterItem[]) {
     setOrderedItems(next);
     const updates = next.map((it, idx) =>
