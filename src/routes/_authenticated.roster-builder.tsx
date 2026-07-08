@@ -1063,6 +1063,7 @@ function RosterDetailView({
                   />
                 </div>
               ))}
+            </div>
             <div className="space-y-2">
               <Label>Categories</Label>
               <p className="text-xs text-muted-foreground">
