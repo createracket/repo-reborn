@@ -1270,12 +1270,14 @@ function DraggableRosterList({
   onRemove,
   onChanged,
   categories,
+  allowMulti,
 }: {
   items: RosterItem[];
   onReorder: (next: RosterItem[]) => void;
   onRemove: (id: string) => void;
   onChanged: () => void;
   categories: string[];
+  allowMulti: boolean;
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -1302,6 +1304,7 @@ function DraggableRosterList({
               onRemove={() => onRemove(it.id)}
               onChanged={onChanged}
               categories={categories}
+              allowMulti={allowMulti}
             />
           ))}
         </ul>
