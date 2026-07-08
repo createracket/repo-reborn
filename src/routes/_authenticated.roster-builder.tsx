@@ -1044,6 +1044,26 @@ function RosterDetailView({
               </p>
             </div>
             <div className="space-y-2">
+              <Label>Custom links (up to 3)</Label>
+              <p className="text-xs text-muted-foreground">
+                Shown near the top of the public roster page, under the description and above the metrics. Leave blank to skip.
+              </p>
+              {customLinks.map((link, i) => (
+                <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr]">
+                  <Input
+                    value={link.label}
+                    onChange={(e) => setCustomLinks((prev) => prev.map((l, idx) => idx === i ? { ...l, label: e.target.value } : l))}
+                    placeholder={`Link ${i + 1} title`}
+                    maxLength={60}
+                  />
+                  <Input
+                    value={link.url}
+                    onChange={(e) => setCustomLinks((prev) => prev.map((l, idx) => idx === i ? { ...l, url: e.target.value } : l))}
+                    placeholder="https://…"
+                  />
+                </div>
+              ))}
+            <div className="space-y-2">
               <Label>Categories</Label>
               <p className="text-xs text-muted-foreground">
                 Tailor the category tags used on this roster's creators and public filter.
