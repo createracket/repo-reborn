@@ -381,16 +381,16 @@ function PublicRosterPage() {
                               Example video
                             </a>
                           )}
-                          {it.content_review_url && (
-                            <a
-                              href={it.content_review_url}
-                              target="_blank"
-                              rel="noreferrer noopener"
-                              className="text-primary hover:underline"
-                            >
-                              Content to review
-                            </a>
-                          )}
+                      {it.content_review_url && (
+                        <a
+                          href={it.content_review_url}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          className="text-pink-accent hover:underline"
+                        >
+                          Content to review
+                        </a>
+                      )}
                           {it.bio_page_url && (
                             <a
                               href={it.bio_page_url}
