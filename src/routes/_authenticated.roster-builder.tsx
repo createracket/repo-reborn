@@ -141,6 +141,7 @@ type RosterItem = {
   status: string;
   budget: number | null;
   category: string | null;
+  categories: string[];
   metrics_month: string | null;
   location: "GB" | "US" | "NZ" | "AU" | null;
 };
