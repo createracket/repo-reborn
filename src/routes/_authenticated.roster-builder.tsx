@@ -650,6 +650,19 @@ function RosterDetailView({
   const [estEngagement, setEstEngagement] = useState(
     roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
   );
+  const emptyLinks = [
+    { label: "", url: "" },
+    { label: "", url: "" },
+    { label: "", url: "" },
+  ];
+  const initialLinks = (() => {
+    const src = roster.custom_links ?? [];
+    return emptyLinks.map((_, i) => ({
+      label: src[i]?.label ?? "",
+      url: src[i]?.url ?? "",
+    }));
+  })();
+  const [customLinks, setCustomLinks] = useState(initialLinks);
   const [savingMeta, setSavingMeta] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
