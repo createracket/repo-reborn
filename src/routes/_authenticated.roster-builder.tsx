@@ -1548,30 +1548,46 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
               ))}
             </SelectContent>
           </Select>
-          <Select
-            value={item.category ?? "none"}
-            onValueChange={async (v) => {
-              const next = v === "none" ? null : v;
-              const { error } = await supabase
-                .from("roster_items")
-                .update({ category: next } as never)
-                .eq("id", item.id);
-              if (error) toast.error(error.message);
-              else onChanged();
-            }}
-          >
-            <SelectTrigger className="h-8 w-[150px] text-xs">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none" className="text-xs">No category</SelectItem>
-              {Array.from(new Set([...(categories ?? []), ...(item.category ? [item.category] : [])])).map((c) => (
-                <SelectItem key={c} value={c} className="text-xs">
-                  {categoryLabel(c)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {allowMulti ? (
+            <MultiCategoryPicker
+              value={itemCategories(item)}
+              options={Array.from(new Set([...(categories ?? []), ...itemCategories(item)]))}
+              onChange={async (nextArr) => {
+                const { error } = await supabase
+                  .from("roster_items")
+                  .update({ categories: nextArr, category: nextArr[0] ?? null } as never)
+                  .eq("id", item.id);
+                if (error) toast.error(error.message);
+                else onChanged();
+              }}
+            />
+          ) : (
+            <Select
+              value={item.category ?? "none"}
+              onValueChange={async (v) => {
+                const next = v === "none" ? null : v;
+                const nextArr = next ? [next] : [];
+                const { error } = await supabase
+                  .from("roster_items")
+                  .update({ category: next, categories: nextArr } as never)
+                  .eq("id", item.id);
+                if (error) toast.error(error.message);
+                else onChanged();
+              }}
+            >
+              <SelectTrigger className="h-8 w-[150px] text-xs">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none" className="text-xs">No category</SelectItem>
+                {Array.from(new Set([...(categories ?? []), ...(item.category ? [item.category] : [])])).map((c) => (
+                  <SelectItem key={c} value={c} className="text-xs">
+                    {categoryLabel(c)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Button
             size="sm"
             variant="outline"
