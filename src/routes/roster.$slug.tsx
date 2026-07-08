@@ -78,8 +78,18 @@ const CATEGORY_LABEL: Record<string, string> = {
   music_fan: "Music Fan",
   artist_exchange: "Artist Exchange",
 };
+const CATEGORY_BADGE: Record<string, string> = {
+  musician: "bg-pink-accent text-[#2b2b2b]",
+  ugc: "bg-purple text-white",
+  egc: "bg-sky-500 text-white",
+  music_fan: "bg-emerald-500 text-white",
+  artist_exchange: "bg-rose-500 text-white",
+};
 function categoryLabel(value: string) {
   return CATEGORY_LABEL[value] ?? value;
+}
+function categoryBadgeClass(value: string) {
+  return CATEGORY_BADGE[value] ?? "bg-muted text-foreground";
 }
 
 const STATUS_BADGE: Record<string, string> = {
