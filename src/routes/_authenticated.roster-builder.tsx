@@ -728,6 +728,9 @@ function RosterDetailView({
   async function saveMeta() {
     setSavingMeta(true);
     const engParsed = estEngagement.trim() === "" ? null : Number(estEngagement);
+    const cleanedLinks = customLinks
+      .map((l) => ({ label: l.label.trim(), url: l.url.trim() }))
+      .filter((l) => l.url.length > 0);
     const { error } = await supabase
       .from("rosters")
       .update({
@@ -737,6 +740,7 @@ function RosterDetailView({
         client_email: clientEmail.trim().toLowerCase() || null,
         brand_email: brandEmail.trim().toLowerCase() || null,
         est_engagement_pct: engParsed != null && !Number.isNaN(engParsed) ? engParsed : null,
+        custom_links: cleanedLinks,
       } as never)
       .eq("id", roster.id);
     setSavingMeta(false);
