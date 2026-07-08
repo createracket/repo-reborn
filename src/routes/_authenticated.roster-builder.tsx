@@ -1718,6 +1718,7 @@ function EditProspectPanel({
       return;
     }
     toast.success("Updated");
+    onSaved?.();
     onClose();
   }
 
