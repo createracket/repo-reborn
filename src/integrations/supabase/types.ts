@@ -946,6 +946,7 @@ export type Database = {
           avatar_url: string | null
           bio_page_url: string | null
           budget: number | null
+          categories: string[]
           category: string | null
           content_review_url: string | null
           created_at: string
@@ -978,6 +979,7 @@ export type Database = {
           avatar_url?: string | null
           bio_page_url?: string | null
           budget?: number | null
+          categories?: string[]
           category?: string | null
           content_review_url?: string | null
           created_at?: string
@@ -1010,6 +1012,7 @@ export type Database = {
           avatar_url?: string | null
           bio_page_url?: string | null
           budget?: number | null
+          categories?: string[]
           category?: string | null
           content_review_url?: string | null
           created_at?: string
@@ -1119,6 +1122,7 @@ export type Database = {
       }
       rosters: {
         Row: {
+          allow_multi_category: boolean
           brand_email: string | null
           brief_id: string | null
           categories: string[]
@@ -1139,6 +1143,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          allow_multi_category?: boolean
           brand_email?: string | null
           brief_id?: string | null
           categories?: string[]
@@ -1159,6 +1164,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          allow_multi_category?: boolean
           brand_email?: string | null
           brief_id?: string | null
           categories?: string[]
