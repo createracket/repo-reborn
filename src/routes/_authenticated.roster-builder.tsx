@@ -679,7 +679,7 @@ function RosterDetailView({
   // Also surface any category value currently on items (e.g. legacy values) so
   // it stays filterable and editable even if not in the roster's list.
   const itemCategoryValues = Array.from(
-    new Set(items.map((it) => it.category).filter((v): v is string => !!v)),
+    new Set(items.flatMap((it) => itemCategories(it))),
   );
   const filterCategoryOptions = Array.from(new Set([...rosterCategories, ...itemCategoryValues]));
 
