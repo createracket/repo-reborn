@@ -301,8 +301,8 @@ function PublicRosterPage() {
         )}
 
         {(() => {
-          const activeItems = items.filter((it) => it.status !== "hold" && (categoryFilter === "all" || it.category === categoryFilter));
-          const archivedItems = items.filter((it) => it.status === "hold" && (categoryFilter === "all" || it.category === categoryFilter));
+          const activeItems = items.filter((it) => it.status !== "hold" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
+          const archivedItems = items.filter((it) => it.status === "hold" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
 
           const renderItem = (it: PublicItem) => {
             const stats: Array<[string, number | null, string | null]> = [
