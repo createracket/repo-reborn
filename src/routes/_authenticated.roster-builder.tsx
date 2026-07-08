@@ -96,6 +96,7 @@ type Roster = {
   brand_email: string | null;
   est_engagement_pct: number | null;
   categories: string[] | null;
+  custom_links: Array<{ label: string; url: string }> | null;
 };
 
 type Brief = {
@@ -649,6 +650,19 @@ function RosterDetailView({
   const [estEngagement, setEstEngagement] = useState(
     roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
   );
+  const emptyLinks = [
+    { label: "", url: "" },
+    { label: "", url: "" },
+    { label: "", url: "" },
+  ];
+  const initialLinks = (() => {
+    const src = roster.custom_links ?? [];
+    return emptyLinks.map((_, i) => ({
+      label: src[i]?.label ?? "",
+      url: src[i]?.url ?? "",
+    }));
+  })();
+  const [customLinks, setCustomLinks] = useState(initialLinks);
   const [savingMeta, setSavingMeta] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -668,6 +682,13 @@ function RosterDetailView({
     setEstEngagement(
       roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
     );
+    {
+      const src = roster.custom_links ?? [];
+      setCustomLinks([0, 1, 2].map((i) => ({
+        label: src[i]?.label ?? "",
+        url: src[i]?.url ?? "",
+      })));
+    }
     // brand_email/client_email are not selectable on the base table by the
     // client for security; fetch them via the owner/admin-only RPC.
     setClientEmail("");
@@ -707,6 +728,9 @@ function RosterDetailView({
   async function saveMeta() {
     setSavingMeta(true);
     const engParsed = estEngagement.trim() === "" ? null : Number(estEngagement);
+    const cleanedLinks = customLinks
+      .map((l) => ({ label: l.label.trim(), url: l.url.trim() }))
+      .filter((l) => l.url.length > 0);
     const { error } = await supabase
       .from("rosters")
       .update({
@@ -716,6 +740,7 @@ function RosterDetailView({
         client_email: clientEmail.trim().toLowerCase() || null,
         brand_email: brandEmail.trim().toLowerCase() || null,
         est_engagement_pct: engParsed != null && !Number.isNaN(engParsed) ? engParsed : null,
+        custom_links: cleanedLinks,
       } as never)
       .eq("id", roster.id);
     setSavingMeta(false);
@@ -1017,6 +1042,27 @@ function RosterDetailView({
               <p className="text-xs text-muted-foreground">
                 Manual value shown next to Total followers and Est. reach on the public roster page.
               </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Custom links (up to 3)</Label>
+              <p className="text-xs text-muted-foreground">
+                Shown near the top of the public roster page, under the description and above the metrics. Leave blank to skip.
+              </p>
+              {customLinks.map((link, i) => (
+                <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr]">
+                  <Input
+                    value={link.label}
+                    onChange={(e) => setCustomLinks((prev) => prev.map((l, idx) => idx === i ? { ...l, label: e.target.value } : l))}
+                    placeholder={`Link ${i + 1} title`}
+                    maxLength={60}
+                  />
+                  <Input
+                    value={link.url}
+                    onChange={(e) => setCustomLinks((prev) => prev.map((l, idx) => idx === i ? { ...l, url: e.target.value } : l))}
+                    placeholder="https://…"
+                  />
+                </div>
+              ))}
             </div>
             <div className="space-y-2">
               <Label>Categories</Label>

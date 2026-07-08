@@ -23,11 +23,13 @@ type PublicRoster = {
   slug: string;
   published: boolean;
   published_at: string | null;
+  updated_at: string | null;
   header_image_url: string | null;
   hide_prospect_tags: boolean;
   hide_statuses: boolean;
   est_engagement_pct: number | null;
   categories: string[] | null;
+  custom_links: Array<{ label: string; url: string }> | null;
 };
 
 type PublicItem = {
@@ -121,7 +123,7 @@ function PublicRosterPage() {
       const { data: r } = await (supabase as any)
         .from("public_rosters")
         .select(
-          "id, title, description, slug, published, published_at, header_image_url, hide_prospect_tags, hide_statuses, est_engagement_pct, categories",
+          "id, title, description, slug, published, published_at, updated_at, header_image_url, hide_prospect_tags, hide_statuses, est_engagement_pct, categories, custom_links",
         )
         .eq("slug", slug)
         .eq("published", true)
@@ -214,6 +216,30 @@ function PublicRosterPage() {
           <p className="mt-4 whitespace-pre-wrap text-lg text-muted-foreground">
             {roster.description}
           </p>
+        )}
+        {(roster.updated_at || roster.published_at) && (
+          <p className="mt-3 text-xs uppercase tracking-wider text-muted-foreground">
+            Last updated {new Date((roster.updated_at ?? roster.published_at) as string).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
+          </p>
+        )}
+
+        {roster.custom_links && roster.custom_links.length > 0 && (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {roster.custom_links.map((l, i) => (
+              l.url ? (
+                <a
+                  key={i}
+                  href={l.url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-pink-accent/40 bg-pink-accent/10 px-3 py-1.5 text-sm text-foreground hover:bg-pink-accent/20"
+                >
+                  {l.label || l.url}
+                  <ExternalLink className="size-3.5" />
+                </a>
+              ) : null
+            ))}
+          </div>
         )}
 
         {(totalFollowers > 0 || roster.est_engagement_pct != null) && (

@@ -1124,6 +1124,7 @@ export type Database = {
           categories: string[]
           client_email: string | null
           created_at: string
+          custom_links: Json
           description: string | null
           est_engagement_pct: number | null
           header_image_url: string | null
@@ -1143,6 +1144,7 @@ export type Database = {
           categories?: string[]
           client_email?: string | null
           created_at?: string
+          custom_links?: Json
           description?: string | null
           est_engagement_pct?: number | null
           header_image_url?: string | null
@@ -1162,6 +1164,7 @@ export type Database = {
           categories?: string[]
           client_email?: string | null
           created_at?: string
+          custom_links?: Json
           description?: string | null
           est_engagement_pct?: number | null
           header_image_url?: string | null
@@ -1466,6 +1469,7 @@ export type Database = {
         Row: {
           categories: string[] | null
           created_at: string | null
+          custom_links: Json | null
           description: string | null
           est_engagement_pct: number | null
           header_image_url: string | null
@@ -1482,6 +1486,7 @@ export type Database = {
         Insert: {
           categories?: string[] | null
           created_at?: string | null
+          custom_links?: Json | null
           description?: string | null
           est_engagement_pct?: number | null
           header_image_url?: string | null
@@ -1498,6 +1503,7 @@ export type Database = {
         Update: {
           categories?: string[] | null
           created_at?: string | null
+          custom_links?: Json | null
           description?: string | null
           est_engagement_pct?: number | null
           header_image_url?: string | null
