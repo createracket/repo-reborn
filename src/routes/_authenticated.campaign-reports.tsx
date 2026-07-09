@@ -90,6 +90,7 @@ type Report = {
   source_roster_id: string | null;
   created_at: string;
   updated_at: string;
+  categories: string[] | null;
 };
 
 type Creator = {
@@ -100,6 +101,7 @@ type Creator = {
   avatar_url: string | null;
   position: number;
   location: string | null;
+  category: string | null;
 };
 
 const CREATOR_LOCATION_CYCLE: Array<"GB" | "US" | "NZ" | "AU" | null> = [null, "GB", "US", "NZ", "AU"];
