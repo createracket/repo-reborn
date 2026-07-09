@@ -523,6 +523,7 @@ function ReportDetailView({
   const [uploadingHeader, setUploadingHeader] = useState(false);
   const [categories, setCategories] = useState<string[]>(report.categories ?? []);
   const [newCategory, setNewCategory] = useState("");
+  const [hideCategories, setHideCategories] = useState<boolean>(!!report.hide_categories);
 
   useEffect(() => {
     setTitle(report.title);
@@ -530,6 +531,7 @@ function ReportDetailView({
     setSlug(report.slug);
     setHeader(report.header_image_url ?? "");
     setCategories(report.categories ?? []);
+    setHideCategories(!!report.hide_categories);
     // brand_email/client_email are hidden from base-table SELECT; fetch via
     // the owner/admin-only RPC.
     setClientEmail("");
