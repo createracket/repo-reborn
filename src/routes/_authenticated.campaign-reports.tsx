@@ -91,6 +91,7 @@ type Report = {
   created_at: string;
   updated_at: string;
   categories: string[] | null;
+  hide_categories: boolean | null;
 };
 
 type Creator = {
