@@ -20,6 +20,8 @@ type PublicReport = {
   published: boolean;
   published_at: string | null;
   header_image_url: string | null;
+  categories: string[] | null;
+  hide_categories: boolean | null;
 };
 
 type FeaturedComment = {
@@ -62,6 +64,7 @@ type PublicCreator = {
   avatar_url: string | null;
   position: number;
   location: string | null;
+  category: string | null;
   posts: PublicPost[];
 };
 
@@ -101,7 +104,7 @@ function PublicReportPage() {
     (async () => {
       const { data: r } = await (supabase as any)
         .from("public_campaign_reports")
-        .select("id, title, description, slug, published, published_at, header_image_url")
+        .select("id, title, description, slug, published, published_at, header_image_url, categories, hide_categories")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
@@ -112,7 +115,7 @@ function PublicReportPage() {
       setReport(r as PublicReport);
       const { data: cr } = await (supabase as any)
         .from("campaign_report_creators")
-        .select("id, name, handle, avatar_url, position, location")
+        .select("id, name, handle, avatar_url, position, location, category")
         .eq("report_id", (r as PublicReport).id)
         .order("position", { ascending: true });
       const creatorRows = ((cr as any[]) ?? []) as Omit<PublicCreator, "posts">[];
@@ -342,17 +345,24 @@ function PublicReportPage() {
                           c.name.slice(0, 2).toUpperCase()
                         )}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <h2 className="font-display text-xl">{c.name}</h2>
                         {c.handle && (
                           <p className="text-sm text-muted-foreground">{c.handle}</p>
+                        )}
+                        {!report.hide_categories && c.category && (
+                          <span className="mt-1 inline-block rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[10px] uppercase tracking-wider">
+                            {c.category}
+                          </span>
                         )}
                       </div>
                       <p className="ml-auto text-sm text-muted-foreground">No posts yet.</p>
                     </CardContent>
                   </Card>
                 ) : (
-                  c.posts.map((p) => <PostCard key={p.id} post={p} creator={c} />)
+                  c.posts.map((p) => (
+                    <PostCard key={p.id} post={p} creator={c} hideCategory={!!report.hide_categories} />
+                  ))
                 )}
               </div>
             ))
@@ -402,7 +412,7 @@ function ExpandableCaption({ caption }: { caption: string }) {
   );
 }
 
-function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator }) {
+function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: PublicCreator; hideCategory: boolean }) {
   const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
   // Only show sentiment if it was intentionally adjusted (default seed is 50).
   const sentiment = post.sentiment_score != null && post.sentiment_score !== 50 ? post.sentiment_score : null;
@@ -434,6 +444,11 @@ function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator 
               </div>
               {creator.handle && (
                 <p className="truncate text-xs text-muted-foreground">{creator.handle}</p>
+              )}
+              {!hideCategory && creator.category && (
+                <span className="mt-1 inline-block rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[10px] uppercase tracking-wider">
+                  {creator.category}
+                </span>
               )}
             </div>
           </div>

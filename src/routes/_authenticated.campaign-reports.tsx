@@ -91,6 +91,7 @@ type Report = {
   created_at: string;
   updated_at: string;
   categories: string[] | null;
+  hide_categories: boolean | null;
 };
 
 type Creator = {
@@ -522,6 +523,7 @@ function ReportDetailView({
   const [uploadingHeader, setUploadingHeader] = useState(false);
   const [categories, setCategories] = useState<string[]>(report.categories ?? []);
   const [newCategory, setNewCategory] = useState("");
+  const [hideCategories, setHideCategories] = useState<boolean>(!!report.hide_categories);
 
   useEffect(() => {
     setTitle(report.title);
@@ -529,6 +531,7 @@ function ReportDetailView({
     setSlug(report.slug);
     setHeader(report.header_image_url ?? "");
     setCategories(report.categories ?? []);
+    setHideCategories(!!report.hide_categories);
     // brand_email/client_email are hidden from base-table SELECT; fetch via
     // the owner/admin-only RPC.
     setClientEmail("");
@@ -854,8 +857,29 @@ function ReportDetailView({
               Add
             </Button>
           </div>
+          <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+            <div>
+              <div className="text-sm font-medium">Hide categories</div>
+              <div className="text-xs text-muted-foreground">
+                Hides the category badge on the public campaign report page.
+              </div>
+            </div>
+            <Switch
+              checked={hideCategories}
+              onCheckedChange={async (next) => {
+                setHideCategories(next);
+                const { error } = await sb
+                  .from("campaign_reports")
+                  .update({ hide_categories: next })
+                  .eq("id", report.id);
+                if (error) return toast.error(error.message);
+                await onChanged();
+              }}
+            />
+          </div>
         </CardContent>
       </Card>
+
 
       {/* Creators */}
       <Card>
