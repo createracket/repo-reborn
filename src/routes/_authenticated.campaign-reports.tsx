@@ -771,6 +771,92 @@ function ReportDetailView({
         </CardContent>
       </Card>
 
+      {/* Categories */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display text-2xl">Categories</CardTitle>
+          <CardDescription>
+            Add your own category tags (e.g. Artist, UGC) to label creators on this report.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {categories.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {categories.map((c) => (
+                <span
+                  key={c}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs"
+                >
+                  {c}
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const next = categories.filter((v) => v !== c);
+                      setCategories(next);
+                      const { error } = await sb
+                        .from("campaign_reports")
+                        .update({ categories: next })
+                        .eq("id", report.id);
+                      if (error) return toast.error(error.message);
+                      await onChanged();
+                    }}
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label={`Remove ${c}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Input
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="Add a category…"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  void (async () => {
+                    const v = newCategory.trim();
+                    if (!v || categories.includes(v)) return;
+                    const next = [...categories, v];
+                    setCategories(next);
+                    setNewCategory("");
+                    const { error } = await sb
+                      .from("campaign_reports")
+                      .update({ categories: next })
+                      .eq("id", report.id);
+                    if (error) return toast.error(error.message);
+                    await onChanged();
+                  })();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={async () => {
+                const v = newCategory.trim();
+                if (!v || categories.includes(v)) return;
+                const next = [...categories, v];
+                setCategories(next);
+                setNewCategory("");
+                const { error } = await sb
+                  .from("campaign_reports")
+                  .update({ categories: next })
+                  .eq("id", report.id);
+                if (error) return toast.error(error.message);
+                await onChanged();
+              }}
+              disabled={!newCategory.trim()}
+            >
+              Add
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Creators */}
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
@@ -795,6 +881,7 @@ function ReportDetailView({
                       creator={c}
                       posts={posts.filter((p) => p.creator_id === c.id)}
                       onChanged={onChanged}
+                      categories={categories}
                     />
                   ))}
                 </div>
