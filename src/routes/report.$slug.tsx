@@ -268,11 +268,37 @@ function PublicReportPage() {
           </div>
         )}
 
-        <section className="mt-12 space-y-10">
-          {creators.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No creators on this report yet.</p>
+        {monthOptions.length > 0 && (
+          <div className="mt-10 flex items-center justify-end gap-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Filter className="size-4" />
+              <span>Filter by month</span>
+            </div>
+            <Select value={monthFilter} onValueChange={(v) => setMonthFilter(v)}>
+              <SelectTrigger className="w-[180px] text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All months</SelectItem>
+                {monthOptions.map((m) => (
+                  <SelectItem key={m.key} value={m.key}>
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        <section className="mt-6 space-y-10">
+          {filteredCreators.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {monthFilter === "all"
+                ? "No creators on this report yet."
+                : "No posts in this month."}
+            </p>
           ) : (
-            creators.map((c) => (
+            filteredCreators.map((c) => (
               <div key={c.id} className="space-y-4">
                 {c.posts.length === 0 ? (
                   <Card>
