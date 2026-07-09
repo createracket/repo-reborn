@@ -1211,35 +1211,98 @@ function RosterDetailView({
             </div>
           </CardHeader>
           <CardContent>
-            {orderedItems.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Roster is empty. Add a community profile or a prospective creator from the right.
-              </p>
-            ) : categoryFilter === "all" ? (
-              <DraggableRosterList
-                items={orderedItems}
-                onReorder={persistOrder}
-                onRemove={removeItem}
-                onChanged={onChanged}
-                categories={filterCategoryOptions}
-                allowMulti={roster.allow_multi_category}
-              />
-            ) : (
-              <ul className="space-y-3">
-                {orderedItems
-                  .filter((it) => itemCategories(it).includes(categoryFilter))
-                  .map((it) => (
-                    <RosterItemRow
-                      key={it.id}
-                      item={it}
-                      onRemove={() => removeItem(it.id)}
+            {(() => {
+              const filtered = categoryFilter === "all"
+                ? orderedItems
+                : orderedItems.filter((it) => itemCategories(it).includes(categoryFilter));
+              const mainItems = filtered.filter((it) => it.status !== "hold" && it.status !== "live");
+              const liveItems = filtered.filter((it) => it.status === "live");
+              const archivedItems = filtered.filter((it) => it.status === "hold");
+
+              function persistSection(section: "main" | "live" | "archive", nextSection: RosterItem[]) {
+                const others = orderedItems.filter((it) => {
+                  if (section === "main") return it.status === "hold" || it.status === "live";
+                  if (section === "live") return it.status !== "live";
+                  return it.status !== "hold";
+                });
+                // Rebuild full order: keep other sections in their current relative order,
+                // but place the edited section where it belongs (main → live → archive).
+                const mainNext = section === "main" ? nextSection : orderedItems.filter((it) => it.status !== "hold" && it.status !== "live");
+                const liveNext = section === "live" ? nextSection : orderedItems.filter((it) => it.status === "live");
+                const archiveNext = section === "archive" ? nextSection : orderedItems.filter((it) => it.status === "hold");
+                void others; // silence unused
+                persistOrder([...mainNext, ...liveNext, ...archiveNext]);
+              }
+
+              if (orderedItems.length === 0) {
+                return (
+                  <p className="text-sm text-muted-foreground">
+                    Roster is empty. Add a community profile or a prospective creator from the right.
+                  </p>
+                );
+              }
+
+              return (
+                <div className="space-y-6">
+                  {mainItems.length > 0 && (
+                    <DraggableRosterList
+                      items={mainItems}
+                      onReorder={(next) => persistSection("main", next)}
+                      onRemove={removeItem}
                       onChanged={onChanged}
                       categories={filterCategoryOptions}
                       allowMulti={roster.allow_multi_category}
                     />
-                  ))}
-              </ul>
-            )}
+                  )}
+
+                  {liveItems.length > 0 && (
+                    <details className="group rounded-2xl border border-pink-accent/40 bg-pink-accent/5">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-pink-accent hover:text-foreground">
+                        <span className="uppercase tracking-wider">
+                          Live · {liveItems.length}
+                        </span>
+                        <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+                      </summary>
+                      <div className="p-3 pt-0">
+                        <DraggableRosterList
+                          items={liveItems}
+                          onReorder={(next) => persistSection("live", next)}
+                          onRemove={removeItem}
+                          onChanged={onChanged}
+                          categories={filterCategoryOptions}
+                          allowMulti={roster.allow_multi_category}
+                        />
+                      </div>
+                    </details>
+                  )}
+
+                  {archivedItems.length > 0 && (
+                    <details className="group rounded-2xl border border-border/60 bg-muted/20">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
+                        <span className="uppercase tracking-wider">
+                          Archive · {archivedItems.length}
+                        </span>
+                        <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+                      </summary>
+                      <div className="p-3 pt-0">
+                        <DraggableRosterList
+                          items={archivedItems}
+                          onReorder={(next) => persistSection("archive", next)}
+                          onRemove={removeItem}
+                          onChanged={onChanged}
+                          categories={filterCategoryOptions}
+                          allowMulti={roster.allow_multi_category}
+                        />
+                      </div>
+                    </details>
+                  )}
+
+                  {mainItems.length === 0 && liveItems.length === 0 && archivedItems.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No creators match this filter.</p>
+                  )}
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
       </div>
