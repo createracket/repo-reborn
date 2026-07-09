@@ -445,6 +445,11 @@ function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: 
               {creator.handle && (
                 <p className="truncate text-xs text-muted-foreground">{creator.handle}</p>
               )}
+              {!hideCategory && creator.category && (
+                <span className="mt-1 inline-block rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[10px] uppercase tracking-wider">
+                  {creator.category}
+                </span>
+              )}
             </div>
           </div>
           <div
