@@ -857,8 +857,29 @@ function ReportDetailView({
               Add
             </Button>
           </div>
+          <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+            <div>
+              <div className="text-sm font-medium">Hide categories</div>
+              <div className="text-xs text-muted-foreground">
+                Hides the category badge on the public campaign report page.
+              </div>
+            </div>
+            <Switch
+              checked={hideCategories}
+              onCheckedChange={async (next) => {
+                setHideCategories(next);
+                const { error } = await sb
+                  .from("campaign_reports")
+                  .update({ hide_categories: next })
+                  .eq("id", report.id);
+                if (error) return toast.error(error.message);
+                await onChanged();
+              }}
+            />
+          </div>
         </CardContent>
       </Card>
+
 
       {/* Creators */}
       <Card>
