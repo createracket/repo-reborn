@@ -95,6 +95,7 @@ function PublicReportPage() {
   const [report, setReport] = useState<PublicReport | null>(null);
   const [creators, setCreators] = useState<PublicCreator[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
+  const [monthFilter, setMonthFilter] = useState<string>("all");
 
   useEffect(() => {
     (async () => {
