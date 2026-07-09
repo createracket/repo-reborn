@@ -412,7 +412,7 @@ function ExpandableCaption({ caption }: { caption: string }) {
   );
 }
 
-function PostCard({ post, creator }: { post: PublicPost; creator: PublicCreator }) {
+function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: PublicCreator; hideCategory: boolean }) {
   const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
   // Only show sentiment if it was intentionally adjusted (default seed is 50).
   const sentiment = post.sentiment_score != null && post.sentiment_score !== 50 ? post.sentiment_score : null;
