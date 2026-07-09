@@ -144,7 +144,7 @@ type RosterItem = {
   category: string | null;
   categories: string[];
   metrics_month: string | null;
-  location: "GB" | "US" | "NZ" | "AU" | null;
+  location: "GB" | "US" | "NZ" | "AU" | "JP" | null;
 };
 
 const LOCATION_CYCLE: Array<"GB" | "US" | "NZ" | "AU" | null> = [null, "GB", "US", "NZ", "AU"];
