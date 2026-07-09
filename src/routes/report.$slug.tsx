@@ -20,6 +20,8 @@ type PublicReport = {
   published: boolean;
   published_at: string | null;
   header_image_url: string | null;
+  categories: string[] | null;
+  hide_categories: boolean | null;
 };
 
 type FeaturedComment = {
