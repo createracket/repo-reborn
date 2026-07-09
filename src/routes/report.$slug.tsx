@@ -7,6 +7,8 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCount, formatPct, type Platform } from "@/lib/youtube-utils";
 
@@ -93,6 +95,7 @@ function PublicReportPage() {
   const [report, setReport] = useState<PublicReport | null>(null);
   const [creators, setCreators] = useState<PublicCreator[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
+  const [monthFilter, setMonthFilter] = useState<string>("all");
 
   useEffect(() => {
     (async () => {
@@ -166,6 +169,36 @@ function PublicReportPage() {
   }
 
   const allPosts = creators.flatMap((c) => c.posts);
+
+  const monthOptions = (() => {
+    const map = new Map<string, string>();
+    allPosts.forEach((p) => {
+      if (!p.posted_at) return;
+      const d = new Date(p.posted_at);
+      if (Number.isNaN(d.getTime())) return;
+      const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+      const label = d.toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
+      map.set(key, label);
+    });
+    return Array.from(map.entries())
+      .sort((a, b) => (a[0] < b[0] ? 1 : -1))
+      .map(([key, label]) => ({ key, label }));
+  })();
+
+  const filteredCreators = monthFilter === "all"
+    ? creators
+    : creators
+        .map((c) => ({
+          ...c,
+          posts: c.posts.filter((p) => {
+            if (!p.posted_at) return false;
+            const d = new Date(p.posted_at);
+            if (Number.isNaN(d.getTime())) return false;
+            const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+            return key === monthFilter;
+          }),
+        }))
+        .filter((c) => c.posts.length > 0);
   const totals = allPosts.reduce(
     (acc, p) => ({
       views: acc.views + (p.views ?? 0),
@@ -235,11 +268,37 @@ function PublicReportPage() {
           </div>
         )}
 
-        <section className="mt-12 space-y-10">
-          {creators.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No creators on this report yet.</p>
+        {monthOptions.length > 0 && (
+          <div className="mt-10 flex items-center justify-end gap-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Filter className="size-4" />
+              <span>Filter by month</span>
+            </div>
+            <Select value={monthFilter} onValueChange={(v) => setMonthFilter(v)}>
+              <SelectTrigger className="w-[180px] text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All months</SelectItem>
+                {monthOptions.map((m) => (
+                  <SelectItem key={m.key} value={m.key}>
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        <section className="mt-6 space-y-10">
+          {filteredCreators.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {monthFilter === "all"
+                ? "No creators on this report yet."
+                : "No posts in this month."}
+            </p>
           ) : (
-            creators.map((c) => (
+            filteredCreators.map((c) => (
               <div key={c.id} className="space-y-4">
                 {c.posts.length === 0 ? (
                   <Card>
