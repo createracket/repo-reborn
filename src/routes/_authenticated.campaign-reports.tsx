@@ -520,6 +520,8 @@ function ReportDetailView({
   const [brandEmail, setBrandEmail] = useState("");
   const [copied, setCopied] = useState(false);
   const [uploadingHeader, setUploadingHeader] = useState(false);
+  const [categories, setCategories] = useState<string[]>(report.categories ?? []);
+  const [newCategory, setNewCategory] = useState("");
 
   useEffect(() => {
     setTitle(report.title);
