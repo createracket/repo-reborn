@@ -301,7 +301,8 @@ function PublicRosterPage() {
         )}
 
         {(() => {
-          const activeItems = items.filter((it) => it.status !== "hold" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
+          const activeItems = items.filter((it) => it.status !== "hold" && it.status !== "live" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
+          const liveItems = items.filter((it) => it.status === "live" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
           const archivedItems = items.filter((it) => it.status === "hold" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
 
           const renderItem = (it: PublicItem) => {
