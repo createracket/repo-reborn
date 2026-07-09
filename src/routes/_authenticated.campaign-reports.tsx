@@ -900,15 +900,18 @@ function CreatorRow({
   creator,
   posts,
   onChanged,
+  categories,
 }: {
   creator: Creator;
   posts: Post[];
   onChanged: () => Promise<void>;
+  categories: string[];
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(creator.name);
   const [handle, setHandle] = useState(creator.handle ?? "");
   const [avatar, setAvatar] = useState(creator.avatar_url ?? "");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: creator.id,
@@ -929,6 +932,47 @@ function CreatorRow({
     setHandle(creator.handle ?? "");
     setAvatar(creator.avatar_url ?? "");
   }, [creator.id]);
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) {
+        toast.error("Sign in required");
+        return;
+      }
+      const resized = await resizeImageFile(file, 512, 0.85);
+      const path = `${u.user.id}/campaign-creator/${creator.id}/${crypto.randomUUID()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
+      if (upErr) {
+        toast.error(`Upload failed: ${upErr.message}`);
+        return;
+      }
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      setAvatar(data.publicUrl);
+      const { error } = await sb
+        .from("campaign_report_creators")
+        .update({ avatar_url: data.publicUrl })
+        .eq("id", creator.id);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success("Avatar uploaded");
+      await onChanged();
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
 
   async function saveCreator() {
     const { error } = await sb
