@@ -1380,9 +1380,11 @@ export type Database = {
       }
       public_campaign_reports: {
         Row: {
+          categories: string[] | null
           created_at: string | null
           description: string | null
           header_image_url: string | null
+          hide_categories: boolean | null
           id: string | null
           owner_id: string | null
           published: boolean | null
@@ -1392,9 +1394,11 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          categories?: string[] | null
           created_at?: string | null
           description?: string | null
           header_image_url?: string | null
+          hide_categories?: boolean | null
           id?: string | null
           owner_id?: string | null
           published?: boolean | null
@@ -1404,9 +1408,11 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          categories?: string[] | null
           created_at?: string | null
           description?: string | null
           header_image_url?: string | null
+          hide_categories?: boolean | null
           id?: string | null
           owner_id?: string | null
           published?: boolean | null
