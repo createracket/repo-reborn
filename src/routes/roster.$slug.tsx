@@ -496,6 +496,22 @@ function PublicRosterPage() {
                 )}
               </section>
 
+              {liveItems.length > 0 && (
+                <section className="mt-8">
+                  <details className="group rounded-2xl border border-pink-accent/40 bg-pink-accent/5">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-3 text-sm font-medium text-pink-accent hover:text-foreground">
+                      <span className="uppercase tracking-wider">
+                        Live · {liveItems.length}
+                      </span>
+                      <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="space-y-3 p-3 pt-0">
+                      {liveItems.map(renderItem)}
+                    </div>
+                  </details>
+                </section>
+              )}
+
               {archivedItems.length > 0 && (
                 <section className="mt-8">
                   <details className="group rounded-2xl border border-border/60 bg-muted/20">
