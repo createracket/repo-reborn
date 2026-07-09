@@ -213,6 +213,25 @@ function PublicReportPage() {
   const totalEngagement = totals.likes + totals.comments + totals.shares + totals.saves;
   const estEngagementPct =
     totals.followers > 0 ? (totalEngagement / totals.followers) * 0.4 * 100 : null;
+
+  const monthTotals = (() => {
+    const posts = filteredCreators.flatMap((c) => c.posts);
+    const acc = posts.reduce(
+      (a, p) => ({
+        views: a.views + (p.views ?? 0),
+        likes: a.likes + (p.likes ?? 0),
+        comments: a.comments + (p.comments ?? 0),
+        shares: a.shares + (p.shares ?? 0),
+        saves: a.saves + (p.saves ?? 0),
+        followers: a.followers + (p.followers ?? 0),
+      }),
+      { views: 0, likes: 0, comments: 0, shares: 0, saves: 0, followers: 0 },
+    );
+    const engagement = acc.likes + acc.comments + acc.shares + acc.saves;
+    const engagementPct = acc.followers > 0 ? (engagement / acc.followers) * 0.4 * 100 : null;
+    return { ...acc, engagementPct, posts: posts.length, creators: filteredCreators.length };
+  })();
+
   const latestUpdate = (() => {
     const dates: Date[] = [];
     if (report.published_at) dates.push(new Date(report.published_at));
@@ -265,6 +284,19 @@ function PublicReportPage() {
             />
             <TotalStat label="Total creators" value={String(creators.length)} />
             <TotalStat label="Live posts" value={String(allPosts.length)} />
+          </div>
+        )}
+
+        {monthFilter !== "all" && filteredCreators.length > 0 && (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <TotalStat label="Month views" value={formatCount(monthTotals.views)} />
+            <TotalStat label="Month reach" value={formatCount(Math.round(monthTotals.views * 0.8))} />
+            <TotalStat
+              label="Month engagement"
+              value={monthTotals.engagementPct != null ? `${monthTotals.engagementPct.toFixed(2)}%` : "—"}
+            />
+            <TotalStat label="Month creators" value={String(monthTotals.creators)} />
+            <TotalStat label="Month posts" value={String(monthTotals.posts)} />
           </div>
         )}
 
