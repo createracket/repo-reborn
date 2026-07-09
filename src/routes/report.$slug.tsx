@@ -64,6 +64,7 @@ type PublicCreator = {
   avatar_url: string | null;
   position: number;
   location: string | null;
+  category: string | null;
   posts: PublicPost[];
 };
 
