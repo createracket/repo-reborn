@@ -167,6 +167,7 @@ export type Database = {
       campaign_report_creators: {
         Row: {
           avatar_url: string | null
+          category: string | null
           created_at: string
           handle: string | null
           id: string
@@ -178,6 +179,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          category?: string | null
           created_at?: string
           handle?: string | null
           id?: string
@@ -189,6 +191,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          category?: string | null
           created_at?: string
           handle?: string | null
           id?: string
@@ -310,6 +313,7 @@ export type Database = {
       campaign_reports: {
         Row: {
           brand_email: string | null
+          categories: string[]
           client_email: string | null
           created_at: string
           description: string | null
@@ -325,6 +329,7 @@ export type Database = {
         }
         Insert: {
           brand_email?: string | null
+          categories?: string[]
           client_email?: string | null
           created_at?: string
           description?: string | null
@@ -340,6 +345,7 @@ export type Database = {
         }
         Update: {
           brand_email?: string | null
+          categories?: string[]
           client_email?: string | null
           created_at?: string
           description?: string | null
