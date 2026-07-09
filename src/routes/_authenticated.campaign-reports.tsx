@@ -1050,11 +1050,59 @@ function CreatorRow({
         >
           <GripVertical className="size-4" />
         </button>
+        <div className="flex items-center gap-2">
+          <div className="size-10 shrink-0 overflow-hidden rounded-full border border-border/60 bg-muted">
+            {avatar ? (
+              <img src={avatar} alt="" className="size-full object-cover" />
+            ) : null}
+          </div>
+          <input
+            id={`creator-avatar-upload-${creator.id}`}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            onChange={handleAvatarUpload}
+            disabled={uploadingAvatar}
+          />
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={uploadingAvatar}
+            onClick={() => document.getElementById(`creator-avatar-upload-${creator.id}`)?.click()}
+            title="Upload avatar"
+          >
+            <ImagePlus className="size-4" />
+            <span className="sr-only">{uploadingAvatar ? "Uploading…" : "Upload"}</span>
+          </Button>
+        </div>
         <div className="min-w-0 flex-1 grid gap-2 md:grid-cols-[1fr_1fr_1fr_auto]">
           <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
           <Input placeholder="@handle" value={handle} onChange={(e) => setHandle(e.target.value)} />
           <Input placeholder="Avatar URL" value={avatar} onChange={(e) => setAvatar(e.target.value)} />
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Select
+              value={creator.category ?? "none"}
+              onValueChange={async (v) => {
+                const next = v === "none" ? null : v;
+                const { error } = await sb
+                  .from("campaign_report_creators")
+                  .update({ category: next })
+                  .eq("id", creator.id);
+                if (error) return toast.error(error.message);
+                await onChanged();
+              }}
+            >
+              <SelectTrigger className="h-9 min-w-[8rem] text-xs">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none" className="text-xs">No category</SelectItem>
+                {Array.from(new Set([...categories, ...(creator.category ? [creator.category] : [])])).map((c) => (
+                  <SelectItem key={c} value={c} className="text-xs">{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button
               size="sm"
               variant="outline"
@@ -1085,6 +1133,7 @@ function CreatorRow({
             </Button>
           </div>
         </div>
+
       </div>
       {open && (
         <div className="border-t border-border/60 p-4 space-y-4">
