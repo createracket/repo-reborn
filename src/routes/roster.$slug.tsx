@@ -64,8 +64,8 @@ function itemCats(it: PublicItem): string[] {
   return it.category ? [it.category] : [];
 }
 
-const LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺" };
-const LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia" };
+const LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺", JP: "🇯🇵" };
+const LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia", JP: "Japan" };
 
 const STATUS_LABEL: Record<string, string> = {
   in_review: "In Review",
