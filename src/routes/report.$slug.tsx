@@ -168,6 +168,36 @@ function PublicReportPage() {
   }
 
   const allPosts = creators.flatMap((c) => c.posts);
+
+  const monthOptions = (() => {
+    const map = new Map<string, string>();
+    allPosts.forEach((p) => {
+      if (!p.posted_at) return;
+      const d = new Date(p.posted_at);
+      if (Number.isNaN(d.getTime())) return;
+      const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+      const label = d.toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
+      map.set(key, label);
+    });
+    return Array.from(map.entries())
+      .sort((a, b) => (a[0] < b[0] ? 1 : -1))
+      .map(([key, label]) => ({ key, label }));
+  })();
+
+  const filteredCreators = monthFilter === "all"
+    ? creators
+    : creators
+        .map((c) => ({
+          ...c,
+          posts: c.posts.filter((p) => {
+            if (!p.posted_at) return false;
+            const d = new Date(p.posted_at);
+            if (Number.isNaN(d.getTime())) return false;
+            const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+            return key === monthFilter;
+          }),
+        }))
+        .filter((c) => c.posts.length > 0);
   const totals = allPosts.reduce(
     (acc, p) => ({
       views: acc.views + (p.views ?? 0),
