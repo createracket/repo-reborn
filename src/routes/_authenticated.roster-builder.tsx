@@ -147,10 +147,10 @@ type RosterItem = {
   location: "GB" | "US" | "NZ" | "AU" | "JP" | null;
 };
 
-const LOCATION_CYCLE: Array<"GB" | "US" | "NZ" | "AU" | null> = [null, "GB", "US", "NZ", "AU"];
-const LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺" };
-const LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia" };
-function nextLocation(current: "GB" | "US" | "NZ" | "AU" | null) {
+const LOCATION_CYCLE: Array<"GB" | "US" | "NZ" | "AU" | "JP" | null> = [null, "GB", "US", "NZ", "AU", "JP"];
+const LOCATION_FLAG: Record<string, string> = { GB: "🇬🇧", US: "🇺🇸", NZ: "🇳🇿", AU: "🇦🇺", JP: "🇯🇵" };
+const LOCATION_LABEL: Record<string, string> = { GB: "UK", US: "USA", NZ: "New Zealand", AU: "Australia", JP: "Japan" };
+function nextLocation(current: "GB" | "US" | "NZ" | "AU" | "JP" | null) {
   const idx = LOCATION_CYCLE.indexOf(current);
   return LOCATION_CYCLE[(idx + 1) % LOCATION_CYCLE.length];
 }
