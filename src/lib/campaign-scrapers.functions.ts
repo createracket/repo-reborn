@@ -95,9 +95,15 @@ async function scrapeYouTube(url: string): Promise<ScrapeResult> {
   };
 }
 
-async function runApifyActor(actorId: string, input: unknown, token: string) {
-  // Sync-get-dataset-items returns results in-process (single URL, ~10-30s).
-  const url = `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items?token=${token}&timeout=60`;
+async function runApifyActor(
+  actorId: string,
+  input: unknown,
+  token: string,
+  timeoutSecs = 180,
+) {
+  // Sync-get-dataset-items returns results in-process. Profile scrapers often
+  // need >60s to boot the actor + fetch, so default to 180s.
+  const url = `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items?token=${token}&timeout=${timeoutSecs}`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
