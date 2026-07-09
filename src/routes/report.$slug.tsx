@@ -345,17 +345,24 @@ function PublicReportPage() {
                           c.name.slice(0, 2).toUpperCase()
                         )}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <h2 className="font-display text-xl">{c.name}</h2>
                         {c.handle && (
                           <p className="text-sm text-muted-foreground">{c.handle}</p>
+                        )}
+                        {!report.hide_categories && c.category && (
+                          <span className="mt-1 inline-block rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[10px] uppercase tracking-wider">
+                            {c.category}
+                          </span>
                         )}
                       </div>
                       <p className="ml-auto text-sm text-muted-foreground">No posts yet.</p>
                     </CardContent>
                   </Card>
                 ) : (
-                  c.posts.map((p) => <PostCard key={p.id} post={p} creator={c} />)
+                  c.posts.map((p) => (
+                    <PostCard key={p.id} post={p} creator={c} hideCategory={!!report.hide_categories} />
+                  ))
                 )}
               </div>
             ))
