@@ -1,0 +1,1 @@
+ALTER TABLE public.campaign_reports ADD COLUMN IF NOT EXISTS hide_categories boolean NOT NULL DEFAULT false;

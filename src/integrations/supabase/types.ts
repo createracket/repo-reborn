@@ -318,6 +318,7 @@ export type Database = {
           created_at: string
           description: string | null
           header_image_url: string | null
+          hide_categories: boolean
           id: string
           owner_id: string
           published: boolean
@@ -334,6 +335,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           header_image_url?: string | null
+          hide_categories?: boolean
           id?: string
           owner_id: string
           published?: boolean
@@ -350,6 +352,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           header_image_url?: string | null
+          hide_categories?: boolean
           id?: string
           owner_id?: string
           published?: boolean
