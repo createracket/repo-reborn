@@ -104,7 +104,7 @@ function PublicReportPage() {
     (async () => {
       const { data: r } = await (supabase as any)
         .from("public_campaign_reports")
-        .select("id, title, description, slug, published, published_at, header_image_url")
+        .select("id, title, description, slug, published, published_at, header_image_url, categories, hide_categories")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
@@ -115,7 +115,7 @@ function PublicReportPage() {
       setReport(r as PublicReport);
       const { data: cr } = await (supabase as any)
         .from("campaign_report_creators")
-        .select("id, name, handle, avatar_url, position, location")
+        .select("id, name, handle, avatar_url, position, location, category")
         .eq("report_id", (r as PublicReport).id)
         .order("position", { ascending: true });
       const creatorRows = ((cr as any[]) ?? []) as Omit<PublicCreator, "posts">[];
