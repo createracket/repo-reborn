@@ -424,7 +424,7 @@ function ConnectPage() {
                       </p>
                     </div>
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                      {CAMPAIGN_OPTIONS.map((opt) => {
+                      {(accountKind === "brand" ? CAMPAIGN_OPTIONS_BRAND : CAMPAIGN_OPTIONS_ARTIST).map((opt) => {
                         const active = campaignKind === opt.value;
                         return (
                           <button
