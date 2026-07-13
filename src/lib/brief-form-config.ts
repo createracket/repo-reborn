@@ -120,6 +120,8 @@ export const DEFAULT_BRIEF_FORM_CONFIG: BriefFormConfig = {
     "Brand Ambassadorship",
     "Merchandise Collaboration",
     "Sponsored Song/Video",
+    "Fan page creation and/or management",
+    "I'd like your recommendation based on my campaign",
   ],
   collaborationTypesBrand: [
     "Organic Social Content\n(Strategy, Planning and/or Production)",
@@ -132,7 +134,7 @@ export const DEFAULT_BRIEF_FORM_CONFIG: BriefFormConfig = {
     "E-Commerce Collaborations",
     "Artist Playlists and Streaming Integration",
     "I'd like your recommendation based on my campaign",
-    "Fan page creation and/or management",
+  ],
   ],
 };
 
