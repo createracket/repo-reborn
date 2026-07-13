@@ -47,6 +47,7 @@ export type BriefFormConfig = {
   coreValues: string[];
   collaborationTypesLabel: string;
   collaborationTypes: string[];
+  collaborationTypesBrand?: string[];
 };
 
 
