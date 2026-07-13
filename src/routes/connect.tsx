@@ -171,7 +171,8 @@ function ConnectPage() {
       : types;
 
     const accountLabel = ACCOUNT_OPTIONS.find((o) => o.value === accountKind)?.label ?? accountKind;
-    const campaignLabel = CAMPAIGN_OPTIONS.find((o) => o.value === campaignKind)?.label ?? campaignKind;
+    const campaignOptions = accountKind === "brand" ? CAMPAIGN_OPTIONS_BRAND : CAMPAIGN_OPTIONS_ARTIST;
+    const campaignLabel = campaignOptions.find((o) => o.value === campaignKind)?.label ?? campaignKind;
     const rawExtra = fd.get("additional_info")?.toString().trim() ?? "";
     const preface = `Account type: ${accountLabel}\nCampaign type: ${campaignLabel}`;
     const combinedExtra = rawExtra ? `${preface}\n\n${rawExtra}` : preface;
