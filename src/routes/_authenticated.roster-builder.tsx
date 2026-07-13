@@ -228,7 +228,9 @@ type CommunityRow = {
   account_type: string;
   tagline: string | null;
   avatar_url: string | null;
+  source?: "community" | "brand";
 };
+
 
 function RosterBuilderPage() {
   const navigate = useNavigate();
