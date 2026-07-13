@@ -47,7 +47,7 @@ const briefSchema = z.object({
     .nonnegative("Must be 0 or more")
     .max(10_000_000)
     .optional(),
-  currency: z.enum(["AUD", "GBP", "USD"]).default("GBP"),
+  currency: z.enum(["USD", "AUD", "GBP", "NZD"]).default("USD"),
   transparency: z
     .enum(["early_planning", "budget_pending", "locked_in", "live"])
     .optional(),
