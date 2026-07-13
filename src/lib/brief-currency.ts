@@ -1,10 +1,11 @@
-export type BriefCurrency = "AUD" | "GBP" | "USD";
-export const BRIEF_CURRENCIES: BriefCurrency[] = ["GBP", "USD", "AUD"];
+export type BriefCurrency = "USD" | "AUD" | "GBP" | "NZD";
+export const BRIEF_CURRENCIES: BriefCurrency[] = ["USD", "AUD", "GBP", "NZD"];
 
 export const CURRENCY_SYMBOL: Record<BriefCurrency, string> = {
-  GBP: "£",
   USD: "$",
   AUD: "A$",
+  GBP: "£",
+  NZD: "NZ$",
 };
 
 // Approximate FX rates against GBP (updated 2026). Purely indicative — used
@@ -13,6 +14,7 @@ const RATES_VS_GBP: Record<BriefCurrency, number> = {
   GBP: 1,
   USD: 1.27,
   AUD: 1.92,
+  NZD: 2.10,
 };
 
 export function convertCurrency(amount: number, from: BriefCurrency, to: BriefCurrency): number {
