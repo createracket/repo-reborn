@@ -58,6 +58,11 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link to="/" hash="faqs" className="hover:text-purple">
+                  FAQs
+                </Link>
+              </li>
+              <li>
                 <a
                   href={`mailto:${contactEmail}`}
                   className="inline-flex items-center gap-2 hover:text-purple"

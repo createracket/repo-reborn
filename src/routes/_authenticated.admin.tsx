@@ -26,6 +26,7 @@ import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
 import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
 import { TrafficAdmin } from "@/components/admin/TrafficAdmin";
 import { ExampleOpportunitiesAdmin } from "@/components/admin/ExampleOpportunitiesAdmin";
+import { FaqsAdmin } from "@/components/admin/FaqsAdmin";
 import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
 import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
 import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
@@ -215,6 +216,7 @@ function AdminPage() {
             <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
             <TabsTrigger value="example-opps">Example opportunities</TabsTrigger>
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
+            <TabsTrigger value="faqs">FAQs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="traffic" className="mt-6">
@@ -645,6 +647,10 @@ function AdminPage() {
 
           <TabsContent value="example-opps" className="mt-6">
             <ExampleOpportunitiesAdmin />
+          </TabsContent>
+
+          <TabsContent value="faqs" className="mt-6">
+            <FaqsAdmin />
           </TabsContent>
         </Tabs>
       </main>
