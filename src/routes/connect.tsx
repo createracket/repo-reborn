@@ -621,7 +621,7 @@ function ConnectPage() {
                                     checked={types.includes(type)}
                                     onCheckedChange={() => toggle(types, setTypes, type)}
                                   />
-                                  <span className="text-sm font-normal">{type}</span>
+                                  <span className="whitespace-pre-line text-sm font-normal">{type}</span>
                                 </label>
                               ))}
                             </div>
