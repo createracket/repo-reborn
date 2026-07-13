@@ -648,6 +648,10 @@ function AdminPage() {
           <TabsContent value="example-opps" className="mt-6">
             <ExampleOpportunitiesAdmin />
           </TabsContent>
+
+          <TabsContent value="faqs" className="mt-6">
+            <FaqsAdmin />
+          </TabsContent>
         </Tabs>
       </main>
       <SiteFooter />
