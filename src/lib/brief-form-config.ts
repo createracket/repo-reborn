@@ -47,6 +47,7 @@ export type BriefFormConfig = {
   coreValues: string[];
   collaborationTypesLabel: string;
   collaborationTypes: string[];
+  collaborationTypesBrand?: string[];
 };
 
 
@@ -120,6 +121,19 @@ export const DEFAULT_BRIEF_FORM_CONFIG: BriefFormConfig = {
     "Merchandise Collaboration",
     "Sponsored Song/Video",
   ],
+  collaborationTypesBrand: [
+    "Organic Social Content - Strategy, Planning and/or Production",
+    "Paid Social Content - Strategy, Planning and/or Production",
+    "Creators for Organic Social Content",
+    "Creators for Paid Social Content",
+    "Creators for Omnichannel Content",
+    "Talent to appear in content I'm planning to produce",
+    "In-person Activation(s) - Strategy, Planning and/or Production",
+    "Merch & E-Commerce Collaborations",
+    "Artist Playlists & Streaming Integration",
+    "I'd like your recommendation based on my campaign",
+    "Fan page creation/management",
+  ],
 };
 
 // ---------- Merge ----------
@@ -178,6 +192,10 @@ export function mergeBriefFormConfig(
       overrides.collaborationTypes && overrides.collaborationTypes.length > 0
         ? overrides.collaborationTypes
         : DEFAULT_BRIEF_FORM_CONFIG.collaborationTypes,
+    collaborationTypesBrand:
+      overrides.collaborationTypesBrand && overrides.collaborationTypesBrand.length > 0
+        ? overrides.collaborationTypesBrand
+        : DEFAULT_BRIEF_FORM_CONFIG.collaborationTypesBrand,
   };
 }
 
