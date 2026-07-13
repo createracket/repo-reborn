@@ -423,8 +423,11 @@ function ConnectPage() {
                         Pick the shape that fits best — you can refine the details below.
                       </p>
                     </div>
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                      {(accountKind === "brand" ? CAMPAIGN_OPTIONS_BRAND : CAMPAIGN_OPTIONS_ARTIST).map((opt) => {
+                    {(() => {
+                      const opts = accountKind === "brand" ? CAMPAIGN_OPTIONS_BRAND : CAMPAIGN_OPTIONS_ARTIST;
+                      const main = opts.filter((o) => o.value !== "unsure");
+                      const unsure = opts.find((o) => o.value === "unsure");
+                      const renderCard = (opt: typeof opts[number]) => {
                         const active = campaignKind === opt.value;
                         return (
                           <button
@@ -455,8 +458,20 @@ function ConnectPage() {
                             <p className="mt-2 text-sm text-muted-foreground">{opt.desc}</p>
                           </button>
                         );
-                      })}
-                    </div>
+                      };
+                      return (
+                        <>
+                          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                            {main.map(renderCard)}
+                          </div>
+                          {unsure && (
+                            <div className="grid grid-cols-1 gap-3 pt-3">
+                              {renderCard(unsure)}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </section>
 
                   <Separator />
