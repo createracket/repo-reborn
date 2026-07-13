@@ -577,20 +577,60 @@ function ConnectPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>{config.collaborationTypesLabel}</Label>
-                      <div className="grid grid-cols-1 gap-3 pt-2 md:grid-cols-2">
-                        {[...((accountKind === "brand" && config.collaborationTypesBrand && config.collaborationTypesBrand.length > 0) ? config.collaborationTypesBrand : config.collaborationTypes), "Something else"].map((type) => (
-                          <label
-                            key={type}
-                            className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40"
-                          >
-                            <Checkbox
-                              checked={types.includes(type)}
-                              onCheckedChange={() => toggle(types, setTypes, type)}
-                            />
-                            <span className="text-sm font-normal">{type}</span>
-                          </label>
-                        ))}
-                      </div>
+                      {(() => {
+                        const source = (accountKind === "brand" && config.collaborationTypesBrand && config.collaborationTypesBrand.length > 0)
+                          ? config.collaborationTypesBrand
+                          : config.collaborationTypes;
+                        const seen = new Set<string>();
+                        const deduped = source.filter((t) => {
+                          const key = t.trim().toLowerCase();
+                          if (seen.has(key)) return false;
+                          seen.add(key);
+                          return true;
+                        });
+                        const isSpecial = (t: string) => {
+                          const k = t.trim().toLowerCase();
+                          return k === "all of the above" || k === "something else";
+                        };
+                        const main = deduped.filter((t) => !isSpecial(t));
+                        const hasAll = deduped.some((t) => t.trim().toLowerCase() === "all of the above");
+                        return (
+                          <>
+                            <div className="grid grid-cols-1 gap-3 pt-2 md:grid-cols-2">
+                              {main.map((type) => (
+                                <label
+                                  key={type}
+                                  className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40"
+                                >
+                                  <Checkbox
+                                    checked={types.includes(type)}
+                                    onCheckedChange={() => toggle(types, setTypes, type)}
+                                  />
+                                  <span className="text-sm font-normal">{type}</span>
+                                </label>
+                              ))}
+                            </div>
+                            <div className="grid grid-cols-1 gap-3 pt-3">
+                              {hasAll && (
+                                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40">
+                                  <Checkbox
+                                    checked={types.includes("All of the above")}
+                                    onCheckedChange={() => toggle(types, setTypes, "All of the above")}
+                                  />
+                                  <span className="text-sm font-normal">All of the above</span>
+                                </label>
+                              )}
+                              <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40">
+                                <Checkbox
+                                  checked={types.includes("Something else")}
+                                  onCheckedChange={() => toggle(types, setTypes, "Something else")}
+                                />
+                                <span className="text-sm font-normal">Something else</span>
+                              </label>
+                            </div>
+                          </>
+                        );
+                      })()}
                       {types.includes("Something else") && (
                         <Input
                           value={otherType}
