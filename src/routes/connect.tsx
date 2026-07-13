@@ -181,7 +181,7 @@ function ConnectPage() {
       title: fd.get("title")?.toString() ?? "",
       description: fd.get("description")?.toString() ?? "",
       budget: budgetRaw ? Number(budgetRaw) : undefined,
-      currency: (fd.get("currency")?.toString() as any) || "GBP",
+      currency: (fd.get("currency")?.toString() as any) || "USD",
       transparency: (fd.get("transparency")?.toString() || undefined) as any,
       timeline: fd.get("timeline")?.toString() || undefined,
       target_audience: fd.get("target_audience")?.toString() || undefined,
