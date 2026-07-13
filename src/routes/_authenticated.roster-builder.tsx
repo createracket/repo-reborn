@@ -228,7 +228,9 @@ type CommunityRow = {
   account_type: string;
   tagline: string | null;
   avatar_url: string | null;
+  source?: "community" | "brand";
 };
+
 
 function RosterBuilderPage() {
   const navigate = useNavigate();
@@ -265,10 +267,15 @@ function RosterBuilderPage() {
       }
       setIsAdmin(true);
       await loadRosters();
-      const [{ data: cm }, { data: pr }, { data: cb }] = await Promise.all([
+      const [{ data: cm }, { data: br }, { data: pr }, { data: cb }] = await Promise.all([
         supabase
           .from("community_profiles")
           .select("id, display_name, account_type, tagline, avatar_url")
+          .order("display_name"),
+        supabase
+          .from("profiles")
+          .select("id, display_name, avatar_url, bio, account_type")
+          .eq("account_type", "brand")
           .order("display_name"),
         supabase
           .from("profiles")
@@ -279,10 +286,22 @@ function RosterBuilderPage() {
           .select("id, title, description, contact_email, budget, status, created_at")
           .order("created_at", { ascending: false }),
       ]);
-      setCommunity((cm as CommunityRow[]) ?? []);
+      const communityRows = ((cm as CommunityRow[]) ?? []).map((c) => ({ ...c, source: "community" as const }));
+      const brandRows: CommunityRow[] = (((br as Array<{ id: string; display_name: string | null; avatar_url: string | null; bio: string | null }>) ?? [])
+        .filter((b) => !!b.display_name))
+        .map((b) => ({
+          id: b.id,
+          display_name: b.display_name ?? "",
+          account_type: "BRAND",
+          tagline: b.bio,
+          avatar_url: b.avatar_url,
+          source: "brand" as const,
+        }));
+      setCommunity([...brandRows, ...communityRows]);
       setProfiles((pr as ProfileRow[]) ?? []);
       setBriefs((cb as Brief[]) ?? []);
       setChecking(false);
+
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -2069,12 +2088,15 @@ function AddCommunityCard({
   }, [community, existingProfileIds, query]);
 
   async function add(c: CommunityRow) {
+    const isBrand = c.source === "brand";
     const { error } = await supabase.from("roster_items").insert({
       roster_id: rosterId,
-      kind: "profile",
-      profile_id: c.id,
+      kind: isBrand ? "prospect" : "profile",
+      profile_id: isBrand ? null : c.id,
       name: c.display_name,
       avatar_url: c.avatar_url,
+      category: isBrand ? "brand" : null,
+      categories: isBrand ? ["brand"] : [],
       position: nextPosition,
     } as never);
     if (error) {
@@ -2091,13 +2113,14 @@ function AddCommunityCard({
         <CardTitle className="flex items-center gap-2 font-display text-lg">
           <Users className="size-4" /> Add from community
         </CardTitle>
-        <CardDescription>Pull in existing community profiles.</CardDescription>
+        <CardDescription>Pull in existing community creators and brands.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search community…"
+            placeholder="Search creators or brands…"
+
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-9"
