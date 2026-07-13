@@ -684,6 +684,8 @@ function ConnectPage() {
                       {submitting ? config.page.submittingLabel : config.page.submitLabel}
                     </Button>
                   </div>
+                  </>
+                  )}
                 </form>
               </CardContent>
             </Card>
