@@ -267,10 +267,15 @@ function RosterBuilderPage() {
       }
       setIsAdmin(true);
       await loadRosters();
-      const [{ data: cm }, { data: pr }, { data: cb }] = await Promise.all([
+      const [{ data: cm }, { data: br }, { data: pr }, { data: cb }] = await Promise.all([
         supabase
           .from("community_profiles")
           .select("id, display_name, account_type, tagline, avatar_url")
+          .order("display_name"),
+        supabase
+          .from("profiles")
+          .select("id, display_name, avatar_url, bio, account_type")
+          .eq("account_type", "brand")
           .order("display_name"),
         supabase
           .from("profiles")
@@ -281,10 +286,22 @@ function RosterBuilderPage() {
           .select("id, title, description, contact_email, budget, status, created_at")
           .order("created_at", { ascending: false }),
       ]);
-      setCommunity((cm as CommunityRow[]) ?? []);
+      const communityRows = ((cm as CommunityRow[]) ?? []).map((c) => ({ ...c, source: "community" as const }));
+      const brandRows: CommunityRow[] = (((br as Array<{ id: string; display_name: string | null; avatar_url: string | null; bio: string | null }>) ?? [])
+        .filter((b) => !!b.display_name))
+        .map((b) => ({
+          id: b.id,
+          display_name: b.display_name ?? "",
+          account_type: "BRAND",
+          tagline: b.bio,
+          avatar_url: b.avatar_url,
+          source: "brand" as const,
+        }));
+      setCommunity([...brandRows, ...communityRows]);
       setProfiles((pr as ProfileRow[]) ?? []);
       setBriefs((cb as Brief[]) ?? []);
       setChecking(false);
+
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
