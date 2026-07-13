@@ -411,6 +411,8 @@ function ConnectPage() {
                     </div>
                   </section>
 
+                  {accountKind && (
+                  <>
                   <Separator />
 
                   {/* Section 0b — Campaign type */}
