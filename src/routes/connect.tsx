@@ -62,14 +62,21 @@ const briefSchema = z.object({
 });
 
 type AccountKind = "brand" | "artist";
-type CampaignKind = "seed" | "endorse" | "partner";
+type CampaignKind = "seed" | "endorse" | "partner" | "unsure";
 
 const ACCOUNT_OPTIONS: Array<{ value: AccountKind; label: string; desc: string }> = [
   { value: "brand", label: "Brand", desc: "I'm planning a campaign and want to collab with cool creators, including musicians." },
   { value: "artist", label: "Artist", desc: "I'm an artist looking to partner with brands and/or engage more fans directly." },
 ];
 
-const CAMPAIGN_OPTIONS: Array<{ value: CampaignKind; label: string; desc: string; tag: string }> = [
+const UNSURE_OPTION: { value: CampaignKind; label: string; desc: string; tag: string } = {
+  value: "unsure",
+  label: "Unsure at this stage",
+  tag: "Not sure yet",
+  desc: "Not sure which service is the right fit? Tell us about your goals and we'll help you figure it out.",
+};
+
+const CAMPAIGN_OPTIONS_BRAND: Array<{ value: CampaignKind; label: string; desc: string; tag: string }> = [
   {
     value: "seed",
     label: "Seed",
@@ -88,6 +95,29 @@ const CAMPAIGN_OPTIONS: Array<{ value: CampaignKind; label: string; desc: string
     tag: "Bespoke",
     desc: "Custom collabs with tailored campaign tools and retained account management accounts - priority matching and paid media support.",
   },
+  UNSURE_OPTION,
+];
+
+const CAMPAIGN_OPTIONS_ARTIST: Array<{ value: CampaignKind; label: string; desc: string; tag: string }> = [
+  {
+    value: "seed",
+    label: "Seed",
+    tag: "From ~$500",
+    desc: "Gift product and seed new campaign assets with relevant creators - musicians, fans and cultural tastemakers.",
+  },
+  {
+    value: "endorse",
+    label: "Endorse",
+    tag: "Retainer + campaign costs",
+    desc: "Build a bespoke roster for a one-off campaign or ongoing ambassador program - lightweight agreements with set deliverables.",
+  },
+  {
+    value: "partner",
+    label: "Partner",
+    tag: "Bespoke",
+    desc: "Custom collabs with tailored campaign tools and retained account management accounts - priority matching and paid media support.",
+  },
+  UNSURE_OPTION,
 ];
 
 function ConnectPage() {
