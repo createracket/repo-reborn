@@ -135,7 +135,6 @@ export const DEFAULT_BRIEF_FORM_CONFIG: BriefFormConfig = {
     "Artist Playlists and Streaming Integration",
     "I'd like your recommendation based on my campaign",
   ],
-  ],
 };
 
 // ---------- Merge ----------
