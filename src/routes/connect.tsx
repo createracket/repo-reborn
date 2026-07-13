@@ -545,7 +545,7 @@ function ConnectPage() {
                     <div className="space-y-2">
                       <Label>{config.collaborationTypesLabel}</Label>
                       <div className="grid grid-cols-1 gap-3 pt-2 md:grid-cols-2">
-                        {[...config.collaborationTypes, "Something else"].map((type) => (
+                        {[...((accountKind === "brand" && config.collaborationTypesBrand && config.collaborationTypesBrand.length > 0) ? config.collaborationTypesBrand : config.collaborationTypes), "Something else"].map((type) => (
                           <label
                             key={type}
                             className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 p-3 hover:bg-muted/40"
