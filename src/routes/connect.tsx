@@ -514,7 +514,7 @@ function ConnectPage() {
                             <select
                               id="currency"
                               name="currency"
-                              defaultValue="GBP"
+                              defaultValue="USD"
                               className="rounded-md border border-input bg-background px-3 py-2 text-sm"
                             >
                               {BRIEF_CURRENCIES.map((c) => (
