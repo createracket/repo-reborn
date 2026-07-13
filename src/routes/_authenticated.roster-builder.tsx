@@ -2088,12 +2088,15 @@ function AddCommunityCard({
   }, [community, existingProfileIds, query]);
 
   async function add(c: CommunityRow) {
+    const isBrand = c.source === "brand";
     const { error } = await supabase.from("roster_items").insert({
       roster_id: rosterId,
-      kind: "profile",
-      profile_id: c.id,
+      kind: isBrand ? "prospect" : "profile",
+      profile_id: isBrand ? null : c.id,
       name: c.display_name,
       avatar_url: c.avatar_url,
+      category: isBrand ? "brand" : null,
+      categories: isBrand ? ["brand"] : [],
       position: nextPosition,
     } as never);
     if (error) {
@@ -2110,13 +2113,14 @@ function AddCommunityCard({
         <CardTitle className="flex items-center gap-2 font-display text-lg">
           <Users className="size-4" /> Add from community
         </CardTitle>
-        <CardDescription>Pull in existing community profiles.</CardDescription>
+        <CardDescription>Pull in existing community creators and brands.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search community…"
+            placeholder="Search creators or brands…"
+
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="pl-9"
