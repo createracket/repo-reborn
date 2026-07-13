@@ -192,6 +192,10 @@ export function mergeBriefFormConfig(
       overrides.collaborationTypes && overrides.collaborationTypes.length > 0
         ? overrides.collaborationTypes
         : DEFAULT_BRIEF_FORM_CONFIG.collaborationTypes,
+    collaborationTypesBrand:
+      overrides.collaborationTypesBrand && overrides.collaborationTypesBrand.length > 0
+        ? overrides.collaborationTypesBrand
+        : DEFAULT_BRIEF_FORM_CONFIG.collaborationTypesBrand,
   };
 }
 
