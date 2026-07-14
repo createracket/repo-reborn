@@ -275,10 +275,10 @@ function DashboardPage() {
           .single(),
         supabase
           .from("campaign_briefs")
-          .select("id, title, description, budget, currency, transparency, published_at, created_at")
+          .select("id, title, description, budget, currency, transparency, published_at, created_at, artist_archetypes, brand_archetypes")
           .eq("published", true)
           .order("published_at", { ascending: false })
-          .limit(6),
+          .limit(50),
       ]);
 
       // Briefs the current user submitted (Project Planner)
