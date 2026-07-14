@@ -98,6 +98,8 @@ type Opportunity = {
   published_at: string | null;
   created_at: string;
   brief_source: "user" | "lead";
+  artist_archetypes?: string[] | null;
+  brand_archetypes?: string[] | null;
 };
 
 function DashboardPage() {
