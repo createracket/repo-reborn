@@ -622,6 +622,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
   const [values, setValues] = useState<string[]>([]);
   const [types, setTypes] = useState<string[]>([]);
+  const [artistArchetypes, setArtistArchetypes] = useState<string[]>([]);
+  const [brandArchetypes, setBrandArchetypes] = useState<string[]>([]);
   const [form, setForm] = useState({
     title: "",
     description: "",
