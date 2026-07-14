@@ -450,6 +450,8 @@ function EditBriefDialog({
         currency: brief.currency ?? "GBP",
         transparency: brief.transparency ?? "",
         contact_email: brief.contact_email ?? "",
+        artist_archetypes: brief.artist_archetypes ?? [],
+        brand_archetypes: brief.brand_archetypes ?? [],
       });
     } else {
       setForm({
