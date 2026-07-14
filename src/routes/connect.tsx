@@ -81,13 +81,13 @@ const CAMPAIGN_OPTIONS_BRAND: Array<{ value: CampaignKind; label: string; desc: 
     value: "seed",
     label: "Seed",
     tag: "From ~$500",
-    desc: "Gift product and seed new campaign assets with relevant creators - musicians, fans and cultural tastemakers.",
+    desc: "Bring real fans into your next experience and grow your audience organically through a strategic sampling campaign. Gift music, merch and tickets to influential folks.",
   },
   {
     value: "endorse",
     label: "Endorse",
     tag: "Retainer + campaign costs",
-    desc: "Build a bespoke roster for a one-off campaign or ongoing ambassador program - lightweight agreements with set deliverables.",
+    desc: "Proactively outreach to brand partners and/or build a bespoke roster to bolster your next release. Leverage creative briefing tools and build long-term partnerships.",
   },
   {
     value: "partner",
@@ -103,13 +103,13 @@ const CAMPAIGN_OPTIONS_ARTIST: Array<{ value: CampaignKind; label: string; desc:
     value: "seed",
     label: "Seed",
     tag: "From ~$500",
-    desc: "Gift product and seed new campaign assets with relevant creators - musicians, fans and cultural tastemakers.",
+    desc: "Bring real fans into your next experience and grow your audience organically through a strategic sampling campaign. Gift music, merch and tickets to influential folks.",
   },
   {
     value: "endorse",
     label: "Endorse",
     tag: "Retainer + campaign costs",
-    desc: "Build a bespoke roster for a one-off campaign or ongoing ambassador program - lightweight agreements with set deliverables.",
+    desc: "Proactively outreach to brand partners and/or build a bespoke roster to bolster your next release. Leverage creative briefing tools and build long-term partnerships.",
   },
   {
     value: "partner",
