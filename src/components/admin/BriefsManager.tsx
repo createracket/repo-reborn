@@ -484,6 +484,10 @@ function EditBriefDialog({
       transparency: form.transparency || null,
       contact_email: form.contact_email || null,
     };
+    if (isUser) {
+      patch.artist_archetypes = Array.isArray(form.artist_archetypes) ? form.artist_archetypes : [];
+      patch.brand_archetypes = Array.isArray(form.brand_archetypes) ? form.brand_archetypes : [];
+    }
     if (!isUser) {
       patch.contact_name = form.contact_name || null;
       patch.company = form.company || null;
