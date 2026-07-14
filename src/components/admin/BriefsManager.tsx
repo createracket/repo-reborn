@@ -797,6 +797,24 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
             </div>
           </div>
           <div className="md:col-span-2">
+            <ArchetypePicker
+              label="Artist archetypes (visibility)"
+              help="Only artists whose Vibe Check archetype matches will see this opportunity on their dashboard once published. Leave empty to show to every artist. Users added manually below always see it regardless."
+              options={ARTIST_ARCHETYPE_OPTIONS}
+              value={artistArchetypes}
+              onChange={setArtistArchetypes}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <ArchetypePicker
+              label="Brand archetypes (visibility)"
+              help="Only brands whose Vibe Check archetype matches will see this opportunity on their dashboard once published. Leave empty to show to every brand."
+              options={BRAND_ARCHETYPE_OPTIONS}
+              value={brandArchetypes}
+              onChange={setBrandArchetypes}
+            />
+          </div>
+          <div className="md:col-span-2">
             <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Add brief"}</Button>
           </div>
             </form>
