@@ -75,6 +75,7 @@ export type CampaignBrief = {
   status: string;
   contact_email: string | null; published: boolean; published_at: string | null;
   linked_roster_id: string | null;
+  artist_archetypes: string[]; brand_archetypes: string[];
 };
 export type Profile = {
   id: string; email: string | null; display_name: string | null;
