@@ -674,6 +674,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
         target_audience: form.target_audience.trim() || null,
         collaboration_types: types,
         core_values: values,
+        artist_archetypes: artistArchetypes,
+        brand_archetypes: brandArchetypes,
         status: form.status || "in_review",
       } as any);
       if (error) throw error;
@@ -681,6 +683,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
       setForm({ title: "", description: "", contact_email: "", budget: "", currency: "GBP", transparency: "", timeline: "", target_audience: "", status: "in_review" });
       setValues([]);
       setTypes([]);
+      setArtistArchetypes([]);
+      setBrandArchetypes([]);
       onCreated();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to add brief");
