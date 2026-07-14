@@ -17,6 +17,48 @@ import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus 
 import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
 import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS, transparencyLabel } from "@/lib/brief-currency";
+import { DEFAULT_ARTIST_ARCHETYPES, DEFAULT_BRAND_ARCHETYPES } from "@/lib/vibe-check-config";
+
+const ARTIST_ARCHETYPE_OPTIONS = Object.values(DEFAULT_ARTIST_ARCHETYPES).map((a) => a.name);
+const BRAND_ARCHETYPE_OPTIONS = Object.values(DEFAULT_BRAND_ARCHETYPES).map((a) => a.name);
+
+function ArchetypePicker({
+  label,
+  help,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  help?: string;
+  options: string[];
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      {help ? <p className="text-xs text-muted-foreground">{help}</p> : null}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {options.map((opt) => {
+          const checked = value.includes(opt);
+          return (
+            <label key={opt} className="flex cursor-pointer items-center gap-2 rounded-md border border-border/60 p-2 text-sm">
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() =>
+                  onChange(checked ? value.filter((v) => v !== opt) : [...value, opt])
+                }
+              />
+              {opt}
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export type LeadBrief = {
   id: string; created_at: string; title: string; description: string;
@@ -33,6 +75,7 @@ export type CampaignBrief = {
   status: string;
   contact_email: string | null; published: boolean; published_at: string | null;
   linked_roster_id: string | null;
+  artist_archetypes: string[]; brand_archetypes: string[];
 };
 export type Profile = {
   id: string; email: string | null; display_name: string | null;
@@ -69,7 +112,7 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr, emailRes] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, artist_archetypes, brand_archetypes").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
       (supabase as any).rpc("admin_campaign_brief_emails"),
     ]);
@@ -407,6 +450,8 @@ function EditBriefDialog({
         currency: brief.currency ?? "GBP",
         transparency: brief.transparency ?? "",
         contact_email: brief.contact_email ?? "",
+        artist_archetypes: brief.artist_archetypes ?? [],
+        brand_archetypes: brief.brand_archetypes ?? [],
       });
     } else {
       setForm({
@@ -439,6 +484,10 @@ function EditBriefDialog({
       transparency: form.transparency || null,
       contact_email: form.contact_email || null,
     };
+    if (isUser) {
+      patch.artist_archetypes = Array.isArray(form.artist_archetypes) ? form.artist_archetypes : [];
+      patch.brand_archetypes = Array.isArray(form.brand_archetypes) ? form.brand_archetypes : [];
+    }
     if (!isUser) {
       patch.contact_name = form.contact_name || null;
       patch.company = form.company || null;
@@ -505,8 +554,27 @@ function EditBriefDialog({
               ))}
             </select>
           </div>
+          {isUser ? (
+            <>
+              <ArchetypePicker
+                label="Artist archetypes (visibility)"
+                help="Only artists whose Vibe Check archetype matches will see this opportunity when published. Leave empty to show to every artist. Manually shared users always see it."
+                options={ARTIST_ARCHETYPE_OPTIONS}
+                value={(form.artist_archetypes as string[]) ?? []}
+                onChange={(next) => setForm({ ...form, artist_archetypes: next })}
+              />
+              <ArchetypePicker
+                label="Brand archetypes (visibility)"
+                help="Only brands whose Vibe Check archetype matches will see this opportunity when published. Leave empty to show to every brand."
+                options={BRAND_ARCHETYPE_OPTIONS}
+                value={(form.brand_archetypes as string[]) ?? []}
+                onChange={(next) => setForm({ ...form, brand_archetypes: next })}
+              />
+            </>
+          ) : null}
           {!isUser ? (
             <>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Contact name</Label>
@@ -579,6 +647,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
   const [values, setValues] = useState<string[]>([]);
   const [types, setTypes] = useState<string[]>([]);
+  const [artistArchetypes, setArtistArchetypes] = useState<string[]>([]);
+  const [brandArchetypes, setBrandArchetypes] = useState<string[]>([]);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -629,6 +699,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
         target_audience: form.target_audience.trim() || null,
         collaboration_types: types,
         core_values: values,
+        artist_archetypes: artistArchetypes,
+        brand_archetypes: brandArchetypes,
         status: form.status || "in_review",
       } as any);
       if (error) throw error;
@@ -636,6 +708,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
       setForm({ title: "", description: "", contact_email: "", budget: "", currency: "GBP", transparency: "", timeline: "", target_audience: "", status: "in_review" });
       setValues([]);
       setTypes([]);
+      setArtistArchetypes([]);
+      setBrandArchetypes([]);
       onCreated();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to add brief");
@@ -746,6 +820,24 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
                 </label>
               ))}
             </div>
+          </div>
+          <div className="md:col-span-2">
+            <ArchetypePicker
+              label="Artist archetypes (visibility)"
+              help="Only artists whose Vibe Check archetype matches will see this opportunity on their dashboard once published. Leave empty to show to every artist. Users added manually below always see it regardless."
+              options={ARTIST_ARCHETYPE_OPTIONS}
+              value={artistArchetypes}
+              onChange={setArtistArchetypes}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <ArchetypePicker
+              label="Brand archetypes (visibility)"
+              help="Only brands whose Vibe Check archetype matches will see this opportunity on their dashboard once published. Leave empty to show to every brand."
+              options={BRAND_ARCHETYPE_OPTIONS}
+              value={brandArchetypes}
+              onChange={setBrandArchetypes}
+            />
           </div>
           <div className="md:col-span-2">
             <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Add brief"}</Button>

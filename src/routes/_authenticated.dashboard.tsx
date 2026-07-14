@@ -98,6 +98,8 @@ type Opportunity = {
   published_at: string | null;
   created_at: string;
   brief_source: "user" | "lead";
+  artist_archetypes?: string[] | null;
+  brand_archetypes?: string[] | null;
 };
 
 function DashboardPage() {
@@ -273,10 +275,10 @@ function DashboardPage() {
           .single(),
         supabase
           .from("campaign_briefs")
-          .select("id, title, description, budget, currency, transparency, published_at, created_at")
+          .select("id, title, description, budget, currency, transparency, published_at, created_at, artist_archetypes, brand_archetypes")
           .eq("published", true)
           .order("published_at", { ascending: false })
-          .limit(6),
+          .limit(50),
       ]);
 
       // Briefs the current user submitted (Project Planner)
@@ -334,7 +336,34 @@ function DashboardPage() {
           ? (supabase as any).from("lead_briefs_shared").select("id, title, description, budget, currency, transparency, created_at").in("id", shareLeadIds)
           : Promise.resolve({ data: [] as any[] }),
       ]);
-      const publishedRows = (((opps as any[]) ?? []) as any[]).map((r) => ({ ...r, brief_source: "user" as const })) as Opportunity[];
+      const publishedRowsAll = (((opps as any[]) ?? []) as any[]).map((r) => ({ ...r, brief_source: "user" as const })) as Opportunity[];
+
+      // Filter published opportunities by archetype match against the current user's Vibe Check.
+      // If a brief has no archetypes set, it's visible to everyone (backwards compatible).
+      // Privately shared briefs (below) always bypass this filter.
+      const latestVibe = (vibes?.[0] as VibeRow | undefined) ?? null;
+      let userArchetypeNames: string[] = [];
+      let userVibeKind: "artist" | "brand" | "fan" | null = latestVibe?.result ?? null;
+      if (latestVibe) {
+        if (latestVibe.result === "brand") {
+          const scoring: any = calculateBrandVibe(latestVibe.answers ?? {});
+          const name = scoring?.brandArchetype?.type;
+          if (name) userArchetypeNames = [name];
+        } else if (latestVibe.result === "artist") {
+          const scoring: any = calculateVibeScore(latestVibe.answers ?? {});
+          userArchetypeNames = [scoring?.primary, scoring?.secondary].filter(Boolean) as string[];
+        }
+      }
+      const publishedRows = publishedRowsAll.filter((r) => {
+        const artistList = (r.artist_archetypes ?? []) as string[];
+        const brandList = (r.brand_archetypes ?? []) as string[];
+        const hasAnyFilter = artistList.length > 0 || brandList.length > 0;
+        if (!hasAnyFilter) return true;
+        if (!userVibeKind || userArchetypeNames.length === 0) return false;
+        const relevantList = userVibeKind === "brand" ? brandList : artistList;
+        if (relevantList.length === 0) return false;
+        return userArchetypeNames.some((n) => relevantList.includes(n));
+      });
       const sharedRows: Opportunity[] = [
         ...(((sharedUser as any).data ?? []) as any[]).map((r) => ({ ...r, brief_source: "user" as const })),
         ...(((sharedLead as any).data ?? []) as any[]).map((r) => ({ ...r, published_at: null, brief_source: "lead" as const })),
