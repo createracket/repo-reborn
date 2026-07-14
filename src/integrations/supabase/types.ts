@@ -91,6 +91,8 @@ export type Database = {
       }
       campaign_briefs: {
         Row: {
+          artist_archetypes: string[]
+          brand_archetypes: string[]
           budget: number | null
           collaboration_types: string[]
           contact_email: string | null
@@ -110,6 +112,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          artist_archetypes?: string[]
+          brand_archetypes?: string[]
           budget?: number | null
           collaboration_types?: string[]
           contact_email?: string | null
@@ -129,6 +133,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          artist_archetypes?: string[]
+          brand_archetypes?: string[]
           budget?: number | null
           collaboration_types?: string[]
           contact_email?: string | null
