@@ -554,7 +554,24 @@ function EditBriefDialog({
               ))}
             </select>
           </div>
-          {!isUser ? (
+          {isUser ? (
+            <>
+              <ArchetypePicker
+                label="Artist archetypes (visibility)"
+                help="Only artists whose Vibe Check archetype matches will see this opportunity when published. Leave empty to show to every artist. Manually shared users always see it."
+                options={ARTIST_ARCHETYPE_OPTIONS}
+                value={(form.artist_archetypes as string[]) ?? []}
+                onChange={(next) => setForm({ ...form, artist_archetypes: next })}
+              />
+              <ArchetypePicker
+                label="Brand archetypes (visibility)"
+                help="Only brands whose Vibe Check archetype matches will see this opportunity when published. Leave empty to show to every brand."
+                options={BRAND_ARCHETYPE_OPTIONS}
+                value={(form.brand_archetypes as string[]) ?? []}
+                onChange={(next) => setForm({ ...form, brand_archetypes: next })}
+              />
+            </>
+          ) : null}
             <>
               <div className="grid grid-cols-2 gap-3">
                 <div>
