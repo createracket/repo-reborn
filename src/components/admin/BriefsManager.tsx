@@ -17,6 +17,48 @@ import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus 
 import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
 import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS, transparencyLabel } from "@/lib/brief-currency";
+import { DEFAULT_ARTIST_ARCHETYPES, DEFAULT_BRAND_ARCHETYPES } from "@/lib/vibe-check-config";
+
+const ARTIST_ARCHETYPE_OPTIONS = Object.values(DEFAULT_ARTIST_ARCHETYPES).map((a) => a.name);
+const BRAND_ARCHETYPE_OPTIONS = Object.values(DEFAULT_BRAND_ARCHETYPES).map((a) => a.name);
+
+function ArchetypePicker({
+  label,
+  help,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  help?: string;
+  options: string[];
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      {help ? <p className="text-xs text-muted-foreground">{help}</p> : null}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {options.map((opt) => {
+          const checked = value.includes(opt);
+          return (
+            <label key={opt} className="flex cursor-pointer items-center gap-2 rounded-md border border-border/60 p-2 text-sm">
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() =>
+                  onChange(checked ? value.filter((v) => v !== opt) : [...value, opt])
+                }
+              />
+              {opt}
+            </label>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export type LeadBrief = {
   id: string; created_at: string; title: string; description: string;
