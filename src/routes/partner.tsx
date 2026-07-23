@@ -66,24 +66,24 @@ function PartnerPage() {
     <>
       <SiteHeader minimal />
       <main className="min-h-screen bg-background text-foreground">
-      <section className="mx-auto max-w-5xl px-4 py-16 md:py-24">
-        <h1 className="text-center font-display text-2xl font-bold text-primary md:text-3xl">
+      <section className="mx-auto max-w-7xl px-3 py-10 sm:px-6 md:py-16">
+        <h1 className="text-center font-display text-3xl font-bold text-primary md:text-5xl">
           How Brands Create Racket
         </h1>
 
-        <div className="mt-6 rounded-2xl border border-border/60 bg-card/40 p-6 md:p-8">
-          <p className="text-center text-sm leading-relaxed text-foreground md:text-base">
+        <div className="mt-8 rounded-2xl border border-border/60 bg-card/40 p-6 md:p-10">
+          <p className="text-center text-base leading-relaxed text-foreground md:text-xl">
             Racket is your creative partner, not another platform to figure out. You bring a brief and a product - we
             match you with artists whose audiences already trust them. Enough to buy from them. No generic content, no
             compromising your messaging. Every campaign is curated, contextual, and low-risk to get started.
           </p>
         </div>
 
-        <h2 className="mt-14 text-center font-display text-xl font-bold text-[#b7d34a] md:text-2xl">
+        <h2 className="mt-14 text-center font-display text-2xl font-bold text-[#b7d34a] md:text-3xl">
           Choose your tier:
         </h2>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {TIERS.map((t) => (
             <div key={t.label} className="flex flex-col gap-3">
               <div
