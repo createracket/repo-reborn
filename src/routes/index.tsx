@@ -490,7 +490,7 @@ function EcosystemCard({
       <Card className={`rounded-2xl border-0 shadow-lg ${bg}`}>
         <CardHeader className="flex flex-row items-center justify-center gap-3 lg:justify-start">
           {icon}
-          <CardTitle className="font-headline">{title}</CardTitle>
+          <CardTitle className="font-headline text-3xl md:text-4xl tracking-tight">{title}</CardTitle>
         </CardHeader>
         <CardContent className="text-center lg:text-left">
           <p>{body}</p>
