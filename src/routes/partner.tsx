@@ -66,45 +66,45 @@ function PartnerPage() {
     <>
       <SiteHeader minimal />
       <main className="min-h-screen bg-background text-foreground">
-      <section className="mx-auto max-w-5xl px-4 py-16 md:py-24">
-        <h1 className="text-center font-display text-2xl font-bold text-primary md:text-3xl">
+      <section className="mx-auto max-w-7xl px-3 py-10 sm:px-6 md:py-16">
+        <h1 className="text-center font-display text-3xl font-bold text-primary md:text-5xl">
           How Brands Create Racket
         </h1>
 
-        <div className="mt-6 rounded-2xl border border-border/60 bg-card/40 p-6 md:p-8">
-          <p className="text-center text-sm leading-relaxed text-foreground md:text-base">
+        <div className="mt-8 rounded-2xl border border-border/60 bg-card/40 p-6 md:p-10">
+          <p className="text-center text-base leading-relaxed text-foreground md:text-xl">
             Racket is your creative partner, not another platform to figure out. You bring a brief and a product - we
             match you with artists whose audiences already trust them. Enough to buy from them. No generic content, no
             compromising your messaging. Every campaign is curated, contextual, and low-risk to get started.
           </p>
         </div>
 
-        <h2 className="mt-14 text-center font-display text-xl font-bold text-[#b7d34a] md:text-2xl">
+        <h2 className="mt-14 text-center font-display text-2xl font-bold text-[#b7d34a] md:text-3xl">
           Choose your tier:
         </h2>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
           {TIERS.map((t) => (
             <div key={t.label} className="flex flex-col gap-3">
               <div
-                className="flex h-32 items-center justify-center rounded-xl px-4 shadow-lg md:h-36"
+                className="flex h-36 items-center justify-center rounded-xl px-4 shadow-lg md:h-44"
                 style={{ background: t.gradient }}
               >
-                <span className="font-display text-3xl font-bold text-white drop-shadow-md md:text-4xl">{t.label}</span>
+                <span className="font-display text-4xl font-bold text-white drop-shadow-md md:text-5xl">{t.label}</span>
               </div>
-              <div className="min-h-[80px] rounded-xl border border-border/60 bg-card/30 p-4 text-center">
-                <p className="text-sm leading-snug text-foreground/90">{t.tagline}</p>
+              <div className="min-h-[90px] rounded-xl border border-border/60 bg-card/30 p-4 text-center">
+                <p className="text-base leading-snug text-foreground/90">{t.tagline}</p>
               </div>
               <div className="rounded-xl border border-border/60 bg-card/30 p-5">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-display text-xl font-bold text-foreground">{t.label}</span>
+                  <span className="font-display text-2xl font-bold text-foreground">{t.label}</span>
                   {t.tag && (
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/60">
                       {t.tag}
                     </span>
                   )}
                 </div>
-                {t.desc && <p className="mt-3 text-sm leading-relaxed text-foreground/80">{t.desc}</p>}
+                {t.desc && <p className="mt-3 text-base leading-relaxed text-foreground/80">{t.desc}</p>}
               </div>
             </div>
           ))}
@@ -112,7 +112,7 @@ function PartnerPage() {
 
         <Link
           to="/login"
-          className="mt-10 block rounded-full py-4 text-center font-display text-lg font-semibold text-foreground underline underline-offset-4 shadow-md transition hover:opacity-90"
+          className="mt-12 block rounded-full py-5 text-center font-display text-xl font-semibold text-foreground underline underline-offset-4 shadow-md transition hover:opacity-90 md:text-2xl"
           style={{
             background: "linear-gradient(90deg, #e8a998 0%, #f0c8b8 50%, #f8ecd8 100%)",
             color: "#111",
