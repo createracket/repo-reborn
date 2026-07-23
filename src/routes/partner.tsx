@@ -113,7 +113,8 @@ function PartnerPage() {
                 {t.desc && <p className="mt-3 text-base leading-relaxed text-foreground/80">{t.desc}</p>}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <Link
