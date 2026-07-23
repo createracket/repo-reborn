@@ -251,7 +251,7 @@ function Home() {
               variants={fadeUp}
               className="font-headline text-4xl leading-tight tracking-tighter md:text-6xl"
             >
-              <span className="text-pink-accent">Unskippable collabs</span>
+              <span className="text-pink-accent">Unskippable</span> <span className="text-white">collabs</span>
             </motion.h1>
 
             <motion.p
