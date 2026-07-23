@@ -83,14 +83,20 @@ function PartnerPage() {
           Choose your tier:
         </h2>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-          {TIERS.map((t) => (
+        <div className="mt-8 grid grid-cols-4 gap-2 sm:gap-5">
+          {TIERS.map((t) => {
+            const darkText = t.label === "Seed" || t.label === "Endorse";
+            return (
             <div key={t.label} className="flex flex-col gap-3">
               <div
-                className="flex h-36 items-center justify-center rounded-xl px-4 shadow-lg md:h-44"
+                className="flex h-24 items-center justify-center rounded-xl px-2 shadow-lg sm:h-36 md:h-44"
                 style={{ background: t.gradient }}
               >
-                <span className="font-display text-4xl font-bold text-white drop-shadow-md md:text-5xl">{t.label}</span>
+                <span
+                  className={`font-display text-lg font-bold drop-shadow-md sm:text-3xl md:text-5xl ${darkText ? "text-[#111]" : "text-white"}`}
+                >
+                  {t.label}
+                </span>
               </div>
               <div className="min-h-[90px] rounded-xl border border-border/60 bg-card/30 p-4 text-center">
                 <p className="text-base leading-snug text-foreground/90">{t.tagline}</p>
