@@ -41,21 +41,21 @@ const TIERS: Tier[] = [
   {
     label: "Seed",
     tagline: "Putting your product in the right hands",
-    gradient: "linear-gradient(135deg, #4b2fb3 0%, #3a1f8f 55%, #6a4ee0 100%)",
+    gradient: "#BADA55",
     tag: "LOW-RISK, EASY ENTRY",
     desc: "Gift awesome products and seed new campaign assets with relevant creators - reaching musicians, fans, and cultural tastemakers.",
   },
   {
     label: "Endorse",
     tagline: "Get priority for highly targeted campaigns",
-    gradient: "linear-gradient(135deg, #8faa2e 0%, #6f8a1f 55%, #3f4d10 100%)",
+    gradient: "#FFC0CB",
     tag: "CAMPAIGN PLAN",
     desc: "Build a bespoke roster for a campaign or ambassador program - leveraging lightweight agreements with set deliverables.",
   },
   {
     label: "Partner",
     tagline: "Retained programmes for sustainable results",
-    gradient: "linear-gradient(135deg, #a48b8a 0%, #6a4f4d 55%, #d7bcbb 100%)",
+    gradient: "#5C37D0",
     tag: "Bespoke",
     desc: "Custom collabs with tailored campaign tools and full account management - priority matching and paid media support.",
   },
@@ -83,14 +83,20 @@ function PartnerPage() {
           Choose your tier:
         </h2>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-          {TIERS.map((t) => (
+        <div className="mt-8 grid grid-cols-4 gap-2 sm:gap-5">
+          {TIERS.map((t) => {
+            const darkText = t.label === "Seed" || t.label === "Endorse";
+            return (
             <div key={t.label} className="flex flex-col gap-3">
               <div
-                className="flex h-36 items-center justify-center rounded-xl px-4 shadow-lg md:h-44"
+                className="flex h-24 items-center justify-center rounded-xl px-2 shadow-lg sm:h-36 md:h-44"
                 style={{ background: t.gradient }}
               >
-                <span className="font-display text-4xl font-bold text-white drop-shadow-md md:text-5xl">{t.label}</span>
+                <span
+                  className={`font-display text-lg font-bold drop-shadow-md sm:text-3xl md:text-5xl ${darkText ? "text-[#111]" : "text-white"}`}
+                >
+                  {t.label}
+                </span>
               </div>
               <div className="min-h-[90px] rounded-xl border border-border/60 bg-card/30 p-4 text-center">
                 <p className="text-base leading-snug text-foreground/90">{t.tagline}</p>
@@ -107,7 +113,8 @@ function PartnerPage() {
                 {t.desc && <p className="mt-3 text-base leading-relaxed text-foreground/80">{t.desc}</p>}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <Link
