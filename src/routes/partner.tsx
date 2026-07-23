@@ -87,24 +87,24 @@ function PartnerPage() {
           {TIERS.map((t) => (
             <div key={t.label} className="flex flex-col gap-3">
               <div
-                className="flex h-32 items-center justify-center rounded-xl px-4 shadow-lg md:h-36"
+                className="flex h-36 items-center justify-center rounded-xl px-4 shadow-lg md:h-44"
                 style={{ background: t.gradient }}
               >
-                <span className="font-display text-3xl font-bold text-white drop-shadow-md md:text-4xl">{t.label}</span>
+                <span className="font-display text-4xl font-bold text-white drop-shadow-md md:text-5xl">{t.label}</span>
               </div>
-              <div className="min-h-[80px] rounded-xl border border-border/60 bg-card/30 p-4 text-center">
-                <p className="text-sm leading-snug text-foreground/90">{t.tagline}</p>
+              <div className="min-h-[90px] rounded-xl border border-border/60 bg-card/30 p-4 text-center">
+                <p className="text-base leading-snug text-foreground/90">{t.tagline}</p>
               </div>
               <div className="rounded-xl border border-border/60 bg-card/30 p-5">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-display text-xl font-bold text-foreground">{t.label}</span>
+                  <span className="font-display text-2xl font-bold text-foreground">{t.label}</span>
                   {t.tag && (
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/60">
                       {t.tag}
                     </span>
                   )}
                 </div>
-                {t.desc && <p className="mt-3 text-sm leading-relaxed text-foreground/80">{t.desc}</p>}
+                {t.desc && <p className="mt-3 text-base leading-relaxed text-foreground/80">{t.desc}</p>}
               </div>
             </div>
           ))}
@@ -112,7 +112,7 @@ function PartnerPage() {
 
         <Link
           to="/login"
-          className="mt-10 block rounded-full py-4 text-center font-display text-lg font-semibold text-foreground underline underline-offset-4 shadow-md transition hover:opacity-90"
+          className="mt-12 block rounded-full py-5 text-center font-display text-xl font-semibold text-foreground underline underline-offset-4 shadow-md transition hover:opacity-90 md:text-2xl"
           style={{
             background: "linear-gradient(90deg, #e8a998 0%, #f0c8b8 50%, #f8ecd8 100%)",
             color: "#111",
