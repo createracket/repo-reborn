@@ -251,11 +251,7 @@ function Home() {
               variants={fadeUp}
               className="font-headline text-4xl leading-tight tracking-tighter md:text-6xl"
             >
-              <span className="text-white">Where </span>
-              <span className="text-pink-accent">cool collabs</span>
-              <br />
-              <span className="text-pink-accent"></span>
-              <span className="text-white">make real noise</span>
+              <span className="text-pink-accent">Unskippable collabs</span>
             </motion.h1>
 
             <motion.p
