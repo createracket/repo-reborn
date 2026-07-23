@@ -1,0 +1,274 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { Check, Sparkles } from "lucide-react";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { Button } from "@/components/ui/button";
+
+export const Route = createFileRoute("/pricing")({
+  head: () => ({
+    meta: [
+      { title: "Pricing — Create Racket" },
+      {
+        name: "description",
+        content:
+          "Simple pricing for artists and brands. Start free, upgrade to Pro for priority briefs, advanced metrics and roster tools.",
+      },
+      { property: "og:title", content: "Pricing — Create Racket" },
+      {
+        property: "og:description",
+        content:
+          "Free forever for fans and browsing artists. Pro at $49/mo (or $490/yr) with a 7-day free trial.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: PricingPage,
+});
+
+type Interval = "monthly" | "yearly";
+
+type Plan = {
+  id: "free" | "pro" | "brand";
+  name: string;
+  tagline: string;
+  priceMonthly: number | null;
+  priceYearly: number | null;
+  priceLabel?: string; // for brand
+  cta: string;
+  ctaTo: string;
+  highlight?: boolean;
+  accent: string; // tailwind color hex
+  features: string[];
+  footnote?: string;
+};
+
+const PLANS: Plan[] = [
+  {
+    id: "free",
+    name: "Discovery",
+    tagline: "Vibe check, browse rosters, get matched.",
+    priceMonthly: 0,
+    priceYearly: 0,
+    cta: "Get started free",
+    ctaTo: "/login",
+    accent: "#BADA55",
+    features: [
+      "Vibe Check archetype match",
+      "Browse public rosters & reports",
+      "Apply to 1 brief per month",
+      "Community newsletter",
+    ],
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    tagline: "For artists & studios ready to work.",
+    priceMonthly: 49,
+    priceYearly: 490,
+    cta: "Start 7-day free trial",
+    ctaTo: "/login",
+    highlight: true,
+    accent: "#FFC0CB",
+    features: [
+      "Everything in Discovery",
+      "Unlimited brief applications",
+      "Priority matching on new briefs",
+      "Public artist profile & roster inclusion",
+      "Advanced audience & streaming metrics",
+      "Campaign report builder",
+      "Direct support",
+    ],
+    footnote: "7-day free trial. Cancel anytime.",
+  },
+  {
+    id: "brand",
+    name: "Brand",
+    tagline: "For brands & agencies briefing artists.",
+    priceMonthly: null,
+    priceYearly: null,
+    priceLabel: "Custom",
+    cta: "Talk to us",
+    ctaTo: "/connect",
+    accent: "#5C37D0",
+    features: [
+      "Curated artist rosters",
+      "Managed campaign delivery",
+      "Custom reporting & insights",
+      "Dedicated account partner",
+      "Off-platform billing / retainer",
+    ],
+  },
+];
+
+function PricingPage() {
+  const [interval, setInterval] = useState<Interval>("monthly");
+
+  return (
+    <>
+      <SiteHeader />
+      <main className="min-h-screen bg-background text-foreground">
+        <section className="mx-auto max-w-6xl px-4 py-14 md:py-20">
+          {/* Header */}
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/40 px-3 py-1 text-xs font-medium text-foreground/70">
+              <Sparkles className="h-3.5 w-3.5 text-pink-accent" />
+              Simple pricing. No lock-in.
+            </div>
+            <h1 className="mt-5 font-display text-4xl font-bold text-primary md:text-6xl">
+              Pricing that scales with the noise you make
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-foreground/80 md:text-lg">
+              Start free. Upgrade when you're ready for priority briefs, deeper metrics, and the
+              tools we use to run real campaigns.
+            </p>
+
+            {/* Interval toggle */}
+            <div className="mt-8 inline-flex items-center rounded-full border border-border/60 bg-card/40 p-1">
+              <button
+                type="button"
+                onClick={() => setInterval("monthly")}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
+                  interval === "monthly"
+                    ? "bg-foreground text-background"
+                    : "text-foreground/70 hover:text-foreground"
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                onClick={() => setInterval("yearly")}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
+                  interval === "yearly"
+                    ? "bg-foreground text-background"
+                    : "text-foreground/70 hover:text-foreground"
+                }`}
+              >
+                Yearly
+                <span className="ml-1.5 rounded-full bg-[#BADA55] px-1.5 py-0.5 text-[10px] font-bold text-[#111]">
+                  2 months free
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Plans */}
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {PLANS.map((plan) => (
+              <PlanCard key={plan.id} plan={plan} interval={interval} />
+            ))}
+          </div>
+
+          {/* Promo code note */}
+          <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-border/60 bg-card/30 p-5 text-center text-sm text-foreground/80">
+            Got an access code from a previous invite? Apply it at checkout — early supporters keep
+            their discount.
+          </div>
+
+          {/* FAQ mini */}
+          <div className="mt-16 grid gap-6 md:grid-cols-2">
+            <Faq
+              q="Can I switch plans later?"
+              a="Yes — upgrade or downgrade anytime from your billing settings. Changes prorate automatically."
+            />
+            <Faq
+              q="Do you offer a free trial?"
+              a="Pro comes with a 7-day free trial. No charge until the trial ends, and you can cancel with one click."
+            />
+            <Faq
+              q="Which payment methods work?"
+              a="All major cards via Stripe. Enterprise and Brand plans can be billed off-platform."
+            />
+            <Faq
+              q="What if I'm a fan, not an artist?"
+              a="Discovery is free forever. You can vibe check, browse rosters and follow campaigns without paying."
+            />
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
+
+function PlanCard({ plan, interval }: { plan: Plan; interval: Interval }) {
+  const price =
+    plan.priceLabel != null
+      ? plan.priceLabel
+      : interval === "monthly"
+        ? `$${plan.priceMonthly}`
+        : `$${plan.priceYearly}`;
+  const perLabel =
+    plan.priceLabel != null
+      ? ""
+      : (plan.priceMonthly ?? 0) === 0
+        ? "forever"
+        : interval === "monthly"
+          ? "/month"
+          : "/year";
+
+  return (
+    <div
+      className={`relative flex flex-col rounded-2xl border p-6 md:p-7 ${
+        plan.highlight
+          ? "border-pink-accent/60 bg-card/60 shadow-[0_0_0_1px_rgba(255,192,203,0.35)]"
+          : "border-border/60 bg-card/30"
+      }`}
+    >
+      {plan.highlight && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-pink-accent px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#111]">
+          Most popular
+        </span>
+      )}
+
+      <div
+        className="mb-5 h-2 w-14 rounded-full"
+        style={{ background: plan.accent }}
+        aria-hidden
+      />
+      <h3 className="font-display text-2xl font-bold text-foreground">{plan.name}</h3>
+      <p className="mt-1 text-sm text-foreground/70">{plan.tagline}</p>
+
+      <div className="mt-6 flex items-baseline gap-1">
+        <span className="font-display text-5xl font-bold text-foreground">{price}</span>
+        {perLabel && <span className="text-sm text-foreground/60">{perLabel}</span>}
+      </div>
+      {plan.id === "pro" && interval === "yearly" && (
+        <div className="mt-1 text-xs text-foreground/60">Equivalent to ~$41/month</div>
+      )}
+
+      <ul className="mt-6 space-y-2.5">
+        {plan.features.map((f) => (
+          <li key={f} className="flex items-start gap-2 text-sm text-foreground/85">
+            <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-pink-accent" />
+            <span>{f}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-7">
+        <Button
+          asChild
+          className={`w-full ${plan.highlight ? "" : "bg-foreground/10 text-foreground hover:bg-foreground/20"}`}
+          variant={plan.highlight ? "default" : "secondary"}
+        >
+          <Link to={plan.ctaTo}>{plan.cta}</Link>
+        </Button>
+        {plan.footnote && (
+          <p className="mt-2 text-center text-xs text-foreground/60">{plan.footnote}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Faq({ q, a }: { q: string; a: string }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card/30 p-5">
+      <h4 className="font-display text-base font-semibold text-foreground">{q}</h4>
+      <p className="mt-2 text-sm leading-relaxed text-foreground/75">{a}</p>
+    </div>
+  );
+}
