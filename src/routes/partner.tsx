@@ -93,7 +93,7 @@ function PartnerPage() {
                 style={{ background: t.gradient }}
               >
                 <span
-                  className={`font-display text-lg font-bold drop-shadow-md sm:text-3xl md:text-5xl ${darkText ? "text-[#111]" : "text-white"}`}
+                  className={`font-display text-sm font-bold leading-tight drop-shadow-md sm:text-2xl md:text-4xl lg:text-5xl ${darkText ? "text-[#111]" : "text-white"}`}
                 >
                   {t.label}
                 </span>
