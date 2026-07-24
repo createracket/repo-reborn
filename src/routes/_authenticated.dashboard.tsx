@@ -580,7 +580,7 @@ function DashboardPage() {
                     </CardTitle>
                     <CardDescription>
                       Kick off a campaign by submitting a brief. We'll take it from review through to
-                      roster and reporting — track every step here.
+                      roster and reporting - track every step here.
                     </CardDescription>
                   </div>
                   <Button asChild size="sm">
@@ -1064,7 +1064,7 @@ function DashboardPage() {
                     <h3 className="font-display text-xl">Suggested matches</h3>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    A taste of who's on Create Racket — sample artists and brands to give you a feel
+                    A taste of who's on Racket - sample artists and brands to give you a feel
                     for the kind of matches we'll surface as the community grows.
                   </p>
                   <div className="mt-4">
