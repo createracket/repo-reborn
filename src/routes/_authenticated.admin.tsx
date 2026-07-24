@@ -493,6 +493,35 @@ function AdminPage() {
                       </td>
                       <td className="p-3 text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
                       <td className="p-3">
+                        {(() => {
+                          const isPaid = p.subscription_tier === "paid";
+                          return (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const next = isPaid ? "free" : "paid";
+                                const prev = profiles;
+                                setProfiles((rows) => rows.map((r) => r.id === p.id ? { ...r, subscription_tier: next } : r));
+                                const { error } = await (supabase as any)
+                                  .from("profiles")
+                                  .update({ subscription_tier: next })
+                                  .eq("id", p.id);
+                                if (error) {
+                                  setProfiles(prev);
+                                  toast.error(error.message);
+                                } else {
+                                  toast.success(next === "paid" ? "Upgraded to Paid" : "Downgraded to Free");
+                                }
+                              }}
+                              className={`rounded-full border px-2.5 py-0.5 text-xs uppercase tracking-wider transition ${isPaid ? "border-primary bg-primary/15 text-primary hover:bg-primary/25" : "border-border/60 bg-muted/40 text-muted-foreground hover:bg-muted"}`}
+                              title={isPaid ? "Click to downgrade to Free" : "Click to upgrade to Paid"}
+                            >
+                              {isPaid ? "Paid" : "Free"}
+                            </button>
+                          );
+                        })()}
+                      </td>
+                      <td className="p-3">
                         <Switch
                           checked={!!p.is_featured}
                           disabled={!p.slug}
