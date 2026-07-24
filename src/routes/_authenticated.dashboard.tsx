@@ -122,6 +122,7 @@ function DashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const soundBoardRef = useRef<HTMLDivElement>(null);
   const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
 
   const isAllView = rosterFilter === "all";
