@@ -120,6 +120,8 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<"free" | "paid">("free");
+  const [adminViewAsTier, setAdminViewAsTier] = useState<"free" | "paid">("paid");
   const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
   const soundBoardRef = useRef<HTMLDivElement>(null);
