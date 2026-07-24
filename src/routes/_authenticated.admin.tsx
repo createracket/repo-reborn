@@ -219,6 +219,25 @@ function AdminPage() {
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="faqs">FAQs</TabsTrigger>
             <TabsTrigger value="sound-board">Sound Board</TabsTrigger>
+            <div className="mx-1 h-6 w-px self-center bg-border" aria-hidden />
+            <Link
+              to="/roster-builder"
+              className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            >
+              Roster Builder <ExternalLink className="size-3.5" />
+            </Link>
+            <Link
+              to="/campaign-reports"
+              className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            >
+              Campaign Reports <ExternalLink className="size-3.5" />
+            </Link>
+            <Link
+              to="/campaign-builder"
+              className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            >
+              Campaign Builder <ExternalLink className="size-3.5" />
+            </Link>
           </TabsList>
 
           <TabsContent value="traffic" className="mt-6">
