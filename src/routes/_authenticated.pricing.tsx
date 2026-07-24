@@ -162,8 +162,11 @@ function PricingPage() {
             ))}
           </div>
 
-          {/* Promo code note */}
-          <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-border/60 bg-card/30 p-5 text-center text-sm text-foreground/80">
+          {/* Currency + promo note */}
+          <p className="mx-auto mt-8 max-w-2xl text-center text-xs text-foreground/60">
+            *All prices in USD. Local currency conversions and applicable taxes are calculated at checkout.
+          </p>
+          <div className="mx-auto mt-4 max-w-2xl rounded-2xl border border-border/60 bg-card/30 p-5 text-center text-sm text-foreground/80">
             Got an access code from a previous invite? Apply it at checkout or contact us for help.
           </div>
 
@@ -234,9 +237,12 @@ function PlanCard({ plan, interval }: { plan: Plan; interval: Interval }) {
       <div className="mt-6 flex items-baseline gap-1">
         <span className="font-display text-5xl font-bold text-foreground">{price}</span>
         {perLabel && <span className="text-sm text-foreground/60">{perLabel}</span>}
+        {plan.priceLabel == null && (plan.priceMonthly ?? 0) > 0 && (
+          <span className="ml-1 text-xs font-medium text-foreground/60">USD*</span>
+        )}
       </div>
       {plan.id === "pro" && interval === "yearly" && (
-        <div className="mt-1 text-xs text-foreground/60">Equivalent to ~$41/month</div>
+        <div className="mt-1 text-xs text-foreground/60">Equivalent to ~$41 USD/month</div>
       )}
 
       <ul className="mt-6 space-y-2.5">
