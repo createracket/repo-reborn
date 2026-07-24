@@ -23,6 +23,15 @@ type SoundBoardItem = {
 export function SoundBoardAdmin() {
   const [rows, setRows] = useState<SoundBoardItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+
+  function toggleOpen(id: string) {
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
 
   async function load() {
     setLoading(true);
