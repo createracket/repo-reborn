@@ -732,7 +732,7 @@ function DashboardPage() {
 
           {/* NEW OPPORTUNITIES (full width) */}
           <div className="lg:col-span-3">
-            <Card className="bg-[#d4c6a1]/20 border-[#d4c6a1]/40">
+            <Card className="bg-[#c8c584]/20 border-[#c8c584]/40">
               <CardHeader>
                 <CardTitle className="font-display text-2xl flex items-center gap-2">
                   <Megaphone className="size-5 text-pink-accent" /> New opportunities
