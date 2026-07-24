@@ -920,6 +920,7 @@ export type Database = {
           notify_newsletter: boolean
           slug: string | null
           socials: Json
+          subscription_tier: string
           top_audience_location: string | null
           total_followers: number | null
           total_streams: number | null
@@ -948,6 +949,7 @@ export type Database = {
           notify_newsletter?: boolean
           slug?: string | null
           socials?: Json
+          subscription_tier?: string
           top_audience_location?: string | null
           total_followers?: number | null
           total_streams?: number | null
@@ -976,6 +978,7 @@ export type Database = {
           notify_newsletter?: boolean
           slug?: string | null
           socials?: Json
+          subscription_tier?: string
           top_audience_location?: string | null
           total_followers?: number | null
           total_streams?: number | null
