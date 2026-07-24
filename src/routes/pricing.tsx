@@ -171,19 +171,19 @@ function PricingPage() {
           <div className="mt-16 grid gap-6 md:grid-cols-2">
             <Faq
               q="Can I switch plans later?"
-              a="Yes — upgrade or downgrade anytime from your billing settings. Changes prorate automatically."
+              a="Yes - upgrade anytime from your billing settings. Changes prorate automatically."
             />
             <Faq
               q="Do you offer a free trial?"
-              a="Pro comes with a 7-day free trial. No charge until the trial ends, and you can cancel with one click."
+              a="No but you can cancel your Priority Access if you're not vibing it - monthly cancellation periods apply but there's no surprise fees. "
             />
             <Faq
               q="Which payment methods work?"
-              a="All major cards via Stripe. Enterprise and Brand plans can be billed off-platform."
+              a="All major cards via Stripe. Enterprise and Brand plans can be billed off-platform - talk to our team to find something that fits."
             />
             <Faq
               q="What if I'm a fan, not an artist?"
-              a="Discovery is free forever. You can vibe check, browse rosters and follow campaigns without paying."
+              a="Racket is currently built for music and media partnerships but likeminded fans can subscriber for free to our newsletter and follow along on socials. "
             />
           </div>
         </section>
