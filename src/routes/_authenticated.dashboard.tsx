@@ -1300,7 +1300,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
 
   return (
     <>
-      <li className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4">
+      <li className="flex flex-col gap-2 rounded-xl border-2 border-border bg-card p-4 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-medium leading-tight">{opp.title}</h3>
           {opp.budget ? (
