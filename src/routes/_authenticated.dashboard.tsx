@@ -120,6 +120,8 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<"free" | "paid">("free");
+  const [adminViewAsTier, setAdminViewAsTier] = useState<"free" | "paid">("paid");
   const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
   const soundBoardRef = useRef<HTMLDivElement>(null);
@@ -230,6 +232,13 @@ function DashboardPage() {
         .eq("role", "admin")
         .maybeSingle();
       setIsAdmin(!!roleRow);
+
+      const { data: tierRow } = await (supabase as any)
+        .from("profiles")
+        .select("subscription_tier")
+        .eq("id", u.user.id)
+        .maybeSingle();
+      setSubscriptionTier(((tierRow as any)?.subscription_tier === "paid" ? "paid" : "free"));
 
       // Auto-enrol new accounts into the mailing list
       if (u.user.email) {
@@ -734,19 +743,54 @@ function DashboardPage() {
 
           {/* NEW OPPORTUNITIES (full width) */}
           <div className="lg:col-span-3">
+            {(() => {
+              const effectiveTier: "free" | "paid" = isAdmin ? adminViewAsTier : subscriptionTier;
+              const isFreeView = effectiveTier === "free";
+              return (
             <Card>
               <CardHeader>
-                <CardTitle className="font-display text-2xl flex items-center gap-2">
-                  <Megaphone className="size-5 text-pink-accent" /> New opportunities
-                </CardTitle>
-                <CardDescription>
-                  Live briefs from the Racket community. Click to review and express interest, or{" "}
-                  <Link to="/contact" className="text-primary hover:underline">contact us</Link>{" "}
-                  with any questions.
-                </CardDescription>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <CardTitle className="font-display text-2xl flex items-center gap-2">
+                      <Megaphone className="size-5 text-pink-accent" /> New opportunities
+                    </CardTitle>
+                    <CardDescription>
+                      Live briefs from the Racket community. Click to review and express interest, or{" "}
+                      <Link to="/contact" className="text-primary hover:underline">contact us</Link>{" "}
+                      with any questions.
+                    </CardDescription>
+                  </div>
+                  {isAdmin ? (
+                    <div className="flex items-center gap-1 rounded-full border border-border/60 bg-muted/40 p-0.5 text-[11px] uppercase tracking-wider">
+                      <button
+                        type="button"
+                        onClick={() => setAdminViewAsTier("paid")}
+                        className={`rounded-full px-2.5 py-1 transition ${adminViewAsTier === "paid" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                      >
+                        Paid view
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAdminViewAsTier("free")}
+                        className={`rounded-full px-2.5 py-1 transition ${adminViewAsTier === "free" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                      >
+                        Free view
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {loading ? (
+                {isFreeView ? (
+                  <div className="rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-6 text-center">
+                    <p className="font-display text-lg">Unlock access to collabs as a paid subscriber</p>
+                    <div className="mt-3">
+                      <Button asChild size="sm">
+                        <Link to="/pricing">See plans</Link>
+                      </Button>
+                    </div>
+                  </div>
+                ) : loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
                 ) : opportunities.length === 0 && spotlightOpps.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
@@ -876,6 +920,8 @@ function DashboardPage() {
                 ) : null}
               </CardContent>
             </Card>
+              );
+            })()}
           </div>
 
 

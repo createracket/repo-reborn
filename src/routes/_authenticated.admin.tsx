@@ -53,7 +53,7 @@ type LeadBrief = {
 };
 type ContactMsg = { id: string; created_at: string; name: string; email: string; message: string; handled: boolean };
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
-type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null };
+type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null };
 type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null; published: boolean; published_at: string | null; linked_roster_id: string | null };
 
 type Spotlight = {
@@ -114,7 +114,7 @@ function AdminPage() {
         supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
-        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, currency, transparency").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id").order("created_at", { ascending: false }),
@@ -460,7 +460,7 @@ function AdminPage() {
               onCreated={async () => {
                 const { data } = await supabase
                   .from("profiles")
-                  .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured")
+                  .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier")
                   .order("created_at", { ascending: false });
                 setProfiles((data as Profile[]) ?? []);
               }}
@@ -474,7 +474,7 @@ function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <Table headers={["Display name", "Email", "Profile type", "Slug", "Joined", "Featured", ""]}>
+                <Table headers={["Display name", "Email", "Profile type", "Slug", "Joined", "Subscription", "Featured", ""]}>
                   {profiles.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
@@ -492,6 +492,35 @@ function AdminPage() {
                         {p.slug ? <code className="text-xs">/u/{p.slug}</code> : <span className="text-xs italic">no slug</span>}
                       </td>
                       <td className="p-3 text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
+                      <td className="p-3">
+                        {(() => {
+                          const isPaid = p.subscription_tier === "paid";
+                          return (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const next = isPaid ? "free" : "paid";
+                                const prev = profiles;
+                                setProfiles((rows) => rows.map((r) => r.id === p.id ? { ...r, subscription_tier: next } : r));
+                                const { error } = await (supabase as any)
+                                  .from("profiles")
+                                  .update({ subscription_tier: next })
+                                  .eq("id", p.id);
+                                if (error) {
+                                  setProfiles(prev);
+                                  toast.error(error.message);
+                                } else {
+                                  toast.success(next === "paid" ? "Upgraded to Paid" : "Downgraded to Free");
+                                }
+                              }}
+                              className={`rounded-full border px-2.5 py-0.5 text-xs uppercase tracking-wider transition ${isPaid ? "border-primary bg-primary/15 text-primary hover:bg-primary/25" : "border-border/60 bg-muted/40 text-muted-foreground hover:bg-muted"}`}
+                              title={isPaid ? "Click to downgrade to Free" : "Click to upgrade to Paid"}
+                            >
+                              {isPaid ? "Paid" : "Free"}
+                            </button>
+                          );
+                        })()}
+                      </td>
                       <td className="p-3">
                         <Switch
                           checked={!!p.is_featured}
