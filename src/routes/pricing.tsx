@@ -80,7 +80,7 @@ const PLANS: Plan[] = [
       "Campaign reporting tools",
       "Direct support",
     ],
-    footnote: "No annual commitment, cancel any time.",
+    footnote: "Limited-time joining offer. 30-day cancellation, no refunds.",
   },
   {
     id: "brand",
