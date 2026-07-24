@@ -199,10 +199,19 @@ function AdminPage() {
             <h1 className="mt-1 font-display text-4xl md:text-5xl">Dev view</h1>
             <p className="mt-2 text-muted-foreground">Backend records across the platform.</p>
           </div>
-          <Button asChild variant="outline">
-            <Link to="/roster-builder">Roster Builder →</Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline">
+              <Link to="/roster-builder">Roster Builder →</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/campaign-reports">Campaign Reports →</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/campaign-builder">Campaign Builder →</Link>
+            </Button>
+          </div>
         </div>
+
 
         <Tabs defaultValue="traffic">
           <TabsList className="flex flex-wrap">
@@ -219,26 +228,8 @@ function AdminPage() {
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="faqs">FAQs</TabsTrigger>
             <TabsTrigger value="sound-board">Sound Board</TabsTrigger>
-            <div className="mx-1 h-6 w-px self-center bg-border" aria-hidden />
-            <Link
-              to="/roster-builder"
-              className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              Roster Builder <ExternalLink className="size-3.5" />
-            </Link>
-            <Link
-              to="/campaign-reports"
-              className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              Campaign Reports <ExternalLink className="size-3.5" />
-            </Link>
-            <Link
-              to="/campaign-builder"
-              className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            >
-              Campaign Builder <ExternalLink className="size-3.5" />
-            </Link>
           </TabsList>
+
 
           <TabsContent value="traffic" className="mt-6">
             <TrafficAdmin />
