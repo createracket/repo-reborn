@@ -1216,22 +1216,28 @@ function DashboardPage() {
                   ref={soundBoardRef}
                   className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
                 >
-                  {SOUND_BOARD_PLACEHOLDERS.map((item, i) => (
-                    <div
-                      key={i}
-                      className="snap-start shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.333%-8px)] lg:w-[calc(20%-10px)]"
-                    >
-                      <div className="group flex h-full flex-col gap-2 rounded-xl border border-border/60 bg-card p-3">
+                  {(soundBoardItems.length > 0 ? soundBoardItems : SOUND_BOARD_PLACEHOLDERS).map((item: any, i: number) => {
+                    const inner = (
+                      <div className="group flex h-full flex-col gap-2 rounded-xl border border-border/60 bg-card p-3 transition hover:border-pink-accent/60">
                         <div
                           className="w-full overflow-hidden rounded-lg"
                           style={{ aspectRatio: "9 / 16" }}
                         >
-                          <div
-                            className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-white/70"
-                            style={{ background: item.gradient }}
-                          >
-                            Coming soon
-                          </div>
+                          {item.thumbnail_url ? (
+                            <img
+                              src={item.thumbnail_url}
+                              alt={item.title}
+                              loading="lazy"
+                              className="size-full object-cover"
+                            />
+                          ) : (
+                            <div
+                              className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-white/70"
+                              style={{ background: item.gradient || "linear-gradient(135deg,#5C37D0,#FFC0CB)" }}
+                            >
+                              Coming soon
+                            </div>
+                          )}
                         </div>
                         <h3 className="mt-1 text-sm font-medium leading-tight group-hover:text-pink-accent">
                           {item.title}
@@ -1240,8 +1246,27 @@ function DashboardPage() {
                           {item.copy}
                         </p>
                       </div>
-                    </div>
-                  ))}
+                    );
+                    return (
+                      <div
+                        key={item.id ?? i}
+                        className="snap-start shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.333%-8px)] lg:w-[calc(20%-10px)]"
+                      >
+                        {item.video_url ? (
+                          <a
+                            href={item.video_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block h-full"
+                          >
+                            {inner}
+                          </a>
+                        ) : (
+                          inner
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
