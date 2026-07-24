@@ -117,8 +117,8 @@ function PricingPage() {
               <Sparkles className="h-3.5 w-3.5 text-pink-accent" />
               Simple pricing. No lock-in.
             </div>
-            <h1 className="mt-5 font-display text-4xl font-bold text-primary md:text-6xl">
-              Pricing that scales with the noise you make
+            <h1 className="mt-5 font-display text-4xl font-bold text-white md:text-6xl">
+              Partnerships that scale with the noise you make
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-foreground/80 md:text-lg">
               Start free. Upgrade when you're ready for priority briefs, deeper metrics, and the
