@@ -25,11 +25,11 @@ function VibeCheckLanding() {
       <section className="container mx-auto px-4 py-20 md:py-28">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">
-            The Vibe Check
+            YOUR VIBE CHECK
           </p>
           <h1 className="mt-3 font-display text-4xl md:text-6xl">
-            <span className="text-foreground">WHAT'S YOUR</span>{" "}
-            <span className="text-gradient-racket">RACKET</span>?
+            <span className="text-foreground">Fine tune your next</span>{" "}
+            <span className="text-gradient-racket">collab</span>
           </h1>
           <p className="mt-5 text-muted-foreground">
             Pick a lane. We'll learn your archetype and start matching you to the
