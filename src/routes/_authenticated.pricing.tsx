@@ -162,8 +162,11 @@ function PricingPage() {
             ))}
           </div>
 
-          {/* Promo code note */}
-          <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-border/60 bg-card/30 p-5 text-center text-sm text-foreground/80">
+          {/* Currency + promo note */}
+          <p className="mx-auto mt-8 max-w-2xl text-center text-xs text-foreground/60">
+            *All prices in USD. Local currency conversions and applicable taxes are calculated at checkout.
+          </p>
+          <div className="mx-auto mt-4 max-w-2xl rounded-2xl border border-border/60 bg-card/30 p-5 text-center text-sm text-foreground/80">
             Got an access code from a previous invite? Apply it at checkout or contact us for help.
           </div>
 
