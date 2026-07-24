@@ -23,11 +23,11 @@ function VibeCheckLanding() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <section className="container mx-auto px-4 py-20 md:py-28">
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-5xl text-center">
           <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">
             YOUR VIBE CHECK
           </p>
-          <h1 className="mt-3 font-display text-4xl md:text-6xl">
+          <h1 className="mt-3 font-display text-3xl sm:text-5xl md:text-7xl whitespace-nowrap">
             <span className="text-foreground">Fine tune your next</span>{" "}
             <span className="text-gradient-racket">collab</span>
           </h1>
