@@ -571,7 +571,7 @@ function DashboardPage() {
 
           {/* PROJECT PLANNER */}
           <div className="lg:col-span-3">
-            <Card>
+            <Card className="bg-[#e2bfb4]/20 border-[#e2bfb4]/40">
               <CardHeader>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
