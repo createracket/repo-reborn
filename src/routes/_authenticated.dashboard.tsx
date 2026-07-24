@@ -783,7 +783,7 @@ function DashboardPage() {
               <CardContent className="space-y-6">
                 {isFreeView ? (
                   <div className="rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-6 text-center">
-                    <p className="font-display text-lg">Unlock access to collabs as a paid subscriber</p>
+                    <p className="font-display text-lg">Unlock access to collabs as a priority subscriber</p>
                     <div className="mt-3">
                       <Button asChild size="sm">
                         <Link to="/pricing">See plans</Link>
