@@ -879,7 +879,7 @@ function DashboardPage() {
 
           {/* ROSTER (full width) */}
           <div className="lg:col-span-3">
-            <Card className="bg-[#e2bfb4]/20 border-[#e2bfb4]/40">
+            <Card>
               <CardHeader>
                 <CardTitle className="font-display text-2xl flex items-center gap-2">
                   <Users className="size-5 text-primary" /> Your roster
