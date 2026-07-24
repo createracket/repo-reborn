@@ -67,7 +67,7 @@ const PLANS: Plan[] = [
     tagline: "For artists & teams ready to connect.",
     priceMonthly: 49,
     priceYearly: 490,
-    cta: "Complimentary strategy call - limited time joining offer!",
+    cta: "Book a free strategy call",
     ctaTo: "/login",
     highlight: true,
     accent: "#FFC0CB",
@@ -80,7 +80,7 @@ const PLANS: Plan[] = [
       "Campaign reporting tools",
       "Direct support",
     ],
-    footnote: "No annual commitment, cancel any time.",
+    footnote: "Limited-time joining offer. 30-day cancellation, no refunds.",
   },
   {
     id: "brand",
