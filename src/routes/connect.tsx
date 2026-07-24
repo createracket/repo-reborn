@@ -20,6 +20,7 @@ import {
 } from "@/lib/brief-form-config";
 import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS } from "@/lib/brief-currency";
 import logo from "@/assets/CR-Logo-Half-Colour.png.asset.json";
+import { VoiceNoteRecorder } from "@/components/briefs/VoiceNoteRecorder";
 
 export const Route = createFileRoute("/connect")({
   head: () => ({
@@ -132,6 +133,7 @@ function ConnectPage() {
   const [authedUserId, setAuthedUserId] = useState<string | null>(null);
   const [accountKind, setAccountKind] = useState<AccountKind | null>(null);
   const [campaignKind, setCampaignKind] = useState<CampaignKind | null>(null);
+  const [additionalInfo, setAdditionalInfo] = useState("");
 
   useEffect(() => {
     loadBriefFormConfig().then(setConfig).catch(() => setConfig(DEFAULT_BRIEF_FORM_CONFIG));
@@ -723,12 +725,23 @@ function ConnectPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="additional_info">{f.additional_info.label}</Label>
+                      <VoiceNoteRecorder
+                        onTranscribed={(text) =>
+                          setAdditionalInfo((prev) => {
+                            const trimmed = prev.trim();
+                            const next = trimmed ? `${trimmed}\n\n${text}` : text;
+                            return next.slice(0, 5000);
+                          })
+                        }
+                      />
                       <Textarea
                         id="additional_info"
                         name="additional_info"
                         placeholder={f.additional_info.placeholder}
                         rows={5}
                         maxLength={5000}
+                        value={additionalInfo}
+                        onChange={(e) => setAdditionalInfo(e.target.value)}
                       />
                     </div>
                   </section>
