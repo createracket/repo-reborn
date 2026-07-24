@@ -929,8 +929,8 @@ function DashboardPage() {
                             </p>
                           ) : latestVibe ? (
                             <p className="text-muted-foreground">
-                              Your roster is empty. Community browsing is coming soon — we'll start
-                              surfacing matches based on your Vibe Check results here.
+                              Community browsing is coming soon - we'll start surfacing matches
+                              based on your Vibe Check results here.
                             </p>
                           ) : (
                             <>
