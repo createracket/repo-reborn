@@ -67,7 +67,7 @@ const PLANS: Plan[] = [
     tagline: "For artists & teams ready to connect.",
     priceMonthly: 49,
     priceYearly: 490,
-    cta: "Join to secure your free strategy call",
+    cta: "Secure your free strategy call",
     ctaTo: "/login",
     highlight: true,
     accent: "#FFC0CB",
