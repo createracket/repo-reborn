@@ -94,8 +94,8 @@ const PLANS: Plan[] = [
     accent: "#5C37D0",
     features: [
       "Everything in Priority ",
-      "Unlimited connections",
       "Managed campaign services",
+      "Unlimited seeding & gifting ",
       "Bespoke roster features",
       "Dedicated account partner",
       "Off-platform billing / retainer",
