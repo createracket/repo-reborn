@@ -474,7 +474,7 @@ function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <Table headers={["Display name", "Email", "Profile type", "Slug", "Joined", "Featured", ""]}>
+                <Table headers={["Display name", "Email", "Profile type", "Slug", "Joined", "Subscription", "Featured", ""]}>
                   {profiles.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
