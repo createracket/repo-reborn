@@ -90,15 +90,6 @@ export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
                   <Link to="/admin" className="text-primary hover:text-foreground transition-colors">
                     Admin
                   </Link>
-                  <Link to="/roster-builder" className="hover:text-foreground transition-colors">
-                    Roster Builder
-                  </Link>
-                  <Link to="/campaign-reports" className="hover:text-foreground transition-colors">
-                    Campaign Reports
-                  </Link>
-                  <Link to="/campaign-builder" className="hover:text-foreground transition-colors">
-                    Campaign Builder
-                  </Link>
                   <Link to="/connect" className="hover:text-foreground transition-colors">
                     Connect
                   </Link>
@@ -164,9 +155,6 @@ export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
                         <>
                           <MobileLink to="/dashboard">Dashboard</MobileLink>
                           <MobileLink to="/admin" highlight>Admin</MobileLink>
-                          <MobileLink to="/roster-builder">Roster Builder</MobileLink>
-                          <MobileLink to="/campaign-reports">Campaign Reports</MobileLink>
-                          <MobileLink to="/campaign-builder">Campaign Builder</MobileLink>
                           <MobileLink to="/connect">Connect</MobileLink>
                           <MobileLink to="/profile">Edit Profile</MobileLink>
                         </>
