@@ -219,7 +219,7 @@ function PlanCard({ plan, interval }: { plan: Plan; interval: Interval }) {
     >
       {plan.highlight && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-pink-accent px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#111]">
-          Most popular
+          EARLY MEMBER OFFER
         </span>
       )}
 
