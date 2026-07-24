@@ -126,6 +126,18 @@ function DashboardPage() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const soundBoardRef = useRef<HTMLDivElement>(null);
   const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
+  const [soundBoardItems, setSoundBoardItems] = useState<Array<{ id: string; title: string; copy: string; video_url: string | null; thumbnail_url: string | null; gradient: string | null }>>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("sound_board_items")
+        .select("id,title,copy,video_url,thumbnail_url,gradient,position,published")
+        .eq("published", true)
+        .order("position", { ascending: true });
+      setSoundBoardItems(((data as any[]) ?? []) as any);
+    })();
+  }, []);
 
   const isAllView = rosterFilter === "all";
   const isMineView = rosterFilter === "mine";
