@@ -217,6 +217,7 @@ function AdminPage() {
             <TabsTrigger value="example-opps">Example opportunities</TabsTrigger>
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="faqs">FAQs</TabsTrigger>
+            <TabsTrigger value="sound-board">Sound Board</TabsTrigger>
           </TabsList>
 
           <TabsContent value="traffic" className="mt-6">
