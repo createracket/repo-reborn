@@ -27,6 +27,7 @@ import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
 import { TrafficAdmin } from "@/components/admin/TrafficAdmin";
 import { ExampleOpportunitiesAdmin } from "@/components/admin/ExampleOpportunitiesAdmin";
 import { FaqsAdmin } from "@/components/admin/FaqsAdmin";
+import { SoundBoardAdmin } from "@/components/admin/SoundBoardAdmin";
 import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
 import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
 import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
