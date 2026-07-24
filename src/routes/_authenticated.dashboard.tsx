@@ -1301,9 +1301,9 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
 
   return (
     <>
-      <li className="flex flex-col gap-2 rounded-xl border-2 border-border bg-card p-4 shadow-sm">
+      <li className="group flex flex-col gap-2 rounded-xl border-2 border-border bg-card p-4 shadow-sm transition-colors">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-medium leading-tight">{opp.title}</h3>
+          <h3 className="font-medium leading-tight transition-colors group-hover:text-pink-accent">{opp.title}</h3>
           {opp.budget ? (
             <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
               <BudgetDisplay amount={opp.budget} currency={opp.currency} />
