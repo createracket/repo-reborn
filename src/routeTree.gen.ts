@@ -15,7 +15,6 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PartnerRouteImport } from './routes/partner'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -35,6 +34,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
 import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authenticated.roster-builder'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
+import { Route as AuthenticatedPricingRouteImport } from './routes/_authenticated.pricing'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedCampaignReportsRouteImport } from './routes/_authenticated.campaign-reports'
 import { Route as AuthenticatedCampaignBuilderRouteImport } from './routes/_authenticated.campaign-builder'
@@ -77,11 +77,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartnerRoute = PartnerRouteImport.update({
@@ -179,6 +174,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPricingRoute = AuthenticatedPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -258,7 +258,6 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/partner': typeof PartnerRoute
-  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -269,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/pricing': typeof AuthenticatedPricingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
@@ -298,7 +298,6 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/partner': typeof PartnerRoute
-  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -309,6 +308,7 @@ export interface FileRoutesByTo {
   '/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/pricing': typeof AuthenticatedPricingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
@@ -340,7 +340,6 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/partner': typeof PartnerRoute
-  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
@@ -351,6 +350,7 @@ export interface FileRoutesById {
   '/_authenticated/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/_authenticated/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/pricing': typeof AuthenticatedPricingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
@@ -382,7 +382,6 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/partner'
-    | '/pricing'
     | '/privacy'
     | '/reset-password'
     | '/results'
@@ -393,6 +392,7 @@ export interface FileRouteTypes {
     | '/campaign-builder'
     | '/campaign-reports'
     | '/dashboard'
+    | '/pricing'
     | '/profile'
     | '/roster-builder'
     | '/brands/how-it-works'
@@ -422,7 +422,6 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/partner'
-    | '/pricing'
     | '/privacy'
     | '/reset-password'
     | '/results'
@@ -433,6 +432,7 @@ export interface FileRouteTypes {
     | '/campaign-builder'
     | '/campaign-reports'
     | '/dashboard'
+    | '/pricing'
     | '/profile'
     | '/roster-builder'
     | '/brands/how-it-works'
@@ -463,7 +463,6 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/partner'
-    | '/pricing'
     | '/privacy'
     | '/reset-password'
     | '/results'
@@ -474,6 +473,7 @@ export interface FileRouteTypes {
     | '/_authenticated/campaign-builder'
     | '/_authenticated/campaign-reports'
     | '/_authenticated/dashboard'
+    | '/_authenticated/pricing'
     | '/_authenticated/profile'
     | '/_authenticated/roster-builder'
     | '/brands/how-it-works'
@@ -505,7 +505,6 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   PartnerRoute: typeof PartnerRoute
-  PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
@@ -574,13 +573,6 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partner': {
@@ -716,6 +708,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/pricing': {
+      id: '/_authenticated/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof AuthenticatedPricingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -815,6 +814,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCampaignBuilderRoute: typeof AuthenticatedCampaignBuilderRoute
   AuthenticatedCampaignReportsRoute: typeof AuthenticatedCampaignReportsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedPricingRoute: typeof AuthenticatedPricingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedRosterBuilderRoute: typeof AuthenticatedRosterBuilderRoute
 }
@@ -824,6 +824,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCampaignBuilderRoute: AuthenticatedCampaignBuilderRoute,
   AuthenticatedCampaignReportsRoute: AuthenticatedCampaignReportsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedPricingRoute: AuthenticatedPricingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedRosterBuilderRoute: AuthenticatedRosterBuilderRoute,
 }
@@ -841,7 +842,6 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   PartnerRoute: PartnerRoute,
-  PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
