@@ -546,7 +546,7 @@ function DashboardPage() {
           </div>
 
           {/* QUICK ACTIONS */}
-          <Card>
+          <Card className="border-pink-accent">
             <CardHeader>
               <CardTitle className="font-display text-2xl">Quick actions</CardTitle>
             </CardHeader>
@@ -879,7 +879,7 @@ function DashboardPage() {
 
           {/* ROSTER (full width) */}
           <div className="lg:col-span-3">
-            <Card className="border-pink-accent">
+            <Card>
               <CardHeader>
                 <CardTitle className="font-display text-2xl flex items-center gap-2">
                   <Users className="size-5 text-primary" /> Your roster
