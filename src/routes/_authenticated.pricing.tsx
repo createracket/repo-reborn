@@ -234,9 +234,12 @@ function PlanCard({ plan, interval }: { plan: Plan; interval: Interval }) {
       <div className="mt-6 flex items-baseline gap-1">
         <span className="font-display text-5xl font-bold text-foreground">{price}</span>
         {perLabel && <span className="text-sm text-foreground/60">{perLabel}</span>}
+        {plan.priceLabel == null && (plan.priceMonthly ?? 0) > 0 && (
+          <span className="ml-1 text-xs font-medium text-foreground/60">USD*</span>
+        )}
       </div>
       {plan.id === "pro" && interval === "yearly" && (
-        <div className="mt-1 text-xs text-foreground/60">Equivalent to ~$41/month</div>
+        <div className="mt-1 text-xs text-foreground/60">Equivalent to ~$41 USD/month</div>
       )}
 
       <ul className="mt-6 space-y-2.5">
