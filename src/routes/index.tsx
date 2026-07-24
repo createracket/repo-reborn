@@ -415,7 +415,7 @@ function Home() {
                 >
                   <Card className="h-full rounded-2xl border-0 bg-card text-foreground shadow-xl">
                     <CardContent className="space-y-6 p-6 text-center">
-                      <p className="text-lg font-medium">"{t.quote}"</p>
+                      <p className="text-sm font-medium leading-relaxed text-balance">"{t.quote}"</p>
                       <div>
                         <p className="font-bold text-pink-accent">{t.name}</p>
                         <p className="text-sm text-muted-foreground">{t.title}</p>
