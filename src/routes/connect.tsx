@@ -683,7 +683,7 @@ function ConnectPage() {
                         <Input
                           id="contact_name"
                           name="contact_name"
-                          placeholder="Jane Doe"
+                          placeholder="Vinnie Bones"
                           required
                           maxLength={120}
                         />
