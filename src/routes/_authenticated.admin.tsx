@@ -199,10 +199,19 @@ function AdminPage() {
             <h1 className="mt-1 font-display text-4xl md:text-5xl">Dev view</h1>
             <p className="mt-2 text-muted-foreground">Backend records across the platform.</p>
           </div>
-          <Button asChild variant="outline">
-            <Link to="/roster-builder">Roster Builder →</Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline">
+              <Link to="/roster-builder">Roster Builder →</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/campaign-reports">Campaign Reports →</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/campaign-builder">Campaign Builder →</Link>
+            </Button>
+          </div>
         </div>
+
 
         <Tabs defaultValue="traffic">
           <TabsList className="flex flex-wrap">
