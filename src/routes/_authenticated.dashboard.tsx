@@ -920,6 +920,8 @@ function DashboardPage() {
                 ) : null}
               </CardContent>
             </Card>
+              );
+            })()}
           </div>
 
 
