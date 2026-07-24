@@ -683,6 +683,10 @@ function AdminPage() {
           <TabsContent value="faqs" className="mt-6">
             <FaqsAdmin />
           </TabsContent>
+
+          <TabsContent value="sound-board" className="mt-6">
+            <SoundBoardAdmin />
+          </TabsContent>
         </Tabs>
       </main>
       <SiteFooter />
