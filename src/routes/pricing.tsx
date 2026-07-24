@@ -164,8 +164,7 @@ function PricingPage() {
 
           {/* Promo code note */}
           <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-border/60 bg-card/30 p-5 text-center text-sm text-foreground/80">
-            Got an access code from a previous invite? Apply it at checkout — early supporters keep
-            their discount.
+            Got an access code from a previous invite? Apply it at checkout or contact us for help.
           </div>
 
           {/* FAQ mini */}
