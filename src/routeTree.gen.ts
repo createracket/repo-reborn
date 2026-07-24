@@ -41,6 +41,7 @@ import { Route as AuthenticatedCampaignBuilderRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
+import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/public/transcribe-voice-note'
 import { Route as ApiPublicTrackPageviewRouteImport } from './routes/api/public/track-pageview'
 import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact-submit'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -211,6 +212,12 @@ const ApiPublicWaitlistJoinRoute = ApiPublicWaitlistJoinRouteImport.update({
   path: '/api/public/waitlist-join',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicTranscribeVoiceNoteRoute =
+  ApiPublicTranscribeVoiceNoteRouteImport.update({
+    id: '/api/public/transcribe-voice-note',
+    path: '/api/public/transcribe-voice-note',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicTrackPageviewRoute = ApiPublicTrackPageviewRouteImport.update({
   id: '/api/public/track-pageview',
   path: '/api/public/track-pageview',
@@ -282,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/vibe-check/': typeof VibeCheckIndexRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
+  '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -322,6 +330,7 @@ export interface FileRoutesByTo {
   '/vibe-check': typeof VibeCheckIndexRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
+  '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -364,6 +373,7 @@ export interface FileRoutesById {
   '/vibe-check/': typeof VibeCheckIndexRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
+  '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -406,6 +416,7 @@ export interface FileRouteTypes {
     | '/vibe-check/'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
+    | '/api/public/transcribe-voice-note'
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/lovable/email/auth/preview'
@@ -446,6 +457,7 @@ export interface FileRouteTypes {
     | '/vibe-check'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
+    | '/api/public/transcribe-voice-note'
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/lovable/email/auth/preview'
@@ -487,6 +499,7 @@ export interface FileRouteTypes {
     | '/vibe-check/'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
+    | '/api/public/transcribe-voice-note'
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/lovable/email/auth/preview'
@@ -522,6 +535,7 @@ export interface RootRouteChildren {
   VibeCheckIndexRoute: typeof VibeCheckIndexRoute
   ApiPublicContactSubmitRoute: typeof ApiPublicContactSubmitRoute
   ApiPublicTrackPageviewRoute: typeof ApiPublicTrackPageviewRoute
+  ApiPublicTranscribeVoiceNoteRoute: typeof ApiPublicTranscribeVoiceNoteRoute
   ApiPublicWaitlistJoinRoute: typeof ApiPublicWaitlistJoinRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -757,6 +771,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWaitlistJoinRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/transcribe-voice-note': {
+      id: '/api/public/transcribe-voice-note'
+      path: '/api/public/transcribe-voice-note'
+      fullPath: '/api/public/transcribe-voice-note'
+      preLoaderRoute: typeof ApiPublicTranscribeVoiceNoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/track-pageview': {
       id: '/api/public/track-pageview'
       path: '/api/public/track-pageview'
@@ -859,6 +880,7 @@ const rootRouteChildren: RootRouteChildren = {
   VibeCheckIndexRoute: VibeCheckIndexRoute,
   ApiPublicContactSubmitRoute: ApiPublicContactSubmitRoute,
   ApiPublicTrackPageviewRoute: ApiPublicTrackPageviewRoute,
+  ApiPublicTranscribeVoiceNoteRoute: ApiPublicTranscribeVoiceNoteRoute,
   ApiPublicWaitlistJoinRoute: ApiPublicWaitlistJoinRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
