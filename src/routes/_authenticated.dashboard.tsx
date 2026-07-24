@@ -122,6 +122,7 @@ function DashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const soundBoardRef = useRef<HTMLDivElement>(null);
   const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
 
   const isAllView = rosterFilter === "all";
@@ -1109,12 +1110,102 @@ function DashboardPage() {
             </Card>
           </div>
 
+          {/* SOUND BOARD (full width) */}
+          <div className="lg:col-span-3">
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <CardTitle className="font-display text-2xl flex items-center gap-2">
+                      <Megaphone className="size-5 text-primary" /> Sound Board
+                    </CardTitle>
+                    <CardDescription>
+                      Case studies, campaign moments and social content worth a look — cycle through for inspiration.
+                    </CardDescription>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 rounded-full"
+                      onClick={() => {
+                        const el = soundBoardRef.current;
+                        if (!el || !el.firstElementChild) return;
+                        const tileWidth = (el.firstElementChild as HTMLElement).offsetWidth + 12;
+                        el.scrollBy({ left: -tileWidth, behavior: "smooth" });
+                      }}
+                    >
+                      <ChevronLeft className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 rounded-full"
+                      onClick={() => {
+                        const el = soundBoardRef.current;
+                        if (!el || !el.firstElementChild) return;
+                        const tileWidth = (el.firstElementChild as HTMLElement).offsetWidth + 12;
+                        el.scrollBy({ left: tileWidth, behavior: "smooth" });
+                      }}
+                    >
+                      <ChevronRight className="size-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div
+                  ref={soundBoardRef}
+                  className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
+                >
+                  {SOUND_BOARD_PLACEHOLDERS.map((item, i) => (
+                    <div
+                      key={i}
+                      className="snap-start shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.333%-8px)] lg:w-[calc(20%-10px)]"
+                    >
+                      <div className="group flex h-full flex-col gap-2 rounded-xl border border-border/60 bg-card p-3">
+                        <div
+                          className="w-full overflow-hidden rounded-lg"
+                          style={{ aspectRatio: "9 / 16" }}
+                        >
+                          <div
+                            className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-white/70"
+                            style={{ background: item.gradient }}
+                          >
+                            Coming soon
+                          </div>
+                        </div>
+                        <h3 className="mt-1 text-sm font-medium leading-tight group-hover:text-pink-accent">
+                          {item.title}
+                        </h3>
+                        <p className="text-xs text-muted-foreground line-clamp-3">
+                          {item.copy}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
         </div>
       </main>
       <SiteFooter />
     </div>
   );
 }
+
+const SOUND_BOARD_PLACEHOLDERS: Array<{ title: string; copy: string; gradient: string }> = [
+  { title: "Case study coming soon", copy: "A campaign breakdown showing how a brand and artist collaborated end-to-end.", gradient: "linear-gradient(135deg,#5C37D0,#FFC0CB)" },
+  { title: "Social moment", copy: "Example of an unskippable collab clip that landed with real fans.", gradient: "linear-gradient(135deg,#BADA55,#5C37D0)" },
+  { title: "Brand x artist story", copy: "Behind-the-scenes look at a partnership from brief to release.", gradient: "linear-gradient(135deg,#FFC0CB,#BADA55)" },
+  { title: "Fan-first activation", copy: "How a community-led moment turned into a full campaign.", gradient: "linear-gradient(135deg,#5C37D0,#BADA55)" },
+  { title: "UGC that landed", copy: "Creator content that outperformed the paid cut — and why.", gradient: "linear-gradient(135deg,#FFC0CB,#5C37D0)" },
+  { title: "Playlist push", copy: "Turning a sync placement into an ongoing streaming story.", gradient: "linear-gradient(135deg,#BADA55,#FFC0CB)" },
+  { title: "Tour tie-in", copy: "Aligning brand activations with a live moment for maximum reach.", gradient: "linear-gradient(135deg,#5C37D0,#FFC0CB)" },
+  { title: "Feature drop", copy: "How one collab clip became a repeatable content format.", gradient: "linear-gradient(135deg,#BADA55,#5C37D0)" },
+];
 
 function VibeCard({ loading, vibe }: { loading: boolean; vibe: VibeRow | null }) {
   if (loading) {
