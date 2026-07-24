@@ -1318,8 +1318,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
         <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap">
           {opp.description}
         </p>
-        <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-          <span>Posted {posted}</span>
+        <div className="mt-1 flex items-center justify-end gap-2 text-xs text-muted-foreground">
           <Button
             size="sm"
             variant="secondary"
