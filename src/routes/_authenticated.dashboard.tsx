@@ -233,6 +233,13 @@ function DashboardPage() {
         .maybeSingle();
       setIsAdmin(!!roleRow);
 
+      const { data: tierRow } = await (supabase as any)
+        .from("profiles")
+        .select("subscription_tier")
+        .eq("id", u.user.id)
+        .maybeSingle();
+      setSubscriptionTier(((tierRow as any)?.subscription_tier === "paid" ? "paid" : "free"));
+
       // Auto-enrol new accounts into the mailing list
       if (u.user.email) {
         const { data: existing } = await supabase
