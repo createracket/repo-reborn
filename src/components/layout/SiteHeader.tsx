@@ -155,9 +155,6 @@ export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
                         <>
                           <MobileLink to="/dashboard">Dashboard</MobileLink>
                           <MobileLink to="/admin" highlight>Admin</MobileLink>
-                          <MobileLink to="/roster-builder">Roster Builder</MobileLink>
-                          <MobileLink to="/campaign-reports">Campaign Reports</MobileLink>
-                          <MobileLink to="/campaign-builder">Campaign Builder</MobileLink>
                           <MobileLink to="/connect">Connect</MobileLink>
                           <MobileLink to="/profile">Edit Profile</MobileLink>
                         </>
