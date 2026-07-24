@@ -110,76 +110,105 @@ export function SoundBoardAdmin() {
         {!loading && rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No cards yet.</p>
         ) : null}
-        {rows.map((row) => (
-          <div key={row.id} className="rounded-lg border border-border p-4 space-y-3">
-            <div className="grid gap-3 md:grid-cols-[1fr_100px_auto]">
-              <div>
-                <Label>Title</Label>
-                <Input
-                  value={row.title}
-                  onChange={(e) => updateLocal(row.id, { title: e.target.value })}
-                />
+        {rows.map((row) => {
+          const isOpen = openIds.has(row.id);
+          return (
+            <div key={row.id} className="rounded-lg border border-border">
+              <div className="flex items-center gap-2 p-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleOpen(row.id)}
+                  className="shrink-0"
+                  aria-label={isOpen ? "Collapse" : "Expand"}
+                >
+                  {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => toggleOpen(row.id)}
+                  className="flex-1 text-left truncate font-medium"
+                >
+                  <span className="text-xs text-muted-foreground mr-2">#{row.position}</span>
+                  {row.title || "Untitled"}
+                </button>
+                <span className="text-xs text-muted-foreground shrink-0">
+                  {row.published ? "Published" : "Hidden"}
+                </span>
               </div>
-              <div>
-                <Label>Position</Label>
-                <Input
-                  type="number"
-                  value={row.position}
-                  onChange={(e) => updateLocal(row.id, { position: Number(e.target.value) })}
-                />
-              </div>
-              <div className="flex items-end gap-2">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={row.published}
-                    onCheckedChange={(v) => updateLocal(row.id, { published: v })}
-                  />
-                  <span className="text-sm">Published</span>
+              {isOpen ? (
+                <div className="border-t border-border p-4 space-y-3">
+                  <div className="grid gap-3 md:grid-cols-[1fr_100px_auto]">
+                    <div>
+                      <Label>Title</Label>
+                      <Input
+                        value={row.title}
+                        onChange={(e) => updateLocal(row.id, { title: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Position</Label>
+                      <Input
+                        type="number"
+                        value={row.position}
+                        onChange={(e) => updateLocal(row.id, { position: Number(e.target.value) })}
+                      />
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={row.published}
+                          onCheckedChange={(v) => updateLocal(row.id, { published: v })}
+                        />
+                        <span className="text-sm">Published</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Copy</Label>
+                    <Textarea
+                      rows={2}
+                      value={row.copy}
+                      onChange={(e) => updateLocal(row.id, { copy: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <Label>Video / post URL</Label>
+                      <Input
+                        placeholder="https://instagram.com/... or TikTok/YouTube link"
+                        value={row.video_url ?? ""}
+                        onChange={(e) => updateLocal(row.id, { video_url: e.target.value || null })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Thumbnail image URL</Label>
+                      <Input
+                        placeholder="https://... (9:16 preferred)"
+                        value={row.thumbnail_url ?? ""}
+                        onChange={(e) => updateLocal(row.id, { thumbnail_url: e.target.value || null })}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Fallback gradient (used when no thumbnail)</Label>
+                    <Input
+                      placeholder="linear-gradient(135deg,#5C37D0,#FFC0CB)"
+                      value={row.gradient ?? ""}
+                      onChange={(e) => updateLocal(row.id, { gradient: e.target.value || null })}
+                    />
+                  </div>
+                  <div className="flex justify-between">
+                    <Button variant="outline" size="sm" onClick={() => deleteRow(row.id)}>
+                      <Trash2 className="mr-1 size-4" /> Delete
+                    </Button>
+                    <Button size="sm" onClick={() => saveRow(row)}>Save</Button>
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
-            <div>
-              <Label>Copy</Label>
-              <Textarea
-                rows={2}
-                value={row.copy}
-                onChange={(e) => updateLocal(row.id, { copy: e.target.value })}
-              />
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <div>
-                <Label>Video / post URL</Label>
-                <Input
-                  placeholder="https://instagram.com/... or TikTok/YouTube link"
-                  value={row.video_url ?? ""}
-                  onChange={(e) => updateLocal(row.id, { video_url: e.target.value || null })}
-                />
-              </div>
-              <div>
-                <Label>Thumbnail image URL</Label>
-                <Input
-                  placeholder="https://... (9:16 preferred)"
-                  value={row.thumbnail_url ?? ""}
-                  onChange={(e) => updateLocal(row.id, { thumbnail_url: e.target.value || null })}
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Fallback gradient (used when no thumbnail)</Label>
-              <Input
-                placeholder="linear-gradient(135deg,#5C37D0,#FFC0CB)"
-                value={row.gradient ?? ""}
-                onChange={(e) => updateLocal(row.id, { gradient: e.target.value || null })}
-              />
-            </div>
-            <div className="flex justify-between">
-              <Button variant="outline" size="sm" onClick={() => deleteRow(row.id)}>
-                <Trash2 className="mr-1 size-4" /> Delete
-              </Button>
-              <Button size="sm" onClick={() => saveRow(row)}>Save</Button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </CardContent>
     </Card>
   );
