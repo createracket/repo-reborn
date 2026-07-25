@@ -411,7 +411,8 @@ function AdminPage() {
                       </div>
                       <PartnerPageShares partnerPageId={s.id} profiles={profiles} />
                     </CardContent>
-                    {(() => {
+                    )}
+                    {openSpotlights.has(s.id) && (() => {
                       const rows = interests.filter((i) => i.partner_page_id === s.id);
                       if (rows.length === 0) return null;
                       const isExpanded = expandedInterests.has(s.id);
