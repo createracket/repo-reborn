@@ -61,6 +61,7 @@
   --color-pink-accent: var(--pink-accent);
   --color-purple: var(--purple);
   --color-coral: var(--pink-accent);
+  --color-blush: var(--pink-accent);
   --color-lime: var(--primary);
   --color-brand-light: var(--brand-light);
 }
