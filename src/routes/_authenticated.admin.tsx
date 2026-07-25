@@ -299,7 +299,16 @@ function AdminPage() {
                     <CardHeader>
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div>
-                          <CardTitle className="text-lg">{s.headline}</CardTitle>
+                          <CardTitle className="text-lg">
+                            <button
+                              type="button"
+                              onClick={() => toggleSpotlightOpen(s.id)}
+                              className="inline-flex items-center gap-2 text-left hover:text-foreground/80"
+                            >
+                              {openSpotlights.has(s.id) ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                              <span>{s.headline}</span>
+                            </button>
+                          </CardTitle>
                           <CardDescription>
                             /spotlight/{s.slug} · {s.type}
                             {s.subtitle ? ` · ${s.subtitle}` : ""}
