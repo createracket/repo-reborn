@@ -33,17 +33,22 @@ import { Route as ReportSlugRouteImport } from './routes/report.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
 import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authenticated.roster-builder'
+import { Route as AuthenticatedRacketDeskRouteImport } from './routes/_authenticated.racket-desk'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedPricingRouteImport } from './routes/_authenticated.pricing'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
 import { Route as AuthenticatedCampaignReportsRouteImport } from './routes/_authenticated.campaign-reports'
 import { Route as AuthenticatedCampaignBuilderRouteImport } from './routes/_authenticated.campaign-builder'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
+import { Route as AuthenticatedRacketDeskIndexRouteImport } from './routes/_authenticated.racket-desk.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
 import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/public/transcribe-voice-note'
 import { Route as ApiPublicTrackPageviewRouteImport } from './routes/api/public/track-pageview'
 import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact-submit'
+import { Route as AuthenticatedRacketDeskProfilesRouteImport } from './routes/_authenticated.racket-desk.profiles'
+import { Route as AuthenticatedRacketDeskFanIntelRouteImport } from './routes/_authenticated.racket-desk.fan-intel'
+import { Route as AuthenticatedRacketDeskDemoRouteImport } from './routes/_authenticated.racket-desk.demo'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -170,6 +175,11 @@ const AuthenticatedRosterBuilderRoute =
     path: '/roster-builder',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedRacketDeskRoute = AuthenticatedRacketDeskRouteImport.update({
+  id: '/racket-desk',
+  path: '/racket-desk',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -202,6 +212,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedRacketDeskIndexRoute =
+  AuthenticatedRacketDeskIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedRacketDeskRoute,
+  } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -228,6 +244,24 @@ const ApiPublicContactSubmitRoute = ApiPublicContactSubmitRouteImport.update({
   path: '/api/public/contact-submit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRacketDeskProfilesRoute =
+  AuthenticatedRacketDeskProfilesRouteImport.update({
+    id: '/profiles',
+    path: '/profiles',
+    getParentRoute: () => AuthenticatedRacketDeskRoute,
+  } as any)
+const AuthenticatedRacketDeskFanIntelRoute =
+  AuthenticatedRacketDeskFanIntelRouteImport.update({
+    id: '/fan-intel',
+    path: '/fan-intel',
+    getParentRoute: () => AuthenticatedRacketDeskRoute,
+  } as any)
+const AuthenticatedRacketDeskDemoRoute =
+  AuthenticatedRacketDeskDemoRouteImport.update({
+    id: '/demo',
+    path: '/demo',
+    getParentRoute: () => AuthenticatedRacketDeskRoute,
+  } as any)
 const LovableEmailTransactionalSendRoute =
   LovableEmailTransactionalSendRouteImport.update({
     id: '/lovable/email/transactional/send',
@@ -277,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/pricing': typeof AuthenticatedPricingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/racket-desk': typeof AuthenticatedRacketDeskRouteWithChildren
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -287,11 +322,15 @@ export interface FileRoutesByFullPath {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
+  '/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
+  '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
+  '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -328,11 +367,15 @@ export interface FileRoutesByTo {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check': typeof VibeCheckIndexRoute
+  '/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
+  '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
+  '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/racket-desk': typeof AuthenticatedRacketDeskIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -361,6 +404,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/pricing': typeof AuthenticatedPricingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/racket-desk': typeof AuthenticatedRacketDeskRouteWithChildren
   '/_authenticated/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -371,11 +415,15 @@ export interface FileRoutesById {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
+  '/_authenticated/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
+  '/_authenticated/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
+  '/_authenticated/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/_authenticated/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -404,6 +452,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/pricing'
     | '/profile'
+    | '/racket-desk'
     | '/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
@@ -414,11 +463,15 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check/'
+    | '/racket-desk/demo'
+    | '/racket-desk/fan-intel'
+    | '/racket-desk/profiles'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
     | '/api/public/transcribe-voice-note'
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
+    | '/racket-desk/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -455,11 +508,15 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check'
+    | '/racket-desk/demo'
+    | '/racket-desk/fan-intel'
+    | '/racket-desk/profiles'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
     | '/api/public/transcribe-voice-note'
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
+    | '/racket-desk'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -487,6 +544,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/pricing'
     | '/_authenticated/profile'
+    | '/_authenticated/racket-desk'
     | '/_authenticated/roster-builder'
     | '/brands/how-it-works'
     | '/email/unsubscribe'
@@ -497,11 +555,15 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check/'
+    | '/_authenticated/racket-desk/demo'
+    | '/_authenticated/racket-desk/fan-intel'
+    | '/_authenticated/racket-desk/profiles'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
     | '/api/public/transcribe-voice-note'
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
+    | '/_authenticated/racket-desk/'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -715,6 +777,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRosterBuilderRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/racket-desk': {
+      id: '/_authenticated/racket-desk'
+      path: '/racket-desk'
+      fullPath: '/racket-desk'
+      preLoaderRoute: typeof AuthenticatedRacketDeskRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -757,6 +826,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/racket-desk/': {
+      id: '/_authenticated/racket-desk/'
+      path: '/'
+      fullPath: '/racket-desk/'
+      preLoaderRoute: typeof AuthenticatedRacketDeskIndexRouteImport
+      parentRoute: typeof AuthenticatedRacketDeskRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -791,6 +867,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/public/contact-submit'
       preLoaderRoute: typeof ApiPublicContactSubmitRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/racket-desk/profiles': {
+      id: '/_authenticated/racket-desk/profiles'
+      path: '/profiles'
+      fullPath: '/racket-desk/profiles'
+      preLoaderRoute: typeof AuthenticatedRacketDeskProfilesRouteImport
+      parentRoute: typeof AuthenticatedRacketDeskRoute
+    }
+    '/_authenticated/racket-desk/fan-intel': {
+      id: '/_authenticated/racket-desk/fan-intel'
+      path: '/fan-intel'
+      fullPath: '/racket-desk/fan-intel'
+      preLoaderRoute: typeof AuthenticatedRacketDeskFanIntelRouteImport
+      parentRoute: typeof AuthenticatedRacketDeskRoute
+    }
+    '/_authenticated/racket-desk/demo': {
+      id: '/_authenticated/racket-desk/demo'
+      path: '/demo'
+      fullPath: '/racket-desk/demo'
+      preLoaderRoute: typeof AuthenticatedRacketDeskDemoRouteImport
+      parentRoute: typeof AuthenticatedRacketDeskRoute
     }
     '/lovable/email/transactional/send': {
       id: '/lovable/email/transactional/send'
@@ -830,6 +927,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRacketDeskRouteChildren {
+  AuthenticatedRacketDeskDemoRoute: typeof AuthenticatedRacketDeskDemoRoute
+  AuthenticatedRacketDeskFanIntelRoute: typeof AuthenticatedRacketDeskFanIntelRoute
+  AuthenticatedRacketDeskProfilesRoute: typeof AuthenticatedRacketDeskProfilesRoute
+  AuthenticatedRacketDeskIndexRoute: typeof AuthenticatedRacketDeskIndexRoute
+}
+
+const AuthenticatedRacketDeskRouteChildren: AuthenticatedRacketDeskRouteChildren =
+  {
+    AuthenticatedRacketDeskDemoRoute: AuthenticatedRacketDeskDemoRoute,
+    AuthenticatedRacketDeskFanIntelRoute: AuthenticatedRacketDeskFanIntelRoute,
+    AuthenticatedRacketDeskProfilesRoute: AuthenticatedRacketDeskProfilesRoute,
+    AuthenticatedRacketDeskIndexRoute: AuthenticatedRacketDeskIndexRoute,
+  }
+
+const AuthenticatedRacketDeskRouteWithChildren =
+  AuthenticatedRacketDeskRoute._addFileChildren(
+    AuthenticatedRacketDeskRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedCampaignBuilderRoute: typeof AuthenticatedCampaignBuilderRoute
@@ -837,6 +954,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPricingRoute: typeof AuthenticatedPricingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedRacketDeskRoute: typeof AuthenticatedRacketDeskRouteWithChildren
   AuthenticatedRosterBuilderRoute: typeof AuthenticatedRosterBuilderRoute
 }
 
@@ -847,6 +965,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPricingRoute: AuthenticatedPricingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedRacketDeskRoute: AuthenticatedRacketDeskRouteWithChildren,
   AuthenticatedRosterBuilderRoute: AuthenticatedRosterBuilderRoute,
 }
 

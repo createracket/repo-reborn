@@ -13,12 +13,12 @@ export const Route = createFileRoute("/_authenticated/racket-desk")({
   component: RacketDeskLayout,
 });
 
-const NAV = [
+const NAV: Array<{ to: string; label: string; exact?: boolean }> = [
   { to: "/racket-desk", label: "Today", exact: true },
   { to: "/racket-desk/fan-intel", label: "Fan intel" },
   { to: "/racket-desk/profiles", label: "My profiles" },
   { to: "/racket-desk/demo", label: "Take the tour" },
-] as const;
+];
 
 function RacketDeskLayout() {
   const navigate = useNavigate();
