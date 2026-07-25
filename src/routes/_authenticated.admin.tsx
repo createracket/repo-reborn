@@ -81,6 +81,12 @@ function AdminPage() {
   const [spotlightFormOpen, setSpotlightFormOpen] = useState(false);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
+  const [openSpotlights, setOpenSpotlights] = useState<Set<string>>(new Set());
+  const toggleSpotlightOpen = (id: string) => setOpenSpotlights((prev) => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
 
   const profileByEmail = useMemo(() => {
@@ -293,7 +299,16 @@ function AdminPage() {
                     <CardHeader>
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div>
-                          <CardTitle className="text-lg">{s.headline}</CardTitle>
+                          <CardTitle className="text-lg">
+                            <button
+                              type="button"
+                              onClick={() => toggleSpotlightOpen(s.id)}
+                              className="inline-flex items-center gap-2 text-left hover:text-foreground/80"
+                            >
+                              {openSpotlights.has(s.id) ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                              <span>{s.headline}</span>
+                            </button>
+                          </CardTitle>
                           <CardDescription>
                             /spotlight/{s.slug} · {s.type}
                             {s.subtitle ? ` · ${s.subtitle}` : ""}
@@ -363,6 +378,7 @@ function AdminPage() {
                         </div>
                       </div>
                     </CardHeader>
+                    {openSpotlights.has(s.id) && (
                     <CardContent className="space-y-3 border-t border-border/60 pt-4">
                       <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
                         <div>
@@ -395,7 +411,8 @@ function AdminPage() {
                       </div>
                       <PartnerPageShares partnerPageId={s.id} profiles={profiles} />
                     </CardContent>
-                    {(() => {
+                    )}
+                    {openSpotlights.has(s.id) && (() => {
                       const rows = interests.filter((i) => i.partner_page_id === s.id);
                       if (rows.length === 0) return null;
                       const isExpanded = expandedInterests.has(s.id);
