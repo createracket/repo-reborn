@@ -215,6 +215,9 @@ function AdminPage() {
             <Button asChild variant="outline">
               <Link to="/campaign-builder">Campaign Builder →</Link>
             </Button>
+            <Button asChild variant="outline">
+              <Link to="/racket-desk">Racket Desk →</Link>
+            </Button>
           </div>
         </div>
 
