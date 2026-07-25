@@ -81,6 +81,12 @@ function AdminPage() {
   const [spotlightFormOpen, setSpotlightFormOpen] = useState(false);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
+  const [openSpotlights, setOpenSpotlights] = useState<Set<string>>(new Set());
+  const toggleSpotlightOpen = (id: string) => setOpenSpotlights((prev) => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
 
   const profileByEmail = useMemo(() => {
