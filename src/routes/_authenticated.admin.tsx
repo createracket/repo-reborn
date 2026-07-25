@@ -378,6 +378,7 @@ function AdminPage() {
                         </div>
                       </div>
                     </CardHeader>
+                    {openSpotlights.has(s.id) && (
                     <CardContent className="space-y-3 border-t border-border/60 pt-4">
                       <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
                         <div>
