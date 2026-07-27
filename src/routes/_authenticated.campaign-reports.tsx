@@ -534,6 +534,7 @@ function ReportDetailView({
     setHeader(report.header_image_url ?? "");
     setCategories(report.categories ?? []);
     setHideCategories(!!report.hide_categories);
+    setTemplate(report.template ?? "original");
     // brand_email/client_email are hidden from base-table SELECT; fetch via
     // the owner/admin-only RPC.
     setClientEmail("");
