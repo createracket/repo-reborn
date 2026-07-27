@@ -203,15 +203,18 @@ function PublicReportPage() {
           }),
         }))
         .filter((c) => c.posts.length > 0);
+  // Negative values are "hidden/unavailable" sentinels from social scrapers
+  // (e.g. Instagram posts with like counts turned off) — never count them.
+  const num = (v: number | null | undefined) => (v == null || v < 0 ? 0 : v);
   const sumTotals = (posts: PublicPost[]) =>
     posts.reduce(
       (acc, p) => ({
-        views: acc.views + (p.views ?? 0),
-        likes: acc.likes + (p.likes ?? 0),
-        comments: acc.comments + (p.comments ?? 0),
-        shares: acc.shares + (p.shares ?? 0),
-        saves: acc.saves + (p.saves ?? 0),
-        followers: acc.followers + (p.followers ?? 0),
+        views: acc.views + num(p.views),
+        likes: acc.likes + num(p.likes),
+        comments: acc.comments + num(p.comments),
+        shares: acc.shares + num(p.shares),
+        saves: acc.saves + num(p.saves),
+        followers: acc.followers + num(p.followers),
       }),
       { views: 0, likes: 0, comments: 0, shares: 0, saves: 0, followers: 0 },
     );
