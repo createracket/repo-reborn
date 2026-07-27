@@ -239,14 +239,30 @@ function PublicReportPage() {
     return acc.followers > 0 ? (engagement / acc.followers) * 0.4 * 100 : null;
   };
 
+  // Reach is summed post by post: use the entered Reach % when present,
+  // otherwise fall back to the 80%-of-views estimate.
+  const computeReach = (posts: PublicPost[]) =>
+    Math.round(
+      posts.reduce((acc, p) => acc + (p.views ?? 0) * ((p.reach_pct ?? 80) / 100), 0),
+    );
+  const hasRealReach = (posts: PublicPost[]) => posts.some((p) => p.reach_pct != null);
+
   const totals = sumTotals(allPosts);
   const estEngagementPct = computeEngagementPct(allPosts);
+  const totalReach = computeReach(allPosts);
 
   const monthTotals = (() => {
     const posts = filteredCreators.flatMap((c) => c.posts);
     const acc = sumTotals(posts);
     const engagementPct = computeEngagementPct(posts);
-    return { ...acc, engagementPct, posts: posts.length, creators: filteredCreators.length };
+    return {
+      ...acc,
+      engagementPct,
+      reach: computeReach(posts),
+      hasRealReach: hasRealReach(posts),
+      posts: posts.length,
+      creators: filteredCreators.length,
+    };
   })();
 
 
@@ -295,7 +311,7 @@ function PublicReportPage() {
         {allPosts.length > 0 && (
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <TotalStat label="Total views" value={formatCount(totals.views)} />
-            <TotalStat label="Est. reach" value={formatCount(Math.round(totals.views * 0.8))} />
+            <TotalStat label={hasRealReach(allPosts) ? "Reach" : "Est. reach"} value={formatCount(totalReach)} />
             <TotalStat
               label="Est. engagement"
               value={estEngagementPct != null ? `${estEngagementPct.toFixed(2)}%` : "—"}
@@ -308,7 +324,7 @@ function PublicReportPage() {
         {monthFilter !== "all" && filteredCreators.length > 0 && (
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <TotalStat label="Month views" value={formatCount(monthTotals.views)} />
-            <TotalStat label="Month reach" value={formatCount(Math.round(monthTotals.views * 0.8))} />
+            <TotalStat label="Month reach" value={formatCount(monthTotals.reach)} />
             <TotalStat
               label="Month engagement"
               value={monthTotals.engagementPct != null ? `${monthTotals.engagementPct.toFixed(2)}%` : "—"}
