@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { BookmarkPlus, Loader2, Plus, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { supabase } from "@/integrations/supabase/client";
 import {
-  loadProfiles,
-  saveProfiles,
   loadCachedIdea,
   saveCachedIdea,
   loadBankedIdeas,
