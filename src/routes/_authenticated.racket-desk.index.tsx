@@ -190,24 +190,22 @@ function SectionHeader({
 function TrendCard({ trend }: { trend: Trend }) {
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition hover:border-lime/50">
-      <div className="relative aspect-[16/10] w-full overflow-hidden" style={{ background: trend.thumbGradient }}>
-        <div className="absolute inset-0 flex items-center justify-center text-5xl opacity-90">{trend.thumbEmoji}</div>
-        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-3">
-          <div className="rounded-full bg-background/70 px-2.5 py-1 text-[11px] font-medium backdrop-blur">{trend.creator}</div>
-          {trend.isNew && (
-            <span className="rounded-sm bg-coral/90 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
-              new
-            </span>
-          )}
-        </div>
-        <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-background/70 px-2.5 py-1 text-[11px] backdrop-blur">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 pb-3 pt-4 text-[11px]">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1">
           <span className={`h-1.5 w-1.5 rounded-full ${platformDot[trend.platform]}`} />
           <span className="font-medium">{trend.platform}</span>
           <span className="text-muted-foreground">· {trend.region}</span>
-        </div>
+        </span>
+        <span className="rounded-full bg-secondary px-2.5 py-1 font-medium">{trend.creator}</span>
+        {trend.isNew && (
+          <span className="rounded-sm bg-coral/90 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
+            new
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-5">
+
         <h3 className="font-display text-lg leading-snug">{trend.title}</h3>
         <div className="mt-1 text-sm text-muted-foreground">{trend.format}</div>
         <p className="mt-3 text-sm italic text-foreground/80">"{trend.hookLine}"</p>
@@ -275,10 +273,10 @@ function CopyFormatDialog({ trend }: { trend: Trend }) {
         </DialogHeader>
 
         <div className="mt-2 space-y-4">
-          <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-xl text-6xl" style={{ background: trend.thumbGradient }}>
-            {trend.thumbEmoji}
-            <div className="absolute bottom-2 left-2 rounded-full bg-background/70 px-2 py-0.5 text-xs backdrop-blur">{trend.creator}</div>
+          <div className="rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
+            {trend.creator}
           </div>
+
 
           <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
             <BreakdownRow label="Hook (0–3s)" value={b.hook} />
