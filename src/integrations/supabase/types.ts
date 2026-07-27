@@ -987,6 +987,36 @@ export type Database = {
         }
         Relationships: []
       }
+      racket_desk_profiles: {
+        Row: {
+          created_at: string
+          handle: string
+          id: string
+          platform: string
+          regions: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          handle: string
+          id?: string
+          platform: string
+          regions?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          handle?: string
+          id?: string
+          platform?: string
+          regions?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       roster_items: {
         Row: {
           apple_music_followers: number | null
