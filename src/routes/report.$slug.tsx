@@ -396,6 +396,62 @@ function TotalStat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCreator }) {
+  const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
+  const media = (
+    <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
+      {post.thumbnail_url ? (
+        <img src={post.thumbnail_url} alt="" className="size-full object-cover" />
+      ) : (
+        <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
+          No thumbnail
+        </div>
+      )}
+      <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 text-[10px] font-medium backdrop-blur">
+        <Icon className="size-3" />
+        {PLATFORM_LABEL[post.platform]}
+      </span>
+    </div>
+  );
+
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="space-y-3 p-3">
+        {post.post_url ? (
+          <a href={post.post_url} target="_blank" rel="noreferrer noopener" className="block">
+            {media}
+          </a>
+        ) : (
+          media
+        )}
+        <div className="min-w-0">
+          <p className="truncate font-display text-base leading-tight">{creator.name}</p>
+          {creator.handle && (
+            <p className="truncate text-xs text-muted-foreground">{creator.handle}</p>
+          )}
+        </div>
+        <div className="grid grid-cols-2 gap-2 border-t border-border/60 pt-3">
+          <SimpleMetric label="Views" value={formatCount(post.views)} />
+          <SimpleMetric label="Likes" value={formatCount(post.likes)} />
+          <SimpleMetric label="Comments" value={formatCount(post.comments)} />
+          <SimpleMetric label="ER %" value={formatPct(post.engagement_rate_pct)} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SimpleMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="mt-0.5 font-display text-xl leading-none">{value}</p>
+    </div>
+  );
+}
+
+
+
 function ExpandableCaption({ caption }: { caption: string }) {
   const [expanded, setExpanded] = useState(false);
   const lines = caption.split("\n").filter(Boolean);
