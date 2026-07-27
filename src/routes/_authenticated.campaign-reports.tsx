@@ -92,6 +92,7 @@ type Report = {
   updated_at: string;
   categories: string[] | null;
   hide_categories: boolean | null;
+  template: string | null;
 };
 
 type Creator = {
@@ -524,6 +525,7 @@ function ReportDetailView({
   const [categories, setCategories] = useState<string[]>(report.categories ?? []);
   const [newCategory, setNewCategory] = useState("");
   const [hideCategories, setHideCategories] = useState<boolean>(!!report.hide_categories);
+  const [template, setTemplate] = useState<string>(report.template ?? "original");
 
   useEffect(() => {
     setTitle(report.title);
@@ -532,6 +534,7 @@ function ReportDetailView({
     setHeader(report.header_image_url ?? "");
     setCategories(report.categories ?? []);
     setHideCategories(!!report.hide_categories);
+    setTemplate(report.template ?? "original");
     // brand_email/client_email are hidden from base-table SELECT; fetch via
     // the owner/admin-only RPC.
     setClientEmail("");
@@ -879,6 +882,56 @@ function ReportDetailView({
           </div>
         </CardContent>
       </Card>
+
+      {/* Design template */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display text-2xl">Design template</CardTitle>
+          <CardDescription>
+            Choose how the public report page is laid out.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[
+              {
+                key: "original",
+                name: "Original",
+                blurb: "Full detail — one card per post with every metric, caption and comments.",
+              },
+              {
+                key: "simple",
+                name: "Simple",
+                blurb: "Videos in a row with 4 key metrics under each thumbnail.",
+              },
+            ].map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={async () => {
+                  if (template === t.key) return;
+                  setTemplate(t.key);
+                  const { error } = await sb
+                    .from("campaign_reports")
+                    .update({ template: t.key } as never)
+                    .eq("id", report.id);
+                  if (error) return toast.error(error.message);
+                  await onChanged();
+                }}
+                className={`rounded-lg border p-4 text-left transition ${
+                  template === t.key
+                    ? "border-pink-accent bg-pink-accent/10"
+                    : "border-border/60 hover:border-border"
+                }`}
+              >
+                <div className="text-sm font-medium">{t.name}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{t.blurb}</div>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
 
 
       {/* Creators */}

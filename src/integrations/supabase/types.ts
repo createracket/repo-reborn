@@ -331,6 +331,7 @@ export type Database = {
           published_at: string | null
           slug: string
           source_roster_id: string | null
+          template: string
           title: string
           updated_at: string
         }
@@ -348,6 +349,7 @@ export type Database = {
           published_at?: string | null
           slug: string
           source_roster_id?: string | null
+          template?: string
           title?: string
           updated_at?: string
         }
@@ -365,6 +367,7 @@ export type Database = {
           published_at?: string | null
           slug?: string
           source_roster_id?: string | null
+          template?: string
           title?: string
           updated_at?: string
         }
@@ -1498,6 +1501,7 @@ export type Database = {
           published: boolean | null
           published_at: string | null
           slug: string | null
+          template: string | null
           title: string | null
           updated_at: string | null
         }
@@ -1512,6 +1516,7 @@ export type Database = {
           published?: boolean | null
           published_at?: string | null
           slug?: string | null
+          template?: string | null
           title?: string | null
           updated_at?: string | null
         }
@@ -1526,6 +1531,7 @@ export type Database = {
           published?: boolean | null
           published_at?: string | null
           slug?: string | null
+          template?: string | null
           title?: string | null
           updated_at?: string | null
         }
