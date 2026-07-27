@@ -1339,7 +1339,33 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
     }
   }
 
+  const erByViews = (() => {
+    const followers = numOrNull(form.followers);
+    if (!followers || followers <= 0) return null;
+    const total =
+      (numOrNull(form.views) ?? 0) + (numOrNull(form.likes) ?? 0) + (numOrNull(form.comments) ?? 0);
+    if (total <= 0) return null;
+    return (total / followers) * 100;
+  })();
+
+  async function applyErByViews() {
+    if (erByViews == null) {
+      toast.error("Add followers and at least one of views, likes or comments first");
+      return;
+    }
+    const value = Number(erByViews.toFixed(2));
+    set("engagement_rate_pct", String(value));
+    const { error } = await sb
+      .from("campaign_report_posts")
+      .update({ engagement_rate_pct: value })
+      .eq("id", post.id);
+    if (error) return toast.error(error.message);
+    toast.success(`ER set to ${value}%`);
+    await onChanged();
+  }
+
   async function savePost() {
+
     setSaving(true);
     const { error } = await sb
       .from("campaign_report_posts")
