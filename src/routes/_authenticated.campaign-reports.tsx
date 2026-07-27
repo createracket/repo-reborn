@@ -525,6 +525,7 @@ function ReportDetailView({
   const [categories, setCategories] = useState<string[]>(report.categories ?? []);
   const [newCategory, setNewCategory] = useState("");
   const [hideCategories, setHideCategories] = useState<boolean>(!!report.hide_categories);
+  const [template, setTemplate] = useState<string>(report.template ?? "original");
 
   useEffect(() => {
     setTitle(report.title);
