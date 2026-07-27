@@ -203,7 +203,7 @@ function PublicReportPage() {
           }),
         }))
         .filter((c) => c.posts.length > 0);
-  const sumTotals = (posts: Post[]) =>
+  const sumTotals = (posts: PublicPost[]) =>
     posts.reduce(
       (acc, p) => ({
         views: acc.views + (p.views ?? 0),
@@ -220,7 +220,7 @@ function PublicReportPage() {
   // Posts with a saved engagement_rate_pct are weighted by their followers (or
   // counted equally when followers are unknown); remaining posts fall back to the
   // aggregate estimate so a partially-filled report still reads sensibly.
-  const computeEngagementPct = (posts: Post[]) => {
+  const computeEngagementPct = (posts: PublicPost[]) => {
     const withEr = posts.filter((p) => p.engagement_rate_pct != null);
     if (withEr.length > 0) {
       const useFollowers = withEr.some((p) => (p.followers ?? 0) > 0);
