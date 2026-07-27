@@ -333,6 +333,14 @@ function PublicReportPage() {
                 ? "No creators on this report yet."
                 : "No posts in this month."}
             </p>
+          ) : report.template === "simple" ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {filteredCreators.flatMap((c) =>
+                c.posts.map((p) => (
+                  <SimplePostCard key={p.id} post={p} creator={c} />
+                )),
+              )}
+            </div>
           ) : (
             filteredCreators.map((c) => (
               <div key={c.id} className="space-y-4">
@@ -370,6 +378,7 @@ function PublicReportPage() {
 
           )}
         </section>
+
       </main>
       <SiteFooter />
     </div>
