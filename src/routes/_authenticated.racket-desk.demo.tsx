@@ -141,10 +141,8 @@ function Step({ id, n, icon: Icon, title, body, bullets, children }: {
 function PreviewCard({ trend }: { trend: (typeof trends)[number] }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border">
-      <div className="relative flex aspect-[16/10] items-center justify-center text-5xl" style={{ background: trend.thumbGradient }}>
-        {trend.thumbEmoji}
-        <div className="absolute bottom-2 left-2 rounded-full bg-background/70 px-2 py-0.5 text-[11px] backdrop-blur">{trend.creator}</div>
-      </div>
+      <div className="border-b border-border px-3 py-2 text-[11px] text-muted-foreground">{trend.creator}</div>
+
       <div className="p-3">
         <div className="text-[11px] text-muted-foreground">{trend.platform} · {trend.region}</div>
         <div className="mt-0.5 font-display text-sm leading-snug">{trend.title}</div>
