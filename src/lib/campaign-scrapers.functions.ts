@@ -138,15 +138,25 @@ async function scrapeInstagram(url: string): Promise<ScrapeResult> {
       timestamp?: string;
       hashtags?: string[];
       ownerFollowersCount?: number;
-      owner?: { followersCount?: number; edge_followed_by?: { count?: number } };
+      ownerUsername?: string;
+      owner?: { followersCount?: number; username?: string; edge_followed_by?: { count?: number } };
     }>;
     const p = results[0];
     if (!p) return { ok: false, error: "No Instagram post returned." };
-    const followers =
+    let followers =
       p.ownerFollowersCount ??
       p.owner?.followersCount ??
       p.owner?.edge_followed_by?.count ??
       null;
+    // The post scraper often omits follower counts — fall back to the profile
+    // scraper using the post owner's handle (or the handle in the URL).
+    if (followers == null) {
+      const handle = p.ownerUsername ?? p.owner?.username ?? extractInstagramHandle(url);
+      if (handle) {
+        const prof = await scrapeInstagramProfile(`https://www.instagram.com/${handle}/`);
+        if (prof.ok) followers = prof.followers;
+      }
+    }
     return {
       ok: true,
       platform: "instagram",
@@ -161,6 +171,7 @@ async function scrapeInstagram(url: string): Promise<ScrapeResult> {
         hashtags: p.hashtags ?? [],
       },
     };
+
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }
