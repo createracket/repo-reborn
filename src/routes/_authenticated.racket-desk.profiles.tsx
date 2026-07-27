@@ -45,33 +45,66 @@ function ProfilesPage() {
 
   const generate = useServerFn(generateDailyIdea);
 
+  const fetchProfiles = async () => {
+    const { data, error } = await supabase
+      .from("racket_desk_profiles")
+      .select("id, platform, handle, regions")
+      .order("created_at", { ascending: true });
+    if (error) {
+      toast.error("Couldn't load your saved profiles");
+      return;
+    }
+    setProfiles(
+      (data ?? []).map((r) => ({
+        id: r.id,
+        platform: r.platform as Platform,
+        handle: r.handle,
+        regions: (r.regions ?? []) as Region[],
+      })),
+    );
+  };
+
   useEffect(() => {
-    setProfiles(loadProfiles());
+    void fetchProfiles();
     setIdea(loadCachedIdea());
     setBanked(loadBankedIdeas());
   }, []);
 
-  const persist = (next: Profile[]) => {
-    setProfiles(next);
-    saveProfiles(next);
-  };
-
-  const addProfile = () => {
+  const addProfile = async () => {
     const handle = draft.handle.trim().replace(/^@/, "");
     if (!handle) return toast.error("Add a handle first");
     if (draft.regions.length === 0) return toast.error("Pick at least one region");
-    const next: Profile = {
-      id: `${draft.platform}-${handle}-${Date.now()}`,
-      platform: draft.platform,
-      handle,
-      regions: draft.regions,
-    };
-    persist([...profiles, next]);
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return toast.error("Sign in to save profiles");
+    const { data, error } = await supabase
+      .from("racket_desk_profiles")
+      .insert({
+        user_id: auth.user.id,
+        platform: draft.platform,
+        handle,
+        regions: draft.regions,
+      })
+      .select("id, platform, handle, regions")
+      .single();
+    if (error || !data) return toast.error("Couldn't save that profile");
+    setProfiles((prev) => [
+      ...prev,
+      { id: data.id, platform: data.platform as Platform, handle: data.handle, regions: (data.regions ?? []) as Region[] },
+    ]);
     setDraft({ platform: draft.platform, handle: "", regions: draft.regions });
-    toast.success(`Added ${draft.platform} @${handle}`);
+    toast.success(`Saved ${draft.platform} @${handle}`);
   };
 
-  const removeProfile = (id: string) => persist(profiles.filter((p) => p.id !== id));
+  const removeProfile = async (id: string) => {
+    const prev = profiles;
+    setProfiles(profiles.filter((p) => p.id !== id));
+    const { error } = await supabase.from("racket_desk_profiles").delete().eq("id", id);
+    if (error) {
+      setProfiles(prev);
+      toast.error("Couldn't remove that profile");
+    }
+  };
+
 
   const toggleRegion = (r: Region) =>
     setDraft((d) => ({
