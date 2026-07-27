@@ -1339,7 +1339,33 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
     }
   }
 
+  const erByViews = (() => {
+    const followers = numOrNull(form.followers);
+    if (!followers || followers <= 0) return null;
+    const total =
+      (numOrNull(form.views) ?? 0) + (numOrNull(form.likes) ?? 0) + (numOrNull(form.comments) ?? 0);
+    if (total <= 0) return null;
+    return (total / followers) * 100;
+  })();
+
+  async function applyErByViews() {
+    if (erByViews == null) {
+      toast.error("Add followers and at least one of views, likes or comments first");
+      return;
+    }
+    const value = Number(erByViews.toFixed(2));
+    set("engagement_rate_pct", String(value));
+    const { error } = await sb
+      .from("campaign_report_posts")
+      .update({ engagement_rate_pct: value })
+      .eq("id", post.id);
+    if (error) return toast.error(error.message);
+    toast.success(`ER set to ${value}%`);
+    await onChanged();
+  }
+
   async function savePost() {
+
     setSaving(true);
     const { error } = await sb
       .from("campaign_report_posts")
@@ -1492,6 +1518,16 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         <NumField label="Followers" v={form.followers} on={(x) => set("followers", x)} />
       </div>
 
+      <div className="flex flex-wrap items-center gap-3">
+        <Button size="sm" variant="outline" onClick={applyErByViews}>
+          ER by views
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          (views + likes + comments) ÷ followers
+          {erByViews != null ? ` = ${erByViews.toFixed(1)}%` : ""}
+        </span>
+      </div>
+
       <button
         type="button"
         onClick={() => setExpanded((x) => !x)}
@@ -1499,6 +1535,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
       >
         {expanded ? "Hide" : "Show"} advanced fields (shares, saves, sentiment, ER %, watch time, reach)
       </button>
+
 
       {expanded && (
         <div className="space-y-3 border-t border-border/60 pt-3">
