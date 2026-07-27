@@ -33,13 +33,14 @@ export function detectPlatform(url: string): Platform | null {
 }
 
 export function formatCount(n: number | null | undefined): string {
-  if (n == null) return "—";
+  // Negative values are "hidden/unavailable" sentinels from social scrapers.
+  if (n == null || n < 0) return "—";
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return String(n);
 }
 
 export function formatPct(n: number | null | undefined): string {
-  if (n == null) return "—";
+  if (n == null || n < 0) return "—";
   return `${Number(n).toFixed(n >= 100 ? 0 : 1)}%`;
 }

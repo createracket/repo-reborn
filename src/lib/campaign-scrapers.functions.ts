@@ -235,6 +235,20 @@ async function scrapeTikTok(url: string): Promise<ScrapeResult> {
 }
 
 /**
+ * Social platforms return -1 (or other negatives) when a count is hidden —
+ * e.g. Instagram posts with like counts turned off. Treat those as unknown.
+ */
+function sanitiseMetrics(result: ScrapeResult): ScrapeResult {
+  if (!result.ok) return result;
+  const m = { ...result.metrics };
+  (["views", "likes", "comments", "shares", "saves", "followers"] as const).forEach((k) => {
+    const v = m[k];
+    if (typeof v === "number" && (v < 0 || !Number.isFinite(v))) m[k] = null;
+  });
+  return { ...result, metrics: m };
+}
+
+/**
  * Scrape metrics for a single post URL. Auth-gated. Returns raw metrics —
  * caller decides whether to write them to the DB.
  */
@@ -245,9 +259,9 @@ export const scrapePostMetrics = createServerFn({ method: "POST" })
     const platform = detectPlatform(data.url);
     if (!platform)
       return { ok: false, error: "Unrecognised URL — must be Instagram, TikTok, or YouTube." };
-    if (platform === "youtube") return scrapeYouTube(data.url);
-    if (platform === "instagram") return scrapeInstagram(data.url);
-    return scrapeTikTok(data.url);
+    if (platform === "youtube") return sanitiseMetrics(await scrapeYouTube(data.url));
+    if (platform === "instagram") return sanitiseMetrics(await scrapeInstagram(data.url));
+    return sanitiseMetrics(await scrapeTikTok(data.url));
   });
 
 // ============================================================

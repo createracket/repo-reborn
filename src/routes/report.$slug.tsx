@@ -203,15 +203,18 @@ function PublicReportPage() {
           }),
         }))
         .filter((c) => c.posts.length > 0);
+  // Negative values are "hidden/unavailable" sentinels from social scrapers
+  // (e.g. Instagram posts with like counts turned off) — never count them.
+  const num = (v: number | null | undefined) => (v == null || v < 0 ? 0 : v);
   const sumTotals = (posts: PublicPost[]) =>
     posts.reduce(
       (acc, p) => ({
-        views: acc.views + (p.views ?? 0),
-        likes: acc.likes + (p.likes ?? 0),
-        comments: acc.comments + (p.comments ?? 0),
-        shares: acc.shares + (p.shares ?? 0),
-        saves: acc.saves + (p.saves ?? 0),
-        followers: acc.followers + (p.followers ?? 0),
+        views: acc.views + num(p.views),
+        likes: acc.likes + num(p.likes),
+        comments: acc.comments + num(p.comments),
+        shares: acc.shares + num(p.shares),
+        saves: acc.saves + num(p.saves),
+        followers: acc.followers + num(p.followers),
       }),
       { views: 0, likes: 0, comments: 0, shares: 0, saves: 0, followers: 0 },
     );
@@ -221,13 +224,15 @@ function PublicReportPage() {
   // counted equally when followers are unknown); remaining posts fall back to the
   // aggregate estimate so a partially-filled report still reads sensibly.
   const computeEngagementPct = (posts: PublicPost[]) => {
-    const withEr = posts.filter((p) => p.engagement_rate_pct != null);
+    const withEr = posts.filter(
+      (p) => p.engagement_rate_pct != null && (p.engagement_rate_pct as number) >= 0,
+    );
     if (withEr.length > 0) {
-      const useFollowers = withEr.some((p) => (p.followers ?? 0) > 0);
+      const useFollowers = withEr.some((p) => num(p.followers) > 0);
       let weightSum = 0;
       let weighted = 0;
       withEr.forEach((p) => {
-        const w = useFollowers ? (p.followers ?? 0) : 1;
+        const w = useFollowers ? num(p.followers) : 1;
         if (w <= 0) return;
         weightSum += w;
         weighted += w * (p.engagement_rate_pct as number);
@@ -243,9 +248,14 @@ function PublicReportPage() {
   // otherwise fall back to the 80%-of-views estimate.
   const computeReach = (posts: PublicPost[]) =>
     Math.round(
-      posts.reduce((acc, p) => acc + (p.views ?? 0) * ((p.reach_pct ?? 80) / 100), 0),
+      posts.reduce(
+        (acc, p) =>
+          acc + num(p.views) * ((p.reach_pct != null && p.reach_pct >= 0 ? p.reach_pct : 80) / 100),
+        0,
+      ),
     );
-  const hasRealReach = (posts: PublicPost[]) => posts.some((p) => p.reach_pct != null);
+  const hasRealReach = (posts: PublicPost[]) =>
+    posts.some((p) => p.reach_pct != null && p.reach_pct >= 0);
 
   const totals = sumTotals(allPosts);
   const estEngagementPct = computeEngagementPct(allPosts);
