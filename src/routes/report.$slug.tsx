@@ -239,14 +239,30 @@ function PublicReportPage() {
     return acc.followers > 0 ? (engagement / acc.followers) * 0.4 * 100 : null;
   };
 
+  // Reach is summed post by post: use the entered Reach % when present,
+  // otherwise fall back to the 80%-of-views estimate.
+  const computeReach = (posts: PublicPost[]) =>
+    Math.round(
+      posts.reduce((acc, p) => acc + (p.views ?? 0) * ((p.reach_pct ?? 80) / 100), 0),
+    );
+  const hasRealReach = (posts: PublicPost[]) => posts.some((p) => p.reach_pct != null);
+
   const totals = sumTotals(allPosts);
   const estEngagementPct = computeEngagementPct(allPosts);
+  const totalReach = computeReach(allPosts);
 
   const monthTotals = (() => {
     const posts = filteredCreators.flatMap((c) => c.posts);
     const acc = sumTotals(posts);
     const engagementPct = computeEngagementPct(posts);
-    return { ...acc, engagementPct, posts: posts.length, creators: filteredCreators.length };
+    return {
+      ...acc,
+      engagementPct,
+      reach: computeReach(posts),
+      hasRealReach: hasRealReach(posts),
+      posts: posts.length,
+      creators: filteredCreators.length,
+    };
   })();
 
 
