@@ -22,6 +22,7 @@ type PublicReport = {
   header_image_url: string | null;
   categories: string[] | null;
   hide_categories: boolean | null;
+  template: string | null;
 };
 
 type FeaturedComment = {
