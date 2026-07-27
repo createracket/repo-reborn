@@ -224,13 +224,15 @@ function PublicReportPage() {
   // counted equally when followers are unknown); remaining posts fall back to the
   // aggregate estimate so a partially-filled report still reads sensibly.
   const computeEngagementPct = (posts: PublicPost[]) => {
-    const withEr = posts.filter((p) => p.engagement_rate_pct != null);
+    const withEr = posts.filter(
+      (p) => p.engagement_rate_pct != null && (p.engagement_rate_pct as number) >= 0,
+    );
     if (withEr.length > 0) {
-      const useFollowers = withEr.some((p) => (p.followers ?? 0) > 0);
+      const useFollowers = withEr.some((p) => num(p.followers) > 0);
       let weightSum = 0;
       let weighted = 0;
       withEr.forEach((p) => {
-        const w = useFollowers ? (p.followers ?? 0) : 1;
+        const w = useFollowers ? num(p.followers) : 1;
         if (w <= 0) return;
         weightSum += w;
         weighted += w * (p.engagement_rate_pct as number);
@@ -246,9 +248,14 @@ function PublicReportPage() {
   // otherwise fall back to the 80%-of-views estimate.
   const computeReach = (posts: PublicPost[]) =>
     Math.round(
-      posts.reduce((acc, p) => acc + (p.views ?? 0) * ((p.reach_pct ?? 80) / 100), 0),
+      posts.reduce(
+        (acc, p) =>
+          acc + num(p.views) * ((p.reach_pct != null && p.reach_pct >= 0 ? p.reach_pct : 80) / 100),
+        0,
+      ),
     );
-  const hasRealReach = (posts: PublicPost[]) => posts.some((p) => p.reach_pct != null);
+  const hasRealReach = (posts: PublicPost[]) =>
+    posts.some((p) => p.reach_pct != null && p.reach_pct >= 0);
 
   const totals = sumTotals(allPosts);
   const estEngagementPct = computeEngagementPct(allPosts);
