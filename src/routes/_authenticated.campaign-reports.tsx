@@ -1492,6 +1492,16 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         <NumField label="Followers" v={form.followers} on={(x) => set("followers", x)} />
       </div>
 
+      <div className="flex flex-wrap items-center gap-3">
+        <Button size="sm" variant="outline" onClick={applyErByViews}>
+          ER by views
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          (views + likes + comments) ÷ followers
+          {erByViews != null ? ` = ${erByViews.toFixed(1)}%` : ""}
+        </span>
+      </div>
+
       <button
         type="button"
         onClick={() => setExpanded((x) => !x)}
@@ -1499,6 +1509,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
       >
         {expanded ? "Hide" : "Show"} advanced fields (shares, saves, sentiment, ER %, watch time, reach)
       </button>
+
 
       {expanded && (
         <div className="space-y-3 border-t border-border/60 pt-3">
