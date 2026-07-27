@@ -324,7 +324,7 @@ function PublicReportPage() {
         {monthFilter !== "all" && filteredCreators.length > 0 && (
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <TotalStat label="Month views" value={formatCount(monthTotals.views)} />
-            <TotalStat label="Month reach" value={formatCount(Math.round(monthTotals.views * 0.8))} />
+            <TotalStat label="Month reach" value={formatCount(monthTotals.reach)} />
             <TotalStat
               label="Month engagement"
               value={monthTotals.engagementPct != null ? `${monthTotals.engagementPct.toFixed(2)}%` : "—"}
