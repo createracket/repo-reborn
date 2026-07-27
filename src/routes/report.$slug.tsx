@@ -203,38 +203,52 @@ function PublicReportPage() {
           }),
         }))
         .filter((c) => c.posts.length > 0);
-  const totals = allPosts.reduce(
-    (acc, p) => ({
-      views: acc.views + (p.views ?? 0),
-      likes: acc.likes + (p.likes ?? 0),
-      comments: acc.comments + (p.comments ?? 0),
-      shares: acc.shares + (p.shares ?? 0),
-      saves: acc.saves + (p.saves ?? 0),
-      followers: acc.followers + (p.followers ?? 0),
-    }),
-    { views: 0, likes: 0, comments: 0, shares: 0, saves: 0, followers: 0 },
-  );
-  const totalEngagement = totals.likes + totals.comments + totals.shares + totals.saves;
-  const estEngagementPct =
-    totals.followers > 0 ? (totalEngagement / totals.followers) * 0.4 * 100 : null;
-
-  const monthTotals = (() => {
-    const posts = filteredCreators.flatMap((c) => c.posts);
-    const acc = posts.reduce(
-      (a, p) => ({
-        views: a.views + (p.views ?? 0),
-        likes: a.likes + (p.likes ?? 0),
-        comments: a.comments + (p.comments ?? 0),
-        shares: a.shares + (p.shares ?? 0),
-        saves: a.saves + (p.saves ?? 0),
-        followers: a.followers + (p.followers ?? 0),
+  const sumTotals = (posts: Post[]) =>
+    posts.reduce(
+      (acc, p) => ({
+        views: acc.views + (p.views ?? 0),
+        likes: acc.likes + (p.likes ?? 0),
+        comments: acc.comments + (p.comments ?? 0),
+        shares: acc.shares + (p.shares ?? 0),
+        saves: acc.saves + (p.saves ?? 0),
+        followers: acc.followers + (p.followers ?? 0),
       }),
       { views: 0, likes: 0, comments: 0, shares: 0, saves: 0, followers: 0 },
     );
+
+  // Overall ER respects per-post engagement rates when they have been calculated.
+  // Posts with a saved engagement_rate_pct are weighted by their followers (or
+  // counted equally when followers are unknown); remaining posts fall back to the
+  // aggregate estimate so a partially-filled report still reads sensibly.
+  const computeEngagementPct = (posts: Post[]) => {
+    const withEr = posts.filter((p) => p.engagement_rate_pct != null);
+    if (withEr.length > 0) {
+      const useFollowers = withEr.some((p) => (p.followers ?? 0) > 0);
+      let weightSum = 0;
+      let weighted = 0;
+      withEr.forEach((p) => {
+        const w = useFollowers ? (p.followers ?? 0) : 1;
+        if (w <= 0) return;
+        weightSum += w;
+        weighted += w * (p.engagement_rate_pct as number);
+      });
+      if (weightSum > 0) return weighted / weightSum;
+    }
+    const acc = sumTotals(posts);
     const engagement = acc.likes + acc.comments + acc.shares + acc.saves;
-    const engagementPct = acc.followers > 0 ? (engagement / acc.followers) * 0.4 * 100 : null;
+    return acc.followers > 0 ? (engagement / acc.followers) * 0.4 * 100 : null;
+  };
+
+  const totals = sumTotals(allPosts);
+  const estEngagementPct = computeEngagementPct(allPosts);
+
+  const monthTotals = (() => {
+    const posts = filteredCreators.flatMap((c) => c.posts);
+    const acc = sumTotals(posts);
+    const engagementPct = computeEngagementPct(posts);
     return { ...acc, engagementPct, posts: posts.length, creators: filteredCreators.length };
   })();
+
 
   const latestUpdate = (() => {
     const dates: Date[] = [];
