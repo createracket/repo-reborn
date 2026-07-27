@@ -273,10 +273,10 @@ function CopyFormatDialog({ trend }: { trend: Trend }) {
         </DialogHeader>
 
         <div className="mt-2 space-y-4">
-          <div className="relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-xl text-6xl" style={{ background: trend.thumbGradient }}>
-            {trend.thumbEmoji}
-            <div className="absolute bottom-2 left-2 rounded-full bg-background/70 px-2 py-0.5 text-xs backdrop-blur">{trend.creator}</div>
+          <div className="rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
+            {trend.creator}
           </div>
+
 
           <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
             <BreakdownRow label="Hook (0–3s)" value={b.hook} />
