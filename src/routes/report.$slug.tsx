@@ -311,7 +311,7 @@ function PublicReportPage() {
         {allPosts.length > 0 && (
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <TotalStat label="Total views" value={formatCount(totals.views)} />
-            <TotalStat label="Est. reach" value={formatCount(Math.round(totals.views * 0.8))} />
+            <TotalStat label={hasRealReach(allPosts) ? "Reach" : "Est. reach"} value={formatCount(totalReach)} />
             <TotalStat
               label="Est. engagement"
               value={estEngagementPct != null ? `${estEngagementPct.toFixed(2)}%` : "—"}
