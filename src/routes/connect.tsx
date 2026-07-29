@@ -88,7 +88,7 @@ const CAMPAIGN_OPTIONS_BRAND: Array<{ value: CampaignKind; label: string; desc: 
     value: "endorse",
     label: "Endorse",
     tag: "Retainer + campaign costs",
-    desc: "Proactively outreach to brand partners and/or build a bespoke roster to bolster your next release. Leverage creative briefing tools and build long-term partnerships.",
+    desc: "Proactively outreach to creators (inc. musicians) and find the right talent to support your next brand campaign. Build a bespoke roster using creative briefing tools and nurture long-term partnerships.",
   },
   {
     value: "partner",
