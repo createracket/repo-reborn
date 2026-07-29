@@ -85,7 +85,6 @@ function PartnerPage() {
 
         <div className="mt-8 grid grid-cols-4 gap-2 sm:gap-5">
           {TIERS.map((t) => {
-            const darkText = t.label === "Seed" || t.label === "Endorse";
             return (
             <div key={t.label} className="flex flex-col gap-3">
               <div
@@ -93,7 +92,7 @@ function PartnerPage() {
                 style={{ background: t.gradient }}
               >
                 <span
-                  className={`font-display text-sm font-bold leading-tight drop-shadow-md sm:text-2xl md:text-4xl lg:text-5xl ${darkText ? "text-[#111]" : "text-white"}`}
+                  className="font-display text-sm font-bold leading-tight text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)] sm:text-2xl md:text-4xl lg:text-5xl"
                 >
                   {t.label}
                 </span>
