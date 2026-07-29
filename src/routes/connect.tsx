@@ -103,7 +103,7 @@ const CAMPAIGN_OPTIONS_ARTIST: Array<{ value: CampaignKind; label: string; desc:
   {
     value: "seed",
     label: "Seed",
-    tag: "From ~$500",
+    tag: "LOW-COST, EASY ENTRY",
     desc: "Bring real fans into your next experience and grow your audience organically through a strategic sampling campaign. Gift music, merch and tickets to influential folks.",
   },
   {
