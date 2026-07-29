@@ -81,20 +81,20 @@ const CAMPAIGN_OPTIONS_BRAND: Array<{ value: CampaignKind; label: string; desc: 
   {
     value: "seed",
     label: "Seed",
-    tag: "From ~$500",
-    desc: "Bring real fans into your next experience and grow your audience organically through a strategic sampling campaign. Gift music, merch and tickets to influential folks.",
+    tag: "LOW-COST, EASY ENTRY",
+    desc: "Gift awesome products and seed new campaign assets with relevant creators - reaching musicians, fans, and cultural tastemakers. ",
   },
   {
     value: "endorse",
     label: "Endorse",
-    tag: "Retainer + campaign costs",
-    desc: "Proactively outreach to creators (inc. musicians) and find the right talent to support your next brand campaign. Build a bespoke roster using creative briefing tools and nurture long-term partnerships.",
+    tag: "CAMPAIGN PLAN",
+    desc: "Find the right talent to support your next brand campaign. Build a bespoke roster or ongoing ambassador program - leverage briefing tools and lightweight agreements.",
   },
   {
     value: "partner",
     label: "Partner",
     tag: "Bespoke",
-    desc: "Custom collabs with tailored campaign tools and retained account management accounts - priority matching and paid media support.",
+    desc: "Custom collabs with tailored campaign tools and retained account management accounts - priority matching and paid media support. ",
   },
   UNSURE_OPTION,
 ];
@@ -103,20 +103,20 @@ const CAMPAIGN_OPTIONS_ARTIST: Array<{ value: CampaignKind; label: string; desc:
   {
     value: "seed",
     label: "Seed",
-    tag: "From ~$500",
-    desc: "Bring real fans into your next experience and grow your audience organically through a strategic sampling campaign. Gift music, merch and tickets to influential folks.",
+    tag: "LOW-COST, EASY ENTRY",
+    desc: "Gift awesome products and seed new campaign assets with relevant creators - reaching musicians, fans, and cultural tastemakers. ",
   },
   {
     value: "endorse",
     label: "Endorse",
-    tag: "Retainer + campaign costs",
-    desc: "Proactively outreach to brand partners and/or build a bespoke roster to bolster your next release. Leverage creative briefing tools and build long-term partnerships.",
+    tag: "CAMPAIGN PLAN",
+    desc: "Find the right talent to support your next brand campaign. Build a bespoke roster or ongoing ambassador program - leverage briefing tools and lightweight agreements.",
   },
   {
     value: "partner",
     label: "Partner",
     tag: "Bespoke",
-    desc: "Custom collabs with tailored campaign tools and retained account management accounts - priority matching and paid media support.",
+    desc: "Custom collabs with tailored campaign tools and retained account management accounts - priority matching and paid media support. ",
   },
   UNSURE_OPTION,
 ];
