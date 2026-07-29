@@ -109,7 +109,7 @@ const CAMPAIGN_OPTIONS_ARTIST: Array<{ value: CampaignKind; label: string; desc:
   {
     value: "endorse",
     label: "Endorse",
-    tag: "Retainer + campaign costs",
+    tag: "CAMPAIGN COSTS",
     desc: "Proactively outreach to brand partners and/or build a bespoke roster to bolster your next release. Leverage creative briefing tools and build long-term partnerships.",
   },
   {
