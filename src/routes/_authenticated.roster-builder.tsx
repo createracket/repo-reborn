@@ -104,6 +104,11 @@ type Roster = {
   access_code_label: string | null;
 };
 
+/** Slug of the roster currently being edited — used to name storage folders. */
+const RosterSlugContext = React.createContext<string>("misc");
+
+
+
 function itemCategories(item: { categories?: string[] | null; category: string | null }): string[] {
   const arr = Array.isArray(item.categories) ? item.categories.filter((c): c is string => !!c) : [];
   if (arr.length > 0) return arr;
