@@ -1405,8 +1405,10 @@ function RosterDetailView({
         />
       </div>
     </div>
+    </RosterSlugContext.Provider>
   );
 }
+
 
 function DraggableRosterList({
   items,
