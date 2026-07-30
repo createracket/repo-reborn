@@ -579,12 +579,7 @@ function EditProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="sp">Spotify</Label>
-                <div className="flex gap-1.5">
-                  <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
-                  <Button type="button" size="sm" variant="outline" onClick={syncSpotify} disabled={fetching === "spotify"} title="Auto-sync streaming numbers">
-                    <RefreshCw className={`size-3.5 ${fetching === "spotify" ? "animate-spin" : ""}`} />
-                  </Button>
-                </div>
+                <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
                 <p className="text-[11px] text-muted-foreground">Auto-syncs followers, monthly listeners and total streams.</p>
               </div>
               <div className="space-y-1.5">
