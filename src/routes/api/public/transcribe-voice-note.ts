@@ -12,6 +12,29 @@ export const Route = createFileRoute('/api/public/transcribe-voice-note')({
           return Response.json({ error: 'AI not configured' }, { status: 500 })
         }
 
+        // Signed-in only: transcription costs tokens, so it is metered per user.
+        const token = (request.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+        if (!token) {
+          return Response.json({ error: 'Sign in to use voice notes.' }, { status: 401 })
+        }
+        const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+        const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token)
+        const userId = userData?.user?.id
+        if (userErr || !userId) {
+          return Response.json({ error: 'Sign in to use voice notes.' }, { status: 401 })
+        }
+
+        const { assertQuota, consumeQuota, QuotaError } = await import('@/lib/usage.server')
+        try {
+          await assertQuota(userId, 'voice_note')
+        } catch (e) {
+          if (e instanceof QuotaError) {
+            return Response.json({ error: e.message }, { status: 429 })
+          }
+          throw e
+        }
+
+
         const contentType = request.headers.get('content-type') || ''
         if (!contentType.includes('multipart/form-data')) {
           return Response.json({ error: 'Expected multipart/form-data' }, { status: 400 })
