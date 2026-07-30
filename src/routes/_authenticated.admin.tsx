@@ -234,7 +234,7 @@ function AdminPage() {
             
             <TabsTrigger value="brief-form">Brief Form</TabsTrigger>
             <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
-            <TabsTrigger value="example-opps">Example opportunities</TabsTrigger>
+            
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="faqs">FAQs</TabsTrigger>
             <TabsTrigger value="sound-board">Sound Board</TabsTrigger>
@@ -460,7 +460,11 @@ function AdminPage() {
                 ))}
               </div>
             )}
+            <div className="pt-8 border-t border-border">
+              <ExampleOpportunitiesAdmin />
+            </div>
           </TabsContent>
+
 
 
           <TabsContent value="users" className="mt-6 space-y-6">
@@ -706,10 +710,6 @@ function AdminPage() {
 
           <TabsContent value="emails" className="mt-6">
             <EmailsAdmin />
-          </TabsContent>
-
-          <TabsContent value="example-opps" className="mt-6">
-            <ExampleOpportunitiesAdmin />
           </TabsContent>
 
           <TabsContent value="faqs" className="mt-6">
