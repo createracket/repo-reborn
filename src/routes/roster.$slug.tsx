@@ -296,7 +296,7 @@ function PublicRosterPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="container mx-auto max-w-4xl px-4 py-12 md:py-20">
+      <main className="container mx-auto max-w-4xl px-3 py-8 sm:px-4 md:py-12">
         {roster.header_image_url ? (
           <div
             className="mb-10 overflow-hidden rounded-2xl border border-border/60"
@@ -416,7 +416,7 @@ function PublicRosterPage() {
             const showProspect = it.kind === "prospect" && !roster.hide_prospect_tags;
             return (
               <Card key={it.id}>
-                <CardContent className="p-5">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-start gap-4">
                     <div className="size-16 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-base font-medium text-muted-foreground">
                       {it.avatar_url ? (
@@ -428,7 +428,7 @@ function PublicRosterPage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-display text-xl">{it.name}</h3>
+                          <h3 className="font-display text-xl sm:text-2xl">{it.name}</h3>
                           {it.location && LOCATION_FLAG[it.location] && (
                             <span
                               className="text-lg leading-none"
@@ -466,23 +466,23 @@ function PublicRosterPage() {
                       </div>
 
                       {it.vibe && (
-                        <div className="mt-3">
+                        <div className="mt-2">
                           <p className="mt-1 rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-sm text-foreground">
                             {it.vibe}
                           </p>
                         </div>
                       )}
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
                         {totalReach > 0 && (
-                          <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
-                            Total Audience {formatCount(totalReach)}
+                          <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2.5 py-1 font-semibold text-foreground">
+                            {formatCount(totalReach)} total followers
                           </span>
                         )}
                         {stats.map(([label, count, url]) =>
                           count != null || url ? (
                             <span
                               key={label}
-                              className="rounded-md border border-border/60 bg-muted/30 px-2 py-0.5"
+                              className="rounded-md border border-border/60 bg-muted/30 px-2.5 py-1"
                             >
                               {label}
                               {count != null ? ` ${formatCount(count)}` : ""}
