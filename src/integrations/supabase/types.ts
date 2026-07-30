@@ -934,6 +934,7 @@ export type Database = {
           total_followers: number | null
           total_streams: number | null
           updated_at: string
+          usage_blocked: boolean
           values: string[]
         }
         Insert: {
@@ -963,6 +964,7 @@ export type Database = {
           total_followers?: number | null
           total_streams?: number | null
           updated_at?: string
+          usage_blocked?: boolean
           values?: string[]
         }
         Update: {
@@ -992,6 +994,7 @@ export type Database = {
           total_followers?: number | null
           total_streams?: number | null
           updated_at?: string
+          usage_blocked?: boolean
           values?: string[]
         }
         Relationships: []
@@ -1444,6 +1447,54 @@ export type Database = {
           id?: string
           metadata?: Json | null
           reason?: string
+        }
+        Relationships: []
+      }
+      usage_events: {
+        Row: {
+          action: string
+          bonus: number
+          count: number
+          period: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          bonus?: number
+          count?: number
+          period: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          bonus?: number
+          count?: number
+          period?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      usage_limits: {
+        Row: {
+          action: string
+          label: string
+          monthly_limit: number
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          label: string
+          monthly_limit: number
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          label?: string
+          monthly_limit?: number
+          updated_at?: string
         }
         Relationships: []
       }
