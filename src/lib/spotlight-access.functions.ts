@@ -58,7 +58,12 @@ export const unlockSpotlight = createServerFn({ method: "POST" })
       .eq("published", true)
       .maybeSingle();
 
-    const record = row as (Record<string, unknown> & { access_code: string | null; id: string }) | null;
+    const record = row as
+      | (Record<string, string | number | boolean | null | string[] | Record<string, string>> & {
+          access_code: string | null;
+          id: string;
+        })
+      | null;
     if (!record || !record.access_code) return { ok: false as const };
 
     const expected = String(record.access_code).trim().toLowerCase();
