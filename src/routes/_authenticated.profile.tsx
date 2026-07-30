@@ -569,12 +569,7 @@ function EditProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="tt">TikTok</Label>
-                <div className="flex gap-1.5">
-                  <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
-                  <Button type="button" size="sm" variant="outline" onClick={() => fetchSocialFollowers("tiktok")} disabled={fetching === "tiktok"} title="Fetch followers">
-                    <RefreshCw className={`size-3.5 ${fetching === "tiktok" ? "animate-spin" : ""}`} />
-                  </Button>
-                </div>
+                <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
                 {fetchedCounts.tiktok != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()}</p> : null}
               </div>
               <div className="space-y-1.5">
