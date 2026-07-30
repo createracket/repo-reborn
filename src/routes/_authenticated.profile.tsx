@@ -604,12 +604,7 @@ function EditProfilePage() {
               ) : null}
               <div className="space-y-1.5">
                 <Label htmlFor="yt">YouTube</Label>
-                <div className="flex gap-1.5">
-                  <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
-                  <Button type="button" size="sm" variant="outline" onClick={() => fetchSocialFollowers("youtube")} disabled={fetching === "youtube"} title="Fetch subscribers">
-                    <RefreshCw className={`size-3.5 ${fetching === "youtube" ? "animate-spin" : ""}`} />
-                  </Button>
-                </div>
+                <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
                 {fetchedCounts.youtube != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()}</p> : null}
               </div>
               <div className="space-y-1.5 md:col-span-2">
