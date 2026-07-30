@@ -99,8 +99,15 @@ export function VoiceNoteRecorder({ onTranscribed }: Props) {
       const fd = new FormData();
       const ext = (blob.type.split("/")[1] || "webm").split(";")[0];
       fd.append("file", blob, `voice-note.${ext}`);
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) {
+        toast.error("Sign in to use voice notes.");
+        return;
+      }
       const res = await fetch("/api/public/transcribe-voice-note", {
         method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
         body: fd,
       });
       const data = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
