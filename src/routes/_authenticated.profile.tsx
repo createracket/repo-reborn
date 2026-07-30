@@ -553,18 +553,20 @@ function EditProfilePage() {
                 <Textarea id="bio" rows={4} value={form.bio} onChange={(e) => set("bio", e.target.value)} />
               </div>
 
-              <div className="md:col-span-2 pt-2">
+              <div className="md:col-span-2 pt-2 flex flex-wrap items-center justify-between gap-2">
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Socials</p>
+                <div className="flex flex-col items-end gap-0.5">
+                  <Button type="button" size="sm" variant="outline" onClick={syncAll} disabled={fetching === "all"}>
+                    <RefreshCw className={`mr-1.5 size-3.5 ${fetching === "all" ? "animate-spin" : ""}`} />
+                    {fetching === "all" ? "Syncing…" : "Sync my numbers"}
+                  </Button>
+                  <p className="text-[11px] text-muted-foreground">{syncAllowanceLabel}</p>
+                </div>
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="ig">Instagram</Label>
-                <div className="flex gap-1.5">
-                  <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
-                  <Button type="button" size="sm" variant="outline" onClick={() => fetchSocialFollowers("instagram")} disabled={fetching === "instagram"} title="Fetch followers">
-                    <RefreshCw className={`size-3.5 ${fetching === "instagram" ? "animate-spin" : ""}`} />
-                  </Button>
-                </div>
+                <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
                 {fetchedCounts.instagram != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()}</p> : null}
               </div>
               <div className="space-y-1.5">
