@@ -440,13 +440,8 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
   const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
   const media = (
     <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
-      {post.thumbnail_url ? (
-        <img src={post.thumbnail_url} alt="" className="size-full object-cover" />
-      ) : (
-        <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
-          No thumbnail
-        </div>
-      )}
+      <PostThumb src={post.thumbnail_url} />
+
       <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 text-[10px] font-medium backdrop-blur">
         <Icon className="size-3" />
         {PLATFORM_LABEL[post.platform]}
