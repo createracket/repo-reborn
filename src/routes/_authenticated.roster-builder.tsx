@@ -1922,7 +1922,7 @@ function EditProspectPanel({
       }
       const { resizeImageFile } = await import("@/lib/image-resize");
       const resized = await resizeImageFile(file, 1080, 0.85);
-      const path = `${u.user.id}/roster/${item.id}/${crypto.randomUUID()}.jpg`;
+      const path = `roster/${rosterSlug}/${slugifyName(form.name)}-${crypto.randomUUID().slice(0, 8)}.jpg`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
         .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
