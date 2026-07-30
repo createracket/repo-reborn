@@ -414,7 +414,24 @@ function UnifiedBriefs({
             </Collapsible>
           </Card>
         );
-      })}
+  };
+
+  return (
+    <div className="space-y-3">
+      {activeRows.map(renderRow)}
+      {closedRows.length ? (
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              <span>Closed campaigns ({closedRows.length})</span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3 space-y-3">
+            {closedRows.map(renderRow)}
+          </CollapsibleContent>
+        </Collapsible>
+      ) : null}
       <EditBriefDialog
         brief={editing}
         onClose={() => setEditing(null)}
