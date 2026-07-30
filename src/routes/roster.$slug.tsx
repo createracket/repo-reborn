@@ -416,7 +416,7 @@ function PublicRosterPage() {
             const showProspect = it.kind === "prospect" && !roster.hide_prospect_tags;
             return (
               <Card key={it.id}>
-                <CardContent className="p-5">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-start gap-4">
                     <div className="size-16 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-base font-medium text-muted-foreground">
                       {it.avatar_url ? (
@@ -472,17 +472,17 @@ function PublicRosterPage() {
                           </p>
                         </div>
                       )}
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
                         {totalReach > 0 && (
-                          <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
-                            Total Audience {formatCount(totalReach)}
+                          <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2.5 py-1 font-semibold text-foreground">
+                            {formatCount(totalReach)} total followers
                           </span>
                         )}
                         {stats.map(([label, count, url]) =>
                           count != null || url ? (
                             <span
                               key={label}
-                              className="rounded-md border border-border/60 bg-muted/30 px-2 py-0.5"
+                              className="rounded-md border border-border/60 bg-muted/30 px-2.5 py-1"
                             >
                               {label}
                               {count != null ? ` ${formatCount(count)}` : ""}
