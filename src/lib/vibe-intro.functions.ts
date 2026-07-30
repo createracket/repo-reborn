@@ -20,15 +20,19 @@ const BRAND_FIELDS = `
 `.trim();
 
 export const parseVibeIntro = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(
     z.object({
       flow: z.enum(["musician", "brand"]),
       text: z.string().min(20).max(4000),
     }).parse,
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { assertQuota, consumeQuota } = await import("./usage.server");
+    await assertQuota(context.userId, "vibe_intro");
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("LOVABLE_API_KEY not configured");
+
 
     const schemaHint = data.flow === "musician" ? MUSICIAN_FIELDS : BRAND_FIELDS;
     const system = `You extract structured profile data from a short free-text intro.
