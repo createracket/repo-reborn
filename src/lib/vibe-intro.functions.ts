@@ -76,5 +76,6 @@ Rules:
     } catch {
       parsed = {};
     }
+    await consumeQuota(context.userId, "vibe_intro");
     return { fields: parsed as Record<string, any> };
   });
