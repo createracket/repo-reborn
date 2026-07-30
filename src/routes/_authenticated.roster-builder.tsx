@@ -1029,7 +1029,7 @@ function RosterDetailView({
                       }
                       const { resizeImageFile } = await import("@/lib/image-resize");
                       const resized = await resizeImageFile(file, 1600, 0.85);
-                      const path = `${u.user.id}/roster/${roster.id}/header-${crypto.randomUUID()}.jpg`;
+                      const path = `roster/${roster.slug ?? roster.id}/header-${crypto.randomUUID()}.jpg`;
                       const { error: upErr } = await supabase.storage
                         .from("avatars")
                         .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
