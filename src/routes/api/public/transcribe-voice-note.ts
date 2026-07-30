@@ -86,6 +86,7 @@ export const Route = createFileRoute('/api/public/transcribe-voice-note')({
         }
 
         const json = (await res.json()) as { text?: string }
+        await consumeQuota(userId, 'voice_note')
         return Response.json({ text: json.text ?? '' })
       },
     },
