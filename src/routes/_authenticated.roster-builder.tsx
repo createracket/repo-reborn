@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   ShieldAlert,
@@ -103,6 +103,22 @@ type Roster = {
   access_code: string | null;
   access_code_label: string | null;
 };
+
+/** Slug of the roster currently being edited — used to name storage folders. */
+const RosterSlugContext = createContext<string>("misc");
+
+/** Turn a creator name into a safe, readable storage filename prefix. */
+function slugifyName(name: string): string {
+  const s = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+  return s || "creator";
+}
+
+
+
 
 function itemCategories(item: { categories?: string[] | null; category: string | null }): string[] {
   const arr = Array.isArray(item.categories) ? item.categories.filter((c): c is string => !!c) : [];
@@ -918,7 +934,9 @@ function RosterDetailView({
   const linkableBriefs = briefs;
 
   return (
+    <RosterSlugContext.Provider value={roster.slug ?? roster.id}>
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+
       <div className="space-y-6">
         {/* Linked brief */}
         <Card>
@@ -1022,7 +1040,7 @@ function RosterDetailView({
                       }
                       const { resizeImageFile } = await import("@/lib/image-resize");
                       const resized = await resizeImageFile(file, 1600, 0.85);
-                      const path = `${u.user.id}/roster/${roster.id}/header-${crypto.randomUUID()}.jpg`;
+                      const path = `roster/${roster.slug ?? roster.id}/header-${crypto.randomUUID()}.jpg`;
                       const { error: upErr } = await supabase.storage
                         .from("avatars")
                         .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
@@ -1403,8 +1421,10 @@ function RosterDetailView({
         />
       </div>
     </div>
+    </RosterSlugContext.Provider>
   );
 }
+
 
 function DraggableRosterList({
   items,
@@ -1790,7 +1810,9 @@ function EditProspectPanel({
   onClose: () => void;
   onSaved?: () => void;
 }) {
+  const rosterSlug = useContext(RosterSlugContext);
   const [form, setForm] = useState({
+
     name: item.name,
     avatar_url: item.avatar_url ?? "",
     instagram_url: item.instagram_url ?? "",
@@ -1913,7 +1935,7 @@ function EditProspectPanel({
       }
       const { resizeImageFile } = await import("@/lib/image-resize");
       const resized = await resizeImageFile(file, 1080, 0.85);
-      const path = `${u.user.id}/roster/${item.id}/${crypto.randomUUID()}.jpg`;
+      const path = `roster/${rosterSlug}/${slugifyName(form.name)}-${crypto.randomUUID().slice(0, 8)}.jpg`;
       const { error: upErr } = await supabase.storage
         .from("avatars")
         .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
