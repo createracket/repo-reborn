@@ -559,28 +559,19 @@ function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: 
             className="overflow-hidden rounded-xl bg-muted"
             style={{ aspectRatio: "4 / 5" }}
           >
-            {post.thumbnail_url ? (
-              post.post_url ? (
-                <a
-                  href={post.post_url}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="block size-full"
-                >
-                  <img
-                    src={post.thumbnail_url}
-                    alt=""
-                    className="size-full object-cover"
-                  />
-                </a>
-              ) : (
-                <img src={post.thumbnail_url} alt="" className="size-full object-cover" />
-              )
+            {post.post_url ? (
+              <a
+                href={post.post_url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="block size-full"
+              >
+                <PostThumb src={post.thumbnail_url} />
+              </a>
             ) : (
-              <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
-                No thumbnail
-              </div>
+              <PostThumb src={post.thumbnail_url} />
             )}
+
           </div>
           {post.featured_comments && post.featured_comments.length > 0 && (
             <div className="rounded-xl border border-border/60 bg-muted/30 p-3 space-y-2.5">
