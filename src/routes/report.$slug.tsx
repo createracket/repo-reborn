@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCount, formatPct, type Platform } from "@/lib/youtube-utils";
+import { PostThumb } from "@/components/reports/PostThumb";
+
 
 type PublicReport = {
   id: string;
@@ -440,13 +442,8 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
   const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
   const media = (
     <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
-      {post.thumbnail_url ? (
-        <img src={post.thumbnail_url} alt="" className="size-full object-cover" />
-      ) : (
-        <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
-          No thumbnail
-        </div>
-      )}
+      <PostThumb src={post.thumbnail_url} />
+
       <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 text-[10px] font-medium backdrop-blur">
         <Icon className="size-3" />
         {PLATFORM_LABEL[post.platform]}
@@ -562,28 +559,19 @@ function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: 
             className="overflow-hidden rounded-xl bg-muted"
             style={{ aspectRatio: "4 / 5" }}
           >
-            {post.thumbnail_url ? (
-              post.post_url ? (
-                <a
-                  href={post.post_url}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="block size-full"
-                >
-                  <img
-                    src={post.thumbnail_url}
-                    alt=""
-                    className="size-full object-cover"
-                  />
-                </a>
-              ) : (
-                <img src={post.thumbnail_url} alt="" className="size-full object-cover" />
-              )
+            {post.post_url ? (
+              <a
+                href={post.post_url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="block size-full"
+              >
+                <PostThumb src={post.thumbnail_url} />
+              </a>
             ) : (
-              <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
-                No thumbnail
-              </div>
+              <PostThumb src={post.thumbnail_url} />
             )}
+
           </div>
           {post.featured_comments && post.featured_comments.length > 0 && (
             <div className="rounded-xl border border-border/60 bg-muted/30 p-3 space-y-2.5">
