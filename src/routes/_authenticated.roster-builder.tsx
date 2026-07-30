@@ -713,6 +713,8 @@ function RosterDetailView({
     setTitle(roster.title);
     setDescription(roster.description ?? "");
     setHeaderImageUrl(roster.header_image_url ?? "");
+    setAccessCode(roster.access_code ?? "");
+    setAccessCodeLabel(roster.access_code_label ?? "Access code");
     setEstEngagement(
       roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
     );
