@@ -8,6 +8,7 @@ export const BRIEF_STATUSES = [
   "in_progress",
   "review_your_roster",
   "review_your_report",
+  "closed",
 ] as const;
 
 export type BriefStatus = (typeof BRIEF_STATUSES)[number];
@@ -18,6 +19,7 @@ export const BRIEF_STATUS_LABEL: Record<BriefStatus, string> = {
   in_progress: "In progress",
   review_your_roster: "Review your roster",
   review_your_report: "Review your report",
+  closed: "Closed",
 };
 
 const STATUS_CLASSES: Record<BriefStatus, string> = {
@@ -26,6 +28,7 @@ const STATUS_CLASSES: Record<BriefStatus, string> = {
   in_progress: "bg-pink-accent/15 text-pink-accent border-pink-accent/30",
   review_your_roster: "bg-primary/15 text-primary border-primary/30",
   review_your_report: "bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/30",
+  closed: "bg-muted text-muted-foreground border-border",
 };
 
 export function normalizeStatus(value: string | null | undefined): BriefStatus {

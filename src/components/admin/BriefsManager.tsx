@@ -248,9 +248,10 @@ function UnifiedBriefs({
     }
   }
 
-  return (
-    <div className="space-y-3">
-      {rows.map((b) => {
+  const activeRows = rows.filter((b) => normalizeStatus(b.status) !== "closed");
+  const closedRows = rows.filter((b) => normalizeStatus(b.status) === "closed");
+
+  const renderRow = (b: UnifiedBrief) => {
         const isUser = b.source === "user";
         const lead = !isUser ? (b as LeadBrief & { source: "lead" }) : null;
         const camp = isUser ? (b as CampaignBrief & { source: "user" }) : null;
@@ -413,7 +414,24 @@ function UnifiedBriefs({
             </Collapsible>
           </Card>
         );
-      })}
+  };
+
+  return (
+    <div className="space-y-3">
+      {activeRows.map(renderRow)}
+      {closedRows.length ? (
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              <span>Closed campaigns ({closedRows.length})</span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3 space-y-3">
+            {closedRows.map(renderRow)}
+          </CollapsibleContent>
+        </Collapsible>
+      ) : null}
       <EditBriefDialog
         brief={editing}
         onClose={() => setEditing(null)}
