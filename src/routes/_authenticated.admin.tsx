@@ -28,6 +28,7 @@ import { TrafficAdmin } from "@/components/admin/TrafficAdmin";
 import { ExampleOpportunitiesAdmin } from "@/components/admin/ExampleOpportunitiesAdmin";
 import { FaqsAdmin } from "@/components/admin/FaqsAdmin";
 import { SoundBoardAdmin } from "@/components/admin/SoundBoardAdmin";
+import { UsageAdmin } from "@/components/admin/UsageAdmin";
 import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
 import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
 import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
@@ -237,6 +238,7 @@ function AdminPage() {
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="faqs">FAQs</TabsTrigger>
             <TabsTrigger value="sound-board">Sound Board</TabsTrigger>
+            <TabsTrigger value="usage">Usage</TabsTrigger>
           </TabsList>
 
 
@@ -716,6 +718,10 @@ function AdminPage() {
 
           <TabsContent value="sound-board" className="mt-6">
             <SoundBoardAdmin />
+          </TabsContent>
+
+          <TabsContent value="usage" className="mt-6">
+            <UsageAdmin />
           </TabsContent>
         </Tabs>
       </main>
