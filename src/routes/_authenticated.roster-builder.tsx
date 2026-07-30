@@ -1799,7 +1799,9 @@ function EditProspectPanel({
   onClose: () => void;
   onSaved?: () => void;
 }) {
+  const rosterSlug = useContext(RosterSlugContext);
   const [form, setForm] = useState({
+
     name: item.name,
     avatar_url: item.avatar_url ?? "",
     instagram_url: item.instagram_url ?? "",
