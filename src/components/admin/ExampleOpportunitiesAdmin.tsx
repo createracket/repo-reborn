@@ -19,7 +19,16 @@ export type ExampleOpportunity = {
 
 export function ExampleOpportunitiesAdmin() {
   const [rows, setRows] = useState<ExampleOpportunity[]>([]);
+  const [open, setOpen] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+
+  function toggle(id: string) {
+    setOpen((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
 
   async function load() {
     setLoading(true);
