@@ -1214,6 +1214,8 @@ function SpotlightForm({
     header_image_url: editData?.header_image_url ?? "",
     profile_image_url: editData?.profile_image_url ?? "",
     published: editData?.published ?? false,
+    access_code: editData?.access_code ?? "",
+    access_code_label: editData?.access_code_label ?? "Access code",
     total_followers: editData?.total_followers?.toString() ?? "",
     total_streams: editData?.total_streams?.toString() ?? "",
     monthly_streams: editData?.monthly_streams?.toString() ?? "",
@@ -1381,6 +1383,10 @@ function SpotlightForm({
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
       published: form.published,
+      access_code: form.access_code.trim() || null,
+      access_code_label: form.access_code.trim()
+        ? form.access_code_label.trim() || "Access code"
+        : null,
       total_followers: numOrNull(form.total_followers),
       total_streams: numOrNull(form.total_streams),
       monthly_streams: numOrNull(form.monthly_streams),
@@ -1422,6 +1428,7 @@ function SpotlightForm({
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "",
         header_image_url: "", profile_image_url: "", published: false,
+        access_code: "", access_code_label: "Access code",
         total_followers: "", total_streams: "", monthly_streams: "",
         avg_reach: "", avg_engagement: "",
       });
@@ -1435,6 +1442,34 @@ function SpotlightForm({
           <div className="space-y-1.5">
             <Label htmlFor="slug">Slug *</Label>
             <Input id="slug" value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="ymyb-spotlight" />
+          </div>
+          <div className="space-y-1.5 md:col-span-2 rounded-lg border border-border/60 p-3">
+            <Label className="text-sm font-medium">Private access code</Label>
+            <p className="text-xs text-muted-foreground">
+              Optional. With a code set, this spotlight is hidden from the public and from search — visitors
+              must enter their email and the code. Admins and anyone the page is assigned to still see it
+              normally (including on their dashboard).
+            </p>
+            <div className="grid gap-2 pt-1 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="access_code_label" className="text-xs">Code name</Label>
+                <Input
+                  id="access_code_label"
+                  value={form.access_code_label}
+                  onChange={(e) => set("access_code_label", e.target.value)}
+                  placeholder="Access code"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="access_code" className="text-xs">Code</Label>
+                <Input
+                  id="access_code"
+                  value={form.access_code}
+                  onChange={(e) => set("access_code", e.target.value)}
+                  placeholder="e.g. SPOTLIGHT26"
+                />
+              </div>
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="type">Type</Label>
