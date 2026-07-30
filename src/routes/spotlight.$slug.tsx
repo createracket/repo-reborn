@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getSocialEmbed } from "@/lib/social-embed";
+import { getSpotlightGate, unlockSpotlight } from "@/lib/spotlight-access.functions";
 
 type PartnerLinks = {
   instagram?: string;
@@ -179,6 +180,85 @@ function SpotlightPage() {
         <main className="container mx-auto px-4 py-16">
           <p className="text-sm text-muted-foreground">Loading spotlight…</p>
         </main>
+      </div>
+    );
+  }
+
+  if (status === "gated" && gate) {
+    const submitGate = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setGateBusy(true);
+      setGateError(null);
+      try {
+        const res = await unlockSpotlight({
+          data: { slug, email: gateEmail.trim(), code: gateCode.trim() },
+        });
+        if (!res.ok) {
+          setGateError("That code doesn't look right. Check it and try again.");
+          return;
+        }
+        setPage(res.page as unknown as PartnerPage);
+        setStatus("ready");
+      } catch {
+        setGateError("Something went wrong. Please try again.");
+      } finally {
+        setGateBusy(false);
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <main className="container mx-auto max-w-2xl px-4 py-12 md:py-20">
+          {gate.header_image_url ? (
+            <div className="mb-10 overflow-hidden rounded-2xl border border-border/60" style={{ aspectRatio: "16 / 9" }}>
+              <img src={gate.header_image_url} alt={gate.headline} className="size-full object-cover" />
+            </div>
+          ) : null}
+          <Badge variant="outline" className="uppercase tracking-[0.2em]">
+            <Mic2 className="mr-1.5 size-3" /> Spotlight
+          </Badge>
+          {gate.subtitle ? (
+            <p className="mt-4 text-sm uppercase tracking-[0.3em] text-muted-foreground">{gate.subtitle}</p>
+          ) : null}
+          <h1 className="mt-2 font-display text-4xl leading-tight md:text-5xl">{gate.headline}</h1>
+          <p className="mt-3 text-muted-foreground">
+            This spotlight is private. Enter your email and the access code you were given to view it.
+          </p>
+
+          <form onSubmit={submitGate} className="mt-8 space-y-4 rounded-2xl border border-border/60 bg-card p-6">
+            <div>
+              <label htmlFor="gate-email" className="text-sm font-medium">Email</label>
+              <input
+                id="gate-email"
+                type="email"
+                required
+                maxLength={255}
+                value={gateEmail}
+                onChange={(e) => setGateEmail(e.target.value)}
+                placeholder="you@company.com"
+                className="mt-1.5 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-pink-accent focus:outline-none"
+              />
+            </div>
+            <div>
+              <label htmlFor="gate-code" className="text-sm font-medium">{gate.code_label}</label>
+              <input
+                id="gate-code"
+                required
+                maxLength={120}
+                value={gateCode}
+                onChange={(e) => setGateCode(e.target.value)}
+                placeholder="Enter your code"
+                className="mt-1.5 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-pink-accent focus:outline-none"
+              />
+            </div>
+            {gateError && <p className="text-sm text-destructive">{gateError}</p>}
+            <Button type="submit" disabled={gateBusy} className="w-full">
+              {gateBusy ? "Checking…" : "View spotlight"}
+            </Button>
+          </form>
+        </main>
+        <SiteFooter />
       </div>
     );
   }
