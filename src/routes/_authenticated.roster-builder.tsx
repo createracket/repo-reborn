@@ -695,6 +695,9 @@ function RosterDetailView({
   })();
   const [customLinks, setCustomLinks] = useState(initialLinks);
   const [savingMeta, setSavingMeta] = useState(false);
+  const [accessCode, setAccessCode] = useState(roster.access_code ?? "");
+  const [accessCodeLabel, setAccessCodeLabel] = useState(roster.access_code_label ?? "Access code");
+  const [savingAccess, setSavingAccess] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [newCategory, setNewCategory] = useState("");
