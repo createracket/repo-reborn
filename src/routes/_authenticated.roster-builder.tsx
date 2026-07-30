@@ -107,6 +107,17 @@ type Roster = {
 /** Slug of the roster currently being edited — used to name storage folders. */
 const RosterSlugContext = createContext<string>("misc");
 
+/** Turn a creator name into a safe, readable storage filename prefix. */
+function slugifyName(name: string): string {
+  const s = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+  return s || "creator";
+}
+
+
 
 
 function itemCategories(item: { categories?: string[] | null; category: string | null }): string[] {
