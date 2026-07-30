@@ -821,6 +821,8 @@ export type Database = {
       }
       partner_pages: {
         Row: {
+          access_code: string | null
+          access_code_label: string | null
           audience_segments: string[]
           avg_engagement: number | null
           avg_reach: number | null
@@ -847,6 +849,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_code?: string | null
+          access_code_label?: string | null
           audience_segments?: string[]
           avg_engagement?: number | null
           avg_reach?: number | null
@@ -873,6 +877,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_code?: string | null
+          access_code_label?: string | null
           audience_segments?: string[]
           avg_engagement?: number | null
           avg_reach?: number | null
@@ -1355,6 +1361,35 @@ export type Database = {
           video_url?: string | null
         }
         Relationships: []
+      }
+      spotlight_access_leads: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          partner_page_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          partner_page_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          partner_page_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotlight_access_leads_partner_page_id_fkey"
+            columns: ["partner_page_id"]
+            isOneToOne: false
+            referencedRelation: "partner_pages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       spotlight_interests: {
         Row: {
