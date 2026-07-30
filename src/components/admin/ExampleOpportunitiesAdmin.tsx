@@ -201,7 +201,9 @@ export function ExampleOpportunitiesAdmin() {
                     </div>
                   </div>
                 </div>
+                ) : null}
               </div>
+
             ))}
             <Button variant="outline" onClick={addRow}>+ Add example</Button>
           </>
