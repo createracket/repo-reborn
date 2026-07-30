@@ -694,10 +694,8 @@ function extractAppleMusicStorefront(url: string): string {
  * does not expose follower or monthly-listener numbers, so those are returned
  * as null; the fetched name is what we use for the mismatch check.
  */
-export const scrapeAppleMusicArtist = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ url: z.string().min(1) }).parse)
-  .handler(async ({ data }): Promise<AppleMusicArtistResult> => {
+async function appleMusicArtistCore(data: { url: string }): Promise<AppleMusicArtistResult> {
+  {
     const artistId = extractAppleMusicArtistId(data.url);
     if (!artistId)
       return { ok: false, error: "Couldn't parse Apple Music artist ID from URL." };
