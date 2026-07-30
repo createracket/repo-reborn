@@ -296,7 +296,7 @@ function PublicRosterPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="container mx-auto max-w-4xl px-4 py-12 md:py-20">
+      <main className="container mx-auto max-w-4xl px-3 py-8 sm:px-4 md:py-12">
         {roster.header_image_url ? (
           <div
             className="mb-10 overflow-hidden rounded-2xl border border-border/60"
@@ -428,7 +428,7 @@ function PublicRosterPage() {
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-display text-xl">{it.name}</h3>
+                          <h3 className="font-display text-xl sm:text-2xl">{it.name}</h3>
                           {it.location && LOCATION_FLAG[it.location] && (
                             <span
                               className="text-lg leading-none"
@@ -466,7 +466,7 @@ function PublicRosterPage() {
                       </div>
 
                       {it.vibe && (
-                        <div className="mt-3">
+                        <div className="mt-2">
                           <p className="mt-1 rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-sm text-foreground">
                             {it.vibe}
                           </p>
