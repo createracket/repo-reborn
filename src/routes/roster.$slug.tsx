@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { getRosterGate, unlockRoster } from "@/lib/roster-access.functions";
 
 type PublicRoster = {
   id: string;
@@ -132,7 +133,12 @@ function PublicRosterPage() {
   const { slug } = Route.useParams();
   const [roster, setRoster] = useState<PublicRoster | null>(null);
   const [items, setItems] = useState<PublicItem[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
+  const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
+  const [gate, setGate] = useState<{ title: string; header_image_url: string | null; code_label: string } | null>(null);
+  const [gateEmail, setGateEmail] = useState("");
+  const [gateCode, setGateCode] = useState("");
+  const [gateError, setGateError] = useState<string | null>(null);
+  const [gateBusy, setGateBusy] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   useEffect(() => {
@@ -146,7 +152,13 @@ function PublicRosterPage() {
         .eq("published", true)
         .maybeSingle();
       if (!r) {
-        setStatus("missing");
+        const info = await getRosterGate({ data: { slug } });
+        if (info.gated) {
+          setGate({ title: info.title, header_image_url: info.header_image_url, code_label: info.code_label });
+          setStatus("gated");
+        } else {
+          setStatus("missing");
+        }
         return;
       }
       const pr = r as unknown as PublicRoster;
@@ -170,6 +182,81 @@ function PublicRosterPage() {
         <main className="container mx-auto px-4 py-16">
           <p className="text-sm text-muted-foreground">Loading roster…</p>
         </main>
+      </div>
+    );
+  }
+
+  if (status === "gated" && gate) {
+    const submitGate = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setGateBusy(true);
+      setGateError(null);
+      try {
+        const res = await unlockRoster({ data: { slug, email: gateEmail.trim(), code: gateCode.trim() } });
+        if (!res.ok) {
+          setGateError("That code doesn't look right. Check it and try again.");
+          return;
+        }
+        setRoster(res.roster as unknown as PublicRoster);
+        setItems((res.items as unknown as PublicItem[]) ?? []);
+        setStatus("ready");
+      } catch {
+        setGateError("Something went wrong. Please try again.");
+      } finally {
+        setGateBusy(false);
+      }
+    };
+
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <main className="container mx-auto max-w-2xl px-4 py-12 md:py-20">
+          {gate.header_image_url ? (
+            <div className="mb-10 overflow-hidden rounded-2xl border border-border/60" style={{ aspectRatio: "16 / 9" }}>
+              <img src={gate.header_image_url} alt={gate.title} className="size-full object-cover" />
+            </div>
+          ) : null}
+          <Badge variant="outline" className="uppercase tracking-[0.2em]">
+            <Users className="mr-1.5 size-3" /> Roster
+          </Badge>
+          <h1 className="mt-4 font-display text-4xl leading-tight md:text-5xl">{gate.title}</h1>
+          <p className="mt-3 text-muted-foreground">
+            This roster is private. Enter your email and the access code you were given to view it.
+          </p>
+
+          <form onSubmit={submitGate} className="mt-8 space-y-4 rounded-2xl border border-border/60 bg-card p-6">
+            <div>
+              <label htmlFor="gate-email" className="text-sm font-medium">Email</label>
+              <input
+                id="gate-email"
+                type="email"
+                required
+                maxLength={255}
+                value={gateEmail}
+                onChange={(e) => setGateEmail(e.target.value)}
+                placeholder="you@company.com"
+                className="mt-1.5 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-pink-accent focus:outline-none"
+              />
+            </div>
+            <div>
+              <label htmlFor="gate-code" className="text-sm font-medium">{gate.code_label}</label>
+              <input
+                id="gate-code"
+                required
+                maxLength={120}
+                value={gateCode}
+                onChange={(e) => setGateCode(e.target.value)}
+                placeholder="Enter your code"
+                className="mt-1.5 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:border-pink-accent focus:outline-none"
+              />
+            </div>
+            {gateError && <p className="text-sm text-destructive">{gateError}</p>}
+            <Button type="submit" disabled={gateBusy} className="w-full">
+              {gateBusy ? "Checking…" : "View roster"}
+            </Button>
+          </form>
+        </main>
+        <SiteFooter />
       </div>
     );
   }
