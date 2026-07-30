@@ -149,90 +149,115 @@ function EditProfilePage() {
     setForm((f) => ({ ...f, socials: { ...f.socials, [k]: v } }));
   }
 
-  const scrapeProfile = useServerFn(scrapeProfileFollowers);
-  const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
-  const scrapeApple = useServerFn(scrapeAppleMusicArtist);
+  const runSync = useServerFn(runProfileSync);
+  const loadUsage = useServerFn(getMyUsage);
   const [fetching, setFetching] = useState<string | null>(null);
   const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number }>({});
   const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
+  const [syncQuota, setSyncQuota] = useState<{ remaining: number; limit: number; resets: string } | null>(null);
+
+  useEffect(() => {
+    loadUsage({ data: {} })
+      .then((r) => {
+        const row = r.actions.find((a) => a.action === "profile_sync");
+        if (row) setSyncQuota({ remaining: row.remaining, limit: row.limit, resets: row.resets });
+      })
+      .catch(() => undefined);
+  }, [loadUsage]);
+
+  const syncAllowanceLabel = !syncQuota
+    ? "Syncs all connected links at once."
+    : syncQuota.remaining < 0
+      ? "Unlimited syncs (admin)."
+      : syncQuota.remaining > 0
+        ? `${syncQuota.remaining} of ${syncQuota.limit} sync${syncQuota.limit === 1 ? "" : "s"} left this month.`
+        : `No syncs left — resets ${syncQuota.resets}.`;
 
   function candidateNames() {
     return [form.display_name, form.artist_name, form.slug];
   }
 
-  async function syncSpotify() {
-    const url = (form.socials.spotify || "").trim();
-    if (!url) { toast.error("Enter a Spotify artist URL first"); return; }
-    setFetching("spotify");
-    try {
-      const r = await scrapeSpotify({ data: { url } });
-      if (!r.ok) { toast.error(r.error); return; }
-      const parts: string[] = [];
-      if (r.followers != null) { setForm((f) => ({ ...f, total_followers: String(r.followers ?? "") })); parts.push(`${r.followers.toLocaleString()} followers`); }
-      if (r.monthly_listeners != null) { setForm((f) => ({ ...f, monthly_streams: String(r.monthly_listeners ?? "") })); parts.push(`${r.monthly_listeners.toLocaleString()} monthly listeners`); }
-      if (r.total_streams != null) { setForm((f) => ({ ...f, total_streams: String(r.total_streams ?? "") })); parts.push(`${r.total_streams.toLocaleString()} total streams`); }
-      // Mismatch check
-      if (r.name && !isNameMatch(r.name, candidateNames())) {
-        const reason = `Spotify artist "${r.name}" does not match profile name.`;
-        setForm((f) => ({ ...f, flagged_streaming_mismatch: true, flagged_streaming_reason: reason }));
-        setMismatchWarning(MISMATCH_MESSAGE);
-      } else if (r.name) {
-        setMismatchWarning(null);
-      }
-      toast.success(parts.length ? `Spotify: ${parts.join(" · ")}` : "Spotify synced");
-    } finally { setFetching(null); }
+  function normaliseSocial(platform: "instagram" | "tiktok" | "youtube", raw: string) {
+    const url = raw.trim();
+    if (!url) return null;
+    if (/^https?:\/\//i.test(url)) return url;
+    const h = url.replace(/^@/, "");
+    if (platform === "instagram") return `https://instagram.com/${h}`;
+    if (platform === "tiktok") return `https://tiktok.com/@${h}`;
+    return `https://youtube.com/@${h}`;
   }
 
-  async function syncApple() {
-    const url = (form.socials.apple_music || "").trim();
-    if (!url) { toast.error("Enter an Apple Music artist URL first"); return; }
-    setFetching("apple");
-    try {
-      const r = await scrapeApple({ data: { url } });
-      if (!r.ok) { toast.error(r.error); return; }
-      if (r.name && !isNameMatch(r.name, candidateNames())) {
-        const reason = `Apple Music artist "${r.name}" does not match profile name.`;
-        setForm((f) => ({ ...f, flagged_streaming_mismatch: true, flagged_streaming_reason: reason }));
-        setMismatchWarning(MISMATCH_MESSAGE);
-      } else if (r.name) {
-        setMismatchWarning(null);
-      }
-      toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
-    } finally { setFetching(null); }
-  }
-
-
-  async function fetchSocialFollowers(platform: "instagram" | "tiktok" | "youtube") {
-    const url = (form.socials[platform] || "").trim();
-    if (!url) {
-      toast.error(`Enter a ${platform} handle or URL first`);
+  /** One metered run that refreshes every connected platform. */
+  async function syncAll() {
+    const payload = {
+      instagram_url: normaliseSocial("instagram", form.socials.instagram ?? ""),
+      tiktok_url: normaliseSocial("tiktok", form.socials.tiktok ?? ""),
+      youtube_url: normaliseSocial("youtube", form.socials.youtube ?? ""),
+      spotify_url: (form.socials.spotify ?? "").trim() || null,
+      apple_music_url: (form.socials.apple_music ?? "").trim() || null,
+    };
+    if (!Object.values(payload).some(Boolean)) {
+      toast.error("Add at least one social or streaming link first");
       return;
     }
-    // Convert bare handles to a URL the scraper understands.
-    let full = url;
-    if (!/^https?:\/\//i.test(full)) {
-      const h = full.replace(/^@/, "");
-      if (platform === "instagram") full = `https://instagram.com/${h}`;
-      else if (platform === "tiktok") full = `https://tiktok.com/@${h}`;
-      else full = `https://youtube.com/@${h}`;
-    }
-    setFetching(platform);
+    setFetching("all");
     try {
-      const r = await scrapeProfile({ data: { url: full } });
+      const r = await runSync({ data: payload });
       if (!r.ok) {
-        toast.error(r.error);
+        toast.error(r.error ?? "Sync unavailable");
+        if (r.resets) setSyncQuota((q) => (q ? { ...q, remaining: 0, resets: r.resets! } : q));
         return;
       }
-      if (r.followers != null) {
-        setFetchedCounts((c) => ({ ...c, [platform]: r.followers ?? 0 }));
-        toast.success(`${platform}: ${r.followers.toLocaleString()} followers`);
-      } else {
-        toast.error("No follower count returned");
+      if (typeof r.remaining === "number") {
+        setSyncQuota((q) => (q ? { ...q, remaining: r.remaining!, resets: r.resets ?? q.resets } : q));
       }
+
+      const parts: string[] = [];
+      const counts: { instagram?: number; tiktok?: number; youtube?: number } = {};
+      (["instagram", "tiktok", "youtube"] as const).forEach((p) => {
+        const res = r[p];
+        if (res && res.ok && res.followers != null) {
+          counts[p] = res.followers;
+          parts.push(`${p}: ${res.followers.toLocaleString()}`);
+        }
+      });
+      if (Object.keys(counts).length) setFetchedCounts((c) => ({ ...c, ...counts }));
+
+      let mismatch: string | null = null;
+      const sp = r.spotify;
+      if (sp && sp.ok) {
+        if (sp.followers != null) setForm((f) => ({ ...f, total_followers: String(sp.followers ?? "") }));
+        if (sp.monthly_listeners != null) {
+          setForm((f) => ({ ...f, monthly_streams: String(sp.monthly_listeners ?? "") }));
+          parts.push(`${sp.monthly_listeners.toLocaleString()} monthly listeners`);
+        }
+        if (sp.total_streams != null) {
+          setForm((f) => ({ ...f, total_streams: String(sp.total_streams ?? "") }));
+          parts.push(`${sp.total_streams.toLocaleString()} total streams`);
+        }
+        if (sp.name && !isNameMatch(sp.name, candidateNames())) {
+          mismatch = `Spotify artist "${sp.name}" does not match profile name.`;
+        }
+      }
+      const am = r.apple;
+      if (am && am.ok && am.name && !isNameMatch(am.name, candidateNames())) {
+        mismatch = mismatch ?? `Apple Music artist "${am.name}" does not match profile name.`;
+      }
+      if (mismatch) {
+        setForm((f) => ({ ...f, flagged_streaming_mismatch: true, flagged_streaming_reason: mismatch! }));
+        setMismatchWarning(MISMATCH_MESSAGE);
+      } else {
+        setMismatchWarning(null);
+      }
+
+      toast.success(parts.length ? `Synced — ${parts.join(" · ")}` : "Sync finished, but no numbers were returned");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Sync failed");
     } finally {
       setFetching(null);
     }
   }
+
 
   function applyTotalFromFetched() {
     const total =
