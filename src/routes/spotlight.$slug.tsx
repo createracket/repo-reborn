@@ -96,9 +96,19 @@ function SpotlightPage() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
   const [page, setPage] = useState<PartnerPage | null>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
+  const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
   const [registered, setRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [gate, setGate] = useState<{
+    headline: string;
+    subtitle: string | null;
+    header_image_url: string | null;
+    code_label: string;
+  } | null>(null);
+  const [gateEmail, setGateEmail] = useState("");
+  const [gateCode, setGateCode] = useState("");
+  const [gateBusy, setGateBusy] = useState(false);
+  const [gateError, setGateError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -109,7 +119,18 @@ function SpotlightPage() {
         .eq("published", true)
         .maybeSingle();
       if (error || !data) {
-        setStatus("missing");
+        const info = await getSpotlightGate({ data: { slug } });
+        if (info.gated) {
+          setGate({
+            headline: info.headline,
+            subtitle: info.subtitle,
+            header_image_url: info.header_image_url,
+            code_label: info.code_label,
+          });
+          setStatus("gated");
+        } else {
+          setStatus("missing");
+        }
         return;
       }
       const p = data as unknown as PartnerPage;
