@@ -923,7 +923,7 @@ function RosterDetailView({
   const linkableBriefs = briefs;
 
   return (
-    <RosterSlugContext.Provider value={roster.slug}>
+    <RosterSlugContext.Provider value={roster.slug ?? roster.id}>
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
 
       <div className="space-y-6">
