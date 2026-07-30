@@ -173,7 +173,12 @@ export function OnboardingForm({ flow }: { flow: Flow }) {
       }
       setShowIntro(false);
     } catch (err: any) {
-      toast.error(err?.message || "Couldn't process that. Try again or skip.");
+      const msg = String(err?.message || "");
+      if (/unauthor/i.test(msg) || /401/.test(msg)) {
+        toast.error("Sign in to use auto-fill — or fill the form in manually below.");
+      } else {
+        toast.error(msg || "Couldn't process that. Try again or skip.");
+      }
     } finally {
       setIntroLoading(false);
     }
