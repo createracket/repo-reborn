@@ -110,8 +110,30 @@ export function ExampleOpportunitiesAdmin() {
         ) : (
           <>
             {rows.map((row) => (
-              <div key={row.id} className="rounded-xl border border-border/60 bg-card p-4 space-y-3">
-                <div className="flex flex-wrap gap-4">
+              <div key={row.id} className="rounded-xl border border-border/60 bg-card">
+                <button
+                  type="button"
+                  onClick={() => toggle(row.id)}
+                  className="flex w-full items-center gap-3 p-4 text-left"
+                >
+                  <div
+                    className="shrink-0 overflow-hidden rounded border border-border/60 bg-muted/40"
+                    style={{ width: 56, aspectRatio: "16 / 9" }}
+                  >
+                    {row.image_url ? <img src={row.image_url} alt="" className="size-full object-cover" /> : null}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{row.title || "Untitled example"}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {[row.location, row.description].filter(Boolean).join(" · ") || "No details yet"}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground">#{row.position}</span>
+                  {open.has(row.id) ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+                {open.has(row.id) ? (
+                <div className="flex flex-wrap gap-4 border-t border-border/60 p-4">
+
                   <div className="w-32 shrink-0 space-y-2">
                     <div
                       className="overflow-hidden rounded-md border border-border/60 bg-muted/40"
