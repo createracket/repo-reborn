@@ -1020,6 +1020,42 @@ export type Database = {
         }
         Relationships: []
       }
+      roster_access_leads: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          roster_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          roster_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          roster_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roster_access_leads_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
+            referencedRelation: "public_rosters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roster_access_leads_roster_id_fkey"
+            columns: ["roster_id"]
+            isOneToOne: false
+            referencedRelation: "rosters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roster_items: {
         Row: {
           apple_music_followers: number | null
@@ -1203,6 +1239,8 @@ export type Database = {
       }
       rosters: {
         Row: {
+          access_code: string | null
+          access_code_label: string | null
           allow_multi_category: boolean
           brand_email: string | null
           brief_id: string | null
@@ -1224,6 +1262,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_code?: string | null
+          access_code_label?: string | null
           allow_multi_category?: boolean
           brand_email?: string | null
           brief_id?: string | null
@@ -1245,6 +1285,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_code?: string | null
+          access_code_label?: string | null
           allow_multi_category?: boolean
           brand_email?: string | null
           brief_id?: string | null

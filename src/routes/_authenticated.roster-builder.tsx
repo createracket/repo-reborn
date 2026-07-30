@@ -100,6 +100,8 @@ type Roster = {
   categories: string[] | null;
   custom_links: Array<{ label: string; url: string }> | null;
   allow_multi_category: boolean;
+  access_code: string | null;
+  access_code_label: string | null;
 };
 
 function itemCategories(item: { categories?: string[] | null; category: string | null }): string[] {
@@ -693,6 +695,9 @@ function RosterDetailView({
   })();
   const [customLinks, setCustomLinks] = useState(initialLinks);
   const [savingMeta, setSavingMeta] = useState(false);
+  const [accessCode, setAccessCode] = useState(roster.access_code ?? "");
+  const [accessCodeLabel, setAccessCodeLabel] = useState(roster.access_code_label ?? "Access code");
+  const [savingAccess, setSavingAccess] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [newCategory, setNewCategory] = useState("");
@@ -708,6 +713,8 @@ function RosterDetailView({
     setTitle(roster.title);
     setDescription(roster.description ?? "");
     setHeaderImageUrl(roster.header_image_url ?? "");
+    setAccessCode(roster.access_code ?? "");
+    setAccessCodeLabel(roster.access_code_label ?? "Access code");
     setEstEngagement(
       roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
     );
@@ -833,6 +840,25 @@ function RosterDetailView({
       toast.error(error.message);
       return;
     }
+    onChanged();
+  }
+
+  async function saveAccessCode() {
+    setSavingAccess(true);
+    const code = accessCode.trim();
+    const { error } = await supabase
+      .from("rosters")
+      .update({
+        access_code: code || null,
+        access_code_label: code ? accessCodeLabel.trim() || "Access code" : null,
+      } as never)
+      .eq("id", roster.id);
+    setSavingAccess(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(code ? "Access code saved" : "Access code removed");
     onChanged();
   }
 
@@ -1187,6 +1213,38 @@ function RosterDetailView({
                 checked={roster.allow_multi_category}
                 onCheckedChange={toggleAllowMultiCategory}
               />
+            </div>
+            <div className="rounded-lg border border-border/60 p-3">
+              <div className="text-sm font-medium">Private access code</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Set a code to share this roster with leads who don't have an account. The page stays hidden
+                (and never indexed) until they enter their email and this code. Leave blank for a normal public link.
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="access-code-label" className="text-xs">Code name</Label>
+                  <Input
+                    id="access-code-label"
+                    value={accessCodeLabel}
+                    onChange={(e) => setAccessCodeLabel(e.target.value)}
+                    placeholder="Access code"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="access-code" className="text-xs">Code</Label>
+                  <Input
+                    id="access-code"
+                    value={accessCode}
+                    onChange={(e) => setAccessCode(e.target.value)}
+                    placeholder="e.g. MULBERRY26"
+                  />
+                </div>
+              </div>
+              <div className="mt-3 flex justify-end">
+                <Button type="button" variant="outline" size="sm" onClick={saveAccessCode} disabled={savingAccess}>
+                  {savingAccess ? "Saving…" : "Save access code"}
+                </Button>
+              </div>
             </div>
             <div className="flex justify-end">
               <Button onClick={saveMeta} disabled={savingMeta || !title.trim()}>
