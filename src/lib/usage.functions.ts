@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 /** Current signed-in user's monthly allowances. */
 export const getMyUsage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({}).passthrough().parse(input ?? {}))
   .handler(async ({ context }) => {
     const { getQuota } = await import("./usage.server");
     const actions = ["profile_sync", "vibe_intro", "voice_note"] as const;
