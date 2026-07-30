@@ -752,6 +752,86 @@ async function appleMusicArtistCore(data: { url: string }): Promise<AppleMusicAr
         error: e instanceof Error ? e.message : "Failed to reach Apple Music.",
       };
     }
+  }
+}
+
+export const scrapeAppleMusicArtist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ url: z.string().min(1) }).parse)
+  .handler(async ({ data }): Promise<AppleMusicArtistResult> => appleMusicArtistCore(data));
+
+// ============================================================
+// Metered member profile sync (1 run / month for non-admins)
+// ============================================================
+
+const profileSyncInput = z.object({
+  instagram_url: z.string().nullish(),
+  tiktok_url: z.string().nullish(),
+  youtube_url: z.string().nullish(),
+  spotify_url: z.string().nullish(),
+  apple_music_url: z.string().nullish(),
+});
+
+export type ProfileSyncResult = {
+  ok: boolean;
+  error?: string;
+  remaining?: number;
+  resets?: string;
+  instagram?: ProfileResult | null;
+  tiktok?: ProfileResult | null;
+  youtube?: ProfileResult | null;
+  spotify?: SpotifyArtistResult | null;
+  apple?: AppleMusicArtistResult | null;
+};
+
+async function scrapeProfileByUrl(url: string): Promise<ProfileResult> {
+  const platform = detectProfilePlatform(url);
+  if (platform === "instagram") return scrapeInstagramProfile(url);
+  if (platform === "tiktok") return scrapeTikTokProfile(url);
+  if (platform === "youtube") return scrapeYouTubeChannel(url);
+  return { ok: false, error: "Unsupported profile URL." };
+}
+
+/**
+ * Runs every connected platform in one metered call so a member spends at most
+ * one monthly sync allowance per refresh. Admins are exempt.
+ */
+export const runProfileSync = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => profileSyncInput.parse(input ?? {}))
+  .handler(async ({ data, context }): Promise<ProfileSyncResult> => {
+    const { assertQuota, consumeQuota, getQuota, QuotaError } = await import("./usage.server");
+    try {
+      await assertQuota(context.userId, "profile_sync");
+    } catch (e) {
+      if (e instanceof QuotaError) {
+        const q = await getQuota(context.userId, "profile_sync");
+        return { ok: false, error: e.message, remaining: 0, resets: q.resets };
+      }
+      throw e;
+    }
+
+    const [instagram, tiktok, youtube, spotify, apple] = await Promise.all([
+      data.instagram_url ? scrapeProfileByUrl(data.instagram_url) : Promise.resolve(null),
+      data.tiktok_url ? scrapeProfileByUrl(data.tiktok_url) : Promise.resolve(null),
+      data.youtube_url ? scrapeProfileByUrl(data.youtube_url) : Promise.resolve(null),
+      data.spotify_url ? spotifyArtistCore({ url: data.spotify_url }) : Promise.resolve(null),
+      data.apple_music_url ? appleMusicArtistCore({ url: data.apple_music_url }) : Promise.resolve(null),
+    ]);
+
+    await consumeQuota(context.userId, "profile_sync");
+    const q = await getQuota(context.userId, "profile_sync");
+    return {
+      ok: true,
+      remaining: q.admin ? -1 : q.remaining,
+      resets: q.resets,
+      instagram,
+      tiktok,
+      youtube,
+      spotify,
+      apple,
+    };
   });
+
 
 
