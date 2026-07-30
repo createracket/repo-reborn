@@ -577,10 +577,8 @@ async function fetchKworbTotalStreams(artistId: string): Promise<number | null> 
  * Scrape Spotify artist metrics: followers (Web API), monthly listeners
  * (open.spotify.com), and estimated total streams (Kworb).
  */
-export const scrapeSpotifyArtist = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ url: z.string().min(1) }).parse)
-  .handler(async ({ data }): Promise<SpotifyArtistResult> => {
+async function spotifyArtistCore(data: { url: string }): Promise<SpotifyArtistResult> {
+  {
     const artistId = extractSpotifyArtistId(data.url);
     if (!artistId)
       return { ok: false, error: "Couldn't parse Spotify artist ID from URL." };
