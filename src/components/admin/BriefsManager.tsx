@@ -248,9 +248,10 @@ function UnifiedBriefs({
     }
   }
 
-  return (
-    <div className="space-y-3">
-      {rows.map((b) => {
+  const activeRows = rows.filter((b) => normalizeStatus(b.status) !== "closed");
+  const closedRows = rows.filter((b) => normalizeStatus(b.status) === "closed");
+
+  const renderRow = (b: UnifiedBrief) => {
         const isUser = b.source === "user";
         const lead = !isUser ? (b as LeadBrief & { source: "lead" }) : null;
         const camp = isUser ? (b as CampaignBrief & { source: "user" }) : null;
