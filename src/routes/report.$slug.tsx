@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCount, formatPct, type Platform } from "@/lib/youtube-utils";
+import { PostThumb } from "@/components/reports/PostThumb";
+
 
 type PublicReport = {
   id: string;
