@@ -589,12 +589,7 @@ function EditProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="am">Apple Music</Label>
-                <div className="flex gap-1.5">
-                  <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
-                  <Button type="button" size="sm" variant="outline" onClick={syncApple} disabled={fetching === "apple"} title="Auto-sync Apple Music artist">
-                    <RefreshCw className={`size-3.5 ${fetching === "apple" ? "animate-spin" : ""}`} />
-                  </Button>
-                </div>
+                <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
                 <p className="text-[11px] text-muted-foreground">Verifies the artist name against your profile.</p>
               </div>
               {mismatchWarning ? (
