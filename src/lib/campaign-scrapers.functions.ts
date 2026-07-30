@@ -631,7 +631,13 @@ async function spotifyArtistCore(data: { url: string }): Promise<SpotifyArtistRe
       total_streams,
       avatar_url: await mirrorOrKeep(avatar_url, "spotify"),
     };
-  });
+  }
+}
+
+export const scrapeSpotifyArtist = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ url: z.string().min(1) }).parse)
+  .handler(async ({ data }): Promise<SpotifyArtistResult> => spotifyArtistCore(data));
 
 // ============================================================
 // Apple Music artist scraping
