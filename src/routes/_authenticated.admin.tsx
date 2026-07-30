@@ -237,6 +237,7 @@ function AdminPage() {
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="faqs">FAQs</TabsTrigger>
             <TabsTrigger value="sound-board">Sound Board</TabsTrigger>
+            <TabsTrigger value="usage">Usage</TabsTrigger>
           </TabsList>
 
 
