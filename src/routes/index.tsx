@@ -501,9 +501,58 @@ function EcosystemCard({
 }
 
 function VideoMarquee() {
+  const isMobile = useIsMobile();
   const [hovered, setHovered] = useState<number | null>(null);
+  const [armed, setArmed] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
-  const items = [...homeVideos, ...homeVideos];
+
+  const clips = isMobile ? homeVideos.slice(0, 6) : homeVideos;
+  const items = [...clips, ...clips];
+
+  // Only start loading/playing once the marquee is near the viewport.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setArmed(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setArmed(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // Attach sources + play only for clips currently on screen.
+  useEffect(() => {
+    if (!armed) return;
+    if (typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const v = entry.target as HTMLVideoElement;
+          if (entry.isIntersecting) {
+            const src = v.dataset.src;
+            if (src && !v.src) v.src = src;
+            v.play().catch(() => {});
+          } else {
+            v.pause();
+          }
+        }
+      },
+      { rootMargin: "100px" },
+    );
+    videoRefs.current.forEach((v) => v && io.observe(v));
+    return () => io.disconnect();
+  }, [armed, items.length]);
 
   function handleEnter(i: number) {
     setHovered(i);
@@ -521,6 +570,7 @@ function VideoMarquee() {
 
   return (
     <div
+      ref={containerRef}
       className="flex w-max gap-4 animate-marquee"
       style={{
         animationDuration: "80s",
@@ -532,19 +582,18 @@ function VideoMarquee() {
           key={i}
           onMouseEnter={() => handleEnter(i)}
           onMouseLeave={handleLeave}
-          className="w-[200px] shrink-0 overflow-hidden rounded-2xl bg-black/40 shadow-lg sm:w-[240px] md:w-[280px]"
+          className="w-[200px] shrink-0 overflow-hidden rounded-2xl shadow-lg sm:w-[240px] md:w-[280px]"
         >
-          <div className="aspect-[9/16]">
+          <div className="aspect-[9/16] bg-[linear-gradient(135deg,#5C37D0_0%,#FF6FB5_100%)]">
             <video
               ref={(el) => {
                 videoRefs.current[i] = el;
               }}
-              src={v.url}
-              autoPlay
+              data-src={v.url}
               muted
               loop
               playsInline
-              preload="metadata"
+              preload="none"
               className="h-full w-full object-cover"
             />
           </div>
@@ -553,6 +602,7 @@ function VideoMarquee() {
     </div>
   );
 }
+
 
 
 
