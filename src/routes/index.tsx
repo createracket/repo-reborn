@@ -511,6 +511,7 @@ function VideoMarquee() {
   const isMobile = useIsMobile();
   const [hovered, setHovered] = useState<number | null>(null);
   const [armed, setArmed] = useState(false);
+  const [ready, setReady] = useState<Record<number, boolean>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
 
@@ -532,7 +533,7 @@ function VideoMarquee() {
           io.disconnect();
         }
       },
-      { rootMargin: "200px" },
+      { rootMargin: "600px" },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -555,7 +556,7 @@ function VideoMarquee() {
           }
         }
       },
-      { rootMargin: "100px" },
+      { rootMargin: "600px" },
     );
     videoRefs.current.forEach((v) => v && io.observe(v));
     return () => io.disconnect();
@@ -584,31 +585,46 @@ function VideoMarquee() {
         animationPlayState: hovered !== null ? "paused" : "running",
       }}
     >
-      {items.map((v, i) => (
-        <div
-          key={i}
-          onMouseEnter={() => handleEnter(i)}
-          onMouseLeave={handleLeave}
-          className="w-[200px] shrink-0 overflow-hidden rounded-2xl shadow-lg sm:w-[240px] md:w-[280px]"
-        >
-          <div className="aspect-[9/16] bg-[linear-gradient(135deg,#5C37D0_0%,#FF6FB5_100%)]">
-            <video
-              ref={(el) => {
-                videoRefs.current[i] = el;
-              }}
-              data-src={v.url}
-              muted
-              loop
-              playsInline
-              preload="none"
-              className="h-full w-full object-cover"
-            />
+      {items.map((v, i) => {
+        // Eager-load the first couple of clips so something is visibly playing fast.
+        const eager = i < 2;
+        return (
+          <div
+            key={i}
+            onMouseEnter={() => handleEnter(i)}
+            onMouseLeave={handleLeave}
+            className="w-[200px] shrink-0 overflow-hidden rounded-2xl shadow-lg sm:w-[240px] md:w-[280px]"
+          >
+            <div className="relative aspect-[9/16] bg-white/5">
+              <div
+                className={`absolute inset-0 bg-[linear-gradient(135deg,#5C37D0_0%,#FF6FB5_100%)] transition-opacity duration-500 ${
+                  ready[i] ? "opacity-0" : "opacity-40 animate-pulse"
+                }`}
+              />
+              <video
+                ref={(el) => {
+                  videoRefs.current[i] = el;
+                }}
+                src={eager ? v.url : undefined}
+                data-src={v.url}
+                muted
+                loop
+                autoPlay={eager}
+                playsInline
+                preload={eager ? "auto" : "none"}
+                onLoadedData={() => setReady((r) => (r[i] ? r : { ...r, [i]: true }))}
+                className={`relative h-full w-full object-cover transition-opacity duration-500 ${
+                  ready[i] ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
+
 
 
 
