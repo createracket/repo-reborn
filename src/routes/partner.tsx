@@ -27,6 +27,7 @@ type Tier = {
   tag: string;
   tagline: string;
   desc: string;
+  titleBg: string;
 };
 
 const TIERS: Tier[] = [
