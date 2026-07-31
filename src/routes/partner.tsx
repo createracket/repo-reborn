@@ -88,11 +88,20 @@ function PartnerPage() {
           <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
             {TIERS.map((t) => (
               <div key={t.label} className="flex flex-col gap-3">
+                <div
+                  className="rounded-2xl px-3 py-2.5 text-center md:py-3"
+                  style={{ background: t.titleBg }}
+                >
+                  <span className="font-display text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)] md:text-3xl">
+                    {t.label}
+                  </span>
+                </div>
                 <div className="flex min-h-[72px] items-center justify-center rounded-2xl bg-card/50 px-4 py-4 md:min-h-[92px]">
                   <p className="text-center text-sm font-medium leading-snug text-foreground md:text-base">
                     {t.tagline}
                   </p>
                 </div>
+
                 <div className="flex flex-1 flex-col rounded-2xl bg-card/50 p-4 md:p-5">
                   <div className="flex items-baseline justify-between gap-2">
                     <h3 className="font-display text-xl font-bold text-white md:text-2xl">
