@@ -27,6 +27,7 @@ type Tier = {
   tag: string;
   tagline: string;
   desc: string;
+  titleBg: string;
 };
 
 const TIERS: Tier[] = [
@@ -35,26 +36,31 @@ const TIERS: Tier[] = [
     tag: "FREE",
     tagline: "Free to vibe check and submit your first brief",
     desc: "Take our vibe check to start finding future collaborators and submit your first brief for free. No cost, no commitment.",
+    titleBg: "linear-gradient(90deg, #8b5cf6 0%, #c084fc 45%, #f4b8c4 100%)",
   },
   {
     label: "Seed",
     tag: "LOW-RISK, EASY ENTRY",
     tagline: "Putting your product in the right hands",
     desc: "Gift awesome products and seed new campaign assets with relevant creators - reaching musicians, fans, and cultural tastemakers.",
+    titleBg: "linear-gradient(90deg, #5C37D0 0%, #6d43e8 100%)",
   },
   {
     label: "Endorse",
     tag: "CAMPAIGN PLAN",
     tagline: "Get priority for highly targeted campaigns",
     desc: "Build a bespoke roster for a campaign or ambassador program - leveraging lightweight agreements with set deliverables.",
+    titleBg: "linear-gradient(90deg, #a8cc3d 0%, #bada55 100%)",
   },
   {
     label: "Partner",
     tag: "BESPOKE",
     tagline: "Retained programmes for sustainable results",
     desc: "Custom collabs with tailored campaign tools and full account management - priority matching and paid media support.",
+    titleBg: "linear-gradient(90deg, #e8a8ac 0%, #f2c4c4 100%)",
   },
 ];
+
 
 function PartnerPage() {
   return (
@@ -82,11 +88,20 @@ function PartnerPage() {
           <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
             {TIERS.map((t) => (
               <div key={t.label} className="flex flex-col gap-3">
+                <div
+                  className="rounded-2xl px-3 py-2.5 text-center md:py-3"
+                  style={{ background: t.titleBg }}
+                >
+                  <span className="font-display text-xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)] md:text-3xl">
+                    {t.label}
+                  </span>
+                </div>
                 <div className="flex min-h-[72px] items-center justify-center rounded-2xl bg-card/50 px-4 py-4 md:min-h-[92px]">
                   <p className="text-center text-sm font-medium leading-snug text-foreground md:text-base">
                     {t.tagline}
                   </p>
                 </div>
+
                 <div className="flex flex-1 flex-col rounded-2xl bg-card/50 p-4 md:p-5">
                   <div className="flex items-baseline justify-between gap-2">
                     <h3 className="font-display text-xl font-bold text-white md:text-2xl">
