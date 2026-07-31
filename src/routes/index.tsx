@@ -5,6 +5,7 @@ import { Users, Handshake, Link2, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { HomeFaqs } from "@/components/site/HomeFaqs";
 import createLogoTransparent from "@/assets/CR-Logo-Half-Colour.svg.asset.json";
 import racketLogoIconLight from "@/assets/CR-Logo-Icon-Light.png.asset.json";
