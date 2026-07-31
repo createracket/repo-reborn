@@ -385,8 +385,11 @@ function Home() {
                   <img
                     src={communityMap.url}
                     alt="Map of the Create Racket global community"
+                    loading="lazy"
+                    decoding="async"
                     className="block w-full"
                   />
+
                 </div>
               </motion.div>
 
