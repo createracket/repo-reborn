@@ -9,105 +9,59 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as ResultsRouteImport } from './routes/results'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PartnerRouteImport } from './routes/partner'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as FanSignupRouteImport } from './routes/fan-signup'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as ConnectRouteImport } from './routes/connect'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
-import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
-import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
-import { Route as USlugRouteImport } from './routes/u.$slug'
-import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
-import { Route as RosterSlugRouteImport } from './routes/roster.$slug'
-import { Route as ReportSlugRouteImport } from './routes/report.$slug'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
-import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
-import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authenticated.roster-builder'
-import { Route as AuthenticatedRacketDeskRouteImport } from './routes/_authenticated.racket-desk'
-import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
-import { Route as AuthenticatedPricingRouteImport } from './routes/_authenticated.pricing'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
-import { Route as AuthenticatedCampaignReportsRouteImport } from './routes/_authenticated.campaign-reports'
-import { Route as AuthenticatedCampaignBuilderRouteImport } from './routes/_authenticated.campaign-builder'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as ConnectRouteImport } from './routes/connect'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FanSignupRouteImport } from './routes/fan-signup'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PartnerRouteImport } from './routes/partner'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ResultsRouteImport } from './routes/results'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
+import { Route as AuthenticatedCampaignBuilderRouteImport } from './routes/_authenticated.campaign-builder'
+import { Route as AuthenticatedCampaignReportsRouteImport } from './routes/_authenticated.campaign-reports'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedPricingRouteImport } from './routes/_authenticated.pricing'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
+import { Route as AuthenticatedRacketDeskRouteImport } from './routes/_authenticated.racket-desk'
+import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authenticated.roster-builder'
+import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ReportSlugRouteImport } from './routes/report.$slug'
+import { Route as RosterSlugRouteImport } from './routes/roster.$slug'
+import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
+import { Route as USlugRouteImport } from './routes/u.$slug'
+import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
+import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
+import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
 import { Route as AuthenticatedRacketDeskIndexRouteImport } from './routes/_authenticated.racket-desk.index'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
-import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/public/transcribe-voice-note'
-import { Route as ApiPublicTrackPageviewRouteImport } from './routes/api/public/track-pageview'
-import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact-submit'
-import { Route as AuthenticatedRacketDeskProfilesRouteImport } from './routes/_authenticated.racket-desk.profiles'
-import { Route as AuthenticatedRacketDeskFanIntelRouteImport } from './routes/_authenticated.racket-desk.fan-intel'
 import { Route as AuthenticatedRacketDeskDemoRouteImport } from './routes/_authenticated.racket-desk.demo'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as AuthenticatedRacketDeskFanIntelRouteImport } from './routes/_authenticated.racket-desk.fan-intel'
+import { Route as AuthenticatedRacketDeskProfilesRouteImport } from './routes/_authenticated.racket-desk.profiles'
+import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact-submit'
+import { Route as ApiPublicTrackPageviewRouteImport } from './routes/api/public/track-pageview'
+import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/public/transcribe-voice-note'
+import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResultsRoute = ResultsRouteImport.update({
-  id: '/results',
-  path: '/results',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PartnerRoute = PartnerRouteImport.update({
-  id: '/partner',
-  path: '/partner',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FanSignupRoute = FanSignupRouteImport.update({
-  id: '/fan-signup',
-  path: '/fan-signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConnectRoute = ConnectRouteImport.update({
@@ -115,74 +69,81 @@ const ConnectRoute = ConnectRouteImport.update({
   path: '/connect',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
-  id: '/_authenticated',
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const FanSignupRoute = FanSignupRouteImport.update({
+  id: '/fan-signup',
+  path: '/fan-signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VibeCheckIndexRoute = VibeCheckIndexRouteImport.update({
-  id: '/vibe-check/',
-  path: '/vibe-check/',
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VibeCheckMusicianRoute = VibeCheckMusicianRouteImport.update({
-  id: '/vibe-check/musician',
-  path: '/vibe-check/musician',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VibeCheckBrandRoute = VibeCheckBrandRouteImport.update({
-  id: '/vibe-check/brand',
-  path: '/vibe-check/brand',
+const PartnerRoute = PartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
   getParentRoute: () => rootRouteImport,
 } as any)
-const USlugRoute = USlugRouteImport.update({
-  id: '/u/$slug',
-  path: '/u/$slug',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SpotlightSlugRoute = SpotlightSlugRouteImport.update({
-  id: '/spotlight/$slug',
-  path: '/spotlight/$slug',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RosterSlugRoute = RosterSlugRouteImport.update({
-  id: '/roster/$slug',
-  path: '/roster/$slug',
+const ResultsRoute = ResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReportSlugRoute = ReportSlugRouteImport.update({
-  id: '/report/$slug',
-  path: '/report/$slug',
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BrandsHowItWorksRoute = BrandsHowItWorksRouteImport.update({
-  id: '/brands/how-it-works',
-  path: '/brands/how-it-works',
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRosterBuilderRoute =
-  AuthenticatedRosterBuilderRouteImport.update({
-    id: '/roster-builder',
-    path: '/roster-builder',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedRacketDeskRoute = AuthenticatedRacketDeskRouteImport.update({
-  id: '/racket-desk',
-  path: '/racket-desk',
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
+const AuthenticatedCampaignBuilderRoute =
+  AuthenticatedCampaignBuilderRouteImport.update({
+    id: '/campaign-builder',
+    path: '/campaign-builder',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCampaignReportsRoute =
+  AuthenticatedCampaignReportsRouteImport.update({
+    id: '/campaign-reports',
+    path: '/campaign-reports',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedPricingRoute = AuthenticatedPricingRouteImport.update({
@@ -190,70 +151,71 @@ const AuthenticatedPricingRoute = AuthenticatedPricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedCampaignReportsRoute =
-  AuthenticatedCampaignReportsRouteImport.update({
-    id: '/campaign-reports',
-    path: '/campaign-reports',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedCampaignBuilderRoute =
-  AuthenticatedCampaignBuilderRouteImport.update({
-    id: '/campaign-builder',
-    path: '/campaign-builder',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const AuthenticatedRacketDeskRoute = AuthenticatedRacketDeskRouteImport.update({
+  id: '/racket-desk',
+  path: '/racket-desk',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedRosterBuilderRoute =
+  AuthenticatedRosterBuilderRouteImport.update({
+    id: '/roster-builder',
+    path: '/roster-builder',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const BrandsHowItWorksRoute = BrandsHowItWorksRouteImport.update({
+  id: '/brands/how-it-works',
+  path: '/brands/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportSlugRoute = ReportSlugRouteImport.update({
+  id: '/report/$slug',
+  path: '/report/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RosterSlugRoute = RosterSlugRouteImport.update({
+  id: '/roster/$slug',
+  path: '/roster/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SpotlightSlugRoute = SpotlightSlugRouteImport.update({
+  id: '/spotlight/$slug',
+  path: '/spotlight/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const USlugRoute = USlugRouteImport.update({
+  id: '/u/$slug',
+  path: '/u/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VibeCheckIndexRoute = VibeCheckIndexRouteImport.update({
+  id: '/vibe-check/',
+  path: '/vibe-check/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VibeCheckBrandRoute = VibeCheckBrandRouteImport.update({
+  id: '/vibe-check/brand',
+  path: '/vibe-check/brand',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VibeCheckMusicianRoute = VibeCheckMusicianRouteImport.update({
+  id: '/vibe-check/musician',
+  path: '/vibe-check/musician',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRacketDeskIndexRoute =
   AuthenticatedRacketDeskIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => AuthenticatedRacketDeskRoute,
-  } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicWaitlistJoinRoute = ApiPublicWaitlistJoinRouteImport.update({
-  id: '/api/public/waitlist-join',
-  path: '/api/public/waitlist-join',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicTranscribeVoiceNoteRoute =
-  ApiPublicTranscribeVoiceNoteRouteImport.update({
-    id: '/api/public/transcribe-voice-note',
-    path: '/api/public/transcribe-voice-note',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicTrackPageviewRoute = ApiPublicTrackPageviewRouteImport.update({
-  id: '/api/public/track-pageview',
-  path: '/api/public/track-pageview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicContactSubmitRoute = ApiPublicContactSubmitRouteImport.update({
-  id: '/api/public/contact-submit',
-  path: '/api/public/contact-submit',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRacketDeskProfilesRoute =
-  AuthenticatedRacketDeskProfilesRouteImport.update({
-    id: '/profiles',
-    path: '/profiles',
-    getParentRoute: () => AuthenticatedRacketDeskRoute,
-  } as any)
-const AuthenticatedRacketDeskFanIntelRoute =
-  AuthenticatedRacketDeskFanIntelRouteImport.update({
-    id: '/fan-intel',
-    path: '/fan-intel',
     getParentRoute: () => AuthenticatedRacketDeskRoute,
   } as any)
 const AuthenticatedRacketDeskDemoRoute =
@@ -262,10 +224,58 @@ const AuthenticatedRacketDeskDemoRoute =
     path: '/demo',
     getParentRoute: () => AuthenticatedRacketDeskRoute,
   } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
+const AuthenticatedRacketDeskFanIntelRoute =
+  AuthenticatedRacketDeskFanIntelRouteImport.update({
+    id: '/fan-intel',
+    path: '/fan-intel',
+    getParentRoute: () => AuthenticatedRacketDeskRoute,
+  } as any)
+const AuthenticatedRacketDeskProfilesRoute =
+  AuthenticatedRacketDeskProfilesRouteImport.update({
+    id: '/profiles',
+    path: '/profiles',
+    getParentRoute: () => AuthenticatedRacketDeskRoute,
+  } as any)
+const ApiPublicContactSubmitRoute = ApiPublicContactSubmitRouteImport.update({
+  id: '/api/public/contact-submit',
+  path: '/api/public/contact-submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicTrackPageviewRoute = ApiPublicTrackPageviewRouteImport.update({
+  id: '/api/public/track-pageview',
+  path: '/api/public/track-pageview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicTranscribeVoiceNoteRoute =
+  ApiPublicTranscribeVoiceNoteRouteImport.update({
+    id: '/api/public/transcribe-voice-note',
+    path: '/api/public/transcribe-voice-note',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicWaitlistJoinRoute = ApiPublicWaitlistJoinRouteImport.update({
+  id: '/api/public/waitlist-join',
+  path: '/api/public/waitlist-join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
 const LovableEmailTransactionalPreviewRoute =
@@ -274,22 +284,12 @@ const LovableEmailTransactionalPreviewRoute =
     path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -609,88 +609,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/results': {
-      id: '/results'
-      path: '/results'
-      fullPath: '/results'
-      preLoaderRoute: typeof ResultsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/partner': {
-      id: '/partner'
-      path: '/partner'
-      fullPath: '/partner'
-      preLoaderRoute: typeof PartnerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fan-signup': {
-      id: '/fan-signup'
-      path: '/fan-signup'
-      fullPath: '/fan-signup'
-      preLoaderRoute: typeof FanSignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/connect': {
-      id: '/connect'
-      path: '/connect'
-      fullPath: '/connect'
-      preLoaderRoute: typeof ConnectRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -700,116 +623,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/connect': {
+      id: '/connect'
+      path: '/connect'
+      fullPath: '/connect'
+      preLoaderRoute: typeof ConnectRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vibe-check/': {
-      id: '/vibe-check/'
-      path: '/vibe-check'
-      fullPath: '/vibe-check/'
-      preLoaderRoute: typeof VibeCheckIndexRouteImport
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vibe-check/musician': {
-      id: '/vibe-check/musician'
-      path: '/vibe-check/musician'
-      fullPath: '/vibe-check/musician'
-      preLoaderRoute: typeof VibeCheckMusicianRouteImport
+    '/fan-signup': {
+      id: '/fan-signup'
+      path: '/fan-signup'
+      fullPath: '/fan-signup'
+      preLoaderRoute: typeof FanSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vibe-check/brand': {
-      id: '/vibe-check/brand'
-      path: '/vibe-check/brand'
-      fullPath: '/vibe-check/brand'
-      preLoaderRoute: typeof VibeCheckBrandRouteImport
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/u/$slug': {
-      id: '/u/$slug'
-      path: '/u/$slug'
-      fullPath: '/u/$slug'
-      preLoaderRoute: typeof USlugRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/spotlight/$slug': {
-      id: '/spotlight/$slug'
-      path: '/spotlight/$slug'
-      fullPath: '/spotlight/$slug'
-      preLoaderRoute: typeof SpotlightSlugRouteImport
+    '/partner': {
+      id: '/partner'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof PartnerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/roster/$slug': {
-      id: '/roster/$slug'
-      path: '/roster/$slug'
-      fullPath: '/roster/$slug'
-      preLoaderRoute: typeof RosterSlugRouteImport
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/report/$slug': {
-      id: '/report/$slug'
-      path: '/report/$slug'
-      fullPath: '/report/$slug'
-      preLoaderRoute: typeof ReportSlugRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+    '/results': {
+      id: '/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof ResultsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/brands/how-it-works': {
-      id: '/brands/how-it-works'
-      path: '/brands/how-it-works'
-      fullPath: '/brands/how-it-works'
-      preLoaderRoute: typeof BrandsHowItWorksRouteImport
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/roster-builder': {
-      id: '/_authenticated/roster-builder'
-      path: '/roster-builder'
-      fullPath: '/roster-builder'
-      preLoaderRoute: typeof AuthenticatedRosterBuilderRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/racket-desk': {
-      id: '/_authenticated/racket-desk'
-      path: '/racket-desk'
-      fullPath: '/racket-desk'
-      preLoaderRoute: typeof AuthenticatedRacketDeskRouteImport
-      parentRoute: typeof AuthenticatedRoute
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/profile': {
-      id: '/_authenticated/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/pricing': {
-      id: '/_authenticated/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof AuthenticatedPricingRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/campaign-reports': {
-      id: '/_authenticated/campaign-reports'
-      path: '/campaign-reports'
-      fullPath: '/campaign-reports'
-      preLoaderRoute: typeof AuthenticatedCampaignReportsRouteImport
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/campaign-builder': {
@@ -819,67 +721,116 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCampaignBuilderRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+    '/_authenticated/campaign-reports': {
+      id: '/_authenticated/campaign-reports'
+      path: '/campaign-reports'
+      fullPath: '/campaign-reports'
+      preLoaderRoute: typeof AuthenticatedCampaignReportsRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/pricing': {
+      id: '/_authenticated/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof AuthenticatedPricingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/racket-desk': {
+      id: '/_authenticated/racket-desk'
+      path: '/racket-desk'
+      fullPath: '/racket-desk'
+      preLoaderRoute: typeof AuthenticatedRacketDeskRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/roster-builder': {
+      id: '/_authenticated/roster-builder'
+      path: '/roster-builder'
+      fullPath: '/roster-builder'
+      preLoaderRoute: typeof AuthenticatedRosterBuilderRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/brands/how-it-works': {
+      id: '/brands/how-it-works'
+      path: '/brands/how-it-works'
+      fullPath: '/brands/how-it-works'
+      preLoaderRoute: typeof BrandsHowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report/$slug': {
+      id: '/report/$slug'
+      path: '/report/$slug'
+      fullPath: '/report/$slug'
+      preLoaderRoute: typeof ReportSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/roster/$slug': {
+      id: '/roster/$slug'
+      path: '/roster/$slug'
+      fullPath: '/roster/$slug'
+      preLoaderRoute: typeof RosterSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/spotlight/$slug': {
+      id: '/spotlight/$slug'
+      path: '/spotlight/$slug'
+      fullPath: '/spotlight/$slug'
+      preLoaderRoute: typeof SpotlightSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/$slug': {
+      id: '/u/$slug'
+      path: '/u/$slug'
+      fullPath: '/u/$slug'
+      preLoaderRoute: typeof USlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vibe-check/': {
+      id: '/vibe-check/'
+      path: '/vibe-check'
+      fullPath: '/vibe-check/'
+      preLoaderRoute: typeof VibeCheckIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vibe-check/brand': {
+      id: '/vibe-check/brand'
+      path: '/vibe-check/brand'
+      fullPath: '/vibe-check/brand'
+      preLoaderRoute: typeof VibeCheckBrandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vibe-check/musician': {
+      id: '/vibe-check/musician'
+      path: '/vibe-check/musician'
+      fullPath: '/vibe-check/musician'
+      preLoaderRoute: typeof VibeCheckMusicianRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/racket-desk/': {
       id: '/_authenticated/racket-desk/'
       path: '/'
       fullPath: '/racket-desk/'
       preLoaderRoute: typeof AuthenticatedRacketDeskIndexRouteImport
-      parentRoute: typeof AuthenticatedRacketDeskRoute
-    }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/waitlist-join': {
-      id: '/api/public/waitlist-join'
-      path: '/api/public/waitlist-join'
-      fullPath: '/api/public/waitlist-join'
-      preLoaderRoute: typeof ApiPublicWaitlistJoinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/transcribe-voice-note': {
-      id: '/api/public/transcribe-voice-note'
-      path: '/api/public/transcribe-voice-note'
-      fullPath: '/api/public/transcribe-voice-note'
-      preLoaderRoute: typeof ApiPublicTranscribeVoiceNoteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/track-pageview': {
-      id: '/api/public/track-pageview'
-      path: '/api/public/track-pageview'
-      fullPath: '/api/public/track-pageview'
-      preLoaderRoute: typeof ApiPublicTrackPageviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/contact-submit': {
-      id: '/api/public/contact-submit'
-      path: '/api/public/contact-submit'
-      fullPath: '/api/public/contact-submit'
-      preLoaderRoute: typeof ApiPublicContactSubmitRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/racket-desk/profiles': {
-      id: '/_authenticated/racket-desk/profiles'
-      path: '/profiles'
-      fullPath: '/racket-desk/profiles'
-      preLoaderRoute: typeof AuthenticatedRacketDeskProfilesRouteImport
-      parentRoute: typeof AuthenticatedRacketDeskRoute
-    }
-    '/_authenticated/racket-desk/fan-intel': {
-      id: '/_authenticated/racket-desk/fan-intel'
-      path: '/fan-intel'
-      fullPath: '/racket-desk/fan-intel'
-      preLoaderRoute: typeof AuthenticatedRacketDeskFanIntelRouteImport
       parentRoute: typeof AuthenticatedRacketDeskRoute
     }
     '/_authenticated/racket-desk/demo': {
@@ -889,25 +840,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRacketDeskDemoRouteImport
       parentRoute: typeof AuthenticatedRacketDeskRoute
     }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+    '/_authenticated/racket-desk/fan-intel': {
+      id: '/_authenticated/racket-desk/fan-intel'
+      path: '/fan-intel'
+      fullPath: '/racket-desk/fan-intel'
+      preLoaderRoute: typeof AuthenticatedRacketDeskFanIntelRouteImport
+      parentRoute: typeof AuthenticatedRacketDeskRoute
+    }
+    '/_authenticated/racket-desk/profiles': {
+      id: '/_authenticated/racket-desk/profiles'
+      path: '/profiles'
+      fullPath: '/racket-desk/profiles'
+      preLoaderRoute: typeof AuthenticatedRacketDeskProfilesRouteImport
+      parentRoute: typeof AuthenticatedRacketDeskRoute
+    }
+    '/api/public/contact-submit': {
+      id: '/api/public/contact-submit'
+      path: '/api/public/contact-submit'
+      fullPath: '/api/public/contact-submit'
+      preLoaderRoute: typeof ApiPublicContactSubmitRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+    '/api/public/track-pageview': {
+      id: '/api/public/track-pageview'
+      path: '/api/public/track-pageview'
+      fullPath: '/api/public/track-pageview'
+      preLoaderRoute: typeof ApiPublicTrackPageviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+    '/api/public/transcribe-voice-note': {
+      id: '/api/public/transcribe-voice-note'
+      path: '/api/public/transcribe-voice-note'
+      fullPath: '/api/public/transcribe-voice-note'
+      preLoaderRoute: typeof ApiPublicTranscribeVoiceNoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/waitlist-join': {
+      id: '/api/public/waitlist-join'
+      path: '/api/public/waitlist-join'
+      fullPath: '/api/public/waitlist-join'
+      preLoaderRoute: typeof ApiPublicWaitlistJoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/auth/webhook': {
@@ -917,11 +903,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
