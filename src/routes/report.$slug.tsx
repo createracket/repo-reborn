@@ -12,6 +12,7 @@ import { Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCount, formatPct, type Platform } from "@/lib/youtube-utils";
 import { PostThumb } from "@/components/reports/PostThumb";
+import { getReportGate, unlockReport } from "@/lib/report-access.functions";
 
 
 type PublicReport = {
