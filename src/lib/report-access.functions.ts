@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
+
 const GateInfoSchema = z.object({ slug: z.string().trim().min(1).max(200) });
 
 const UnlockSchema = z.object({
@@ -52,7 +54,7 @@ export const unlockReport = createServerFn({ method: "POST" })
       .eq("published", true)
       .maybeSingle();
 
-    const record = row as (Record<string, unknown> & { access_code: string | null; id: string }) | null;
+    const record = row as (Record<string, Json> & { access_code: string | null; id: string }) | null;
     if (!record || !record.access_code) return { ok: false as const };
 
     const expected = String(record.access_code).trim().toLowerCase();
@@ -66,15 +68,15 @@ export const unlockReport = createServerFn({ method: "POST" })
       .eq("report_id", report.id as string)
       .order("position", { ascending: true });
 
-    const creatorRows = (creators ?? []) as Array<{ id: string }>;
-    let posts: unknown[] = [];
+    const creatorRows = (creators ?? []) as unknown as Array<Record<string, Json> & { id: string }>;
+    let posts: Record<string, Json>[] = [];
     if (creatorRows.length > 0) {
       const { data: postRows } = await supabaseAdmin
         .from("campaign_report_posts")
         .select("*, updated_at")
         .in("creator_id", creatorRows.map((c) => c.id))
         .order("position", { ascending: true });
-      posts = postRows ?? [];
+      posts = (postRows ?? []) as unknown as Record<string, Json>[];
     }
 
     await supabaseAdmin
