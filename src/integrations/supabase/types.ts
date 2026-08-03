@@ -170,6 +170,42 @@ export type Database = {
           },
         ]
       }
+      campaign_report_access_leads: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          report_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          report_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_report_access_leads_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_report_access_leads_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "public_campaign_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_report_creators: {
         Row: {
           avatar_url: string | null
@@ -318,6 +354,8 @@ export type Database = {
       }
       campaign_reports: {
         Row: {
+          access_code: string | null
+          access_code_label: string | null
           brand_email: string | null
           categories: string[]
           client_email: string | null
@@ -336,6 +374,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_code?: string | null
+          access_code_label?: string | null
           brand_email?: string | null
           categories?: string[]
           client_email?: string | null
@@ -354,6 +394,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_code?: string | null
+          access_code_label?: string | null
           brand_email?: string | null
           categories?: string[]
           client_email?: string | null
