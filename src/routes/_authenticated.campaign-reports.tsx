@@ -93,6 +93,8 @@ type Report = {
   categories: string[] | null;
   hide_categories: boolean | null;
   template: string | null;
+  access_code: string | null;
+  access_code_label: string | null;
 };
 
 type Creator = {
@@ -526,6 +528,9 @@ function ReportDetailView({
   const [newCategory, setNewCategory] = useState("");
   const [hideCategories, setHideCategories] = useState<boolean>(!!report.hide_categories);
   const [template, setTemplate] = useState<string>(report.template ?? "original");
+  const [accessCode, setAccessCode] = useState(report.access_code ?? "");
+  const [accessCodeLabel, setAccessCodeLabel] = useState(report.access_code_label ?? "Access code");
+  const [savingAccess, setSavingAccess] = useState(false);
 
   useEffect(() => {
     setTitle(report.title);
@@ -535,6 +540,8 @@ function ReportDetailView({
     setCategories(report.categories ?? []);
     setHideCategories(!!report.hide_categories);
     setTemplate(report.template ?? "original");
+    setAccessCode(report.access_code ?? "");
+    setAccessCodeLabel(report.access_code_label ?? "Access code");
     // brand_email/client_email are hidden from base-table SELECT; fetch via
     // the owner/admin-only RPC.
     setClientEmail("");
@@ -551,6 +558,22 @@ function ReportDetailView({
       }
     })();
   }, [report.id]);
+
+  async function saveAccessCode() {
+    setSavingAccess(true);
+    const code = accessCode.trim();
+    const { error } = await sb
+      .from("campaign_reports")
+      .update({
+        access_code: code || null,
+        access_code_label: code ? accessCodeLabel.trim() || "Access code" : null,
+      } as never)
+      .eq("id", report.id);
+    setSavingAccess(false);
+    if (error) return toast.error(error.message);
+    toast.success(code ? "Access code saved" : "Access code removed");
+    await onChanged();
+  }
 
   async function saveMeta() {
     setSavingMeta(true);
@@ -879,6 +902,44 @@ function ReportDetailView({
                 await onChanged();
               }}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Private access */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display text-2xl">Private access code</CardTitle>
+          <CardDescription>
+            Set a code to share this report with people who don't have an account. The page stays hidden
+            (and never indexed) until they enter their email and this code. Leave blank for a normal link.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="report-access-code-label" className="text-xs">Code name</Label>
+              <Input
+                id="report-access-code-label"
+                value={accessCodeLabel}
+                onChange={(e) => setAccessCodeLabel(e.target.value)}
+                placeholder="Access code"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="report-access-code" className="text-xs">Code</Label>
+              <Input
+                id="report-access-code"
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value)}
+                placeholder="e.g. TIXEL26"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button type="button" variant="outline" size="sm" onClick={saveAccessCode} disabled={savingAccess}>
+              {savingAccess ? "Saving…" : "Save access code"}
+            </Button>
           </div>
         </CardContent>
       </Card>
