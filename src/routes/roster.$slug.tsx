@@ -97,7 +97,7 @@ function categoryLabel(value: string) {
   return CATEGORY_LABEL[value] ?? value;
 }
 function categoryBadgeClass(value: string) {
-  return CATEGORY_BADGE[value] ?? "bg-muted text-foreground";
+  return CATEGORY_BADGE[value] ?? "bg-primary/25 text-primary border border-primary/40";
 }
 
 const STATUS_BADGE: Record<string, string> = {
