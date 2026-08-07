@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, ExternalLink } from "lucide-react";
+import { FileText, ExternalLink, ChevronRight } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -30,8 +30,9 @@ export function ListeningReportsCard() {
       </CardHeader>
       <CardContent className="space-y-3">
         {reports.map((r) => (
-          <details key={r.id} className="rounded-xl border border-border/60 bg-card p-4">
-            <summary className="flex cursor-pointer flex-wrap items-center gap-2 text-sm">
+          <details key={r.id} className="group rounded-xl border border-border/60 bg-card p-4">
+            <summary className="flex cursor-pointer flex-wrap items-center gap-2 text-sm [&::-webkit-details-marker]:hidden [&::marker]:content-['']">
+              <ChevronRight className="size-4 shrink-0 text-primary transition-transform group-open:rotate-90" />
               <span className="min-w-0 flex-1 font-medium">
                 {r.report_title || r.artist_name}
               </span>
