@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { getRosterGate, unlockRoster } from "@/lib/roster-access.functions";
+import { getRosterGate, unlockRoster, getRosterForMember } from "@/lib/roster-access.functions";
 import { socialAudience, totalFans } from "@/lib/audience";
 
 type PublicRoster = {
@@ -159,6 +159,21 @@ function PublicRosterPage() {
         .eq("published", true)
         .maybeSingle();
       if (!r) {
+        // Signed-in owners/admins/assigned users bypass the passcode gate.
+        const { data: sess } = await supabase.auth.getSession();
+        if (sess.session) {
+          try {
+            const mine = await getRosterForMember({ data: { slug } });
+            if (mine.ok) {
+              setRoster(mine.roster as unknown as PublicRoster);
+              setItems((mine.items as unknown as PublicItem[]) ?? []);
+              setStatus("ready");
+              return;
+            }
+          } catch {
+            /* fall through to the gate */
+          }
+        }
         const info = await getRosterGate({ data: { slug } });
         if (info.gated) {
           setGate({ title: info.title, header_image_url: info.header_image_url, code_label: info.code_label });
