@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
+import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist, scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
 import { draftSpotlightFromText } from "@/lib/spotlight-draft.functions";
 import { adminUploadSpotlightImage } from "@/lib/spotlight-images.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
