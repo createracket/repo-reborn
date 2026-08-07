@@ -12,6 +12,7 @@ export interface FanComment {
   sentiment: Sentiment;
   platform: "TikTok" | "Instagram" | "YouTube";
   post: string; // which of your posts they commented on
+  postUrl?: string; // direct link to the post the comment sits on
   likes: number;
   when: string; // "2h", "1d"
 }
@@ -178,6 +179,24 @@ export const fanClusters: FanCluster[] = [
     ],
   },
 ];
+
+// Best-effort deep links for demo comments: profile links resolve from the
+// platform + handle, post links fall back to the commenter's profile.
+export function commentProfileUrl(c: FanComment): string {
+  const handle = c.handle.replace(/^@/, "");
+  switch (c.platform) {
+    case "TikTok":
+      return `https://www.tiktok.com/@${handle}`;
+    case "Instagram":
+      return `https://www.instagram.com/${handle}/`;
+    case "YouTube":
+      return `https://www.youtube.com/@${handle}`;
+  }
+}
+
+export function commentPostUrl(c: FanComment): string {
+  return c.postUrl ?? commentProfileUrl(c);
+}
 
 export const sentimentColor: Record<Sentiment, string> = {
   love: "bg-lime/20 text-lime border-lime/30",
