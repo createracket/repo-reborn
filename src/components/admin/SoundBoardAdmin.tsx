@@ -182,13 +182,50 @@ export function SoundBoardAdmin() {
                       />
                     </div>
                     <div>
-                      <Label>Thumbnail image URL</Label>
+                      <Label>Thumbnail image</Label>
                       <Input
                         placeholder="https://... (9:16 preferred)"
                         value={row.thumbnail_url ?? ""}
                         onChange={(e) => updateLocal(row.id, { thumbnail_url: e.target.value || null })}
                       />
+                      <div className="mt-2 flex items-center gap-2">
+                        <input
+                          id={`sb-file-${row.id}`}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (file) uploadCover(row, file);
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={uploadingId === row.id}
+                          onClick={() => document.getElementById(`sb-file-${row.id}`)?.click()}
+                        >
+                          <Upload className="mr-1 size-4" />
+                          {uploadingId === row.id ? "Uploading…" : "Upload image"}
+                        </Button>
+                        {row.thumbnail_url ? (
+                          <img
+                            src={row.thumbnail_url}
+                            alt={`${row.title} thumbnail preview`}
+                            className="h-12 w-[27px] rounded object-cover border border-border"
+                            loading="lazy"
+                          />
+                        ) : null}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Uploads are stored in the <code>sound-board/</code> folder of the
+                        public images bucket, so you can also drop files there manually and
+                        paste the public URL above.
+                      </p>
                     </div>
+
                   </div>
                   <div>
                     <Label>Fallback gradient (used when no thumbnail)</Label>
