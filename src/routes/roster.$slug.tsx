@@ -577,29 +577,50 @@ function PublicRosterPage() {
                     ...items.flatMap((i) => itemCats(i)),
                   ]),
                 );
-                if (filterValues.length === 0) return null;
+                const statusValues = roster.hide_statuses
+                  ? []
+                  : Array.from(new Set(items.map((i) => i.status || "in_review")));
+                if (filterValues.length === 0 && statusValues.length === 0) return null;
                 return (
-                  <div className="mt-10 flex items-center justify-end gap-3">
+                  <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Filter className="size-4" />
                       <span>Filter</span>
                     </div>
-                    <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
-                      <SelectTrigger className="w-[180px] text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
-                        {filterValues.map((v) => (
-                          <SelectItem key={v} value={v}>
-                            {categoryLabel(v)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {filterValues.length > 0 && (
+                      <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
+                        <SelectTrigger className="w-[180px] text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All categories</SelectItem>
+                          {filterValues.map((v) => (
+                            <SelectItem key={v} value={v}>
+                              {categoryLabel(v)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {statusValues.length > 0 && (
+                      <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
+                        <SelectTrigger className="w-[180px] text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All statuses</SelectItem>
+                          {statusValues.map((v) => (
+                            <SelectItem key={v} value={v}>
+                              {STATUS_LABEL[v] ?? "In Review"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                 );
               })()}
+
               <section className="mt-4 space-y-3">
                 {items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No creators on this roster yet.</p>
