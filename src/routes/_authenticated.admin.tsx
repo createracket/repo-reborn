@@ -1316,8 +1316,32 @@ function SpotlightForm({
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
   const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
   const scrapeApple = useServerFn(scrapeAppleMusicArtist);
-  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube" | "spotify" | "apple">(null);
-  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number; spotify?: number }>({});
+  const [syncing, setSyncing] = useState<string | null>(null);
+  const [fetchedCounts, setFetchedCounts] = useState<Record<string, number>>({});
+  // Extra social handles (band members, side projects) — up to 5 per platform.
+  const EXTRA_PLATFORMS = ["instagram", "tiktok", "youtube", "spotify", "apple_music"] as const;
+  type ExtraPlatform = (typeof EXTRA_PLATFORMS)[number];
+  const [extraLinks, setExtraLinks] = useState<Record<ExtraPlatform, string[]>>(() => ({
+    instagram: editData?.links?.instagram_extra ?? [],
+    tiktok: editData?.links?.tiktok_extra ?? [],
+    youtube: editData?.links?.youtube_extra ?? [],
+    spotify: editData?.links?.spotify_extra ?? [],
+    apple_music: editData?.links?.apple_music_extra ?? [],
+  }));
+  function addExtra(p: ExtraPlatform) {
+    setExtraLinks((s) => (s[p].length >= 5 ? s : { ...s, [p]: [...s[p], ""] }));
+  }
+  function setExtra(p: ExtraPlatform, i: number, v: string) {
+    setExtraLinks((s) => ({ ...s, [p]: s[p].map((x, ix) => (ix === i ? v : x)) }));
+  }
+  function removeExtra(p: ExtraPlatform, i: number) {
+    setExtraLinks((s) => ({ ...s, [p]: s[p].filter((_, ix) => ix !== i) }));
+    setFetchedCounts((c) => {
+      const next = { ...c };
+      delete next[`${p}:${i}`];
+      return next;
+    });
+  }
   const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
   const [flagState, setFlagState] = useState<{ flagged: boolean; reason: string | null }>(() => ({
     flagged: !!editData?.flagged_streaming_mismatch,
