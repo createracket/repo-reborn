@@ -1174,13 +1174,14 @@ function Table({ headers, children }: { headers: string[]; children: React.React
 }
 
 function ImageUploader({
-  label, value, onChange, aspect, hint,
+  label, value, onChange, aspect, hint, folder,
 }: {
   label: string;
   value: string;
   onChange: (url: string) => void;
   aspect: string;
   hint: string;
+  folder?: string;
 }) {
   const [uploading, setUploading] = useState(false);
 
@@ -1193,7 +1194,7 @@ function ImageUploader({
     }
     setUploading(true);
     const ext = file.name.split(".").pop() || "jpg";
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const path = `${folder ? `${folder}/` : ""}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage.from("spotlight-images").upload(path, file, {
       cacheControl: "3600", upsert: false, contentType: file.type,
     });
