@@ -96,7 +96,11 @@ export const getSpotlightForMember = createServerFn({ method: "POST" })
       .eq("published", true)
       .maybeSingle();
 
-    const page = row as (Record<string, unknown> & { id: string }) | null;
+    const page = row as
+      | (Record<string, string | number | boolean | null | string[] | Record<string, string>> & {
+          id: string;
+        })
+      | null;
     if (!page) return { ok: false as const };
 
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
