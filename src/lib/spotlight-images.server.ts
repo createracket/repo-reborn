@@ -41,15 +41,31 @@ export async function uploadSpotlightImage(
   if (fileBytes.byteLength > MAX_UPLOAD_BYTES) throw new Error("Image must be under 8MB");
 
   const path = `${input.folder}/${crypto.randomUUID()}.${extensionByType[input.contentType]}`;
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { error } = await supabaseAdmin.storage.from("spotlight-images").upload(path, fileBytes, {
-    cacheControl: "3600",
-    contentType: input.contentType,
-    upsert: false,
+  const backendUrl = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!backendUrl || !serviceKey) throw new Error("Image storage is not configured");
+
+  // New opaque server keys authenticate through `apikey`. Sending one as a
+  // bearer token causes Storage to fall back to RLS instead of service access.
+  const objectPath = path.split("/").map(encodeURIComponent).join("/");
+  const response = await fetch(`${backendUrl}/storage/v1/object/spotlight-images/${objectPath}`, {
+    method: "POST",
+    headers: {
+      apikey: serviceKey,
+      "cache-control": "max-age=3600",
+      "content-type": input.contentType,
+      "x-upsert": "false",
+    },
+    body: fileBytes,
   });
 
-  if (error) throw new Error(error.message);
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { message?: string; error?: string } | null;
+    throw new Error(payload?.message ?? payload?.error ?? "Image upload failed");
+  }
 
-  const { data } = supabaseAdmin.storage.from("spotlight-images").getPublicUrl(path);
-  return { publicUrl: data.publicUrl };
+  return {
+    publicUrl: `${backendUrl}/storage/v1/object/public/spotlight-images/${objectPath}`,
+  };
 }
