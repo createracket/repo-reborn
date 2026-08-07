@@ -119,7 +119,7 @@ function DashboardPage() {
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
-  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean }>>([]);
+  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
   const [loading, setLoading] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -315,7 +315,7 @@ function DashboardPage() {
       // Briefs the current user submitted (Project Planner)
       const { data: mineBriefs } = await (supabase as any)
         .from("campaign_briefs")
-        .select("id, title, created_at, status, budget, currency, linked_roster_id")
+        .select("id, title, created_at, status, budget, currency, linked_roster_id, linked_report_id")
         .eq("user_id", u.user.id)
         .order("created_at", { ascending: false });
       const mineBriefRows = (((mineBriefs as any[]) ?? [])).filter((r) => r?.status !== "closed");
@@ -333,9 +333,23 @@ function DashboardPage() {
           rosterInfo.set(r.id, { slug: r.slug ?? null, published: !!r.published }),
         );
       }
+      const linkedReportIds = Array.from(
+        new Set(mineBriefRows.map((r) => r.linked_report_id).filter(Boolean) as string[]),
+      );
+      const reportInfo = new Map<string, { slug: string | null; published: boolean }>();
+      if (linkedReportIds.length) {
+        const { data: reportRows } = await (supabase as any)
+          .from("campaign_reports")
+          .select("id, slug, published")
+          .in("id", linkedReportIds);
+        ((reportRows ?? []) as any[]).forEach((r) =>
+          reportInfo.set(r.id, { slug: r.slug ?? null, published: !!r.published }),
+        );
+      }
       setMyBriefs(
         mineBriefRows.map((r) => {
           const info = r.linked_roster_id ? rosterInfo.get(r.linked_roster_id) : null;
+          const rep = r.linked_report_id ? reportInfo.get(r.linked_report_id) : null;
           return {
             id: r.id,
             title: r.title,
@@ -346,6 +360,8 @@ function DashboardPage() {
             linked_roster_id: r.linked_roster_id ?? null,
             linked_roster_slug: info?.slug ?? null,
             linked_roster_published: !!info?.published,
+            linked_report_slug: rep?.slug ?? null,
+            linked_report_published: !!rep?.published,
           };
         }),
       );
@@ -665,7 +681,9 @@ function DashboardPage() {
                             href={
                               b.status === "review_your_roster" && b.linked_roster_slug && b.linked_roster_published
                                 ? `/roster/${b.linked_roster_slug}`
-                                : null
+                                : b.status === "review_your_report" && b.linked_report_slug && b.linked_report_published
+                                  ? `/report/${b.linked_report_slug}`
+                                  : null
                             }
                           />
                         </div>
