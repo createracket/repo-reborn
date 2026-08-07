@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getSocialEmbed } from "@/lib/social-embed";
 import { getClipPosters } from "@/lib/clip-poster.functions";
-import { getSpotlightGate, unlockSpotlight, getSpotlightPreview } from "@/lib/spotlight-access.functions";
+import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember } from "@/lib/spotlight-access.functions";
 
 type PartnerLinks = {
   instagram?: string;
