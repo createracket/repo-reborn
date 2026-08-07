@@ -1218,6 +1218,9 @@ function SpotlightForm({
     video1: editData?.links?.video1 ?? "",
     video2: editData?.links?.video2 ?? "",
     video3: editData?.links?.video3 ?? "",
+    video1_cover: editData?.links?.video1_cover ?? "",
+    video2_cover: editData?.links?.video2_cover ?? "",
+    video3_cover: editData?.links?.video3_cover ?? "",
     header_image_url: editData?.header_image_url ?? "",
     profile_image_url: editData?.profile_image_url ?? "",
     published: editData?.published ?? false,
@@ -1487,6 +1490,9 @@ function SpotlightForm({
         video1: form.video1,
         video2: form.video2,
         video3: form.video3,
+        video1_cover: form.video1_cover,
+        video2_cover: form.video2_cover,
+        video3_cover: form.video3_cover,
         instagram_extra: extraLinks.instagram.map((s) => s.trim()).filter(Boolean),
         tiktok_extra: extraLinks.tiktok.map((s) => s.trim()).filter(Boolean),
         youtube_extra: extraLinks.youtube.map((s) => s.trim()).filter(Boolean),
@@ -1540,6 +1546,7 @@ function SpotlightForm({
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "",
+        video1_cover: "", video2_cover: "", video3_cover: "",
         header_image_url: "", profile_image_url: "", published: false,
         access_code: "", access_code_label: "Access code",
         total_followers: "", total_streams: "", monthly_streams: "",
@@ -1752,19 +1759,26 @@ function SpotlightForm({
           </div>
           <div className="space-y-1.5 md:col-span-2">
             <Label>Featured videos (TikTok or Instagram URLs)</Label>
-            <p className="text-xs text-muted-foreground">Paste up to three public TikTok or Instagram post/reel URLs. They'll embed at the bottom of the spotlight page.</p>
+            <p className="text-xs text-muted-foreground">
+              Paste up to three public TikTok or Instagram post/reel URLs. Each shows as a clip card at the bottom of the
+              spotlight page. Add a cover image URL for Instagram clips — Instagram no longer serves public thumbnails,
+              so without one the card falls back to a gradient.
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="video1">Video 1</Label>
             <Input id="video1" value={form.video1} onChange={(e) => set("video1", e.target.value)} placeholder="https://www.tiktok.com/@user/video/123…" />
+            <Input id="video1_cover" value={form.video1_cover} onChange={(e) => set("video1_cover", e.target.value)} placeholder="Cover image URL (optional)" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="video2">Video 2</Label>
             <Input id="video2" value={form.video2} onChange={(e) => set("video2", e.target.value)} placeholder="https://www.instagram.com/reel/…" />
+            <Input id="video2_cover" value={form.video2_cover} onChange={(e) => set("video2_cover", e.target.value)} placeholder="Cover image URL (optional)" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="video3">Video 3</Label>
             <Input id="video3" value={form.video3} onChange={(e) => set("video3", e.target.value)} placeholder="https://www.tiktok.com/@user/video/…" />
+            <Input id="video3_cover" value={form.video3_cover} onChange={(e) => set("video3_cover", e.target.value)} placeholder="Cover image URL (optional)" />
           </div>
           <div className="md:col-span-2 pt-2">
             <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics (optional)</p>

@@ -5,11 +5,14 @@ import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { ClipCard } from "@/components/spotlight/ClipCard";
+import { SpotlightNotFound } from "@/components/spotlight/SpotlightNotFound";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getSocialEmbed } from "@/lib/social-embed";
+import { getClipPosters } from "@/lib/clip-poster.functions";
 import { getSpotlightGate, unlockSpotlight, getSpotlightPreview } from "@/lib/spotlight-access.functions";
 
 type PartnerLinks = {
@@ -20,6 +23,9 @@ type PartnerLinks = {
   video1?: string;
   video2?: string;
   video3?: string;
+  video1_cover?: string;
+  video2_cover?: string;
+  video3_cover?: string;
   tiktok?: string;
   youtube?: string;
   apple_music?: string;
@@ -83,7 +89,7 @@ export const Route = createFileRoute("/spotlight/$slug")({
     };
   },
   component: SpotlightPage,
-  notFoundComponent: NotFound,
+  notFoundComponent: SpotlightNotFound,
   errorComponent: ({ error }) => (
     <div className="min-h-screen bg-background">
       <SiteHeader />
@@ -97,19 +103,6 @@ export const Route = createFileRoute("/spotlight/$slug")({
   ),
 });
 
-function NotFound() {
-  return (
-    <div className="min-h-screen bg-background">
-      <SiteHeader />
-      <main className="container mx-auto px-4 py-24 text-center">
-        <h1 className="font-display text-4xl">Spotlight not found</h1>
-        <p className="mt-2 text-muted-foreground">This page may be unpublished or doesn't exist.</p>
-        <Button asChild className="mt-6"><Link to="/">Go home</Link></Button>
-      </main>
-      <SiteFooter />
-    </div>
-  );
-}
 
 function SpotlightPage() {
   const { slug } = Route.useParams();
@@ -129,6 +122,33 @@ function SpotlightPage() {
   const [gateCode, setGateCode] = useState("");
   const [gateBusy, setGateBusy] = useState(false);
   const [gateError, setGateError] = useState<string | null>(null);
+  const [posters, setPosters] = useState<Record<string, string | null>>({});
+
+  // Fetch provider poster thumbnails (TikTok) for clips without a manual cover.
+  useEffect(() => {
+    const l = page?.links ?? {};
+    const urls = [l.video1, l.video2, l.video3].filter((u): u is string => !!u);
+    if (urls.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await getClipPosters({ data: { urls } });
+        if (!cancelled) {
+          const byHref: Record<string, string | null> = {};
+          for (const u of urls) {
+            const embed = getSocialEmbed(u);
+            if (embed) byHref[embed.href] = res.posters[u] ?? null;
+          }
+          setPosters(byHref);
+        }
+      } catch {
+        /* posters are optional */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [page]);
 
   useEffect(() => {
     (async () => {
@@ -297,7 +317,7 @@ function SpotlightPage() {
     );
   }
 
-  if (status === "missing" || !page) return <NotFound />;
+  if (status === "missing" || !page) return <SpotlightNotFound />;
 
   const links = page.links ?? {};
 
@@ -495,58 +515,30 @@ function SpotlightPage() {
         ) : null}
         {/* Videos */}
         {(() => {
-          const videos = [links.video1, links.video2, links.video3]
-            .map((u) => (u ? getSocialEmbed(u) : null))
-            .filter((x): x is NonNullable<ReturnType<typeof getSocialEmbed>> => !!x);
+          const raw: Array<{ url?: string; cover?: string }> = [
+            { url: links.video1, cover: links.video1_cover },
+            { url: links.video2, cover: links.video2_cover },
+            { url: links.video3, cover: links.video3_cover },
+          ];
+          const videos = raw
+            .map((v) => {
+              const embed = v.url ? getSocialEmbed(v.url) : null;
+              return embed ? { embed, cover: v.cover } : null;
+            })
+            .filter((v): v is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover: string | undefined } => !!v);
           if (videos.length === 0) return null;
           return (
             <section className="mt-16">
               <h2 className="font-display text-3xl">Watch</h2>
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
-                {videos.map((v, i) => {
-                  const isIg = v.provider === "instagram";
-                  return (
-                    <div
-                      key={i}
-                      className="relative overflow-hidden rounded-2xl border border-border/60 bg-muted/40"
-                      style={{ aspectRatio: "9 / 16" }}
-                    >
-                      <iframe
-                        src={v.src}
-                        title={`${v.provider} video ${i + 1}`}
-                        frameBorder={0}
-                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture; web-share"
-                        allowFullScreen
-                        loading="lazy"
-                        scrolling="no"
-                        className={isIg ? "absolute left-1/2 -translate-x-1/2" : "size-full"}
-                        // Instagram embed has a ~56px header and a tall caption/actions
-                        // footer ("View more on Instagram", likes, icons). Oversize and
-                        // offset so only the media itself is visible.
-                        style={
-                          isIg
-                            ? {
-                                top: "-56px",
-                                width: "100%",
-                                height: "calc(100% + 440px)",
-                              }
-                            : undefined
-                        }
-                      />
-                      {isIg && (
-                        <a
-                          href={v.href}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label="Open on Instagram"
-                          className="absolute right-2 top-2 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-wide text-white backdrop-blur hover:bg-black/70"
-                        >
-                          Open
-                        </a>
-                      )}
-                    </div>
-                  );
-                })}
+              <div className="mt-4 grid gap-6 md:grid-cols-3">
+                {videos.map((v, i) => (
+                  <ClipCard
+                    key={i}
+                    href={v.embed.href}
+                    provider={v.embed.provider}
+                    poster={v.cover ?? posters[v.embed.href] ?? null}
+                  />
+                ))}
               </div>
             </section>
           );
