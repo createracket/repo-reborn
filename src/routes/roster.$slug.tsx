@@ -361,7 +361,8 @@ function PublicRosterPage() {
           <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
             {totalSocial > 0 && (
               <>
-                <Card className="border-pink-accent">
+                <Card className="border-2 border-pink-accent bg-pink-accent/5">
+
 
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
