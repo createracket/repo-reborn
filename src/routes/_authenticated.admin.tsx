@@ -1454,11 +1454,15 @@ function SpotlightForm({
     }
   }
 
-  function applyTotalFollowers() {
-    // Sum main + extra handles across Instagram / TikTok / YouTube.
-    const total = Object.entries(fetchedCounts)
+  // Sum main + extra handles across Instagram / TikTok / YouTube.
+  function sumSocialCounts(counts: Record<string, number>) {
+    return Object.entries(counts)
       .filter(([k]) => /^(instagram|tiktok|youtube)(:|$)/.test(k))
       .reduce((sum, [, v]) => sum + (v ?? 0), 0);
+  }
+
+  function applyTotalFollowers() {
+    const total = sumSocialCounts(fetchedCounts);
     if (total <= 0) {
       toast.error("Sync at least one social first");
       return;
@@ -1506,6 +1510,7 @@ function SpotlightForm({
         youtube_extra: extraLinks.youtube.map((s) => s.trim()).filter(Boolean),
         spotify_extra: extraLinks.spotify.map((s) => s.trim()).filter(Boolean),
         apple_music_extra: extraLinks.apple_music.map((s) => s.trim()).filter(Boolean),
+        follower_counts: fetchedCounts,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
