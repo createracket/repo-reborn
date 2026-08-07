@@ -390,21 +390,34 @@ function SpotlightPage() {
             ) : null}
             {links.instagram ? (
               <Button asChild variant="outline" size="sm">
-                <a href={links.instagram} target="_blank" rel="noreferrer">
-                  <Instagram className="mr-1.5 size-3.5" />Instagram
+                <a href={links.instagram} target="_blank" rel="noreferrer" aria-label={`Instagram ${handleLabel(links.instagram)}`}>
+                  <Instagram className="mr-1.5 size-3.5" />{handleLabel(links.instagram)}
                 </a>
               </Button>
             ) : null}
             {([
-              { url: links.twitch, label: "Twitch" },
-              { url: links.facebook, label: "Facebook" },
-              { url: links.x, label: "X" },
-              { url: links.custom_url, label: links.custom_label || "Link" },
+              { url: links.tiktok, label: "TikTok", abbr: "TT" },
+              { url: links.youtube, label: "YouTube", abbr: "YT", Icon: Youtube },
+              { url: links.apple_music, label: "Apple Music", abbr: "AM", Icon: Music2 },
+              { url: links.twitch, label: "Twitch", abbr: "TW", Icon: Twitch },
+              { url: links.facebook, label: "Facebook", abbr: "FB", Icon: Facebook },
+              { url: links.x, label: "X", abbr: "X" },
+              { url: links.custom_url, label: links.custom_label || "Link", abbr: (links.custom_label || "Link").slice(0, 2).toUpperCase() },
             ] as const).map((l) =>
               l.url ? (
                 <Button key={l.label} asChild variant="outline" size="sm">
-                  <a href={l.url.startsWith("http") ? l.url : `https://${l.url}`} target="_blank" rel="noreferrer">
-                    {l.label}
+                  <a
+                    href={l.url.startsWith("http") ? l.url : `https://${l.url}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`${l.label} ${handleLabel(l.url)}`}
+                  >
+                    {"Icon" in l && l.Icon ? (
+                      <l.Icon className="mr-1.5 size-3.5" aria-hidden />
+                    ) : (
+                      <span className="mr-1.5 text-[0.7rem] font-semibold tracking-wider">{l.abbr}</span>
+                    )}
+                    {handleLabel(l.url)}
                   </a>
                 </Button>
               ) : null,
