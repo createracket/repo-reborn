@@ -44,6 +44,7 @@ import { Route as AuthenticatedRacketDeskIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedRacketDeskDemoRouteImport } from './routes/_authenticated.racket-desk.demo'
 import { Route as AuthenticatedRacketDeskFanIntelRouteImport } from './routes/_authenticated.racket-desk.fan-intel'
 import { Route as AuthenticatedRacketDeskProfilesRouteImport } from './routes/_authenticated.racket-desk.profiles'
+import { Route as AuthenticatedRacketDeskReportsRouteImport } from './routes/_authenticated.racket-desk.reports'
 import { Route as AuthenticatedRacketDeskSocialListeningRouteImport } from './routes/_authenticated.racket-desk.social-listening'
 import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact-submit'
 import { Route as ApiPublicTrackPageviewRouteImport } from './routes/api/public/track-pageview'
@@ -237,6 +238,12 @@ const AuthenticatedRacketDeskProfilesRoute =
     path: '/profiles',
     getParentRoute: () => AuthenticatedRacketDeskRoute,
   } as any)
+const AuthenticatedRacketDeskReportsRoute =
+  AuthenticatedRacketDeskReportsRouteImport.update({
+    id: '/reports',
+    path: '/reports',
+    getParentRoute: () => AuthenticatedRacketDeskRoute,
+  } as any)
 const AuthenticatedRacketDeskSocialListeningRoute =
   AuthenticatedRacketDeskSocialListeningRouteImport.update({
     id: '/social-listening',
@@ -332,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
   '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
+  '/racket-desk/reports': typeof AuthenticatedRacketDeskReportsRoute
   '/racket-desk/social-listening': typeof AuthenticatedRacketDeskSocialListeningRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
@@ -378,6 +386,7 @@ export interface FileRoutesByTo {
   '/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
   '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
+  '/racket-desk/reports': typeof AuthenticatedRacketDeskReportsRoute
   '/racket-desk/social-listening': typeof AuthenticatedRacketDeskSocialListeningRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
@@ -427,6 +436,7 @@ export interface FileRoutesById {
   '/_authenticated/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
   '/_authenticated/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/_authenticated/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
+  '/_authenticated/racket-desk/reports': typeof AuthenticatedRacketDeskReportsRoute
   '/_authenticated/racket-desk/social-listening': typeof AuthenticatedRacketDeskSocialListeningRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
@@ -476,6 +486,7 @@ export interface FileRouteTypes {
     | '/racket-desk/demo'
     | '/racket-desk/fan-intel'
     | '/racket-desk/profiles'
+    | '/racket-desk/reports'
     | '/racket-desk/social-listening'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
@@ -522,6 +533,7 @@ export interface FileRouteTypes {
     | '/racket-desk/demo'
     | '/racket-desk/fan-intel'
     | '/racket-desk/profiles'
+    | '/racket-desk/reports'
     | '/racket-desk/social-listening'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
@@ -570,6 +582,7 @@ export interface FileRouteTypes {
     | '/_authenticated/racket-desk/demo'
     | '/_authenticated/racket-desk/fan-intel'
     | '/_authenticated/racket-desk/profiles'
+    | '/_authenticated/racket-desk/reports'
     | '/_authenticated/racket-desk/social-listening'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
@@ -867,6 +880,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRacketDeskProfilesRouteImport
       parentRoute: typeof AuthenticatedRacketDeskRoute
     }
+    '/_authenticated/racket-desk/reports': {
+      id: '/_authenticated/racket-desk/reports'
+      path: '/reports'
+      fullPath: '/racket-desk/reports'
+      preLoaderRoute: typeof AuthenticatedRacketDeskReportsRouteImport
+      parentRoute: typeof AuthenticatedRacketDeskRoute
+    }
     '/_authenticated/racket-desk/social-listening': {
       id: '/_authenticated/racket-desk/social-listening'
       path: '/social-listening'
@@ -951,6 +971,7 @@ interface AuthenticatedRacketDeskRouteChildren {
   AuthenticatedRacketDeskDemoRoute: typeof AuthenticatedRacketDeskDemoRoute
   AuthenticatedRacketDeskFanIntelRoute: typeof AuthenticatedRacketDeskFanIntelRoute
   AuthenticatedRacketDeskProfilesRoute: typeof AuthenticatedRacketDeskProfilesRoute
+  AuthenticatedRacketDeskReportsRoute: typeof AuthenticatedRacketDeskReportsRoute
   AuthenticatedRacketDeskSocialListeningRoute: typeof AuthenticatedRacketDeskSocialListeningRoute
   AuthenticatedRacketDeskIndexRoute: typeof AuthenticatedRacketDeskIndexRoute
 }
@@ -960,6 +981,7 @@ const AuthenticatedRacketDeskRouteChildren: AuthenticatedRacketDeskRouteChildren
     AuthenticatedRacketDeskDemoRoute: AuthenticatedRacketDeskDemoRoute,
     AuthenticatedRacketDeskFanIntelRoute: AuthenticatedRacketDeskFanIntelRoute,
     AuthenticatedRacketDeskProfilesRoute: AuthenticatedRacketDeskProfilesRoute,
+    AuthenticatedRacketDeskReportsRoute: AuthenticatedRacketDeskReportsRoute,
     AuthenticatedRacketDeskSocialListeningRoute:
       AuthenticatedRacketDeskSocialListeningRoute,
     AuthenticatedRacketDeskIndexRoute: AuthenticatedRacketDeskIndexRoute,
