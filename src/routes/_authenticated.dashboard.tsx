@@ -676,7 +676,7 @@ function DashboardPage() {
                         className={`rounded-xl border border-border/60 bg-card p-4 ${r.published && r.slug ? "hover:bg-muted/50 transition-colors" : ""}`}
                       >
                         {r.published && r.slug ? (
-                          <Link to={`/roster/${r.slug}`} className="flex items-center justify-between gap-3">
+                          <Link to="/roster/$slug" params={{ slug: r.slug }} className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
                               <div className="font-medium">{r.title}</div>
                               <div className="text-xs text-muted-foreground">
@@ -724,7 +724,7 @@ function DashboardPage() {
                         className={`rounded-xl border border-border/60 bg-card p-4 ${r.published && r.slug ? "hover:bg-muted/50 transition-colors" : ""}`}
                       >
                         {r.published && r.slug ? (
-                          <Link to={`/report/${r.slug}`} className="flex items-center justify-between gap-3">
+                          <Link to="/report/$slug" params={{ slug: r.slug }} className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
                               <div className="font-medium">{r.title}</div>
                               <div className="text-xs text-muted-foreground">
@@ -1048,7 +1048,7 @@ function DashboardPage() {
                             className={`rounded-xl border border-border/60 bg-card p-4 ${c.roster_published && c.roster_slug ? "hover:bg-muted/50 transition-colors cursor-pointer" : ""}`}
                           >
                             {c.roster_published && c.roster_slug ? (
-                              <Link to={`/roster/${c.roster_slug}`} className="flex items-center justify-between gap-3">
+                              <Link to="/roster/$slug" params={{ slug: c.roster_slug }} className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-3 min-w-0">
                                   <div className="size-10 overflow-hidden rounded-full bg-muted shrink-0">
                                     {c.avatar_url ? (
