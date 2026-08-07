@@ -435,10 +435,11 @@ function SpotlightPage() {
 
           {/* Extra handles (band members / side projects) */}
           {(() => {
-            const groups: Array<{ label: string; abbr: string; Icon?: typeof Instagram; urls: string[] }> = [
+            const ytNames = links.youtube_extra_names ?? [];
+            const groups: Array<{ label: string; abbr: string; Icon?: typeof Instagram; urls: string[]; names?: string[] }> = [
               { label: "Instagram", abbr: "IG", Icon: Instagram, urls: links.instagram_extra ?? [] },
               { label: "TikTok", abbr: "TT", urls: links.tiktok_extra ?? [] },
-              { label: "YouTube", abbr: "YT", Icon: Youtube, urls: links.youtube_extra ?? [] },
+              { label: "YouTube", abbr: "YT", Icon: Youtube, urls: links.youtube_extra ?? [], names: ytNames },
               { label: "Spotify", abbr: "SP", Icon: Music2, urls: links.spotify_extra ?? [] },
               { label: "Apple Music", abbr: "AM", Icon: Music2, urls: links.apple_music_extra ?? [] },
               { label: "Twitch", abbr: "TW", Icon: Twitch, urls: links.twitch_extra ?? [] },
@@ -447,26 +448,34 @@ function SpotlightPage() {
             ].filter((g) => g.urls.length > 0);
             if (groups.length === 0) return null;
             return (
-              <div className="flex flex-wrap gap-2 pt-1">
+              <div className="space-y-2 pt-3">
+                <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                  {sectionLabel("members", "Meet the members")}
+                </p>
+                <div className="flex flex-wrap gap-2">
                 {groups.flatMap((g) =>
-                  g.urls.map((u) => (
+                  g.urls.map((u, i) => {
+                    const display = (g.names?.[i] ?? "").trim() || handleLabel(u);
+                    return (
                     <Button key={`${g.label}-${u}`} asChild variant="outline" size="sm">
                       <a
                         href={u.startsWith("http") ? u : `https://${u}`}
                         target="_blank"
                         rel="noreferrer"
-                        aria-label={`${g.label} ${handleLabel(u)}`}
+                        aria-label={`${g.label} ${display}`}
                       >
                         {g.Icon ? (
                           <g.Icon className="mr-1.5 size-3.5" aria-hidden />
                         ) : (
                           <span className="mr-1.5 text-[0.7rem] font-semibold tracking-wider">{g.abbr}</span>
                         )}
-                        {handleLabel(u)}
+                        {display}
                       </a>
                     </Button>
-                  )),
+                    );
+                  }),
                 )}
+                </div>
               </div>
             );
           })()}
