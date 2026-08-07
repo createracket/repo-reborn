@@ -1752,29 +1752,8 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
           )}
         </div>
         <div className="flex flex-col items-end gap-1">
-          <Select
-            value={item.status ?? "in_review"}
-            onValueChange={async (v) => {
-              const { error } = await supabase
-                .from("roster_items")
-                .update({ status: v } as never)
-                .eq("id", item.id);
-              if (error) toast.error(error.message);
-              else onChanged();
-            }}
-          >
-            <SelectTrigger className={`h-8 w-[150px] text-xs ${STATUS_BADGE[item.status ?? "in_review"]}`}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((s) => (
-                <SelectItem key={s.value} value={s.value} className="text-xs">
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           {allowMulti ? (
+
             <MultiCategoryPicker
               value={itemCategories(item)}
               options={Array.from(new Set([...(categories ?? []), ...itemCategories(item)]))}
