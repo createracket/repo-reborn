@@ -1379,7 +1379,12 @@ function SpotlightForm({
         return;
       }
       if (r.followers != null) {
-        setFetchedCounts((c) => ({ ...c, [key]: r.followers ?? 0 }));
+        const next = { ...fetchedCounts, [key]: r.followers };
+        setFetchedCounts(next);
+        // Keep the headline metric in sync automatically so a synced number is
+        // never lost just because "Apply sum" wasn't clicked before saving.
+        const total = sumSocialCounts(next);
+        if (total > 0) set("total_followers", String(total));
         toast.success(`${platform}: ${r.followers.toLocaleString()} followers`);
       } else {
         toast.error("No follower count returned");
@@ -1406,7 +1411,6 @@ function SpotlightForm({
       const updates: string[] = [];
       if (r.followers != null) {
         setFetchedCounts((c) => ({ ...c, [key]: r.followers ?? 0 }));
-        if (extraIndex == null) set("total_followers", String(r.followers));
         updates.push(`${r.followers.toLocaleString()} followers`);
       }
       if (r.monthly_listeners != null) {
