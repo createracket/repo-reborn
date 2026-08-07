@@ -431,8 +431,9 @@ function PublicRosterPage() {
               ["Facebook", it.facebook_followers, it.facebook_url],
               ["X", it.x_followers, it.x_url],
               [it.custom_label || "Link", it.custom_followers, it.custom_url],
-              ["Spotify streams", it.spotify_monthly_listens, it.spotify_url],
-              ["Apple", it.apple_music_followers, it.apple_music_url],
+              ["Spotify", it.spotify_monthly_listens, it.spotify_url],
+              ["Apple Music", it.apple_music_followers, it.apple_music_url],
+
             ];
             const itemSocial = socialAudience(it);
             const itemFans = totalFans(it);
