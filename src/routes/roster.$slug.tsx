@@ -289,18 +289,10 @@ function PublicRosterPage() {
     );
   }
 
-  const totalFollowers = items
-    .filter((it) => it.status !== "hold")
-    .reduce(
-      (acc, it) =>
-        acc +
-        (it.instagram_followers ?? 0) +
-        (it.tiktok_followers ?? 0) +
-        (it.youtube_subscribers ?? 0) +
-        (it.spotify_monthly_listens ?? 0) +
-        (it.apple_music_followers ?? 0),
-      0,
-    );
+  const visibleForTotals = items.filter((it) => it.status !== "hold");
+  const totalSocial = visibleForTotals.reduce((acc, it) => acc + socialAudience(it), 0);
+  const totalAll = visibleForTotals.reduce((acc, it) => acc + totalFans(it), 0);
+
   
 
   return (
