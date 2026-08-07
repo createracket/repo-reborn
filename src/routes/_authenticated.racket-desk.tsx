@@ -19,7 +19,7 @@ const NAV: Array<{ to: string; label: string; exact?: boolean }> = [
   { to: "/racket-desk/social-listening", label: "Social listening" },
   { to: "/racket-desk/profiles", label: "My profiles" },
   { to: "/racket-desk/reports", label: "Reports" },
-  { to: "/racket-desk/demo", label: "Take the tour" },
+  
 ];
 
 function RacketDeskLayout() {
