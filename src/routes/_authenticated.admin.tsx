@@ -1824,34 +1824,48 @@ function SpotlightForm({
               />
             </div>
           </details>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="headline">Headline *</Label>
-            <Input id="headline" value={form.headline} onChange={(e) => set("headline", e.target.value)} placeholder="Your Music, Your Business" />
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="subtitle">Subtitle</Label>
-            <Input id="subtitle" value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="UNLOCK REAL FAN INSIGHTS" />
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="intro">Intro</Label>
-            <Textarea id="intro" rows={3} value={form.intro} onChange={(e) => set("intro", e.target.value)} />
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="host_bio">Host bio</Label>
-            <Textarea id="host_bio" rows={3} value={form.host_bio} onChange={(e) => set("host_bio", e.target.value)} />
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="partnership_pitch">Partnership pitch</Label>
-            <Textarea id="partnership_pitch" rows={3} value={form.partnership_pitch} onChange={(e) => set("partnership_pitch", e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="eoi">EOI opportunities (one per line)</Label>
-            <Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="audience">Audience segments (one per line)</Label>
-            <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
-          </div>
+          <details className="!order-6 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+              Content
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                (type, headline, bio, pitch, EOI &amp; audience)
+              </span>
+            </summary>
+            <div className="grid w-full gap-4 px-4 md:grid-cols-2">
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="type">Type</Label>
+                <Input id="type" value={form.type} onChange={(e) => set("type", e.target.value)} placeholder="podcast" />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="headline">Headline *</Label>
+                <Input id="headline" value={form.headline} onChange={(e) => set("headline", e.target.value)} placeholder="Your Music, Your Business" />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="subtitle">Subtitle</Label>
+                <Input id="subtitle" value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="UNLOCK REAL FAN INSIGHTS" />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="intro">Intro</Label>
+                <Textarea id="intro" rows={3} value={form.intro} onChange={(e) => set("intro", e.target.value)} />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="host_bio">Host bio</Label>
+                <Textarea id="host_bio" rows={3} value={form.host_bio} onChange={(e) => set("host_bio", e.target.value)} />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="partnership_pitch">Partnership pitch</Label>
+                <Textarea id="partnership_pitch" rows={3} value={form.partnership_pitch} onChange={(e) => set("partnership_pitch", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="eoi">EOI opportunities (one per line)</Label>
+                <Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="audience">Audience segments (one per line)</Label>
+                <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
+              </div>
+            </div>
+          </details>
           <div className="space-y-1.5 md:col-span-2">
             <Label htmlFor="vibe_tags">Vibe check tags (comma separated)</Label>
             <Input id="vibe_tags" value={form.vibe_tags} onChange={(e) => set("vibe_tags", e.target.value)} placeholder="Coffee, Sport, Fashion" />
