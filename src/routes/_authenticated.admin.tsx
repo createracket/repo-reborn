@@ -1717,12 +1717,35 @@ function SpotlightForm({
           </div>
           <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+              Section headings
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                (leave blank to use the default wording)
+              </span>
+            </summary>
+            <div className="grid grid-cols-1 gap-4 px-4">
+              {([
+                { k: "label_host_bio", label: "Host bio heading", ph: "About the host" },
+                { k: "label_audience", label: "Audience heading", ph: "Who's listening" },
+                { k: "label_partnership", label: "Partnership heading", ph: "Partnership" },
+                { k: "label_eoi", label: "Expressions of interest heading", ph: "Expressions of interest" },
+                { k: "label_videos", label: "Videos heading", ph: "Watch" },
+              ] as const).map(({ k, label, ph }) => (
+                <div key={k} className="space-y-1.5">
+                  <Label htmlFor={k}>{label}</Label>
+                  <Input id={k} value={form[k]} onChange={(e) => set(k, e.target.value)} placeholder={ph} />
+                </div>
+              ))}
+            </div>
+          </details>
+          <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Social links &amp; handles
               <span className="ml-2 text-xs font-normal text-muted-foreground">
                 (Instagram, TikTok, YouTube, Spotify, Apple Music, Twitch, Facebook, X, other)
               </span>
             </summary>
-            <div className="grid gap-4 px-4">
+            <div className="grid grid-cols-1 gap-4 px-4">
+
           {([
 
             { p: "instagram", label: "Instagram URL", ph: "https://instagram.com/handle", unit: "followers" },
