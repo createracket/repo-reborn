@@ -48,23 +48,19 @@ function Dashboard() {
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
-      <section className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="text-xs uppercase tracking-[0.2em] text-lime">Morning brief · {dateLabel}</div>
-          <h1 className="mt-3 font-display text-4xl tracking-tight sm:text-5xl">
+          <h1 className="mt-2 font-display text-3xl tracking-tight">
             Six formats worth making <span className="text-lime">today</span>.
           </h1>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            Your desk read on what's breaking in music and culture across UK, US and Australia.
-            Rising fast, low competition, and ready to route to an artist on your roster.
-          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               placeholder="Search sounds, hooks, artists…"
-              className="w-64 rounded-full border border-border bg-card py-2 pl-9 pr-4 text-sm placeholder:text-muted-foreground focus:border-lime focus:outline-none"
+              className="w-56 rounded-full border border-border bg-card py-2 pl-9 pr-4 text-sm placeholder:text-muted-foreground focus:border-lime focus:outline-none"
             />
           </div>
           <button className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-sm text-muted-foreground hover:text-foreground">
@@ -73,7 +69,7 @@ function Dashboard() {
         </div>
       </section>
 
-      <section className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="Trends today" value={stats.trendsToday} accent="lime" hint={`Refreshed ${stats.refreshedMinutesAgo}m ago`} />
         <StatCard label="Breaking now" value={12} accent="coral" hint="Rising in last 6h" />
         <StatCard label="Watchlist hits" value={4} hint="Match your artists" />
