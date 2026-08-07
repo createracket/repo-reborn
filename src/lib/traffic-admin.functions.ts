@@ -135,7 +135,10 @@ export const getTrafficStats = createServerFn({ method: "POST" })
     return {
       range: data.range,
       filter: data.filter,
+      includeSelf: data.includeSelf,
+      excludedSelfPageviews,
       since: sinceIso,
+
       totals: {
         pageviews,
         visitors: sessions,
