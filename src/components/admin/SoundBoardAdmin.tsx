@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Trash2, ChevronDown, ChevronRight, Upload } from "lucide-react";
 
 type SoundBoardItem = {
   id: string;
@@ -24,6 +24,35 @@ export function SoundBoardAdmin() {
   const [rows, setRows] = useState<SoundBoardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+
+  async function uploadCover(row: SoundBoardItem, file: File) {
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be under 8MB");
+      return;
+    }
+    setUploadingId(row.id);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `sound-board/${row.id}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("spotlight-images")
+        .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+      updateLocal(row.id, { thumbnail_url: data.publicUrl });
+      const { error: saveError } = await supabase
+        .from("sound_board_items" as any)
+        .update({ thumbnail_url: data.publicUrl } as any)
+        .eq("id", row.id);
+      if (saveError) throw saveError;
+      toast.success("Thumbnail uploaded");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload failed");
+    } finally {
+      setUploadingId(null);
+    }
+  }
 
   function toggleOpen(id: string) {
     setOpenIds((prev) => {
@@ -182,13 +211,50 @@ export function SoundBoardAdmin() {
                       />
                     </div>
                     <div>
-                      <Label>Thumbnail image URL</Label>
+                      <Label>Thumbnail image</Label>
                       <Input
                         placeholder="https://... (9:16 preferred)"
                         value={row.thumbnail_url ?? ""}
                         onChange={(e) => updateLocal(row.id, { thumbnail_url: e.target.value || null })}
                       />
+                      <div className="mt-2 flex items-center gap-2">
+                        <input
+                          id={`sb-file-${row.id}`}
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (file) uploadCover(row, file);
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={uploadingId === row.id}
+                          onClick={() => document.getElementById(`sb-file-${row.id}`)?.click()}
+                        >
+                          <Upload className="mr-1 size-4" />
+                          {uploadingId === row.id ? "Uploading…" : "Upload image"}
+                        </Button>
+                        {row.thumbnail_url ? (
+                          <img
+                            src={row.thumbnail_url}
+                            alt={`${row.title} thumbnail preview`}
+                            className="h-12 w-[27px] rounded object-cover border border-border"
+                            loading="lazy"
+                          />
+                        ) : null}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Uploads are stored in the <code>sound-board/</code> folder of the
+                        public images bucket, so you can also drop files there manually and
+                        paste the public URL above.
+                      </p>
                     </div>
+
                   </div>
                   <div>
                     <Label>Fallback gradient (used when no thumbnail)</Label>
