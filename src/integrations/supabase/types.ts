@@ -1403,8 +1403,11 @@ export type Database = {
           created_by: string | null
           handle: string
           id: string
+          notes: string | null
           platform: string
           posts: Json
+          report_title: string | null
+          saved: boolean
           updated_at: string
         }
         Insert: {
@@ -1414,8 +1417,11 @@ export type Database = {
           created_by?: string | null
           handle: string
           id?: string
+          notes?: string | null
           platform?: string
           posts?: Json
+          report_title?: string | null
+          saved?: boolean
           updated_at?: string
         }
         Update: {
@@ -1425,8 +1431,11 @@ export type Database = {
           created_by?: string | null
           handle?: string
           id?: string
+          notes?: string | null
           platform?: string
           posts?: Json
+          report_title?: string | null
+          saved?: boolean
           updated_at?: string
         }
         Relationships: []
