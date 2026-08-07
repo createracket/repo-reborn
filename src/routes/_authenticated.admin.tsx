@@ -1320,7 +1320,11 @@ function SpotlightForm({
   const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
   const scrapeApple = useServerFn(scrapeAppleMusicArtist);
   const [syncing, setSyncing] = useState<string | null>(null);
-  const [fetchedCounts, setFetchedCounts] = useState<Record<string, number>>({});
+  // Synced per-handle counts. Persisted in links.follower_counts so they survive
+  // a save/reload instead of being lost when the editor unmounts.
+  const [fetchedCounts, setFetchedCounts] = useState<Record<string, number>>(
+    () => (editData?.links?.follower_counts as Record<string, number> | undefined) ?? {},
+  );
   // Extra social handles (band members, side projects) — up to 5 per platform.
   const EXTRA_PLATFORMS = ["instagram", "tiktok", "youtube", "spotify", "apple_music"] as const;
   type ExtraPlatform = (typeof EXTRA_PLATFORMS)[number];
@@ -1375,7 +1379,12 @@ function SpotlightForm({
         return;
       }
       if (r.followers != null) {
-        setFetchedCounts((c) => ({ ...c, [key]: r.followers ?? 0 }));
+        const next = { ...fetchedCounts, [key]: r.followers };
+        setFetchedCounts(next);
+        // Keep the headline metric in sync automatically so a synced number is
+        // never lost just because "Apply sum" wasn't clicked before saving.
+        const total = sumSocialCounts(next);
+        if (total > 0) set("total_followers", String(total));
         toast.success(`${platform}: ${r.followers.toLocaleString()} followers`);
       } else {
         toast.error("No follower count returned");
@@ -1402,7 +1411,6 @@ function SpotlightForm({
       const updates: string[] = [];
       if (r.followers != null) {
         setFetchedCounts((c) => ({ ...c, [key]: r.followers ?? 0 }));
-        if (extraIndex == null) set("total_followers", String(r.followers));
         updates.push(`${r.followers.toLocaleString()} followers`);
       }
       if (r.monthly_listeners != null) {
@@ -1446,11 +1454,15 @@ function SpotlightForm({
     }
   }
 
-  function applyTotalFollowers() {
-    // Sum main + extra handles across Instagram / TikTok / YouTube.
-    const total = Object.entries(fetchedCounts)
+  // Sum main + extra handles across Instagram / TikTok / YouTube.
+  function sumSocialCounts(counts: Record<string, number>) {
+    return Object.entries(counts)
       .filter(([k]) => /^(instagram|tiktok|youtube)(:|$)/.test(k))
       .reduce((sum, [, v]) => sum + (v ?? 0), 0);
+  }
+
+  function applyTotalFollowers() {
+    const total = sumSocialCounts(fetchedCounts);
     if (total <= 0) {
       toast.error("Sync at least one social first");
       return;
@@ -1498,6 +1510,7 @@ function SpotlightForm({
         youtube_extra: extraLinks.youtube.map((s) => s.trim()).filter(Boolean),
         spotify_extra: extraLinks.spotify.map((s) => s.trim()).filter(Boolean),
         apple_music_extra: extraLinks.apple_music.map((s) => s.trim()).filter(Boolean),
+        follower_counts: fetchedCounts,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
