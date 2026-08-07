@@ -32,6 +32,7 @@ export function TrafficAdmin() {
   const fetchStats = useServerFn(getTrafficStats);
   const [range, setRange] = useState<TrafficRange>("7d");
   const [filter, setFilter] = useState<TrafficFilter>("humans");
+  const [includeSelf, setIncludeSelf] = useState(false);
   const [stats, setStats] = useState<TrafficStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,12 +41,13 @@ export function TrafficAdmin() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetchStats({ data: { range, filter } })
+    fetchStats({ data: { range, filter, includeSelf } })
       .then((res) => { if (!cancelled) setStats(res); })
       .catch((e) => { if (!cancelled) setError(e?.message ?? "Failed to load traffic stats"); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [range, filter, fetchStats]);
+  }, [range, filter, includeSelf, fetchStats]);
+
 
   const totalAll = stats ? stats.totals.humanPageviews + stats.totals.botPageviews : 0;
   const botShare = totalAll > 0 && stats ? Math.round((stats.totals.botPageviews / totalAll) * 100) : 0;
@@ -70,6 +72,14 @@ export function TrafficAdmin() {
             onChange={setRange}
             options={RANGES.map((r) => ({ value: r.value, label: r.label }))}
           />
+          <SegmentedControl<"exclude" | "include">
+            value={includeSelf ? "include" : "exclude"}
+            onChange={(v) => setIncludeSelf(v === "include")}
+            options={[
+              { value: "exclude", label: "Exclude me", title: "Hide your own admin browsing" },
+              { value: "include", label: "Include me", title: "Show your own admin browsing" },
+            ]}
+          />
         </div>
       </div>
 
@@ -79,10 +89,14 @@ export function TrafficAdmin() {
             <span className="text-muted-foreground">
               In this period: <strong className="text-foreground">{stats.totals.humanPageviews.toLocaleString()}</strong> human ·{" "}
               <strong className="text-foreground">{stats.totals.botPageviews.toLocaleString()}</strong> bot pageviews ({botShare}% bots)
+              {!stats.includeSelf && stats.excludedSelfPageviews > 0 && (
+                <> · <strong className="text-foreground">{stats.excludedSelfPageviews.toLocaleString()}</strong> of your own views excluded</>
+              )}
             </span>
             <span className="text-xs text-muted-foreground">
               Showing: <strong className="text-foreground">{FILTERS.find((f) => f.value === filter)?.label}</strong>
             </span>
+
           </CardContent>
         </Card>
       )}

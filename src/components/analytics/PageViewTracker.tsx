@@ -43,16 +43,29 @@ export function PageViewTracker() {
       : null;
 
     // Fire and forget. Server handles bot detection + country via edge headers.
-    try {
-      const payload = JSON.stringify({ session_id: sid, path: pathname.slice(0, 512), referrer: ref });
-      fetch("/api/public/track-pageview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: payload,
-        keepalive: true,
-      }).catch(() => {});
-    } catch {}
+    // Attach the session token when signed in so admin activity can be isolated.
+    (async () => {
+      let token: string | null = null;
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data } = await supabase.auth.getSession();
+        token = data.session?.access_token ?? null;
+      } catch {}
+      try {
+        const payload = JSON.stringify({ session_id: sid, path: pathname.slice(0, 512), referrer: ref });
+        await fetch("/api/public/track-pageview", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: payload,
+          keepalive: true,
+        });
+      } catch {}
+    })();
   }, [pathname]);
+
 
   return null;
 }

@@ -7,6 +7,8 @@ export type TrafficFilter = "humans" | "bots" | "all";
 export type TrafficStats = {
   range: TrafficRange;
   filter: TrafficFilter;
+  includeSelf: boolean;
+  excludedSelfPageviews: number;
   since: string;
   totals: {
     pageviews: number;
@@ -28,10 +30,12 @@ const RANGE_DAYS: Record<TrafficRange, number> = { "7d": 7, "30d": 30, "90d": 90
 
 export const getTrafficStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { range?: TrafficRange; filter?: TrafficFilter }) => ({
+  .inputValidator((data: { range?: TrafficRange; filter?: TrafficFilter; includeSelf?: boolean }) => ({
     range: (data?.range ?? "7d") as TrafficRange,
     filter: (data?.filter ?? "humans") as TrafficFilter,
+    includeSelf: data?.includeSelf === true,
   }))
+
   .handler(async ({ data, context }): Promise<TrafficStats> => {
     const { supabase, userId } = context;
 
@@ -49,7 +53,7 @@ export const getTrafficStats = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabase
       .from("page_views" as any)
-      .select("session_id, path, referrer, created_at, is_bot, bot_reason, country")
+      .select("session_id, path, referrer, created_at, is_bot, bot_reason, country, user_id")
       .gte("created_at", sinceIso)
       .order("created_at", { ascending: true })
       .limit(50000);
@@ -64,8 +68,17 @@ export const getTrafficStats = createServerFn({ method: "POST" })
       is_bot: boolean | null;
       bot_reason: string | null;
       country: string | null;
+      user_id: string | null;
     };
-    const all = (rows as unknown as Row[] | null) ?? [];
+    const raw = (rows as unknown as Row[] | null) ?? [];
+
+    // Isolate the signed-in admin's own activity: drop every pageview from any
+    // browser session that was ever tied to this admin account.
+    const mySessions = new Set(
+      raw.filter((r) => r.user_id === userId).map((r) => r.session_id),
+    );
+    const all = data.includeSelf ? raw : raw.filter((r) => !mySessions.has(r.session_id));
+    const excludedSelfPageviews = raw.length - all.length;
 
     const humanPageviews = all.filter((r) => !r.is_bot).length;
     const botPageviews = all.length - humanPageviews;
@@ -74,6 +87,7 @@ export const getTrafficStats = createServerFn({ method: "POST" })
       data.filter === "humans" ? all.filter((r) => !r.is_bot)
       : data.filter === "bots" ? all.filter((r) => r.is_bot)
       : all;
+
 
     const sessionCounts = new Map<string, number>();
     const pageCounts = new Map<string, number>();
@@ -121,7 +135,10 @@ export const getTrafficStats = createServerFn({ method: "POST" })
     return {
       range: data.range,
       filter: data.filter,
+      includeSelf: data.includeSelf,
+      excludedSelfPageviews,
       since: sinceIso,
+
       totals: {
         pageviews,
         visitors: sessions,
