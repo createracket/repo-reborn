@@ -111,16 +111,8 @@ function categoryBadgeClass(value: string) {
   return CATEGORY_BADGE[value] ?? "bg-primary/25 text-primary border border-primary/40";
 }
 
-const STATUS_BADGE: Record<string, string> = {
-  in_review: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
-  approved: "border-primary/40 bg-primary/10 text-primary",
-  confirmed: "border-primary/40 bg-primary/10 text-primary",
-  in_production: "border-chart-4/40 bg-chart-4/10 text-chart-4",
-  briefed: "border-chart-5/40 bg-chart-5/10 text-chart-5",
-  contracting: "border-purple/40 bg-purple/10 text-purple",
-  live: "border-pink-accent/40 bg-pink-accent/10 text-pink-accent",
-  hold: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-};
+const STATUS_BADGE_CLASS = "border-border/70 bg-muted/40 text-muted-foreground";
+
 
 
 export const Route = createFileRoute("/roster/$slug")({
