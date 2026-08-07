@@ -1702,7 +1702,16 @@ function SpotlightForm({
             <Label htmlFor="audience">Audience segments (one per line)</Label>
             <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
           </div>
+          <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+              Social links &amp; handles
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                (Instagram, TikTok, YouTube, Spotify, Apple Music, Twitch, Facebook, X, other)
+              </span>
+            </summary>
+            <div className="grid gap-4 px-4">
           {([
+
             { p: "instagram", label: "Instagram URL", ph: "https://instagram.com/handle", unit: "followers" },
             { p: "tiktok", label: "TikTok URL", ph: "https://tiktok.com/@handle", unit: "followers" },
             { p: "youtube", label: "YouTube URL", ph: "https://youtube.com/@handle", unit: "subscribers" },
