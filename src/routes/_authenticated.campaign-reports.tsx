@@ -1645,6 +1645,13 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
         )}
         <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
           <span>
+            {form.posted_at
+              ? `${new Date(form.posted_at).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })} · `
+              : ""}
             {formatCount(numOrNull(form.views) ?? 0)} views · {formatCount(numOrNull(form.likes) ?? 0)} likes
           </span>
           <button
