@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const GateInfoSchema = z.object({ slug: z.string().trim().min(1).max(200) });
 
@@ -76,4 +77,26 @@ export const unlockSpotlight = createServerFn({ method: "POST" })
       .insert({ partner_page_id: record.id, email: data.email.toLowerCase() });
 
     return { ok: true as const, page };
+  });
+
+/** Admin-only: returns a spotlight regardless of published/gated state, for previewing drafts. */
+export const getSpotlightPreview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => GateInfoSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) return { ok: false as const };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("partner_pages")
+      .select(PAGE_FIELDS)
+      .eq("slug", data.slug)
+      .maybeSingle();
+
+    if (!row) return { ok: false as const };
+    return { ok: true as const, page: row };
   });
