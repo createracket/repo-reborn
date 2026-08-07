@@ -18,7 +18,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import racketNavLogo from "@/assets/logo-singleR-transparent.jpg.asset.json";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
+
 
 /**
  * Header for inner pages (vibe-check, login, dashboard, etc).
@@ -99,6 +101,8 @@ export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
           )}
           {!minimal && (
             <div className="flex items-center gap-2">
+              <ThemeToggle />
+
               {signedIn ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

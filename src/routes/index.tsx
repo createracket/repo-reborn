@@ -5,6 +5,8 @@ import { Users, Handshake, Link2, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HomeFaqs } from "@/components/site/HomeFaqs";
 import createLogoTransparent from "@/assets/CR-Logo-Half-Colour.svg.asset.json";
@@ -233,7 +235,11 @@ function Home() {
             <img src={racketLogoIconLight.url} alt="Racket" className="h-9 w-auto" />
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex" />
-          <HeroAuthButton />
+          <div className="flex items-center gap-1">
+            <ThemeToggle className="text-white/80 hover:bg-white/10 hover:text-white" />
+            <HeroAuthButton />
+          </div>
+
 
         </header>
 
