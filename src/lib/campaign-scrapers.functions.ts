@@ -899,6 +899,9 @@ const profileSyncInput = z.object({
   instagram_url: z.string().nullish(),
   tiktok_url: z.string().nullish(),
   youtube_url: z.string().nullish(),
+  twitch_url: z.string().nullish(),
+  facebook_url: z.string().nullish(),
+  x_url: z.string().nullish(),
   spotify_url: z.string().nullish(),
   apple_music_url: z.string().nullish(),
 });
@@ -911,6 +914,9 @@ export type ProfileSyncResult = {
   instagram?: ProfileResult | null;
   tiktok?: ProfileResult | null;
   youtube?: ProfileResult | null;
+  twitch?: ProfileResult | null;
+  facebook?: ProfileResult | null;
+  x?: ProfileResult | null;
   spotify?: SpotifyArtistResult | null;
   apple?: AppleMusicArtistResult | null;
 };
@@ -920,6 +926,9 @@ async function scrapeProfileByUrl(url: string): Promise<ProfileResult> {
   if (platform === "instagram") return scrapeInstagramProfile(url);
   if (platform === "tiktok") return scrapeTikTokProfile(url);
   if (platform === "youtube") return scrapeYouTubeChannel(url);
+  if (platform === "twitch") return scrapeTwitchChannel(url);
+  if (platform === "facebook") return scrapeFacebookPage(url);
+  if (platform === "x") return scrapeXProfile(url);
   return { ok: false, error: "Unsupported profile URL." };
 }
 
@@ -942,10 +951,13 @@ export const runProfileSync = createServerFn({ method: "POST" })
       throw e;
     }
 
-    const [instagram, tiktok, youtube, spotify, apple] = await Promise.all([
+    const [instagram, tiktok, youtube, twitch, facebook, x, spotify, apple] = await Promise.all([
       data.instagram_url ? scrapeProfileByUrl(data.instagram_url) : Promise.resolve(null),
       data.tiktok_url ? scrapeProfileByUrl(data.tiktok_url) : Promise.resolve(null),
       data.youtube_url ? scrapeProfileByUrl(data.youtube_url) : Promise.resolve(null),
+      data.twitch_url ? scrapeProfileByUrl(data.twitch_url) : Promise.resolve(null),
+      data.facebook_url ? scrapeProfileByUrl(data.facebook_url) : Promise.resolve(null),
+      data.x_url ? scrapeProfileByUrl(data.x_url) : Promise.resolve(null),
       data.spotify_url ? spotifyArtistCore({ url: data.spotify_url }) : Promise.resolve(null),
       data.apple_music_url ? appleMusicArtistCore({ url: data.apple_music_url }) : Promise.resolve(null),
     ]);
@@ -959,6 +971,9 @@ export const runProfileSync = createServerFn({ method: "POST" })
       instagram,
       tiktok,
       youtube,
+      twitch,
+      facebook,
+      x,
       spotify,
       apple,
     };
