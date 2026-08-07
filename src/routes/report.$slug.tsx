@@ -411,7 +411,7 @@ function PublicReportPage() {
             />
           ) : null}
           <div className="min-w-[240px] flex-1">
-            <Badge variant="outline" className="uppercase tracking-[0.2em]">
+            <Badge className="border-transparent bg-lime uppercase tracking-[0.2em] text-primary-foreground hover:bg-lime">
               <Users className="mr-1.5 size-3" /> Campaign Report
             </Badge>
             <h1 className="mt-4 font-display text-5xl leading-tight md:text-6xl">{report.title}</h1>
