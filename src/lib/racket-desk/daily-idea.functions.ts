@@ -47,7 +47,7 @@ export const generateDailyIdea = createServerFn({ method: "POST" })
       .map((p) => `- ${p.platform} @${p.handle} (regions: ${p.regions.join(", ")})`)
       .join("\n");
 
-    const system = `You are Racket, a creative strategist for musicians and their marketing teams. You produce ONE actionable social content idea per day that is on-trend for music and culture across UK, US and AU. Output MUST be valid JSON matching the schema. Be specific, punchy, and shootable today. No emojis in the hook.`;
+    const system = `You are Racket, a creative strategist for musicians and their marketing teams. You produce ONE actionable social content idea per day that is on-trend for music and culture across UK, US and AU. Output MUST be valid JSON matching the schema. Be specific, punchy, and shootable today. No emojis in the hook. Always write in British English spelling (e.g. capitalise, optimise, colour, personalise) — never US spelling.`;
 
     const user = `Date: ${today}
 

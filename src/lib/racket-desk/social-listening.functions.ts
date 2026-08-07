@@ -133,7 +133,7 @@ export const runSocialListening = createServerFn({ method: "POST" })
     }));
 
     const system =
-      "You are a music talent strategist. You read social performance data and fan comments, then say what is working and what to make next. Output MUST be valid JSON only.";
+      "You are a music talent strategist. You read social performance data and fan comments, then say what is working and what to make next. Output MUST be valid JSON only. Always write in British English spelling (e.g. capitalise, optimise, colour, personalise) — never US spelling.";
     const user = `Artist: ${data.artistName} (Instagram @${handle})
 
 Top performing reels (already ranked by engagement):
