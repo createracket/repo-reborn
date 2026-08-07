@@ -1661,67 +1661,77 @@ function SpotlightForm({
             <Label htmlFor="audience">Audience segments (one per line)</Label>
             <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="instagram">Instagram URL</Label>
-            <div className="flex gap-2">
-              <Input id="instagram" value={form.instagram} onChange={(e) => set("instagram", e.target.value)} placeholder="https://instagram.com/handle" />
-              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("instagram")} disabled={syncing !== null}>
-                <RefreshCw className={`size-3 ${syncing === "instagram" ? "animate-spin" : ""}`} />
-                <span className="ml-1">Sync</span>
-              </Button>
-            </div>
-            {fetchedCounts.instagram != null && (
-              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()} followers</p>
-            )}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="tiktok">TikTok URL</Label>
-            <div className="flex gap-2">
-              <Input id="tiktok" value={form.tiktok} onChange={(e) => set("tiktok", e.target.value)} placeholder="https://tiktok.com/@handle" />
-              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("tiktok")} disabled={syncing !== null}>
-                <RefreshCw className={`size-3 ${syncing === "tiktok" ? "animate-spin" : ""}`} />
-                <span className="ml-1">Sync</span>
-              </Button>
-            </div>
-            {fetchedCounts.tiktok != null && (
-              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()} followers</p>
-            )}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="youtube">YouTube URL</Label>
-            <div className="flex gap-2">
-              <Input id="youtube" value={form.youtube} onChange={(e) => set("youtube", e.target.value)} placeholder="https://youtube.com/@handle" />
-              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("youtube")} disabled={syncing !== null}>
-                <RefreshCw className={`size-3 ${syncing === "youtube" ? "animate-spin" : ""}`} />
-                <span className="ml-1">Sync</span>
-              </Button>
-            </div>
-            {fetchedCounts.youtube != null && (
-              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()} subscribers</p>
-            )}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="spotify">Spotify artist URL</Label>
-            <div className="flex gap-2">
-              <Input id="spotify" value={form.spotify} onChange={(e) => set("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/..." />
-              <Button type="button" variant="outline" size="sm" onClick={syncSpotify} disabled={syncing !== null}>
-                <RefreshCw className={`size-3 ${syncing === "spotify" ? "animate-spin" : ""}`} />
-                <span className="ml-1">Sync</span>
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">Fetches followers + monthly listeners (Spotify) and estimated total streams (Kworb).</p>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="apple_music">Apple Music artist URL</Label>
-            <div className="flex gap-2">
-              <Input id="apple_music" value={form.apple_music} onChange={(e) => set("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
-              <Button type="button" variant="outline" size="sm" onClick={syncApple} disabled={syncing !== null}>
-                <RefreshCw className={`size-3 ${syncing === "apple" ? "animate-spin" : ""}`} />
-                <span className="ml-1">Sync</span>
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">Verifies the artist name against the spotlight headline.</p>
-          </div>
+          {([
+            { p: "instagram", label: "Instagram URL", ph: "https://instagram.com/handle", unit: "followers" },
+            { p: "tiktok", label: "TikTok URL", ph: "https://tiktok.com/@handle", unit: "followers" },
+            { p: "youtube", label: "YouTube URL", ph: "https://youtube.com/@handle", unit: "subscribers" },
+            { p: "spotify", label: "Spotify artist URL", ph: "https://open.spotify.com/artist/...", unit: "followers" },
+            { p: "apple_music", label: "Apple Music artist URL", ph: "https://music.apple.com/…/artist/…", unit: "" },
+          ] as const).map(({ p, label, ph, unit }) => {
+            const runSync = (i?: number) => {
+              if (p === "spotify") return syncSpotify(i);
+              if (p === "apple_music") return syncApple(i);
+              return syncSocial(p, i);
+            };
+            const mainKey = p === "apple_music" ? "apple" : p;
+            const extras = extraLinks[p];
+            return (
+              <div key={p} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor={p}>{label}</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => addExtra(p)}
+                    disabled={extras.length >= 5}
+                    title="Add another handle (e.g. a band member)"
+                  >
+                    <Plus className="size-3" />
+                    <span className="ml-1">Add handle</span>
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Input id={p} value={form[p]} onChange={(e) => set(p, e.target.value)} placeholder={ph} />
+                  <Button type="button" variant="outline" size="sm" onClick={() => runSync()} disabled={syncing !== null}>
+                    <RefreshCw className={`size-3 ${syncing === mainKey ? "animate-spin" : ""}`} />
+                    <span className="ml-1">Sync</span>
+                  </Button>
+                </div>
+                {fetchedCounts[p] != null && (
+                  <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts[p].toLocaleString()} {unit || "followers"}</p>
+                )}
+                {extras.map((val, i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="flex gap-2">
+                      <Input
+                        value={val}
+                        onChange={(e) => setExtra(p, i, e.target.value)}
+                        placeholder={`${ph} (extra ${i + 1})`}
+                      />
+                      <Button type="button" variant="outline" size="sm" onClick={() => runSync(i)} disabled={syncing !== null}>
+                        <RefreshCw className={`size-3 ${syncing === `${p}:${i}` ? "animate-spin" : ""}`} />
+                        <span className="ml-1">Sync</span>
+                      </Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => removeExtra(p, i)} aria-label="Remove handle">
+                        <X className="size-3" />
+                      </Button>
+                    </div>
+                    {fetchedCounts[`${p}:${i}`] != null && (
+                      <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts[`${p}:${i}`].toLocaleString()} {unit || "followers"}</p>
+                    )}
+                  </div>
+                ))}
+                {p === "spotify" && (
+                  <p className="text-xs text-muted-foreground">Fetches followers + monthly listeners (Spotify) and estimated total streams (Kworb).</p>
+                )}
+                {p === "apple_music" && (
+                  <p className="text-xs text-muted-foreground">Verifies the artist name against the spotlight headline.</p>
+                )}
+              </div>
+            );
+          })}
           {mismatchWarning ? (
             <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
               {mismatchWarning}
