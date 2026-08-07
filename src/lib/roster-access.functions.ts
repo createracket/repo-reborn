@@ -76,3 +76,45 @@ export const unlockRoster = createServerFn({ method: "POST" })
 
     return { ok: true as const, roster, items: items ?? [] };
   });
+
+/**
+ * Signed-in members (admin, owner, or assigned client/brand email) can view a
+ * code-protected roster without entering the passcode.
+ */
+export const getRosterForMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => GateInfoSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: row } = await supabaseAdmin
+      .from("rosters")
+      .select(`${ROSTER_FIELDS}, owner_id, client_email, brand_email`)
+      .eq("slug", data.slug)
+      .maybeSingle();
+    if (!row) return { ok: false as const };
+
+    const record = row as Record<string, any>;
+    const email = String((context.claims as any)?.email ?? "").toLowerCase();
+
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+
+    const allowed =
+      !!isAdmin ||
+      record.owner_id === context.userId ||
+      (!!email && [record.client_email, record.brand_email].some((e) => (e ?? "").toLowerCase() === email));
+    if (!allowed) return { ok: false as const };
+
+    const { owner_id: _o, client_email: _c, brand_email: _b, ...roster } = record;
+
+    const { data: items } = await supabaseAdmin
+      .from("roster_items")
+      .select(ITEM_FIELDS)
+      .eq("roster_id", roster.id as string)
+      .order("position", { ascending: true });
+
+    return { ok: true as const, roster, items: items ?? [] };
+  });
