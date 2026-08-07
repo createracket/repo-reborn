@@ -820,12 +820,56 @@ function DashboardPage() {
                     No open opportunities right now — here are the types of briefs we surface.
                   </div>
                 ) : opportunities.length === 0 ? null : (
-                  <ul className="grid gap-3 md:grid-cols-2">
-                    {opportunities.map((o) => (
-                      <OpportunityCard key={`${o.brief_source}:${o.id}`} opp={o} />
-                    ))}
-                  </ul>
+                  <div>
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                        Open briefs
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-full"
+                          onClick={() => {
+                            const el = oppCarouselRef.current;
+                            if (!el || !el.firstElementChild) return;
+                            const tileWidth = (el.firstElementChild as HTMLElement).offsetWidth + 12;
+                            el.scrollBy({ left: -tileWidth, behavior: "smooth" });
+                          }}
+                        >
+                          <ChevronLeft className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-full"
+                          onClick={() => {
+                            const el = oppCarouselRef.current;
+                            if (!el || !el.firstElementChild) return;
+                            const tileWidth = (el.firstElementChild as HTMLElement).offsetWidth + 12;
+                            el.scrollBy({ left: tileWidth, behavior: "smooth" });
+                          }}
+                        >
+                          <ChevronRight className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <ul
+                      ref={oppCarouselRef}
+                      className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
+                    >
+                      {opportunities.map((o) => (
+                        <li
+                          key={`${o.brief_source}:${o.id}`}
+                          className="snap-start shrink-0 w-full sm:w-[calc(50%-6px)]"
+                        >
+                          <OpportunityCard opp={o} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
+
 
                 {/* Combined spotlights & examples carousel */}
                 {!loading && (spotlightOpps.length > 0 || examples.length > 0) ? (
