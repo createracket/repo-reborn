@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Ear, ExternalLink, Loader2, Trash2, Sparkles } from "lucide-react";
+import { Ear, ExternalLink, Loader2, Trash2, Sparkles, Bookmark, BookmarkCheck } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import {
   runSocialListening,
   listSocialListeningScans,
   deleteSocialListeningScan,
+  saveSocialListeningScan,
   type ListeningAnalysis,
   type ScannedPost,
 } from "@/lib/racket-desk/social-listening.functions";
@@ -29,6 +31,8 @@ type Scan = {
   posts: ScannedPost[];
   analysis: ListeningAnalysis;
   created_at: string;
+  saved?: boolean;
+  report_title?: string | null;
 };
 
 function fmt(n: number) {
@@ -50,7 +54,7 @@ function SocialListeningPage() {
   useEffect(() => {
     (async () => {
       try {
-        setScans((await listSocialListeningScans()) as Scan[]);
+        setScans((await listSocialListeningScans({ data: { savedOnly: false } })) as Scan[]);
       } catch {
         /* non-fatal */
       }
@@ -80,6 +84,7 @@ function SocialListeningPage() {
         posts: res.posts ?? [],
         analysis: res.analysis,
         created_at: new Date().toISOString(),
+        saved: false,
       };
       setCurrent(scan);
       setScans((s) => [scan, ...s]);
@@ -98,6 +103,21 @@ function SocialListeningPage() {
       if (current?.id === id) setCurrent(null);
     } catch (e: any) {
       toast.error(e?.message ?? "Could not delete scan");
+    }
+  }
+
+  async function toggleSave(scan: Scan, saved: boolean) {
+    if (!scan.id || scan.id === "new") {
+      toast.error("This scan couldn't be stored — run it again.");
+      return;
+    }
+    try {
+      await saveSocialListeningScan({ data: { id: scan.id, saved } });
+      setScans((s) => s.map((x) => (x.id === scan.id ? { ...x, saved } : x)));
+      setCurrent((c) => (c && c.id === scan.id ? { ...c, saved } : c));
+      toast.success(saved ? "Saved to reports" : "Removed from reports");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not save this scan");
     }
   }
 
@@ -157,7 +177,20 @@ function SocialListeningPage() {
       {a && current && (
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
           <section className="lg:col-span-2">
-            <h2 className="font-display text-xl">Top content · @{current.handle}</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-display text-xl">Top content · @{current.handle}</h2>
+              <button
+                onClick={() => toggleSave(current, !current.saved)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold transition ${
+                  current.saved
+                    ? "border-lime bg-lime text-primary-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {current.saved ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
+                {current.saved ? "Saved to reports" : "Save to reports"}
+              </button>
+            </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
               {a.topPosts.map((p) => (
                 <article key={p.url} className="flex flex-col rounded-2xl border border-border bg-card p-4">
@@ -248,7 +281,12 @@ function SocialListeningPage() {
 
       {scans.length > 0 && (
         <section className="mt-12">
-          <h2 className="font-display text-xl">Saved scans</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-display text-xl">Recent scans</h2>
+            <Link to="/racket-desk/reports" className="text-xs text-lime hover:underline">
+              View saved reports →
+            </Link>
+          </div>
           <ul className="mt-3 divide-y divide-border rounded-2xl border border-border">
             {scans.map((s) => (
               <li key={s.id} className="flex items-center gap-3 px-4 py-3 text-sm">
@@ -259,6 +297,13 @@ function SocialListeningPage() {
                 <span className="text-xs text-muted-foreground">
                   {new Date(s.created_at).toLocaleDateString("en-GB")}
                 </span>
+                <button
+                  onClick={() => toggleSave(s, !s.saved)}
+                  aria-label={s.saved ? "Remove from reports" : "Save to reports"}
+                  className={s.saved ? "text-lime" : "text-muted-foreground hover:text-foreground"}
+                >
+                  {s.saved ? <BookmarkCheck className="h-3.5 w-3.5" /> : <Bookmark className="h-3.5 w-3.5" />}
+                </button>
                 <button
                   onClick={() => remove(s.id)}
                   aria-label="Delete scan"

@@ -226,16 +226,21 @@ Respond with JSON only:
 
 export const listSocialListeningScans = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: unknown) =>
+    z.object({ savedOnly: z.boolean().default(false) }).parse(input ?? {}),
+  )
+  .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     await requireAdmin(supabase, userId);
-    const { data, error } = await supabase
+    let q = supabase
       .from("social_listening_scans")
-      .select("id, artist_name, handle, platform, posts, analysis, created_at")
+      .select("id, artist_name, handle, platform, posts, analysis, created_at, saved, report_title, notes")
       .order("created_at", { ascending: false })
-      .limit(25);
+      .limit(data.savedOnly ? 100 : 25);
+    if (data.savedOnly) q = q.eq("saved", true);
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return (data ?? []) as unknown as Array<{
+    return (rows ?? []) as unknown as Array<{
       id: string;
       artist_name: string;
       handle: string;
@@ -243,7 +248,36 @@ export const listSocialListeningScans = createServerFn({ method: "POST" })
       posts: ScannedPost[];
       analysis: ListeningAnalysis;
       created_at: string;
+      saved: boolean;
+      report_title: string | null;
+      notes: string | null;
     }>;
+  });
+
+/** Admin: keep (or un-keep) a scan in the saved reports collection. */
+export const saveSocialListeningScan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        saved: z.boolean().default(true),
+        reportTitle: z.string().trim().max(160).optional(),
+        notes: z.string().trim().max(2000).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await requireAdmin(supabase, userId);
+    const patch: { saved: boolean; report_title?: string | null; notes?: string | null } = {
+      saved: data.saved,
+    };
+    if (data.reportTitle !== undefined) patch.report_title = data.reportTitle || null;
+    if (data.notes !== undefined) patch.notes = data.notes || null;
+    const { error } = await supabase.from("social_listening_scans").update(patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
   });
 
 export const deleteSocialListeningScan = createServerFn({ method: "POST" })
