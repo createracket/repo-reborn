@@ -7,6 +7,8 @@ export type TrafficFilter = "humans" | "bots" | "all";
 export type TrafficStats = {
   range: TrafficRange;
   filter: TrafficFilter;
+  includeSelf: boolean;
+  excludedSelfPageviews: number;
   since: string;
   totals: {
     pageviews: number;
@@ -28,10 +30,12 @@ const RANGE_DAYS: Record<TrafficRange, number> = { "7d": 7, "30d": 30, "90d": 90
 
 export const getTrafficStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { range?: TrafficRange; filter?: TrafficFilter }) => ({
+  .inputValidator((data: { range?: TrafficRange; filter?: TrafficFilter; includeSelf?: boolean }) => ({
     range: (data?.range ?? "7d") as TrafficRange,
     filter: (data?.filter ?? "humans") as TrafficFilter,
+    includeSelf: data?.includeSelf === true,
   }))
+
   .handler(async ({ data, context }): Promise<TrafficStats> => {
     const { supabase, userId } = context;
 
