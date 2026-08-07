@@ -398,9 +398,13 @@ function PublicRosterPage() {
         )}
 
         {(() => {
-          const activeItems = items.filter((it) => it.status !== "hold" && it.status !== "live" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
-          const liveItems = items.filter((it) => it.status === "live" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
-          const archivedItems = items.filter((it) => it.status === "hold" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
+          const matches = (it: PublicItem) =>
+            (categoryFilter === "all" || itemCats(it).includes(categoryFilter)) &&
+            (roster.hide_statuses || statusFilter === "all" || (it.status || "in_review") === statusFilter);
+          const activeItems = items.filter((it) => it.status !== "hold" && it.status !== "live" && matches(it));
+          const liveItems = items.filter((it) => it.status === "live" && matches(it));
+          const archivedItems = items.filter((it) => it.status === "hold" && matches(it));
+
 
           const renderItem = (it: PublicItem) => {
             const stats: Array<[string, number | null, string | null]> = [
