@@ -495,58 +495,29 @@ function SpotlightPage() {
         ) : null}
         {/* Videos */}
         {(() => {
-          const videos = [links.video1, links.video2, links.video3]
-            .map((u) => (u ? getSocialEmbed(u) : null))
-            .filter((x): x is NonNullable<ReturnType<typeof getSocialEmbed>> => !!x);
+          const raw = [
+            { url: links.video1, cover: links.video1_cover },
+            { url: links.video2, cover: links.video2_cover },
+            { url: links.video3, cover: links.video3_cover },
+          ];
+          const videos = raw
+            .map((v) => (v.url ? { embed: getSocialEmbed(v.url), cover: v.cover } : null))
+            .filter((v): v is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover?: string } =>
+              !!v && !!v.embed,
+            );
           if (videos.length === 0) return null;
           return (
             <section className="mt-16">
               <h2 className="font-display text-3xl">Watch</h2>
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
-                {videos.map((v, i) => {
-                  const isIg = v.provider === "instagram";
-                  return (
-                    <div
-                      key={i}
-                      className="relative overflow-hidden rounded-2xl border border-border/60 bg-muted/40"
-                      style={{ aspectRatio: "9 / 16" }}
-                    >
-                      <iframe
-                        src={v.src}
-                        title={`${v.provider} video ${i + 1}`}
-                        frameBorder={0}
-                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture; web-share"
-                        allowFullScreen
-                        loading="lazy"
-                        scrolling="no"
-                        className={isIg ? "absolute left-1/2 -translate-x-1/2" : "size-full"}
-                        // Instagram embed has a ~56px header and a tall caption/actions
-                        // footer ("View more on Instagram", likes, icons). Oversize and
-                        // offset so only the media itself is visible.
-                        style={
-                          isIg
-                            ? {
-                                top: "-56px",
-                                width: "100%",
-                                height: "calc(100% + 440px)",
-                              }
-                            : undefined
-                        }
-                      />
-                      {isIg && (
-                        <a
-                          href={v.href}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label="Open on Instagram"
-                          className="absolute right-2 top-2 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-wide text-white backdrop-blur hover:bg-black/70"
-                        >
-                          Open
-                        </a>
-                      )}
-                    </div>
-                  );
-                })}
+              <div className="mt-4 grid gap-6 md:grid-cols-3">
+                {videos.map((v, i) => (
+                  <ClipCard
+                    key={i}
+                    href={v.embed.href}
+                    provider={v.embed.provider}
+                    poster={v.cover ?? posters[v.embed.href] ?? null}
+                  />
+                ))}
               </div>
             </section>
           );
