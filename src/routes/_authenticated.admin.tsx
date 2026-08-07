@@ -331,7 +331,7 @@ function AdminPage() {
                           </Badge>
                           <Button asChild size="sm" variant="outline">
                             <a href={`/spotlight/${s.slug}`} target="_blank" rel="noreferrer">
-                              View <ExternalLink className="ml-1 size-3" />
+                              {s.published ? "View" : "Preview"} <ExternalLink className="ml-1 size-3" />
                             </a>
                           </Button>
                           <Button
