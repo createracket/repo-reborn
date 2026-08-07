@@ -72,6 +72,14 @@ export function TrafficAdmin() {
             onChange={setRange}
             options={RANGES.map((r) => ({ value: r.value, label: r.label }))}
           />
+          <SegmentedControl<"exclude" | "include">
+            value={includeSelf ? "include" : "exclude"}
+            onChange={(v) => setIncludeSelf(v === "include")}
+            options={[
+              { value: "exclude", label: "Exclude me", title: "Hide your own admin browsing" },
+              { value: "include", label: "Include me", title: "Show your own admin browsing" },
+            ]}
+          />
         </div>
       </div>
 
@@ -81,10 +89,14 @@ export function TrafficAdmin() {
             <span className="text-muted-foreground">
               In this period: <strong className="text-foreground">{stats.totals.humanPageviews.toLocaleString()}</strong> human ·{" "}
               <strong className="text-foreground">{stats.totals.botPageviews.toLocaleString()}</strong> bot pageviews ({botShare}% bots)
+              {!stats.includeSelf && stats.excludedSelfPageviews > 0 && (
+                <> · <strong className="text-foreground">{stats.excludedSelfPageviews.toLocaleString()}</strong> of your own views excluded</>
+              )}
             </span>
             <span className="text-xs text-muted-foreground">
               Showing: <strong className="text-foreground">{FILTERS.find((f) => f.value === filter)?.label}</strong>
             </span>
+
           </CardContent>
         </Card>
       )}
