@@ -234,7 +234,7 @@ export const listSocialListeningScans = createServerFn({ method: "POST" })
     await requireAdmin(supabase, userId);
     let q = supabase
       .from("social_listening_scans")
-      .select("id, artist_name, handle, platform, posts, analysis, created_at, saved, report_title, notes")
+      .select("id, artist_name, handle, platform, posts, analysis, created_at, saved, report_title, notes, dashboard_visible")
       .order("created_at", { ascending: false })
       .limit(data.savedOnly ? 100 : 25);
     if (data.savedOnly) q = q.eq("saved", true);
@@ -251,6 +251,7 @@ export const listSocialListeningScans = createServerFn({ method: "POST" })
       saved: boolean;
       report_title: string | null;
       notes: string | null;
+      dashboard_visible: boolean;
     }>;
   });
 
