@@ -657,6 +657,11 @@ function DashboardPage() {
             </Card>
           </div>
 
+          <div className="lg:col-span-3">
+            <ListeningReportsCard />
+          </div>
+
+
           {assignedRosters.length > 0 && (
             <div className="lg:col-span-3">
               <Card>
