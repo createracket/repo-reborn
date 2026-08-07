@@ -309,17 +309,29 @@ function PublicRosterPage() {
           </div>
         ) : null}
 
-        <Badge variant="outline" className="uppercase tracking-[0.2em]">
-          <Users className="mr-1.5 size-3" /> Roster
-        </Badge>
-        <h1 className="mt-4 font-display text-5xl leading-tight md:text-6xl">
-          {roster.title}
-        </h1>
-        {roster.description && (
-          <p className="mt-4 whitespace-pre-wrap text-lg text-muted-foreground">
-            {roster.description}
-          </p>
-        )}
+        <div className="flex flex-wrap items-start gap-5">
+          {roster.profile_image_url ? (
+            <img
+              src={roster.profile_image_url}
+              alt={roster.title}
+              className="size-24 shrink-0 rounded-xl border border-border/60 object-cover md:size-32"
+            />
+          ) : null}
+          <div className="min-w-[240px] flex-1">
+            <Badge className="border-transparent bg-pink-accent uppercase tracking-[0.2em] text-[#2b2b2b] hover:bg-pink-accent">
+              <Users className="mr-1.5 size-3" /> Roster
+            </Badge>
+            <h1 className="mt-4 font-display text-5xl leading-tight md:text-6xl">
+              {roster.title}
+            </h1>
+            {roster.description && (
+              <p className="mt-4 whitespace-pre-wrap text-lg text-muted-foreground">
+                {roster.description}
+              </p>
+            )}
+          </div>
+        </div>
+
         {(roster.updated_at || roster.published_at) && (
           <p className="mt-3 text-xs uppercase tracking-wider text-muted-foreground">
             Last updated {new Date((roster.updated_at ?? roster.published_at) as string).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
