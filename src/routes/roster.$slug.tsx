@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { getRosterGate, unlockRoster } from "@/lib/roster-access.functions";
+import { socialAudience, totalFans } from "@/lib/audience";
 
 type PublicRoster = {
   id: string;
@@ -176,7 +177,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, position, status, category, categories, location",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, twitch_url, twitch_followers, facebook_url, facebook_followers, x_url, x_followers, custom_label, custom_url, custom_followers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, position, status, category, categories, location",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
