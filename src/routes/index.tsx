@@ -236,9 +236,9 @@ function Home() {
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-white/80 md:flex" />
           <div className="flex items-center gap-1">
-            <ThemeToggle className="text-white/80 hover:bg-white/10 hover:text-white" />
             <HeroAuthButton />
           </div>
+
 
 
         </header>
