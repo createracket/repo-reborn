@@ -41,7 +41,8 @@ Rules:
 - Never invent facts, dates, brands or links that are not in the source text.
 - Omit any field you cannot support from the text.
 - Keep list items short (max ~12 words each), no bullets or numbering characters.
-- Write in confident, plain, non-corporate language. No emojis.`;
+- Write in confident, plain, non-corporate language. No emojis.
+- Always use British English spelling (e.g. capitalise, optimise, colour, personalise) — never US spelling.`;
 
 export const draftSpotlightFromText = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

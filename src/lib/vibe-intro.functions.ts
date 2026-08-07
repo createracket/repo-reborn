@@ -43,7 +43,8 @@ Rules:
 - Use ONLY values from the provided option lists for enumerated fields.
 - Omit any field you can't confidently infer (do not guess).
 - For array fields, return [] if nothing applies.
-- For "story" / "creativeAesthetic" / "bio" fields, write 1-2 polished sentences in the user's voice.`;
+- For "story" / "creativeAesthetic" / "bio" fields, write 1-2 polished sentences in the user's voice.
+- Always use British English spelling (e.g. capitalise, optimise, colour, personalise) — never US spelling.`;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
