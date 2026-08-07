@@ -1384,6 +1384,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
   const [saving, setSaving] = useState(false);
   const [scraping, setScraping] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: post.id,
@@ -1642,11 +1643,24 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
             </a>
           </Button>
         )}
-        <div className="ml-auto flex gap-1 text-xs text-muted-foreground">
-          {formatCount(numOrNull(form.views) ?? 0)} views · {formatCount(numOrNull(form.likes) ?? 0)} likes
+        <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+          <span>
+            {formatCount(numOrNull(form.views) ?? 0)} views · {formatCount(numOrNull(form.likes) ?? 0)} likes
+          </span>
+          <button
+            type="button"
+            onClick={() => setOpen((x) => !x)}
+            aria-label={open ? "Collapse post" : "Expand post"}
+            aria-expanded={open}
+            className="rounded-md p-1 text-muted-foreground transition hover:text-foreground"
+          >
+            {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+          </button>
         </div>
       </div>
 
+      {open && (
+      <>
       <div className="grid gap-3 md:grid-cols-4">
         <NumField label="Views" v={form.views} on={(x) => set("views", x)} />
         <NumField label="Likes" v={form.likes} on={(x) => set("likes", x)} />
@@ -1774,6 +1788,8 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
           </Button>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }
