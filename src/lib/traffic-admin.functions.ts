@@ -49,7 +49,7 @@ export const getTrafficStats = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabase
       .from("page_views" as any)
-      .select("session_id, path, referrer, created_at, is_bot, bot_reason, country")
+      .select("session_id, path, referrer, created_at, is_bot, bot_reason, country, user_id")
       .gte("created_at", sinceIso)
       .order("created_at", { ascending: true })
       .limit(50000);
@@ -64,8 +64,17 @@ export const getTrafficStats = createServerFn({ method: "POST" })
       is_bot: boolean | null;
       bot_reason: string | null;
       country: string | null;
+      user_id: string | null;
     };
-    const all = (rows as unknown as Row[] | null) ?? [];
+    const raw = (rows as unknown as Row[] | null) ?? [];
+
+    // Isolate the signed-in admin's own activity: drop every pageview from any
+    // browser session that was ever tied to this admin account.
+    const mySessions = new Set(
+      raw.filter((r) => r.user_id === userId).map((r) => r.session_id),
+    );
+    const all = data.includeSelf ? raw : raw.filter((r) => !mySessions.has(r.session_id));
+    const excludedSelfPageviews = raw.length - all.length;
 
     const humanPageviews = all.filter((r) => !r.is_bot).length;
     const botPageviews = all.length - humanPageviews;
@@ -74,6 +83,7 @@ export const getTrafficStats = createServerFn({ method: "POST" })
       data.filter === "humans" ? all.filter((r) => !r.is_bot)
       : data.filter === "bots" ? all.filter((r) => r.is_bot)
       : all;
+
 
     const sessionCounts = new Map<string, number>();
     const pageCounts = new Map<string, number>();
