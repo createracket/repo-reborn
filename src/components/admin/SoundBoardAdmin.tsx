@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { adminUploadSpotlightImage } from "@/lib/spotlight-images.functions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +22,20 @@ type SoundBoardItem = {
   published: boolean;
 };
 
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result ?? "");
+      resolve(result.slice(result.indexOf(",") + 1));
+    };
+    reader.onerror = () => reject(new Error("Could not read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function SoundBoardAdmin() {
   const [rows, setRows] = useState<SoundBoardItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,25 +43,31 @@ export function SoundBoardAdmin() {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  const uploadImage = useServerFn(adminUploadSpotlightImage);
 
   async function uploadCover(row: SoundBoardItem, file: File) {
     if (file.size > 8 * 1024 * 1024) {
       toast.error("Image must be under 8MB");
       return;
     }
+    if (!ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) {
+      toast.error("Use a JPG, PNG, WEBP or GIF image");
+      return;
+    }
     setUploadingId(row.id);
     try {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `sound-board/${row.id}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage
-        .from("spotlight-images")
-        .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
-      if (error) throw error;
-      const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
-      updateLocal(row.id, { thumbnail_url: data.publicUrl });
+      const base64 = await fileToBase64(file);
+      const { publicUrl } = await uploadImage({
+        data: {
+          base64,
+          contentType: file.type as (typeof ALLOWED_TYPES)[number],
+          folder: "sound-board",
+        },
+      });
+      updateLocal(row.id, { thumbnail_url: publicUrl });
       const { error: saveError } = await supabase
         .from("sound_board_items" as any)
-        .update({ thumbnail_url: data.publicUrl } as any)
+        .update({ thumbnail_url: publicUrl } as any)
         .eq("id", row.id);
       if (saveError) throw saveError;
       toast.success("Thumbnail uploaded");
@@ -55,6 +77,7 @@ export function SoundBoardAdmin() {
       setUploadingId(null);
     }
   }
+
 
   function toggleOpen(id: string) {
     setOpenIds((prev) => {
