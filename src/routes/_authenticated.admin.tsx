@@ -1747,6 +1747,7 @@ function SpotlightForm({
                 { k: "label_partnership", label: "Partnership heading", ph: "Partnership" },
                 { k: "label_eoi", label: "Expressions of interest heading", ph: "Expressions of interest" },
                 { k: "label_videos", label: "Videos heading", ph: "Watch" },
+                { k: "label_members", label: "Secondary socials heading", ph: "Meet the members" },
               ] as const).map(({ k, label, ph }) => (
                 <div key={k} className="space-y-1.5">
                   <Label htmlFor={k}>{label}</Label>
