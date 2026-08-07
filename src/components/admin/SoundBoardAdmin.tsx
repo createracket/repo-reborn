@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, ChevronDown, ChevronRight, Upload } from "lucide-react";
+import { Trash2, ChevronDown, ChevronRight, Upload, GripVertical } from "lucide-react";
 
 type SoundBoardItem = {
   id: string;
@@ -25,6 +25,8 @@ export function SoundBoardAdmin() {
   const [loading, setLoading] = useState(true);
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
 
   async function uploadCover(row: SoundBoardItem, file: File) {
     if (file.size > 8 * 1024 * 1024) {
@@ -62,6 +64,45 @@ export function SoundBoardAdmin() {
     });
   }
 
+  function sortRows(list: SoundBoardItem[]) {
+    return [...list].sort((a, b) => {
+      if (a.published !== b.published) return a.published ? -1 : 1;
+      return a.position - b.position;
+    });
+  }
+
+  async function persistOrder(next: SoundBoardItem[]) {
+    const ordered = sortRows(next).map((r, i) => ({ ...r, position: i }));
+    setRows(ordered);
+    const changed = ordered.filter((r) => {
+      const prev = rows.find((x) => x.id === r.id);
+      return !prev || prev.position !== r.position;
+    });
+    for (const r of changed) {
+      const { error } = await supabase
+        .from("sound_board_items" as any)
+        .update({ position: r.position } as any)
+        .eq("id", r.id);
+      if (error) { toast.error(error.message); return; }
+    }
+    if (changed.length) toast.success("Order saved");
+  }
+
+  function handleDrop(targetId: string) {
+    const sourceId = dragId;
+    setDragId(null);
+    setOverId(null);
+    if (!sourceId || sourceId === targetId) return;
+    const current = sortRows(rows);
+    const from = current.findIndex((r) => r.id === sourceId);
+    const to = current.findIndex((r) => r.id === targetId);
+    if (from < 0 || to < 0) return;
+    const next = [...current];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    persistOrder(next.map((r, i) => ({ ...r, position: i })));
+  }
+
   async function load() {
     setLoading(true);
     const { data, error } = await supabase
@@ -69,7 +110,7 @@ export function SoundBoardAdmin() {
       .select("*")
       .order("position", { ascending: true });
     if (error) toast.error(error.message);
-    setRows(((data as any[]) ?? []) as SoundBoardItem[]);
+    setRows(sortRows(((data as any[]) ?? []) as SoundBoardItem[]));
     setLoading(false);
   }
 
@@ -109,6 +150,8 @@ export function SoundBoardAdmin() {
       .eq("id", row.id);
     if (error) { toast.error(error.message); return; }
     toast.success("Saved");
+    // unpublished cards drop to the bottom
+    await persistOrder(rows);
   }
 
   async function deleteRow(id: string) {
@@ -139,11 +182,28 @@ export function SoundBoardAdmin() {
         {!loading && rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No cards yet.</p>
         ) : null}
-        {rows.map((row) => {
+        {rows.map((row, idx) => {
           const isOpen = openIds.has(row.id);
           return (
-            <div key={row.id} className="rounded-lg border border-border">
+            <div
+              key={row.id}
+              onDragOver={(e) => { e.preventDefault(); if (dragId && overId !== row.id) setOverId(row.id); }}
+              onDrop={(e) => { e.preventDefault(); handleDrop(row.id); }}
+              className={`rounded-lg border transition-colors ${
+                overId === row.id && dragId !== row.id ? "border-primary" : "border-border"
+              } ${dragId === row.id ? "opacity-50" : ""}`}
+            >
               <div className="flex items-center gap-2 p-3">
+                <span
+                  draggable
+                  onDragStart={() => setDragId(row.id)}
+                  onDragEnd={() => { setDragId(null); setOverId(null); }}
+                  className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground p-1"
+                  aria-label="Drag to reorder"
+                  title="Drag to reorder"
+                >
+                  <GripVertical className="size-4" />
+                </span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -158,7 +218,7 @@ export function SoundBoardAdmin() {
                   onClick={() => toggleOpen(row.id)}
                   className="flex-1 text-left truncate font-medium"
                 >
-                  <span className="text-xs text-muted-foreground mr-2">#{row.position}</span>
+                  <span className="text-xs text-muted-foreground mr-2">#{idx + 1}</span>
                   {row.title || "Untitled"}
                 </button>
                 <span className="text-xs text-muted-foreground shrink-0">
@@ -167,20 +227,12 @@ export function SoundBoardAdmin() {
               </div>
               {isOpen ? (
                 <div className="border-t border-border p-4 space-y-3">
-                  <div className="grid gap-3 md:grid-cols-[1fr_100px_auto]">
+                  <div className="grid gap-3 md:grid-cols-[1fr_auto]">
                     <div>
                       <Label>Title</Label>
                       <Input
                         value={row.title}
                         onChange={(e) => updateLocal(row.id, { title: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Position</Label>
-                      <Input
-                        type="number"
-                        value={row.position}
-                        onChange={(e) => updateLocal(row.id, { position: Number(e.target.value) })}
                       />
                     </div>
                     <div className="flex items-end gap-2">
