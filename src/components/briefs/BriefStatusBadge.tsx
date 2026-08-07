@@ -18,7 +18,7 @@ export const BRIEF_STATUS_LABEL: Record<BriefStatus, string> = {
   in_review: "In review",
   in_progress: "In progress",
   review_your_roster: "Review your roster",
-  review_your_report: "Review your report",
+  review_your_report: "View your report",
   closed: "Closed",
 };
 
