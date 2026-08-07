@@ -102,6 +102,7 @@ type Opportunity = {
   brief_source: "user" | "lead";
   artist_archetypes?: string[] | null;
   brand_archetypes?: string[] | null;
+  display_order?: number | null;
 };
 
 function DashboardPage() {
