@@ -126,6 +126,8 @@ function DashboardPage() {
   const [adminViewAsTier, setAdminViewAsTier] = useState<"free" | "paid">("paid");
   const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const oppCarouselRef = useRef<HTMLDivElement>(null);
+
   const soundBoardRef = useRef<HTMLDivElement>(null);
   const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
   const [soundBoardItems, setSoundBoardItems] = useState<Array<{ id: string; title: string; copy: string; video_url: string | null; thumbnail_url: string | null; gradient: string | null }>>([]);
