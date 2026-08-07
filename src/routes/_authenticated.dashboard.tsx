@@ -1560,8 +1560,6 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
         </p>
       </div>
 
-      </div>
-
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
