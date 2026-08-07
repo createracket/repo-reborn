@@ -42,7 +42,9 @@ type AccountTypeValue = (typeof ACCOUNT_TYPES)[number]["value"];
 
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { mode?: "signin" | "signup"; next?: string } => ({
     mode: search.mode === "signin" ? ("signin" as const) : ("signup" as const),
     next: typeof search.next === "string" ? search.next : undefined,
   }),

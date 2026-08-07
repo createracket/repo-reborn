@@ -1,18 +1,20 @@
 // Server-only usage metering helpers. Never import from client code.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-export type MeteredAction = "profile_sync" | "vibe_intro" | "voice_note";
+export type MeteredAction = "profile_sync" | "vibe_intro" | "voice_note" | "spotlight_draft";
 
 export const ACTION_LABELS: Record<MeteredAction, string> = {
   profile_sync: "Profile sync",
   vibe_intro: "Vibe check intro parse",
   voice_note: "Brief voice note transcription",
+  spotlight_draft: "Spotlight AI draft",
 };
 
 const DEFAULT_LIMITS: Record<MeteredAction, number> = {
   profile_sync: 1,
   vibe_intro: 3,
   voice_note: 3,
+  spotlight_draft: 5,
 };
 
 export function currentPeriod(d = new Date()): string {
