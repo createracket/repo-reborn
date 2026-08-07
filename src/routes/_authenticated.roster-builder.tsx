@@ -797,6 +797,8 @@ function RosterDetailView({
         title: title.trim(),
         description: description.trim() || null,
         header_image_url: headerImageUrl.trim() || null,
+        profile_image_url: profileImageUrl.trim() || null,
+
         client_email: clientEmail.trim().toLowerCase() || null,
         brand_email: brandEmail.trim().toLowerCase() || null,
         est_engagement_pct: engParsed != null && !Number.isNaN(engParsed) ? engParsed : null,
