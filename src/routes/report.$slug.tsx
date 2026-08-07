@@ -23,6 +23,7 @@ type PublicReport = {
   published: boolean;
   published_at: string | null;
   header_image_url: string | null;
+  profile_image_url: string | null;
   categories: string[] | null;
   hide_categories: boolean | null;
   template: string | null;
@@ -113,7 +114,7 @@ function PublicReportPage() {
     (async () => {
       const { data: r } = await (supabase as any)
         .from("public_campaign_reports")
-        .select("id, title, description, slug, published, published_at, header_image_url, categories, hide_categories, template")
+        .select("id, title, description, slug, published, published_at, header_image_url, profile_image_url, categories, hide_categories, template")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
@@ -401,15 +402,26 @@ function PublicReportPage() {
           </div>
         )}
 
-        <Badge variant="outline" className="uppercase tracking-[0.2em]">
-          <Users className="mr-1.5 size-3" /> Campaign Report
-        </Badge>
-        <h1 className="mt-4 font-display text-5xl leading-tight md:text-6xl">{report.title}</h1>
-        {report.description && (
-          <p className="mt-4 whitespace-pre-wrap text-lg text-muted-foreground">
-            {report.description}
-          </p>
-        )}
+        <div className="flex flex-wrap items-start gap-5">
+          {report.profile_image_url ? (
+            <img
+              src={report.profile_image_url}
+              alt={report.title}
+              className="size-24 shrink-0 rounded-xl border border-border/60 object-cover md:size-32"
+            />
+          ) : null}
+          <div className="min-w-[240px] flex-1">
+            <Badge variant="outline" className="uppercase tracking-[0.2em]">
+              <Users className="mr-1.5 size-3" /> Campaign Report
+            </Badge>
+            <h1 className="mt-4 font-display text-5xl leading-tight md:text-6xl">{report.title}</h1>
+            {report.description && (
+              <p className="mt-4 whitespace-pre-wrap text-lg text-muted-foreground">
+                {report.description}
+              </p>
+            )}
+          </div>
+        </div>
         {latestUpdate && (
           <p className="mt-2 text-xs text-muted-foreground">
             Last updated: {latestUpdate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
