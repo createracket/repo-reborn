@@ -52,6 +52,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { socialAudience, totalFans } from "@/lib/audience";
 import {
   DndContext,
   closestCenter,
@@ -150,6 +151,15 @@ type RosterItem = {
   tiktok_followers: number | null;
   youtube_url: string | null;
   youtube_subscribers: number | null;
+  twitch_url: string | null;
+  twitch_followers: number | null;
+  facebook_url: string | null;
+  facebook_followers: number | null;
+  x_url: string | null;
+  x_followers: number | null;
+  custom_label: string | null;
+  custom_url: string | null;
+  custom_followers: number | null;
   spotify_url: string | null;
   spotify_monthly_listens: number | null;
   apple_music_url: string | null;
@@ -763,16 +773,8 @@ function RosterDetailView({
   }, [items]);
 
   const activeOrdered = orderedItems.filter((it) => it.status !== "hold");
-  const totalFollowers = activeOrdered.reduce(
-    (a, it) =>
-      a +
-      (it.instagram_followers ?? 0) +
-      (it.tiktok_followers ?? 0) +
-      (it.youtube_subscribers ?? 0) +
-      (it.spotify_monthly_listens ?? 0) +
-      (it.apple_music_followers ?? 0),
-    0,
-  );
+  const totalSocialAudience = activeOrdered.reduce((a, it) => a + socialAudience(it), 0);
+  const totalFansCount = activeOrdered.reduce((a, it) => a + totalFans(it), 0);
   const totalBudget = activeOrdered.reduce((a, it) => a + (it.budget ?? 0), 0);
 
   const linkedBrief = roster.brief_id ? briefs.find((b) => b.id === roster.brief_id) ?? null : null;
@@ -1282,7 +1284,7 @@ function RosterDetailView({
                   Roster ({orderedItems.length})
                 </CardTitle>
                 <CardDescription>
-                  Drag to reorder. Combined reach {formatCount(totalFollowers)}
+                  Drag to reorder. Total social audience {formatCount(totalSocialAudience)} · Total fans {formatCount(totalFansCount)}
                   {roster.est_engagement_pct != null ? ` · Est. engagement ${roster.est_engagement_pct}%` : ""}
                   {totalBudget > 0 ? ` · Total budget £${totalBudget.toLocaleString()}` : ""}. On-hold creators are excluded from totals.
                 </CardDescription>
@@ -1540,15 +1542,15 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
     ["IG", item.instagram_followers, item.instagram_url],
     ["TT", item.tiktok_followers, item.tiktok_url],
     ["YT", item.youtube_subscribers, item.youtube_url],
+    ["Twitch", item.twitch_followers, item.twitch_url],
+    ["Facebook", item.facebook_followers, item.facebook_url],
+    ["X", item.x_followers, item.x_url],
+    [item.custom_label || "Link", item.custom_followers, item.custom_url],
     ["Spotify streams", item.spotify_monthly_listens, item.spotify_url],
     ["Apple", item.apple_music_followers, item.apple_music_url],
   ];
-  const totalReach =
-    (item.instagram_followers ?? 0) +
-    (item.tiktok_followers ?? 0) +
-    (item.youtube_subscribers ?? 0) +
-    (item.spotify_monthly_listens ?? 0) +
-    (item.apple_music_followers ?? 0);
+  const rowSocial = socialAudience(item);
+  const rowFans = totalFans(item);
   const initials = item.name
     .split(/\s+/)
     .map((s) => s[0])
@@ -1596,9 +1598,14 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
 
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            {totalReach > 0 && (
+            {rowSocial > 0 && (
               <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
-                Total reach {formatCount(totalReach)}
+                Social audience {formatCount(rowSocial)}
+              </span>
+            )}
+            {rowFans > rowSocial && (
+              <span className="rounded-md border border-primary/40 bg-primary/10 px-2 py-0.5 font-medium text-foreground">
+                Total fans {formatCount(rowFans)}
               </span>
             )}
             {item.metrics_month && (
@@ -1821,6 +1828,15 @@ function EditProspectPanel({
     tiktok_followers: item.tiktok_followers?.toString() ?? "",
     youtube_url: item.youtube_url ?? "",
     youtube_subscribers: item.youtube_subscribers?.toString() ?? "",
+    twitch_url: item.twitch_url ?? "",
+    twitch_followers: item.twitch_followers?.toString() ?? "",
+    facebook_url: item.facebook_url ?? "",
+    facebook_followers: item.facebook_followers?.toString() ?? "",
+    x_url: item.x_url ?? "",
+    x_followers: item.x_followers?.toString() ?? "",
+    custom_label: item.custom_label ?? "",
+    custom_url: item.custom_url ?? "",
+    custom_followers: item.custom_followers?.toString() ?? "",
     spotify_url: item.spotify_url ?? "",
     spotify_monthly_listens: item.spotify_monthly_listens?.toString() ?? "",
     apple_music_url: item.apple_music_url ?? "",
@@ -1965,6 +1981,15 @@ function EditProspectPanel({
         tiktok_followers: toNum(form.tiktok_followers),
         youtube_url: form.youtube_url.trim() || null,
         youtube_subscribers: toNum(form.youtube_subscribers),
+        twitch_url: form.twitch_url.trim() || null,
+        twitch_followers: toNum(form.twitch_followers),
+        facebook_url: form.facebook_url.trim() || null,
+        facebook_followers: toNum(form.facebook_followers),
+        x_url: form.x_url.trim() || null,
+        x_followers: toNum(form.x_followers),
+        custom_label: form.custom_label.trim() || null,
+        custom_url: form.custom_url.trim() || null,
+        custom_followers: toNum(form.custom_followers),
         spotify_url: form.spotify_url.trim() || null,
         spotify_monthly_listens: toNum(form.spotify_monthly_listens),
         apple_music_url: form.apple_music_url.trim() || null,
@@ -2079,6 +2104,15 @@ function EditProspectPanel({
         {fld("TT followers", "tiktok_followers")}
         {urlFld("YouTube URL", "youtube_url", "youtube", "youtube_subscribers")}
         {fld("YT subscribers", "youtube_subscribers")}
+        {fld("Twitch URL", "twitch_url", "https://twitch.tv/…")}
+        {fld("Twitch followers", "twitch_followers")}
+        {fld("Facebook URL", "facebook_url", "https://facebook.com/…")}
+        {fld("Facebook followers", "facebook_followers")}
+        {fld("X URL", "x_url", "https://x.com/…")}
+        {fld("X followers", "x_followers")}
+        {fld("Other link label", "custom_label", "e.g. Twitter, Substack")}
+        {fld("Other link URL", "custom_url", "https://…")}
+        {fld("Other link followers", "custom_followers")}
         <div className="space-y-1">
           <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Spotify URL</Label>
           <div className="flex gap-1">
@@ -2261,6 +2295,15 @@ function AddProspectCard({
     tiktok_followers: "",
     youtube_url: "",
     youtube_subscribers: "",
+    twitch_url: "",
+    twitch_followers: "",
+    facebook_url: "",
+    facebook_followers: "",
+    x_url: "",
+    x_followers: "",
+    custom_label: "",
+    custom_url: "",
+    custom_followers: "",
     spotify_url: "",
     spotify_monthly_listens: "",
     apple_music_url: "",
@@ -2377,6 +2420,15 @@ function AddProspectCard({
       tiktok_followers: toNum(form.tiktok_followers),
       youtube_url: form.youtube_url.trim() || null,
       youtube_subscribers: toNum(form.youtube_subscribers),
+      twitch_url: form.twitch_url.trim() || null,
+      twitch_followers: toNum(form.twitch_followers),
+      facebook_url: form.facebook_url.trim() || null,
+      facebook_followers: toNum(form.facebook_followers),
+      x_url: form.x_url.trim() || null,
+      x_followers: toNum(form.x_followers),
+      custom_label: form.custom_label.trim() || null,
+      custom_url: form.custom_url.trim() || null,
+      custom_followers: toNum(form.custom_followers),
       spotify_url: form.spotify_url.trim() || null,
       spotify_monthly_listens: toNum(form.spotify_monthly_listens),
       apple_music_url: form.apple_music_url.trim() || null,
@@ -2403,6 +2455,15 @@ function AddProspectCard({
       tiktok_followers: "",
       youtube_url: "",
       youtube_subscribers: "",
+      twitch_url: "",
+      twitch_followers: "",
+      facebook_url: "",
+      facebook_followers: "",
+      x_url: "",
+      x_followers: "",
+      custom_label: "",
+      custom_url: "",
+      custom_followers: "",
       spotify_url: "",
       spotify_monthly_listens: "",
       apple_music_url: "",
@@ -2498,6 +2559,33 @@ function AddProspectCard({
                   onChange={(e) => update("youtube_subscribers", e.target.value)}
                   placeholder="25000"
                 />
+              </Field>
+              <Field label="Twitch URL">
+                <Input value={form.twitch_url} onChange={(e) => update("twitch_url", e.target.value)} placeholder="https://twitch.tv/…" />
+              </Field>
+              <Field label="Twitch followers">
+                <Input inputMode="numeric" value={form.twitch_followers} onChange={(e) => update("twitch_followers", e.target.value)} />
+              </Field>
+              <Field label="Facebook URL">
+                <Input value={form.facebook_url} onChange={(e) => update("facebook_url", e.target.value)} placeholder="https://facebook.com/…" />
+              </Field>
+              <Field label="Facebook followers">
+                <Input inputMode="numeric" value={form.facebook_followers} onChange={(e) => update("facebook_followers", e.target.value)} />
+              </Field>
+              <Field label="X URL">
+                <Input value={form.x_url} onChange={(e) => update("x_url", e.target.value)} placeholder="https://x.com/…" />
+              </Field>
+              <Field label="X followers">
+                <Input inputMode="numeric" value={form.x_followers} onChange={(e) => update("x_followers", e.target.value)} />
+              </Field>
+              <Field label="Other link label">
+                <Input value={form.custom_label} onChange={(e) => update("custom_label", e.target.value)} placeholder="e.g. Twitter, Substack" />
+              </Field>
+              <Field label="Other link URL">
+                <Input value={form.custom_url} onChange={(e) => update("custom_url", e.target.value)} placeholder="https://…" />
+              </Field>
+              <Field label="Other link followers">
+                <Input inputMode="numeric" value={form.custom_followers} onChange={(e) => update("custom_followers", e.target.value)} />
               </Field>
               <Field label="Spotify URL">
                 <div className="flex gap-1">
