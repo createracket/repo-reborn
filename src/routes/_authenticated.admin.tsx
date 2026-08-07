@@ -1382,13 +1382,14 @@ function SpotlightForm({
     }
   }
 
-  async function syncSpotify() {
-    const raw = String(form.spotify || "").trim();
+  async function syncSpotify(extraIndex?: number) {
+    const key = extraIndex == null ? "spotify" : `spotify:${extraIndex}`;
+    const raw = String((extraIndex == null ? form.spotify : extraLinks.spotify[extraIndex]) || "").trim();
     if (!raw) {
       toast.error("Enter a Spotify artist URL first");
       return;
     }
-    setSyncing("spotify");
+    setSyncing(key);
     try {
       const r = await scrapeSpotify({ data: { url: raw } });
       if (!r.ok) {
@@ -1397,24 +1398,24 @@ function SpotlightForm({
       }
       const updates: string[] = [];
       if (r.followers != null) {
-        setFetchedCounts((c) => ({ ...c, spotify: r.followers ?? 0 }));
-        set("total_followers", String(r.followers));
+        setFetchedCounts((c) => ({ ...c, [key]: r.followers ?? 0 }));
+        if (extraIndex == null) set("total_followers", String(r.followers));
         updates.push(`${r.followers.toLocaleString()} followers`);
       }
       if (r.monthly_listeners != null) {
-        set("monthly_streams", String(r.monthly_listeners));
+        if (extraIndex == null) set("monthly_streams", String(r.monthly_listeners));
         updates.push(`${r.monthly_listeners.toLocaleString()} monthly listeners`);
       }
       if (r.total_streams != null) {
-        set("total_streams", String(r.total_streams));
+        if (extraIndex == null) set("total_streams", String(r.total_streams));
         updates.push(`${r.total_streams.toLocaleString()} total streams`);
       }
       if (updates.length === 0) toast.error("No Spotify metrics returned");
       else toast.success(`Spotify: ${updates.join(" · ")}`);
-      if (r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
+      if (extraIndex == null && r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
         setMismatchWarning(MISMATCH_MESSAGE);
         setFlagState({ flagged: true, reason: `Spotify artist "${r.name}" does not match "${form.headline}".` });
-      } else if (r.name) {
+      } else if (extraIndex == null && r.name) {
         setMismatchWarning(null);
       }
     } finally {
@@ -1422,17 +1423,18 @@ function SpotlightForm({
     }
   }
 
-  async function syncApple() {
-    const raw = String(form.apple_music || "").trim();
+  async function syncApple(extraIndex?: number) {
+    const key = extraIndex == null ? "apple" : `apple_music:${extraIndex}`;
+    const raw = String((extraIndex == null ? form.apple_music : extraLinks.apple_music[extraIndex]) || "").trim();
     if (!raw) { toast.error("Enter an Apple Music artist URL first"); return; }
-    setSyncing("apple");
+    setSyncing(key);
     try {
       const r = await scrapeApple({ data: { url: raw } });
       if (!r.ok) { toast.error(r.error); return; }
-      if (r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
+      if (extraIndex == null && r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
         setMismatchWarning(MISMATCH_MESSAGE);
         setFlagState({ flagged: true, reason: `Apple Music artist "${r.name}" does not match "${form.headline}".` });
-      } else if (r.name) {
+      } else if (extraIndex == null && r.name) {
         setMismatchWarning(null);
       }
       toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
@@ -1442,10 +1444,10 @@ function SpotlightForm({
   }
 
   function applyTotalFollowers() {
-    const total =
-      (fetchedCounts.instagram ?? 0) +
-      (fetchedCounts.tiktok ?? 0) +
-      (fetchedCounts.youtube ?? 0);
+    // Sum main + extra handles across Instagram / TikTok / YouTube.
+    const total = Object.entries(fetchedCounts)
+      .filter(([k]) => /^(instagram|tiktok|youtube)(:|$)/.test(k))
+      .reduce((sum, [, v]) => sum + (v ?? 0), 0);
     if (total <= 0) {
       toast.error("Sync at least one social first");
       return;
