@@ -102,6 +102,7 @@ type Opportunity = {
   brief_source: "user" | "lead";
   artist_archetypes?: string[] | null;
   brand_archetypes?: string[] | null;
+  display_order?: number | null;
 };
 
 function DashboardPage() {
@@ -301,9 +302,10 @@ function DashboardPage() {
           .single(),
         supabase
           .from("campaign_briefs")
-          .select("id, title, description, budget, currency, transparency, published_at, created_at, artist_archetypes, brand_archetypes, status")
+          .select("id, title, description, budget, currency, transparency, published_at, created_at, artist_archetypes, brand_archetypes, status, display_order")
           .eq("published", true)
           .neq("status", "closed")
+          .order("display_order", { ascending: true })
           .order("published_at", { ascending: false })
           .limit(50),
       ]);
@@ -358,10 +360,10 @@ function DashboardPage() {
       const shareLeadIds = ((shares ?? []) as any[]).filter((s) => s.brief_source === "lead").map((s) => s.brief_id as string);
       const [sharedUser, sharedLead] = await Promise.all([
         shareUserIds.length
-          ? supabase.from("campaign_briefs").select("id, title, description, budget, currency, transparency, published_at, created_at, status").in("id", shareUserIds).neq("status", "closed")
+          ? supabase.from("campaign_briefs").select("id, title, description, budget, currency, transparency, published_at, created_at, status, display_order").in("id", shareUserIds).neq("status", "closed")
           : Promise.resolve({ data: [] as any[] }),
         shareLeadIds.length
-          ? (supabase as any).from("lead_briefs_shared").select("id, title, description, budget, currency, transparency, created_at, status").in("id", shareLeadIds).neq("status", "closed")
+          ? (supabase as any).from("lead_briefs_shared").select("id, title, description, budget, currency, transparency, created_at, status, display_order").in("id", shareLeadIds).neq("status", "closed")
           : Promise.resolve({ data: [] as any[] }),
       ]);
       const publishedRowsAll = (((opps as any[]) ?? []) as any[]).map((r) => ({ ...r, brief_source: "user" as const })) as Opportunity[];
@@ -398,7 +400,14 @@ function DashboardPage() {
       ];
       const dedup = new Map<string, Opportunity>();
       [...publishedRows, ...sharedRows].forEach((o) => dedup.set(`${o.brief_source}:${o.id}`, o));
-      setOpportunities(Array.from(dedup.values()).sort((a, b) => (a.published_at ?? a.created_at) < (b.published_at ?? b.created_at) ? 1 : -1));
+      setOpportunities(
+        Array.from(dedup.values()).sort((a, b) => {
+          const ao = a.display_order ?? 0;
+          const bo = b.display_order ?? 0;
+          if (ao !== bo) return ao - bo;
+          return (a.published_at ?? a.created_at) < (b.published_at ?? b.created_at) ? 1 : -1;
+        }),
+      );
 
       const { data: exOpps } = await supabase
         .from("example_opportunities" as any)

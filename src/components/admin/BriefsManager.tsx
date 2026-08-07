@@ -1,7 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,6 +86,7 @@ export type LeadBrief = {
   contact_email: string; contact_name: string | null; company: string | null;
   status: string;
   linked_roster_id: string | null;
+  display_order?: number | null;
 };
 export type CampaignBrief = {
   id: string; created_at: string; title: string; description: string;
@@ -76,6 +95,7 @@ export type CampaignBrief = {
   contact_email: string | null; published: boolean; published_at: string | null;
   linked_roster_id: string | null;
   artist_archetypes: string[]; brand_archetypes: string[];
+  display_order?: number | null;
 };
 export type Profile = {
   id: string; email: string | null; display_name: string | null;
@@ -112,7 +132,7 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr, emailRes] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, artist_archetypes, brand_archetypes").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, artist_archetypes, brand_archetypes, display_order").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
       (supabase as any).rpc("admin_campaign_brief_emails"),
     ]);
@@ -225,9 +245,20 @@ function UnifiedBriefs({
       ...campaigns.map((c) => ({ source: "user" as const, ...c })),
       ...leads.map((l) => ({ source: "lead" as const, ...l })),
     ];
-    list.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+    list.sort((a, b) => {
+      const ao = a.display_order ?? 0;
+      const bo = b.display_order ?? 0;
+      if (ao !== bo) return ao - bo;
+      return a.created_at < b.created_at ? 1 : -1;
+    });
     return list;
   }, [leads, campaigns]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
 
   if (rows.length === 0) {
     return <p className="text-sm text-muted-foreground">No briefs yet.</p>;
@@ -251,7 +282,34 @@ function UnifiedBriefs({
   const activeRows = rows.filter((b) => normalizeStatus(b.status) !== "closed");
   const closedRows = rows.filter((b) => normalizeStatus(b.status) === "closed");
 
-  const renderRow = (b: UnifiedBrief) => {
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const ids = activeRows.map((b) => `${b.source}-${b.id}`);
+    const oldIndex = ids.indexOf(String(active.id));
+    const newIndex = ids.indexOf(String(over.id));
+    if (oldIndex < 0 || newIndex < 0) return;
+    const reordered = arrayMove(activeRows, oldIndex, newIndex);
+
+    reordered.forEach((b, i) => {
+      if (b.source === "user") onCampaignUpdated(b.id, { display_order: i } as Partial<CampaignBrief>);
+      else onLeadUpdated(b.id, { display_order: i } as Partial<LeadBrief>);
+    });
+
+    const results = await Promise.all(
+      reordered.map((b, i) =>
+        supabase
+          .from(b.source === "user" ? "campaign_briefs" : "lead_briefs")
+          .update({ display_order: i } as any)
+          .eq("id", b.id),
+      ),
+    );
+    const failed = results.find((r) => r.error);
+    if (failed?.error) toast.error(failed.error.message);
+    else toast.success("Order updated");
+  }
+
+  const renderRow = (b: UnifiedBrief, dragHandle?: React.ReactNode) => {
         const isUser = b.source === "user";
         const lead = !isUser ? (b as LeadBrief & { source: "lead" }) : null;
         const camp = isUser ? (b as CampaignBrief & { source: "user" }) : null;
@@ -265,8 +323,10 @@ function UnifiedBriefs({
             <Collapsible open={isOpen} onOpenChange={() => toggleOpen(rowKey)}>
             <CardHeader>
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0">
+                {dragHandle}
+                <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+
                     <span
                       className={
                         isUser
@@ -418,7 +478,24 @@ function UnifiedBriefs({
 
   return (
     <div className="space-y-3">
-      {activeRows.map(renderRow)}
+      <p className="text-xs text-muted-foreground">
+        Drag the handle on any brief to reorder — this order is the order opportunities appear on
+        artist dashboards.
+      </p>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext
+          items={activeRows.map((b) => `${b.source}-${b.id}`)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-3">
+            {activeRows.map((b) => (
+              <SortableBriefRow key={`${b.source}-${b.id}`} id={`${b.source}-${b.id}`}>
+                {(handle) => renderRow(b, handle)}
+              </SortableBriefRow>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
       {closedRows.length ? (
         <Collapsible>
           <CollapsibleTrigger asChild>
@@ -428,7 +505,7 @@ function UnifiedBriefs({
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3 space-y-3">
-            {closedRows.map(renderRow)}
+            {closedRows.map((b) => renderRow(b))}
           </CollapsibleContent>
         </Collapsible>
       ) : null}
@@ -445,6 +522,43 @@ function UnifiedBriefs({
     </div>
   );
 }
+
+function SortableBriefRow({
+  id,
+  children,
+}: {
+  id: string;
+  children: (handle: React.ReactNode) => React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const handle = (
+    <button
+      type="button"
+      aria-label="Drag to reorder"
+      className="mt-1 cursor-grab touch-none rounded p-1 text-muted-foreground hover:bg-muted active:cursor-grabbing"
+      {...attributes}
+      {...listeners}
+    >
+      <GripVertical className="h-4 w-4" />
+    </button>
+  );
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.6 : 1,
+        zIndex: isDragging ? 10 : undefined,
+        position: "relative",
+      }}
+    >
+      {children(handle)}
+    </div>
+  );
+}
+
+
 
 function EditBriefDialog({
   brief,
