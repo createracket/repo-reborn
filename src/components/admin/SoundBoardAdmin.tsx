@@ -150,6 +150,8 @@ export function SoundBoardAdmin() {
       .eq("id", row.id);
     if (error) { toast.error(error.message); return; }
     toast.success("Saved");
+    // unpublished cards drop to the bottom
+    await persistOrder(rows);
   }
 
   async function deleteRow(id: string) {
