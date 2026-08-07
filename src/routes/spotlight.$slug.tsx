@@ -517,7 +517,7 @@ function SpotlightPage() {
         {/* Host bio */}
         {page.host_bio ? (
           <section className="mt-16">
-            <h2 className="font-display text-3xl">About the host</h2>
+            <h2 className="font-display text-3xl">{sectionLabel("host_bio", "About the host")}</h2>
             <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.host_bio}</p>
           </section>
         ) : null}
@@ -525,7 +525,7 @@ function SpotlightPage() {
         {/* Audience */}
         {page.audience_segments?.length ? (
           <section className="mt-16">
-            <h2 className="font-display text-3xl">Who's listening</h2>
+            <h2 className="font-display text-3xl">{sectionLabel("audience", "Who's listening")}</h2>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {page.audience_segments.map((seg, i) => (
                 <Card key={i}>
@@ -539,7 +539,7 @@ function SpotlightPage() {
         {/* Partnership pitch */}
         {page.partnership_pitch ? (
           <section className="mt-16">
-            <h2 className="font-display text-3xl">Partnership</h2>
+            <h2 className="font-display text-3xl">{sectionLabel("partnership", "Partnership")}</h2>
             <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.partnership_pitch}</p>
           </section>
         ) : null}
@@ -549,7 +549,7 @@ function SpotlightPage() {
           <section className="mt-10">
             <Card>
               <CardHeader>
-                <CardTitle className="font-display text-2xl">Expressions of interest</CardTitle>
+                <CardTitle className="font-display text-2xl">{sectionLabel("eoi", "Expressions of interest")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="grid gap-2 md:grid-cols-2">
@@ -593,7 +593,7 @@ function SpotlightPage() {
           if (videos.length === 0) return null;
           return (
             <section className="mt-16">
-              <h2 className="font-display text-3xl">Watch</h2>
+              <h2 className="font-display text-3xl">{sectionLabel("videos", "Watch")}</h2>
               <div className="mt-4 grid gap-6 md:grid-cols-3">
                 {videos.map((v, i) => (
                   <ClipCard
