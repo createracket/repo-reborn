@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Trash2, ChevronDown, ChevronRight, Upload } from "lucide-react";
 
 type SoundBoardItem = {
   id: string;
