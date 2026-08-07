@@ -42,6 +42,8 @@ type PartnerLinks = {
   twitch_extra?: string[];
   facebook_extra?: string[];
   x_extra?: string[];
+  youtube_name?: string;
+  youtube_extra_names?: string[];
   section_labels?: Record<string, string>;
 };
 
