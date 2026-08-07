@@ -1532,6 +1532,13 @@ function SpotlightForm({
         facebook_extra: extraLinks.facebook.map((s) => s.trim()).filter(Boolean),
         x_extra: extraLinks.x.map((s) => s.trim()).filter(Boolean),
         follower_counts: fetchedCounts,
+        section_labels: {
+          host_bio: form.label_host_bio.trim(),
+          audience: form.label_audience.trim(),
+          partnership: form.label_partnership.trim(),
+          eoi: form.label_eoi.trim(),
+          videos: form.label_videos.trim(),
+        },
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
