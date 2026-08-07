@@ -282,7 +282,34 @@ function UnifiedBriefs({
   const activeRows = rows.filter((b) => normalizeStatus(b.status) !== "closed");
   const closedRows = rows.filter((b) => normalizeStatus(b.status) === "closed");
 
-  const renderRow = (b: UnifiedBrief) => {
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const ids = activeRows.map((b) => `${b.source}-${b.id}`);
+    const oldIndex = ids.indexOf(String(active.id));
+    const newIndex = ids.indexOf(String(over.id));
+    if (oldIndex < 0 || newIndex < 0) return;
+    const reordered = arrayMove(activeRows, oldIndex, newIndex);
+
+    reordered.forEach((b, i) => {
+      if (b.source === "user") onCampaignUpdated(b.id, { display_order: i } as Partial<CampaignBrief>);
+      else onLeadUpdated(b.id, { display_order: i } as Partial<LeadBrief>);
+    });
+
+    const results = await Promise.all(
+      reordered.map((b, i) =>
+        supabase
+          .from(b.source === "user" ? "campaign_briefs" : "lead_briefs")
+          .update({ display_order: i } as any)
+          .eq("id", b.id),
+      ),
+    );
+    const failed = results.find((r) => r.error);
+    if (failed?.error) toast.error(failed.error.message);
+    else toast.success("Order updated");
+  }
+
+  const renderRow = (b: UnifiedBrief, dragHandle?: React.ReactNode) => {
         const isUser = b.source === "user";
         const lead = !isUser ? (b as LeadBrief & { source: "lead" }) : null;
         const camp = isUser ? (b as CampaignBrief & { source: "user" }) : null;
@@ -296,8 +323,10 @@ function UnifiedBriefs({
             <Collapsible open={isOpen} onOpenChange={() => toggleOpen(rowKey)}>
             <CardHeader>
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0">
+                {dragHandle}
+                <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+
                     <span
                       className={
                         isUser
