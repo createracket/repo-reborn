@@ -126,6 +126,8 @@ function DashboardPage() {
   const [adminViewAsTier, setAdminViewAsTier] = useState<"free" | "paid">("paid");
   const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const oppCarouselRef = useRef<HTMLDivElement>(null);
+
   const soundBoardRef = useRef<HTMLDivElement>(null);
   const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
   const [soundBoardItems, setSoundBoardItems] = useState<Array<{ id: string; title: string; copy: string; video_url: string | null; thumbnail_url: string | null; gradient: string | null }>>([]);
@@ -818,12 +820,56 @@ function DashboardPage() {
                     No open opportunities right now — here are the types of briefs we surface.
                   </div>
                 ) : opportunities.length === 0 ? null : (
-                  <ul className="grid gap-3 md:grid-cols-2">
-                    {opportunities.map((o) => (
-                      <OpportunityCard key={`${o.brief_source}:${o.id}`} opp={o} />
-                    ))}
-                  </ul>
+                  <div>
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                        Open briefs
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-full"
+                          onClick={() => {
+                            const el = oppCarouselRef.current;
+                            if (!el || !el.firstElementChild) return;
+                            const tileWidth = (el.firstElementChild as HTMLElement).offsetWidth + 12;
+                            el.scrollBy({ left: -tileWidth, behavior: "smooth" });
+                          }}
+                        >
+                          <ChevronLeft className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-full"
+                          onClick={() => {
+                            const el = oppCarouselRef.current;
+                            if (!el || !el.firstElementChild) return;
+                            const tileWidth = (el.firstElementChild as HTMLElement).offsetWidth + 12;
+                            el.scrollBy({ left: tileWidth, behavior: "smooth" });
+                          }}
+                        >
+                          <ChevronRight className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div
+                      ref={oppCarouselRef}
+                      className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
+                    >
+                      {opportunities.map((o) => (
+                        <div
+                          key={`${o.brief_source}:${o.id}`}
+                          className="snap-start shrink-0 w-full sm:w-[calc(50%-6px)]"
+                        >
+                          <OpportunityCard opp={o} />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
+
 
                 {/* Combined spotlights & examples carousel */}
                 {!loading && (spotlightOpps.length > 0 || examples.length > 0) ? (
@@ -1484,7 +1530,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
 
   return (
     <>
-      <li className="group flex flex-col gap-2 rounded-xl border-2 border-border bg-card p-4 shadow-sm transition-colors">
+      <div className="group flex h-full flex-col gap-2 rounded-xl border-2 border-border bg-card p-4 shadow-sm transition-colors">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-medium leading-tight transition-colors group-hover:text-pink-accent">{opp.title}</h3>
           {opp.budget ? (
@@ -1511,7 +1557,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
             <Eye className="mr-1 size-3" /> Suss the vibe
           </Button>
         </div>
-      </li>
+      </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
