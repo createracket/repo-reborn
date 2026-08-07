@@ -1517,6 +1517,38 @@ function SpotlightForm({
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+          <div className="md:col-span-2 space-y-2 rounded-lg border border-pink-accent/40 bg-muted/30 p-3">
+            <Label htmlFor="ai-dump" className="text-sm font-medium">
+              Paste artist email / info dump
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Drop the raw email here and AI will draft the headline, intro, bio, partnership pitch,
+              EOI opportunities and audience segments below. Nothing saves until you hit save, so
+              review and edit first. Images, metrics, access code and publish state are untouched.
+            </p>
+            <Textarea
+              id="ai-dump"
+              rows={6}
+              value={aiText}
+              onChange={(e) => setAiText(e.target.value)}
+              placeholder="Paste the artist or manager's email here…"
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <Button type="button" size="sm" onClick={runAiDraft} disabled={aiBusy}>
+                {aiBusy ? "Drafting…" : "Draft spotlight with AI"}
+              </Button>
+              {aiSnapshot ? (
+                <Button type="button" size="sm" variant="ghost" onClick={undoAiDraft}>
+                  Undo AI draft
+                </Button>
+              ) : null}
+              {aiFilled.length > 0 ? (
+                <span className="text-xs text-muted-foreground">Filled: {aiFilled.join(", ")}</span>
+              ) : null}
+            </div>
+          </div>
+
+
 
           <div className="space-y-1.5">
             <Label htmlFor="slug">Slug *</Label>
