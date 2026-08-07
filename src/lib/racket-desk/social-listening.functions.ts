@@ -270,9 +270,11 @@ export const saveSocialListeningScan = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     await requireAdmin(supabase, userId);
-    const patch: Record<string, unknown> = { saved: data.saved };
-    if (data.reportTitle !== undefined) patch['report_title'] = data.reportTitle || null;
-    if (data.notes !== undefined) patch['notes'] = data.notes || null;
+    const patch: { saved: boolean; report_title?: string | null; notes?: string | null } = {
+      saved: data.saved,
+    };
+    if (data.reportTitle !== undefined) patch.report_title = data.reportTitle || null;
+    if (data.notes !== undefined) patch.notes = data.notes || null;
     const { error } = await supabase.from("social_listening_scans").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
