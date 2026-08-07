@@ -433,7 +433,8 @@ function PublicRosterPage() {
             const showProspect = it.kind === "prospect" && !roster.hide_prospect_tags;
             return (
               <Card key={it.id}>
-                <CardContent className="p-3 sm:p-4">
+                <CardContent className="p-5">
+
                   <div className="flex items-start gap-4">
                     <div className="size-16 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-base font-medium text-muted-foreground">
                       {it.avatar_url ? (
