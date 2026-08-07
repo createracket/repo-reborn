@@ -1384,6 +1384,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
   const [saving, setSaving] = useState(false);
   const [scraping, setScraping] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: post.id,
