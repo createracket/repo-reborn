@@ -463,7 +463,7 @@ function PublicRosterPage() {
                             {itemFans > 0 && (
                               <span className="font-semibold text-foreground">
                                 {formatCount(itemFans)}{" "}
-                                <span className="font-normal text-muted-foreground">total fans</span>
+                                <span className="font-normal text-muted-foreground">fans</span>
                               </span>
                             )}
                             {itemSocial > 0 && itemFans !== itemSocial && (
