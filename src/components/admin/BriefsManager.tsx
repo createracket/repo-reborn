@@ -478,7 +478,24 @@ function UnifiedBriefs({
 
   return (
     <div className="space-y-3">
-      {activeRows.map(renderRow)}
+      <p className="text-xs text-muted-foreground">
+        Drag the handle on any brief to reorder — this order is the order opportunities appear on
+        artist dashboards.
+      </p>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext
+          items={activeRows.map((b) => `${b.source}-${b.id}`)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-3">
+            {activeRows.map((b) => (
+              <SortableBriefRow key={`${b.source}-${b.id}`} id={`${b.source}-${b.id}`}>
+                {(handle) => renderRow(b, handle)}
+              </SortableBriefRow>
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
       {closedRows.length ? (
         <Collapsible>
           <CollapsibleTrigger asChild>
@@ -488,7 +505,7 @@ function UnifiedBriefs({
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3 space-y-3">
-            {closedRows.map(renderRow)}
+            {closedRows.map((b) => renderRow(b))}
           </CollapsibleContent>
         </Collapsible>
       ) : null}
