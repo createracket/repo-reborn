@@ -1840,9 +1840,11 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
+
 
 function EditProspectPanel({
   item,
