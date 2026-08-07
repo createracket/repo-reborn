@@ -44,6 +44,7 @@ import { Route as AuthenticatedRacketDeskIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedRacketDeskDemoRouteImport } from './routes/_authenticated.racket-desk.demo'
 import { Route as AuthenticatedRacketDeskFanIntelRouteImport } from './routes/_authenticated.racket-desk.fan-intel'
 import { Route as AuthenticatedRacketDeskProfilesRouteImport } from './routes/_authenticated.racket-desk.profiles'
+import { Route as AuthenticatedRacketDeskSocialListeningRouteImport } from './routes/_authenticated.racket-desk.social-listening'
 import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact-submit'
 import { Route as ApiPublicTrackPageviewRouteImport } from './routes/api/public/track-pageview'
 import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/public/transcribe-voice-note'
@@ -236,6 +237,12 @@ const AuthenticatedRacketDeskProfilesRoute =
     path: '/profiles',
     getParentRoute: () => AuthenticatedRacketDeskRoute,
   } as any)
+const AuthenticatedRacketDeskSocialListeningRoute =
+  AuthenticatedRacketDeskSocialListeningRouteImport.update({
+    id: '/social-listening',
+    path: '/social-listening',
+    getParentRoute: () => AuthenticatedRacketDeskRoute,
+  } as any)
 const ApiPublicContactSubmitRoute = ApiPublicContactSubmitRouteImport.update({
   id: '/api/public/contact-submit',
   path: '/api/public/contact-submit',
@@ -325,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
   '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
+  '/racket-desk/social-listening': typeof AuthenticatedRacketDeskSocialListeningRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
@@ -370,6 +378,7 @@ export interface FileRoutesByTo {
   '/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
   '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
+  '/racket-desk/social-listening': typeof AuthenticatedRacketDeskSocialListeningRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
@@ -418,6 +427,7 @@ export interface FileRoutesById {
   '/_authenticated/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
   '/_authenticated/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/_authenticated/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
+  '/_authenticated/racket-desk/social-listening': typeof AuthenticatedRacketDeskSocialListeningRoute
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
@@ -466,6 +476,7 @@ export interface FileRouteTypes {
     | '/racket-desk/demo'
     | '/racket-desk/fan-intel'
     | '/racket-desk/profiles'
+    | '/racket-desk/social-listening'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
     | '/api/public/transcribe-voice-note'
@@ -511,6 +522,7 @@ export interface FileRouteTypes {
     | '/racket-desk/demo'
     | '/racket-desk/fan-intel'
     | '/racket-desk/profiles'
+    | '/racket-desk/social-listening'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
     | '/api/public/transcribe-voice-note'
@@ -558,6 +570,7 @@ export interface FileRouteTypes {
     | '/_authenticated/racket-desk/demo'
     | '/_authenticated/racket-desk/fan-intel'
     | '/_authenticated/racket-desk/profiles'
+    | '/_authenticated/racket-desk/social-listening'
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
     | '/api/public/transcribe-voice-note'
@@ -854,6 +867,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRacketDeskProfilesRouteImport
       parentRoute: typeof AuthenticatedRacketDeskRoute
     }
+    '/_authenticated/racket-desk/social-listening': {
+      id: '/_authenticated/racket-desk/social-listening'
+      path: '/social-listening'
+      fullPath: '/racket-desk/social-listening'
+      preLoaderRoute: typeof AuthenticatedRacketDeskSocialListeningRouteImport
+      parentRoute: typeof AuthenticatedRacketDeskRoute
+    }
     '/api/public/contact-submit': {
       id: '/api/public/contact-submit'
       path: '/api/public/contact-submit'
@@ -931,6 +951,7 @@ interface AuthenticatedRacketDeskRouteChildren {
   AuthenticatedRacketDeskDemoRoute: typeof AuthenticatedRacketDeskDemoRoute
   AuthenticatedRacketDeskFanIntelRoute: typeof AuthenticatedRacketDeskFanIntelRoute
   AuthenticatedRacketDeskProfilesRoute: typeof AuthenticatedRacketDeskProfilesRoute
+  AuthenticatedRacketDeskSocialListeningRoute: typeof AuthenticatedRacketDeskSocialListeningRoute
   AuthenticatedRacketDeskIndexRoute: typeof AuthenticatedRacketDeskIndexRoute
 }
 
@@ -939,6 +960,8 @@ const AuthenticatedRacketDeskRouteChildren: AuthenticatedRacketDeskRouteChildren
     AuthenticatedRacketDeskDemoRoute: AuthenticatedRacketDeskDemoRoute,
     AuthenticatedRacketDeskFanIntelRoute: AuthenticatedRacketDeskFanIntelRoute,
     AuthenticatedRacketDeskProfilesRoute: AuthenticatedRacketDeskProfilesRoute,
+    AuthenticatedRacketDeskSocialListeningRoute:
+      AuthenticatedRacketDeskSocialListeningRoute,
     AuthenticatedRacketDeskIndexRoute: AuthenticatedRacketDeskIndexRoute,
   }
 
@@ -1011,13 +1034,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
