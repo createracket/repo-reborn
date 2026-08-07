@@ -1,0 +1,2 @@
+ALTER TABLE public.campaign_briefs DROP CONSTRAINT campaign_briefs_status_check;
+ALTER TABLE public.campaign_briefs ADD CONSTRAINT campaign_briefs_status_check CHECK (status = ANY (ARRAY['submitted','in_review','in_progress','review_your_roster','review_your_report','closed']));
