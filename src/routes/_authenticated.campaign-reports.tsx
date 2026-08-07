@@ -1788,6 +1788,8 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
           </Button>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }
