@@ -133,7 +133,9 @@ function DashboardPage() {
   const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
   const [soundBoardItems, setSoundBoardItems] = useState<Array<{ id: string; title: string; copy: string; video_url: string | null; thumbnail_url: string | null; gradient: string | null }>>([]);
 
+  // Sound board is the last section on the page — load it only once the rest of the dashboard has settled
   useEffect(() => {
+    if (loading) return;
     (async () => {
       const { data } = await (supabase as any)
         .from("sound_board_items")
@@ -142,7 +144,7 @@ function DashboardPage() {
         .order("position", { ascending: true });
       setSoundBoardItems(((data as any[]) ?? []) as any);
     })();
-  }, []);
+  }, [loading]);
 
   const isAllView = rosterFilter === "all";
   const isMineView = rosterFilter === "mine";
@@ -348,10 +350,18 @@ function DashboardPage() {
         }),
       );
 
-
       setDisplayName(profile?.display_name ?? null);
       setProfileRow((profile as any) ?? null);
       setLatestVibe((vibes?.[0] as VibeRow) ?? null);
+
+      // Assigned rosters + reports render directly under the planner, so load them next
+      if (u.user.email) {
+        const { data: assigned } = await (supabase as any).rpc("get_assigned_rosters");
+        setAssignedRosters(((assigned as any[]) ?? []) as any);
+        const { data: assignedRep } = await (supabase as any).rpc("get_assigned_campaign_reports");
+        setAssignedReports(((assignedRep as any[]) ?? []) as any);
+      }
+
       // Merge in privately shared briefs (both user + lead briefs)
       const { data: shares } = await supabase
         .from("campaign_brief_shares")
@@ -443,12 +453,8 @@ function DashboardPage() {
 
 
 
-      if (u.user.email) {
-        const { data: assigned } = await (supabase as any).rpc("get_assigned_rosters");
-        setAssignedRosters(((assigned as any[]) ?? []) as any);
-        const { data: assignedRep } = await (supabase as any).rpc("get_assigned_campaign_reports");
-        setAssignedReports(((assignedRep as any[]) ?? []) as any);
-      }
+
+
 
       const featuredMembers: CommunityMember[] = ((featuredRows ?? []) as any[]).map((p) => ({
         id: p.id,
