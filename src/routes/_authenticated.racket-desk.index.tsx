@@ -92,8 +92,8 @@ function Dashboard() {
 
         <aside className="space-y-6">
           <DailyIdeaPromo />
-          <StrategistCard />
-          <RosterMatches />
+          <RegionsPulse />
+
           <RegionsPulse />
         </aside>
       </div>
