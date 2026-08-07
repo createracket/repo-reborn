@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { getRosterGate, unlockRoster } from "@/lib/roster-access.functions";
+import { socialAudience, totalFans } from "@/lib/audience";
 
 type PublicRoster = {
   id: string;
@@ -45,10 +46,20 @@ type PublicItem = {
   tiktok_followers: number | null;
   youtube_url: string | null;
   youtube_subscribers: number | null;
+  twitch_url: string | null;
+  twitch_followers: number | null;
+  facebook_url: string | null;
+  facebook_followers: number | null;
+  x_url: string | null;
+  x_followers: number | null;
+  custom_label: string | null;
+  custom_url: string | null;
+  custom_followers: number | null;
   spotify_url: string | null;
   spotify_monthly_listens: number | null;
   apple_music_url: string | null;
   apple_music_followers: number | null;
+
   example_video_url: string | null;
   bio_page_url: string | null;
   content_review_url: string | null;
@@ -166,7 +177,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, position, status, category, categories, location",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, twitch_url, twitch_followers, facebook_url, facebook_followers, x_url, x_followers, custom_label, custom_url, custom_followers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, position, status, category, categories, location",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
@@ -279,18 +290,10 @@ function PublicRosterPage() {
     );
   }
 
-  const totalFollowers = items
-    .filter((it) => it.status !== "hold")
-    .reduce(
-      (acc, it) =>
-        acc +
-        (it.instagram_followers ?? 0) +
-        (it.tiktok_followers ?? 0) +
-        (it.youtube_subscribers ?? 0) +
-        (it.spotify_monthly_listens ?? 0) +
-        (it.apple_music_followers ?? 0),
-      0,
-    );
+  const visibleForTotals = items.filter((it) => it.status !== "hold");
+  const totalSocial = visibleForTotals.reduce((acc, it) => acc + socialAudience(it), 0);
+  const totalAll = visibleForTotals.reduce((acc, it) => acc + totalFans(it), 0);
+
   
 
   return (
@@ -346,18 +349,30 @@ function PublicRosterPage() {
           </div>
         )}
 
-        {(totalFollowers > 0 || roster.est_engagement_pct != null) && (
-          <div className={`mt-6 grid gap-3 sm:grid-cols-2 ${roster.est_engagement_pct != null ? "lg:grid-cols-3" : ""}`}>
-            {totalFollowers > 0 && (
+        {(totalSocial > 0 || totalAll > 0 || roster.est_engagement_pct != null) && (
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {totalSocial > 0 && (
               <>
                 <Card>
                   <CardContent className="p-5">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                      Total followers
+                      Total social audience
                     </p>
                     <p className="mt-1 font-display text-2xl">
-                      {formatCount(totalFollowers)}
+                      {formatCount(totalSocial)}
                     </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">Excludes streaming platforms</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-5">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Total fans
+                    </p>
+                    <p className="mt-1 font-display text-2xl">
+                      {formatCount(totalAll)}
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">Socials + streaming</p>
                   </CardContent>
                 </Card>
                 <Card>
@@ -366,12 +381,13 @@ function PublicRosterPage() {
                       Est. reach
                     </p>
                     <p className="mt-1 font-display text-2xl">
-                      {formatCount(Math.round(totalFollowers * 0.4))}
+                      {formatCount(Math.round(totalSocial * 0.4))}
                     </p>
                   </CardContent>
                 </Card>
               </>
             )}
+
             {roster.est_engagement_pct != null && (
               <Card>
                 <CardContent className="p-5">
@@ -397,15 +413,16 @@ function PublicRosterPage() {
               ["IG", it.instagram_followers, it.instagram_url],
               ["TT", it.tiktok_followers, it.tiktok_url],
               ["YT", it.youtube_subscribers, it.youtube_url],
+              ["Twitch", it.twitch_followers, it.twitch_url],
+              ["Facebook", it.facebook_followers, it.facebook_url],
+              ["X", it.x_followers, it.x_url],
+              [it.custom_label || "Link", it.custom_followers, it.custom_url],
               ["Spotify streams", it.spotify_monthly_listens, it.spotify_url],
               ["Apple", it.apple_music_followers, it.apple_music_url],
             ];
-            const totalReach =
-              (it.instagram_followers ?? 0) +
-              (it.tiktok_followers ?? 0) +
-              (it.youtube_subscribers ?? 0) +
-              (it.spotify_monthly_listens ?? 0) +
-              (it.apple_music_followers ?? 0);
+            const itemSocial = socialAudience(it);
+            const itemFans = totalFans(it);
+
             const initials = it.name
               .split(/\s+/)
               .map((s) => s[0])
@@ -473,11 +490,17 @@ function PublicRosterPage() {
                         </div>
                       )}
                       <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
-                        {totalReach > 0 && (
+                        {itemSocial > 0 && (
                           <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2.5 py-1 font-semibold text-foreground">
-                            {formatCount(totalReach)} total followers
+                            {formatCount(itemSocial)} social audience
                           </span>
                         )}
+                        {itemFans > itemSocial && (
+                          <span className="rounded-md border border-primary/40 bg-primary/10 px-2.5 py-1 font-semibold text-foreground">
+                            {formatCount(itemFans)} total fans
+                          </span>
+                        )}
+
                         {stats.map(([label, count, url]) =>
                           count != null || url ? (
                             <span

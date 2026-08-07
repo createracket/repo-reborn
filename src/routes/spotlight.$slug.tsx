@@ -34,6 +34,14 @@ type PartnerLinks = {
   youtube_extra?: string[];
   spotify_extra?: string[];
   apple_music_extra?: string[];
+  twitch?: string;
+  facebook?: string;
+  x?: string;
+  custom_label?: string;
+  custom_url?: string;
+  twitch_extra?: string[];
+  facebook_extra?: string[];
+  x_extra?: string[];
 };
 
 function handleLabel(url: string): string {
@@ -376,6 +384,20 @@ function SpotlightPage() {
                 </a>
               </Button>
             ) : null}
+            {([
+              { url: links.twitch, label: "Twitch" },
+              { url: links.facebook, label: "Facebook" },
+              { url: links.x, label: "X" },
+              { url: links.custom_url, label: links.custom_label || "Link" },
+            ] as const).map((l) =>
+              l.url ? (
+                <Button key={l.label} asChild variant="outline" size="sm">
+                  <a href={l.url.startsWith("http") ? l.url : `https://${l.url}`} target="_blank" rel="noreferrer">
+                    {l.label}
+                  </a>
+                </Button>
+              ) : null,
+            )}
             {links.contact ? (
               <Button asChild variant="outline" size="sm">
                 <a href={links.contact.startsWith("http") ? links.contact : `mailto:${links.contact}`}>
@@ -393,6 +415,9 @@ function SpotlightPage() {
               { label: "YouTube", urls: links.youtube_extra ?? [] },
               { label: "Spotify", urls: links.spotify_extra ?? [] },
               { label: "Apple Music", urls: links.apple_music_extra ?? [] },
+              { label: "Twitch", urls: links.twitch_extra ?? [] },
+              { label: "Facebook", urls: links.facebook_extra ?? [] },
+              { label: "X", urls: links.x_extra ?? [] },
             ].filter((g) => g.urls.length > 0);
             if (groups.length === 0) return null;
             return (
@@ -414,7 +439,10 @@ function SpotlightPage() {
         {/* Metrics */}
         {(() => {
           const items: Array<{ label: string; value: string }> = [];
-          const tf = formatMetric(page.total_followers); if (tf) items.push({ label: "Total followers", value: tf });
+          const tf = formatMetric(page.total_followers); if (tf) items.push({ label: "Total social audience", value: tf });
+          const fans = (page.total_followers ?? 0) + (page.monthly_streams ?? 0);
+          const fansLabel = formatMetric(fans);
+          if (fansLabel && fans > (page.total_followers ?? 0)) items.push({ label: "Total fans", value: fansLabel });
           const ts = formatMetric(page.total_streams); if (ts) items.push({ label: "Total streams", value: ts });
           const ms = formatMetric(page.monthly_streams); if (ms) items.push({ label: "Monthly streams", value: ms });
           const ar = formatMetric(page.avg_reach); if (ar) items.push({ label: "Avg. reach", value: ar });

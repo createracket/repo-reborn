@@ -1118,7 +1118,12 @@ export type Database = {
           category: string | null
           content_review_url: string | null
           created_at: string
+          custom_followers: number | null
+          custom_label: string | null
+          custom_url: string | null
           example_video_url: string | null
+          facebook_followers: number | null
+          facebook_url: string | null
           flagged_streaming_mismatch: boolean
           flagged_streaming_reason: string | null
           id: string
@@ -1136,8 +1141,12 @@ export type Database = {
           status: string
           tiktok_followers: number | null
           tiktok_url: string | null
+          twitch_followers: number | null
+          twitch_url: string | null
           updated_at: string
           vibe: string | null
+          x_followers: number | null
+          x_url: string | null
           youtube_subscribers: number | null
           youtube_url: string | null
         }
@@ -1151,7 +1160,12 @@ export type Database = {
           category?: string | null
           content_review_url?: string | null
           created_at?: string
+          custom_followers?: number | null
+          custom_label?: string | null
+          custom_url?: string | null
           example_video_url?: string | null
+          facebook_followers?: number | null
+          facebook_url?: string | null
           flagged_streaming_mismatch?: boolean
           flagged_streaming_reason?: string | null
           id?: string
@@ -1169,8 +1183,12 @@ export type Database = {
           status?: string
           tiktok_followers?: number | null
           tiktok_url?: string | null
+          twitch_followers?: number | null
+          twitch_url?: string | null
           updated_at?: string
           vibe?: string | null
+          x_followers?: number | null
+          x_url?: string | null
           youtube_subscribers?: number | null
           youtube_url?: string | null
         }
@@ -1184,7 +1202,12 @@ export type Database = {
           category?: string | null
           content_review_url?: string | null
           created_at?: string
+          custom_followers?: number | null
+          custom_label?: string | null
+          custom_url?: string | null
           example_video_url?: string | null
+          facebook_followers?: number | null
+          facebook_url?: string | null
           flagged_streaming_mismatch?: boolean
           flagged_streaming_reason?: string | null
           id?: string
@@ -1202,8 +1225,12 @@ export type Database = {
           status?: string
           tiktok_followers?: number | null
           tiktok_url?: string | null
+          twitch_followers?: number | null
+          twitch_url?: string | null
           updated_at?: string
           vibe?: string | null
+          x_followers?: number | null
+          x_url?: string | null
           youtube_subscribers?: number | null
           youtube_url?: string | null
         }
