@@ -1687,24 +1687,30 @@ function SpotlightForm({
             <Label htmlFor="type">Type</Label>
             <Input id="type" value={form.type} onChange={(e) => set("type", e.target.value)} placeholder="podcast" />
           </div>
-          <div className="md:col-span-2">
-            <ImageUploader
-              label="Header image"
-              value={form.header_image_url}
-              onChange={(url) => set("header_image_url", url)}
-              aspect="16 / 9"
-              hint="16:9 banner shown at the top of the spotlight page. JPG/PNG, up to 8MB."
-            />
-          </div>
-          <div className="md:col-span-2">
-            <ImageUploader
-              label="Profile photo / artwork"
-              value={form.profile_image_url}
-              onChange={(url) => set("profile_image_url", url)}
-              aspect="1 / 1"
-              hint="Square headshot or cover artwork. JPG/PNG, up to 8MB."
-            />
-          </div>
+          <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+              Images
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                (header image &amp; profile photo)
+              </span>
+            </summary>
+            <div className="flex w-full flex-col gap-4 px-4">
+              <ImageUploader
+                label="Header image"
+                value={form.header_image_url}
+                onChange={(url) => set("header_image_url", url)}
+                aspect="16 / 9"
+                hint="16:9 banner shown at the top of the spotlight page. JPG/PNG, up to 8MB."
+              />
+              <ImageUploader
+                label="Profile photo / artwork"
+                value={form.profile_image_url}
+                onChange={(url) => set("profile_image_url", url)}
+                aspect="1 / 1"
+                hint="Square headshot or cover artwork. JPG/PNG, up to 8MB."
+              />
+            </div>
+          </details>
           <div className="space-y-1.5 md:col-span-2">
             <Label htmlFor="headline">Headline *</Label>
             <Input id="headline" value={form.headline} onChange={(e) => set("headline", e.target.value)} placeholder="Your Music, Your Business" />
