@@ -1807,6 +1807,13 @@ function SpotlightForm({
                 {fetchedCounts[p] != null && (
                   <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts[p].toLocaleString()} {unit || "followers"}</p>
                 )}
+                {p === "youtube" && (
+                  <Input
+                    value={form.youtube_name}
+                    onChange={(e) => set("youtube_name", e.target.value)}
+                    placeholder="Display name (optional, e.g. State Champs)"
+                  />
+                )}
                 {extras.map((val, i) => (
                   <div key={i} className="space-y-1">
                     <div className="flex gap-2">
@@ -1823,6 +1830,13 @@ function SpotlightForm({
                         <X className="size-3" />
                       </Button>
                     </div>
+                    {p === "youtube" && (
+                      <Input
+                        value={extraNames.youtube[i] ?? ""}
+                        onChange={(e) => setExtraName(i, e.target.value)}
+                        placeholder={`Display name (optional, extra ${i + 1})`}
+                      />
+                    )}
                     {fetchedCounts[`${p}:${i}`] != null && (
                       <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts[`${p}:${i}`].toLocaleString()} {unit || "followers"}</p>
                     )}
