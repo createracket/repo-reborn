@@ -3,13 +3,14 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { adminUploadSpotlightImage } from "@/lib/spotlight-images.functions";
+import { scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, ChevronDown, ChevronRight, Upload, GripVertical } from "lucide-react";
+import { Trash2, ChevronDown, ChevronRight, Upload, GripVertical, RefreshCw } from "lucide-react";
 
 type SoundBoardItem = {
   id: string;
