@@ -1617,7 +1617,7 @@ function SpotlightForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2 [&>*]:order-4">
+    <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2 [&>*]:order-6">
           <div className="!order-1 md:col-span-2 space-y-2 rounded-lg border border-pink-accent/40 bg-muted/30 p-3">
             <Label htmlFor="ai-dump" className="text-sm font-medium">
               Paste artist email / info dump
