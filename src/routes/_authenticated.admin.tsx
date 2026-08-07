@@ -1241,6 +1241,8 @@ function SpotlightForm({
     label_partnership: editData?.links?.section_labels?.partnership ?? "",
     label_eoi: editData?.links?.section_labels?.eoi ?? "",
     label_videos: editData?.links?.section_labels?.videos ?? "",
+    label_members: editData?.links?.section_labels?.members ?? "",
+    youtube_name: editData?.links?.youtube_name ?? "",
   });
 
   function numOrNull(v: string): number | null {
