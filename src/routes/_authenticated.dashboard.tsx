@@ -1188,7 +1188,7 @@ function DashboardPage() {
                     ) : community.length === 0 ? (
                       <p className="text-sm text-muted-foreground">No community members yet.</p>
                     ) : (
-                      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                      <ul className="grid max-h-[26rem] gap-3 overflow-y-auto overscroll-contain pr-1 sm:max-h-none sm:overflow-visible sm:pr-0 sm:grid-cols-2 lg:grid-cols-4">
                         {community.map((m) => (
                           <li
                             key={m.id}
