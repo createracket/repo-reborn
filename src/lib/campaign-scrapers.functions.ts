@@ -271,19 +271,24 @@ export const scrapePostMetrics = createServerFn({ method: "POST" })
 type ProfileResult =
   | {
       ok: true;
-      platform: "instagram" | "tiktok" | "youtube";
+      platform: "instagram" | "tiktok" | "youtube" | "twitch" | "facebook" | "x";
       followers: number | null;
       avatar_url?: string | null;
       handle?: string | null;
     }
   | { ok: false; error: string };
 
-function detectProfilePlatform(url: string): "instagram" | "tiktok" | "youtube" | null {
+function detectProfilePlatform(
+  url: string,
+): "instagram" | "tiktok" | "youtube" | "twitch" | "facebook" | "x" | null {
   try {
     const host = new URL(url).hostname.replace(/^www\./, "");
     if (host.includes("instagram.com")) return "instagram";
     if (host.includes("tiktok.com")) return "tiktok";
     if (host === "youtu.be" || host.includes("youtube.com")) return "youtube";
+    if (host.includes("twitch.tv")) return "twitch";
+    if (host.includes("facebook.com") || host.includes("fb.com")) return "facebook";
+    if (host === "x.com" || host.includes("twitter.com")) return "x";
     return null;
   } catch {
     return null;
@@ -418,6 +423,126 @@ async function scrapeYouTubeChannel(url: string): Promise<ProfileResult> {
   };
 }
 
+function firstPathSegment(url: string): string | null {
+  try {
+    const u = new URL(url.startsWith("http") ? url : `https://${url}`);
+    const seg = u.pathname.split("/").filter(Boolean);
+    return seg[0] ? seg[0].replace(/^@/, "") : null;
+  } catch {
+    return url.trim().replace(/^@/, "") || null;
+  }
+}
+
+async function scrapeTwitchChannel(url: string): Promise<ProfileResult> {
+  const login = firstPathSegment(url);
+  if (!login) return { ok: false, error: "Couldn't parse Twitch channel from URL." };
+  const lovableKey = process.env.LOVABLE_API_KEY;
+  const twitchKey = process.env.TWITCH_API_KEY;
+  if (!lovableKey || !twitchKey)
+    return { ok: false, error: "Twitch isn't connected yet — connect Twitch to enable follower fetch." };
+  try {
+    const headers = {
+      Authorization: `Bearer ${lovableKey}`,
+      "X-Connection-Api-Key": twitchKey,
+    };
+    const userRes = await fetch(
+      `https://connector-gateway.lovable.dev/twitch/users?login=${encodeURIComponent(login)}`,
+      { headers },
+    );
+    if (!userRes.ok) {
+      const body = await userRes.text();
+      return { ok: false, error: `Twitch error ${userRes.status}: ${body.slice(0, 150)}` };
+    }
+    const uj = (await userRes.json()) as {
+      data?: Array<{ id?: string; display_name?: string; profile_image_url?: string }>;
+    };
+    const user = uj.data?.[0];
+    if (!user?.id) return { ok: false, error: "Twitch channel not found." };
+    let followers: number | null = null;
+    const fRes = await fetch(
+      `https://connector-gateway.lovable.dev/twitch/channels/followers?broadcaster_id=${user.id}&first=1`,
+      { headers },
+    );
+    if (fRes.ok) {
+      const fj = (await fRes.json()) as { total?: number };
+      followers = typeof fj.total === "number" ? fj.total : null;
+    }
+    return {
+      ok: true,
+      platform: "twitch",
+      followers,
+      avatar_url: await mirrorOrKeep(user.profile_image_url ?? null, "twitch"),
+      handle: user.display_name ?? login,
+    };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+async function scrapeFacebookPage(url: string): Promise<ProfileResult> {
+  const token = process.env.APIFY_API_TOKEN;
+  if (!token) return { ok: false, error: "APIFY_API_TOKEN not configured." };
+  try {
+    const results = (await runApifyActor(
+      "apify~facebook-pages-scraper",
+      { startUrls: [{ url: url.startsWith("http") ? url : `https://${url}` }] },
+      token,
+    )) as Array<{
+      followers?: number;
+      followersCount?: number;
+      likes?: number;
+      title?: string;
+      pageName?: string;
+      profilePictureUrl?: string;
+      profilePhoto?: string;
+    }>;
+    const p = results[0];
+    if (!p) return { ok: false, error: "No Facebook page returned." };
+    return {
+      ok: true,
+      platform: "facebook",
+      followers: p.followers ?? p.followersCount ?? p.likes ?? null,
+      avatar_url: await mirrorOrKeep(p.profilePictureUrl ?? p.profilePhoto ?? null, "fb"),
+      handle: p.title ?? p.pageName ?? null,
+    };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+async function scrapeXProfile(url: string): Promise<ProfileResult> {
+  const token = process.env.APIFY_API_TOKEN;
+  if (!token) return { ok: false, error: "APIFY_API_TOKEN not configured." };
+  const handle = firstPathSegment(url);
+  if (!handle) return { ok: false, error: "Couldn't parse X handle from URL." };
+  try {
+    const results = (await runApifyActor(
+      "apidojo~twitter-user-scraper",
+      { twitterHandles: [handle], maxItems: 1, getFollowers: false, getFollowing: false },
+      token,
+    )) as Array<{
+      followers?: number;
+      followersCount?: number;
+      userName?: string;
+      screen_name?: string;
+      name?: string;
+      profilePicture?: string;
+      profile_image_url_https?: string;
+    }>;
+    const p = results[0];
+    if (!p) return { ok: false, error: "No X profile returned." };
+    return {
+      ok: true,
+      platform: "x",
+      followers: p.followers ?? p.followersCount ?? null,
+      avatar_url: await mirrorOrKeep(p.profilePicture ?? p.profile_image_url_https ?? null, "x"),
+      handle: p.userName ?? p.screen_name ?? handle,
+    };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
 /**
  * Scrape follower count (and avatar) for a single profile URL.
  * Auth-gated. Used by roster + profile pages.
@@ -428,9 +553,15 @@ export const scrapeProfileFollowers = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<ProfileResult> => {
     const platform = detectProfilePlatform(data.url);
     if (!platform)
-      return { ok: false, error: "Unrecognised URL — must be Instagram, TikTok, or YouTube." };
+      return {
+        ok: false,
+        error: "Unrecognised URL — must be Instagram, TikTok, YouTube, Twitch, Facebook or X.",
+      };
     if (platform === "instagram") return scrapeInstagramProfile(data.url);
     if (platform === "tiktok") return scrapeTikTokProfile(data.url);
+    if (platform === "twitch") return scrapeTwitchChannel(data.url);
+    if (platform === "facebook") return scrapeFacebookPage(data.url);
+    if (platform === "x") return scrapeXProfile(data.url);
     return scrapeYouTubeChannel(data.url);
   });
 
