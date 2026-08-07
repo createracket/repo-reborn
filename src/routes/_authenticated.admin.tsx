@@ -1241,6 +1241,8 @@ function SpotlightForm({
     label_partnership: editData?.links?.section_labels?.partnership ?? "",
     label_eoi: editData?.links?.section_labels?.eoi ?? "",
     label_videos: editData?.links?.section_labels?.videos ?? "",
+    label_members: editData?.links?.section_labels?.members ?? "",
+    youtube_name: editData?.links?.youtube_name ?? "",
   });
 
   function numOrNull(v: string): number | null {
@@ -1348,6 +1350,17 @@ function SpotlightForm({
     facebook: editData?.links?.facebook_extra ?? [],
     x: editData?.links?.x_extra ?? [],
   }));
+  const [extraNames, setExtraNames] = useState<Record<"youtube", string[]>>(() => ({
+    youtube: editData?.links?.youtube_extra_names ?? [],
+  }));
+  function setExtraName(i: number, v: string) {
+    setExtraNames((s) => {
+      const next = [...s.youtube];
+      while (next.length <= i) next.push("");
+      next[i] = v;
+      return { youtube: next };
+    });
+  }
   function addExtra(p: ExtraPlatform) {
     setExtraLinks((s) => (s[p].length >= 5 ? s : { ...s, [p]: [...s[p], ""] }));
   }
@@ -1356,6 +1369,7 @@ function SpotlightForm({
   }
   function removeExtra(p: ExtraPlatform, i: number) {
     setExtraLinks((s) => ({ ...s, [p]: s[p].filter((_, ix) => ix !== i) }));
+    if (p === "youtube") setExtraNames((s) => ({ youtube: s.youtube.filter((_, ix) => ix !== i) }));
     setFetchedCounts((c) => {
       const next = { ...c };
       delete next[`${p}:${i}`];
@@ -1532,12 +1546,15 @@ function SpotlightForm({
         facebook_extra: extraLinks.facebook.map((s) => s.trim()).filter(Boolean),
         x_extra: extraLinks.x.map((s) => s.trim()).filter(Boolean),
         follower_counts: fetchedCounts,
+        youtube_name: form.youtube_name.trim(),
+        youtube_extra_names: extraLinks.youtube.map((_, i) => (extraNames.youtube[i] ?? "").trim()),
         section_labels: {
           host_bio: form.label_host_bio.trim(),
           audience: form.label_audience.trim(),
           partnership: form.label_partnership.trim(),
           eoi: form.label_eoi.trim(),
           videos: form.label_videos.trim(),
+          members: form.label_members.trim(),
         },
       },
       header_image_url: form.header_image_url || null,
@@ -1593,6 +1610,7 @@ function SpotlightForm({
         total_followers: "", total_streams: "", monthly_streams: "",
         avg_reach: "", avg_engagement: "",
         label_host_bio: "", label_audience: "", label_partnership: "", label_eoi: "", label_videos: "",
+        label_members: "", youtube_name: "",
       });
     }
     onCreated();
@@ -1729,6 +1747,7 @@ function SpotlightForm({
                 { k: "label_partnership", label: "Partnership heading", ph: "Partnership" },
                 { k: "label_eoi", label: "Expressions of interest heading", ph: "Expressions of interest" },
                 { k: "label_videos", label: "Videos heading", ph: "Watch" },
+                { k: "label_members", label: "Secondary socials heading", ph: "Meet the members" },
               ] as const).map(({ k, label, ph }) => (
                 <div key={k} className="space-y-1.5">
                   <Label htmlFor={k}>{label}</Label>
@@ -1788,6 +1807,13 @@ function SpotlightForm({
                 {fetchedCounts[p] != null && (
                   <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts[p].toLocaleString()} {unit || "followers"}</p>
                 )}
+                {p === "youtube" && (
+                  <Input
+                    value={form.youtube_name}
+                    onChange={(e) => set("youtube_name", e.target.value)}
+                    placeholder="Display name (optional, e.g. State Champs)"
+                  />
+                )}
                 {extras.map((val, i) => (
                   <div key={i} className="space-y-1">
                     <div className="flex gap-2">
@@ -1804,6 +1830,13 @@ function SpotlightForm({
                         <X className="size-3" />
                       </Button>
                     </div>
+                    {p === "youtube" && (
+                      <Input
+                        value={extraNames.youtube[i] ?? ""}
+                        onChange={(e) => setExtraName(i, e.target.value)}
+                        placeholder={`Display name (optional, extra ${i + 1})`}
+                      />
+                    )}
                     {fetchedCounts[`${p}:${i}`] != null && (
                       <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts[`${p}:${i}`].toLocaleString()} {unit || "followers"}</p>
                     )}
