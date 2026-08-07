@@ -510,7 +510,7 @@ function SpotlightPage() {
               const embed = v.url ? getSocialEmbed(v.url) : null;
               return embed ? { embed, cover: v.cover } : null;
             })
-            .filter((v): v is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover?: string } => !!v);
+            .filter((v): v is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover: string | undefined } => !!v);
           if (videos.length === 0) return null;
           return (
             <section className="mt-16">
