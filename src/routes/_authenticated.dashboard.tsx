@@ -400,7 +400,14 @@ function DashboardPage() {
       ];
       const dedup = new Map<string, Opportunity>();
       [...publishedRows, ...sharedRows].forEach((o) => dedup.set(`${o.brief_source}:${o.id}`, o));
-      setOpportunities(Array.from(dedup.values()).sort((a, b) => (a.published_at ?? a.created_at) < (b.published_at ?? b.created_at) ? 1 : -1));
+      setOpportunities(
+        Array.from(dedup.values()).sort((a, b) => {
+          const ao = a.display_order ?? 0;
+          const bo = b.display_order ?? 0;
+          if (ao !== bo) return ao - bo;
+          return (a.published_at ?? a.created_at) < (b.published_at ?? b.created_at) ? 1 : -1;
+        }),
+      );
 
       const { data: exOpps } = await supabase
         .from("example_opportunities" as any)
