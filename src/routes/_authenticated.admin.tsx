@@ -1986,24 +1986,40 @@ function SpotlightForm({
             <div className="flex w-full flex-col gap-4 px-4">
               <p className="text-xs text-muted-foreground">
                 Paste up to three public TikTok or Instagram post/reel URLs. Each shows as a clip card at the bottom of the
-                spotlight page. Add a cover image URL for Instagram clips — Instagram no longer serves public thumbnails,
-                so without one the card falls back to a gradient.
+                spotlight page. Add a cover image for Instagram clips — Instagram no longer serves public thumbnails,
+                so without one the card falls back to a gradient. Uploads land in the{" "}
+                <code>video-covers/</code> folder of the public spotlight images bucket, so you can also drop files
+                there directly and paste the public URL.
               </p>
-              <div className="space-y-1.5">
-                <Label htmlFor="video1">Video 1</Label>
-                <Input id="video1" value={form.video1} onChange={(e) => set("video1", e.target.value)} placeholder="https://www.tiktok.com/@user/video/123…" />
-                <Input id="video1_cover" value={form.video1_cover} onChange={(e) => set("video1_cover", e.target.value)} placeholder="Cover image URL (optional)" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="video2">Video 2</Label>
-                <Input id="video2" value={form.video2} onChange={(e) => set("video2", e.target.value)} placeholder="https://www.instagram.com/reel/…" />
-                <Input id="video2_cover" value={form.video2_cover} onChange={(e) => set("video2_cover", e.target.value)} placeholder="Cover image URL (optional)" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="video3">Video 3</Label>
-                <Input id="video3" value={form.video3} onChange={(e) => set("video3", e.target.value)} placeholder="https://www.tiktok.com/@user/video/…" />
-                <Input id="video3_cover" value={form.video3_cover} onChange={(e) => set("video3_cover", e.target.value)} placeholder="Cover image URL (optional)" />
-              </div>
+              {([1, 2, 3] as const).map((n) => {
+                const urlKey = `video${n}` as "video1" | "video2" | "video3";
+                const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover";
+                return (
+                  <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
+                    <Label htmlFor={urlKey}>Video {n}</Label>
+                    <Input
+                      id={urlKey}
+                      value={form[urlKey]}
+                      onChange={(e) => set(urlKey, e.target.value)}
+                      placeholder="https://www.tiktok.com/@user/video/… or Instagram reel URL"
+                    />
+                    <Input
+                      id={coverKey}
+                      value={form[coverKey]}
+                      onChange={(e) => set(coverKey, e.target.value)}
+                      placeholder="Cover image URL (optional)"
+                    />
+                    <ImageUploader
+                      label={`Video ${n} cover`}
+                      value={form[coverKey]}
+                      onChange={(url) => set(coverKey, url)}
+                      aspect="9 / 16"
+                      hint="9:16 preferred, under 8MB."
+                      folder="video-covers"
+                    />
+                  </div>
+                );
+              })}
             </div>
           </details>
           <div className="md:col-span-2 pt-2">
