@@ -100,6 +100,7 @@ export type Database = {
           created_at: string
           currency: string | null
           description: string
+          display_order: number
           id: string
           linked_roster_id: string | null
           published: boolean
@@ -121,6 +122,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string
+          display_order?: number
           id?: string
           linked_roster_id?: string | null
           published?: boolean
@@ -142,6 +144,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string
+          display_order?: number
           id?: string
           linked_roster_id?: string | null
           published?: boolean
@@ -700,6 +703,7 @@ export type Database = {
           created_at: string
           currency: string | null
           description: string
+          display_order: number
           id: string
           linked_roster_id: string | null
           status: string
@@ -719,6 +723,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string
+          display_order?: number
           id?: string
           linked_roster_id?: string | null
           status?: string
@@ -738,6 +743,7 @@ export type Database = {
           created_at?: string
           currency?: string | null
           description?: string
+          display_order?: number
           id?: string
           linked_roster_id?: string | null
           status?: string
