@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play } from "lucide-react";
+import { Instagram, Music2, Play } from "lucide-react";
 
 /**
  * Portrait (9:16) social clip card for spotlight pages.
@@ -47,8 +47,15 @@ export function ClipCard({
 
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
 
-      <span className="absolute left-5 top-5 rounded-full bg-pink-accent px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground">
-        {label}
+      <span
+        className="absolute left-5 top-5 inline-flex items-center justify-center rounded-full bg-pink-accent p-2 text-primary-foreground"
+        title={label}
+      >
+        {provider === "tiktok" ? (
+          <Music2 className="size-4" aria-label={label} />
+        ) : (
+          <Instagram className="size-4" aria-label={label} />
+        )}
       </span>
 
       <span className="absolute inset-0 flex items-center justify-center">
