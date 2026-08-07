@@ -158,7 +158,7 @@ function EditProfilePage() {
   const runSync = useServerFn(runProfileSync);
   const loadUsage = useServerFn(getMyUsage);
   const [fetching, setFetching] = useState<string | null>(null);
-  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number }>({});
+  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number; twitch?: number; facebook?: number; x?: number }>({});
   const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
   const [syncQuota, setSyncQuota] = useState<{ remaining: number; limit: number; resets: string } | null>(null);
 
