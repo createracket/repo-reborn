@@ -1342,6 +1342,7 @@ export type Database = {
           hide_statuses: boolean
           id: string
           owner_id: string
+          profile_image_url: string | null
           published: boolean
           published_at: string | null
           slug: string | null
@@ -1365,6 +1366,7 @@ export type Database = {
           hide_statuses?: boolean
           id?: string
           owner_id: string
+          profile_image_url?: string | null
           published?: boolean
           published_at?: string | null
           slug?: string | null
@@ -1388,6 +1390,7 @@ export type Database = {
           hide_statuses?: boolean
           id?: string
           owner_id?: string
+          profile_image_url?: string | null
           published?: boolean
           published_at?: string | null
           slug?: string | null
