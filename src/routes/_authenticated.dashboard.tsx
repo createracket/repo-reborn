@@ -302,9 +302,10 @@ function DashboardPage() {
           .single(),
         supabase
           .from("campaign_briefs")
-          .select("id, title, description, budget, currency, transparency, published_at, created_at, artist_archetypes, brand_archetypes, status")
+          .select("id, title, description, budget, currency, transparency, published_at, created_at, artist_archetypes, brand_archetypes, status, display_order")
           .eq("published", true)
           .neq("status", "closed")
+          .order("display_order", { ascending: true })
           .order("published_at", { ascending: false })
           .limit(50),
       ]);
