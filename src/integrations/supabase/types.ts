@@ -1395,6 +1395,42 @@ export type Database = {
           },
         ]
       }
+      social_listening_scans: {
+        Row: {
+          analysis: Json
+          artist_name: string
+          created_at: string
+          created_by: string | null
+          handle: string
+          id: string
+          platform: string
+          posts: Json
+          updated_at: string
+        }
+        Insert: {
+          analysis?: Json
+          artist_name: string
+          created_at?: string
+          created_by?: string | null
+          handle: string
+          id?: string
+          platform?: string
+          posts?: Json
+          updated_at?: string
+        }
+        Update: {
+          analysis?: Json
+          artist_name?: string
+          created_at?: string
+          created_by?: string | null
+          handle?: string
+          id?: string
+          platform?: string
+          posts?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sound_board_items: {
         Row: {
           copy: string
