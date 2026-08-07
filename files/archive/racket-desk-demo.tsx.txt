@@ -1,3 +1,5 @@
+// Archived from src/routes/_authenticated.racket-desk.demo.tsx (Racket Desk 'Take the tour' page).
+// To restore: move back to src/routes/_authenticated.racket-desk.demo.tsx and re-add the nav entry { to: '/racket-desk/demo', label: 'Take the tour' } in src/routes/_authenticated.racket-desk.tsx.
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
