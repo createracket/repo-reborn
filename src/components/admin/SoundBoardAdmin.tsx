@@ -180,11 +180,28 @@ export function SoundBoardAdmin() {
         {!loading && rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">No cards yet.</p>
         ) : null}
-        {rows.map((row) => {
+        {rows.map((row, idx) => {
           const isOpen = openIds.has(row.id);
           return (
-            <div key={row.id} className="rounded-lg border border-border">
+            <div
+              key={row.id}
+              onDragOver={(e) => { e.preventDefault(); if (dragId && overId !== row.id) setOverId(row.id); }}
+              onDrop={(e) => { e.preventDefault(); handleDrop(row.id); }}
+              className={`rounded-lg border transition-colors ${
+                overId === row.id && dragId !== row.id ? "border-primary" : "border-border"
+              } ${dragId === row.id ? "opacity-50" : ""}`}
+            >
               <div className="flex items-center gap-2 p-3">
+                <span
+                  draggable
+                  onDragStart={() => setDragId(row.id)}
+                  onDragEnd={() => { setDragId(null); setOverId(null); }}
+                  className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground p-1"
+                  aria-label="Drag to reorder"
+                  title="Drag to reorder"
+                >
+                  <GripVertical className="size-4" />
+                </span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -199,7 +216,7 @@ export function SoundBoardAdmin() {
                   onClick={() => toggleOpen(row.id)}
                   className="flex-1 text-left truncate font-medium"
                 >
-                  <span className="text-xs text-muted-foreground mr-2">#{row.position}</span>
+                  <span className="text-xs text-muted-foreground mr-2">#{idx + 1}</span>
                   {row.title || "Untitled"}
                 </button>
                 <span className="text-xs text-muted-foreground shrink-0">
@@ -208,20 +225,12 @@ export function SoundBoardAdmin() {
               </div>
               {isOpen ? (
                 <div className="border-t border-border p-4 space-y-3">
-                  <div className="grid gap-3 md:grid-cols-[1fr_100px_auto]">
+                  <div className="grid gap-3 md:grid-cols-[1fr_auto]">
                     <div>
                       <Label>Title</Label>
                       <Input
                         value={row.title}
                         onChange={(e) => updateLocal(row.id, { title: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Position</Label>
-                      <Input
-                        type="number"
-                        value={row.position}
-                        onChange={(e) => updateLocal(row.id, { position: Number(e.target.value) })}
                       />
                     </div>
                     <div className="flex items-end gap-2">
