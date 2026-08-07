@@ -41,7 +41,6 @@ import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
 import { Route as AuthenticatedRacketDeskIndexRouteImport } from './routes/_authenticated.racket-desk.index'
-import { Route as AuthenticatedRacketDeskDemoRouteImport } from './routes/_authenticated.racket-desk.demo'
 import { Route as AuthenticatedRacketDeskFanIntelRouteImport } from './routes/_authenticated.racket-desk.fan-intel'
 import { Route as AuthenticatedRacketDeskProfilesRouteImport } from './routes/_authenticated.racket-desk.profiles'
 import { Route as AuthenticatedRacketDeskReportsRouteImport } from './routes/_authenticated.racket-desk.reports'
@@ -220,12 +219,6 @@ const AuthenticatedRacketDeskIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedRacketDeskRoute,
   } as any)
-const AuthenticatedRacketDeskDemoRoute =
-  AuthenticatedRacketDeskDemoRouteImport.update({
-    id: '/demo',
-    path: '/demo',
-    getParentRoute: () => AuthenticatedRacketDeskRoute,
-  } as any)
 const AuthenticatedRacketDeskFanIntelRoute =
   AuthenticatedRacketDeskFanIntelRouteImport.update({
     id: '/fan-intel',
@@ -336,7 +329,6 @@ export interface FileRoutesByFullPath {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
-  '/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
   '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
   '/racket-desk/reports': typeof AuthenticatedRacketDeskReportsRoute
@@ -383,7 +375,6 @@ export interface FileRoutesByTo {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check': typeof VibeCheckIndexRoute
-  '/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
   '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
   '/racket-desk/reports': typeof AuthenticatedRacketDeskReportsRoute
@@ -433,7 +424,6 @@ export interface FileRoutesById {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
-  '/_authenticated/racket-desk/demo': typeof AuthenticatedRacketDeskDemoRoute
   '/_authenticated/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/_authenticated/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
   '/_authenticated/racket-desk/reports': typeof AuthenticatedRacketDeskReportsRoute
@@ -483,7 +473,6 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check/'
-    | '/racket-desk/demo'
     | '/racket-desk/fan-intel'
     | '/racket-desk/profiles'
     | '/racket-desk/reports'
@@ -530,7 +519,6 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check'
-    | '/racket-desk/demo'
     | '/racket-desk/fan-intel'
     | '/racket-desk/profiles'
     | '/racket-desk/reports'
@@ -579,7 +567,6 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check/'
-    | '/_authenticated/racket-desk/demo'
     | '/_authenticated/racket-desk/fan-intel'
     | '/_authenticated/racket-desk/profiles'
     | '/_authenticated/racket-desk/reports'
@@ -859,13 +846,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRacketDeskIndexRouteImport
       parentRoute: typeof AuthenticatedRacketDeskRoute
     }
-    '/_authenticated/racket-desk/demo': {
-      id: '/_authenticated/racket-desk/demo'
-      path: '/demo'
-      fullPath: '/racket-desk/demo'
-      preLoaderRoute: typeof AuthenticatedRacketDeskDemoRouteImport
-      parentRoute: typeof AuthenticatedRacketDeskRoute
-    }
     '/_authenticated/racket-desk/fan-intel': {
       id: '/_authenticated/racket-desk/fan-intel'
       path: '/fan-intel'
@@ -968,7 +948,6 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRacketDeskRouteChildren {
-  AuthenticatedRacketDeskDemoRoute: typeof AuthenticatedRacketDeskDemoRoute
   AuthenticatedRacketDeskFanIntelRoute: typeof AuthenticatedRacketDeskFanIntelRoute
   AuthenticatedRacketDeskProfilesRoute: typeof AuthenticatedRacketDeskProfilesRoute
   AuthenticatedRacketDeskReportsRoute: typeof AuthenticatedRacketDeskReportsRoute
@@ -978,7 +957,6 @@ interface AuthenticatedRacketDeskRouteChildren {
 
 const AuthenticatedRacketDeskRouteChildren: AuthenticatedRacketDeskRouteChildren =
   {
-    AuthenticatedRacketDeskDemoRoute: AuthenticatedRacketDeskDemoRoute,
     AuthenticatedRacketDeskFanIntelRoute: AuthenticatedRacketDeskFanIntelRoute,
     AuthenticatedRacketDeskProfilesRoute: AuthenticatedRacketDeskProfilesRoute,
     AuthenticatedRacketDeskReportsRoute: AuthenticatedRacketDeskReportsRoute,
@@ -1056,3 +1034,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
