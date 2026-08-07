@@ -1555,9 +1555,12 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
       }
       const m = result.metrics;
       const detected = detectPlatform(form.post_url) ?? form.platform;
+      // Keep a thumbnail we already host (uploaded or mirrored) — refreshing
+      // metrics must never swap it for a short-lived platform CDN link.
+      const keepExisting = form.thumbnail_url.includes("/storage/v1/object/public/");
       const patch = {
         platform: detected,
-        thumbnail_url: m.thumbnail_url ?? form.thumbnail_url,
+        thumbnail_url: keepExisting ? form.thumbnail_url : (m.thumbnail_url ?? form.thumbnail_url),
         caption: m.caption ?? form.caption,
         posted_at: m.posted_at ? m.posted_at.slice(0, 10) : form.posted_at,
         views: m.views != null ? String(m.views) : form.views,
