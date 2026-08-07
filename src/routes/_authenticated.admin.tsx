@@ -1213,6 +1213,11 @@ function SpotlightForm({
     youtube: editData?.links?.youtube ?? "",
     spotify: editData?.links?.spotify ?? "",
     apple_music: editData?.links?.apple_music ?? "",
+    twitch: editData?.links?.twitch ?? "",
+    facebook: editData?.links?.facebook ?? "",
+    x: editData?.links?.x ?? "",
+    custom_label: editData?.links?.custom_label ?? "",
+    custom_url: editData?.links?.custom_url ?? "",
     spotifyEmbed: editData?.links?.spotifyEmbed ?? "",
     contact: editData?.links?.contact ?? "",
     video1: editData?.links?.video1 ?? "",
@@ -1326,7 +1331,7 @@ function SpotlightForm({
     () => (editData?.links?.follower_counts as Record<string, number> | undefined) ?? {},
   );
   // Extra social handles (band members, side projects) — up to 5 per platform.
-  const EXTRA_PLATFORMS = ["instagram", "tiktok", "youtube", "spotify", "apple_music"] as const;
+  const EXTRA_PLATFORMS = ["instagram", "tiktok", "youtube", "spotify", "apple_music", "twitch", "facebook", "x"] as const;
   type ExtraPlatform = (typeof EXTRA_PLATFORMS)[number];
   const [extraLinks, setExtraLinks] = useState<Record<ExtraPlatform, string[]>>(() => ({
     instagram: editData?.links?.instagram_extra ?? [],
@@ -1334,6 +1339,9 @@ function SpotlightForm({
     youtube: editData?.links?.youtube_extra ?? [],
     spotify: editData?.links?.spotify_extra ?? [],
     apple_music: editData?.links?.apple_music_extra ?? [],
+    twitch: editData?.links?.twitch_extra ?? [],
+    facebook: editData?.links?.facebook_extra ?? [],
+    x: editData?.links?.x_extra ?? [],
   }));
   function addExtra(p: ExtraPlatform) {
     setExtraLinks((s) => (s[p].length >= 5 ? s : { ...s, [p]: [...s[p], ""] }));
@@ -1457,7 +1465,7 @@ function SpotlightForm({
   // Sum main + extra handles across Instagram / TikTok / YouTube.
   function sumSocialCounts(counts: Record<string, number>) {
     return Object.entries(counts)
-      .filter(([k]) => /^(instagram|tiktok|youtube)(:|$)/.test(k))
+      .filter(([k]) => /^(instagram|tiktok|youtube|twitch|facebook|x|custom)(:|$)/.test(k))
       .reduce((sum, [, v]) => sum + (v ?? 0), 0);
   }
 
@@ -1510,6 +1518,14 @@ function SpotlightForm({
         youtube_extra: extraLinks.youtube.map((s) => s.trim()).filter(Boolean),
         spotify_extra: extraLinks.spotify.map((s) => s.trim()).filter(Boolean),
         apple_music_extra: extraLinks.apple_music.map((s) => s.trim()).filter(Boolean),
+        twitch: form.twitch,
+        facebook: form.facebook,
+        x: form.x,
+        custom_label: form.custom_label,
+        custom_url: form.custom_url,
+        twitch_extra: extraLinks.twitch.map((s) => s.trim()).filter(Boolean),
+        facebook_extra: extraLinks.facebook.map((s) => s.trim()).filter(Boolean),
+        x_extra: extraLinks.x.map((s) => s.trim()).filter(Boolean),
         follower_counts: fetchedCounts,
       },
       header_image_url: form.header_image_url || null,
@@ -1557,7 +1573,7 @@ function SpotlightForm({
       setForm({
         slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
-        instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", spotifyEmbed: "", contact: "",
+        instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "",
         video1_cover: "", video2_cover: "", video3_cover: "",
         header_image_url: "", profile_image_url: "", published: false,
@@ -1757,6 +1773,49 @@ function SpotlightForm({
               </div>
             );
           })}
+          {([
+            { k: "twitch", label: "Twitch URL", ph: "https://twitch.tv/handle" },
+            { k: "facebook", label: "Facebook URL", ph: "https://facebook.com/page" },
+            { k: "x", label: "X URL", ph: "https://x.com/handle" },
+          ] as const).map(({ k, label, ph }) => (
+            <div key={k} className="space-y-1.5">
+              <Label htmlFor={k}>{label}</Label>
+              <Input id={k} value={form[k]} onChange={(e) => set(k, e.target.value)} placeholder={ph} />
+              <Input
+                inputMode="numeric"
+                value={fetchedCounts[k] != null ? String(fetchedCounts[k]) : ""}
+                onChange={(e) => {
+                  const n = Number(e.target.value);
+                  setFetchedCounts((c) => {
+                    const next = { ...c };
+                    if (!e.target.value.trim() || !Number.isFinite(n)) delete next[k];
+                    else next[k] = n;
+                    return next;
+                  });
+                }}
+                placeholder="Followers (manual)"
+              />
+            </div>
+          ))}
+          <div className="space-y-1.5">
+            <Label htmlFor="custom_label">Other link</Label>
+            <Input id="custom_label" value={form.custom_label} onChange={(e) => set("custom_label", e.target.value)} placeholder="Label (e.g. Bandcamp)" />
+            <Input value={form.custom_url} onChange={(e) => set("custom_url", e.target.value)} placeholder="https://…" />
+            <Input
+              inputMode="numeric"
+              value={fetchedCounts["custom"] != null ? String(fetchedCounts["custom"]) : ""}
+              onChange={(e) => {
+                const n = Number(e.target.value);
+                setFetchedCounts((c) => {
+                  const next = { ...c };
+                  if (!e.target.value.trim() || !Number.isFinite(n)) delete next["custom"];
+                  else next["custom"] = n;
+                  return next;
+                });
+              }}
+              placeholder="Followers (manual)"
+            />
+          </div>
           {mismatchWarning ? (
             <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
               {mismatchWarning}
@@ -1797,7 +1856,7 @@ function SpotlightForm({
             <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics (optional)</p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="sp-tf">Total followers</Label>
+            <Label htmlFor="sp-tf">Total social audience</Label>
             <div className="flex gap-2">
               <Input id="sp-tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
               <Button type="button" variant="outline" size="sm" onClick={applyTotalFollowers} disabled={!fetchedCounts.instagram && !fetchedCounts.tiktok && !fetchedCounts.youtube}>
