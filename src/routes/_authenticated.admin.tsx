@@ -1174,6 +1174,41 @@ function Table({ headers, children }: { headers: string[]; children: React.React
   );
 }
 
+/** Pull the post's preview image from a TikTok / Instagram / YouTube URL. */
+function FetchPreviewButton({ url, onFetched }: { url: string; onFetched: (u: string) => void }) {
+  const [loading, setLoading] = useState(false);
+  const fetchPreview = useServerFn(scrapePostMetrics);
+
+  async function run() {
+    const clean = (url ?? "").trim();
+    if (!clean) {
+      toast.error("Add the post URL first");
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await fetchPreview({ data: { url: clean } });
+      if (!result.ok) throw new Error(result.error);
+      const thumb = result.metrics.thumbnail_url;
+      if (!thumb) throw new Error("No preview image available for that link");
+      onFetched(thumb);
+      toast.success("Preview pulled from link");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't fetch preview");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Button type="button" variant="outline" size="sm" disabled={loading || !url} onClick={run}>
+      <RefreshCw className={`mr-1 size-4 ${loading ? "animate-spin" : ""}`} />
+      {loading ? "Fetching…" : "Fetch preview"}
+    </Button>
+  );
+}
+
+
 function ImageUploader({
   label, value, onChange, aspect, hint, folder,
 }: {
