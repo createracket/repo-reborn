@@ -552,9 +552,11 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
     <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
       <PostThumb src={post.thumbnail_url} />
 
-      <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 text-[10px] font-medium backdrop-blur">
-        <Icon className="size-3" />
-        {PLATFORM_LABEL[post.platform]}
+      <span
+        className="absolute left-2 top-2 inline-flex items-center rounded-full bg-background/80 p-1.5 backdrop-blur"
+        title={PLATFORM_LABEL[post.platform]}
+      >
+        <Icon className="size-3.5" aria-label={PLATFORM_LABEL[post.platform]} />
       </span>
     </div>
   );
