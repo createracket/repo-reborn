@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Play } from "lucide-react";
+import { Instagram, Music2, Play } from "lucide-react";
 
 /**
  * Portrait (9:16) social clip card for spotlight pages.
