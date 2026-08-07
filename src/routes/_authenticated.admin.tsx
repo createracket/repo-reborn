@@ -1832,6 +1832,9 @@ function SpotlightForm({
               placeholder="Followers (manual)"
             />
           </div>
+            </div>
+          </details>
+
           {mismatchWarning ? (
             <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
               {mismatchWarning}
