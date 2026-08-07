@@ -79,6 +79,49 @@ export const unlockSpotlight = createServerFn({ method: "POST" })
     return { ok: true as const, page };
   });
 
+/**
+ * Signed-in members: returns a published spotlight without the passcode gate when the
+ * caller is an admin or is on the spotlight's share list (by user id or email).
+ */
+export const getSpotlightForMember = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => GateInfoSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: row } = await supabaseAdmin
+      .from("partner_pages")
+      .select(PAGE_FIELDS)
+      .eq("slug", data.slug)
+      .eq("published", true)
+      .maybeSingle();
+
+    const page = row as (Record<string, unknown> & { id: string }) | null;
+    if (!page) return { ok: false as const };
+
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+
+    if (!isAdmin) {
+      const email = String((context.claims as Record<string, unknown>)?.["email"] ?? "").toLowerCase();
+      const { data: shares } = await supabaseAdmin
+        .from("partner_page_shares")
+        .select("target_user_id, target_email")
+        .eq("partner_page_id", page.id);
+
+      const allowed = ((shares ?? []) as { target_user_id: string | null; target_email: string | null }[]).some(
+        (s) =>
+          s.target_user_id === context.userId ||
+          (!!s.target_email && !!email && s.target_email.toLowerCase() === email),
+      );
+      if (!allowed) return { ok: false as const };
+    }
+
+    return { ok: true as const, page };
+  });
+
 /** Admin-only: returns a spotlight regardless of published/gated state, for previewing drafts. */
 export const getSpotlightPreview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
