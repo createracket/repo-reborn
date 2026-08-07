@@ -143,6 +143,8 @@ function PublicRosterPage() {
   const [gateError, setGateError] = useState<string | null>(null);
   const [gateBusy, setGateBusy] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
 
   useEffect(() => {
     (async () => {
