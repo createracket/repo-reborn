@@ -876,7 +876,7 @@ function DashboardPage() {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                        Featured spotlights & examples
+                        Featured spotlights
                       </div>
                       <div className="flex gap-1">
                         <Button
