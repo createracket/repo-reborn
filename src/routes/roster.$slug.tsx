@@ -356,18 +356,30 @@ function PublicRosterPage() {
           </div>
         )}
 
-        {(totalFollowers > 0 || roster.est_engagement_pct != null) && (
-          <div className={`mt-6 grid gap-3 sm:grid-cols-2 ${roster.est_engagement_pct != null ? "lg:grid-cols-3" : ""}`}>
-            {totalFollowers > 0 && (
+        {(totalSocial > 0 || totalAll > 0 || roster.est_engagement_pct != null) && (
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {totalSocial > 0 && (
               <>
                 <Card>
                   <CardContent className="p-5">
                     <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                      Total followers
+                      Total social audience
                     </p>
                     <p className="mt-1 font-display text-2xl">
-                      {formatCount(totalFollowers)}
+                      {formatCount(totalSocial)}
                     </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">Excludes streaming platforms</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-5">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Total fans
+                    </p>
+                    <p className="mt-1 font-display text-2xl">
+                      {formatCount(totalAll)}
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground">Socials + streaming</p>
                   </CardContent>
                 </Card>
                 <Card>
@@ -376,12 +388,13 @@ function PublicRosterPage() {
                       Est. reach
                     </p>
                     <p className="mt-1 font-display text-2xl">
-                      {formatCount(Math.round(totalFollowers * 0.4))}
+                      {formatCount(Math.round(totalSocial * 0.4))}
                     </p>
                   </CardContent>
                 </Card>
               </>
             )}
+
             {roster.est_engagement_pct != null && (
               <Card>
                 <CardContent className="p-5">
