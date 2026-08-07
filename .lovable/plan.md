@@ -47,15 +47,13 @@ app once you're happy.
 
 ## Technical notes
 
+- Dark stays the default: with no saved preference, the site renders dark. Light
+  is opt-in via the header toggle and remembered per device.
+- Toggle uses Lucide `Sun` / `Moon` icons — moon shown in light mode, sun in dark.
 - No new dependency; a ~40-line provider is enough (avoids `next-themes` SSR
   quirks with TanStack Start).
-- SSR renders without a theme class; the pre-hydration inline script sets it,
-  so no hydration mismatch and no flash.
-- Public share pages (roster/report/spotlight passcode-gated views) will default
-  to dark unless you want them theme-aware too.
+- SSR renders dark; the pre-hydration inline script applies a saved light
+  preference before first paint, so no flash and no hydration mismatch.
+- Public share pages (roster/report/spotlight passcode-gated views) get the
+  toggle too, so light mode is available everywhere.
 
-## Open question
-
-Should light mode be the default for new visitors, or should the site stay dark
-by default with light as an opt-in? Current plan: dark stays the default, light
-is opt-in.
