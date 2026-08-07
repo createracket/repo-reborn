@@ -359,7 +359,7 @@ function PublicRosterPage() {
                 <Card>
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
-                      Total fans
+                      Fans
                     </p>
                     <p className="mt-1 font-display text-xl sm:text-2xl">
                       {formatCount(totalAll)}
