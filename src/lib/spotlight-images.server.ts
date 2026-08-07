@@ -9,7 +9,7 @@ const MAX_BASE64_LENGTH = Math.ceil((MAX_UPLOAD_BYTES * 4) / 3) + 8;
 export const UploadSpotlightImageSchema = z.object({
   base64: z.string().min(1).max(MAX_BASE64_LENGTH),
   contentType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif"]),
-  folder: z.enum(["spotlights", "video-covers"]),
+  folder: z.enum(["spotlights", "video-covers", "sound-board"]),
 });
 
 export type UploadSpotlightImageInput = z.infer<typeof UploadSpotlightImageSchema>;
