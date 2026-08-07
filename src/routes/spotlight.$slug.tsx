@@ -42,7 +42,16 @@ type PartnerLinks = {
   twitch_extra?: string[];
   facebook_extra?: string[];
   x_extra?: string[];
+  section_labels?: Record<string, string>;
 };
+
+export const SPOTLIGHT_SECTIONS = [
+  { key: "host_bio", label: "About the host" },
+  { key: "audience", label: "Who's listening" },
+  { key: "partnership", label: "Partnership" },
+  { key: "eoi", label: "Expressions of interest" },
+  { key: "videos", label: "Watch" },
+] as const;
 
 function handleLabel(url: string): string {
   try {
