@@ -12,7 +12,7 @@ import { Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCount, formatPct, type Platform } from "@/lib/youtube-utils";
 import { PostThumb } from "@/components/reports/PostThumb";
-import { getReportGate, unlockReport } from "@/lib/report-access.functions";
+import { getReportGate, unlockReport, getReportForMember } from "@/lib/report-access.functions";
 
 
 type PublicReport = {
@@ -119,6 +119,29 @@ function PublicReportPage() {
         .eq("published", true)
         .maybeSingle();
       if (!r) {
+        // Signed-in owners/admins/assigned users bypass the passcode gate.
+        const { data: sess } = await supabase.auth.getSession();
+        if (sess.session) {
+          try {
+            const mine = await getReportForMember({ data: { slug } });
+            if (mine.ok) {
+              const rows = (mine.creators as unknown as Omit<PublicCreator, "posts">[]) ?? [];
+              const allPosts = (mine.posts as unknown as PublicPost[]) ?? [];
+              const grouped = new Map<string, PublicPost[]>();
+              allPosts.forEach((p) => {
+                const arr = grouped.get(p.creator_id) ?? [];
+                arr.push(p);
+                grouped.set(p.creator_id, arr);
+              });
+              setReport(mine.report as unknown as PublicReport);
+              setCreators(rows.map((c) => ({ ...c, posts: grouped.get(c.id) ?? [] })));
+              setStatus("ready");
+              return;
+            }
+          } catch {
+            /* fall through to the gate */
+          }
+        }
         const info = await getReportGate({ data: { slug } });
         if (info.gated) {
           setGate({ title: info.title, header_image_url: info.header_image_url, code_label: info.code_label });
