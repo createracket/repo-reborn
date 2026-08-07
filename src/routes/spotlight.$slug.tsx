@@ -20,7 +20,25 @@ type PartnerLinks = {
   video1?: string;
   video2?: string;
   video3?: string;
+  tiktok?: string;
+  youtube?: string;
+  apple_music?: string;
+  instagram_extra?: string[];
+  tiktok_extra?: string[];
+  youtube_extra?: string[];
+  spotify_extra?: string[];
+  apple_music_extra?: string[];
 };
+
+function handleLabel(url: string): string {
+  try {
+    const u = new URL(url.startsWith("http") ? url : `https://${url}`);
+    const seg = u.pathname.split("/").filter(Boolean).pop() ?? u.hostname;
+    return seg.startsWith("@") ? seg : `@${seg}`;
+  } catch {
+    return url;
+  }
+}
 
 type PartnerPage = {
   id: string;
