@@ -407,15 +407,16 @@ function PublicRosterPage() {
               ["IG", it.instagram_followers, it.instagram_url],
               ["TT", it.tiktok_followers, it.tiktok_url],
               ["YT", it.youtube_subscribers, it.youtube_url],
+              ["Twitch", it.twitch_followers, it.twitch_url],
+              ["Facebook", it.facebook_followers, it.facebook_url],
+              ["X", it.x_followers, it.x_url],
+              [it.custom_label || "Link", it.custom_followers, it.custom_url],
               ["Spotify streams", it.spotify_monthly_listens, it.spotify_url],
               ["Apple", it.apple_music_followers, it.apple_music_url],
             ];
-            const totalReach =
-              (it.instagram_followers ?? 0) +
-              (it.tiktok_followers ?? 0) +
-              (it.youtube_subscribers ?? 0) +
-              (it.spotify_monthly_listens ?? 0) +
-              (it.apple_music_followers ?? 0);
+            const itemSocial = socialAudience(it);
+            const itemFans = totalFans(it);
+
             const initials = it.name
               .split(/\s+/)
               .map((s) => s[0])
