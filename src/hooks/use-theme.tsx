@@ -15,10 +15,14 @@ const STORAGE_KEY = "cr-theme";
 /** Routes that always render dark, whatever the saved preference. */
 const ALWAYS_DARK = ["/", "/auth", "/login", "/signup"];
 
+/** Public/shared pages that always render dark for consistent external viewing. */
+const ALWAYS_DARK_PREFIXES = ["/partner", "/roster/", "/spotlight/", "/report/"];
+
 function isAlwaysDark(pathname: string) {
   const p = pathname.replace(/\/+$/, "") || "/";
-  return ALWAYS_DARK.includes(p);
+  return ALWAYS_DARK.includes(p) || ALWAYS_DARK_PREFIXES.some((x) => p === x.replace(/\/$/, "") || p.startsWith(x));
 }
+
 
 /**
  * Light mode is only available to signed-in users. Detect a Supabase session
