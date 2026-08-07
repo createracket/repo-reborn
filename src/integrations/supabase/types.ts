@@ -1738,6 +1738,7 @@ export type Database = {
           created_at: string | null
           currency: string | null
           description: string | null
+          display_order: number | null
           id: string | null
           status: string | null
           target_audience: string | null
@@ -1752,6 +1753,7 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           description?: string | null
+          display_order?: number | null
           id?: string | null
           status?: string | null
           target_audience?: string | null
@@ -1766,6 +1768,7 @@ export type Database = {
           created_at?: string | null
           currency?: string | null
           description?: string | null
+          display_order?: number | null
           id?: string | null
           status?: string | null
           target_audience?: string | null
