@@ -1092,6 +1092,81 @@ function RosterDetailView({
                 </div>
               )}
             </div>
+            <div className="space-y-2">
+              <Label>Thumbnail image</Label>
+              <p className="text-xs text-muted-foreground">
+                Square image shown next to the roster title, like spotlight pages.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  id={`thumb-upload-${roster.id}`}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!file) return;
+                    if (!file.type.startsWith("image/")) {
+                      toast.error("Please choose an image file");
+                      return;
+                    }
+                    if (file.size > 12 * 1024 * 1024) {
+                      toast.error("Image must be under 12MB");
+                      return;
+                    }
+                    setSavingMeta(true);
+                    try {
+                      const { data: u } = await supabase.auth.getUser();
+                      if (!u.user) {
+                        toast.error("Sign in required");
+                        return;
+                      }
+                      const { resizeImageFile } = await import("@/lib/image-resize");
+                      const resized = await resizeImageFile(file, 800, 0.85);
+                      const path = `roster/${roster.slug ?? roster.id}/thumb-${crypto.randomUUID()}.jpg`;
+                      const { error: upErr } = await supabase.storage
+                        .from("avatars")
+                        .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: "image/jpeg" });
+                      if (upErr) {
+                        toast.error(`Upload failed: ${upErr.message}`);
+                        return;
+                      }
+                      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+                      setProfileImageUrl(data.publicUrl);
+                      toast.success("Thumbnail uploaded — click Save to apply");
+                    } finally {
+                      setSavingMeta(false);
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById(`thumb-upload-${roster.id}`)?.click()}
+                  disabled={savingMeta}
+                >
+                  {profileImageUrl ? "Replace thumbnail" : "Upload thumbnail"}
+                </Button>
+                {profileImageUrl && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setProfileImageUrl("")}>
+                    Remove
+                  </Button>
+                )}
+              </div>
+              <Input
+                value={profileImageUrl}
+                onChange={(e) => setProfileImageUrl(e.target.value)}
+                placeholder="…or paste an image URL"
+              />
+              {profileImageUrl && (
+                <div className="mt-2 size-24 overflow-hidden rounded-lg border border-border/60">
+                  <img src={profileImageUrl} alt="" className="size-full object-cover" />
+                </div>
+              )}
+            </div>
+
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Client email</Label>
