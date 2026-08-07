@@ -50,17 +50,17 @@ export async function uploadSpotlightImage(
   // bearer token causes Storage to fall back to RLS instead of service access;
   // legacy JWT service keys still require the bearer header.
   const objectPath = path.split("/").map(encodeURIComponent).join("/");
-  const authHeaders = serviceKey.startsWith("sb_secret_")
-    ? { apikey: serviceKey }
-    : { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
+  const headers = new Headers({
+    apikey: serviceKey,
+    "cache-control": "max-age=3600",
+    "content-type": input.contentType,
+    "x-upsert": "false",
+  });
+  if (!serviceKey.startsWith("sb_secret_")) headers.set("Authorization", `Bearer ${serviceKey}`);
+
   const response = await fetch(`${backendUrl}/storage/v1/object/spotlight-images/${objectPath}`, {
     method: "POST",
-    headers: {
-      ...authHeaders,
-      "cache-control": "max-age=3600",
-      "content-type": input.contentType,
-      "x-upsert": "false",
-    },
+    headers,
     body: fileBytes,
   });
 
