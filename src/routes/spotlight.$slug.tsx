@@ -382,7 +382,34 @@ function SpotlightPage() {
             <p className="text-lg text-muted-foreground">{page.intro}</p>
           ) : null}
 
+          {/* Metrics */}
+          {(() => {
+            const items: Array<{ label: string; value: string }> = [];
+            const fans = (page.total_followers ?? 0) + (page.monthly_streams ?? 0);
+            const fansLabel = formatMetric(fans);
+            if (fansLabel && fans > (page.total_followers ?? 0)) items.push({ label: "Total fans", value: fansLabel });
+            const tf = formatMetric(page.total_followers); if (tf) items.push({ label: "Total social audience", value: tf });
+            const ms = formatMetric(page.monthly_streams); if (ms) items.push({ label: "Monthly streams", value: ms });
+            const ts = formatMetric(page.total_streams); if (ts) items.push({ label: "Total streams", value: ts });
+            const ar = formatMetric(page.avg_reach); if (ar) items.push({ label: "Avg. reach", value: ar });
+            if (page.avg_engagement != null) items.push({ label: "Avg. engagement", value: `${page.avg_engagement}%` });
+            if (items.length === 0) return null;
+            return (
+              <div className="grid gap-3 pt-2 sm:grid-cols-2 md:grid-cols-3">
+                {items.map((m) => (
+                  <Card key={m.label} className="border-pink-accent">
+                    <CardContent className="p-5">
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground">{m.label}</p>
+                      <p className="mt-1 font-display text-2xl">{m.value}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            );
+          })()}
+
           <div className="flex flex-wrap gap-2 pt-2">
+
             {links.spotify ? (
               <Button asChild variant="default" size="sm">
                 <a href={links.spotify} target="_blank" rel="noreferrer">
