@@ -1546,7 +1546,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
 
   return (
     <>
-      <div className="group flex h-full flex-col gap-2 rounded-xl border-2 border-border bg-card p-4 shadow-sm transition-colors">
+      <div className="group flex h-full flex-col gap-2 rounded-xl border-2 border-border bg-card p-4 shadow-sm transition-colors hover:border-lime">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <h3 className="font-medium leading-tight transition-colors group-hover:text-pink-accent">{opp.title}</h3>
