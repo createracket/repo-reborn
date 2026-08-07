@@ -317,7 +317,7 @@ function SpotlightPage() {
     );
   }
 
-  if (status === "missing" || !page) return <NotFound />;
+  if (status === "missing" || !page) return <SpotlightNotFound />;
 
   const links = page.links ?? {};
 
