@@ -199,6 +199,9 @@ function EditProfilePage() {
       instagram_url: normaliseSocial("instagram", form.socials.instagram ?? ""),
       tiktok_url: normaliseSocial("tiktok", form.socials.tiktok ?? ""),
       youtube_url: normaliseSocial("youtube", form.socials.youtube ?? ""),
+      twitch_url: (form.socials.twitch ?? "").trim() || null,
+      facebook_url: (form.socials.facebook ?? "").trim() || null,
+      x_url: (form.socials.x ?? "").trim() || null,
       spotify_url: (form.socials.spotify ?? "").trim() || null,
       apple_music_url: (form.socials.apple_music ?? "").trim() || null,
     };
@@ -219,8 +222,8 @@ function EditProfilePage() {
       }
 
       const parts: string[] = [];
-      const counts: { instagram?: number; tiktok?: number; youtube?: number } = {};
-      (["instagram", "tiktok", "youtube"] as const).forEach((p) => {
+      const counts: { instagram?: number; tiktok?: number; youtube?: number; twitch?: number; facebook?: number; x?: number } = {};
+      (["instagram", "tiktok", "youtube", "twitch", "facebook", "x"] as const).forEach((p) => {
         const res = r[p];
         if (res && res.ok && res.followers != null) {
           counts[p] = res.followers;
@@ -269,7 +272,10 @@ function EditProfilePage() {
     const total =
       (fetchedCounts.instagram ?? 0) +
       (fetchedCounts.tiktok ?? 0) +
-      (fetchedCounts.youtube ?? 0);
+      (fetchedCounts.youtube ?? 0) +
+      (fetchedCounts.twitch ?? 0) +
+      (fetchedCounts.facebook ?? 0) +
+      (fetchedCounts.x ?? 0);
     if (total <= 0) {
       toast.error("Fetch at least one social first");
       return;
