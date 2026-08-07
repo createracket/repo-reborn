@@ -399,7 +399,7 @@ function SpotlightPage() {
             ) : null}
             {([
               { url: links.tiktok, label: "TikTok", abbr: "TT" },
-              { url: links.youtube, label: "YouTube", abbr: "YT", Icon: Youtube },
+              { url: links.youtube, label: "YouTube", abbr: "YT", Icon: Youtube, name: (links.youtube_name ?? "").trim() },
               { url: links.apple_music, label: "Apple Music", abbr: "AM", Icon: Music2 },
               { url: links.twitch, label: "Twitch", abbr: "TW", Icon: Twitch },
               { url: links.facebook, label: "Facebook", abbr: "FB", Icon: Facebook },
@@ -412,14 +412,14 @@ function SpotlightPage() {
                     href={l.url.startsWith("http") ? l.url : `https://${l.url}`}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={`${l.label} ${handleLabel(l.url)}`}
+                    aria-label={`${l.label} ${("name" in l && l.name) || handleLabel(l.url)}`}
                   >
                     {"Icon" in l && l.Icon ? (
                       <l.Icon className="mr-1.5 size-3.5" aria-hidden />
                     ) : (
                       <span className="mr-1.5 text-[0.7rem] font-semibold tracking-wider">{l.abbr}</span>
                     )}
-                    {handleLabel(l.url)}
+                    {("name" in l && l.name) || handleLabel(l.url)}
                   </a>
                 </Button>
               ) : null,
