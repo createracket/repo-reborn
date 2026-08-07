@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getSocialEmbed } from "@/lib/social-embed";
-import { getSpotlightGate, unlockSpotlight } from "@/lib/spotlight-access.functions";
+import { getSpotlightGate, unlockSpotlight, getSpotlightPreview } from "@/lib/spotlight-access.functions";
 
 type PartnerLinks = {
   instagram?: string;
@@ -98,6 +98,7 @@ function SpotlightPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState<PartnerPage | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
+  const [isPreview, setIsPreview] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [gate, setGate] = useState<{
@@ -285,6 +286,11 @@ function SpotlightPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
+      {isPreview ? (
+        <div className="border-b border-border/60 bg-muted/60 px-4 py-2 text-center text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          Draft preview — visible to admins only
+        </div>
+      ) : null}
       <main className="container mx-auto max-w-4xl px-4 py-12 md:py-20">
         {/* Header image (16:9) */}
         {page.header_image_url ? (
