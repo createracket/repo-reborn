@@ -35,6 +35,11 @@ type ProfileSocials = {
   spotify?: string;
   apple_music?: string;
   youtube?: string;
+  twitch?: string;
+  facebook?: string;
+  x?: string;
+  custom_label?: string;
+  custom_url?: string;
   website?: string;
 };
 
@@ -46,7 +51,7 @@ const emptyForm = {
   location: "",
   bio: "",
   avatar_url: "",
-  socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", website: "" } as ProfileSocials,
+  socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", website: "" } as ProfileSocials,
   total_followers: "",
   total_streams: "",
   monthly_streams: "",
@@ -127,7 +132,7 @@ function EditProfilePage() {
           location: d.location ?? "",
           bio: d.bio ?? "",
           avatar_url: d.avatar_url ?? "",
-          socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", website: "", ...(d.socials ?? {}) },
+          socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", website: "", ...(d.socials ?? {}) },
           total_followers: d.total_followers?.toString() ?? "",
           total_streams: d.total_streams?.toString() ?? "",
           monthly_streams: d.monthly_streams?.toString() ?? "",
@@ -620,6 +625,26 @@ function EditProfilePage() {
                 <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
                 {fetchedCounts.youtube != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()}</p> : null}
               </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="twitch">Twitch</Label>
+                <Input id="twitch" value={form.socials.twitch ?? ""} onChange={(e) => setSocial("twitch", e.target.value)} placeholder="@handle or full URL" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="fb">Facebook</Label>
+                <Input id="fb" value={form.socials.facebook ?? ""} onChange={(e) => setSocial("facebook", e.target.value)} placeholder="Page name or full URL" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="xcom">X</Label>
+                <Input id="xcom" value={form.socials.x ?? ""} onChange={(e) => setSocial("x", e.target.value)} placeholder="@handle or full URL" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="clabel">Other link label</Label>
+                <Input id="clabel" value={form.socials.custom_label ?? ""} onChange={(e) => setSocial("custom_label", e.target.value)} placeholder="e.g. Bandcamp" />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="curl">Other link URL</Label>
+                <Input id="curl" value={form.socials.custom_url ?? ""} onChange={(e) => setSocial("custom_url", e.target.value)} placeholder="https://…" />
+              </div>
               <div className="space-y-1.5 md:col-span-2">
                 <Label htmlFor="web">Website</Label>
                 <Input id="web" value={form.socials.website ?? ""} onChange={(e) => setSocial("website", e.target.value)} placeholder="https://…" />
@@ -628,7 +653,7 @@ function EditProfilePage() {
                 <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
                   Auto calculate your followers
                 </Button>
-                <p className="mt-1 text-xs text-muted-foreground">Sums fetched Instagram, TikTok and YouTube counts into Total followers below.</p>
+                <p className="mt-1 text-xs text-muted-foreground">Sums fetched Instagram, TikTok and YouTube counts into Total social audience below. Total fans adds your monthly streams on top.</p>
               </div>
 
 
@@ -637,7 +662,7 @@ function EditProfilePage() {
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics</p>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="tf">Total followers</Label>
+                <Label htmlFor="tf">Total social audience</Label>
                 <Input id="tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
               </div>
               <div className="space-y-1.5">
