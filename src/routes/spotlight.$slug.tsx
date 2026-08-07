@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Instagram, Mail, ExternalLink, Mic2, Check } from "lucide-react";
+import { Instagram, Mail, ExternalLink, Mic2, Check, Youtube, Twitch, Facebook, Music2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
