@@ -5,11 +5,13 @@ import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { ClipCard } from "@/components/spotlight/ClipCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getSocialEmbed } from "@/lib/social-embed";
+import { getClipPosters } from "@/lib/clip-poster.functions";
 import { getSpotlightGate, unlockSpotlight, getSpotlightPreview } from "@/lib/spotlight-access.functions";
 
 type PartnerLinks = {
@@ -20,6 +22,9 @@ type PartnerLinks = {
   video1?: string;
   video2?: string;
   video3?: string;
+  video1_cover?: string;
+  video2_cover?: string;
+  video3_cover?: string;
   tiktok?: string;
   youtube?: string;
   apple_music?: string;
@@ -495,16 +500,17 @@ function SpotlightPage() {
         ) : null}
         {/* Videos */}
         {(() => {
-          const raw = [
+          const raw: Array<{ url?: string; cover?: string }> = [
             { url: links.video1, cover: links.video1_cover },
             { url: links.video2, cover: links.video2_cover },
             { url: links.video3, cover: links.video3_cover },
           ];
           const videos = raw
-            .map((v) => (v.url ? { embed: getSocialEmbed(v.url), cover: v.cover } : null))
-            .filter((v): v is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover?: string } =>
-              !!v && !!v.embed,
-            );
+            .map((v) => {
+              const embed = v.url ? getSocialEmbed(v.url) : null;
+              return embed ? { embed, cover: v.cover } : null;
+            })
+            .filter((v): v is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover?: string } => !!v);
           if (videos.length === 0) return null;
           return (
             <section className="mt-16">
