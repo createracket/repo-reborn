@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Instagram, Mail, ExternalLink, Mic2, Check } from "lucide-react";
+import { Instagram, Mail, ExternalLink, Mic2, Check, Youtube, Twitch, Facebook, Music2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -409,15 +409,15 @@ function SpotlightPage() {
 
           {/* Extra handles (band members / side projects) */}
           {(() => {
-            const groups: Array<{ label: string; urls: string[] }> = [
-              { label: "Instagram", urls: links.instagram_extra ?? [] },
-              { label: "TikTok", urls: links.tiktok_extra ?? [] },
-              { label: "YouTube", urls: links.youtube_extra ?? [] },
-              { label: "Spotify", urls: links.spotify_extra ?? [] },
-              { label: "Apple Music", urls: links.apple_music_extra ?? [] },
-              { label: "Twitch", urls: links.twitch_extra ?? [] },
-              { label: "Facebook", urls: links.facebook_extra ?? [] },
-              { label: "X", urls: links.x_extra ?? [] },
+            const groups: Array<{ label: string; abbr: string; Icon?: typeof Instagram; urls: string[] }> = [
+              { label: "Instagram", abbr: "IG", Icon: Instagram, urls: links.instagram_extra ?? [] },
+              { label: "TikTok", abbr: "TT", urls: links.tiktok_extra ?? [] },
+              { label: "YouTube", abbr: "YT", Icon: Youtube, urls: links.youtube_extra ?? [] },
+              { label: "Spotify", abbr: "SP", Icon: Music2, urls: links.spotify_extra ?? [] },
+              { label: "Apple Music", abbr: "AM", Icon: Music2, urls: links.apple_music_extra ?? [] },
+              { label: "Twitch", abbr: "TW", Icon: Twitch, urls: links.twitch_extra ?? [] },
+              { label: "Facebook", abbr: "FB", Icon: Facebook, urls: links.facebook_extra ?? [] },
+              { label: "X", abbr: "X", urls: links.x_extra ?? [] },
             ].filter((g) => g.urls.length > 0);
             if (groups.length === 0) return null;
             return (
@@ -425,8 +425,18 @@ function SpotlightPage() {
                 {groups.flatMap((g) =>
                   g.urls.map((u) => (
                     <Button key={`${g.label}-${u}`} asChild variant="outline" size="sm">
-                      <a href={u.startsWith("http") ? u : `https://${u}`} target="_blank" rel="noreferrer">
-                        {g.label} · {handleLabel(u)}
+                      <a
+                        href={u.startsWith("http") ? u : `https://${u}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`${g.label} ${handleLabel(u)}`}
+                      >
+                        {g.Icon ? (
+                          <g.Icon className="mr-1.5 size-3.5" aria-hidden />
+                        ) : (
+                          <span className="mr-1.5 text-[0.7rem] font-semibold tracking-wider">{g.abbr}</span>
+                        )}
+                        {handleLabel(u)}
                       </a>
                     </Button>
                   )),
@@ -434,6 +444,7 @@ function SpotlightPage() {
               </div>
             );
           })()}
+
         </section>
 
         {/* Metrics */}
