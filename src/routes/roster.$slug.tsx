@@ -27,6 +27,8 @@ type PublicRoster = {
   published_at: string | null;
   updated_at: string | null;
   header_image_url: string | null;
+  profile_image_url: string | null;
+
   hide_prospect_tags: boolean;
   hide_statuses: boolean;
   est_engagement_pct: number | null;
