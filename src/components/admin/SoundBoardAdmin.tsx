@@ -62,6 +62,45 @@ export function SoundBoardAdmin() {
     });
   }
 
+  function sortRows(list: SoundBoardItem[]) {
+    return [...list].sort((a, b) => {
+      if (a.published !== b.published) return a.published ? -1 : 1;
+      return a.position - b.position;
+    });
+  }
+
+  async function persistOrder(next: SoundBoardItem[]) {
+    const ordered = sortRows(next).map((r, i) => ({ ...r, position: i }));
+    setRows(ordered);
+    const changed = ordered.filter((r) => {
+      const prev = rows.find((x) => x.id === r.id);
+      return !prev || prev.position !== r.position;
+    });
+    for (const r of changed) {
+      const { error } = await supabase
+        .from("sound_board_items" as any)
+        .update({ position: r.position } as any)
+        .eq("id", r.id);
+      if (error) { toast.error(error.message); return; }
+    }
+    if (changed.length) toast.success("Order saved");
+  }
+
+  function handleDrop(targetId: string) {
+    const sourceId = dragId;
+    setDragId(null);
+    setOverId(null);
+    if (!sourceId || sourceId === targetId) return;
+    const current = sortRows(rows);
+    const from = current.findIndex((r) => r.id === sourceId);
+    const to = current.findIndex((r) => r.id === targetId);
+    if (from < 0 || to < 0) return;
+    const next = [...current];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    persistOrder(next.map((r, i) => ({ ...r, position: i })));
+  }
+
   async function load() {
     setLoading(true);
     const { data, error } = await supabase
@@ -69,7 +108,7 @@ export function SoundBoardAdmin() {
       .select("*")
       .order("position", { ascending: true });
     if (error) toast.error(error.message);
-    setRows(((data as any[]) ?? []) as SoundBoardItem[]);
+    setRows(sortRows(((data as any[]) ?? []) as SoundBoardItem[]));
     setLoading(false);
   }
 
