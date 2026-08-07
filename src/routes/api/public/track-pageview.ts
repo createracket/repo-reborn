@@ -53,6 +53,25 @@ export const Route = createFileRoute('/api/public/track-pageview')({
 
         const botReason = detectBot(ua)
 
+        // Resolve the signed-in user (if any) so internal/admin activity can be filtered out.
+        let userId: string | null = null
+        const authHeader = request.headers.get('authorization')
+        if (authHeader?.startsWith('Bearer ')) {
+          try {
+            const { createClient } = await import('@supabase/supabase-js')
+            const client = createClient(
+              process.env['SUPABASE_URL']!,
+              process.env['SUPABASE_PUBLISHABLE_KEY']!,
+              { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+            )
+            const token = authHeader.slice(7)
+            const { data } = await client.auth.getClaims(token)
+            userId = (data?.claims?.sub as string | undefined) ?? null
+          } catch {
+            userId = null
+          }
+        }
+
         const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
         const { error } = await supabaseAdmin.from('page_views').insert({
           session_id: sessionId,
@@ -62,8 +81,9 @@ export const Route = createFileRoute('/api/public/track-pageview')({
           is_bot: botReason !== null,
           bot_reason: botReason,
           country: country && country !== 'XX' ? country.toUpperCase().slice(0, 2) : null,
-          user_id: null,
+          user_id: userId,
         })
+
 
         if (error) {
           console.error('page_views insert failed', error)
