@@ -865,6 +865,7 @@ export type Database = {
         Row: {
           access_code: string | null
           access_code_label: string | null
+          archived: boolean
           audience_segments: string[]
           avg_engagement: number | null
           avg_reach: number | null
@@ -893,6 +894,7 @@ export type Database = {
         Insert: {
           access_code?: string | null
           access_code_label?: string | null
+          archived?: boolean
           audience_segments?: string[]
           avg_engagement?: number | null
           avg_reach?: number | null
@@ -921,6 +923,7 @@ export type Database = {
         Update: {
           access_code?: string | null
           access_code_label?: string | null
+          archived?: boolean
           audience_segments?: string[]
           avg_engagement?: number | null
           avg_reach?: number | null
