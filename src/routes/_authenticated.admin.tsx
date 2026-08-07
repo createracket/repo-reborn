@@ -1236,6 +1236,11 @@ function SpotlightForm({
     monthly_streams: editData?.monthly_streams?.toString() ?? "",
     avg_reach: editData?.avg_reach?.toString() ?? "",
     avg_engagement: editData?.avg_engagement?.toString() ?? "",
+    label_host_bio: editData?.links?.section_labels?.host_bio ?? "",
+    label_audience: editData?.links?.section_labels?.audience ?? "",
+    label_partnership: editData?.links?.section_labels?.partnership ?? "",
+    label_eoi: editData?.links?.section_labels?.eoi ?? "",
+    label_videos: editData?.links?.section_labels?.videos ?? "",
   });
 
   function numOrNull(v: string): number | null {
@@ -1527,6 +1532,13 @@ function SpotlightForm({
         facebook_extra: extraLinks.facebook.map((s) => s.trim()).filter(Boolean),
         x_extra: extraLinks.x.map((s) => s.trim()).filter(Boolean),
         follower_counts: fetchedCounts,
+        section_labels: {
+          host_bio: form.label_host_bio.trim(),
+          audience: form.label_audience.trim(),
+          partnership: form.label_partnership.trim(),
+          eoi: form.label_eoi.trim(),
+          videos: form.label_videos.trim(),
+        },
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
@@ -1580,6 +1592,7 @@ function SpotlightForm({
         access_code: "", access_code_label: "Access code",
         total_followers: "", total_streams: "", monthly_streams: "",
         avg_reach: "", avg_engagement: "",
+        label_host_bio: "", label_audience: "", label_partnership: "", label_eoi: "", label_videos: "",
       });
     }
     onCreated();
@@ -1704,12 +1717,35 @@ function SpotlightForm({
           </div>
           <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+              Section headings
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                (leave blank to use the default wording)
+              </span>
+            </summary>
+            <div className="grid grid-cols-1 gap-4 px-4">
+              {([
+                { k: "label_host_bio", label: "Host bio heading", ph: "About the host" },
+                { k: "label_audience", label: "Audience heading", ph: "Who's listening" },
+                { k: "label_partnership", label: "Partnership heading", ph: "Partnership" },
+                { k: "label_eoi", label: "Expressions of interest heading", ph: "Expressions of interest" },
+                { k: "label_videos", label: "Videos heading", ph: "Watch" },
+              ] as const).map(({ k, label, ph }) => (
+                <div key={k} className="space-y-1.5">
+                  <Label htmlFor={k}>{label}</Label>
+                  <Input id={k} value={form[k]} onChange={(e) => set(k, e.target.value)} placeholder={ph} />
+                </div>
+              ))}
+            </div>
+          </details>
+          <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Social links &amp; handles
               <span className="ml-2 text-xs font-normal text-muted-foreground">
                 (Instagram, TikTok, YouTube, Spotify, Apple Music, Twitch, Facebook, X, other)
               </span>
             </summary>
-            <div className="grid gap-4 px-4">
+            <div className="grid grid-cols-1 gap-4 px-4">
+
           {([
 
             { p: "instagram", label: "Instagram URL", ph: "https://instagram.com/handle", unit: "followers" },

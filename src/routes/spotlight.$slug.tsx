@@ -42,7 +42,16 @@ type PartnerLinks = {
   twitch_extra?: string[];
   facebook_extra?: string[];
   x_extra?: string[];
+  section_labels?: Record<string, string>;
 };
+
+export const SPOTLIGHT_SECTIONS = [
+  { key: "host_bio", label: "About the host" },
+  { key: "audience", label: "Who's listening" },
+  { key: "partnership", label: "Partnership" },
+  { key: "eoi", label: "Expressions of interest" },
+  { key: "videos", label: "Watch" },
+] as const;
 
 function handleLabel(url: string): string {
   try {
@@ -328,6 +337,8 @@ function SpotlightPage() {
   if (status === "missing" || !page) return <SpotlightNotFound />;
 
   const links = page.links ?? {};
+  const sectionLabel = (key: string, fallback: string) =>
+    (links.section_labels?.[key] ?? "").trim() || fallback;
 
   return (
     <div className="min-h-screen bg-background">
@@ -379,21 +390,34 @@ function SpotlightPage() {
             ) : null}
             {links.instagram ? (
               <Button asChild variant="outline" size="sm">
-                <a href={links.instagram} target="_blank" rel="noreferrer">
-                  <Instagram className="mr-1.5 size-3.5" />Instagram
+                <a href={links.instagram} target="_blank" rel="noreferrer" aria-label={`Instagram ${handleLabel(links.instagram)}`}>
+                  <Instagram className="mr-1.5 size-3.5" />{handleLabel(links.instagram)}
                 </a>
               </Button>
             ) : null}
             {([
-              { url: links.twitch, label: "Twitch" },
-              { url: links.facebook, label: "Facebook" },
-              { url: links.x, label: "X" },
-              { url: links.custom_url, label: links.custom_label || "Link" },
+              { url: links.tiktok, label: "TikTok", abbr: "TT" },
+              { url: links.youtube, label: "YouTube", abbr: "YT", Icon: Youtube },
+              { url: links.apple_music, label: "Apple Music", abbr: "AM", Icon: Music2 },
+              { url: links.twitch, label: "Twitch", abbr: "TW", Icon: Twitch },
+              { url: links.facebook, label: "Facebook", abbr: "FB", Icon: Facebook },
+              { url: links.x, label: "X", abbr: "X" },
+              { url: links.custom_url, label: links.custom_label || "Link", abbr: (links.custom_label || "Link").slice(0, 2).toUpperCase() },
             ] as const).map((l) =>
               l.url ? (
                 <Button key={l.label} asChild variant="outline" size="sm">
-                  <a href={l.url.startsWith("http") ? l.url : `https://${l.url}`} target="_blank" rel="noreferrer">
-                    {l.label}
+                  <a
+                    href={l.url.startsWith("http") ? l.url : `https://${l.url}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`${l.label} ${handleLabel(l.url)}`}
+                  >
+                    {"Icon" in l && l.Icon ? (
+                      <l.Icon className="mr-1.5 size-3.5" aria-hidden />
+                    ) : (
+                      <span className="mr-1.5 text-[0.7rem] font-semibold tracking-wider">{l.abbr}</span>
+                    )}
+                    {handleLabel(l.url)}
                   </a>
                 </Button>
               ) : null,
@@ -493,7 +517,7 @@ function SpotlightPage() {
         {/* Host bio */}
         {page.host_bio ? (
           <section className="mt-16">
-            <h2 className="font-display text-3xl">About the host</h2>
+            <h2 className="font-display text-3xl">{sectionLabel("host_bio", "About the host")}</h2>
             <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.host_bio}</p>
           </section>
         ) : null}
@@ -501,7 +525,7 @@ function SpotlightPage() {
         {/* Audience */}
         {page.audience_segments?.length ? (
           <section className="mt-16">
-            <h2 className="font-display text-3xl">Who's listening</h2>
+            <h2 className="font-display text-3xl">{sectionLabel("audience", "Who's listening")}</h2>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {page.audience_segments.map((seg, i) => (
                 <Card key={i}>
@@ -515,7 +539,7 @@ function SpotlightPage() {
         {/* Partnership pitch */}
         {page.partnership_pitch ? (
           <section className="mt-16">
-            <h2 className="font-display text-3xl">Partnership</h2>
+            <h2 className="font-display text-3xl">{sectionLabel("partnership", "Partnership")}</h2>
             <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.partnership_pitch}</p>
           </section>
         ) : null}
@@ -525,7 +549,7 @@ function SpotlightPage() {
           <section className="mt-10">
             <Card>
               <CardHeader>
-                <CardTitle className="font-display text-2xl">Expressions of interest</CardTitle>
+                <CardTitle className="font-display text-2xl">{sectionLabel("eoi", "Expressions of interest")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="grid gap-2 md:grid-cols-2">
@@ -569,7 +593,7 @@ function SpotlightPage() {
           if (videos.length === 0) return null;
           return (
             <section className="mt-16">
-              <h2 className="font-display text-3xl">Watch</h2>
+              <h2 className="font-display text-3xl">{sectionLabel("videos", "Watch")}</h2>
               <div className="mt-4 grid gap-6 md:grid-cols-3">
                 {videos.map((v, i) => (
                   <ClipCard
