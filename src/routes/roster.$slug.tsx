@@ -483,11 +483,17 @@ function PublicRosterPage() {
                         </div>
                       )}
                       <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
-                        {totalReach > 0 && (
+                        {itemSocial > 0 && (
                           <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2.5 py-1 font-semibold text-foreground">
-                            {formatCount(totalReach)} total followers
+                            {formatCount(itemSocial)} social audience
                           </span>
                         )}
+                        {itemFans > itemSocial && (
+                          <span className="rounded-md border border-primary/40 bg-primary/10 px-2.5 py-1 font-semibold text-foreground">
+                            {formatCount(itemFans)} total fans
+                          </span>
+                        )}
+
                         {stats.map(([label, count, url]) =>
                           count != null || url ? (
                             <span
