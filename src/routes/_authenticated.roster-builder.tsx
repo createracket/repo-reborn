@@ -1517,6 +1517,8 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [open, setOpen] = useState(false);
+
   const isVerified = item.kind === "profile";
 
   useEffect(() => {
@@ -1559,32 +1561,88 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
     .join("")
     .toUpperCase();
   return (
-    <div className="rounded-xl border border-border/60 bg-card p-4">
-      <div className="flex items-start gap-3">
+    <div className="rounded-xl border border-border/60 bg-card p-3 sm:p-4">
+      {/* Compact header — name + status, like the sound board cards */}
+      <div className="flex items-center gap-3">
         <button
           type="button"
           {...(dragHandleProps ?? {})}
-          className="mt-1 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+          className="cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
           title="Drag to reorder"
           aria-label="Drag to reorder"
         >
           <GripVertical className="size-4" />
         </button>
-        <div className="size-14 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
+        <div className="size-9 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-[11px] font-medium text-muted-foreground">
           {item.avatar_url ? (
             <img src={item.avatar_url} alt="" className="size-full object-cover" />
           ) : (
             <span>{initials || "?"}</span>
           )}
         </div>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+          aria-expanded={open}
+        >
+          <span className="truncate font-medium">{item.name}</span>
+          {item.location && LOCATION_FLAG[item.location] && (
+            <span className="text-base leading-none" title={LOCATION_LABEL[item.location]}>
+              {LOCATION_FLAG[item.location]}
+            </span>
+          )}
+          {isVerified && <BadgeCheck className="size-4 shrink-0 text-pink-accent" />}
+        </button>
+        <Select
+          value={item.status ?? "in_review"}
+          onValueChange={async (v) => {
+            const { error } = await supabase
+              .from("roster_items")
+              .update({ status: v } as never)
+              .eq("id", item.id);
+            if (error) toast.error(error.message);
+            else onChanged();
+          }}
+        >
+          <SelectTrigger className={`h-8 w-[130px] shrink-0 text-xs ${STATUS_BADGE[item.status ?? "in_review"]}`}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map((s) => (
+              <SelectItem key={s.value} value={s.value} className="text-xs">
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="shrink-0"
+          onClick={() => setOpen((v) => !v)}
+          title={open ? "Hide details" : "Show details"}
+          aria-label={open ? "Hide details" : "Show details"}
+        >
+          <ChevronDown className={`size-4 transition-transform ${open ? "rotate-180" : ""}`} />
+        </Button>
+      </div>
+
+      {!open && (
+        <div className="mt-2 flex flex-wrap items-center gap-2 pl-[4.25rem] text-xs text-muted-foreground">
+          {itemCategories(item).map((c) => (
+            <Badge key={c} className={`border-transparent text-[10px] uppercase ${categoryBadgeClass(c)}`}>
+              {categoryLabel(c)}
+            </Badge>
+          ))}
+          {rowSocial > 0 && <span>Social audience {formatCount(rowSocial)}</span>}
+        </div>
+      )}
+
+      {open && (
+      <div className="mt-4 flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-medium">{item.name}</span>
-            {item.location && LOCATION_FLAG[item.location] && (
-              <span className="text-base leading-none" title={LOCATION_LABEL[item.location]} aria-label={LOCATION_LABEL[item.location]}>
-                {LOCATION_FLAG[item.location]}
-              </span>
-            )}
             {isVerified && (
               <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] hover:bg-pink-accent/90 text-[10px] uppercase">
                 <BadgeCheck className="size-3" /> Verified
@@ -1598,6 +1656,7 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
 
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+
             {rowSocial > 0 && (
               <span className="rounded-md border border-pink-accent/40 bg-pink-accent/10 px-2 py-0.5 font-medium text-foreground">
                 Social audience {formatCount(rowSocial)}
@@ -1695,29 +1754,8 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
           )}
         </div>
         <div className="flex flex-col items-end gap-1">
-          <Select
-            value={item.status ?? "in_review"}
-            onValueChange={async (v) => {
-              const { error } = await supabase
-                .from("roster_items")
-                .update({ status: v } as never)
-                .eq("id", item.id);
-              if (error) toast.error(error.message);
-              else onChanged();
-            }}
-          >
-            <SelectTrigger className={`h-8 w-[150px] text-xs ${STATUS_BADGE[item.status ?? "in_review"]}`}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((s) => (
-                <SelectItem key={s.value} value={s.value} className="text-xs">
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           {allowMulti ? (
+
             <MultiCategoryPicker
               value={itemCategories(item)}
               options={Array.from(new Set([...(categories ?? []), ...itemCategories(item)]))}
@@ -1804,9 +1842,11 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
+
 
 function EditProspectPanel({
   item,
