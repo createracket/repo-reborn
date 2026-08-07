@@ -1240,6 +1240,78 @@ function SpotlightForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  // --- AI draft from a pasted email / info dump ---
+  const draftSpotlight = useServerFn(draftSpotlightFromText);
+  const [aiText, setAiText] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiSnapshot, setAiSnapshot] = useState<typeof form | null>(null);
+  const [aiFilled, setAiFilled] = useState<string[]>([]);
+
+  async function runAiDraft() {
+    const text = aiText.trim();
+    if (text.length < 40) {
+      toast.error("Paste a bit more detail first (at least a few sentences).");
+      return;
+    }
+    setAiBusy(true);
+    try {
+      const { draft } = await draftSpotlight({
+        data: { text: text.slice(0, 20000), ...(form.headline ? { artistName: form.headline } : {}) },
+      });
+      const snapshot = form;
+      const filled: string[] = [];
+      setForm((f) => {
+        const next = { ...f };
+        const put = (key: keyof typeof f, value: string | undefined, label: string) => {
+          if (!value) return;
+          (next[key] as string) = value;
+          filled.push(label);
+        };
+        put("headline", draft.headline, "Headline");
+        put("subtitle", draft.subtitle, "Subtitle");
+        if (!f.slug && draft.slug) put("slug", draft.slug, "Slug");
+        put("intro", draft.intro, "Intro");
+        put("host_bio", draft.host_bio, "Bio");
+        put("partnership_pitch", draft.partnership_pitch, "Partnership pitch");
+        if (draft.eoi_opportunities?.length) {
+          next.eoi_opportunities = draft.eoi_opportunities.join("\n");
+          filled.push("EOI opportunities");
+        }
+        if (draft.audience_segments?.length) {
+          next.audience_segments = draft.audience_segments.join("\n");
+          filled.push("Audience segments");
+        }
+        if (!f.instagram) put("instagram", draft.instagram, "Instagram");
+        if (!f.tiktok) put("tiktok", draft.tiktok, "TikTok");
+        if (!f.youtube) put("youtube", draft.youtube, "YouTube");
+        if (!f.spotify) put("spotify", draft.spotify, "Spotify");
+        if (!f.contact) put("contact", draft.contact, "Contact");
+        return next;
+      });
+      if (filled.length === 0) {
+        toast.error("The AI couldn't pull anything usable from that text.");
+        return;
+      }
+      setAiSnapshot(snapshot);
+      setAiFilled(filled);
+      toast.success(`Draft applied — review before saving (${filled.length} fields).`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "AI draft failed");
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
+  function undoAiDraft() {
+    if (!aiSnapshot) return;
+    setForm(aiSnapshot);
+    setAiSnapshot(null);
+    setAiFilled([]);
+    toast.success("Reverted to the values before the AI draft.");
+  }
+
+
+
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
   const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
   const scrapeApple = useServerFn(scrapeAppleMusicArtist);
