@@ -423,7 +423,7 @@ function PublicReportPage() {
           </div>
         </div>
         {latestUpdate && (
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2 text-xs text-muted-foreground md:hidden">
             Last updated: {latestUpdate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
           </p>
         )}
@@ -439,6 +439,12 @@ function PublicReportPage() {
             <TotalStat label="Total creators" value={String(creators.length)} />
             <TotalStat label="Live posts" value={String(allPosts.length)} />
           </div>
+        )}
+
+        {latestUpdate && (
+          <p className="mt-3 hidden text-xs text-muted-foreground md:block">
+            Last updated: {latestUpdate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+          </p>
         )}
 
         {monthFilter !== "all" && filteredCreators.length > 0 && (
