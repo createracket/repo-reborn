@@ -1550,8 +1550,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
         <div className="mt-1 flex items-center justify-end gap-2 text-xs text-muted-foreground">
           <Button
             size="sm"
-            variant="secondary"
-            className="h-7 px-3"
+            className="h-7 px-3 bg-pink-accent text-primary-foreground hover:bg-pink-accent/90"
             onClick={() => setOpen(true)}
           >
             <Eye className="mr-1 size-3" /> Suss the vibe
