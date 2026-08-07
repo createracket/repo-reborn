@@ -245,9 +245,20 @@ function UnifiedBriefs({
       ...campaigns.map((c) => ({ source: "user" as const, ...c })),
       ...leads.map((l) => ({ source: "lead" as const, ...l })),
     ];
-    list.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+    list.sort((a, b) => {
+      const ao = a.display_order ?? 0;
+      const bo = b.display_order ?? 0;
+      if (ao !== bo) return ao - bo;
+      return a.created_at < b.created_at ? 1 : -1;
+    });
     return list;
   }, [leads, campaigns]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
 
   if (rows.length === 0) {
     return <p className="text-sm text-muted-foreground">No briefs yet.</p>;
