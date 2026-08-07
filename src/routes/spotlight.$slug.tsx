@@ -120,6 +120,21 @@ function SpotlightPage() {
         .eq("published", true)
         .maybeSingle();
       if (error || !data) {
+        // Admins can preview unpublished drafts.
+        const { data: session } = await supabase.auth.getSession();
+        if (session.session) {
+          try {
+            const prev = await getSpotlightPreview({ data: { slug } });
+            if (prev.ok) {
+              setPage(prev.page as unknown as PartnerPage);
+              setIsPreview(true);
+              setStatus("ready");
+              return;
+            }
+          } catch {
+            /* not an admin — fall through */
+          }
+        }
         const info = await getSpotlightGate({ data: { slug } });
         if (info.gated) {
           setGate({
