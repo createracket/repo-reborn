@@ -44,7 +44,37 @@ export function SoundBoardAdmin() {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  const [fetchingId, setFetchingId] = useState<string | null>(null);
   const uploadImage = useServerFn(adminUploadSpotlightImage);
+  const fetchPreview = useServerFn(scrapePostMetrics);
+
+  /** Pull a preview image (and copy fallback) from the pasted post URL. */
+  async function fetchThumbnail(row: SoundBoardItem) {
+    const url = (row.video_url ?? "").trim();
+    if (!url) {
+      toast.error("Add a video / post URL first");
+      return;
+    }
+    setFetchingId(row.id);
+    try {
+      const result = await fetchPreview({ data: { url } });
+      if (!result.ok) throw new Error(result.error);
+      const thumb = result.metrics.thumbnail_url;
+      if (!thumb) throw new Error("No preview image available for that link");
+      updateLocal(row.id, { thumbnail_url: thumb });
+      const { error } = await supabase
+        .from("sound_board_items" as any)
+        .update({ thumbnail_url: thumb } as any)
+        .eq("id", row.id);
+      if (error) throw error;
+      toast.success("Preview pulled from link");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't fetch preview");
+    } finally {
+      setFetchingId(null);
+    }
+  }
+
 
   async function uploadCover(row: SoundBoardItem, file: File) {
     if (file.size > 8 * 1024 * 1024) {
