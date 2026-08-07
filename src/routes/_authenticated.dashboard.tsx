@@ -854,19 +854,19 @@ function DashboardPage() {
                         </Button>
                       </div>
                     </div>
-                    <ul
+                    <div
                       ref={oppCarouselRef}
                       className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
                     >
                       {opportunities.map((o) => (
-                        <li
+                        <div
                           key={`${o.brief_source}:${o.id}`}
                           className="snap-start shrink-0 w-full sm:w-[calc(50%-6px)]"
                         >
                           <OpportunityCard opp={o} />
-                        </li>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 )}
 
@@ -1530,7 +1530,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
 
   return (
     <>
-      <li className="group flex flex-col gap-2 rounded-xl border-2 border-border bg-card p-4 shadow-sm transition-colors">
+      <div className="group flex h-full flex-col gap-2 rounded-xl border-2 border-border bg-card p-4 shadow-sm transition-colors">
         <div className="flex items-start justify-between gap-3">
           <h3 className="font-medium leading-tight transition-colors group-hover:text-pink-accent">{opp.title}</h3>
           {opp.budget ? (
@@ -1557,7 +1557,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
             <Eye className="mr-1 size-3" /> Suss the vibe
           </Button>
         </div>
-      </li>
+      </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
