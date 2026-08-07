@@ -1849,7 +1849,7 @@ function SpotlightForm({
             <Input id="vibe_tags" value={form.vibe_tags} onChange={(e) => set("vibe_tags", e.target.value)} placeholder="Coffee, Sport, Fashion" />
             {form.vibe_tags.trim() ? (
               <div className="flex flex-wrap gap-2 pt-1">
-                {form.vibe_tags.split(",").map((t) => t.trim()).filter(Boolean).map((t, i) => (
+                {form.vibe_tags.split(",").map((t: string) => t.trim()).filter(Boolean).map((t: string, i: number) => (
                   <span key={i} className="rounded-full border border-border px-3 py-1 text-xs">{t}</span>
                 ))}
               </div>
