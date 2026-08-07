@@ -337,6 +337,8 @@ function SpotlightPage() {
   if (status === "missing" || !page) return <SpotlightNotFound />;
 
   const links = page.links ?? {};
+  const sectionLabel = (key: string, fallback: string) =>
+    (links.section_labels?.[key] ?? "").trim() || fallback;
 
   return (
     <div className="min-h-screen bg-background">
