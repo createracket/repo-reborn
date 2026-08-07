@@ -48,7 +48,7 @@ function hasSupabaseSession() {
  * first paint. Dark is the default; light is opt-in for signed-in users and
  * never applies to the homepage or auth pages.
  */
-export const themeInitScript = `(function(){try{var d=document.documentElement;var t=localStorage.getItem("${STORAGE_KEY}");var p=location.pathname.replace(/\\/+$/,"")||"/";var alwaysDark=${JSON.stringify(ALWAYS_DARK)}.indexOf(p)>-1;var s=false;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"&&localStorage.getItem(k)){s=true;break}}if(t==="light"&&!alwaysDark&&s){d.classList.remove("dark")}else{d.classList.add("dark")}}catch(e){document.documentElement.classList.add("dark")}})();`;
+export const themeInitScript = `(function(){try{var d=document.documentElement;var t=localStorage.getItem("${STORAGE_KEY}");var p=location.pathname.replace(/\\/+$/,"")||"/";var ad=${JSON.stringify(ALWAYS_DARK)};var ap=${JSON.stringify(ALWAYS_DARK_PREFIXES)};var alwaysDark=ad.indexOf(p)>-1;for(var j=0;j<ap.length&&!alwaysDark;j++){var pre=ap[j];if(p===pre.replace(/\\/$/,"")||p.indexOf(pre)===0){alwaysDark=true}}var s=false;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"&&localStorage.getItem(k)){s=true;break}}if(t==="light"&&!alwaysDark&&s){d.classList.remove("dark")}else{d.classList.add("dark")}}catch(e){document.documentElement.classList.add("dark")}})();`;
 
 type ThemeContextValue = {
   theme: Theme;
