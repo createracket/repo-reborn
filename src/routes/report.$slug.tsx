@@ -556,7 +556,17 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
         className="absolute left-2 top-2 inline-flex items-center rounded-full bg-background/80 p-1.5 backdrop-blur"
         title={PLATFORM_LABEL[post.platform]}
       >
-        <Icon className="size-3.5" aria-label={PLATFORM_LABEL[post.platform]} />
+        <Icon
+          className={
+            "size-3.5 " +
+            (post.platform === "instagram"
+              ? "text-pink-accent"
+              : post.platform === "tiktok"
+                ? "text-lime"
+                : "")
+          }
+          aria-label={PLATFORM_LABEL[post.platform]}
+        />
       </span>
     </div>
   );
