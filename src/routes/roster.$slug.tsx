@@ -350,37 +350,37 @@ function PublicRosterPage() {
         )}
 
         {(totalSocial > 0 || totalAll > 0 || roster.est_engagement_pct != null) && (
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
             {totalSocial > 0 && (
               <>
                 <Card>
-                  <CardContent className="p-5">
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  <CardContent className="p-3 sm:p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
                       Total social audience
                     </p>
-                    <p className="mt-1 font-display text-2xl">
+                    <p className="mt-1 font-display text-xl sm:text-2xl">
                       {formatCount(totalSocial)}
                     </p>
-                    <p className="mt-1 text-[11px] text-muted-foreground">Excludes streaming platforms</p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">Excludes streaming platforms</p>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-5">
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  <CardContent className="p-3 sm:p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
                       Total fans
                     </p>
-                    <p className="mt-1 font-display text-2xl">
+                    <p className="mt-1 font-display text-xl sm:text-2xl">
                       {formatCount(totalAll)}
                     </p>
-                    <p className="mt-1 text-[11px] text-muted-foreground">Socials + streaming</p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">Socials + streaming</p>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-5">
-                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  <CardContent className="p-3 sm:p-4">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
                       Est. reach
                     </p>
-                    <p className="mt-1 font-display text-2xl">
+                    <p className="mt-1 font-display text-xl sm:text-2xl">
                       {formatCount(Math.round(totalSocial * 0.4))}
                     </p>
                   </CardContent>
@@ -390,11 +390,11 @@ function PublicRosterPage() {
 
             {roster.est_engagement_pct != null && (
               <Card>
-                <CardContent className="p-5">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                <CardContent className="p-3 sm:p-4">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
                     Est. engagement
                   </p>
-                  <p className="mt-1 font-display text-2xl">
+                  <p className="mt-1 font-display text-xl sm:text-2xl">
                     {roster.est_engagement_pct}%
                   </p>
                 </CardContent>
@@ -433,7 +433,8 @@ function PublicRosterPage() {
             const showProspect = it.kind === "prospect" && !roster.hide_prospect_tags;
             return (
               <Card key={it.id}>
-                <CardContent className="p-3 sm:p-4">
+                <CardContent className="p-5">
+
                   <div className="flex items-start gap-4">
                     <div className="size-16 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-base font-medium text-muted-foreground">
                       {it.avatar_url ? (
