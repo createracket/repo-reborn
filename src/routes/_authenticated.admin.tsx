@@ -1236,6 +1236,11 @@ function SpotlightForm({
     monthly_streams: editData?.monthly_streams?.toString() ?? "",
     avg_reach: editData?.avg_reach?.toString() ?? "",
     avg_engagement: editData?.avg_engagement?.toString() ?? "",
+    label_host_bio: editData?.links?.section_labels?.host_bio ?? "",
+    label_audience: editData?.links?.section_labels?.audience ?? "",
+    label_partnership: editData?.links?.section_labels?.partnership ?? "",
+    label_eoi: editData?.links?.section_labels?.eoi ?? "",
+    label_videos: editData?.links?.section_labels?.videos ?? "",
   });
 
   function numOrNull(v: string): number | null {
