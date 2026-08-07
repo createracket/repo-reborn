@@ -1517,6 +1517,8 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [open, setOpen] = useState(false);
+
   const isVerified = item.kind === "profile";
 
   useEffect(() => {
