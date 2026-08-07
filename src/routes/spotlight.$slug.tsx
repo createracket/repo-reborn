@@ -464,19 +464,20 @@ function SpotlightPage() {
 
         {/* Spotify embed */}
         {links.spotifyEmbed ? (
-          <section className="mt-12">
+          <section className="mt-10">
             <iframe
               src={links.spotifyEmbed}
               width="100%"
-              height="232"
+              height="152"
               frameBorder={0}
               allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
               loading="lazy"
-              className="rounded-xl"
+              className="block rounded-xl"
               title="Spotify player"
             />
           </section>
         ) : null}
+
 
         {/* Host bio */}
         {page.host_bio ? (
