@@ -68,6 +68,7 @@ export type LeadBrief = {
   contact_email: string; contact_name: string | null; company: string | null;
   status: string;
   linked_roster_id: string | null;
+  display_order?: number | null;
 };
 export type CampaignBrief = {
   id: string; created_at: string; title: string; description: string;
@@ -76,6 +77,7 @@ export type CampaignBrief = {
   contact_email: string | null; published: boolean; published_at: string | null;
   linked_roster_id: string | null;
   artist_archetypes: string[]; brand_archetypes: string[];
+  display_order?: number | null;
 };
 export type Profile = {
   id: string; email: string | null; display_name: string | null;
