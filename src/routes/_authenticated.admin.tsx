@@ -1866,7 +1866,7 @@ function SpotlightForm({
             <Label htmlFor="sp-tf">Total social audience</Label>
             <div className="flex gap-2">
               <Input id="sp-tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
-              <Button type="button" variant="outline" size="sm" onClick={applyTotalFollowers} disabled={!fetchedCounts.instagram && !fetchedCounts.tiktok && !fetchedCounts.youtube}>
+              <Button type="button" variant="outline" size="sm" onClick={applyTotalFollowers} disabled={sumSocialCounts(fetchedCounts) <= 0}>
                 Apply sum
               </Button>
             </div>
