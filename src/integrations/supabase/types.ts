@@ -368,6 +368,7 @@ export type Database = {
           hide_categories: boolean
           id: string
           owner_id: string
+          profile_image_url: string | null
           published: boolean
           published_at: string | null
           slug: string
@@ -388,6 +389,7 @@ export type Database = {
           hide_categories?: boolean
           id?: string
           owner_id: string
+          profile_image_url?: string | null
           published?: boolean
           published_at?: string | null
           slug: string
@@ -408,6 +410,7 @@ export type Database = {
           hide_categories?: boolean
           id?: string
           owner_id?: string
+          profile_image_url?: string | null
           published?: boolean
           published_at?: string | null
           slug?: string
@@ -1789,7 +1792,7 @@ export type Database = {
           header_image_url: string | null
           hide_categories: boolean | null
           id: string | null
-          owner_id: string | null
+          profile_image_url: string | null
           published: boolean | null
           published_at: string | null
           slug: string | null
@@ -1804,7 +1807,7 @@ export type Database = {
           header_image_url?: string | null
           hide_categories?: boolean | null
           id?: string | null
-          owner_id?: string | null
+          profile_image_url?: string | null
           published?: boolean | null
           published_at?: string | null
           slug?: string | null
@@ -1819,7 +1822,7 @@ export type Database = {
           header_image_url?: string | null
           hide_categories?: boolean | null
           id?: string | null
-          owner_id?: string | null
+          profile_image_url?: string | null
           published?: boolean | null
           published_at?: string | null
           slug?: string | null

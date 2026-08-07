@@ -85,6 +85,7 @@ type Report = {
   published: boolean;
   published_at: string | null;
   header_image_url: string | null;
+  profile_image_url: string | null;
   client_email: string | null;
   brand_email: string | null;
   source_roster_id: string | null;
@@ -520,6 +521,8 @@ function ReportDetailView({
   const [description, setDescription] = useState(report.description ?? "");
   const [slug, setSlug] = useState(report.slug);
   const [header, setHeader] = useState(report.header_image_url ?? "");
+  const [thumb, setThumb] = useState(report.profile_image_url ?? "");
+  const [uploadingThumb, setUploadingThumb] = useState(false);
   const [clientEmail, setClientEmail] = useState("");
   const [brandEmail, setBrandEmail] = useState("");
   const [copied, setCopied] = useState(false);
@@ -537,6 +540,7 @@ function ReportDetailView({
     setDescription(report.description ?? "");
     setSlug(report.slug);
     setHeader(report.header_image_url ?? "");
+    setThumb(report.profile_image_url ?? "");
     setCategories(report.categories ?? []);
     setHideCategories(!!report.hide_categories);
     setTemplate(report.template ?? "original");
@@ -589,6 +593,7 @@ function ReportDetailView({
         description: description.trim() || null,
         slug: v.normalized,
         header_image_url: header.trim() || null,
+        profile_image_url: thumb.trim() || null,
         client_email: clientEmail.trim().toLowerCase() || null,
         brand_email: brandEmail.trim().toLowerCase() || null,
       })
@@ -621,6 +626,28 @@ function ReportDetailView({
       toast.error((err as Error).message);
     } finally {
       setUploadingHeader(false);
+      e.target.value = "";
+    }
+  }
+
+  async function handleThumbUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingThumb(true);
+    try {
+      const resized = await resizeImageFile(file, 720);
+      const path = `report-thumbs/${report.id}/${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("spotlight-images")
+        .upload(path, resized, { cacheControl: "3600", upsert: false, contentType: resized.type });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+      setThumb(urlData.publicUrl);
+      toast.success("Thumbnail uploaded");
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setUploadingThumb(false);
       e.target.value = "";
     }
   }
@@ -776,6 +803,51 @@ function ReportDetailView({
             <Input
               value={header}
               onChange={(e) => setHeader(e.target.value)}
+              placeholder="Or paste an image URL"
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label>Thumbnail image</Label>
+            <p className="text-xs text-muted-foreground">
+              Square image shown next to the report title, like roster pages.
+            </p>
+            <div className="flex flex-wrap items-start gap-3">
+              {thumb && (
+                <img
+                  src={thumb}
+                  alt="Thumbnail preview"
+                  className="size-20 rounded-md border border-border/60 object-cover"
+                />
+              )}
+              <div className="flex items-center gap-2">
+                <input
+                  id="thumb-upload"
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={handleThumbUpload}
+                  disabled={uploadingThumb}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={uploadingThumb}
+                  onClick={() => document.getElementById("thumb-upload")?.click()}
+                >
+                  <ImagePlus className="mr-2 size-4" />
+                  {uploadingThumb ? "Uploading…" : "Upload image"}
+                </Button>
+                {thumb && (
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setThumb("")}>
+                    Remove
+                  </Button>
+                )}
+              </div>
+            </div>
+            <Input
+              value={thumb}
+              onChange={(e) => setThumb(e.target.value)}
               placeholder="Or paste an image URL"
             />
           </div>
