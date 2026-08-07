@@ -513,28 +513,37 @@ function PublicRosterPage() {
                         </div>
                       </div>
 
-                      <div className="mt-2.5 flex flex-wrap gap-1.5 text-xs text-muted-foreground">
-                        {stats.map(([label, count, url]) =>
-                          count != null || url ? (
+                      <div className="mt-2.5 flex flex-wrap gap-1.5 text-xs">
+                        {stats.map(([label, count, url]) => {
+                          if (count == null && !url) return null;
+                          const content = (
+                            <>
+                              <span className="text-[0.7rem] font-semibold tracking-wider">{label}</span>
+                              {count != null ? (
+                                <span className="text-muted-foreground">{formatCount(count)}</span>
+                              ) : null}
+                            </>
+                          );
+                          return url ? (
+                            <a
+                              key={label}
+                              href={url}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-foreground transition-colors hover:border-foreground/40 hover:bg-muted/40"
+                            >
+                              {content}
+                            </a>
+                          ) : (
                             <span
                               key={label}
-                              className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-muted/30 px-2 py-0.5"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-muted-foreground"
                             >
-                              {label}
-                              {count != null ? ` ${formatCount(count)}` : ""}
-                              {url ? (
-                                <a
-                                  href={url}
-                                  target="_blank"
-                                  rel="noreferrer noopener"
-                                  className="inline-flex items-center text-primary hover:underline"
-                                >
-                                  <ExternalLink className="size-3" />
-                                </a>
-                              ) : null}
+                              {content}
                             </span>
-                          ) : null,
-                        )}
+                          );
+                        })}
+
                       </div>
 
                       {it.vibe && (
