@@ -1983,7 +1983,7 @@ function EditProspectPanel({
     setForm((f) => ({ ...f, [k]: v }));
 
   async function fetchFollowers(
-    platform: "instagram" | "tiktok" | "youtube",
+    platform: "instagram" | "tiktok" | "youtube" | "twitch" | "facebook" | "x",
     urlKey: keyof typeof form,
     followersKey: keyof typeof form,
   ) {
@@ -2160,7 +2160,7 @@ function EditProspectPanel({
   const urlFld = (
     label: string,
     key: keyof typeof form,
-    platform: "instagram" | "tiktok" | "youtube",
+    platform: "instagram" | "tiktok" | "youtube" | "twitch" | "facebook" | "x",
     followersKey: keyof typeof form,
     placeholder?: string,
   ) => (
@@ -2227,11 +2227,11 @@ function EditProspectPanel({
         {fld("TT followers", "tiktok_followers")}
         {urlFld("YouTube URL", "youtube_url", "youtube", "youtube_subscribers")}
         {fld("YT subscribers", "youtube_subscribers")}
-        {fld("Twitch URL", "twitch_url", "https://twitch.tv/…")}
+        {urlFld("Twitch URL", "twitch_url", "twitch", "twitch_followers", "https://twitch.tv/…")}
         {fld("Twitch followers", "twitch_followers")}
-        {fld("Facebook URL", "facebook_url", "https://facebook.com/…")}
+        {urlFld("Facebook URL", "facebook_url", "facebook", "facebook_followers", "https://facebook.com/…")}
         {fld("Facebook followers", "facebook_followers")}
-        {fld("X URL", "x_url", "https://x.com/…")}
+        {urlFld("X URL", "x_url", "x", "x_followers", "https://x.com/…")}
         {fld("X followers", "x_followers")}
         {fld("Other link label", "custom_label", "e.g. Twitter, Substack")}
         {fld("Other link URL", "custom_url", "https://…")}
@@ -2479,7 +2479,7 @@ function AddProspectCard({
   }
 
   async function fetchFollowers(
-    platform: "instagram" | "tiktok" | "youtube",
+    platform: "instagram" | "tiktok" | "youtube" | "twitch" | "facebook" | "x",
     urlKey: keyof typeof form,
     followersKey: keyof typeof form,
   ) {
@@ -2506,7 +2506,7 @@ function AddProspectCard({
     }
   }
 
-  function FetchBtn({ platform, urlKey, followersKey }: { platform: "instagram" | "tiktok" | "youtube"; urlKey: keyof typeof form; followersKey: keyof typeof form; }) {
+  function FetchBtn({ platform, urlKey, followersKey }: { platform: "instagram" | "tiktok" | "youtube" | "twitch" | "facebook" | "x"; urlKey: keyof typeof form; followersKey: keyof typeof form; }) {
     return (
       <Button
         type="button"
@@ -2684,19 +2684,28 @@ function AddProspectCard({
                 />
               </Field>
               <Field label="Twitch URL">
-                <Input value={form.twitch_url} onChange={(e) => update("twitch_url", e.target.value)} placeholder="https://twitch.tv/…" />
+                <div className="flex gap-1">
+                  <Input value={form.twitch_url} onChange={(e) => update("twitch_url", e.target.value)} placeholder="https://twitch.tv/…" />
+                  <FetchBtn platform="twitch" urlKey="twitch_url" followersKey="twitch_followers" />
+                </div>
               </Field>
               <Field label="Twitch followers">
                 <Input inputMode="numeric" value={form.twitch_followers} onChange={(e) => update("twitch_followers", e.target.value)} />
               </Field>
               <Field label="Facebook URL">
-                <Input value={form.facebook_url} onChange={(e) => update("facebook_url", e.target.value)} placeholder="https://facebook.com/…" />
+                <div className="flex gap-1">
+                  <Input value={form.facebook_url} onChange={(e) => update("facebook_url", e.target.value)} placeholder="https://facebook.com/…" />
+                  <FetchBtn platform="facebook" urlKey="facebook_url" followersKey="facebook_followers" />
+                </div>
               </Field>
               <Field label="Facebook followers">
                 <Input inputMode="numeric" value={form.facebook_followers} onChange={(e) => update("facebook_followers", e.target.value)} />
               </Field>
               <Field label="X URL">
-                <Input value={form.x_url} onChange={(e) => update("x_url", e.target.value)} placeholder="https://x.com/…" />
+                <div className="flex gap-1">
+                  <Input value={form.x_url} onChange={(e) => update("x_url", e.target.value)} placeholder="https://x.com/…" />
+                  <FetchBtn platform="x" urlKey="x_url" followersKey="x_followers" />
+                </div>
               </Field>
               <Field label="X followers">
                 <Input inputMode="numeric" value={form.x_followers} onChange={(e) => update("x_followers", e.target.value)} />
