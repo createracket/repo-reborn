@@ -66,8 +66,62 @@
   --color-brand-light: var(--brand-light);
 }
 
+/* Light mode (opt-in). Dark remains the default — see .dark below, which is
+   applied to <html> by default and only removed when the user picks light. */
 :root {
   --radius: 0.875rem;
+
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.22 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0 0);
+
+  /* Primary — Racket Green #BADA55 */
+  --primary: oklch(0.82 0.19 125);
+  --primary-foreground: oklch(0.22 0 0);
+
+  --secondary: oklch(0.955 0 0);
+  --secondary-foreground: oklch(0.25 0 0);
+
+  --muted: oklch(0.955 0 0);
+  --muted-foreground: oklch(0.48 0 0);
+
+  --accent: oklch(0.955 0 0);
+  --accent-foreground: oklch(0.25 0 0);
+
+  /* Racket Pink #FFC0CB */
+  --pink-accent: oklch(0.84 0.09 12);
+  /* Racket Purple #5C37D0 */
+  --purple: oklch(0.45 0.21 290);
+  --brand-light: oklch(0.98 0 0);
+
+  --destructive: oklch(0.58 0.23 27);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  --border: oklch(0.22 0 0 / 14%);
+  --input: oklch(0.22 0 0 / 16%);
+  --ring: oklch(0.72 0.18 125 / 55%);
+
+  --chart-1: oklch(0.78 0.19 125);
+  --chart-2: oklch(0.78 0.11 12);
+  --chart-3: oklch(0.45 0.21 290);
+  --chart-4: oklch(0.75 0.18 70);
+  --chart-5: oklch(0.6 0.18 200);
+
+  --sidebar: oklch(0.97 0 0);
+  --sidebar-foreground: oklch(0.22 0 0);
+  --sidebar-primary: oklch(0.82 0.19 125);
+  --sidebar-primary-foreground: oklch(0.22 0 0);
+  --sidebar-accent: oklch(0.94 0 0);
+  --sidebar-accent-foreground: oklch(0.22 0 0);
+  --sidebar-border: oklch(0.22 0 0 / 10%);
+  --sidebar-ring: oklch(0.72 0.18 125 / 55%);
+}
+
+.dark {
+  color-scheme: dark;
 
   /* Surfaces — Create Racket charcoal */
   --background: oklch(0.255 0 0);               /* #2B2B2B */
@@ -120,9 +174,6 @@
   --sidebar-ring: oklch(0.86 0.21 125 / 60%);
 }
 
-.dark {
-  color-scheme: dark;
-}
 
 @layer base {
   * {
