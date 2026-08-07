@@ -312,7 +312,8 @@ function DashboardPage() {
         .select("id, title, created_at, status, budget, currency, linked_roster_id")
         .eq("user_id", u.user.id)
         .order("created_at", { ascending: false });
-      const mineBriefRows = ((mineBriefs as any[]) ?? []);
+      const mineBriefRows = (((mineBriefs as any[]) ?? [])).filter((r) => r?.status !== "closed");
+
       const linkedRosterIds = Array.from(
         new Set(mineBriefRows.map((r) => r.linked_roster_id).filter(Boolean) as string[]),
       );
