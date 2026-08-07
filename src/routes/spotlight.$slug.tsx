@@ -134,6 +134,33 @@ function SpotlightPage() {
   const [gateCode, setGateCode] = useState("");
   const [gateBusy, setGateBusy] = useState(false);
   const [gateError, setGateError] = useState<string | null>(null);
+  const [posters, setPosters] = useState<Record<string, string | null>>({});
+
+  // Fetch provider poster thumbnails (TikTok) for clips without a manual cover.
+  useEffect(() => {
+    const l = page?.links ?? {};
+    const urls = [l.video1, l.video2, l.video3].filter((u): u is string => !!u);
+    if (urls.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await getClipPosters({ data: { urls } });
+        if (!cancelled) {
+          const byHref: Record<string, string | null> = {};
+          for (const u of urls) {
+            const embed = getSocialEmbed(u);
+            if (embed) byHref[embed.href] = res.posters[u] ?? null;
+          }
+          setPosters(byHref);
+        }
+      } catch {
+        /* posters are optional */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [page]);
 
   useEffect(() => {
     (async () => {
