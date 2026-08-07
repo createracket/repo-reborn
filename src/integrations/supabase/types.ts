@@ -899,6 +899,7 @@ export type Database = {
           total_streams: number | null
           type: string
           updated_at: string
+          vibe_tags: string[]
         }
         Insert: {
           access_code?: string | null
@@ -928,6 +929,7 @@ export type Database = {
           total_streams?: number | null
           type?: string
           updated_at?: string
+          vibe_tags?: string[]
         }
         Update: {
           access_code?: string | null
@@ -957,6 +959,7 @@ export type Database = {
           total_streams?: number | null
           type?: string
           updated_at?: string
+          vibe_tags?: string[]
         }
         Relationships: []
       }
