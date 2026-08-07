@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
+  commentPostUrl,
+  commentProfileUrl,
   fanClusters,
   recentComments,
   sentimentBreakdown,
@@ -149,17 +151,45 @@ function FanIntelPage() {
           <div className="mt-3 space-y-3">
             {comments.map((c) => (
               <div key={c.id} className="flex gap-3 rounded-2xl border border-border bg-card p-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-lg">{c.avatar}</div>
+                <a
+                  href={commentProfileUrl(c)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-lg transition hover:ring-2 hover:ring-lime"
+                >
+                  {c.avatar}
+                </a>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">{c.handle}</span>
+                    <a
+                      href={commentProfileUrl(c)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-foreground hover:text-lime hover:underline"
+                    >
+                      {c.handle}
+                    </a>
                     <span>·</span>
-                    <span>{c.post}</span>
+                    <a
+                      href={commentPostUrl(c)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 hover:text-foreground hover:underline"
+                    >
+                      {c.post} <ArrowUpRight className="h-3 w-3" />
+                    </a>
                     <span>·</span>
                     <span>{c.when}</span>
                     <span className={`ml-auto inline-flex h-5 items-center rounded-full border px-2 text-[10px] font-medium ${sentimentColor[c.sentiment]}`}>{c.sentiment}</span>
                   </div>
-                  <p className="mt-1.5 text-sm text-foreground">{c.text}</p>
+                  <a
+                    href={commentPostUrl(c)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1.5 block text-sm text-foreground hover:underline"
+                  >
+                    {c.text}
+                  </a>
                   <div className="mt-2 flex items-center gap-3 text-[11px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1"><Heart className="h-3 w-3" /> {c.likes}</span>
                     <span>{c.platform}</span>
