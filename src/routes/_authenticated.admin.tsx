@@ -1796,10 +1796,6 @@ function SpotlightForm({
               </div>
             </div>
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="type">Type</Label>
-            <Input id="type" value={form.type} onChange={(e) => set("type", e.target.value)} placeholder="podcast" />
-          </div>
           <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Images
