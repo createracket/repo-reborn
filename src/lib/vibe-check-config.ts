@@ -74,7 +74,7 @@ export const DEFAULT_ARTIST_ARCHETYPES: Record<ArtistArchetypeKey, ArtistArchety
   loyalist: {
     name: "The Loyalist",
     description:
-      "You're a community builder with deeply engaged fans who prioritize authentic connections over sheer reach. You thrive on building relationships.",
+      "You're a community builder with deeply engaged fans who prioritise authentic connections over sheer reach. You thrive on building relationships.",
     bestFor: "Long-term ambassadorships, community engagement",
   },
   changemaker: {
@@ -92,7 +92,7 @@ export const DEFAULT_ARTIST_ARCHETYPES: Record<ArtistArchetypeKey, ArtistArchety
   builder: {
     name: "The Builder",
     description:
-      "You're a business-minded artist focused on growth, professionalization, and maximizing opportunities. You see the big picture.",
+      "You're a business-minded artist focused on growth, professionalisation, and maximising opportunities. You see the big picture.",
     bestFor: "Performance campaigns, affiliate partnerships",
   },
   liveWire: {
@@ -110,7 +110,7 @@ export const DEFAULT_ARTIST_ARCHETYPES: Record<ArtistArchetypeKey, ArtistArchety
   advocate: {
     name: "The Advocate",
     description:
-      "You're a wellness champion and authentic voice who prioritizes mental health, vulnerability, and real connection. You speak your truth.",
+      "You're a wellness champion and authentic voice who prioritises mental health, vulnerability, and real connection. You speak your truth.",
     bestFor: "Authentic testimonials, wellness campaigns, social impact",
   },
 };
@@ -119,7 +119,7 @@ export const DEFAULT_BRAND_ARCHETYPES: Record<BrandArchetypeKey, BrandArchetypeM
   communityFirst: {
     name: "The Community-First Brand",
     description:
-      "You prioritize authentic connections and building loyal communities. You understand that real influence comes from genuine relationships, not just reach.",
+      "You prioritise authentic connections and building loyal communities. You understand that real influence comes from genuine relationships, not just reach.",
   },
   innovationPartner: {
     name: "The Innovation Partner",
