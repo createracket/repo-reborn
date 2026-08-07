@@ -99,6 +99,8 @@ export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
           )}
           {!minimal && (
             <div className="flex items-center gap-2">
+              <ThemeToggle />
+
               {signedIn ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
