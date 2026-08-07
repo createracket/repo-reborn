@@ -1,0 +1,1 @@
+ALTER TABLE public.rosters ADD COLUMN IF NOT EXISTS profile_image_url text;
