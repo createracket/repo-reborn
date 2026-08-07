@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X } from "lucide-react";
+import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
@@ -62,6 +62,7 @@ type CampaignBrief = { id: string; created_at: string; title: string; descriptio
 type Spotlight = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
   published: boolean; dashboard_visible: boolean; created_at: string; links?: Record<string, string> | null;
+  archived?: boolean | null;
 };
 
 type SpotlightInterest = {
@@ -84,6 +85,7 @@ function AdminPage() {
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
   const [openSpotlights, setOpenSpotlights] = useState<Set<string>>(new Set());
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const toggleSpotlightOpen = (id: string) => setOpenSpotlights((prev) => {
     const next = new Set(prev);
     if (next.has(id)) next.delete(id); else next.add(id);
@@ -162,6 +164,194 @@ function AdminPage() {
       .select("*")
       .order("created_at", { ascending: false });
     setSpotlights((data as unknown as Spotlight[]) ?? []);
+  }
+
+  const activeSpotlights = spotlights.filter((s) => !s.archived);
+  const archivedSpotlights = spotlights.filter((s) => !!s.archived);
+
+  async function setSpotlightArchived(s: Spotlight, archived: boolean) {
+    const patch: Record<string, any> = archived
+      ? { archived: true, published: false, dashboard_visible: false }
+      : { archived: false };
+    const { error } = await supabase
+      .from("partner_pages" as any)
+      .update(patch as any)
+      .eq("id", s.id);
+    if (error) return toast.error(error.message);
+    toast.success(archived ? "Archived" : "Restored");
+    refreshSpotlights();
+  }
+
+  function renderSpotlightCard(s: Spotlight) {
+    return (
+                  <Card key={s.id}>
+                    <CardHeader>
+                      <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div>
+                          <CardTitle className="text-lg">
+                            <button
+                              type="button"
+                              onClick={() => toggleSpotlightOpen(s.id)}
+                              className="inline-flex items-center gap-2 text-left hover:text-foreground/80"
+                            >
+                              {openSpotlights.has(s.id) ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                              <span>{s.headline}</span>
+                            </button>
+                          </CardTitle>
+                          <CardDescription>
+                            /spotlight/{s.slug} · {s.type}
+                            {s.subtitle ? ` · ${s.subtitle}` : ""}
+                          </CardDescription>
+                          {s.links?.contact ? (
+                            <div className="mt-1">
+                              <ProfileChip profile={lookupProfile(s.links.contact)} fallbackEmail={s.links.contact} />
+                            </div>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={s.archived ? "secondary" : s.published ? "default" : "outline"}>
+                            {s.archived ? "Archived" : s.published ? "Published" : "Draft"}
+                          </Badge>
+                          <Button asChild size="sm" variant="outline">
+                            <a href={`/spotlight/${s.slug}`} target="_blank" rel="noreferrer">
+                              {s.published ? "View" : "Preview"} <ExternalLink className="ml-1 size-3" />
+                            </a>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              const { data, error } = await supabase
+                                .from("partner_pages" as any)
+                                .select("*")
+                                .eq("id", s.id)
+                                .single();
+                              if (error) return toast.error(error.message);
+                              setEditingSpotlight(data);
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                          >
+                            <Pencil className="mr-1 size-3" /> Edit
+                          </Button>
+                          {!s.archived ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={async () => {
+                                const { error } = await supabase
+                                  .from("partner_pages" as any)
+                                  .update({ published: !s.published })
+                                  .eq("id", s.id);
+                                if (error) return toast.error(error.message);
+                                toast.success(s.published ? "Unpublished" : "Published");
+                                refreshSpotlights();
+                              }}
+                            >
+                              {s.published ? "Unpublish" : "Publish"}
+                            </Button>
+                          ) : null}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSpotlightArchived(s, !s.archived)}
+                          >
+                            <Archive className="mr-1 size-3" /> {s.archived ? "Restore" : "Archive"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={async () => {
+                              if (!confirm(`Delete spotlight "${s.headline}"?`)) return;
+                              const { error } = await supabase
+                                .from("partner_pages" as any)
+                                .delete()
+                                .eq("id", s.id);
+                              if (error) return toast.error(error.message);
+                              toast.success("Deleted");
+                              refreshSpotlights();
+                            }}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    {openSpotlights.has(s.id) && (
+                    <CardContent className="space-y-3 border-t border-border/60 pt-4">
+                      <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+                        <div>
+                          <Label htmlFor={`sp-live-${s.id}`} className="text-sm font-medium">
+                            Live on all dashboards
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {s.dashboard_visible
+                              ? "Showing in every signed-in user's opportunities feed."
+                              : "Hidden from the general opportunities feed."}
+                          </p>
+                        </div>
+                        <Switch
+                          id={`sp-live-${s.id}`}
+                          checked={s.dashboard_visible}
+                          disabled={!!s.archived}
+                          onCheckedChange={async (checked) => {
+                            setSpotlights((rows) => rows.map((r) => r.id === s.id ? { ...r, dashboard_visible: checked } : r));
+                            const { error } = await supabase
+                              .from("partner_pages" as any)
+                              .update({ dashboard_visible: checked } as any)
+                              .eq("id", s.id);
+                            if (error) {
+                              setSpotlights((rows) => rows.map((r) => r.id === s.id ? { ...r, dashboard_visible: !checked } : r));
+                              toast.error(error.message);
+                            } else {
+                              toast.success(checked ? "Live on all dashboards" : "Hidden from all dashboards");
+                            }
+                          }}
+                        />
+                      </div>
+                      <PartnerPageShares partnerPageId={s.id} profiles={profiles} />
+                    </CardContent>
+                    )}
+                    {openSpotlights.has(s.id) && (() => {
+                      const rows = interests.filter((i) => i.partner_page_id === s.id);
+                      if (rows.length === 0) return null;
+                      const isExpanded = expandedInterests.has(s.id);
+                      return (
+                        <CardContent className="border-t border-border/60 pt-4">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setExpandedInterests((prev) => {
+                                const next = new Set(prev);
+                                if (next.has(s.id)) next.delete(s.id);
+                                else next.add(s.id);
+                                return next;
+                              });
+                            }}
+                            className="mb-2 flex w-full items-center justify-between text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                          >
+                            <span>Registered interest ({rows.length})</span>
+                            {isExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                          </button>
+                          {isExpanded && (
+                            <ul className="space-y-1 text-sm">
+                              {rows.map((r) => (
+                                <li key={r.id} className="flex flex-wrap items-center justify-between gap-2">
+                                  <span>
+                                    {r.profile?.display_name ?? "Unnamed user"}
+                                    {r.profile?.email ? <span className="text-muted-foreground"> · {r.profile.email}</span> : null}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(r.created_at).toLocaleDateString()}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </CardContent>
+                      );
+                    })()}
+                  </Card>
+    );
   }
 
   if (checking) {
@@ -298,169 +488,31 @@ function AdminPage() {
               )}
             </Card>
 
-            {spotlights.length === 0 ? <Empty /> : (
+            {activeSpotlights.length === 0 ? <Empty /> : (
               <div className="space-y-3">
-                {spotlights.map((s) => (
-                  <Card key={s.id}>
-                    <CardHeader>
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                          <CardTitle className="text-lg">
-                            <button
-                              type="button"
-                              onClick={() => toggleSpotlightOpen(s.id)}
-                              className="inline-flex items-center gap-2 text-left hover:text-foreground/80"
-                            >
-                              {openSpotlights.has(s.id) ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                              <span>{s.headline}</span>
-                            </button>
-                          </CardTitle>
-                          <CardDescription>
-                            /spotlight/{s.slug} · {s.type}
-                            {s.subtitle ? ` · ${s.subtitle}` : ""}
-                          </CardDescription>
-                          {s.links?.contact ? (
-                            <div className="mt-1">
-                              <ProfileChip profile={lookupProfile(s.links.contact)} fallbackEmail={s.links.contact} />
-                            </div>
-                          ) : null}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={s.published ? "default" : "outline"}>
-                            {s.published ? "Published" : "Draft"}
-                          </Badge>
-                          <Button asChild size="sm" variant="outline">
-                            <a href={`/spotlight/${s.slug}`} target="_blank" rel="noreferrer">
-                              {s.published ? "View" : "Preview"} <ExternalLink className="ml-1 size-3" />
-                            </a>
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={async () => {
-                              const { data, error } = await supabase
-                                .from("partner_pages" as any)
-                                .select("*")
-                                .eq("id", s.id)
-                                .single();
-                              if (error) return toast.error(error.message);
-                              setEditingSpotlight(data);
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                            }}
-                          >
-                            <Pencil className="mr-1 size-3" /> Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={async () => {
-                              const { error } = await supabase
-                                .from("partner_pages" as any)
-                                .update({ published: !s.published })
-                                .eq("id", s.id);
-                              if (error) return toast.error(error.message);
-                              toast.success(s.published ? "Unpublished" : "Published");
-                              refreshSpotlights();
-                            }}
-                          >
-                            {s.published ? "Unpublish" : "Publish"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={async () => {
-                              if (!confirm(`Delete spotlight "${s.headline}"?`)) return;
-                              const { error } = await supabase
-                                .from("partner_pages" as any)
-                                .delete()
-                                .eq("id", s.id);
-                              if (error) return toast.error(error.message);
-                              toast.success("Deleted");
-                              refreshSpotlights();
-                            }}
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    {openSpotlights.has(s.id) && (
-                    <CardContent className="space-y-3 border-t border-border/60 pt-4">
-                      <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-                        <div>
-                          <Label htmlFor={`sp-live-${s.id}`} className="text-sm font-medium">
-                            Live on all dashboards
-                          </Label>
-                          <p className="text-xs text-muted-foreground">
-                            {s.dashboard_visible
-                              ? "Showing in every signed-in user's opportunities feed."
-                              : "Hidden from the general opportunities feed."}
-                          </p>
-                        </div>
-                        <Switch
-                          id={`sp-live-${s.id}`}
-                          checked={s.dashboard_visible}
-                          onCheckedChange={async (checked) => {
-                            setSpotlights((rows) => rows.map((r) => r.id === s.id ? { ...r, dashboard_visible: checked } : r));
-                            const { error } = await supabase
-                              .from("partner_pages" as any)
-                              .update({ dashboard_visible: checked } as any)
-                              .eq("id", s.id);
-                            if (error) {
-                              setSpotlights((rows) => rows.map((r) => r.id === s.id ? { ...r, dashboard_visible: !checked } : r));
-                              toast.error(error.message);
-                            } else {
-                              toast.success(checked ? "Live on all dashboards" : "Hidden from all dashboards");
-                            }
-                          }}
-                        />
-                      </div>
-                      <PartnerPageShares partnerPageId={s.id} profiles={profiles} />
-                    </CardContent>
-                    )}
-                    {openSpotlights.has(s.id) && (() => {
-                      const rows = interests.filter((i) => i.partner_page_id === s.id);
-                      if (rows.length === 0) return null;
-                      const isExpanded = expandedInterests.has(s.id);
-                      return (
-                        <CardContent className="border-t border-border/60 pt-4">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setExpandedInterests((prev) => {
-                                const next = new Set(prev);
-                                if (next.has(s.id)) next.delete(s.id);
-                                else next.add(s.id);
-                                return next;
-                              });
-                            }}
-                            className="mb-2 flex w-full items-center justify-between text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
-                          >
-                            <span>Registered interest ({rows.length})</span>
-                            {isExpanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                          </button>
-                          {isExpanded && (
-                            <ul className="space-y-1 text-sm">
-                              {rows.map((r) => (
-                                <li key={r.id} className="flex flex-wrap items-center justify-between gap-2">
-                                  <span>
-                                    {r.profile?.display_name ?? "Unnamed user"}
-                                    {r.profile?.email ? <span className="text-muted-foreground"> · {r.profile.email}</span> : null}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {new Date(r.created_at).toLocaleDateString()}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </CardContent>
-                      );
-                    })()}
-                  </Card>
-                ))}
+                {activeSpotlights.map((s) => renderSpotlightCard(s))}
               </div>
             )}
+
+            {archivedSpotlights.length > 0 ? (
+              <div className="mt-8 rounded-lg border border-border/60 bg-muted/20">
+                <button
+                  type="button"
+                  onClick={() => setArchiveOpen((v) => !v)}
+                  className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium hover:text-foreground/80"
+                >
+                  <span className="uppercase tracking-wider text-muted-foreground">
+                    Archived spotlights ({archivedSpotlights.length})
+                  </span>
+                  {archiveOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </button>
+                {archiveOpen ? (
+                  <div className="space-y-3 border-t border-border/60 p-4">
+                    {archivedSpotlights.map((s) => renderSpotlightCard(s))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             <div className="pt-8 border-t border-border">
               <ExampleOpportunitiesAdmin />
             </div>
