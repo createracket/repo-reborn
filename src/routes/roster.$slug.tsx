@@ -483,7 +483,7 @@ function PublicRosterPage() {
                           {!roster.hide_statuses && (
                             <Badge
                               variant="outline"
-                              className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE[it.status] ?? "border-border/70 bg-muted/40 text-muted-foreground"}`}
+                              className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE_CLASS}`}
                             >
                               {STATUS_LABEL[it.status] ?? "In Review"}
                             </Badge>
