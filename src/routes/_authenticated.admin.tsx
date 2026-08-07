@@ -1320,7 +1320,11 @@ function SpotlightForm({
   const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
   const scrapeApple = useServerFn(scrapeAppleMusicArtist);
   const [syncing, setSyncing] = useState<string | null>(null);
-  const [fetchedCounts, setFetchedCounts] = useState<Record<string, number>>({});
+  // Synced per-handle counts. Persisted in links.follower_counts so they survive
+  // a save/reload instead of being lost when the editor unmounts.
+  const [fetchedCounts, setFetchedCounts] = useState<Record<string, number>>(
+    () => (editData?.links?.follower_counts as Record<string, number> | undefined) ?? {},
+  );
   // Extra social handles (band members, side projects) — up to 5 per platform.
   const EXTRA_PLATFORMS = ["instagram", "tiktok", "youtube", "spotify", "apple_music"] as const;
   type ExtraPlatform = (typeof EXTRA_PLATFORMS)[number];
