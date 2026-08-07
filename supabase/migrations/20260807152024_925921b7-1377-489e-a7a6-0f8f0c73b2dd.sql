@@ -1,0 +1,2 @@
+ALTER TABLE public.campaign_briefs ADD COLUMN IF NOT EXISTS linked_report_id uuid REFERENCES public.campaign_reports(id) ON DELETE SET NULL;
+ALTER TABLE public.lead_briefs ADD COLUMN IF NOT EXISTS linked_report_id uuid REFERENCES public.campaign_reports(id) ON DELETE SET NULL;
