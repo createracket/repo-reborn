@@ -246,7 +246,7 @@ function SpotlightPage() {
         <main className="container mx-auto max-w-2xl px-4 py-12 md:py-20">
           {gate.header_image_url ? (
             <div className="mb-10 overflow-hidden rounded-2xl border border-border/60" style={{ aspectRatio: "16 / 9" }}>
-              <img src={gate.header_image_url} alt={gate.headline} className="size-full object-cover grayscale" />
+              <img src={gate.header_image_url} alt={gate.headline} className="size-full object-cover" />
             </div>
           ) : null}
           <Badge variant="outline" className="uppercase tracking-[0.2em]">
@@ -313,7 +313,7 @@ function SpotlightPage() {
         {/* Header image (16:9) */}
         {page.header_image_url ? (
           <div className="mb-10 overflow-hidden rounded-2xl border border-border/60" style={{ aspectRatio: "16 / 9" }}>
-            <img src={page.header_image_url} alt={page.headline} className="size-full object-cover grayscale" />
+            <img src={page.header_image_url} alt={page.headline} className="size-full object-cover" />
           </div>
         ) : null}
 
