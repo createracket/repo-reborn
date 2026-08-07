@@ -32,6 +32,7 @@ export function TrafficAdmin() {
   const fetchStats = useServerFn(getTrafficStats);
   const [range, setRange] = useState<TrafficRange>("7d");
   const [filter, setFilter] = useState<TrafficFilter>("humans");
+  const [includeSelf, setIncludeSelf] = useState(false);
   const [stats, setStats] = useState<TrafficStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,12 +41,13 @@ export function TrafficAdmin() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetchStats({ data: { range, filter } })
+    fetchStats({ data: { range, filter, includeSelf } })
       .then((res) => { if (!cancelled) setStats(res); })
       .catch((e) => { if (!cancelled) setError(e?.message ?? "Failed to load traffic stats"); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [range, filter, fetchStats]);
+  }, [range, filter, includeSelf, fetchStats]);
+
 
   const totalAll = stats ? stats.totals.humanPageviews + stats.totals.botPageviews : 0;
   const botShare = totalAll > 0 && stats ? Math.round((stats.totals.botPageviews / totalAll) * 100) : 0;
