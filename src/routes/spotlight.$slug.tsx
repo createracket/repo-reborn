@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { ClipCard } from "@/components/spotlight/ClipCard";
+import { SpotlightNotFound } from "@/components/spotlight/SpotlightNotFound";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
