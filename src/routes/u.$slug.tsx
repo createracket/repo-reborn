@@ -101,7 +101,10 @@ function PublicProfilePage() {
 
   const socials = profile.socials ?? {};
   const metrics: Array<{ label: string; value: string }> = [];
-  const f = formatNumber(profile.total_followers); if (f) metrics.push({ label: "Total followers", value: f });
+  const f = formatNumber(profile.total_followers); if (f) metrics.push({ label: "Total social audience", value: f });
+  const fans = (profile.total_followers ?? 0) + (profile.monthly_streams ?? 0);
+  const fansLabel = formatNumber(fans);
+  if (fansLabel && fans > (profile.total_followers ?? 0)) metrics.push({ label: "Total fans", value: fansLabel });
   const ts = formatNumber(profile.total_streams); if (ts) metrics.push({ label: "Total streams", value: ts });
   const ms = formatNumber(profile.monthly_streams); if (ms) metrics.push({ label: "Monthly streams", value: ms });
   const ar = formatNumber(profile.avg_reach); if (ar) metrics.push({ label: "Avg. reach", value: ar });
@@ -113,6 +116,10 @@ function PublicProfilePage() {
     { key: "tiktok", icon: Music2, label: "TikTok", base: "https://www.tiktok.com/@" },
     { key: "spotify", icon: Music2, label: "Spotify", base: undefined },
     { key: "youtube", icon: Youtube, label: "YouTube", base: undefined },
+    { key: "twitch", icon: Twitch, label: "Twitch", base: "https://twitch.tv/" },
+    { key: "facebook", icon: Facebook, label: "Facebook", base: "https://facebook.com/" },
+    { key: "x", icon: Globe, label: "X", base: "https://x.com/" },
+    { key: "custom_url", icon: LinkIcon, label: (socials as Record<string, string>)["custom_label"] || "Link", base: undefined },
     { key: "website", icon: Globe, label: "Website", base: undefined },
   ].map((s) => ({ ...s, value: (socials as any)[s.key] as string | undefined }))
    .filter((s) => s.value);
