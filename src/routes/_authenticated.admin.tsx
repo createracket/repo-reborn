@@ -2052,6 +2052,7 @@ function SpotlightForm({
                       onChange={(e) => set(urlKey, e.target.value)}
                       placeholder="https://www.tiktok.com/@user/video/… or Instagram reel URL"
                     />
+                    <FetchPreviewButton url={form[urlKey]} onFetched={(u) => set(coverKey, u)} />
                     <Input
                       id={coverKey}
                       value={form[coverKey]}
