@@ -1485,7 +1485,10 @@ function SpotlightForm({
     reason: editData?.flagged_streaming_reason ?? null,
   }));
 
-  async function syncSocial(platform: "instagram" | "tiktok" | "youtube", extraIndex?: number) {
+  async function syncSocial(
+    platform: "instagram" | "tiktok" | "youtube" | "twitch" | "facebook" | "x",
+    extraIndex?: number,
+  ) {
     const key = extraIndex == null ? platform : `${platform}:${extraIndex}`;
     const raw = String(
       (extraIndex == null ? form[platform] : extraLinks[platform][extraIndex]) || "",
@@ -1499,6 +1502,9 @@ function SpotlightForm({
       const h = full.replace(/^@/, "");
       if (platform === "instagram") full = `https://instagram.com/${h}`;
       else if (platform === "tiktok") full = `https://tiktok.com/@${h}`;
+      else if (platform === "twitch") full = `https://twitch.tv/${h}`;
+      else if (platform === "facebook") full = `https://facebook.com/${h}`;
+      else if (platform === "x") full = `https://x.com/${h}`;
       else full = `https://youtube.com/@${h}`;
     }
     setSyncing(key);
@@ -1976,8 +1982,8 @@ function SpotlightForm({
           <div className="md:col-span-2 pt-2">
             <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">More socials</p>
             <p className="text-xs text-muted-foreground">
-              Twitch, Facebook, X and one custom link. No auto-sync yet — enter follower counts manually and they
-              roll into Total social audience.
+              Twitch, Facebook, X and one custom link. Hit Sync to fetch follower counts automatically, or type them
+              in manually — either way they roll into Total social audience.
             </p>
           </div>
           {([
@@ -1987,7 +1993,19 @@ function SpotlightForm({
           ] as const).map(({ k, label, ph }) => (
             <div key={k} className="space-y-1.5">
               <Label htmlFor={k}>{label}</Label>
-              <Input id={k} value={form[k]} onChange={(e) => set(k, e.target.value)} placeholder={ph} />
+              <div className="flex gap-2">
+                <Input id={k} value={form[k]} onChange={(e) => set(k, e.target.value)} placeholder={ph} />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => syncSocial(k)}
+                  disabled={syncing !== null}
+                >
+                  <RefreshCw className={`size-3 ${syncing === k ? "animate-spin" : ""}`} />
+                  <span className="ml-1">Sync</span>
+                </Button>
+              </div>
               <Input
                 inputMode="numeric"
                 value={fetchedCounts[k] != null ? String(fetchedCounts[k]) : ""}
