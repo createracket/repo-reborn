@@ -1350,6 +1350,17 @@ function SpotlightForm({
     facebook: editData?.links?.facebook_extra ?? [],
     x: editData?.links?.x_extra ?? [],
   }));
+  const [extraNames, setExtraNames] = useState<Record<"youtube", string[]>>(() => ({
+    youtube: editData?.links?.youtube_extra_names ?? [],
+  }));
+  function setExtraName(i: number, v: string) {
+    setExtraNames((s) => {
+      const next = [...s.youtube];
+      while (next.length <= i) next.push("");
+      next[i] = v;
+      return { youtube: next };
+    });
+  }
   function addExtra(p: ExtraPlatform) {
     setExtraLinks((s) => (s[p].length >= 5 ? s : { ...s, [p]: [...s[p], ""] }));
   }
@@ -1358,6 +1369,7 @@ function SpotlightForm({
   }
   function removeExtra(p: ExtraPlatform, i: number) {
     setExtraLinks((s) => ({ ...s, [p]: s[p].filter((_, ix) => ix !== i) }));
+    if (p === "youtube") setExtraNames((s) => ({ youtube: s.youtube.filter((_, ix) => ix !== i) }));
     setFetchedCounts((c) => {
       const next = { ...c };
       delete next[`${p}:${i}`];
