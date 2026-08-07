@@ -111,16 +111,8 @@ function categoryBadgeClass(value: string) {
   return CATEGORY_BADGE[value] ?? "bg-primary/25 text-primary border border-primary/40";
 }
 
-const STATUS_BADGE: Record<string, string> = {
-  in_review: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
-  approved: "border-primary/40 bg-primary/10 text-primary",
-  confirmed: "border-primary/40 bg-primary/10 text-primary",
-  in_production: "border-chart-4/40 bg-chart-4/10 text-chart-4",
-  briefed: "border-chart-5/40 bg-chart-5/10 text-chart-5",
-  contracting: "border-purple/40 bg-purple/10 text-purple",
-  live: "border-pink-accent/40 bg-pink-accent/10 text-pink-accent",
-  hold: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-};
+const STATUS_BADGE_CLASS = "border-border/70 bg-muted/40 text-muted-foreground";
+
 
 
 export const Route = createFileRoute("/roster/$slug")({
@@ -151,6 +143,8 @@ function PublicRosterPage() {
   const [gateError, setGateError] = useState<string | null>(null);
   const [gateBusy, setGateBusy] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
 
   useEffect(() => {
     (async () => {
@@ -356,7 +350,7 @@ function PublicRosterPage() {
                 <Card>
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
-                      Total social audience
+                      Socials
                     </p>
                     <p className="mt-1 font-display text-xl sm:text-2xl">
                       {formatCount(totalSocial)}
@@ -367,7 +361,7 @@ function PublicRosterPage() {
                 <Card>
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
-                      Total fans
+                      Fans
                     </p>
                     <p className="mt-1 font-display text-xl sm:text-2xl">
                       {formatCount(totalAll)}
@@ -404,9 +398,13 @@ function PublicRosterPage() {
         )}
 
         {(() => {
-          const activeItems = items.filter((it) => it.status !== "hold" && it.status !== "live" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
-          const liveItems = items.filter((it) => it.status === "live" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
-          const archivedItems = items.filter((it) => it.status === "hold" && (categoryFilter === "all" || itemCats(it).includes(categoryFilter)));
+          const matches = (it: PublicItem) =>
+            (categoryFilter === "all" || itemCats(it).includes(categoryFilter)) &&
+            (roster.hide_statuses || statusFilter === "all" || (it.status || "in_review") === statusFilter);
+          const activeItems = items.filter((it) => it.status !== "hold" && it.status !== "live" && matches(it));
+          const liveItems = items.filter((it) => it.status === "live" && matches(it));
+          const archivedItems = items.filter((it) => it.status === "hold" && matches(it));
+
 
           const renderItem = (it: PublicItem) => {
             const stats: Array<[string, number | null, string | null]> = [
@@ -471,13 +469,13 @@ function PublicRosterPage() {
                             {itemFans > 0 && (
                               <span className="font-semibold text-foreground">
                                 {formatCount(itemFans)}{" "}
-                                <span className="font-normal text-muted-foreground">total fans</span>
+                                <span className="font-normal text-muted-foreground">fans</span>
                               </span>
                             )}
                             {itemSocial > 0 && itemFans !== itemSocial && (
                               <span className="font-semibold text-foreground">
                                 {formatCount(itemSocial)}{" "}
-                                <span className="font-normal text-muted-foreground">social</span>
+                                <span className="font-normal text-muted-foreground">socials</span>
                               </span>
                             )}
                           </div>
@@ -491,7 +489,7 @@ function PublicRosterPage() {
                           {!roster.hide_statuses && (
                             <Badge
                               variant="outline"
-                              className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE[it.status] ?? "border-border/70 bg-muted/40 text-muted-foreground"}`}
+                              className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE_CLASS}`}
                             >
                               {STATUS_LABEL[it.status] ?? "In Review"}
                             </Badge>
@@ -579,29 +577,50 @@ function PublicRosterPage() {
                     ...items.flatMap((i) => itemCats(i)),
                   ]),
                 );
-                if (filterValues.length === 0) return null;
+                const statusValues = roster.hide_statuses
+                  ? []
+                  : Array.from(new Set(items.map((i) => i.status || "in_review")));
+                if (filterValues.length === 0 && statusValues.length === 0) return null;
                 return (
-                  <div className="mt-10 flex items-center justify-end gap-3">
+                  <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Filter className="size-4" />
                       <span>Filter</span>
                     </div>
-                    <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
-                      <SelectTrigger className="w-[180px] text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
-                        {filterValues.map((v) => (
-                          <SelectItem key={v} value={v}>
-                            {categoryLabel(v)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {filterValues.length > 0 && (
+                      <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
+                        <SelectTrigger className="w-[180px] text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All categories</SelectItem>
+                          {filterValues.map((v) => (
+                            <SelectItem key={v} value={v}>
+                              {categoryLabel(v)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {statusValues.length > 0 && (
+                      <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
+                        <SelectTrigger className="w-[180px] text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All statuses</SelectItem>
+                          {statusValues.map((v) => (
+                            <SelectItem key={v} value={v}>
+                              {STATUS_LABEL[v] ?? "In Review"}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                 );
               })()}
+
               <section className="mt-4 space-y-3">
                 {items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No creators on this roster yet.</p>
