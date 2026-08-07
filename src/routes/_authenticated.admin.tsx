@@ -1740,7 +1740,7 @@ function SpotlightForm({
                 (leave blank to use the default wording)
               </span>
             </summary>
-            <div className="grid grid-cols-1 gap-4 px-4">
+            <div className="flex w-full flex-col gap-4 px-4">
               {([
                 { k: "label_host_bio", label: "Host bio heading", ph: "About the host" },
                 { k: "label_audience", label: "Audience heading", ph: "Who's listening" },
@@ -1781,7 +1781,7 @@ function SpotlightForm({
             const mainKey = p === "apple_music" ? "apple" : p;
             const extras = extraLinks[p];
             return (
-              <div key={p} className="space-y-1.5">
+              <div key={p} className="w-full space-y-1.5">
                 <div className="flex items-center justify-between">
                   <Label htmlFor={p}>{label}</Label>
                   <Button
