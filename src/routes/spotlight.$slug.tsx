@@ -76,6 +76,7 @@ type PartnerPage = {
   partnership_pitch: string | null;
   eoi_opportunities: string[];
   audience_segments: string[];
+  vibe_tags?: string[] | null;
   links: PartnerLinks;
   published: boolean;
   header_image_url: string | null;
@@ -553,6 +554,23 @@ function SpotlightPage() {
           <section className="mt-16">
             <h2 className="font-display text-3xl">{sectionLabel("partnership", "Partnership")}</h2>
             <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.partnership_pitch}</p>
+          </section>
+        ) : null}
+
+        {/* Vibe check */}
+        {page.vibe_tags?.length ? (
+          <section className="mt-10">
+            <h2 className="font-display text-3xl">{sectionLabel("vibe_check", "Vibe check")}</h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {page.vibe_tags.map((tag, i) => (
+                <span
+                  key={i}
+                  className="rounded-full border border-border px-4 py-1.5 text-sm text-foreground/80"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </section>
         ) : null}
 

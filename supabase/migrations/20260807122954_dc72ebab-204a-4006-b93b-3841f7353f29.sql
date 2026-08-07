@@ -1,0 +1,1 @@
+ALTER TABLE public.partner_pages ADD COLUMN IF NOT EXISTS vibe_tags text[] NOT NULL DEFAULT '{}'::text[];

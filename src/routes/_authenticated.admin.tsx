@@ -1310,6 +1310,7 @@ function SpotlightForm({
     partnership_pitch: editData?.partnership_pitch ?? "",
     eoi_opportunities: (editData?.eoi_opportunities ?? []).join("\n"),
     audience_segments: (editData?.audience_segments ?? []).join("\n"),
+    vibe_tags: (editData?.vibe_tags ?? []).join(", "),
     instagram: editData?.links?.instagram ?? "",
     tiktok: editData?.links?.tiktok ?? "",
     youtube: editData?.links?.youtube ?? "",
@@ -1620,6 +1621,8 @@ function SpotlightForm({
         .split("\n").map((s: string) => s.trim()).filter(Boolean),
       audience_segments: form.audience_segments
         .split("\n").map((s: string) => s.trim()).filter(Boolean),
+      vibe_tags: form.vibe_tags
+        .split(",").map((s: string) => s.trim()).filter(Boolean),
       links: {
         instagram: form.instagram,
         tiktok: form.tiktok,
@@ -1703,7 +1706,7 @@ function SpotlightForm({
       toast.success(`Spotlight created at /spotlight/${slug}`);
       setForm({
         slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
-        host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "",
+        host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "", vibe_tags: "",
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "",
         video1_cover: "", video2_cover: "", video3_cover: "",
@@ -1840,6 +1843,17 @@ function SpotlightForm({
           <div className="space-y-1.5">
             <Label htmlFor="audience">Audience segments (one per line)</Label>
             <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="vibe_tags">Vibe check tags (comma separated)</Label>
+            <Input id="vibe_tags" value={form.vibe_tags} onChange={(e) => set("vibe_tags", e.target.value)} placeholder="Coffee, Sport, Fashion" />
+            {form.vibe_tags.trim() ? (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {form.vibe_tags.split(",").map((t: string) => t.trim()).filter(Boolean).map((t: string, i: number) => (
+                  <span key={i} className="rounded-full border border-border px-3 py-1 text-xs">{t}</span>
+                ))}
+              </div>
+            ) : null}
           </div>
           <details className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
