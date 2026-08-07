@@ -315,6 +315,20 @@ export function SoundBoardAdmin() {
                         value={row.video_url ?? ""}
                         onChange={(e) => updateLocal(row.id, { video_url: e.target.value || null })}
                       />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        disabled={fetchingId === row.id || !row.video_url}
+                        onClick={() => fetchThumbnail(row)}
+                      >
+                        <RefreshCw className={`mr-1 size-4 ${fetchingId === row.id ? "animate-spin" : ""}`} />
+                        {fetchingId === row.id ? "Fetching…" : "Fetch preview"}
+                      </Button>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Pulls the post's preview image automatically. Upload below to override it.
+                      </p>
                     </div>
                     <div>
                       <Label>Thumbnail image</Label>
