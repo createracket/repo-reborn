@@ -20,7 +20,25 @@ type PartnerLinks = {
   video1?: string;
   video2?: string;
   video3?: string;
+  tiktok?: string;
+  youtube?: string;
+  apple_music?: string;
+  instagram_extra?: string[];
+  tiktok_extra?: string[];
+  youtube_extra?: string[];
+  spotify_extra?: string[];
+  apple_music_extra?: string[];
 };
+
+function handleLabel(url: string): string {
+  try {
+    const u = new URL(url.startsWith("http") ? url : `https://${url}`);
+    const seg = u.pathname.split("/").filter(Boolean).pop() ?? u.hostname;
+    return seg.startsWith("@") ? seg : `@${seg}`;
+  } catch {
+    return url;
+  }
+}
 
 type PartnerPage = {
   id: string;
@@ -346,6 +364,31 @@ function SpotlightPage() {
               </Button>
             ) : null}
           </div>
+
+          {/* Extra handles (band members / side projects) */}
+          {(() => {
+            const groups: Array<{ label: string; urls: string[] }> = [
+              { label: "Instagram", urls: links.instagram_extra ?? [] },
+              { label: "TikTok", urls: links.tiktok_extra ?? [] },
+              { label: "YouTube", urls: links.youtube_extra ?? [] },
+              { label: "Spotify", urls: links.spotify_extra ?? [] },
+              { label: "Apple Music", urls: links.apple_music_extra ?? [] },
+            ].filter((g) => g.urls.length > 0);
+            if (groups.length === 0) return null;
+            return (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {groups.flatMap((g) =>
+                  g.urls.map((u) => (
+                    <Button key={`${g.label}-${u}`} asChild variant="outline" size="sm">
+                      <a href={u.startsWith("http") ? u : `https://${u}`} target="_blank" rel="noreferrer">
+                        {g.label} · {handleLabel(u)}
+                      </a>
+                    </Button>
+                  )),
+                )}
+              </div>
+            );
+          })()}
         </section>
 
         {/* Metrics */}

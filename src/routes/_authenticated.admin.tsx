@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
@@ -1316,16 +1316,43 @@ function SpotlightForm({
   const scrapeProfile = useServerFn(scrapeProfileFollowers);
   const scrapeSpotify = useServerFn(scrapeSpotifyArtist);
   const scrapeApple = useServerFn(scrapeAppleMusicArtist);
-  const [syncing, setSyncing] = useState<null | "instagram" | "tiktok" | "youtube" | "spotify" | "apple">(null);
-  const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number; spotify?: number }>({});
+  const [syncing, setSyncing] = useState<string | null>(null);
+  const [fetchedCounts, setFetchedCounts] = useState<Record<string, number>>({});
+  // Extra social handles (band members, side projects) — up to 5 per platform.
+  const EXTRA_PLATFORMS = ["instagram", "tiktok", "youtube", "spotify", "apple_music"] as const;
+  type ExtraPlatform = (typeof EXTRA_PLATFORMS)[number];
+  const [extraLinks, setExtraLinks] = useState<Record<ExtraPlatform, string[]>>(() => ({
+    instagram: editData?.links?.instagram_extra ?? [],
+    tiktok: editData?.links?.tiktok_extra ?? [],
+    youtube: editData?.links?.youtube_extra ?? [],
+    spotify: editData?.links?.spotify_extra ?? [],
+    apple_music: editData?.links?.apple_music_extra ?? [],
+  }));
+  function addExtra(p: ExtraPlatform) {
+    setExtraLinks((s) => (s[p].length >= 5 ? s : { ...s, [p]: [...s[p], ""] }));
+  }
+  function setExtra(p: ExtraPlatform, i: number, v: string) {
+    setExtraLinks((s) => ({ ...s, [p]: s[p].map((x, ix) => (ix === i ? v : x)) }));
+  }
+  function removeExtra(p: ExtraPlatform, i: number) {
+    setExtraLinks((s) => ({ ...s, [p]: s[p].filter((_, ix) => ix !== i) }));
+    setFetchedCounts((c) => {
+      const next = { ...c };
+      delete next[`${p}:${i}`];
+      return next;
+    });
+  }
   const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
   const [flagState, setFlagState] = useState<{ flagged: boolean; reason: string | null }>(() => ({
     flagged: !!editData?.flagged_streaming_mismatch,
     reason: editData?.flagged_streaming_reason ?? null,
   }));
 
-  async function syncSocial(platform: "instagram" | "tiktok" | "youtube") {
-    const raw = String(form[platform] || "").trim();
+  async function syncSocial(platform: "instagram" | "tiktok" | "youtube", extraIndex?: number) {
+    const key = extraIndex == null ? platform : `${platform}:${extraIndex}`;
+    const raw = String(
+      (extraIndex == null ? form[platform] : extraLinks[platform][extraIndex]) || "",
+    ).trim();
     if (!raw) {
       toast.error(`Enter a ${platform} URL first`);
       return;
@@ -1337,7 +1364,7 @@ function SpotlightForm({
       else if (platform === "tiktok") full = `https://tiktok.com/@${h}`;
       else full = `https://youtube.com/@${h}`;
     }
-    setSyncing(platform);
+    setSyncing(key);
     try {
       const r = await scrapeProfile({ data: { url: full } });
       if (!r.ok) {
@@ -1345,7 +1372,7 @@ function SpotlightForm({
         return;
       }
       if (r.followers != null) {
-        setFetchedCounts((c) => ({ ...c, [platform]: r.followers ?? 0 }));
+        setFetchedCounts((c) => ({ ...c, [key]: r.followers ?? 0 }));
         toast.success(`${platform}: ${r.followers.toLocaleString()} followers`);
       } else {
         toast.error("No follower count returned");
@@ -1355,13 +1382,14 @@ function SpotlightForm({
     }
   }
 
-  async function syncSpotify() {
-    const raw = String(form.spotify || "").trim();
+  async function syncSpotify(extraIndex?: number) {
+    const key = extraIndex == null ? "spotify" : `spotify:${extraIndex}`;
+    const raw = String((extraIndex == null ? form.spotify : extraLinks.spotify[extraIndex]) || "").trim();
     if (!raw) {
       toast.error("Enter a Spotify artist URL first");
       return;
     }
-    setSyncing("spotify");
+    setSyncing(key);
     try {
       const r = await scrapeSpotify({ data: { url: raw } });
       if (!r.ok) {
@@ -1370,24 +1398,24 @@ function SpotlightForm({
       }
       const updates: string[] = [];
       if (r.followers != null) {
-        setFetchedCounts((c) => ({ ...c, spotify: r.followers ?? 0 }));
-        set("total_followers", String(r.followers));
+        setFetchedCounts((c) => ({ ...c, [key]: r.followers ?? 0 }));
+        if (extraIndex == null) set("total_followers", String(r.followers));
         updates.push(`${r.followers.toLocaleString()} followers`);
       }
       if (r.monthly_listeners != null) {
-        set("monthly_streams", String(r.monthly_listeners));
+        if (extraIndex == null) set("monthly_streams", String(r.monthly_listeners));
         updates.push(`${r.monthly_listeners.toLocaleString()} monthly listeners`);
       }
       if (r.total_streams != null) {
-        set("total_streams", String(r.total_streams));
+        if (extraIndex == null) set("total_streams", String(r.total_streams));
         updates.push(`${r.total_streams.toLocaleString()} total streams`);
       }
       if (updates.length === 0) toast.error("No Spotify metrics returned");
       else toast.success(`Spotify: ${updates.join(" · ")}`);
-      if (r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
+      if (extraIndex == null && r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
         setMismatchWarning(MISMATCH_MESSAGE);
         setFlagState({ flagged: true, reason: `Spotify artist "${r.name}" does not match "${form.headline}".` });
-      } else if (r.name) {
+      } else if (extraIndex == null && r.name) {
         setMismatchWarning(null);
       }
     } finally {
@@ -1395,17 +1423,18 @@ function SpotlightForm({
     }
   }
 
-  async function syncApple() {
-    const raw = String(form.apple_music || "").trim();
+  async function syncApple(extraIndex?: number) {
+    const key = extraIndex == null ? "apple" : `apple_music:${extraIndex}`;
+    const raw = String((extraIndex == null ? form.apple_music : extraLinks.apple_music[extraIndex]) || "").trim();
     if (!raw) { toast.error("Enter an Apple Music artist URL first"); return; }
-    setSyncing("apple");
+    setSyncing(key);
     try {
       const r = await scrapeApple({ data: { url: raw } });
       if (!r.ok) { toast.error(r.error); return; }
-      if (r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
+      if (extraIndex == null && r.name && !isNameMatch(r.name, [form.headline, form.slug])) {
         setMismatchWarning(MISMATCH_MESSAGE);
         setFlagState({ flagged: true, reason: `Apple Music artist "${r.name}" does not match "${form.headline}".` });
-      } else if (r.name) {
+      } else if (extraIndex == null && r.name) {
         setMismatchWarning(null);
       }
       toast.success(r.name ? `Apple Music: ${r.name}` : "Apple Music synced");
@@ -1415,10 +1444,10 @@ function SpotlightForm({
   }
 
   function applyTotalFollowers() {
-    const total =
-      (fetchedCounts.instagram ?? 0) +
-      (fetchedCounts.tiktok ?? 0) +
-      (fetchedCounts.youtube ?? 0);
+    // Sum main + extra handles across Instagram / TikTok / YouTube.
+    const total = Object.entries(fetchedCounts)
+      .filter(([k]) => /^(instagram|tiktok|youtube)(:|$)/.test(k))
+      .reduce((sum, [, v]) => sum + (v ?? 0), 0);
     if (total <= 0) {
       toast.error("Sync at least one social first");
       return;
@@ -1458,6 +1487,11 @@ function SpotlightForm({
         video1: form.video1,
         video2: form.video2,
         video3: form.video3,
+        instagram_extra: extraLinks.instagram.map((s) => s.trim()).filter(Boolean),
+        tiktok_extra: extraLinks.tiktok.map((s) => s.trim()).filter(Boolean),
+        youtube_extra: extraLinks.youtube.map((s) => s.trim()).filter(Boolean),
+        spotify_extra: extraLinks.spotify.map((s) => s.trim()).filter(Boolean),
+        apple_music_extra: extraLinks.apple_music.map((s) => s.trim()).filter(Boolean),
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
@@ -1632,67 +1666,77 @@ function SpotlightForm({
             <Label htmlFor="audience">Audience segments (one per line)</Label>
             <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="instagram">Instagram URL</Label>
-            <div className="flex gap-2">
-              <Input id="instagram" value={form.instagram} onChange={(e) => set("instagram", e.target.value)} placeholder="https://instagram.com/handle" />
-              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("instagram")} disabled={syncing !== null}>
-                <RefreshCw className={`size-3 ${syncing === "instagram" ? "animate-spin" : ""}`} />
-                <span className="ml-1">Sync</span>
-              </Button>
-            </div>
-            {fetchedCounts.instagram != null && (
-              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()} followers</p>
-            )}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="tiktok">TikTok URL</Label>
-            <div className="flex gap-2">
-              <Input id="tiktok" value={form.tiktok} onChange={(e) => set("tiktok", e.target.value)} placeholder="https://tiktok.com/@handle" />
-              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("tiktok")} disabled={syncing !== null}>
-                <RefreshCw className={`size-3 ${syncing === "tiktok" ? "animate-spin" : ""}`} />
-                <span className="ml-1">Sync</span>
-              </Button>
-            </div>
-            {fetchedCounts.tiktok != null && (
-              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()} followers</p>
-            )}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="youtube">YouTube URL</Label>
-            <div className="flex gap-2">
-              <Input id="youtube" value={form.youtube} onChange={(e) => set("youtube", e.target.value)} placeholder="https://youtube.com/@handle" />
-              <Button type="button" variant="outline" size="sm" onClick={() => syncSocial("youtube")} disabled={syncing !== null}>
-                <RefreshCw className={`size-3 ${syncing === "youtube" ? "animate-spin" : ""}`} />
-                <span className="ml-1">Sync</span>
-              </Button>
-            </div>
-            {fetchedCounts.youtube != null && (
-              <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()} subscribers</p>
-            )}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="spotify">Spotify artist URL</Label>
-            <div className="flex gap-2">
-              <Input id="spotify" value={form.spotify} onChange={(e) => set("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/..." />
-              <Button type="button" variant="outline" size="sm" onClick={syncSpotify} disabled={syncing !== null}>
-                <RefreshCw className={`size-3 ${syncing === "spotify" ? "animate-spin" : ""}`} />
-                <span className="ml-1">Sync</span>
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">Fetches followers + monthly listeners (Spotify) and estimated total streams (Kworb).</p>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="apple_music">Apple Music artist URL</Label>
-            <div className="flex gap-2">
-              <Input id="apple_music" value={form.apple_music} onChange={(e) => set("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
-              <Button type="button" variant="outline" size="sm" onClick={syncApple} disabled={syncing !== null}>
-                <RefreshCw className={`size-3 ${syncing === "apple" ? "animate-spin" : ""}`} />
-                <span className="ml-1">Sync</span>
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">Verifies the artist name against the spotlight headline.</p>
-          </div>
+          {([
+            { p: "instagram", label: "Instagram URL", ph: "https://instagram.com/handle", unit: "followers" },
+            { p: "tiktok", label: "TikTok URL", ph: "https://tiktok.com/@handle", unit: "followers" },
+            { p: "youtube", label: "YouTube URL", ph: "https://youtube.com/@handle", unit: "subscribers" },
+            { p: "spotify", label: "Spotify artist URL", ph: "https://open.spotify.com/artist/...", unit: "followers" },
+            { p: "apple_music", label: "Apple Music artist URL", ph: "https://music.apple.com/…/artist/…", unit: "" },
+          ] as const).map(({ p, label, ph, unit }) => {
+            const runSync = (i?: number) => {
+              if (p === "spotify") return syncSpotify(i);
+              if (p === "apple_music") return syncApple(i);
+              return syncSocial(p, i);
+            };
+            const mainKey = p === "apple_music" ? "apple" : p;
+            const extras = extraLinks[p];
+            return (
+              <div key={p} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor={p}>{label}</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => addExtra(p)}
+                    disabled={extras.length >= 5}
+                    title="Add another handle (e.g. a band member)"
+                  >
+                    <Plus className="size-3" />
+                    <span className="ml-1">Add handle</span>
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Input id={p} value={form[p]} onChange={(e) => set(p, e.target.value)} placeholder={ph} />
+                  <Button type="button" variant="outline" size="sm" onClick={() => runSync()} disabled={syncing !== null}>
+                    <RefreshCw className={`size-3 ${syncing === mainKey ? "animate-spin" : ""}`} />
+                    <span className="ml-1">Sync</span>
+                  </Button>
+                </div>
+                {fetchedCounts[p] != null && (
+                  <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts[p].toLocaleString()} {unit || "followers"}</p>
+                )}
+                {extras.map((val, i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="flex gap-2">
+                      <Input
+                        value={val}
+                        onChange={(e) => setExtra(p, i, e.target.value)}
+                        placeholder={`${ph} (extra ${i + 1})`}
+                      />
+                      <Button type="button" variant="outline" size="sm" onClick={() => runSync(i)} disabled={syncing !== null}>
+                        <RefreshCw className={`size-3 ${syncing === `${p}:${i}` ? "animate-spin" : ""}`} />
+                        <span className="ml-1">Sync</span>
+                      </Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => removeExtra(p, i)} aria-label="Remove handle">
+                        <X className="size-3" />
+                      </Button>
+                    </div>
+                    {fetchedCounts[`${p}:${i}`] != null && (
+                      <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts[`${p}:${i}`].toLocaleString()} {unit || "followers"}</p>
+                    )}
+                  </div>
+                ))}
+                {p === "spotify" && (
+                  <p className="text-xs text-muted-foreground">Fetches followers + monthly listeners (Spotify) and estimated total streams (Kworb).</p>
+                )}
+                {p === "apple_music" && (
+                  <p className="text-xs text-muted-foreground">Verifies the artist name against the spotlight headline.</p>
+                )}
+              </div>
+            );
+          })}
           {mismatchWarning ? (
             <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
               {mismatchWarning}
