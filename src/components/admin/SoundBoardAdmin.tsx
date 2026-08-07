@@ -25,6 +25,8 @@ export function SoundBoardAdmin() {
   const [loading, setLoading] = useState(true);
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
 
   async function uploadCover(row: SoundBoardItem, file: File) {
     if (file.size > 8 * 1024 * 1024) {
