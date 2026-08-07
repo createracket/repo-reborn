@@ -3,13 +3,14 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { adminUploadSpotlightImage } from "@/lib/spotlight-images.functions";
+import { scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, ChevronDown, ChevronRight, Upload, GripVertical } from "lucide-react";
+import { Trash2, ChevronDown, ChevronRight, Upload, GripVertical, RefreshCw } from "lucide-react";
 
 type SoundBoardItem = {
   id: string;
@@ -43,7 +44,37 @@ export function SoundBoardAdmin() {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  const [fetchingId, setFetchingId] = useState<string | null>(null);
   const uploadImage = useServerFn(adminUploadSpotlightImage);
+  const fetchPreview = useServerFn(scrapePostMetrics);
+
+  /** Pull a preview image (and copy fallback) from the pasted post URL. */
+  async function fetchThumbnail(row: SoundBoardItem) {
+    const url = (row.video_url ?? "").trim();
+    if (!url) {
+      toast.error("Add a video / post URL first");
+      return;
+    }
+    setFetchingId(row.id);
+    try {
+      const result = await fetchPreview({ data: { url } });
+      if (!result.ok) throw new Error(result.error);
+      const thumb = result.metrics.thumbnail_url;
+      if (!thumb) throw new Error("No preview image available for that link");
+      updateLocal(row.id, { thumbnail_url: thumb });
+      const { error } = await supabase
+        .from("sound_board_items" as any)
+        .update({ thumbnail_url: thumb } as any)
+        .eq("id", row.id);
+      if (error) throw error;
+      toast.success("Preview pulled from link");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't fetch preview");
+    } finally {
+      setFetchingId(null);
+    }
+  }
+
 
   async function uploadCover(row: SoundBoardItem, file: File) {
     if (file.size > 8 * 1024 * 1024) {
@@ -284,6 +315,20 @@ export function SoundBoardAdmin() {
                         value={row.video_url ?? ""}
                         onChange={(e) => updateLocal(row.id, { video_url: e.target.value || null })}
                       />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        disabled={fetchingId === row.id || !row.video_url}
+                        onClick={() => fetchThumbnail(row)}
+                      >
+                        <RefreshCw className={`mr-1 size-4 ${fetchingId === row.id ? "animate-spin" : ""}`} />
+                        {fetchingId === row.id ? "Fetching…" : "Fetch preview"}
+                      </Button>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Pulls the post's preview image automatically. Upload below to override it.
+                      </p>
                     </div>
                     <div>
                       <Label>Thumbnail image</Label>
