@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
 import { draftSpotlightFromText } from "@/lib/spotlight-draft.functions";
+import { adminUploadSpotlightImage } from "@/lib/spotlight-images.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -1181,33 +1182,46 @@ function ImageUploader({
   onChange: (url: string) => void;
   aspect: string;
   hint: string;
-  folder?: string;
+  folder?: "spotlights" | "video-covers";
 }) {
   const [uploading, setUploading] = useState(false);
+  const uploadImage = useServerFn(adminUploadSpotlightImage);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const supportedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
+    if (!supportedTypes.includes(file.type as (typeof supportedTypes)[number])) {
+      toast.error("Please choose a JPG, PNG, WebP or GIF image");
+      return;
+    }
     if (file.size > 8 * 1024 * 1024) {
       toast.error("Image must be under 8MB");
       return;
     }
     setUploading(true);
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `${folder ? `${folder}/` : ""}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error } = await supabase.storage.from("spotlight-images").upload(path, file, {
-      cacheControl: "3600", upsert: false, contentType: file.type,
-    });
-    if (error) {
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+        reader.onerror = () => reject(new Error("Could not read image"));
+        reader.readAsDataURL(file);
+      });
+      const { publicUrl } = await uploadImage({
+        data: {
+          base64,
+          contentType: file.type as (typeof supportedTypes)[number],
+          folder: folder ?? "spotlights",
+        },
+      });
+      onChange(publicUrl);
+      toast.success(`${label} uploaded`);
+      e.target.value = "";
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Image upload failed");
+    } finally {
       setUploading(false);
-      toast.error(error.message);
-      return;
     }
-    const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
-    onChange(data.publicUrl);
-    setUploading(false);
-    toast.success(`${label} uploaded`);
-    e.target.value = "";
   }
 
   return (
