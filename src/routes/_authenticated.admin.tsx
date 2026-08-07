@@ -34,6 +34,7 @@ import { UsageAdmin } from "@/components/admin/UsageAdmin";
 import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
 import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
 import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
+import { BriefReportLink } from "@/components/admin/BriefReportLink";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
 
@@ -54,11 +55,12 @@ type LeadBrief = {
   contact_email: string; contact_name: string | null; company: string | null;
   status: string;
   linked_roster_id: string | null;
+  linked_report_id: string | null;
 };
 type ContactMsg = { id: string; created_at: string; name: string; email: string; message: string; handled: boolean };
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
 type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null };
-type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null; published: boolean; published_at: string | null; linked_roster_id: string | null };
+type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null; published: boolean; published_at: string | null; linked_roster_id: string | null; linked_report_id: string | null };
 
 type Spotlight = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
@@ -127,7 +129,7 @@ function AdminPage() {
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier").order("created_at", { ascending: false }),
-        supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, currency, transparency").order("created_at", { ascending: false }),
+        supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, linked_report_id, currency, transparency").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id").order("created_at", { ascending: false }),
         (supabase as any).rpc("admin_campaign_brief_emails"),
@@ -907,6 +909,17 @@ function UnifiedBriefs({
                       onChange={(nextId) => {
                         if (b.source === "user") onCampaignUpdated(b.id, { linked_roster_id: nextId } as Partial<CampaignBrief>);
                         else onLeadUpdated(b.id, { linked_roster_id: nextId } as Partial<LeadBrief>);
+                      }}
+                    />
+                  ) : null}
+                  {normalizeStatus(b.status) === "review_your_report" ? (
+                    <BriefReportLink
+                      briefSource={b.source}
+                      briefId={b.id}
+                      linkedReportId={b.linked_report_id}
+                      onChange={(nextId) => {
+                        if (b.source === "user") onCampaignUpdated(b.id, { linked_report_id: nextId } as Partial<CampaignBrief>);
+                        else onLeadUpdated(b.id, { linked_report_id: nextId } as Partial<LeadBrief>);
                       }}
                     />
                   ) : null}

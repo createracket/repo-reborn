@@ -33,6 +33,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
 import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
+import { BriefReportLink } from "@/components/admin/BriefReportLink";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
 import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS, transparencyLabel } from "@/lib/brief-currency";
 import { DEFAULT_ARTIST_ARCHETYPES, DEFAULT_BRAND_ARCHETYPES } from "@/lib/vibe-check-config";
@@ -86,6 +87,7 @@ export type LeadBrief = {
   contact_email: string; contact_name: string | null; company: string | null;
   status: string;
   linked_roster_id: string | null;
+  linked_report_id: string | null;
   display_order?: number | null;
 };
 export type CampaignBrief = {
@@ -94,6 +96,7 @@ export type CampaignBrief = {
   status: string;
   contact_email: string | null; published: boolean; published_at: string | null;
   linked_roster_id: string | null;
+  linked_report_id: string | null;
   artist_archetypes: string[]; brand_archetypes: string[];
   display_order?: number | null;
 };
@@ -132,7 +135,7 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr, emailRes] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, artist_archetypes, brand_archetypes, display_order").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, display_order").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
       (supabase as any).rpc("admin_campaign_brief_emails"),
     ]);
@@ -385,6 +388,17 @@ function UnifiedBriefs({
                       onChange={(nextId) => {
                         if (b.source === "user") onCampaignUpdated(b.id, { linked_roster_id: nextId } as Partial<CampaignBrief>);
                         else onLeadUpdated(b.id, { linked_roster_id: nextId } as Partial<LeadBrief>);
+                      }}
+                    />
+                  ) : null}
+                  {normalizeStatus(b.status) === "review_your_report" ? (
+                    <BriefReportLink
+                      briefSource={b.source}
+                      briefId={b.id}
+                      linkedReportId={b.linked_report_id}
+                      onChange={(nextId) => {
+                        if (b.source === "user") onCampaignUpdated(b.id, { linked_report_id: nextId } as Partial<CampaignBrief>);
+                        else onLeadUpdated(b.id, { linked_report_id: nextId } as Partial<LeadBrief>);
                       }}
                     />
                   ) : null}
