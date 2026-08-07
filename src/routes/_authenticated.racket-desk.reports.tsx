@@ -9,6 +9,7 @@ import {
   type ListeningAnalysis,
   type ScannedPost,
 } from "@/lib/racket-desk/social-listening.functions";
+import { ReportDashboardShare } from "@/components/racket-desk/ReportDashboardShare";
 
 export const Route = createFileRoute("/_authenticated/racket-desk/reports")({
   head: () => ({
@@ -31,6 +32,7 @@ type Scan = {
   saved: boolean;
   report_title: string | null;
   notes: string | null;
+  dashboard_visible: boolean;
 };
 
 function fmt(n: number) {
@@ -232,6 +234,7 @@ function ReportCard({
         </section>
 
         <aside className="space-y-4">
+          <ReportDashboardShare scanId={scan.id} initialVisible={!!scan.dashboard_visible} />
           <Panel title="What's working" items={a.whatsWorking} />
           <Panel title="Fan signals" items={a.fanSignals} />
           {a.futureIdeas.length > 0 && (
