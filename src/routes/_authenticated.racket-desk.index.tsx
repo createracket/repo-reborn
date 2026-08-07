@@ -6,10 +6,7 @@ import {
   ExternalLink,
   Filter,
   Flame,
-  Music2,
   Search,
-  Sparkles,
-  TrendingUp,
   Wand2,
 } from "lucide-react";
 import {
