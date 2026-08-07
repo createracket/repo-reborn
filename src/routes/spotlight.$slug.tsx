@@ -194,6 +194,16 @@ function SpotlightPage() {
           } catch {
             /* not an admin — fall through */
           }
+          try {
+            const member = await getSpotlightForMember({ data: { slug } });
+            if (member.ok) {
+              setPage(member.page as unknown as PartnerPage);
+              setStatus("ready");
+              return;
+            }
+          } catch {
+            /* not a shared member — fall through to the gate */
+          }
         }
         const info = await getSpotlightGate({ data: { slug } });
         if (info.gated) {
