@@ -799,14 +799,12 @@ function PlatformBadge({
       className={classes}
       title={label}
     >
-      <Icon className="size-4" />
-      {label}
+      <Icon className="size-4" aria-label={label} />
       <ExternalLink className="size-3 opacity-70" />
     </a>
   ) : (
-    <span className={classes}>
-      <Icon className="size-4" />
-      {label}
+    <span className={classes} title={label}>
+      <Icon className="size-4" aria-label={label} />
     </span>
   );
 }
