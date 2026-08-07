@@ -44,40 +44,9 @@ export interface ArtistFocus {
   name: string;
   handle: string;
   region: "UK" | "US" | "AU";
-  totalComments: number;
-  netSentiment: number; // -100..100
-  weekDelta: number;
+  platform?: string;
 }
 
-export const artists: ArtistFocus[] = [
-  {
-    id: "nia-fox",
-    name: "Nia Fox",
-    handle: "@niafox",
-    region: "UK",
-    totalComments: 4820,
-    netSentiment: 72,
-    weekDelta: 8,
-  },
-  {
-    id: "wren",
-    name: "Wren",
-    handle: "@wren.audio",
-    region: "AU",
-    totalComments: 2140,
-    netSentiment: 61,
-    weekDelta: -4,
-  },
-  {
-    id: "marlo-day",
-    name: "Marlo Day",
-    handle: "@marlodayy",
-    region: "US",
-    totalComments: 9310,
-    netSentiment: 58,
-    weekDelta: 12,
-  },
-];
 
 export const sentimentBreakdown: SentimentBucket[] = [
   { label: "Love it", sentiment: "love", share: 46, delta: 6, topPhrase: "obsessed with the bridge" },

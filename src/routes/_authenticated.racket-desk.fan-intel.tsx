@@ -1,21 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
   Ear,
   Heart,
   MessageCircle,
   Sparkles,
-  TrendingDown,
   TrendingUp,
   Users,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import {
-  artists,
   fanClusters,
   recentComments,
   sentimentBreakdown,
   sentimentColor,
+  type ArtistFocus,
   type Sentiment,
 } from "@/lib/racket-desk/fan-intel";
 
@@ -30,9 +30,29 @@ export const Route = createFileRoute("/_authenticated/racket-desk/fan-intel")({
 });
 
 function FanIntelPage() {
-  const [artistId, setArtistId] = useState(artists[0].id);
+  const [artists, setArtists] = useState<ArtistFocus[]>([]);
+  const [artistId, setArtistId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | Sentiment>("all");
-  const artist = artists.find((a) => a.id === artistId) ?? artists[0];
+
+  useEffect(() => {
+    void (async () => {
+      const { data } = await supabase
+        .from("racket_desk_profiles")
+        .select("id, platform, handle, regions")
+        .order("created_at", { ascending: true });
+      const mapped: ArtistFocus[] = (data ?? []).map((r) => ({
+        id: r.id,
+        name: `@${r.handle.replace(/^@/, "")}`,
+        handle: `@${r.handle.replace(/^@/, "")}`,
+        region: ((r.regions ?? [])[0] ?? "UK") as ArtistFocus["region"],
+        platform: r.platform,
+      }));
+      setArtists(mapped);
+      setArtistId((prev) => prev ?? mapped[0]?.id ?? null);
+    })();
+  }, []);
+
+  const artist = artists.find((a) => a.id === artistId) ?? artists[0] ?? null;
 
   const comments = filter === "all" ? recentComments : recentComments.filter((c) => c.sentiment === filter);
 
@@ -52,29 +72,39 @@ function FanIntelPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {artists.map((a) => {
-            const active = a.id === artist.id;
-            return (
-              <button
-                key={a.id}
-                onClick={() => setArtistId(a.id)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                  active ? "border-lime bg-lime text-primary-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {a.name} · {a.region}
-              </button>
-            );
-          })}
+          {artists.length === 0 ? (
+            <Link
+              to="/racket-desk/profiles"
+              className="inline-flex items-center gap-1 rounded-full border border-lime px-3 py-1.5 text-xs font-medium text-lime hover:bg-lime hover:text-primary-foreground"
+            >
+              Add profiles to track <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            artists.map((a) => {
+              const active = a.id === artist?.id;
+              return (
+                <button
+                  key={a.id}
+                  onClick={() => setArtistId(a.id)}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                    active ? "border-lime bg-lime text-primary-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {a.name} · {a.platform ?? a.region}
+                </button>
+              );
+            })
+          )}
         </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Comments this week" value={artist.totalComments.toLocaleString()} hint={artist.handle} icon={MessageCircle} />
-        <StatCard label="Net sentiment" value={`+${artist.netSentiment}`} hint="on a −100 to +100 scale" icon={Heart} accent="lime" />
-        <StatCard label="Week over week" value={`${artist.weekDelta > 0 ? "+" : ""}${artist.weekDelta}%`} hint={artist.weekDelta >= 0 ? "trending up" : "trending down"} icon={artist.weekDelta >= 0 ? TrendingUp : TrendingDown} accent={artist.weekDelta >= 0 ? "lime" : "blush"} />
+        <StatCard label="Tracked profile" value={artist?.handle ?? "—"} hint={artist ? `${artist.platform ?? ""} · ${artist.region}` : "Add profiles in My profiles"} icon={MessageCircle} />
+        <StatCard label="Net sentiment" value="—" hint="run a listening scan to populate" icon={Heart} accent="lime" />
+        <StatCard label="Week over week" value="—" hint="run a listening scan to populate" icon={TrendingUp} accent="lime" />
         <StatCard label="Fan clusters mapped" value={String(fanClusters.length)} hint="grouped by comment DNA" icon={Users} />
       </div>
+
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-1">
