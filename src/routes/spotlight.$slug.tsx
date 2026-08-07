@@ -43,6 +43,7 @@ type PartnerLinks = {
   facebook_extra?: string[];
   x_extra?: string[];
   youtube_name?: string;
+  apple_music_name?: string;
   youtube_extra_names?: string[];
   section_labels?: Record<string, string>;
 };
@@ -428,7 +429,7 @@ function SpotlightPage() {
             {([
               { url: links.tiktok, label: "TikTok", abbr: "TT" },
               { url: links.youtube, label: "YouTube", abbr: "YT", Icon: Youtube, name: (links.youtube_name ?? "").trim() },
-              { url: links.apple_music, label: "Apple Music", abbr: "AM", Icon: Music2 },
+              { url: links.apple_music, label: "Apple Music", abbr: "AM", Icon: Music2, name: (links.apple_music_name ?? "").trim() },
               { url: links.twitch, label: "Twitch", abbr: "TW", Icon: Twitch },
               { url: links.facebook, label: "Facebook", abbr: "FB", Icon: Facebook },
               { url: links.x, label: "X", abbr: "X" },

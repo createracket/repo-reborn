@@ -1346,6 +1346,7 @@ function SpotlightForm({
     label_videos: editData?.links?.section_labels?.videos ?? "",
     label_members: editData?.links?.section_labels?.members ?? "",
     youtube_name: editData?.links?.youtube_name ?? "",
+    apple_music_name: editData?.links?.apple_music_name ?? "",
   });
 
   function numOrNull(v: string): number | null {
@@ -1658,6 +1659,7 @@ function SpotlightForm({
         x_extra: extraLinks.x.map((s) => s.trim()).filter(Boolean),
         follower_counts: fetchedCounts,
         youtube_name: form.youtube_name.trim(),
+        apple_music_name: form.apple_music_name.trim(),
         youtube_extra_names: extraLinks.youtube.map((_, i) => (extraNames.youtube[i] ?? "").trim()),
         section_labels: {
           host_bio: form.label_host_bio.trim(),
@@ -1721,7 +1723,7 @@ function SpotlightForm({
         total_followers: "", total_streams: "", monthly_streams: "",
         avg_reach: "", avg_engagement: "",
         label_host_bio: "", label_audience: "", label_partnership: "", label_eoi: "", label_videos: "",
-        label_members: "", youtube_name: "",
+        label_members: "", youtube_name: "", apple_music_name: "",
       });
     }
     onCreated();
@@ -1939,6 +1941,13 @@ function SpotlightForm({
                   <Input
                     value={form.youtube_name}
                     onChange={(e) => set("youtube_name", e.target.value)}
+                    placeholder="Display name (optional, e.g. State Champs)"
+                  />
+                )}
+                {p === "apple_music" && (
+                  <Input
+                    value={form.apple_music_name}
+                    onChange={(e) => set("apple_music_name", e.target.value)}
                     placeholder="Display name (optional, e.g. State Champs)"
                   />
                 )}
