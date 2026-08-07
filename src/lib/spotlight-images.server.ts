@@ -47,12 +47,16 @@ export async function uploadSpotlightImage(
   if (!backendUrl || !serviceKey) throw new Error("Image storage is not configured");
 
   // New opaque server keys authenticate through `apikey`. Sending one as a
-  // bearer token causes Storage to fall back to RLS instead of service access.
+  // bearer token causes Storage to fall back to RLS instead of service access;
+  // legacy JWT service keys still require the bearer header.
   const objectPath = path.split("/").map(encodeURIComponent).join("/");
+  const authHeaders = serviceKey.startsWith("sb_secret_")
+    ? { apikey: serviceKey }
+    : { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
   const response = await fetch(`${backendUrl}/storage/v1/object/spotlight-images/${objectPath}`, {
     method: "POST",
     headers: {
-      apikey: serviceKey,
+      ...authHeaders,
       "cache-control": "max-age=3600",
       "content-type": input.contentType,
       "x-upsert": "false",
