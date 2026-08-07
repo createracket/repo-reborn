@@ -5,8 +5,13 @@ import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, canUseLight, toggleTheme } = useTheme();
   const isDark = theme === "dark";
+
+  // Light mode is a signed-in-only feature, and never on the homepage/auth pages.
+  if (!canUseLight) return null;
+
+
 
   return (
     <Button
