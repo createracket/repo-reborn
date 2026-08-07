@@ -1395,12 +1395,45 @@ export type Database = {
           },
         ]
       }
+      social_listening_scan_shares: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          scan_id: string
+          target_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          scan_id: string
+          target_user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          scan_id?: string
+          target_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_listening_scan_shares_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "social_listening_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       social_listening_scans: {
         Row: {
           analysis: Json
           artist_name: string
           created_at: string
           created_by: string | null
+          dashboard_visible: boolean
           handle: string
           id: string
           notes: string | null
@@ -1415,6 +1448,7 @@ export type Database = {
           artist_name: string
           created_at?: string
           created_by?: string | null
+          dashboard_visible?: boolean
           handle: string
           id?: string
           notes?: string | null
@@ -1429,6 +1463,7 @@ export type Database = {
           artist_name?: string
           created_at?: string
           created_by?: string | null
+          dashboard_visible?: boolean
           handle?: string
           id?: string
           notes?: string | null
