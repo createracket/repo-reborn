@@ -95,6 +95,8 @@ type Roster = {
   hide_prospect_tags: boolean;
   hide_statuses: boolean;
   header_image_url: string | null;
+  profile_image_url: string | null;
+
   client_email: string | null;
   brand_email: string | null;
   est_engagement_pct: number | null;
