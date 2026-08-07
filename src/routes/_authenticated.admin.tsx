@@ -1773,6 +1773,13 @@ function SpotlightForm({
               </div>
             );
           })}
+          <div className="md:col-span-2 pt-2">
+            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">More socials</p>
+            <p className="text-xs text-muted-foreground">
+              Twitch, Facebook, X and one custom link. No auto-sync yet — enter follower counts manually and they
+              roll into Total social audience.
+            </p>
+          </div>
           {([
             { k: "twitch", label: "Twitch URL", ph: "https://twitch.tv/handle" },
             { k: "facebook", label: "Facebook URL", ph: "https://facebook.com/page" },
@@ -1859,7 +1866,7 @@ function SpotlightForm({
             <Label htmlFor="sp-tf">Total social audience</Label>
             <div className="flex gap-2">
               <Input id="sp-tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
-              <Button type="button" variant="outline" size="sm" onClick={applyTotalFollowers} disabled={!fetchedCounts.instagram && !fetchedCounts.tiktok && !fetchedCounts.youtube}>
+              <Button type="button" variant="outline" size="sm" onClick={applyTotalFollowers} disabled={sumSocialCounts(fetchedCounts) <= 0}>
                 Apply sum
               </Button>
             </div>
