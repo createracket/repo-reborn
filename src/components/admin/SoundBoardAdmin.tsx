@@ -24,6 +24,35 @@ export function SoundBoardAdmin() {
   const [rows, setRows] = useState<SoundBoardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+
+  async function uploadCover(row: SoundBoardItem, file: File) {
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be under 8MB");
+      return;
+    }
+    setUploadingId(row.id);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `sound-board/${row.id}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("spotlight-images")
+        .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+      updateLocal(row.id, { thumbnail_url: data.publicUrl });
+      const { error: saveError } = await supabase
+        .from("sound_board_items" as any)
+        .update({ thumbnail_url: data.publicUrl } as any)
+        .eq("id", row.id);
+      if (saveError) throw saveError;
+      toast.success("Thumbnail uploaded");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload failed");
+    } finally {
+      setUploadingId(null);
+    }
+  }
 
   function toggleOpen(id: string) {
     setOpenIds((prev) => {
