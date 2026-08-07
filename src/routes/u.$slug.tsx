@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Instagram, Globe, Music2, Youtube } from "lucide-react";
+import { Instagram, Globe, Music2, Youtube, Twitch, Facebook, Link as LinkIcon } from "lucide-react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
