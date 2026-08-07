@@ -1617,8 +1617,8 @@ function SpotlightForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
-          <div className="md:col-span-2 space-y-2 rounded-lg border border-pink-accent/40 bg-muted/30 p-3">
+    <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2 [&>*]:order-4">
+          <div className="!order-1 md:col-span-2 space-y-2 rounded-lg border border-pink-accent/40 bg-muted/30 p-3">
             <Label htmlFor="ai-dump" className="text-sm font-medium">
               Paste artist email / info dump
             </Label>
@@ -1733,7 +1733,7 @@ function SpotlightForm({
             <Label htmlFor="audience">Audience segments (one per line)</Label>
             <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
           </div>
-          <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+          <details className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Section headings
               <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -1756,14 +1756,14 @@ function SpotlightForm({
               ))}
             </div>
           </details>
-          <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+          <details className="!order-3 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Social links &amp; handles
               <span className="ml-2 text-xs font-normal text-muted-foreground">
                 (Instagram, TikTok, YouTube, Spotify, Apple Music, Twitch, Facebook, X, other)
               </span>
             </summary>
-            <div className="grid grid-cols-1 gap-4 px-4">
+            <div className="flex w-full flex-col gap-4 px-4">
 
           {([
 
