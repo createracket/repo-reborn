@@ -520,14 +520,15 @@ function SpotlightPage() {
                         loading="lazy"
                         scrolling="no"
                         className={isIg ? "absolute left-1/2 -translate-x-1/2" : "size-full"}
-                        // Instagram embed has ~56px header and ~160px caption/footer.
-                        // Oversize + offset to crop white chrome, keeping only the media.
+                        // Instagram embed has a ~56px header and a tall caption/actions
+                        // footer ("View more on Instagram", likes, icons). Oversize and
+                        // offset so only the media itself is visible.
                         style={
                           isIg
                             ? {
                                 top: "-56px",
                                 width: "100%",
-                                height: "calc(100% + 220px)",
+                                height: "calc(100% + 440px)",
                               }
                             : undefined
                         }
