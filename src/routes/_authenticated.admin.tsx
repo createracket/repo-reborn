@@ -1348,8 +1348,11 @@ function SpotlightForm({
     reason: editData?.flagged_streaming_reason ?? null,
   }));
 
-  async function syncSocial(platform: "instagram" | "tiktok" | "youtube") {
-    const raw = String(form[platform] || "").trim();
+  async function syncSocial(platform: "instagram" | "tiktok" | "youtube", extraIndex?: number) {
+    const key = extraIndex == null ? platform : `${platform}:${extraIndex}`;
+    const raw = String(
+      (extraIndex == null ? form[platform] : extraLinks[platform][extraIndex]) || "",
+    ).trim();
     if (!raw) {
       toast.error(`Enter a ${platform} URL first`);
       return;
@@ -1361,7 +1364,7 @@ function SpotlightForm({
       else if (platform === "tiktok") full = `https://tiktok.com/@${h}`;
       else full = `https://youtube.com/@${h}`;
     }
-    setSyncing(platform);
+    setSyncing(key);
     try {
       const r = await scrapeProfile({ data: { url: full } });
       if (!r.ok) {
@@ -1369,7 +1372,7 @@ function SpotlightForm({
         return;
       }
       if (r.followers != null) {
-        setFetchedCounts((c) => ({ ...c, [platform]: r.followers ?? 0 }));
+        setFetchedCounts((c) => ({ ...c, [key]: r.followers ?? 0 }));
         toast.success(`${platform}: ${r.followers.toLocaleString()} followers`);
       } else {
         toast.error("No follower count returned");
