@@ -1595,6 +1595,7 @@ function SpotlightForm({
         total_followers: "", total_streams: "", monthly_streams: "",
         avg_reach: "", avg_engagement: "",
         label_host_bio: "", label_audience: "", label_partnership: "", label_eoi: "", label_videos: "",
+        label_members: "", youtube_name: "",
       });
     }
     onCreated();
