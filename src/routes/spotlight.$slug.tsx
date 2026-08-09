@@ -143,6 +143,8 @@ function SpotlightPage() {
   const [isPreview, setIsPreview] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [guestOpen, setGuestOpen] = useState(false);
+  const [guestEmail, setGuestEmail] = useState("");
   const [gate, setGate] = useState<{
     headline: string;
     subtitle: string | null;
