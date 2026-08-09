@@ -1,4 +1,4 @@
-import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Instagram, Mail, ExternalLink, Mic2, Check, Youtube, Twitch, Facebook, Music2 } from "lucide-react";
 import { toast } from "sonner";
@@ -137,7 +137,6 @@ export const Route = createFileRoute("/spotlight/$slug")({
 
 function SpotlightPage() {
   const { slug } = Route.useParams();
-  const navigate = useNavigate();
   const [page, setPage] = useState<PartnerPage | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
   const [isPreview, setIsPreview] = useState(false);
