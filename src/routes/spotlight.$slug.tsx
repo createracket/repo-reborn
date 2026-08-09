@@ -637,6 +637,36 @@ function SpotlightPage() {
                       <><Check className="mr-1.5 size-4" /> Interest registered</>
                     ) : registering ? "Registering…" : "Register interest"}
                   </Button>
+                  <Dialog open={guestOpen} onOpenChange={setGuestOpen}>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="font-display text-xl">Register your interest</DialogTitle>
+                        <DialogDescription>
+                          Pop in your email and we'll be in touch about this opportunity.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="guest-email">Email</Label>
+                        <Input
+                          id="guest-email"
+                          type="email"
+                          maxLength={255}
+                          value={guestEmail}
+                          onChange={(e) => setGuestEmail(e.target.value)}
+                          placeholder="you@example.com"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        By entering your email, you are giving Racket permission to contact you about this
+                        collab and partnership opportunity.
+                      </p>
+                      <DialogFooter>
+                        <Button onClick={handleGuestRegister} disabled={registering}>
+                          {registering ? "Registering…" : "Register interest"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                   {links.contact ? (
                     <Button asChild variant="outline">
                       <a href={links.contact.startsWith("http") ? links.contact : `mailto:${links.contact}`}>
