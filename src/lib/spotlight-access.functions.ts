@@ -10,6 +10,35 @@ const UnlockSchema = z.object({
   code: z.string().trim().min(1).max(120),
 });
 
+const GuestInterestSchema = z.object({
+  slug: z.string().trim().min(1).max(200),
+  email: z.string().trim().email().max(255),
+  name: z.string().trim().max(120).optional(),
+});
+
+/** Public: capture a signed-out visitor's email as an expression of interest. */
+export const registerSpotlightGuestInterest = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => GuestInterestSchema.parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: row } = await supabaseAdmin
+      .from("partner_pages")
+      .select("id")
+      .eq("slug", data.slug)
+      .eq("published", true)
+      .maybeSingle();
+
+    const page = row as { id: string } | null;
+    if (!page) return { ok: false as const };
+
+    await supabaseAdmin
+      .from("spotlight_access_leads")
+      .insert({ partner_page_id: page.id, email: data.email.toLowerCase() });
+
+    return { ok: true as const };
+  });
+
 const PAGE_FIELDS =
   "id, slug, type, headline, subtitle, intro, host_bio, partnership_pitch, eoi_opportunities, audience_segments, links, published, header_image_url, profile_image_url, total_followers, total_streams, monthly_streams, avg_reach, avg_engagement";
 

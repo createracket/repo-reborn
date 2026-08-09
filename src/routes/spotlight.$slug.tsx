@@ -1,4 +1,4 @@
-import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Instagram, Mail, ExternalLink, Mic2, Check, Youtube, Twitch, Facebook, Music2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,7 +13,17 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getSocialEmbed } from "@/lib/social-embed";
 import { getClipPosters } from "@/lib/clip-poster.functions";
-import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember } from "@/lib/spotlight-access.functions";
+import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember, registerSpotlightGuestInterest } from "@/lib/spotlight-access.functions";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type PartnerLinks = {
   instagram?: string;
@@ -127,12 +137,13 @@ export const Route = createFileRoute("/spotlight/$slug")({
 
 function SpotlightPage() {
   const { slug } = Route.useParams();
-  const navigate = useNavigate();
   const [page, setPage] = useState<PartnerPage | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
   const [isPreview, setIsPreview] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [guestOpen, setGuestOpen] = useState(false);
+  const [guestEmail, setGuestEmail] = useState("");
   const [gate, setGate] = useState<{
     headline: string;
     subtitle: string | null;
@@ -238,13 +249,12 @@ function SpotlightPage() {
 
   async function handleRegister() {
     if (!page) return;
-    setRegistering(true);
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
-      toast.info("Sign in to register your interest");
-      navigate({ to: "/login" });
+      setGuestOpen(true);
       return;
     }
+    setRegistering(true);
     const { error } = await supabase
       .from("spotlight_interests" as any)
       .insert({ partner_page_id: page.id, user_id: u.user.id });
@@ -255,6 +265,26 @@ function SpotlightPage() {
     }
     setRegistered(true);
     toast.success("Interest registered — we'll be in touch.");
+  }
+
+  async function handleGuestRegister() {
+    const email = guestEmail.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      toast.error("Enter a valid email address");
+      return;
+    }
+    setRegistering(true);
+    try {
+      const res = await registerSpotlightGuestInterest({ data: { slug, email } });
+      if (!res.ok) throw new Error("Could not register interest");
+      setGuestOpen(false);
+      setRegistered(true);
+      toast.success("Interest registered — we'll be in touch.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not register interest");
+    } finally {
+      setRegistering(false);
+    }
   }
 
 
@@ -606,6 +636,36 @@ function SpotlightPage() {
                       <><Check className="mr-1.5 size-4" /> Interest registered</>
                     ) : registering ? "Registering…" : "Register interest"}
                   </Button>
+                  <Dialog open={guestOpen} onOpenChange={setGuestOpen}>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="font-display text-xl">Register your interest</DialogTitle>
+                        <DialogDescription>
+                          Pop in your email and we'll be in touch about this opportunity.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="guest-email">Email</Label>
+                        <Input
+                          id="guest-email"
+                          type="email"
+                          maxLength={255}
+                          value={guestEmail}
+                          onChange={(e) => setGuestEmail(e.target.value)}
+                          placeholder="you@example.com"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        By entering your email, you are giving Racket permission to contact you about this
+                        collab and partnership opportunity.
+                      </p>
+                      <DialogFooter>
+                        <Button onClick={handleGuestRegister} disabled={registering}>
+                          {registering ? "Registering…" : "Register interest"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                   {links.contact ? (
                     <Button asChild variant="outline">
                       <a href={links.contact.startsWith("http") ? links.contact : `mailto:${links.contact}`}>
