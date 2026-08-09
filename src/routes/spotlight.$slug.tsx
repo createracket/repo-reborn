@@ -238,13 +238,12 @@ function SpotlightPage() {
 
   async function handleRegister() {
     if (!page) return;
-    setRegistering(true);
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) {
-      toast.info("Sign in to register your interest");
-      navigate({ to: "/login" });
+      setGuestOpen(true);
       return;
     }
+    setRegistering(true);
     const { error } = await supabase
       .from("spotlight_interests" as any)
       .insert({ partner_page_id: page.id, user_id: u.user.id });
@@ -255,6 +254,26 @@ function SpotlightPage() {
     }
     setRegistered(true);
     toast.success("Interest registered — we'll be in touch.");
+  }
+
+  async function handleGuestRegister() {
+    const email = guestEmail.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      toast.error("Enter a valid email address");
+      return;
+    }
+    setRegistering(true);
+    try {
+      const res = await registerSpotlightGuestInterest({ data: { slug, email } });
+      if (!res.ok) throw new Error("Could not register interest");
+      setGuestOpen(false);
+      setRegistered(true);
+      toast.success("Interest registered — we'll be in touch.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not register interest");
+    } finally {
+      setRegistering(false);
+    }
   }
 
 
