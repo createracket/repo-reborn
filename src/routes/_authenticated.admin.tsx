@@ -1782,32 +1782,45 @@ function SpotlightForm({
             <Input id="slug" value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="ymyb-spotlight" />
           </div>
           <div className="space-y-1.5 md:col-span-2 rounded-lg border border-border/60 p-3">
-            <Label className="text-sm font-medium">Private access code</Label>
-            <p className="text-xs text-muted-foreground">
-              Optional. With a code set, this spotlight is hidden from the public and from search — visitors
-              must enter their email and the code. Admins and anyone the page is assigned to still see it
-              normally (including on their dashboard).
-            </p>
-            <div className="grid gap-2 pt-1 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="access_code_label" className="text-xs">Code name</Label>
-                <Input
-                  id="access_code_label"
-                  value={form.access_code_label}
-                  onChange={(e) => set("access_code_label", e.target.value)}
-                  placeholder="Access code"
-                />
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <Label className="text-sm font-medium">Private access code</Label>
+                <p className="text-xs text-muted-foreground">
+                  Off = link-only: anyone with the link can view it without an email or passcode. It stays
+                  out of Google and other search engines either way. On = visitors must enter their email
+                  and the code; admins and assigned users always see it normally.
+                </p>
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="access_code" className="text-xs">Code</Label>
-                <Input
-                  id="access_code"
-                  value={form.access_code}
-                  onChange={(e) => set("access_code", e.target.value)}
-                  placeholder="e.g. SPOTLIGHT26"
+              <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+                Require code
+                <Switch
+                  checked={!!form.access_code.trim()}
+                  onCheckedChange={(on) => set("access_code", on ? "SPOTLIGHT" : "")}
                 />
-              </div>
+              </label>
             </div>
+            {form.access_code.trim() ? (
+              <div className="grid gap-2 pt-1 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="access_code_label" className="text-xs">Code name</Label>
+                  <Input
+                    id="access_code_label"
+                    value={form.access_code_label}
+                    onChange={(e) => set("access_code_label", e.target.value)}
+                    placeholder="Access code"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="access_code" className="text-xs">Code</Label>
+                  <Input
+                    id="access_code"
+                    value={form.access_code}
+                    onChange={(e) => set("access_code", e.target.value)}
+                    placeholder="e.g. SPOTLIGHT26"
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
           <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
