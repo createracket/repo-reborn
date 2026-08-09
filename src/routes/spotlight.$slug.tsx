@@ -13,7 +13,17 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getSocialEmbed } from "@/lib/social-embed";
 import { getClipPosters } from "@/lib/clip-poster.functions";
-import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember } from "@/lib/spotlight-access.functions";
+import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember, registerSpotlightGuestInterest } from "@/lib/spotlight-access.functions";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type PartnerLinks = {
   instagram?: string;
