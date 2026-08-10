@@ -70,12 +70,7 @@ export function ClipCard({
             {caption}
           </span>
         ) : null}
-        <span className="flex items-center gap-2">
-          <span className="h-px flex-1 bg-border" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary">
-            Watch now
-          </span>
-        </span>
+        <span className="block h-px w-full bg-border" />
       </span>
     </a>
   );
