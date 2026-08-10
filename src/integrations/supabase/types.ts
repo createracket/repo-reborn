@@ -1598,24 +1598,33 @@ export type Database = {
       spotlight_interests: {
         Row: {
           created_at: string
+          guest_email: string | null
+          guest_name: string | null
+          handled: boolean
           id: string
           note: string | null
           partner_page_id: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          handled?: boolean
           id?: string
           note?: string | null
           partner_page_id: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
+          guest_email?: string | null
+          guest_name?: string | null
+          handled?: boolean
           id?: string
           note?: string | null
           partner_page_id?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
