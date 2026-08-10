@@ -69,9 +69,11 @@ type Spotlight = {
 };
 
 type SpotlightInterest = {
-  id: string; created_at: string; partner_page_id: string; user_id: string;
+  id: string; created_at: string; partner_page_id: string; user_id: string | null;
+  guest_email?: string | null; guest_name?: string | null; handled?: boolean | null;
   profile?: { display_name: string | null; email: string | null } | null;
 };
+
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -131,7 +133,7 @@ function AdminPage() {
         supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, linked_report_id, currency, transparency").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
-        supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id").order("created_at", { ascending: false }),
+        supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
         (supabase as any).rpc("admin_campaign_brief_emails"),
       ]);
       const emailById = new Map<string, string | null>();
@@ -146,17 +148,18 @@ function AdminPage() {
 
       // Hydrate interests with profile info (display name + email)
       const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
-      const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id)));
+      const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id).filter((v): v is string => !!v)));
       if (userIds.length) {
         const { data: profs } = await supabase
           .from("profiles")
           .select("id, display_name, email")
           .in("id", userIds);
         const map = new Map((profs ?? []).map((p: any) => [p.id, { display_name: p.display_name, email: p.email }]));
-        setInterests(rawInterests.map((i) => ({ ...i, profile: map.get(i.user_id) ?? null })));
+        setInterests(rawInterests.map((i) => ({ ...i, profile: (i.user_id ? map.get(i.user_id) : null) ?? null })));
       } else {
         setInterests(rawInterests);
       }
+
       setChecking(false);
     })();
   }, [navigate]);
@@ -171,6 +174,30 @@ function AdminPage() {
 
   const activeSpotlights = spotlights.filter((s) => !s.archived);
   const archivedSpotlights = spotlights.filter((s) => !!s.archived);
+
+  const unhandledContactCount =
+    contacts.filter((c) => !c.handled).length + interests.filter((i) => !i.handled).length;
+  const spotlightById = new Map(spotlights.map((s) => [s.id, s]));
+
+  async function setInterestHandled(id: string, handled: boolean) {
+    setInterests((rows) => rows.map((r) => (r.id === id ? { ...r, handled } : r)));
+    const { error } = await supabase.from("spotlight_interests" as any).update({ handled } as any).eq("id", id);
+    if (error) {
+      setInterests((rows) => rows.map((r) => (r.id === id ? { ...r, handled: !handled } : r)));
+      toast.error(error.message);
+    }
+  }
+
+  async function setContactHandled(id: string, handled: boolean) {
+    setContacts((rows) => rows.map((r) => (r.id === id ? { ...r, handled } : r)));
+    const { error } = await supabase.from("contact_messages").update({ handled }).eq("id", id);
+    if (error) {
+      setContacts((rows) => rows.map((r) => (r.id === id ? { ...r, handled: !handled } : r)));
+      toast.error(error.message);
+    }
+  }
+
+
 
   async function setSpotlightArchived(s: Spotlight, archived: boolean) {
     const patch: Record<string, any> = archived
@@ -340,9 +367,11 @@ function AdminPage() {
                               {rows.map((r) => (
                                 <li key={r.id} className="flex flex-wrap items-center justify-between gap-2">
                                   <span>
-                                    {r.profile?.display_name ?? "Unnamed user"}
-                                    {r.profile?.email ? <span className="text-muted-foreground"> · {r.profile.email}</span> : null}
+                                    {r.profile?.display_name ?? r.guest_name ?? (r.guest_email ? "Guest" : "Unnamed user")}
+                                    {(r.profile?.email ?? r.guest_email) ? <span className="text-muted-foreground"> · {r.profile?.email ?? r.guest_email}</span> : null}
+                                    {!r.user_id ? <span className="ml-2 rounded-full border border-border/60 px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">Guest</span> : null}
                                   </span>
+
                                   <span className="text-xs text-muted-foreground">
                                     {new Date(r.created_at).toLocaleDateString()}
                                   </span>
@@ -421,7 +450,15 @@ function AdminPage() {
           <TabsList className="flex flex-wrap">
             <TabsTrigger value="traffic">Traffic</TabsTrigger>
             <TabsTrigger value="emails">Emails</TabsTrigger>
-            <TabsTrigger value="contact">Contact ({contacts.length})</TabsTrigger>
+            <TabsTrigger value="contact" className="relative">
+              Contact ({contacts.length + interests.length})
+              {unhandledContactCount > 0 && (
+                <span className="absolute -right-1 -top-2 inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold leading-none text-destructive-foreground shadow">
+                  {unhandledContactCount}
+                </span>
+              )}
+            </TabsTrigger>
+
             <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
             <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
@@ -677,40 +714,95 @@ function AdminPage() {
           </TabsContent>
 
 
-          <TabsContent value="contact" className="mt-6 space-y-3">
-            {contacts.length === 0 ? <Empty /> : contacts.map((m) => (
-              <Card key={m.id}>
-                <CardHeader>
-                  <div className="flex justify-between gap-2">
-                    <div>
-                      <CardTitle className="text-lg">{m.name}</CardTitle>
-                      <CardDescription>{m.email}</CardDescription>
+          <TabsContent value="contact" className="mt-6 space-y-6">
+            <section className="space-y-3">
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground">
+                Spotlight interest ({interests.length})
+              </h3>
+              {interests.length === 0 ? <Empty /> : interests.map((i) => {
+                const s = spotlightById.get(i.partner_page_id);
+                const name = i.profile?.display_name ?? i.guest_name ?? (i.guest_email ? "Guest" : "Unnamed user");
+                const email = i.profile?.email ?? i.guest_email ?? null;
+                return (
+                  <Card key={i.id}>
+                    <CardHeader>
+                      <div className="flex flex-wrap justify-between gap-2">
+                        <div>
+                          <CardTitle className="text-lg">{name}</CardTitle>
+                          <CardDescription>
+                            {email ?? "No email"} · Registered interest in {s?.headline ?? "a spotlight"}
+                            {!i.user_id ? " (not signed in)" : ""}
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Meta date={i.created_at} status={i.handled ? "handled" : "new"} />
+                          <Button size="sm" variant="outline" onClick={() => setInterestHandled(i.id, !i.handled)}>
+                            {i.handled ? "Mark new" : "Mark handled"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            onClick={async () => {
+                              if (!confirm(`Delete interest from ${email ?? name}?`)) return;
+                              const { error } = await supabase.from("spotlight_interests" as any).delete().eq("id", i.id);
+                              if (error) { toast.error(error.message); return; }
+                              setInterests((rows) => rows.filter((r) => r.id !== i.id));
+                              toast.success("Interest removed");
+                            }}
+                          >
+                            <Trash2 className="size-3.5" /> Remove
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                );
+              })}
+            </section>
+
+            <section className="space-y-3">
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground">
+                Contact messages ({contacts.length})
+              </h3>
+              {contacts.length === 0 ? <Empty /> : contacts.map((m) => (
+                <Card key={m.id}>
+                  <CardHeader>
+                    <div className="flex flex-wrap justify-between gap-2">
+                      <div>
+                        <CardTitle className="text-lg">{m.name}</CardTitle>
+                        <CardDescription>{m.email}</CardDescription>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Meta date={m.created_at} status={m.handled ? "handled" : "new"} />
+                        <Button size="sm" variant="outline" onClick={() => setContactHandled(m.id, !m.handled)}>
+                          {m.handled ? "Mark new" : "Mark handled"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-destructive hover:text-destructive"
+                          onClick={async () => {
+                            if (!confirm(`Delete message from ${m.email}?`)) return;
+                            const { error } = await supabase.from("contact_messages").delete().eq("id", m.id);
+                            if (error) { toast.error(error.message); return; }
+                            setContacts((rows) => rows.filter((r) => r.id !== m.id));
+                            toast.success("Message removed");
+                          }}
+                        >
+                          <Trash2 className="size-3.5" /> Remove
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Meta date={m.created_at} status={m.handled ? "handled" : "new"} />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-destructive hover:text-destructive"
-                        onClick={async () => {
-                          if (!confirm(`Delete message from ${m.email}?`)) return;
-                          const { error } = await supabase.from("contact_messages").delete().eq("id", m.id);
-                          if (error) { toast.error(error.message); return; }
-                          setContacts((rows) => rows.filter((r) => r.id !== m.id));
-                          toast.success("Message removed");
-                        }}
-                      >
-                        <Trash2 className="size-3.5" /> Remove
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="text-sm">
-                  <p className="whitespace-pre-wrap text-muted-foreground">{m.message}</p>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardHeader>
+                  <CardContent className="text-sm">
+                    <p className="whitespace-pre-wrap text-muted-foreground">{m.message}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </section>
           </TabsContent>
+
 
           <TabsContent value="mailing" className="mt-6">
             <Card>
