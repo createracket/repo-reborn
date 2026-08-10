@@ -36,8 +36,18 @@ function getPageLabel(pathname: string): string | null {
 
 export function PageBreadcrumbs() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   if (pathname === "/" || pathname === "/dashboard") return null;
+
+  // Signed-out visitors on a shared spotlight link shouldn't see app chrome.
+  if (pathname.startsWith("/spotlight/") && !signedIn) return null;
 
   const label = getPageLabel(pathname);
 
