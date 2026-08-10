@@ -1470,9 +1470,11 @@ function SpotlightForm({
     video1: editData?.links?.video1 ?? "",
     video2: editData?.links?.video2 ?? "",
     video3: editData?.links?.video3 ?? "",
+    video4: editData?.links?.video4 ?? "",
     video1_cover: editData?.links?.video1_cover ?? "",
     video2_cover: editData?.links?.video2_cover ?? "",
     video3_cover: editData?.links?.video3_cover ?? "",
+    video4_cover: editData?.links?.video4_cover ?? "",
     header_image_url: editData?.header_image_url ?? "",
     profile_image_url: editData?.profile_image_url ?? "",
     published: editData?.published ?? false,
@@ -1815,9 +1817,11 @@ function SpotlightForm({
         video1: form.video1,
         video2: form.video2,
         video3: form.video3,
+        video4: form.video4,
         video1_cover: form.video1_cover,
         video2_cover: form.video2_cover,
         video3_cover: form.video3_cover,
+        video4_cover: form.video4_cover,
         instagram_extra: extraLinks.instagram.map((s) => s.trim()).filter(Boolean),
         tiktok_extra: extraLinks.tiktok.map((s) => s.trim()).filter(Boolean),
         youtube_extra: extraLinks.youtube.map((s) => s.trim()).filter(Boolean),
@@ -1890,8 +1894,8 @@ function SpotlightForm({
         slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "", vibe_tags: "",
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", spotifyEmbed: "", contact: "",
-        video1: "", video2: "", video3: "",
-        video1_cover: "", video2_cover: "", video3_cover: "",
+        video1: "", video2: "", video3: "", video4: "",
+        video1_cover: "", video2_cover: "", video3_cover: "", video4_cover: "",
         header_image_url: "", profile_image_url: "", published: false,
         access_code: "", access_code_label: "Access code",
         total_followers: "", total_streams: "", monthly_streams: "",
@@ -2293,20 +2297,20 @@ function SpotlightForm({
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Featured videos
               <span className="ml-2 text-xs font-normal text-muted-foreground">
-                (up to three TikTok or Instagram URLs)
+                (up to four TikTok or Instagram URLs)
               </span>
             </summary>
             <div className="flex w-full flex-col gap-4 px-4">
               <p className="text-xs text-muted-foreground">
-                Paste up to three public TikTok or Instagram post/reel URLs. Each shows as a clip card at the bottom of the
+                Paste up to four public TikTok or Instagram post/reel URLs. Each shows as a clip card at the bottom of the
                 spotlight page. Add a cover image for Instagram clips — Instagram no longer serves public thumbnails,
                 so without one the card falls back to a gradient. Uploads land in the{" "}
                 <code>video-covers/</code> folder of the public spotlight images bucket, so you can also drop files
                 there directly and paste the public URL.
               </p>
-              {([1, 2, 3] as const).map((n) => {
-                const urlKey = `video${n}` as "video1" | "video2" | "video3";
-                const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover";
+              {([1, 2, 3, 4] as const).map((n) => {
+                const urlKey = `video${n}` as "video1" | "video2" | "video3" | "video4";
+                const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover" | "video4_cover";
                 return (
                   <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
                     <Label htmlFor={urlKey}>Video {n}</Label>
