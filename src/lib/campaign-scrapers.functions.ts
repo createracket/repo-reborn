@@ -577,6 +577,7 @@ type SpotifyArtistResult =
       followers: number | null;
       monthly_listeners: number | null;
       total_streams: number | null;
+      genres?: string[];
       avatar_url?: string | null;
     }
   | { ok: false; error: string };
