@@ -84,7 +84,7 @@ export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
             <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
               {!signedIn && (
                 <Link to="/signup" className="hover:text-foreground transition-colors">
-                  Mailing list
+                  Join our mailing list
                 </Link>
               )}
               {isAdmin && (
@@ -152,7 +152,7 @@ export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
                       {!signedIn && (
                         <>
                           <MobileLink to="/login">Log in</MobileLink>
-                          <MobileLink to="/signup">Mailing list</MobileLink>
+                          <MobileLink to="/signup">Join our mailing list</MobileLink>
                         </>
                       )}
                       {isAdmin && (
