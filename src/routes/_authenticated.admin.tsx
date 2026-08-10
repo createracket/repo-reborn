@@ -343,9 +343,11 @@ function AdminPage() {
                               {rows.map((r) => (
                                 <li key={r.id} className="flex flex-wrap items-center justify-between gap-2">
                                   <span>
-                                    {r.profile?.display_name ?? "Unnamed user"}
-                                    {r.profile?.email ? <span className="text-muted-foreground"> · {r.profile.email}</span> : null}
+                                    {r.profile?.display_name ?? r.guest_name ?? (r.guest_email ? "Guest" : "Unnamed user")}
+                                    {(r.profile?.email ?? r.guest_email) ? <span className="text-muted-foreground"> · {r.profile?.email ?? r.guest_email}</span> : null}
+                                    {!r.user_id ? <span className="ml-2 rounded-full border border-border/60 px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">Guest</span> : null}
                                   </span>
+
                                   <span className="text-xs text-muted-foreground">
                                     {new Date(r.created_at).toLocaleDateString()}
                                   </span>
