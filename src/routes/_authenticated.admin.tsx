@@ -1433,15 +1433,18 @@ function ImageUploader({
   );
 }
 
-function SpotlightForm({
+export function SpotlightForm({
   onCreated,
   editData,
   onCancel,
+  section,
 }: {
   onCreated: () => void;
   editData?: Record<string, any> | null;
   onCancel?: () => void;
+  section?: "spotlight" | "brief";
 }) {
+  const sectionKind = section ?? "spotlight";
   const isEditing = !!editData;
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
