@@ -98,10 +98,27 @@ export const getTrafficStats = createServerFn({ method: "POST" })
     const countryMap = new Map<string, { views: number; humans: number; bots: number }>();
     const dayMap = new Map<string, { pageviews: number; visitors: Set<string>; bots: number }>();
 
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      dayMap.set(d.toISOString().slice(0, 10), { pageviews: 0, visitors: new Set(), bots: 0 });
+    const hourly = data.range === "24h";
+    const tzMs = data.tzOffsetMinutes * 60 * 1000; // getTimezoneOffset(): local = utc - offset
+    const bucketKey = (iso: string) => {
+      const local = new Date(new Date(iso).getTime() - tzMs).toISOString();
+      return hourly ? local.slice(0, 13) : local.slice(0, 10);
+    };
+    const bucketLabel = (key: string) => (hourly ? `${key.slice(11, 13)}:00` : key);
+
+    if (hourly) {
+      const nowHour = Math.floor((Date.now() - tzMs) / 3_600_000) * 3_600_000;
+      for (let i = 23; i >= 0; i--) {
+        const d = new Date(nowHour - i * 3_600_000);
+        dayMap.set(d.toISOString().slice(0, 13), { pageviews: 0, visitors: new Set(), bots: 0 });
+      }
+    } else {
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(Date.now() - tzMs - i * 24 * 60 * 60 * 1000);
+        dayMap.set(d.toISOString().slice(0, 10), { pageviews: 0, visitors: new Set(), bots: 0 });
+      }
     }
+
 
     for (const r of list) {
       sessionCounts.set(r.session_id, (sessionCounts.get(r.session_id) ?? 0) + 1);
