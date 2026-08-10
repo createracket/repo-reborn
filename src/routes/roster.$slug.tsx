@@ -113,7 +113,7 @@ function categoryBadgeClass(value: string) {
   return CATEGORY_BADGE[value] ?? "bg-primary/25 text-primary border border-primary/40";
 }
 
-const STATUS_BADGE_CLASS = "border-border/70 bg-muted/40 text-muted-foreground";
+const STATUS_BADGE_CLASS = "border-foreground/50 bg-muted/50 font-semibold text-foreground/90";
 
 
 
@@ -518,18 +518,12 @@ function PublicRosterPage() {
                               {categoryLabel(c)}
                             </span>
                           ))}
-                          {!roster.hide_statuses && (
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE_CLASS}`}
-                            >
-                              {STATUS_LABEL[it.status] ?? "In Review"}
-                            </Badge>
-                          )}
                         </div>
                       </div>
 
-                      <div className="mt-2.5 flex flex-wrap gap-1.5 text-xs">
+                      <div className="mt-2.5 flex flex-wrap items-end justify-between gap-2">
+                        <div className="flex flex-wrap gap-1.5 text-xs">
+
                         {stats.map(([label, count, url]) => {
                           if (count == null && !url) return null;
                           const content = (
@@ -560,7 +554,17 @@ function PublicRosterPage() {
                           );
                         })}
 
+                        </div>
+                        {!roster.hide_statuses && (
+                          <Badge
+                            variant="outline"
+                            className={`shrink-0 px-3 py-1 text-[10px] uppercase tracking-[0.11em] ${STATUS_BADGE_CLASS}`}
+                          >
+                            {STATUS_LABEL[it.status] ?? "In Review"}
+                          </Badge>
+                        )}
                       </div>
+
 
                       {it.vibe && (
                         <p className="mt-2.5 rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-sm text-foreground">
