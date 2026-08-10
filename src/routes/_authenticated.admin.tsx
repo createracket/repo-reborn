@@ -426,7 +426,15 @@ function AdminPage() {
           <TabsList className="flex flex-wrap">
             <TabsTrigger value="traffic">Traffic</TabsTrigger>
             <TabsTrigger value="emails">Emails</TabsTrigger>
-            <TabsTrigger value="contact">Contact ({contacts.length})</TabsTrigger>
+            <TabsTrigger value="contact" className="relative">
+              Contact ({contacts.length + interests.length})
+              {unhandledContactCount > 0 && (
+                <span className="absolute -right-1 -top-2 inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold leading-none text-destructive-foreground shadow">
+                  {unhandledContactCount}
+                </span>
+              )}
+            </TabsTrigger>
+
             <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
             <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
