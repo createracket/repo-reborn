@@ -1994,7 +1994,7 @@ function SpotlightForm({
               />
             </div>
           </details>
-          <details className="!order-6 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+          <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Content
               <span className="ml-2 text-xs font-normal text-muted-foreground">
