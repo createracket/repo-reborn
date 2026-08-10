@@ -64,6 +64,8 @@ export type SpotlightEnrichment = {
   monthly_streams?: number;
   total_streams?: number;
   avatar_url?: string;
+  spotify_name?: string;
+  spotify_genres?: string[];
   errors: string[];
 };
 
