@@ -36,6 +36,8 @@ type PartnerLinks = {
   video1_cover?: string;
   video2_cover?: string;
   video3_cover?: string;
+  video4?: string;
+  video4_cover?: string;
   tiktok?: string;
   youtube?: string;
   apple_music?: string;
@@ -159,7 +161,7 @@ function SpotlightPage() {
   // Fetch provider poster thumbnails (TikTok) for clips without a manual cover.
   useEffect(() => {
     const l = page?.links ?? {};
-    const urls = [l.video1, l.video2, l.video3].filter((u): u is string => !!u);
+    const urls = [l.video1, l.video2, l.video3, l.video4].filter((u): u is string => !!u);
     if (urls.length === 0) return;
     let cancelled = false;
     (async () => {
@@ -684,6 +686,7 @@ function SpotlightPage() {
             { url: links.video1, cover: links.video1_cover },
             { url: links.video2, cover: links.video2_cover },
             { url: links.video3, cover: links.video3_cover },
+            { url: links.video4, cover: links.video4_cover },
           ];
           const videos = raw
             .map((v) => {
@@ -695,7 +698,7 @@ function SpotlightPage() {
           return (
             <section className="mt-16">
               <h2 className="font-display text-3xl">{sectionLabel("videos", "Watch")}</h2>
-              <div className="mt-4 grid gap-6 md:grid-cols-3">
+              <div className={`mt-4 grid gap-6 ${videos.length >= 4 ? "sm:grid-cols-2 md:grid-cols-4" : "md:grid-cols-3"}`}>
                 {videos.map((v, i) => (
                   <ClipCard
                     key={i}
