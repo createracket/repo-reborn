@@ -119,8 +119,14 @@ export function TrafficAdmin() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Daily activity</CardTitle>
-              <CardDescription>Pageviews per day for the selected filter.</CardDescription>
+              <CardTitle className="text-base">
+                {stats.granularity === "hour" ? "Hourly activity" : "Daily activity"}
+              </CardTitle>
+              <CardDescription>
+                {stats.granularity === "hour"
+                  ? "Pageviews per hour over the last 24 hours (your local time)."
+                  : "Pageviews per day for the selected filter."}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <DailyChart data={stats.daily} />
