@@ -1,7 +1,8 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Radio } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/racket-desk")({
   head: () => ({
