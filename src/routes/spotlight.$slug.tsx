@@ -724,7 +724,7 @@ function SpotlightPage() {
           return (
             <section className="mt-12">
               <div
-                className={`grid gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}
+                className={`grid gap-3 sm:gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}
               >
                 {photos.map((src, i) => (
                   <div
