@@ -133,7 +133,7 @@ function AdminPage() {
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, linked_report_id, currency, transparency").order("created_at", { ascending: false }),
-        supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
+        supabase.from("partner_pages" as any).select("*").eq("section", "spotlight").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
         (supabase as any).rpc("admin_campaign_brief_emails"),
       ]);
