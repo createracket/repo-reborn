@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export type TrafficRange = "7d" | "30d" | "90d";
+export type TrafficRange = "24h" | "7d" | "30d" | "90d";
 export type TrafficFilter = "humans" | "bots" | "all";
 
 export type TrafficStats = {
@@ -19,21 +19,23 @@ export type TrafficStats = {
     humanPageviews: number;
     botPageviews: number;
   };
-  daily: Array<{ date: string; pageviews: number; visitors: number; bots: number }>;
+  granularity: "hour" | "day";
+  daily: Array<{ date: string; label: string; pageviews: number; visitors: number; bots: number }>;
   topPages: Array<{ path: string; views: number }>;
   topReferrers: Array<{ referrer: string; views: number }>;
   topCountries: Array<{ country: string; views: number; humans: number; bots: number }>;
   topBotReasons: Array<{ reason: string; views: number }>;
 };
 
-const RANGE_DAYS: Record<TrafficRange, number> = { "7d": 7, "30d": 30, "90d": 90 };
+const RANGE_DAYS: Record<TrafficRange, number> = { "24h": 1, "7d": 7, "30d": 30, "90d": 90 };
 
 export const getTrafficStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { range?: TrafficRange; filter?: TrafficFilter; includeSelf?: boolean }) => ({
+  .inputValidator((data: { range?: TrafficRange; filter?: TrafficFilter; includeSelf?: boolean; tzOffsetMinutes?: number }) => ({
     range: (data?.range ?? "7d") as TrafficRange,
     filter: (data?.filter ?? "humans") as TrafficFilter,
     includeSelf: data?.includeSelf === true,
+    tzOffsetMinutes: Number.isFinite(data?.tzOffsetMinutes) ? Number(data?.tzOffsetMinutes) : 0,
   }))
 
   .handler(async ({ data, context }): Promise<TrafficStats> => {
@@ -96,10 +98,27 @@ export const getTrafficStats = createServerFn({ method: "POST" })
     const countryMap = new Map<string, { views: number; humans: number; bots: number }>();
     const dayMap = new Map<string, { pageviews: number; visitors: Set<string>; bots: number }>();
 
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      dayMap.set(d.toISOString().slice(0, 10), { pageviews: 0, visitors: new Set(), bots: 0 });
+    const hourly = data.range === "24h";
+    const tzMs = data.tzOffsetMinutes * 60 * 1000; // getTimezoneOffset(): local = utc - offset
+    const bucketKey = (iso: string) => {
+      const local = new Date(new Date(iso).getTime() - tzMs).toISOString();
+      return hourly ? local.slice(0, 13) : local.slice(0, 10);
+    };
+    const bucketLabel = (key: string) => (hourly ? `${key.slice(11, 13)}:00` : key);
+
+    if (hourly) {
+      const nowHour = Math.floor((Date.now() - tzMs) / 3_600_000) * 3_600_000;
+      for (let i = 23; i >= 0; i--) {
+        const d = new Date(nowHour - i * 3_600_000);
+        dayMap.set(d.toISOString().slice(0, 13), { pageviews: 0, visitors: new Set(), bots: 0 });
+      }
+    } else {
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(Date.now() - tzMs - i * 24 * 60 * 60 * 1000);
+        dayMap.set(d.toISOString().slice(0, 10), { pageviews: 0, visitors: new Set(), bots: 0 });
+      }
     }
+
 
     for (const r of list) {
       sessionCounts.set(r.session_id, (sessionCounts.get(r.session_id) ?? 0) + 1);
@@ -118,7 +137,7 @@ export const getTrafficStats = createServerFn({ method: "POST" })
         reasonCounts.set(reason, (reasonCounts.get(reason) ?? 0) + 1);
       }
 
-      const dayKey = r.created_at.slice(0, 10);
+      const dayKey = bucketKey(r.created_at);
       const bucket = dayMap.get(dayKey);
       if (bucket) {
         bucket.pageviews++;
@@ -148,8 +167,9 @@ export const getTrafficStats = createServerFn({ method: "POST" })
         humanPageviews,
         botPageviews,
       },
+      granularity: hourly ? ("hour" as const) : ("day" as const),
       daily: Array.from(dayMap.entries()).map(([date, v]) => ({
-        date, pageviews: v.pageviews, visitors: v.visitors.size, bots: v.bots,
+        date, label: bucketLabel(date), pageviews: v.pageviews, visitors: v.visitors.size, bots: v.bots,
       })),
       topPages: Array.from(pageCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 15)
         .map(([path, views]) => ({ path, views })),

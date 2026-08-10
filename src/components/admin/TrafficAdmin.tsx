@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getTrafficStats, type TrafficRange, type TrafficFilter, type TrafficStats } from "@/lib/traffic-admin.functions";
 
 const RANGES: { value: TrafficRange; label: string }[] = [
+  { value: "24h", label: "24 hours" },
   { value: "7d", label: "7 days" },
   { value: "30d", label: "30 days" },
   { value: "90d", label: "90 days" },
@@ -41,7 +42,7 @@ export function TrafficAdmin() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetchStats({ data: { range, filter, includeSelf } })
+    fetchStats({ data: { range, filter, includeSelf, tzOffsetMinutes: new Date().getTimezoneOffset() } })
       .then((res) => { if (!cancelled) setStats(res); })
       .catch((e) => { if (!cancelled) setError(e?.message ?? "Failed to load traffic stats"); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -118,8 +119,14 @@ export function TrafficAdmin() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Daily activity</CardTitle>
-              <CardDescription>Pageviews per day for the selected filter.</CardDescription>
+              <CardTitle className="text-base">
+                {stats.granularity === "hour" ? "Hourly activity" : "Daily activity"}
+              </CardTitle>
+              <CardDescription>
+                {stats.granularity === "hour"
+                  ? "Pageviews per hour over the last 24 hours (your local time)."
+                  : "Pageviews per day for the selected filter."}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <DailyChart data={stats.daily} />
@@ -263,14 +270,14 @@ function DailyChart({ data }: { data: TrafficStats["daily"] }) {
             <div
               className="w-full rounded-t bg-primary/70 transition group-hover:bg-primary"
               style={{ height: `${(d.pageviews / max) * 100}%` }}
-              title={`${d.date} · ${d.pageviews} views · ${d.visitors} visitors · ${d.bots} bot`}
+              title={`${d.label} · ${d.pageviews} views · ${d.visitors} visitors · ${d.bots} bot`}
             />
           </div>
         ))}
       </div>
       <div className="flex justify-between text-[10px] text-muted-foreground">
-        <span>{data[0]?.date}</span>
-        <span>{data[data.length - 1]?.date}</span>
+        <span>{data[0]?.label}</span>
+        <span>{data[data.length - 1]?.label}</span>
       </div>
     </div>
   );
