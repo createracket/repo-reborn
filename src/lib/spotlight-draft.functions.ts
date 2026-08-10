@@ -238,17 +238,8 @@ export const draftSpotlightFromText = createServerFn({ method: "POST" })
     // grounded in real numbers and links instead of guessing from a handle.
     const enrichment = await enrichSocials(data.socials ?? {});
 
-    let spotifyName: string | null = null;
-    let spotifyGenres: string[] = [];
-    if (enrichment.links.spotify) {
-      const s = await spotifyArtistCore({ url: enrichment.links.spotify }).catch(() => null);
-      if (s && s.ok) {
-        spotifyName = s.name ?? null;
-        spotifyGenres = s.genres ?? [];
-      }
-    }
-
-    const verified = describeEnrichment(enrichment, spotifyName, spotifyGenres);
+    const spotifyName = enrichment.spotify_name ?? null;
+    const verified = describeEnrichment(enrichment);
 
     const userContent = [
       data.artistName ? `Artist/act name: ${data.artistName}` : null,
