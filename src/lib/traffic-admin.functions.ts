@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export type TrafficRange = "7d" | "30d" | "90d";
+export type TrafficRange = "24h" | "7d" | "30d" | "90d";
 export type TrafficFilter = "humans" | "bots" | "all";
 
 export type TrafficStats = {
@@ -19,21 +19,23 @@ export type TrafficStats = {
     humanPageviews: number;
     botPageviews: number;
   };
-  daily: Array<{ date: string; pageviews: number; visitors: number; bots: number }>;
+  granularity: "hour" | "day";
+  daily: Array<{ date: string; label: string; pageviews: number; visitors: number; bots: number }>;
   topPages: Array<{ path: string; views: number }>;
   topReferrers: Array<{ referrer: string; views: number }>;
   topCountries: Array<{ country: string; views: number; humans: number; bots: number }>;
   topBotReasons: Array<{ reason: string; views: number }>;
 };
 
-const RANGE_DAYS: Record<TrafficRange, number> = { "7d": 7, "30d": 30, "90d": 90 };
+const RANGE_DAYS: Record<TrafficRange, number> = { "24h": 1, "7d": 7, "30d": 30, "90d": 90 };
 
 export const getTrafficStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { range?: TrafficRange; filter?: TrafficFilter; includeSelf?: boolean }) => ({
+  .inputValidator((data: { range?: TrafficRange; filter?: TrafficFilter; includeSelf?: boolean; tzOffsetMinutes?: number }) => ({
     range: (data?.range ?? "7d") as TrafficRange,
     filter: (data?.filter ?? "humans") as TrafficFilter,
     includeSelf: data?.includeSelf === true,
+    tzOffsetMinutes: Number.isFinite(data?.tzOffsetMinutes) ? Number(data?.tzOffsetMinutes) : 0,
   }))
 
   .handler(async ({ data, context }): Promise<TrafficStats> => {
