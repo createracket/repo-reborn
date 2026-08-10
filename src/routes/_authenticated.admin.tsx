@@ -1801,6 +1801,7 @@ export function SpotlightForm({
     const slug = form.slug.toLowerCase().trim().replace(/\s+/g, "-");
     const payload = {
       slug,
+      section: sectionKind,
       type: form.type || "podcast",
       headline: form.headline,
       subtitle: form.subtitle || null,
