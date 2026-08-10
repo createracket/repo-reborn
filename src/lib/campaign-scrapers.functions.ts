@@ -719,6 +719,7 @@ export async function spotifyArtistCore(data: { url: string }): Promise<SpotifyA
     let name: string | null = null;
     let followers: number | null = null;
     let avatar_url: string | null = null;
+    let genres: string[] = [];
 
     if (token) {
       const r = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
@@ -729,10 +730,12 @@ export async function spotifyArtistCore(data: { url: string }): Promise<SpotifyA
           name?: string;
           followers?: { total?: number };
           images?: Array<{ url?: string }>;
+          genres?: string[];
         };
         name = j.name ?? null;
         followers = j.followers?.total ?? null;
         avatar_url = j.images?.[0]?.url ?? null;
+        genres = Array.isArray(j.genres) ? j.genres.slice(0, 6) : [];
       }
     }
 
