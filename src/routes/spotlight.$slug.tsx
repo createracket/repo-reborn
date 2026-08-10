@@ -606,7 +606,7 @@ function SpotlightPage() {
               {page.vibe_tags.map((tag, i) => (
                 <span
                   key={i}
-                  className="rounded-full border border-border px-4 py-1.5 text-sm text-foreground/80"
+                  className="cursor-default rounded-full border border-border px-4 py-1.5 text-sm text-foreground/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-foreground"
                 >
                   {tag}
                 </span>
