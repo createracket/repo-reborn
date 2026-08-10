@@ -81,6 +81,7 @@ function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [leadBriefs, setLeadBriefs] = useState<LeadBrief[]>([]);
   const [contacts, setContacts] = useState<ContactMsg[]>([]);
+  const [handledOpen, setHandledOpen] = useState(false);
   const [subs, setSubs] = useState<Subscriber[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
