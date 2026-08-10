@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getTrafficStats, type TrafficRange, type TrafficFilter, type TrafficStats } from "@/lib/traffic-admin.functions";
 
 const RANGES: { value: TrafficRange; label: string }[] = [
+  { value: "24h", label: "24 hours" },
   { value: "7d", label: "7 days" },
   { value: "30d", label: "30 days" },
   { value: "90d", label: "90 days" },
@@ -41,7 +42,7 @@ export function TrafficAdmin() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetchStats({ data: { range, filter, includeSelf } })
+    fetchStats({ data: { range, filter, includeSelf, tzOffsetMinutes: new Date().getTimezoneOffset() } })
       .then((res) => { if (!cancelled) setStats(res); })
       .catch((e) => { if (!cancelled) setError(e?.message ?? "Failed to load traffic stats"); })
       .finally(() => { if (!cancelled) setLoading(false); });
