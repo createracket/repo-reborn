@@ -32,12 +32,23 @@ export const registerSpotlightGuestInterest = createServerFn({ method: "POST" })
     const page = row as { id: string } | null;
     if (!page) return { ok: false as const };
 
-    await supabaseAdmin
-      .from("spotlight_access_leads")
-      .insert({ partner_page_id: page.id, email: data.email.toLowerCase() });
+    const { error } = await supabaseAdmin
+      .from("spotlight_interests")
+      .insert({
+        partner_page_id: page.id,
+        user_id: null,
+        guest_email: data.email.toLowerCase(),
+        guest_name: data.name ?? null,
+      } as never);
+
+    // Duplicate registration is still a success from the visitor's point of view.
+    if (error && !error.message.toLowerCase().includes("duplicate")) {
+      return { ok: false as const };
+    }
 
     return { ok: true as const };
   });
+
 
 const PAGE_FIELDS =
   "id, slug, type, headline, subtitle, intro, host_bio, partnership_pitch, eoi_opportunities, audience_segments, links, published, header_image_url, profile_image_url, total_followers, total_streams, monthly_streams, avg_reach, avg_engagement";
