@@ -764,6 +764,7 @@ export async function spotifyArtistCore(data: { url: string }): Promise<SpotifyA
       followers,
       monthly_listeners,
       total_streams,
+      genres,
       avatar_url: await mirrorOrKeep(avatar_url, "spotify"),
     };
   }
