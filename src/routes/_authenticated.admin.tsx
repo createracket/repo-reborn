@@ -175,6 +175,30 @@ function AdminPage() {
   const activeSpotlights = spotlights.filter((s) => !s.archived);
   const archivedSpotlights = spotlights.filter((s) => !!s.archived);
 
+  const unhandledContactCount =
+    contacts.filter((c) => !c.handled).length + interests.filter((i) => !i.handled).length;
+  const spotlightById = new Map(spotlights.map((s) => [s.id, s]));
+
+  async function setInterestHandled(id: string, handled: boolean) {
+    setInterests((rows) => rows.map((r) => (r.id === id ? { ...r, handled } : r)));
+    const { error } = await supabase.from("spotlight_interests" as any).update({ handled } as any).eq("id", id);
+    if (error) {
+      setInterests((rows) => rows.map((r) => (r.id === id ? { ...r, handled: !handled } : r)));
+      toast.error(error.message);
+    }
+  }
+
+  async function setContactHandled(id: string, handled: boolean) {
+    setContacts((rows) => rows.map((r) => (r.id === id ? { ...r, handled } : r)));
+    const { error } = await supabase.from("contact_messages").update({ handled }).eq("id", id);
+    if (error) {
+      setContacts((rows) => rows.map((r) => (r.id === id ? { ...r, handled: !handled } : r)));
+      toast.error(error.message);
+    }
+  }
+
+
+
   async function setSpotlightArchived(s: Spotlight, archived: boolean) {
     const patch: Record<string, any> = archived
       ? { archived: true, published: false, dashboard_visible: false }
