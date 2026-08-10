@@ -436,6 +436,9 @@ function AdminPage() {
               <Link to="/roster-builder">Roster Builder →</Link>
             </Button>
             <Button asChild variant="outline">
+              <Link to="/briefs">Briefs →</Link>
+            </Button>
+            <Button asChild variant="outline">
               <Link to="/campaign-reports">Campaign Reports →</Link>
             </Button>
             <Button asChild variant="outline">
