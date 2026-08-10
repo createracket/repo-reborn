@@ -560,7 +560,17 @@ function PublicRosterPage() {
                           );
                         })}
 
+                        </div>
+                        {!roster.hide_statuses && (
+                          <Badge
+                            variant="outline"
+                            className={`shrink-0 px-3 py-1 text-[10px] uppercase tracking-[0.11em] ${STATUS_BADGE_CLASS}`}
+                          >
+                            {STATUS_LABEL[it.status] ?? "In Review"}
+                          </Badge>
+                        )}
                       </div>
+
 
                       {it.vibe && (
                         <p className="mt-2.5 rounded-xl border border-border/60 bg-muted/30 px-3 py-2 text-sm text-foreground">
