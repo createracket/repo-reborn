@@ -137,7 +137,7 @@ export const getTrafficStats = createServerFn({ method: "POST" })
         reasonCounts.set(reason, (reasonCounts.get(reason) ?? 0) + 1);
       }
 
-      const dayKey = r.created_at.slice(0, 10);
+      const dayKey = bucketKey(r.created_at);
       const bucket = dayMap.get(dayKey);
       if (bucket) {
         bucket.pageviews++;
@@ -167,8 +167,9 @@ export const getTrafficStats = createServerFn({ method: "POST" })
         humanPageviews,
         botPageviews,
       },
+      granularity: hourly ? ("hour" as const) : ("day" as const),
       daily: Array.from(dayMap.entries()).map(([date, v]) => ({
-        date, pageviews: v.pageviews, visitors: v.visitors.size, bots: v.bots,
+        date, label: bucketLabel(date), pageviews: v.pageviews, visitors: v.visitors.size, bots: v.bots,
       })),
       topPages: Array.from(pageCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 15)
         .map(([path, views]) => ({ path, views })),
