@@ -1373,23 +1373,41 @@ function SpotlightForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
-  // --- AI draft from a pasted email / info dump ---
+  // --- AI draft from a pasted email / info dump (+ live social enrichment) ---
   const draftSpotlight = useServerFn(draftSpotlightFromText);
   const [aiText, setAiText] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
   const [aiSnapshot, setAiSnapshot] = useState<typeof form | null>(null);
   const [aiFilled, setAiFilled] = useState<string[]>([]);
+  const [aiHandles, setAiHandles] = useState({
+    instagram: "",
+    tiktok: "",
+    youtube: "",
+    x: "",
+    twitch: "",
+    spotify: "",
+  });
 
   async function runAiDraft() {
     const text = aiText.trim();
-    if (text.length < 40) {
-      toast.error("Paste a bit more detail first (at least a few sentences).");
+    const socials = Object.fromEntries(
+      Object.entries(aiHandles)
+        .map(([k, v]) => [k, v.trim()])
+        .filter(([, v]) => v),
+    ) as Partial<typeof aiHandles>;
+    const hasHandles = Object.keys(socials).length > 0;
+    if (text.length < 40 && !hasHandles) {
+      toast.error("Paste a bit more detail, or add at least one social handle.");
       return;
     }
     setAiBusy(true);
     try {
-      const { draft } = await draftSpotlight({
-        data: { text: text.slice(0, 20000), ...(form.headline ? { artistName: form.headline } : {}) },
+      const { draft, enrichment } = await draftSpotlight({
+        data: {
+          text: text.slice(0, 20000),
+          ...(hasHandles ? { socials } : {}),
+          ...(form.headline ? { artistName: form.headline } : {}),
+        },
       });
       const snapshot = form;
       const filled: string[] = [];
