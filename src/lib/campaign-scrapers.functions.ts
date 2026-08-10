@@ -577,6 +577,7 @@ type SpotifyArtistResult =
       followers: number | null;
       monthly_listeners: number | null;
       total_streams: number | null;
+      genres?: string[];
       avatar_url?: string | null;
     }
   | { ok: false; error: string };
@@ -708,7 +709,7 @@ async function fetchKworbTotalStreams(artistId: string): Promise<number | null> 
  * Scrape Spotify artist metrics: followers (Web API), monthly listeners
  * (open.spotify.com), and estimated total streams (Kworb).
  */
-async function spotifyArtistCore(data: { url: string }): Promise<SpotifyArtistResult> {
+export async function spotifyArtistCore(data: { url: string }): Promise<SpotifyArtistResult> {
   {
     const artistId = extractSpotifyArtistId(data.url);
     if (!artistId)
@@ -718,6 +719,7 @@ async function spotifyArtistCore(data: { url: string }): Promise<SpotifyArtistRe
     let name: string | null = null;
     let followers: number | null = null;
     let avatar_url: string | null = null;
+    let genres: string[] = [];
 
     if (token) {
       const r = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
@@ -728,10 +730,12 @@ async function spotifyArtistCore(data: { url: string }): Promise<SpotifyArtistRe
           name?: string;
           followers?: { total?: number };
           images?: Array<{ url?: string }>;
+          genres?: string[];
         };
         name = j.name ?? null;
         followers = j.followers?.total ?? null;
         avatar_url = j.images?.[0]?.url ?? null;
+        genres = Array.isArray(j.genres) ? j.genres.slice(0, 6) : [];
       }
     }
 
@@ -760,6 +764,7 @@ async function spotifyArtistCore(data: { url: string }): Promise<SpotifyArtistRe
       followers,
       monthly_listeners,
       total_streams,
+      genres,
       avatar_url: await mirrorOrKeep(avatar_url, "spotify"),
     };
   }
@@ -921,7 +926,7 @@ export type ProfileSyncResult = {
   apple?: AppleMusicArtistResult | null;
 };
 
-async function scrapeProfileByUrl(url: string): Promise<ProfileResult> {
+export async function scrapeProfileByUrl(url: string): Promise<ProfileResult> {
   const platform = detectProfilePlatform(url);
   if (platform === "instagram") return scrapeInstagramProfile(url);
   if (platform === "tiktok") return scrapeTikTokProfile(url);

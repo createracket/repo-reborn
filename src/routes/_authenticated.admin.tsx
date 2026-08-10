@@ -1373,23 +1373,41 @@ function SpotlightForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
-  // --- AI draft from a pasted email / info dump ---
+  // --- AI draft from a pasted email / info dump (+ live social enrichment) ---
   const draftSpotlight = useServerFn(draftSpotlightFromText);
   const [aiText, setAiText] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
   const [aiSnapshot, setAiSnapshot] = useState<typeof form | null>(null);
   const [aiFilled, setAiFilled] = useState<string[]>([]);
+  const [aiHandles, setAiHandles] = useState({
+    instagram: "",
+    tiktok: "",
+    youtube: "",
+    x: "",
+    twitch: "",
+    spotify: "",
+  });
 
   async function runAiDraft() {
     const text = aiText.trim();
-    if (text.length < 40) {
-      toast.error("Paste a bit more detail first (at least a few sentences).");
+    const socials = Object.fromEntries(
+      Object.entries(aiHandles)
+        .map(([k, v]) => [k, v.trim()])
+        .filter(([, v]) => v),
+    ) as Partial<typeof aiHandles>;
+    const hasHandles = Object.keys(socials).length > 0;
+    if (text.length < 40 && !hasHandles) {
+      toast.error("Paste a bit more detail, or add at least one social handle.");
       return;
     }
     setAiBusy(true);
     try {
-      const { draft } = await draftSpotlight({
-        data: { text: text.slice(0, 20000), ...(form.headline ? { artistName: form.headline } : {}) },
+      const { draft, enrichment } = await draftSpotlight({
+        data: {
+          text: text.slice(0, 20000),
+          ...(hasHandles ? { socials } : {}),
+          ...(form.headline ? { artistName: form.headline } : {}),
+        },
       });
       const snapshot = form;
       const filled: string[] = [];
@@ -1419,6 +1437,17 @@ function SpotlightForm({
         if (!f.youtube) put("youtube", draft.youtube, "YouTube");
         if (!f.spotify) put("spotify", draft.spotify, "Spotify");
         if (!f.contact) put("contact", draft.contact, "Contact");
+        // Live-fetched links and metrics win over anything typed loosely.
+        if (enrichment.links.x) put("x", enrichment.links.x, "X");
+        if (enrichment.links.twitch) put("twitch", enrichment.links.twitch, "Twitch");
+        if (enrichment.total_followers != null)
+          put("total_followers", String(enrichment.total_followers), "Total followers");
+        if (enrichment.monthly_streams != null)
+          put("monthly_streams", String(enrichment.monthly_streams), "Monthly streams");
+        if (enrichment.total_streams != null)
+          put("total_streams", String(enrichment.total_streams), "Total streams");
+        if (!f.profile_image_url && enrichment.avatar_url)
+          put("profile_image_url", enrichment.avatar_url, "Profile image");
         return next;
       });
       if (filled.length === 0) {
@@ -1427,6 +1456,7 @@ function SpotlightForm({
       }
       setAiSnapshot(snapshot);
       setAiFilled(filled);
+      if (enrichment.errors.length) toast.warning(enrichment.errors.join(" · "));
       toast.success(`Draft applied — review before saving (${filled.length} fields).`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "AI draft failed");
@@ -1750,9 +1780,34 @@ function SpotlightForm({
             </Label>
             <p className="text-xs text-muted-foreground">
               Drop the raw email here and AI will draft the headline, intro, bio, partnership pitch,
-              EOI opportunities and audience segments below. Nothing saves until you hit save, so
-              review and edit first. Images, metrics, access code and publish state are untouched.
+              EOI opportunities and audience segments below. Add social handles too and we fetch the
+              live profiles first, so the bio is grounded in real links and follower counts. Nothing
+              saves until you hit save, so review and edit first.
             </p>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {(
+                [
+                  ["instagram", "Instagram"],
+                  ["tiktok", "TikTok"],
+                  ["youtube", "YouTube"],
+                  ["x", "X"],
+                  ["twitch", "Twitch"],
+                  ["spotify", "Spotify"],
+                ] as const
+              ).map(([key, label]) => (
+                <div key={key} className="space-y-1">
+                  <Label htmlFor={`ai-handle-${key}`} className="text-xs text-muted-foreground">
+                    {label}
+                  </Label>
+                  <Input
+                    id={`ai-handle-${key}`}
+                    value={aiHandles[key]}
+                    onChange={(e) => setAiHandles((h) => ({ ...h, [key]: e.target.value }))}
+                    placeholder={key === "spotify" ? "Artist URL" : "@handle or URL"}
+                  />
+                </div>
+              ))}
+            </div>
             <Textarea
               id="ai-dump"
               rows={6}
@@ -1760,6 +1815,7 @@ function SpotlightForm({
               onChange={(e) => setAiText(e.target.value)}
               placeholder="Paste the artist or manager's email here…"
             />
+
             <div className="flex flex-wrap items-center gap-2">
               <Button type="button" size="sm" onClick={runAiDraft} disabled={aiBusy}>
                 {aiBusy ? "Drafting…" : "Draft spotlight with AI"}
