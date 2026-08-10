@@ -169,11 +169,9 @@ async function enrichSocials(
   return out;
 }
 
-function describeEnrichment(
-  enrichment: SpotlightEnrichment,
-  spotifyName: string | null,
-  spotifyGenres: string[],
-): string | null {
+function describeEnrichment(enrichment: SpotlightEnrichment): string | null {
+  const spotifyName = enrichment.spotify_name ?? null;
+  const spotifyGenres = enrichment.spotify_genres ?? [];
   const lines: string[] = [];
   for (const p of Object.keys(PLATFORM_LABEL) as Platform[]) {
     const url = enrichment.links[p];
