@@ -709,7 +709,7 @@ async function fetchKworbTotalStreams(artistId: string): Promise<number | null> 
  * Scrape Spotify artist metrics: followers (Web API), monthly listeners
  * (open.spotify.com), and estimated total streams (Kworb).
  */
-async function spotifyArtistCore(data: { url: string }): Promise<SpotifyArtistResult> {
+export async function spotifyArtistCore(data: { url: string }): Promise<SpotifyArtistResult> {
   {
     const artistId = extractSpotifyArtistId(data.url);
     if (!artistId)
