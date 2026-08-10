@@ -972,7 +972,7 @@ function DashboardPage() {
                                 ) : null}
                                 <div className="mt-auto flex items-center justify-between gap-2 pt-1">
                                   <p className="truncate text-xs text-muted-foreground">
-                                    {sp.type ? `· ${sp.type}` : ""}
+                                    {sp.type ?? ""}
                                   </p>
                                   <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
                                     Spotlight
