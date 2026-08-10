@@ -518,18 +518,12 @@ function PublicRosterPage() {
                               {categoryLabel(c)}
                             </span>
                           ))}
-                          {!roster.hide_statuses && (
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] uppercase tracking-wider ${STATUS_BADGE_CLASS}`}
-                            >
-                              {STATUS_LABEL[it.status] ?? "In Review"}
-                            </Badge>
-                          )}
                         </div>
                       </div>
 
-                      <div className="mt-2.5 flex flex-wrap gap-1.5 text-xs">
+                      <div className="mt-2.5 flex flex-wrap items-end justify-between gap-2">
+                        <div className="flex flex-wrap gap-1.5 text-xs">
+
                         {stats.map(([label, count, url]) => {
                           if (count == null && !url) return null;
                           const content = (
