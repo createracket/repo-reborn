@@ -69,9 +69,11 @@ type Spotlight = {
 };
 
 type SpotlightInterest = {
-  id: string; created_at: string; partner_page_id: string; user_id: string;
+  id: string; created_at: string; partner_page_id: string; user_id: string | null;
+  guest_email?: string | null; guest_name?: string | null; handled?: boolean | null;
   profile?: { display_name: string | null; email: string | null } | null;
 };
+
 
 function AdminPage() {
   const navigate = useNavigate();
