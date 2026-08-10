@@ -145,6 +145,8 @@ async function enrichSocials(
       if (r.spotify.monthly_listeners != null) out.monthly_streams = r.spotify.monthly_listeners;
       if (r.spotify.total_streams != null) out.total_streams = r.spotify.total_streams;
       if (!out.avatar_url && r.spotify.avatar_url) out.avatar_url = r.spotify.avatar_url;
+      if (r.spotify.name) out.spotify_name = r.spotify.name;
+      if (r.spotify.genres?.length) out.spotify_genres = r.spotify.genres;
       continue;
     }
     if ("profile" in r && r.profile) {
