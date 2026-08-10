@@ -1437,6 +1437,17 @@ function SpotlightForm({
         if (!f.youtube) put("youtube", draft.youtube, "YouTube");
         if (!f.spotify) put("spotify", draft.spotify, "Spotify");
         if (!f.contact) put("contact", draft.contact, "Contact");
+        // Live-fetched links and metrics win over anything typed loosely.
+        if (enrichment.links.x) put("x", enrichment.links.x, "X");
+        if (enrichment.links.twitch) put("twitch", enrichment.links.twitch, "Twitch");
+        if (enrichment.total_followers != null)
+          put("total_followers", String(enrichment.total_followers), "Total followers");
+        if (enrichment.monthly_streams != null)
+          put("monthly_streams", String(enrichment.monthly_streams), "Monthly streams");
+        if (enrichment.total_streams != null)
+          put("total_streams", String(enrichment.total_streams), "Total streams");
+        if (!f.profile_image_url && enrichment.avatar_url)
+          put("profile_image_url", enrichment.avatar_url, "Profile image");
         return next;
       });
       if (filled.length === 0) {
@@ -1445,6 +1456,7 @@ function SpotlightForm({
       }
       setAiSnapshot(snapshot);
       setAiFilled(filled);
+      if (enrichment.errors.length) toast.warning(enrichment.errors.join(" · "));
       toast.success(`Draft applied — review before saving (${filled.length} fields).`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "AI draft failed");
