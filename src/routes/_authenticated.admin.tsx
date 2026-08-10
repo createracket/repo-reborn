@@ -715,11 +715,8 @@ function AdminPage() {
 
 
           <TabsContent value="contact" className="mt-6 space-y-6">
-            <section className="space-y-3">
-              <h3 className="text-xs uppercase tracking-wider text-muted-foreground">
-                Spotlight interest ({interests.length})
-              </h3>
-              {interests.length === 0 ? <Empty /> : interests.map((i) => {
+            {(() => {
+              const renderInterest = (i: SpotlightInterest) => {
                 const s = spotlightById.get(i.partner_page_id);
                 const name = i.profile?.display_name ?? i.guest_name ?? (i.guest_email ? "Guest" : "Unnamed user");
                 const email = i.profile?.email ?? i.guest_email ?? null;
@@ -758,14 +755,9 @@ function AdminPage() {
                     </CardHeader>
                   </Card>
                 );
-              })}
-            </section>
+              };
 
-            <section className="space-y-3">
-              <h3 className="text-xs uppercase tracking-wider text-muted-foreground">
-                Contact messages ({contacts.length})
-              </h3>
-              {contacts.length === 0 ? <Empty /> : contacts.map((m) => (
+              const renderMessage = (m: ContactMsg) => (
                 <Card key={m.id}>
                   <CardHeader>
                     <div className="flex flex-wrap justify-between gap-2">
@@ -799,9 +791,55 @@ function AdminPage() {
                     <p className="whitespace-pre-wrap text-muted-foreground">{m.message}</p>
                   </CardContent>
                 </Card>
-              ))}
-            </section>
+              );
+
+              const openInterests = interests.filter((i) => !i.handled);
+              const openMessages = contacts.filter((m) => !m.handled);
+              const doneInterests = interests.filter((i) => i.handled);
+              const doneMessages = contacts.filter((m) => m.handled);
+              const doneCount = doneInterests.length + doneMessages.length;
+
+              return (
+                <>
+                  <section className="space-y-3">
+                    <h3 className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Spotlight interest ({openInterests.length})
+                    </h3>
+                    {openInterests.length === 0 ? <Empty /> : openInterests.map(renderInterest)}
+                  </section>
+
+                  <section className="space-y-3">
+                    <h3 className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Contact messages ({openMessages.length})
+                    </h3>
+                    {openMessages.length === 0 ? <Empty /> : openMessages.map(renderMessage)}
+                  </section>
+
+                  {doneCount > 0 && (
+                    <section className="space-y-3">
+                      <button
+                        type="button"
+                        onClick={() => setHandledOpen((v) => !v)}
+                        className="flex w-full items-center justify-between rounded-lg border border-border/60 bg-muted/40 px-4 py-3 text-left transition-colors hover:bg-muted"
+                      >
+                        <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                          Handled ({doneCount})
+                        </span>
+                        {handledOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                      </button>
+                      {handledOpen && (
+                        <div className="space-y-3">
+                          {doneInterests.map(renderInterest)}
+                          {doneMessages.map(renderMessage)}
+                        </div>
+                      )}
+                    </section>
+                  )}
+                </>
+              );
+            })()}
           </TabsContent>
+
 
 
           <TabsContent value="mailing" className="mt-6">
