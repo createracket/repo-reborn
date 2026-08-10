@@ -702,7 +702,7 @@ function SpotlightPage() {
           return (
             <section className="mt-16">
               <h2 className="font-display text-3xl">{sectionLabel("videos", "Watch")}</h2>
-              <div className={`mt-4 grid gap-6 ${videos.length >= 4 ? "sm:grid-cols-2 md:grid-cols-4" : "md:grid-cols-3"}`}>
+              <div className={`mt-4 grid gap-3 sm:gap-6 ${videos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : "md:grid-cols-3"}`}>
                 {videos.map((v, i) => (
                   <ClipCard
                     key={i}
@@ -724,7 +724,7 @@ function SpotlightPage() {
           return (
             <section className="mt-12">
               <div
-                className={`grid gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}
+                className={`grid gap-3 sm:gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}
               >
                 {photos.map((src, i) => (
                   <div
