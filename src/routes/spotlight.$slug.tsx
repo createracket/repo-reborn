@@ -38,6 +38,10 @@ type PartnerLinks = {
   video3_cover?: string;
   video4?: string;
   video4_cover?: string;
+  photo1?: string;
+  photo2?: string;
+  photo3?: string;
+  photo4?: string;
   tiktok?: string;
   youtube?: string;
   apple_music?: string;
@@ -706,6 +710,30 @@ function SpotlightPage() {
                     provider={v.embed.provider}
                     poster={v.cover ?? posters[v.embed.href] ?? null}
                   />
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+        {/* Photos */}
+        {(() => {
+          const photos = [links.photo1, links.photo2, links.photo3, links.photo4].filter(
+            (u): u is string => !!u && u.trim().length > 0,
+          );
+          if (photos.length === 0) return null;
+          return (
+            <section className="mt-12">
+              <div
+                className={`grid gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}
+              >
+                {photos.map((src, i) => (
+                  <div
+                    key={i}
+                    className="overflow-hidden rounded-3xl border border-border/60 bg-muted/40"
+                    style={{ aspectRatio: "4 / 5" }}
+                  >
+                    <img src={src} alt="" loading="lazy" className="size-full object-cover" />
+                  </div>
                 ))}
               </div>
             </section>

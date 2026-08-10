@@ -1475,6 +1475,10 @@ function SpotlightForm({
     video2_cover: editData?.links?.video2_cover ?? "",
     video3_cover: editData?.links?.video3_cover ?? "",
     video4_cover: editData?.links?.video4_cover ?? "",
+    photo1: editData?.links?.photo1 ?? "",
+    photo2: editData?.links?.photo2 ?? "",
+    photo3: editData?.links?.photo3 ?? "",
+    photo4: editData?.links?.photo4 ?? "",
     header_image_url: editData?.header_image_url ?? "",
     profile_image_url: editData?.profile_image_url ?? "",
     published: editData?.published ?? false,
@@ -1822,6 +1826,10 @@ function SpotlightForm({
         video2_cover: form.video2_cover,
         video3_cover: form.video3_cover,
         video4_cover: form.video4_cover,
+        photo1: form.photo1,
+        photo2: form.photo2,
+        photo3: form.photo3,
+        photo4: form.photo4,
         instagram_extra: extraLinks.instagram.map((s) => s.trim()).filter(Boolean),
         tiktok_extra: extraLinks.tiktok.map((s) => s.trim()).filter(Boolean),
         youtube_extra: extraLinks.youtube.map((s) => s.trim()).filter(Boolean),
@@ -1896,6 +1904,7 @@ function SpotlightForm({
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "", video4: "",
         video1_cover: "", video2_cover: "", video3_cover: "", video4_cover: "",
+        photo1: "", photo2: "", photo3: "", photo4: "",
         header_image_url: "", profile_image_url: "", published: false,
         access_code: "", access_code_label: "Access code",
         total_followers: "", total_streams: "", monthly_streams: "",
@@ -2334,6 +2343,40 @@ function SpotlightForm({
                       aspect="9 / 16"
                       hint="9:16 preferred, under 8MB."
                       folder="video-covers"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </details>
+          <details className="!order-4 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+              Featured photos
+              <span className="ml-2 text-xs font-normal text-muted-foreground">(optional, up to four 4:5 images)</span>
+            </summary>
+            <div className="flex w-full flex-col gap-4 px-4">
+              <p className="text-xs text-muted-foreground">
+                Upload up to four images. They show in a row under the Watch section on the spotlight page. Portrait
+                4:5 works best. Uploads land in the public spotlight images bucket.
+              </p>
+              {([1, 2, 3, 4] as const).map((n) => {
+                const key = `photo${n}` as "photo1" | "photo2" | "photo3" | "photo4";
+                return (
+                  <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
+                    <Label htmlFor={key}>Photo {n}</Label>
+                    <Input
+                      id={key}
+                      value={form[key]}
+                      onChange={(e) => set(key, e.target.value)}
+                      placeholder="Image URL (optional)"
+                    />
+                    <ImageUploader
+                      label={`Photo ${n}`}
+                      value={form[key]}
+                      onChange={(url) => set(key, url)}
+                      aspect="4 / 5"
+                      hint="4:5 preferred, under 8MB."
+                      folder="spotlights"
                     />
                   </div>
                 );
