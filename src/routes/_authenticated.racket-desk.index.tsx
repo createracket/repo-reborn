@@ -44,7 +44,7 @@ function Dashboard() {
   });
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
+    <div>
       <section className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="text-xs uppercase tracking-[0.2em] text-lime">Morning brief · {dateLabel}</div>

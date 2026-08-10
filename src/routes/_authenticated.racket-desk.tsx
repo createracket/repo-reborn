@@ -1,7 +1,8 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Radio } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/racket-desk")({
   head: () => ({
@@ -55,56 +56,55 @@ function RacketDeskLayout() {
   }
   if (!allowed) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-24 text-center">
-        <h1 className="font-display text-3xl">Admin only</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          The Racket Desk is an internal tool. You need admin access to view it.
-        </p>
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <main className="mx-auto max-w-xl px-4 py-24 text-center">
+          <h1 className="font-display text-3xl">Admin only</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            The Racket Desk is an internal tool. You need admin access to view it.
+          </p>
+        </main>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur">
-        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-4 px-4 py-3 sm:px-6">
-          <Link to="/racket-desk" className="flex items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-lime text-primary-foreground">
-              <Radio className="h-4 w-4" strokeWidth={2.5} />
-            </span>
-            <div className="leading-tight">
-              <div className="font-display text-sm">Racket Desk</div>
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Admin preview</div>
-            </div>
-          </Link>
-          <nav className="flex flex-wrap items-center gap-1.5 text-xs">
-            {NAV.map((item) => {
-              const active = item.exact ? path === item.to : path.startsWith(item.to);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={`rounded-full border px-3 py-1.5 transition ${
-                    active
-                      ? "border-lime bg-lime font-semibold text-primary-foreground"
-                      : "border-border text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-          <Link
-            to="/admin"
-            className="ml-auto rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
-          >
-            ← Back to admin
-          </Link>
+      <SiteHeader />
+      <main className="container mx-auto px-4 py-12">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
+            <h1 className="mt-1 font-display text-4xl md:text-5xl">Racket Desk</h1>
+            <p className="mt-2 text-muted-foreground">Music &amp; culture intelligence, internal preview.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline">
+              <Link to="/admin">← Back to admin</Link>
+            </Button>
+          </div>
         </div>
-      </header>
-      <main>
-        <Outlet />
+
+        <div className="inline-flex max-w-full flex-wrap items-center justify-start gap-1 rounded-lg bg-muted p-1 text-muted-foreground">
+          {NAV.map((item) => {
+            const active = item.exact ? path === item.to : path.startsWith(item.to);
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all ${
+                  active ? "bg-background text-foreground shadow" : "hover:text-foreground"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="mt-6">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

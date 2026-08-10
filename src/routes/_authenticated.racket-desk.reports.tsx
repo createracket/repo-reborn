@@ -84,7 +84,7 @@ function ReportsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
+    <div>
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-lime">
         <FileText className="h-3.5 w-3.5" /> Reports
       </div>
