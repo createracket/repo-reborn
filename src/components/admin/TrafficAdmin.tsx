@@ -270,14 +270,14 @@ function DailyChart({ data }: { data: TrafficStats["daily"] }) {
             <div
               className="w-full rounded-t bg-primary/70 transition group-hover:bg-primary"
               style={{ height: `${(d.pageviews / max) * 100}%` }}
-              title={`${d.date} · ${d.pageviews} views · ${d.visitors} visitors · ${d.bots} bot`}
+              title={`${d.label} · ${d.pageviews} views · ${d.visitors} visitors · ${d.bots} bot`}
             />
           </div>
         ))}
       </div>
       <div className="flex justify-between text-[10px] text-muted-foreground">
-        <span>{data[0]?.date}</span>
-        <span>{data[data.length - 1]?.date}</span>
+        <span>{data[0]?.label}</span>
+        <span>{data[data.length - 1]?.label}</span>
       </div>
     </div>
   );
