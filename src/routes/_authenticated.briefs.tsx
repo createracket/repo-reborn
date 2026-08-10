@@ -269,7 +269,7 @@ function BriefsPage() {
                 <CardContent className="space-y-4">{archived.map(renderCard)}</CardContent>
               ) : null}
             </Card>
-          )}
+          ) : null}
         </div>
       </main>
       <SiteFooter />
