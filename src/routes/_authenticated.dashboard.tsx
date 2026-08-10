@@ -677,7 +677,7 @@ function DashboardPage() {
                           </div>
                           <BriefStatusBadge
                             status={b.status}
-                            className="bg-secondary text-secondary-foreground border-transparent hover:bg-secondary"
+                            className="bg-secondary !text-white dark:!text-white border-transparent hover:bg-secondary"
                             href={
                               b.status === "review_your_roster" && b.linked_roster_slug && b.linked_roster_published
                                 ? `/roster/${b.linked_roster_slug}`
