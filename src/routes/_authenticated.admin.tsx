@@ -133,7 +133,7 @@ function AdminPage() {
         supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, linked_report_id, currency, transparency").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
-        supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id").order("created_at", { ascending: false }),
+        supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
         (supabase as any).rpc("admin_campaign_brief_emails"),
       ]);
       const emailById = new Map<string, string | null>();
@@ -148,17 +148,18 @@ function AdminPage() {
 
       // Hydrate interests with profile info (display name + email)
       const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
-      const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id)));
+      const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id).filter((v): v is string => !!v)));
       if (userIds.length) {
         const { data: profs } = await supabase
           .from("profiles")
           .select("id, display_name, email")
           .in("id", userIds);
         const map = new Map((profs ?? []).map((p: any) => [p.id, { display_name: p.display_name, email: p.email }]));
-        setInterests(rawInterests.map((i) => ({ ...i, profile: map.get(i.user_id) ?? null })));
+        setInterests(rawInterests.map((i) => ({ ...i, profile: (i.user_id ? map.get(i.user_id) : null) ?? null })));
       } else {
         setInterests(rawInterests);
       }
+
       setChecking(false);
     })();
   }, [navigate]);
