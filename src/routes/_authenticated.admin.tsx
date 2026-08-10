@@ -1780,9 +1780,34 @@ function SpotlightForm({
             </Label>
             <p className="text-xs text-muted-foreground">
               Drop the raw email here and AI will draft the headline, intro, bio, partnership pitch,
-              EOI opportunities and audience segments below. Nothing saves until you hit save, so
-              review and edit first. Images, metrics, access code and publish state are untouched.
+              EOI opportunities and audience segments below. Add social handles too and we fetch the
+              live profiles first, so the bio is grounded in real links and follower counts. Nothing
+              saves until you hit save, so review and edit first.
             </p>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {(
+                [
+                  ["instagram", "Instagram"],
+                  ["tiktok", "TikTok"],
+                  ["youtube", "YouTube"],
+                  ["x", "X"],
+                  ["twitch", "Twitch"],
+                  ["spotify", "Spotify"],
+                ] as const
+              ).map(([key, label]) => (
+                <div key={key} className="space-y-1">
+                  <Label htmlFor={`ai-handle-${key}`} className="text-xs text-muted-foreground">
+                    {label}
+                  </Label>
+                  <Input
+                    id={`ai-handle-${key}`}
+                    value={aiHandles[key]}
+                    onChange={(e) => setAiHandles((h) => ({ ...h, [key]: e.target.value }))}
+                    placeholder={key === "spotify" ? "Artist URL" : "@handle or URL"}
+                  />
+                </div>
+              ))}
+            </div>
             <Textarea
               id="ai-dump"
               rows={6}
@@ -1790,6 +1815,7 @@ function SpotlightForm({
               onChange={(e) => setAiText(e.target.value)}
               placeholder="Paste the artist or manager's email here…"
             />
+
             <div className="flex flex-wrap items-center gap-2">
               <Button type="button" size="sm" onClick={runAiDraft} disabled={aiBusy}>
                 {aiBusy ? "Drafting…" : "Draft spotlight with AI"}
