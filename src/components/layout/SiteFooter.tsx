@@ -96,7 +96,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[#2b2b2b]/20 pt-6 text-xs text-[#2b2b2b]/70 sm:flex-row">
-          <span>© {new Date().getFullYear()} Create Racket. Cool collabs</span>
+          <span>© {new Date().getFullYear()} Create Racket. Unskippable collabs</span>
           <nav className="flex items-center gap-4">
             <Link to="/terms" className="hover:text-purple">
               Terms
