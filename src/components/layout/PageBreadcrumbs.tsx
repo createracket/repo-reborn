@@ -1,6 +1,8 @@
-import { useRouterState, Link } from "@tanstack/react-router";
+import { useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 const ROUTE_LABELS: Record<string, string> = {
   "/dashboard": "Dashboard",
