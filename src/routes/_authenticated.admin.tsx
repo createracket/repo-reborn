@@ -169,6 +169,7 @@ function AdminPage() {
     const { data } = await supabase
       .from("partner_pages" as any)
       .select("*")
+      .eq("section", "spotlight")
       .order("created_at", { ascending: false });
     setSpotlights((data as unknown as Spotlight[]) ?? []);
   }
