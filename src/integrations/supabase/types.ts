@@ -927,6 +927,7 @@ export type Database = {
           partnership_pitch: string | null
           profile_image_url: string | null
           published: boolean
+          section: string
           slug: string
           subtitle: string | null
           total_followers: number | null
@@ -957,6 +958,7 @@ export type Database = {
           partnership_pitch?: string | null
           profile_image_url?: string | null
           published?: boolean
+          section?: string
           slug: string
           subtitle?: string | null
           total_followers?: number | null
@@ -987,6 +989,7 @@ export type Database = {
           partnership_pitch?: string | null
           profile_image_url?: string | null
           published?: boolean
+          section?: string
           slug?: string
           subtitle?: string | null
           total_followers?: number | null
