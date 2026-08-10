@@ -113,7 +113,7 @@ function categoryBadgeClass(value: string) {
   return CATEGORY_BADGE[value] ?? "bg-primary/25 text-primary border border-primary/40";
 }
 
-const STATUS_BADGE_CLASS = "border-border/70 bg-muted/40 text-muted-foreground";
+const STATUS_BADGE_CLASS = "border-foreground/50 bg-muted/50 font-semibold text-foreground/90";
 
 
 
