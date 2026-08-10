@@ -2357,7 +2357,7 @@ function SpotlightForm({
             <div className="flex w-full flex-col gap-4 px-4">
               <p className="text-xs text-muted-foreground">
                 Upload up to four images. They show in a row under the Watch section on the spotlight page. Portrait
-                4:5 works best. Uploads land in the <code>photos/</code> folder of the public spotlight images bucket.
+                4:5 works best. Uploads land in the public spotlight images bucket.
               </p>
               {([1, 2, 3, 4] as const).map((n) => {
                 const key = `photo${n}` as "photo1" | "photo2" | "photo3" | "photo4";
@@ -2376,7 +2376,7 @@ function SpotlightForm({
                       onChange={(url) => set(key, url)}
                       aspect="4 / 5"
                       hint="4:5 preferred, under 8MB."
-                      folder="photos"
+                      folder="spotlights"
                     />
                   </div>
                 );
