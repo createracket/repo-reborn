@@ -133,7 +133,7 @@ function AdminPage() {
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
         supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, linked_report_id, currency, transparency").order("created_at", { ascending: false }),
-        supabase.from("partner_pages" as any).select("*").order("created_at", { ascending: false }),
+        supabase.from("partner_pages" as any).select("*").eq("section", "spotlight").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
         (supabase as any).rpc("admin_campaign_brief_emails"),
       ]);
@@ -169,6 +169,7 @@ function AdminPage() {
     const { data } = await supabase
       .from("partner_pages" as any)
       .select("*")
+      .eq("section", "spotlight")
       .order("created_at", { ascending: false });
     setSpotlights((data as unknown as Spotlight[]) ?? []);
   }
@@ -433,6 +434,9 @@ function AdminPage() {
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline">
               <Link to="/roster-builder">Roster Builder →</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/briefs">Briefs →</Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/campaign-reports">Campaign Reports →</Link>
@@ -1433,15 +1437,18 @@ function ImageUploader({
   );
 }
 
-function SpotlightForm({
+export function SpotlightForm({
   onCreated,
   editData,
   onCancel,
+  section,
 }: {
   onCreated: () => void;
   editData?: Record<string, any> | null;
   onCancel?: () => void;
+  section?: "spotlight" | "brief";
 }) {
+  const sectionKind = section ?? "spotlight";
   const isEditing = !!editData;
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -1798,6 +1805,7 @@ function SpotlightForm({
     const slug = form.slug.toLowerCase().trim().replace(/\s+/g, "-");
     const payload = {
       slug,
+      section: sectionKind,
       type: form.type || "podcast",
       headline: form.headline,
       subtitle: form.subtitle || null,

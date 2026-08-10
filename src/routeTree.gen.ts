@@ -24,6 +24,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
+import { Route as AuthenticatedBriefsRouteImport } from './routes/_authenticated.briefs'
 import { Route as AuthenticatedCampaignBuilderRouteImport } from './routes/_authenticated.campaign-builder'
 import { Route as AuthenticatedCampaignReportsRouteImport } from './routes/_authenticated.campaign-reports'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
@@ -128,6 +129,11 @@ const TermsRoute = TermsRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedBriefsRoute = AuthenticatedBriefsRouteImport.update({
+  id: '/briefs',
+  path: '/briefs',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedCampaignBuilderRoute =
@@ -313,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/briefs': typeof AuthenticatedBriefsRoute
   '/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -360,6 +367,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/briefs': typeof AuthenticatedBriefsRoute
   '/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -408,6 +416,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/briefs': typeof AuthenticatedBriefsRoute
   '/_authenticated/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/_authenticated/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -457,6 +466,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/admin'
+    | '/briefs'
     | '/campaign-builder'
     | '/campaign-reports'
     | '/dashboard'
@@ -504,6 +514,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/admin'
+    | '/briefs'
     | '/campaign-builder'
     | '/campaign-reports'
     | '/dashboard'
@@ -551,6 +562,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/_authenticated/admin'
+    | '/_authenticated/briefs'
     | '/_authenticated/campaign-builder'
     | '/_authenticated/campaign-reports'
     | '/_authenticated/dashboard'
@@ -725,6 +737,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/briefs': {
+      id: '/_authenticated/briefs'
+      path: '/briefs'
+      fullPath: '/briefs'
+      preLoaderRoute: typeof AuthenticatedBriefsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/campaign-builder': {
@@ -972,6 +991,7 @@ const AuthenticatedRacketDeskRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedBriefsRoute: typeof AuthenticatedBriefsRoute
   AuthenticatedCampaignBuilderRoute: typeof AuthenticatedCampaignBuilderRoute
   AuthenticatedCampaignReportsRoute: typeof AuthenticatedCampaignReportsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -983,6 +1003,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedBriefsRoute: AuthenticatedBriefsRoute,
   AuthenticatedCampaignBuilderRoute: AuthenticatedCampaignBuilderRoute,
   AuthenticatedCampaignReportsRoute: AuthenticatedCampaignReportsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
