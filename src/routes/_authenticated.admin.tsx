@@ -2097,6 +2097,52 @@ export function SpotlightForm({
                 <Label htmlFor="eoi">EOI opportunities (one per line)</Label>
                 <Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} />
               </div>
+              {sectionKind === "brief" ? (
+                <div className="space-y-1.5 md:col-span-2">
+                  <Label htmlFor="dos_donts">Dos and don'ts (one per line)</Label>
+                  <Textarea
+                    id="dos_donts"
+                    rows={4}
+                    value={form.dos_donts}
+                    onChange={(e) => set("dos_donts", e.target.value)}
+                    placeholder={"+ Tag @brand in the caption\nx Don't mention competitors"}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Use the toggles below to switch each line between a green tick and a yellow cross.
+                  </p>
+                  {form.dos_donts.split("\n").some((l: string) => l.trim()) ? (
+                    <div className="space-y-1.5 pt-1">
+                      {form.dos_donts.split("\n").map((line: string, i: number) => {
+                        const item = parseDoLine(line);
+                        if (!item.text) return null;
+                        return (
+                          <div key={i} className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2"
+                              onClick={() => {
+                                const lines = form.dos_donts.split("\n");
+                                const cur = parseDoLine(lines[i] ?? "");
+                                lines[i] = `${cur.kind === "do" ? "x" : "+"} ${cur.text}`;
+                                set("dos_donts", lines.join("\n"));
+                              }}
+                            >
+                              {item.kind === "do" ? (
+                                <Check className="size-3.5 text-lime" />
+                              ) : (
+                                <X className="size-3.5 text-yellow-400" />
+                              )}
+                            </Button>
+                            <span className="text-sm text-muted-foreground">{item.text}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="space-y-1.5">
                 <Label htmlFor="audience">Audience segments (one per line)</Label>
                 <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
