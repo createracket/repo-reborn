@@ -526,11 +526,11 @@ function PublicReportPage() {
         )}
 
         <section className="mt-6 space-y-10">
-          {filteredCreators.length === 0 ? (
+            {filteredCreators.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {monthFilter === "all"
+              {monthFilter === "all" && platformFilter === "all"
                 ? "No creators on this report yet."
-                : "No posts in this month."}
+                : "No posts match this filter."}
             </p>
           ) : report.template === "simple" ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
