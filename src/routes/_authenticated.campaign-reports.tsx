@@ -983,11 +983,20 @@ function ReportDetailView({
         <CardHeader>
           <CardTitle className="font-display text-2xl">Private access code</CardTitle>
           <CardDescription>
-            Set a code to share this report with people who don't have an account. The page stays hidden
-            (and never indexed) until they enter their email and this code. Leave blank for a normal link.
+            Off = link-only: anyone with the link can view it without an email or passcode. It stays out of
+            Google and other search engines either way. On = visitors must enter their email and the code;
+            admins and assigned users always see it normally.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+            <div className="text-sm font-medium">Require code</div>
+            <Switch
+              checked={!!accessCode.trim()}
+              onCheckedChange={(on) => setAccessCode(on ? "REPORT" : "")}
+            />
+          </div>
+          {accessCode.trim() ? (
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="report-access-code-label" className="text-xs">Code name</Label>
@@ -1008,6 +1017,7 @@ function ReportDetailView({
               />
             </div>
           </div>
+          ) : null}
           <div className="flex justify-end">
             <Button type="button" variant="outline" size="sm" onClick={saveAccessCode} disabled={savingAccess}>
               {savingAccess ? "Saving…" : "Save access code"}

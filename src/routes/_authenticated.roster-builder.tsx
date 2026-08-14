@@ -1318,31 +1318,45 @@ function RosterDetailView({
               />
             </div>
             <div className="rounded-lg border border-border/60 p-3">
-              <div className="text-sm font-medium">Private access code</div>
-              <div className="mt-1 text-xs text-muted-foreground">
-                Set a code to share this roster with leads who don't have an account. The page stays hidden
-                (and never indexed) until they enter their email and this code. Leave blank for a normal public link.
-              </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <Label htmlFor="access-code-label" className="text-xs">Code name</Label>
-                  <Input
-                    id="access-code-label"
-                    value={accessCodeLabel}
-                    onChange={(e) => setAccessCodeLabel(e.target.value)}
-                    placeholder="Access code"
-                  />
+                  <div className="text-sm font-medium">Private access code</div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Off = link-only: anyone with the link can view it without an email or passcode. It stays
+                    out of Google and other search engines either way. On = visitors must enter their email
+                    and the code; admins and assigned users always see it normally.
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="access-code" className="text-xs">Code</Label>
-                  <Input
-                    id="access-code"
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
-                    placeholder="e.g. MULBERRY26"
+                <label className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+                  Require code
+                  <Switch
+                    checked={!!accessCode.trim()}
+                    onCheckedChange={(on) => setAccessCode(on ? "ROSTER" : "")}
                   />
-                </div>
+                </label>
               </div>
+              {accessCode.trim() ? (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor="access-code-label" className="text-xs">Code name</Label>
+                    <Input
+                      id="access-code-label"
+                      value={accessCodeLabel}
+                      onChange={(e) => setAccessCodeLabel(e.target.value)}
+                      placeholder="Access code"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="access-code" className="text-xs">Code</Label>
+                    <Input
+                      id="access-code"
+                      value={accessCode}
+                      onChange={(e) => setAccessCode(e.target.value)}
+                      placeholder="e.g. MULBERRY26"
+                    />
+                  </div>
+                </div>
+              ) : null}
               <div className="mt-3 flex justify-end">
                 <Button type="button" variant="outline" size="sm" onClick={saveAccessCode} disabled={savingAccess}>
                   {savingAccess ? "Saving…" : "Save access code"}
