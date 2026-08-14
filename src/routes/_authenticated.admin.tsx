@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check } from "lucide-react";
+import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check, GripVertical } from "lucide-react";
 import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -1438,6 +1438,24 @@ function ImageUploader({
   );
 }
 
+export const SPOTLIGHT_SECTION_ORDER = [
+  { key: "host_bio", label: "Host bio" },
+  { key: "audience", label: "Audience" },
+  { key: "spotify", label: "Spotify player" },
+  { key: "partnership", label: "Partnership" },
+  { key: "vibe_check", label: "Vibe check" },
+  { key: "dos_donts", label: "Dos and don'ts" },
+  { key: "eoi", label: "Expressions of interest" },
+  { key: "videos", label: "Watch (videos)" },
+  { key: "photos", label: "Photos" },
+] as const;
+
+function normaliseSectionOrder(raw: unknown): string[] {
+  const all = SPOTLIGHT_SECTION_ORDER.map((s) => s.key as string);
+  const given = Array.isArray(raw) ? (raw as string[]).filter((k) => all.includes(k)) : [];
+  return [...given, ...all.filter((k) => !given.includes(k))];
+}
+
 export function SpotlightForm({
   onCreated,
   editData,
@@ -1451,6 +1469,20 @@ export function SpotlightForm({
 }) {
   const sectionKind = section ?? "spotlight";
   const isEditing = !!editData;
+  const [sectionOrder, setSectionOrder] = useState<string[]>(() =>
+    normaliseSectionOrder(editData?.links?.section_order),
+  );
+  const [dragKey, setDragKey] = useState<string | null>(null);
+
+  function moveSection(from: number, to: number) {
+    setSectionOrder((prev) => {
+      if (to < 0 || to >= prev.length || from === to) return prev;
+      const next = [...prev];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return next;
+    });
+  }
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     slug: editData?.slug ?? "",
@@ -1873,6 +1905,7 @@ export function SpotlightForm({
           videos: form.label_videos.trim(),
           members: form.label_members.trim(),
         },
+        section_order: sectionOrder,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
@@ -2196,6 +2229,61 @@ export function SpotlightForm({
                   <Input id={k} value={form[k]} onChange={(e) => set(k, e.target.value)} placeholder={ph} />
                 </div>
               ))}
+              <div className="space-y-2 border-t border-border/60 pt-4">
+                <Label>Section order</Label>
+                <p className="text-xs text-muted-foreground">
+                  Drag to reorder — each heading moves with its content. Empty sections stay hidden.
+                </p>
+                <div className="space-y-1.5">
+                  {sectionOrder.map((key, i) => {
+                    const meta = SPOTLIGHT_SECTION_ORDER.find((s) => s.key === key);
+                    if (!meta) return null;
+                    return (
+                      <div
+                        key={key}
+                        draggable
+                        onDragStart={() => setDragKey(key)}
+                        onDragEnd={() => setDragKey(null)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          if (!dragKey || dragKey === key) return;
+                          moveSection(sectionOrder.indexOf(dragKey), i);
+                          setDragKey(null);
+                        }}
+                        className={`flex items-center gap-2 rounded-md border border-border/60 bg-background px-3 py-2 text-sm ${
+                          dragKey === key ? "opacity-50" : ""
+                        }`}
+                      >
+                        <GripVertical className="size-4 cursor-grab text-muted-foreground" />
+                        <span className="flex-1">{meta.label}</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2"
+                          onClick={() => moveSection(i, i - 1)}
+                          disabled={i === 0}
+                          aria-label={`Move ${meta.label} up`}
+                        >
+                          <ChevronUp className="size-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2"
+                          onClick={() => moveSection(i, i + 1)}
+                          disabled={i === sectionOrder.length - 1}
+                          aria-label={`Move ${meta.label} down`}
+                        >
+                          <ChevronDown className="size-3" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </details>
           <details className="!order-3 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
