@@ -308,17 +308,56 @@ function extractInstagramHandle(url: string): string | null {
 }
 
 function extractTikTokHandle(url: string): string | null {
+  const clean = (h: string) => {
+    const v = h.trim().replace(/^@/, "").split(/[?#/]/)[0];
+    return /^[A-Za-z0-9._]{1,30}$/.test(v) ? v : null;
+  };
   try {
     const u = new URL(url);
     const seg = u.pathname.split("/").filter(Boolean);
+    for (const s of seg) {
+      if (s.startsWith("@")) return clean(s);
+    }
+    // Paths like /handle or /handle/video/123 (no @ prefix)
     const first = seg[0] ?? "";
-    if (first.startsWith("@")) return first.slice(1);
+    if (first && !["t", "v", "video", "embed", "tag", "music", "discover", "foryou", "explore"].includes(first)) {
+      return clean(first);
+    }
     return null;
   } catch {
-    const t = url.trim().replace(/^@/, "");
-    return t || null;
+    return clean(url);
   }
 }
+
+/** Short share links (vm.tiktok.com/…, tiktok.com/t/…) redirect to the real URL. */
+async function resolveTikTokShortLink(url: string): Promise<string> {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    const isShort =
+      host === "vm.tiktok.com" || host === "vt.tiktok.com" || u.pathname.startsWith("/t/");
+    if (!isShort) return url;
+    const res = await fetch(url, { method: "GET", redirect: "follow" });
+    return res.url || url;
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * Accepts a full URL, a bare handle, an @handle, or a scheme-less link and
+ * returns a canonical profile URL so platform detection never fails on input
+ * shape alone.
+ */
+export function normaliseProfileInput(raw: string): string {
+  const value = (raw ?? "").trim();
+  if (!value) return value;
+  if (/^https?:\/\//i.test(value)) return value;
+  if (/^[a-z0-9.-]+\.[a-z]{2,}(\/|$)/i.test(value)) return `https://${value}`;
+  return value;
+}
+
+
 
 async function scrapeInstagramProfile(url: string): Promise<ProfileResult> {
   const token = process.env.APIFY_API_TOKEN;
