@@ -1,0 +1,2 @@
+REVOKE SELECT ON public.campaign_reports FROM anon, authenticated;
+GRANT SELECT (id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url) ON public.campaign_reports TO anon, authenticated;
