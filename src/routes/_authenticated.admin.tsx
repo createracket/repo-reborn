@@ -2229,6 +2229,61 @@ export function SpotlightForm({
                   <Input id={k} value={form[k]} onChange={(e) => set(k, e.target.value)} placeholder={ph} />
                 </div>
               ))}
+              <div className="space-y-2 border-t border-border/60 pt-4">
+                <Label>Section order</Label>
+                <p className="text-xs text-muted-foreground">
+                  Drag to reorder — each heading moves with its content. Empty sections stay hidden.
+                </p>
+                <div className="space-y-1.5">
+                  {sectionOrder.map((key, i) => {
+                    const meta = SPOTLIGHT_SECTION_ORDER.find((s) => s.key === key);
+                    if (!meta) return null;
+                    return (
+                      <div
+                        key={key}
+                        draggable
+                        onDragStart={() => setDragKey(key)}
+                        onDragEnd={() => setDragKey(null)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          if (!dragKey || dragKey === key) return;
+                          moveSection(sectionOrder.indexOf(dragKey), i);
+                          setDragKey(null);
+                        }}
+                        className={`flex items-center gap-2 rounded-md border border-border/60 bg-background px-3 py-2 text-sm ${
+                          dragKey === key ? "opacity-50" : ""
+                        }`}
+                      >
+                        <GripVertical className="size-4 cursor-grab text-muted-foreground" />
+                        <span className="flex-1">{meta.label}</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2"
+                          onClick={() => moveSection(i, i - 1)}
+                          disabled={i === 0}
+                          aria-label={`Move ${meta.label} up`}
+                        >
+                          <ChevronUp className="size-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-2"
+                          onClick={() => moveSection(i, i + 1)}
+                          disabled={i === sectionOrder.length - 1}
+                          aria-label={`Move ${meta.label} down`}
+                        >
+                          <ChevronDown className="size-3" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </details>
           <details className="!order-3 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
