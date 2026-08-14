@@ -183,14 +183,8 @@ function EditProfilePage() {
     return [form.display_name, form.artist_name, form.slug];
   }
 
-  function normaliseSocial(platform: "instagram" | "tiktok" | "youtube", raw: string) {
-    const url = raw.trim();
-    if (!url) return null;
-    if (/^https?:\/\//i.test(url)) return url;
-    const h = url.replace(/^@/, "");
-    if (platform === "instagram") return `https://instagram.com/${h}`;
-    if (platform === "tiktok") return `https://tiktok.com/@${h}`;
-    return `https://youtube.com/@${h}`;
+  function normaliseSocial(platform: SocialPlatform, raw: string) {
+    return toProfileUrl(platform, raw);
   }
 
   /** One metered run that refreshes every connected platform. */
@@ -199,12 +193,13 @@ function EditProfilePage() {
       instagram_url: normaliseSocial("instagram", form.socials.instagram ?? ""),
       tiktok_url: normaliseSocial("tiktok", form.socials.tiktok ?? ""),
       youtube_url: normaliseSocial("youtube", form.socials.youtube ?? ""),
-      twitch_url: (form.socials.twitch ?? "").trim() || null,
-      facebook_url: (form.socials.facebook ?? "").trim() || null,
-      x_url: (form.socials.x ?? "").trim() || null,
+      twitch_url: normaliseSocial("twitch", form.socials.twitch ?? ""),
+      facebook_url: normaliseSocial("facebook", form.socials.facebook ?? ""),
+      x_url: normaliseSocial("x", form.socials.x ?? ""),
       spotify_url: (form.socials.spotify ?? "").trim() || null,
       apple_music_url: (form.socials.apple_music ?? "").trim() || null,
     };
+
     if (!Object.values(payload).some(Boolean)) {
       toast.error("Add at least one social or streaming link first");
       return;
