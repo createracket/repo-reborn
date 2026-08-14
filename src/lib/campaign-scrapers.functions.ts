@@ -390,34 +390,73 @@ async function scrapeInstagramProfile(url: string): Promise<ProfileResult> {
   }
 }
 
-async function scrapeTikTokProfile(url: string): Promise<ProfileResult> {
-  const token = process.env.APIFY_API_TOKEN;
-  if (!token) return { ok: false, error: "APIFY_API_TOKEN not configured." };
-  const handle = extractTikTokHandle(url);
-  if (!handle) return { ok: false, error: "Couldn't parse TikTok handle from URL." };
-  try {
-    const results = (await runApifyActor(
-      "clockworks~tiktok-profile-scraper",
-      { profiles: [handle], resultsPerPage: 1, shouldDownloadVideos: false },
-      token,
-    )) as Array<{
-      authorMeta?: { fans?: number; avatar?: string; name?: string };
-      fans?: number;
-      followerCount?: number;
-    }>;
-    const p = results[0];
-    if (!p) return { ok: false, error: "No TikTok profile returned." };
+type TikTokProfileItem = {
+  authorMeta?: { fans?: number; avatar?: string; name?: string };
+  fans?: number;
+  followerCount?: number;
+  stats?: { followerCount?: number };
+};
+
+function pickTikTokProfile(results: unknown[], handle: string): ProfileResult | null {
+  for (const raw of results as TikTokProfileItem[]) {
+    if (!raw) continue;
+    const followers =
+      raw.authorMeta?.fans ?? raw.fans ?? raw.followerCount ?? raw.stats?.followerCount ?? null;
+    if (followers == null && !raw.authorMeta) continue;
     return {
       ok: true,
       platform: "tiktok",
-      followers: p.authorMeta?.fans ?? p.fans ?? p.followerCount ?? null,
-      avatar_url: await mirrorOrKeep(p.authorMeta?.avatar ?? null, "tt"),
-      handle: p.authorMeta?.name ?? handle,
+      followers,
+      avatar_url: raw.authorMeta?.avatar ?? null,
+      handle: raw.authorMeta?.name ?? handle,
     };
+  }
+  return null;
+}
+
+async function scrapeTikTokProfile(url: string): Promise<ProfileResult> {
+  const token = process.env.APIFY_API_TOKEN;
+  if (!token) return { ok: false, error: "APIFY_API_TOKEN not configured." };
+  const resolved = await resolveTikTokShortLink(normaliseProfileInput(url));
+  const handle = extractTikTokHandle(resolved);
+  if (!handle) return { ok: false, error: "Couldn't parse TikTok handle from URL." };
+  try {
+    let found = pickTikTokProfile(
+      await runApifyActor(
+        "clockworks~tiktok-profile-scraper",
+        { profiles: [handle], resultsPerPage: 1, shouldDownloadVideos: false },
+        token,
+      ),
+      handle,
+    );
+
+    // Fallback: the free scraper also returns authorMeta for a profile URL.
+    if (!found) {
+      found = pickTikTokProfile(
+        await runApifyActor(
+          "clockworks~free-tiktok-scraper",
+          {
+            profiles: [handle],
+            resultsPerPage: 1,
+            shouldDownloadVideos: false,
+            shouldDownloadCovers: false,
+          },
+          token,
+        ),
+        handle,
+      );
+    }
+
+    if (!found) return { ok: false, error: `No TikTok profile found for @${handle}.` };
+    if (found.ok && found.avatar_url) {
+      found = { ...found, avatar_url: await mirrorOrKeep(found.avatar_url, "tt") };
+    }
+    return found;
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }
 }
+
 
 async function scrapeYouTubeChannel(url: string): Promise<ProfileResult> {
   const key = process.env.GOOGLE_API_KEY;
