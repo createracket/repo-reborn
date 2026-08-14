@@ -1006,7 +1006,8 @@ export type ProfileSyncResult = {
   apple?: AppleMusicArtistResult | null;
 };
 
-export async function scrapeProfileByUrl(url: string): Promise<ProfileResult> {
+export async function scrapeProfileByUrl(raw: string): Promise<ProfileResult> {
+  const url = normaliseProfileInput(raw);
   const platform = detectProfilePlatform(url);
   if (platform === "instagram") return scrapeInstagramProfile(url);
   if (platform === "tiktok") return scrapeTikTokProfile(url);
