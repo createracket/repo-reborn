@@ -1923,7 +1923,7 @@ export function SpotlightForm({
         video1: "", video2: "", video3: "", video4: "",
         video1_cover: "", video2_cover: "", video3_cover: "", video4_cover: "",
         photo1: "", photo2: "", photo3: "", photo4: "",
-        header_image_url: "", profile_image_url: "", published: false,
+        header_image_url: "", profile_image_url: "", colour_thumbnails: false, published: false,
         access_code: "", access_code_label: "Access code",
         total_followers: "", total_streams: "", monthly_streams: "",
         avg_reach: "", avg_engagement: "",
