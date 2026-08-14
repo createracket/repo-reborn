@@ -2004,11 +2004,13 @@ function EditProspectPanel({
     urlKey: keyof typeof form,
     followersKey: keyof typeof form,
   ) {
-    const url = String(form[urlKey] || "").trim();
+    const raw = String(form[urlKey] || "").trim();
+    const url = toProfileUrl(platform, raw);
     if (!url) {
-      toast.error(`Enter a ${platform} URL first`);
+      toast.error(`Enter a ${platform} URL or handle first`);
       return;
     }
+    if (url !== raw) upd(urlKey, url as never);
     setFetching(platform);
     try {
       const r = await scrapeProfile({ data: { url } });
@@ -2022,9 +2024,12 @@ function EditProspectPanel({
       } else {
         toast.error("No follower count returned");
       }
+    } catch (e) {
+      toast.error((e as Error).message || `Couldn't reach ${platform}`);
     } finally {
       setFetching(null);
     }
+
   }
 
   async function syncSpotify() {
