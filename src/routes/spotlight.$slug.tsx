@@ -63,6 +63,7 @@ type PartnerLinks = {
   apple_music_name?: string;
   youtube_extra_names?: string[];
   section_labels?: Record<string, string>;
+  colour_thumbnails?: boolean;
 };
 
 export const SPOTLIGHT_SECTIONS = [
@@ -415,7 +416,7 @@ function SpotlightPage() {
               <img
                 src={page.profile_image_url}
                 alt={page.headline}
-                className="size-28 shrink-0 rounded-xl border border-border/60 object-cover grayscale md:size-36"
+                className={`size-28 shrink-0 rounded-xl border border-border/60 object-cover md:size-36 ${links.colour_thumbnails ? "" : "grayscale"}`}
               />
             ) : null}
             <div className="flex-1 space-y-3">

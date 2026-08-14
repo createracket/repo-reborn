@@ -1490,6 +1490,7 @@ export function SpotlightForm({
     photo4: editData?.links?.photo4 ?? "",
     header_image_url: editData?.header_image_url ?? "",
     profile_image_url: editData?.profile_image_url ?? "",
+    colour_thumbnails: (editData?.links?.colour_thumbnails ?? false) as boolean,
     published: editData?.published ?? false,
     access_code: editData?.access_code ?? "",
     access_code_label: editData?.access_code_label ?? "Access code",
@@ -1863,6 +1864,7 @@ export function SpotlightForm({
         youtube_name: form.youtube_name.trim(),
         apple_music_name: form.apple_music_name.trim(),
         youtube_extra_names: extraLinks.youtube.map((_, i) => (extraNames.youtube[i] ?? "").trim()),
+        colour_thumbnails: form.colour_thumbnails,
         section_labels: {
           host_bio: form.label_host_bio.trim(),
           audience: form.label_audience.trim(),
@@ -1921,7 +1923,7 @@ export function SpotlightForm({
         video1: "", video2: "", video3: "", video4: "",
         video1_cover: "", video2_cover: "", video3_cover: "", video4_cover: "",
         photo1: "", photo2: "", photo3: "", photo4: "",
-        header_image_url: "", profile_image_url: "", published: false,
+        header_image_url: "", profile_image_url: "", colour_thumbnails: false, published: false,
         access_code: "", access_code_label: "Access code",
         total_followers: "", total_streams: "", monthly_streams: "",
         avg_reach: "", avg_engagement: "",
@@ -2060,6 +2062,18 @@ export function SpotlightForm({
                 aspect="1 / 1"
                 hint="Square headshot or cover artwork. JPG/PNG, up to 8MB."
               />
+              <label className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3">
+                <span>
+                  <span className="block text-sm font-medium">Colour thumbnails</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Off = profile photo shows in black &amp; white. On = full colour.
+                  </span>
+                </span>
+                <Switch
+                  checked={form.colour_thumbnails}
+                  onCheckedChange={(v) => set("colour_thumbnails", v)}
+                />
+              </label>
             </div>
           </details>
           <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
