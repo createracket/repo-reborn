@@ -169,6 +169,7 @@ type RosterItem = {
   example_video_url: string | null;
   bio_page_url: string | null;
   content_review_url: string | null;
+  content_review_label: string | null;
   position: number;
   status: string;
   budget: number | null;
@@ -1811,7 +1812,7 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
                   rel="noreferrer noopener"
                   className="text-primary hover:underline"
                 >
-                  Content to review
+                  {item.content_review_label?.trim() || "Content to review"}
                 </a>
               )}
               {item.bio_page_url && (
@@ -1981,6 +1982,7 @@ function EditProspectPanel({
     example_video_url: item.example_video_url ?? "",
     bio_page_url: item.bio_page_url ?? "",
     content_review_url: item.content_review_url ?? "",
+    content_review_label: item.content_review_label ?? "",
     budget: item.budget?.toString() ?? "",
     metrics_month: item.metrics_month ?? "",
   });
@@ -2134,6 +2136,7 @@ function EditProspectPanel({
         example_video_url: form.example_video_url.trim() || null,
         bio_page_url: form.bio_page_url.trim() || null,
         content_review_url: form.content_review_url.trim() || null,
+        content_review_label: form.content_review_label.trim() || null,
         budget: toNum(form.budget),
         metrics_month: form.metrics_month.trim() || null,
         ...(flagState.flagged
@@ -2272,6 +2275,7 @@ function EditProspectPanel({
         {fld("Apple followers", "apple_music_followers")}
         {fld("Example video URL", "example_video_url")}
         {fld("Content to review URL (e.g. Frame.io)", "content_review_url")}
+        {fld("Content link label (optional)", "content_review_label")}
         {fld("Bio page URL", "bio_page_url")}
       </div>
       {mismatchWarning ? (
@@ -2449,6 +2453,7 @@ function AddProspectCard({
     has_bio: false,
     bio_page_url: "",
     content_review_url: "",
+    content_review_label: "",
   });
 
   const update = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
@@ -2573,6 +2578,7 @@ function AddProspectCard({
       example_video_url: form.example_video_url.trim() || null,
       bio_page_url: form.has_bio ? form.bio_page_url.trim() || null : null,
       content_review_url: form.content_review_url.trim() || null,
+      content_review_label: form.content_review_label.trim() || null,
       position: nextPosition,
       ...(flagState.flagged
         ? { flagged_streaming_mismatch: true, flagged_streaming_reason: flagState.reason }
@@ -2609,6 +2615,7 @@ function AddProspectCard({
       has_bio: false,
       bio_page_url: "",
       content_review_url: "",
+      content_review_label: "",
     });
     setOpen(false);
     onAdded();
@@ -2791,6 +2798,13 @@ function AddProspectCard({
                 value={form.content_review_url}
                 onChange={(e) => update("content_review_url", e.target.value)}
                 placeholder="https://f.io/…"
+              />
+            </Field>
+            <Field label="Content link label (optional)">
+              <Input
+                value={form.content_review_label}
+                onChange={(e) => update("content_review_label", e.target.value)}
+                placeholder="Content to review"
               />
             </Field>
             <div className="flex items-center gap-2">
