@@ -17,6 +17,7 @@ import { validateSlug, normalizeSlug } from "@/lib/slugs";
 import { runProfileSync } from "@/lib/campaign-scrapers.functions";
 import { getMyUsage } from "@/lib/usage.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
+import { toProfileUrl, type SocialPlatform } from "@/lib/social-handles";
 import { COUNTRIES } from "@/lib/countries";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Loader2, X } from "lucide-react";
