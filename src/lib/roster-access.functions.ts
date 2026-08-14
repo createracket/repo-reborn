@@ -14,7 +14,7 @@ const ROSTER_FIELDS =
   "id, title, description, slug, published, published_at, updated_at, header_image_url, profile_image_url, hide_prospect_tags, hide_statuses, est_engagement_pct, categories, custom_links";
 
 const ITEM_FIELDS =
-  "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, position, status, category, categories, location";
+  "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, content_review_label, position, status, category, categories, location";
 
 /** Public: returns just enough to render the passcode gate (title + header image). */
 export const getRosterGate = createServerFn({ method: "POST" })
