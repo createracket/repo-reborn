@@ -1,0 +1,1 @@
+GRANT SELECT ON public.roster_items TO anon;
