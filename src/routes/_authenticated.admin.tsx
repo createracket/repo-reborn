@@ -1438,6 +1438,24 @@ function ImageUploader({
   );
 }
 
+export const SPOTLIGHT_SECTION_ORDER = [
+  { key: "host_bio", label: "Host bio" },
+  { key: "audience", label: "Audience" },
+  { key: "spotify", label: "Spotify player" },
+  { key: "partnership", label: "Partnership" },
+  { key: "vibe_check", label: "Vibe check" },
+  { key: "dos_donts", label: "Dos and don'ts" },
+  { key: "eoi", label: "Expressions of interest" },
+  { key: "videos", label: "Watch (videos)" },
+  { key: "photos", label: "Photos" },
+] as const;
+
+function normaliseSectionOrder(raw: unknown): string[] {
+  const all = SPOTLIGHT_SECTION_ORDER.map((s) => s.key as string);
+  const given = Array.isArray(raw) ? (raw as string[]).filter((k) => all.includes(k)) : [];
+  return [...given, ...all.filter((k) => !given.includes(k))];
+}
+
 export function SpotlightForm({
   onCreated,
   editData,
