@@ -914,6 +914,7 @@ export type Database = {
           avg_reach: number | null
           created_at: string
           dashboard_visible: boolean
+          dos_donts: string[]
           eoi_opportunities: string[]
           flagged_streaming_mismatch: boolean
           flagged_streaming_reason: string | null
@@ -945,6 +946,7 @@ export type Database = {
           avg_reach?: number | null
           created_at?: string
           dashboard_visible?: boolean
+          dos_donts?: string[]
           eoi_opportunities?: string[]
           flagged_streaming_mismatch?: boolean
           flagged_streaming_reason?: string | null
@@ -976,6 +978,7 @@ export type Database = {
           avg_reach?: number | null
           created_at?: string
           dashboard_visible?: boolean
+          dos_donts?: string[]
           eoi_opportunities?: string[]
           flagged_streaming_mismatch?: boolean
           flagged_streaming_reason?: string | null
