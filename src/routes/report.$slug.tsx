@@ -104,6 +104,7 @@ function PublicReportPage() {
   const [creators, setCreators] = useState<PublicCreator[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
   const [monthFilter, setMonthFilter] = useState<string>("all");
+  const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
   const [gate, setGate] = useState<{ title: string; header_image_url: string | null; code_label: string } | null>(null);
   const [gateEmail, setGateEmail] = useState("");
   const [gateCode, setGateCode] = useState("");
@@ -311,20 +312,20 @@ function PublicReportPage() {
       .map(([key, label]) => ({ key, label }));
   })();
 
-  const filteredCreators = monthFilter === "all"
-    ? creators
-    : creators
-        .map((c) => ({
-          ...c,
-          posts: c.posts.filter((p) => {
-            if (!p.posted_at) return false;
-            const d = new Date(p.posted_at);
-            if (Number.isNaN(d.getTime())) return false;
-            const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
-            return key === monthFilter;
-          }),
-        }))
-        .filter((c) => c.posts.length > 0);
+  const filteredCreators = creators
+    .map((c) => ({
+      ...c,
+      posts: c.posts.filter((p) => {
+        if (platformFilter !== "all" && p.platform !== platformFilter) return false;
+        if (monthFilter === "all") return true;
+        if (!p.posted_at) return false;
+        const d = new Date(p.posted_at);
+        if (Number.isNaN(d.getTime())) return false;
+        const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+        return key === monthFilter;
+      }),
+    }))
+    .filter((c) => c.posts.length > 0);
   // Negative values are "hidden/unavailable" sentinels from social scrapers
   // (e.g. Instagram posts with like counts turned off) — never count them.
   const num = (v: number | null | undefined) => (v == null || v < 0 ? 0 : v);
@@ -484,7 +485,26 @@ function PublicReportPage() {
         )}
 
         {monthOptions.length > 0 && (
-          <div className="mt-10 flex items-center justify-end gap-3">
+          <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
+            <div className="flex items-center gap-1.5">
+              {(["all", "instagram", "tiktok"] as const).map((p) => {
+                const active = platformFilter === p;
+                const label = p === "all" ? "All" : p === "instagram" ? "IG" : "TikTok";
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setPlatformFilter(p)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                      active
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Filter className="size-4" />
               <span>Filter by month</span>
@@ -508,9 +528,9 @@ function PublicReportPage() {
         <section className="mt-6 space-y-10">
           {filteredCreators.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {monthFilter === "all"
+              {monthFilter === "all" && platformFilter === "all"
                 ? "No creators on this report yet."
-                : "No posts in this month."}
+                : "No posts match this filter."}
             </p>
           ) : report.template === "simple" ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
