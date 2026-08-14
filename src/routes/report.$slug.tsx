@@ -485,7 +485,26 @@ function PublicReportPage() {
         )}
 
         {monthOptions.length > 0 && (
-          <div className="mt-10 flex items-center justify-end gap-3">
+          <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
+            <div className="flex items-center gap-1.5">
+              {(["all", "instagram", "tiktok"] as const).map((p) => {
+                const active = platformFilter === p;
+                const label = p === "all" ? "All" : p === "instagram" ? "IG" : "TikTok";
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setPlatformFilter(p)}
+                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                      active
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Filter className="size-4" />
               <span>Filter by month</span>
