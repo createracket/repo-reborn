@@ -51,7 +51,7 @@ export const registerSpotlightGuestInterest = createServerFn({ method: "POST" })
 
 
 const PAGE_FIELDS =
-  "id, slug, type, headline, subtitle, intro, host_bio, partnership_pitch, eoi_opportunities, audience_segments, links, published, header_image_url, profile_image_url, total_followers, total_streams, monthly_streams, avg_reach, avg_engagement";
+  "id, slug, type, headline, subtitle, intro, host_bio, partnership_pitch, eoi_opportunities, dos_donts, audience_segments, links, published, header_image_url, profile_image_url, total_followers, total_streams, monthly_streams, avg_reach, avg_engagement";
 
 /** Public: returns just enough to render the passcode gate (headline + header image). */
 export const getSpotlightGate = createServerFn({ method: "POST" })

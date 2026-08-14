@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive } from "lucide-react";
+import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check } from "lucide-react";
+import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist, scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
@@ -1460,6 +1461,7 @@ export function SpotlightForm({
     host_bio: editData?.host_bio ?? "",
     partnership_pitch: editData?.partnership_pitch ?? "",
     eoi_opportunities: (editData?.eoi_opportunities ?? []).join("\n"),
+    dos_donts: (editData?.dos_donts ?? []).join("\n"),
     audience_segments: (editData?.audience_segments ?? []).join("\n"),
     vibe_tags: (editData?.vibe_tags ?? []).join(", "),
     instagram: editData?.links?.instagram ?? "",
@@ -1814,6 +1816,12 @@ export function SpotlightForm({
       partnership_pitch: form.partnership_pitch || null,
       eoi_opportunities: form.eoi_opportunities
         .split("\n").map((s: string) => s.trim()).filter(Boolean),
+      ...(sectionKind === "brief"
+        ? {
+            dos_donts: form.dos_donts
+              .split("\n").map((s: string) => s.trim()).filter(Boolean),
+          }
+        : {}),
       audience_segments: form.audience_segments
         .split("\n").map((s: string) => s.trim()).filter(Boolean),
       vibe_tags: form.vibe_tags
@@ -1908,7 +1916,7 @@ export function SpotlightForm({
       toast.success(`Spotlight created at /spotlight/${slug}`);
       setForm({
         slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
-        host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "", vibe_tags: "",
+        host_bio: "", partnership_pitch: "", eoi_opportunities: "", dos_donts: "", audience_segments: "", vibe_tags: "",
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "", video4: "",
         video1_cover: "", video2_cover: "", video3_cover: "", video4_cover: "",
@@ -2090,6 +2098,52 @@ export function SpotlightForm({
                 <Label htmlFor="eoi">EOI opportunities (one per line)</Label>
                 <Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} />
               </div>
+              {sectionKind === "brief" ? (
+                <div className="space-y-1.5 md:col-span-2">
+                  <Label htmlFor="dos_donts">Dos and don'ts (one per line)</Label>
+                  <Textarea
+                    id="dos_donts"
+                    rows={4}
+                    value={form.dos_donts}
+                    onChange={(e) => set("dos_donts", e.target.value)}
+                    placeholder={"+ Tag @brand in the caption\nx Don't mention competitors"}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Use the toggles below to switch each line between a green tick and a yellow cross.
+                  </p>
+                  {form.dos_donts.split("\n").some((l: string) => l.trim()) ? (
+                    <div className="space-y-1.5 pt-1">
+                      {form.dos_donts.split("\n").map((line: string, i: number) => {
+                        const item = parseDoLine(line);
+                        if (!item.text) return null;
+                        return (
+                          <div key={i} className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2"
+                              onClick={() => {
+                                const lines = form.dos_donts.split("\n");
+                                const cur = parseDoLine(lines[i] ?? "");
+                                lines[i] = `${cur.kind === "do" ? "x" : "+"} ${cur.text}`;
+                                set("dos_donts", lines.join("\n"));
+                              }}
+                            >
+                              {item.kind === "do" ? (
+                                <Check className="size-3.5 text-green-500" />
+                              ) : (
+                                <X className="size-3.5 text-yellow-400" />
+                              )}
+                            </Button>
+                            <span className="text-sm text-muted-foreground">{item.text}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
               <div className="space-y-1.5">
                 <Label htmlFor="audience">Audience segments (one per line)</Label>
                 <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />

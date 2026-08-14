@@ -1,6 +1,7 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Instagram, Mail, ExternalLink, Mic2, Check, Youtube, Twitch, Facebook, Music2 } from "lucide-react";
+import { Instagram, Mail, ExternalLink, Mic2, Check, X, Youtube, Twitch, Facebook, Music2 } from "lucide-react";
+import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -92,6 +93,7 @@ type PartnerPage = {
   host_bio: string | null;
   partnership_pitch: string | null;
   eoi_opportunities: string[];
+  dos_donts?: string[] | null;
   audience_segments: string[];
   vibe_tags?: string[] | null;
   links: PartnerLinks;
@@ -618,6 +620,35 @@ function SpotlightPage() {
                 </span>
               ))}
             </div>
+          </section>
+        ) : null}
+
+        {/* Dos and don'ts */}
+        {page.dos_donts?.length ? (
+          <section className="mt-10">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-display text-2xl">{sectionLabel("dos_donts", "Dos and don'ts")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="grid gap-2 md:grid-cols-2">
+                  {page.dos_donts.map((raw, i) => {
+                    const item = parseDoLine(raw);
+                    if (!item.text) return null;
+                    return (
+                      <li key={i} className="flex items-start gap-2 text-sm">
+                        {item.kind === "do" ? (
+                          <Check className="mt-0.5 size-4 shrink-0 text-green-500" />
+                        ) : (
+                          <X className="mt-0.5 size-4 shrink-0 text-yellow-400" />
+                        )}
+                        <span>{item.text}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </CardContent>
+            </Card>
           </section>
         ) : null}
 

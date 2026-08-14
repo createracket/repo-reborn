@@ -1,0 +1,1 @@
+ALTER TABLE public.partner_pages ADD COLUMN IF NOT EXISTS dos_donts text[] NOT NULL DEFAULT '{}';
