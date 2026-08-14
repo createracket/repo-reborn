@@ -1,6 +1,7 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Instagram, Mail, ExternalLink, Mic2, Check, Youtube, Twitch, Facebook, Music2 } from "lucide-react";
+import { Instagram, Mail, ExternalLink, Mic2, Check, X, Youtube, Twitch, Facebook, Music2 } from "lucide-react";
+import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
