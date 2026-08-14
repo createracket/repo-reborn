@@ -2131,7 +2131,7 @@ export function SpotlightForm({
                               }}
                             >
                               {item.kind === "do" ? (
-                                <Check className="size-3.5 text-lime" />
+                                <Check className="size-3.5 text-green-500" />
                               ) : (
                                 <X className="size-3.5 text-yellow-400" />
                               )}

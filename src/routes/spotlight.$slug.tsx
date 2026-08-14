@@ -638,7 +638,7 @@ function SpotlightPage() {
                     return (
                       <li key={i} className="flex items-start gap-2 text-sm">
                         {item.kind === "do" ? (
-                          <Check className="mt-0.5 size-4 shrink-0 text-lime" />
+                          <Check className="mt-0.5 size-4 shrink-0 text-green-500" />
                         ) : (
                           <X className="mt-0.5 size-4 shrink-0 text-yellow-400" />
                         )}
