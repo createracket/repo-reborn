@@ -1469,6 +1469,20 @@ export function SpotlightForm({
 }) {
   const sectionKind = section ?? "spotlight";
   const isEditing = !!editData;
+  const [sectionOrder, setSectionOrder] = useState<string[]>(() =>
+    normaliseSectionOrder(editData?.links?.section_order),
+  );
+  const [dragKey, setDragKey] = useState<string | null>(null);
+
+  function moveSection(from: number, to: number) {
+    setSectionOrder((prev) => {
+      if (to < 0 || to >= prev.length || from === to) return prev;
+      const next = [...prev];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return next;
+    });
+  }
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     slug: editData?.slug ?? "",
