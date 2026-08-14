@@ -1909,7 +1909,7 @@ export function SpotlightForm({
       toast.success(`Spotlight created at /spotlight/${slug}`);
       setForm({
         slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
-        host_bio: "", partnership_pitch: "", eoi_opportunities: "", audience_segments: "", vibe_tags: "",
+        host_bio: "", partnership_pitch: "", eoi_opportunities: "", dos_donts: "", audience_segments: "", vibe_tags: "",
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "", video4: "",
         video1_cover: "", video2_cover: "", video3_cover: "", video4_cover: "",
