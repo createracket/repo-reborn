@@ -1168,6 +1168,7 @@ export type Database = {
           budget: number | null
           categories: string[]
           category: string | null
+          content_review_label: string | null
           content_review_url: string | null
           created_at: string
           custom_followers: number | null
@@ -1210,6 +1211,7 @@ export type Database = {
           budget?: number | null
           categories?: string[]
           category?: string | null
+          content_review_label?: string | null
           content_review_url?: string | null
           created_at?: string
           custom_followers?: number | null
@@ -1252,6 +1254,7 @@ export type Database = {
           budget?: number | null
           categories?: string[]
           category?: string | null
+          content_review_label?: string | null
           content_review_url?: string | null
           created_at?: string
           custom_followers?: number | null
