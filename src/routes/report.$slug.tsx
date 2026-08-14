@@ -312,20 +312,20 @@ function PublicReportPage() {
       .map(([key, label]) => ({ key, label }));
   })();
 
-  const filteredCreators = monthFilter === "all"
-    ? creators
-    : creators
-        .map((c) => ({
-          ...c,
-          posts: c.posts.filter((p) => {
-            if (!p.posted_at) return false;
-            const d = new Date(p.posted_at);
-            if (Number.isNaN(d.getTime())) return false;
-            const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
-            return key === monthFilter;
-          }),
-        }))
-        .filter((c) => c.posts.length > 0);
+  const filteredCreators = creators
+    .map((c) => ({
+      ...c,
+      posts: c.posts.filter((p) => {
+        if (platformFilter !== "all" && p.platform !== platformFilter) return false;
+        if (monthFilter === "all") return true;
+        if (!p.posted_at) return false;
+        const d = new Date(p.posted_at);
+        if (Number.isNaN(d.getTime())) return false;
+        const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+        return key === monthFilter;
+      }),
+    }))
+    .filter((c) => c.posts.length > 0);
   // Negative values are "hidden/unavailable" sentinels from social scrapers
   // (e.g. Instagram posts with like counts turned off) — never count them.
   const num = (v: number | null | undefined) => (v == null || v < 0 ? 0 : v);
