@@ -629,18 +629,20 @@ export const scrapeProfileFollowers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ url: z.string().min(1) }).parse)
   .handler(async ({ data }): Promise<ProfileResult> => {
-    const platform = detectProfilePlatform(data.url);
+    const url = normaliseProfileInput(data.url);
+    const platform = detectProfilePlatform(url);
     if (!platform)
       return {
         ok: false,
         error: "Unrecognised URL — must be Instagram, TikTok, YouTube, Twitch, Facebook or X.",
       };
-    if (platform === "instagram") return scrapeInstagramProfile(data.url);
-    if (platform === "tiktok") return scrapeTikTokProfile(data.url);
-    if (platform === "twitch") return scrapeTwitchChannel(data.url);
-    if (platform === "facebook") return scrapeFacebookPage(data.url);
-    if (platform === "x") return scrapeXProfile(data.url);
-    return scrapeYouTubeChannel(data.url);
+    if (platform === "instagram") return scrapeInstagramProfile(url);
+    if (platform === "tiktok") return scrapeTikTokProfile(url);
+    if (platform === "twitch") return scrapeTwitchChannel(url);
+    if (platform === "facebook") return scrapeFacebookPage(url);
+    if (platform === "x") return scrapeXProfile(url);
+    return scrapeYouTubeChannel(url);
+
   });
 
 // ============================================================
