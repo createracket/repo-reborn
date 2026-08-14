@@ -197,7 +197,9 @@ function CampaignReportsPage() {
   const loadReports = useCallback(async () => {
     const { data, error } = await sb
       .from("campaign_reports")
-      .select("*")
+      .select(
+        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url",
+      )
       .order("updated_at", { ascending: false });
     if (error) return toast.error(error.message);
     setReports((data as Report[]) ?? []);
