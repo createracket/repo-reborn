@@ -63,6 +63,7 @@ type PartnerLinks = {
   apple_music_name?: string;
   youtube_extra_names?: string[];
   section_labels?: Record<string, string>;
+  section_order?: string[];
   colour_thumbnails?: boolean;
 };
 
