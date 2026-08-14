@@ -104,6 +104,7 @@ function PublicReportPage() {
   const [creators, setCreators] = useState<PublicCreator[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
   const [monthFilter, setMonthFilter] = useState<string>("all");
+  const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
   const [gate, setGate] = useState<{ title: string; header_image_url: string | null; code_label: string } | null>(null);
   const [gateEmail, setGateEmail] = useState("");
   const [gateCode, setGateCode] = useState("");
