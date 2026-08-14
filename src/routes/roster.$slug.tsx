@@ -513,7 +513,7 @@ function PublicRosterPage() {
                             )}
                           </div>
                         </div>
-                        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+                        <div className="hidden shrink-0 flex-wrap items-center justify-end gap-1.5 sm:flex">
                           {itemCats(it).map((c) => (
                             <span key={c} className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${categoryBadgeClass(c)}`}>
                               {categoryLabel(c)}
@@ -565,6 +565,17 @@ function PublicRosterPage() {
                           </Badge>
                         )}
                       </div>
+
+                      {itemCats(it).length > 0 && (
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:hidden">
+                          {itemCats(it).map((c) => (
+                            <span key={c} className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${categoryBadgeClass(c)}`}>
+                              {categoryLabel(c)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
 
 
                       {it.vibe && (
