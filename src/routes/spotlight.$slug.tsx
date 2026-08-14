@@ -561,216 +561,236 @@ function SpotlightPage() {
 
         </section>
 
-        {/* Host bio */}
-        {page.host_bio ? (
-          <section className="mt-16">
-            <h2 className="font-display text-3xl">{sectionLabel("host_bio", "About the host")}</h2>
-            <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.host_bio}</p>
-          </section>
-        ) : null}
+        {(() => {
+          const nodes: Record<string, React.ReactNode> = {
+            /* Host bio */
+            host_bio: page.host_bio ? (
+              <section className="mt-16">
+                <h2 className="font-display text-3xl">{sectionLabel("host_bio", "About the host")}</h2>
+                <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.host_bio}</p>
+              </section>
+            ) : null,
 
-        {/* Audience */}
-        {page.audience_segments?.length ? (
-          <section className="mt-16">
-            <h2 className="font-display text-3xl">{sectionLabel("audience", "Who's listening")}</h2>
-            <div className="mt-4 grid gap-3 md:grid-cols-3">
-              {page.audience_segments.map((seg, i) => (
-                <Card key={i}>
-                  <CardContent className="p-5 text-sm">{seg}</CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {/* Spotify embed */}
-        {links.spotifyEmbed ? (
-          <section className="mt-10">
-            <iframe
-              src={links.spotifyEmbed}
-              width="100%"
-              height="152"
-              frameBorder={0}
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              className="block rounded-xl"
-              title="Spotify player"
-            />
-          </section>
-        ) : null}
-
-
-        {/* Partnership pitch */}
-        {page.partnership_pitch ? (
-          <section className="mt-16">
-            <h2 className="font-display text-3xl">{sectionLabel("partnership", "Partnership")}</h2>
-            <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.partnership_pitch}</p>
-          </section>
-        ) : null}
-
-        {/* Vibe check */}
-        {page.vibe_tags?.length ? (
-          <section className="mt-10">
-            <h2 className="font-display text-3xl">{sectionLabel("vibe_check", "Vibe check")}</h2>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {page.vibe_tags.map((tag, i) => (
-                <span
-                  key={i}
-                  className="cursor-default rounded-full border border-border px-4 py-1.5 text-sm text-foreground/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-foreground"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {/* Dos and don'ts */}
-        {page.dos_donts?.length ? (
-          <section className="mt-10">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-display text-2xl">{sectionLabel("dos_donts", "Dos and don'ts")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="grid gap-2 md:grid-cols-2">
-                  {page.dos_donts.map((raw, i) => {
-                    const item = parseDoLine(raw);
-                    if (!item.text) return null;
-                    return (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        {item.kind === "do" ? (
-                          <Check className="mt-0.5 size-4 shrink-0 text-green-500" />
-                        ) : (
-                          <X className="mt-0.5 size-4 shrink-0 text-yellow-400" />
-                        )}
-                        <span>{item.text}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </CardContent>
-            </Card>
-          </section>
-        ) : null}
-
-        {/* EOI */}
-        {page.eoi_opportunities?.length ? (
-          <section className="mt-10">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-display text-2xl">{sectionLabel("eoi", "Expressions of interest")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="grid gap-2 md:grid-cols-2">
-                  {page.eoi_opportunities.map((eoi, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm">
-                      <span className="size-1.5 rounded-full bg-primary" /> {eoi}
-                    </li>
+            /* Audience */
+            audience: page.audience_segments?.length ? (
+              <section className="mt-16">
+                <h2 className="font-display text-3xl">{sectionLabel("audience", "Who's listening")}</h2>
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  {page.audience_segments.map((seg, i) => (
+                    <Card key={i}>
+                      <CardContent className="p-5 text-sm">{seg}</CardContent>
+                    </Card>
                   ))}
-                </ul>
-                <div className="mt-6 flex flex-wrap items-center gap-3">
-                  <Button onClick={handleRegister} disabled={registering || registered}>
-                    {registered ? (
-                      <><Check className="mr-1.5 size-4" /> Interest registered</>
-                    ) : registering ? "Registering…" : "Register interest"}
-                  </Button>
-                  <Dialog open={guestOpen} onOpenChange={setGuestOpen}>
-                    <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle className="font-display text-xl">Register your interest</DialogTitle>
-                        <DialogDescription>
-                          Pop in your email and we'll be in touch about this opportunity.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="guest-email">Email</Label>
-                        <Input
-                          id="guest-email"
-                          type="email"
-                          maxLength={255}
-                          value={guestEmail}
-                          onChange={(e) => setGuestEmail(e.target.value)}
-                          placeholder="you@example.com"
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        By entering your email, you are giving Racket permission to contact you about this
-                        collab and partnership opportunity.
-                      </p>
-                      <DialogFooter>
-                        <Button onClick={handleGuestRegister} disabled={registering}>
-                          {registering ? "Registering…" : "Register interest"}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                  {links.contact ? (
-                    <Button asChild variant="outline">
-                      <a href={links.contact.startsWith("http") ? links.contact : `mailto:${links.contact}`}>
-                        <Mail className="mr-1.5 size-4" /> Contact directly
-                      </a>
-                    </Button>
-                  ) : null}
                 </div>
-              </CardContent>
-            </Card>
-          </section>
-        ) : null}
-        {/* Videos */}
-        {(() => {
-          const raw: Array<{ url?: string; cover?: string }> = [
-            { url: links.video1, cover: links.video1_cover },
-            { url: links.video2, cover: links.video2_cover },
-            { url: links.video3, cover: links.video3_cover },
-            { url: links.video4, cover: links.video4_cover },
-          ];
-          const videos = raw
-            .map((v) => {
-              const embed = v.url ? getSocialEmbed(v.url) : null;
-              return embed ? { embed, cover: v.cover } : null;
-            })
-            .filter((v): v is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover: string | undefined } => !!v);
-          if (videos.length === 0) return null;
-          return (
-            <section className="mt-16">
-              <h2 className="font-display text-3xl">{sectionLabel("videos", "Watch")}</h2>
-              <div className={`mt-4 grid gap-3 sm:gap-6 ${videos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : "md:grid-cols-3"}`}>
-                {videos.map((v, i) => (
-                  <ClipCard
-                    key={i}
-                    href={v.embed.href}
-                    provider={v.embed.provider}
-                    poster={v.cover ?? posters[v.embed.href] ?? null}
-                  />
-                ))}
-              </div>
-            </section>
-          );
-        })()}
-        {/* Photos */}
-        {(() => {
-          const photos = [links.photo1, links.photo2, links.photo3, links.photo4].filter(
-            (u): u is string => !!u && u.trim().length > 0,
-          );
-          if (photos.length === 0) return null;
-          return (
-            <section className="mt-12">
-              <div
-                className={`grid gap-3 sm:gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}
-              >
-                {photos.map((src, i) => (
-                  <div
-                    key={i}
-                    className="overflow-hidden rounded-3xl border border-border/60 bg-muted/40"
-                    style={{ aspectRatio: "4 / 5" }}
-                  >
-                    <img src={src} alt="" loading="lazy" className="size-full object-cover" />
+              </section>
+            ) : null,
+
+            /* Spotify embed */
+            spotify: links.spotifyEmbed ? (
+              <section className="mt-10">
+                <iframe
+                  src={links.spotifyEmbed}
+                  width="100%"
+                  height="152"
+                  frameBorder={0}
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  loading="lazy"
+                  className="block rounded-xl"
+                  title="Spotify player"
+                />
+              </section>
+            ) : null,
+
+            /* Partnership pitch */
+            partnership: page.partnership_pitch ? (
+              <section className="mt-16">
+                <h2 className="font-display text-3xl">{sectionLabel("partnership", "Partnership")}</h2>
+                <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.partnership_pitch}</p>
+              </section>
+            ) : null,
+
+            /* Vibe check */
+            vibe_check: page.vibe_tags?.length ? (
+              <section className="mt-10">
+                <h2 className="font-display text-3xl">{sectionLabel("vibe_check", "Vibe check")}</h2>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {page.vibe_tags.map((tag, i) => (
+                    <span
+                      key={i}
+                      className="cursor-default rounded-full border border-border px-4 py-1.5 text-sm text-foreground/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-foreground"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            ) : null,
+
+            /* Dos and don'ts */
+            dos_donts: page.dos_donts?.length ? (
+              <section className="mt-10">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-display text-2xl">{sectionLabel("dos_donts", "Dos and don'ts")}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="grid gap-2 md:grid-cols-2">
+                      {page.dos_donts.map((raw, i) => {
+                        const item = parseDoLine(raw);
+                        if (!item.text) return null;
+                        return (
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            {item.kind === "do" ? (
+                              <Check className="mt-0.5 size-4 shrink-0 text-green-500" />
+                            ) : (
+                              <X className="mt-0.5 size-4 shrink-0 text-yellow-400" />
+                            )}
+                            <span>{item.text}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </section>
+            ) : null,
+
+            /* EOI */
+            eoi: page.eoi_opportunities?.length ? (
+              <section className="mt-10">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-display text-2xl">{sectionLabel("eoi", "Expressions of interest")}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="grid gap-2 md:grid-cols-2">
+                      {page.eoi_opportunities.map((eoi, i) => (
+                        <li key={i} className="flex items-center gap-2 text-sm">
+                          <span className="size-1.5 rounded-full bg-primary" /> {eoi}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-6 flex flex-wrap items-center gap-3">
+                      <Button onClick={handleRegister} disabled={registering || registered}>
+                        {registered ? (
+                          <><Check className="mr-1.5 size-4" /> Interest registered</>
+                        ) : registering ? "Registering…" : "Register interest"}
+                      </Button>
+                      <Dialog open={guestOpen} onOpenChange={setGuestOpen}>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="font-display text-xl">Register your interest</DialogTitle>
+                            <DialogDescription>
+                              Pop in your email and we'll be in touch about this opportunity.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-1.5">
+                            <Label htmlFor="guest-email">Email</Label>
+                            <Input
+                              id="guest-email"
+                              type="email"
+                              maxLength={255}
+                              value={guestEmail}
+                              onChange={(e) => setGuestEmail(e.target.value)}
+                              placeholder="you@example.com"
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            By entering your email, you are giving Racket permission to contact you about this
+                            collab and partnership opportunity.
+                          </p>
+                          <DialogFooter>
+                            <Button onClick={handleGuestRegister} disabled={registering}>
+                              {registering ? "Registering…" : "Register interest"}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                      {links.contact ? (
+                        <Button asChild variant="outline">
+                          <a href={links.contact.startsWith("http") ? links.contact : `mailto:${links.contact}`}>
+                            <Mail className="mr-1.5 size-4" /> Contact directly
+                          </a>
+                        </Button>
+                      ) : null}
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+            ) : null,
+
+            /* Videos */
+            videos: (() => {
+              const raw: Array<{ url?: string; cover?: string }> = [
+                { url: links.video1, cover: links.video1_cover },
+                { url: links.video2, cover: links.video2_cover },
+                { url: links.video3, cover: links.video3_cover },
+                { url: links.video4, cover: links.video4_cover },
+              ];
+              const videos = raw
+                .map((v) => {
+                  const embed = v.url ? getSocialEmbed(v.url) : null;
+                  return embed ? { embed, cover: v.cover } : null;
+                })
+                .filter((v): v is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover: string | undefined } => !!v);
+              if (videos.length === 0) return null;
+              return (
+                <section className="mt-16">
+                  <h2 className="font-display text-3xl">{sectionLabel("videos", "Watch")}</h2>
+                  <div className={`mt-4 grid gap-3 sm:gap-6 ${videos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : "md:grid-cols-3"}`}>
+                    {videos.map((v, i) => (
+                      <ClipCard
+                        key={i}
+                        href={v.embed.href}
+                        provider={v.embed.provider}
+                        poster={v.cover ?? posters[v.embed.href] ?? null}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
-            </section>
-          );
+                </section>
+              );
+            })(),
+
+            /* Photos */
+            photos: (() => {
+              const photos = [links.photo1, links.photo2, links.photo3, links.photo4].filter(
+                (u): u is string => !!u && u.trim().length > 0,
+              );
+              if (photos.length === 0) return null;
+              return (
+                <section className="mt-12">
+                  <div
+                    className={`grid gap-3 sm:gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}
+                  >
+                    {photos.map((src, i) => (
+                      <div
+                        key={i}
+                        className="overflow-hidden rounded-3xl border border-border/60 bg-muted/40"
+                        style={{ aspectRatio: "4 / 5" }}
+                      >
+                        <img src={src} alt="" loading="lazy" className="size-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            })(),
+          };
+
+          const defaults = [
+            "host_bio",
+            "audience",
+            "spotify",
+            "partnership",
+            "vibe_check",
+            "dos_donts",
+            "eoi",
+            "videos",
+            "photos",
+          ];
+          const given = (links.section_order ?? []).filter((k) => defaults.includes(k));
+          const order = [...given, ...defaults.filter((k) => !given.includes(k))];
+          return order.map((k) => (nodes[k] ? <div key={k}>{nodes[k]}</div> : null));
         })()}
       </main>
       <SiteFooter />
