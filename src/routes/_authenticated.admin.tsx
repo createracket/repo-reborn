@@ -1905,6 +1905,7 @@ export function SpotlightForm({
           videos: form.label_videos.trim(),
           members: form.label_members.trim(),
         },
+        section_order: sectionOrder,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
