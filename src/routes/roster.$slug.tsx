@@ -65,6 +65,7 @@ type PublicItem = {
   example_video_url: string | null;
   bio_page_url: string | null;
   content_review_url: string | null;
+  content_review_label: string | null;
   position: number;
   status: string;
   category: string | null;
@@ -591,7 +592,7 @@ function PublicRosterPage() {
                           rel="noreferrer noopener"
                           className="text-pink-accent hover:underline"
                         >
-                          Content to review
+                          {it.content_review_label?.trim() || "Content to review"}
                         </a>
                       )}
                           {it.bio_page_url && (

@@ -1,0 +1,1 @@
+ALTER TABLE public.roster_items ADD COLUMN IF NOT EXISTS content_review_label text;
