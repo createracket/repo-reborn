@@ -25,6 +25,7 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
+import { toProfileUrl } from "@/lib/social-handles";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
 
