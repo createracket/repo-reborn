@@ -1460,6 +1460,7 @@ export function SpotlightForm({
     host_bio: editData?.host_bio ?? "",
     partnership_pitch: editData?.partnership_pitch ?? "",
     eoi_opportunities: (editData?.eoi_opportunities ?? []).join("\n"),
+    dos_donts: (editData?.dos_donts ?? []).join("\n"),
     audience_segments: (editData?.audience_segments ?? []).join("\n"),
     vibe_tags: (editData?.vibe_tags ?? []).join(", "),
     instagram: editData?.links?.instagram ?? "",
