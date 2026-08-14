@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive } from "lucide-react";
+import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check } from "lucide-react";
+import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist, scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
