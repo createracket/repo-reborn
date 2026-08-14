@@ -308,17 +308,56 @@ function extractInstagramHandle(url: string): string | null {
 }
 
 function extractTikTokHandle(url: string): string | null {
+  const clean = (h: string) => {
+    const v = h.trim().replace(/^@/, "").split(/[?#/]/)[0];
+    return /^[A-Za-z0-9._]{1,30}$/.test(v) ? v : null;
+  };
   try {
     const u = new URL(url);
     const seg = u.pathname.split("/").filter(Boolean);
+    for (const s of seg) {
+      if (s.startsWith("@")) return clean(s);
+    }
+    // Paths like /handle or /handle/video/123 (no @ prefix)
     const first = seg[0] ?? "";
-    if (first.startsWith("@")) return first.slice(1);
+    if (first && !["t", "v", "video", "embed", "tag", "music", "discover", "foryou", "explore"].includes(first)) {
+      return clean(first);
+    }
     return null;
   } catch {
-    const t = url.trim().replace(/^@/, "");
-    return t || null;
+    return clean(url);
   }
 }
+
+/** Short share links (vm.tiktok.com/…, tiktok.com/t/…) redirect to the real URL. */
+async function resolveTikTokShortLink(url: string): Promise<string> {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    const isShort =
+      host === "vm.tiktok.com" || host === "vt.tiktok.com" || u.pathname.startsWith("/t/");
+    if (!isShort) return url;
+    const res = await fetch(url, { method: "GET", redirect: "follow" });
+    return res.url || url;
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * Accepts a full URL, a bare handle, an @handle, or a scheme-less link and
+ * returns a canonical profile URL so platform detection never fails on input
+ * shape alone.
+ */
+export function normaliseProfileInput(raw: string): string {
+  const value = (raw ?? "").trim();
+  if (!value) return value;
+  if (/^https?:\/\//i.test(value)) return value;
+  if (/^[a-z0-9.-]+\.[a-z]{2,}(\/|$)/i.test(value)) return `https://${value}`;
+  return value;
+}
+
+
 
 async function scrapeInstagramProfile(url: string): Promise<ProfileResult> {
   const token = process.env.APIFY_API_TOKEN;
@@ -351,34 +390,73 @@ async function scrapeInstagramProfile(url: string): Promise<ProfileResult> {
   }
 }
 
-async function scrapeTikTokProfile(url: string): Promise<ProfileResult> {
-  const token = process.env.APIFY_API_TOKEN;
-  if (!token) return { ok: false, error: "APIFY_API_TOKEN not configured." };
-  const handle = extractTikTokHandle(url);
-  if (!handle) return { ok: false, error: "Couldn't parse TikTok handle from URL." };
-  try {
-    const results = (await runApifyActor(
-      "clockworks~tiktok-profile-scraper",
-      { profiles: [handle], resultsPerPage: 1, shouldDownloadVideos: false },
-      token,
-    )) as Array<{
-      authorMeta?: { fans?: number; avatar?: string; name?: string };
-      fans?: number;
-      followerCount?: number;
-    }>;
-    const p = results[0];
-    if (!p) return { ok: false, error: "No TikTok profile returned." };
+type TikTokProfileItem = {
+  authorMeta?: { fans?: number; avatar?: string; name?: string };
+  fans?: number;
+  followerCount?: number;
+  stats?: { followerCount?: number };
+};
+
+function pickTikTokProfile(results: unknown[], handle: string): ProfileResult | null {
+  for (const raw of results as TikTokProfileItem[]) {
+    if (!raw) continue;
+    const followers =
+      raw.authorMeta?.fans ?? raw.fans ?? raw.followerCount ?? raw.stats?.followerCount ?? null;
+    if (followers == null && !raw.authorMeta) continue;
     return {
       ok: true,
       platform: "tiktok",
-      followers: p.authorMeta?.fans ?? p.fans ?? p.followerCount ?? null,
-      avatar_url: await mirrorOrKeep(p.authorMeta?.avatar ?? null, "tt"),
-      handle: p.authorMeta?.name ?? handle,
+      followers,
+      avatar_url: raw.authorMeta?.avatar ?? null,
+      handle: raw.authorMeta?.name ?? handle,
     };
+  }
+  return null;
+}
+
+async function scrapeTikTokProfile(url: string): Promise<ProfileResult> {
+  const token = process.env.APIFY_API_TOKEN;
+  if (!token) return { ok: false, error: "APIFY_API_TOKEN not configured." };
+  const resolved = await resolveTikTokShortLink(normaliseProfileInput(url));
+  const handle = extractTikTokHandle(resolved);
+  if (!handle) return { ok: false, error: "Couldn't parse TikTok handle from URL." };
+  try {
+    let found = pickTikTokProfile(
+      await runApifyActor(
+        "clockworks~tiktok-profile-scraper",
+        { profiles: [handle], resultsPerPage: 1, shouldDownloadVideos: false },
+        token,
+      ),
+      handle,
+    );
+
+    // Fallback: the free scraper also returns authorMeta for a profile URL.
+    if (!found) {
+      found = pickTikTokProfile(
+        await runApifyActor(
+          "clockworks~free-tiktok-scraper",
+          {
+            profiles: [handle],
+            resultsPerPage: 1,
+            shouldDownloadVideos: false,
+            shouldDownloadCovers: false,
+          },
+          token,
+        ),
+        handle,
+      );
+    }
+
+    if (!found) return { ok: false, error: `No TikTok profile found for @${handle}.` };
+    if (found.ok && found.avatar_url) {
+      found = { ...found, avatar_url: await mirrorOrKeep(found.avatar_url, "tt") };
+    }
+    return found;
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }
 }
+
 
 async function scrapeYouTubeChannel(url: string): Promise<ProfileResult> {
   const key = process.env.GOOGLE_API_KEY;
@@ -551,18 +629,20 @@ export const scrapeProfileFollowers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ url: z.string().min(1) }).parse)
   .handler(async ({ data }): Promise<ProfileResult> => {
-    const platform = detectProfilePlatform(data.url);
+    const url = normaliseProfileInput(data.url);
+    const platform = detectProfilePlatform(url);
     if (!platform)
       return {
         ok: false,
         error: "Unrecognised URL — must be Instagram, TikTok, YouTube, Twitch, Facebook or X.",
       };
-    if (platform === "instagram") return scrapeInstagramProfile(data.url);
-    if (platform === "tiktok") return scrapeTikTokProfile(data.url);
-    if (platform === "twitch") return scrapeTwitchChannel(data.url);
-    if (platform === "facebook") return scrapeFacebookPage(data.url);
-    if (platform === "x") return scrapeXProfile(data.url);
-    return scrapeYouTubeChannel(data.url);
+    if (platform === "instagram") return scrapeInstagramProfile(url);
+    if (platform === "tiktok") return scrapeTikTokProfile(url);
+    if (platform === "twitch") return scrapeTwitchChannel(url);
+    if (platform === "facebook") return scrapeFacebookPage(url);
+    if (platform === "x") return scrapeXProfile(url);
+    return scrapeYouTubeChannel(url);
+
   });
 
 // ============================================================
@@ -926,7 +1006,8 @@ export type ProfileSyncResult = {
   apple?: AppleMusicArtistResult | null;
 };
 
-export async function scrapeProfileByUrl(url: string): Promise<ProfileResult> {
+export async function scrapeProfileByUrl(raw: string): Promise<ProfileResult> {
+  const url = normaliseProfileInput(raw);
   const platform = detectProfilePlatform(url);
   if (platform === "instagram") return scrapeInstagramProfile(url);
   if (platform === "tiktok") return scrapeTikTokProfile(url);

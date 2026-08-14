@@ -25,6 +25,7 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
+import { toProfileUrl } from "@/lib/social-handles";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
 
@@ -2003,11 +2004,13 @@ function EditProspectPanel({
     urlKey: keyof typeof form,
     followersKey: keyof typeof form,
   ) {
-    const url = String(form[urlKey] || "").trim();
+    const raw = String(form[urlKey] || "").trim();
+    const url = toProfileUrl(platform, raw);
     if (!url) {
-      toast.error(`Enter a ${platform} URL first`);
+      toast.error(`Enter a ${platform} URL or handle first`);
       return;
     }
+    if (url !== raw) upd(urlKey, url as never);
     setFetching(platform);
     try {
       const r = await scrapeProfile({ data: { url } });
@@ -2021,9 +2024,12 @@ function EditProspectPanel({
       } else {
         toast.error("No follower count returned");
       }
+    } catch (e) {
+      toast.error((e as Error).message || `Couldn't reach ${platform}`);
     } finally {
       setFetching(null);
     }
+
   }
 
   async function syncSpotify() {
@@ -2502,11 +2508,13 @@ function AddProspectCard({
     urlKey: keyof typeof form,
     followersKey: keyof typeof form,
   ) {
-    const url = String(form[urlKey] || "").trim();
+    const raw = String(form[urlKey] || "").trim();
+    const url = toProfileUrl(platform, raw);
     if (!url) {
-      toast.error(`Enter a ${platform} URL first`);
+      toast.error(`Enter a ${platform} URL or handle first`);
       return;
     }
+    if (url !== raw) update(urlKey, url as never);
     setFetching(platform);
     try {
       const r = await scrapeProfile({ data: { url } });
@@ -2520,9 +2528,12 @@ function AddProspectCard({
       } else {
         toast.error("No follower count returned");
       }
+    } catch (e) {
+      toast.error((e as Error).message || `Couldn't reach ${platform}`);
     } finally {
       setFetching(null);
     }
+
   }
 
   function FetchBtn({ platform, urlKey, followersKey }: { platform: "instagram" | "tiktok" | "youtube" | "twitch" | "facebook" | "x"; urlKey: keyof typeof form; followersKey: keyof typeof form; }) {
