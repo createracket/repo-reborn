@@ -526,7 +526,7 @@ function PublicReportPage() {
         )}
 
         <section className="mt-6 space-y-10">
-            {filteredCreators.length === 0 ? (
+          {filteredCreators.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {monthFilter === "all" && platformFilter === "all"
                 ? "No creators on this report yet."
