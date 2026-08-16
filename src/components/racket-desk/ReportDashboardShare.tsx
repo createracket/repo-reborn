@@ -23,8 +23,8 @@ export function ReportDashboardShare({
   const [open, setOpen] = useState(false);
   const [assignees, setAssignees] = useState<ShareTarget[]>([]);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ShareTarget[]>([]);
-  const [searching, setSearching] = useState(false);
+  const [people, setPeople] = useState<ShareTarget[]>([]);
+  const [loadingPeople, setLoadingPeople] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -32,6 +32,28 @@ export function ReportDashboardShare({
       .then(setAssignees)
       .catch((e: any) => toast.error(e?.message ?? "Could not load assignees"));
   }, [open, scanId]);
+
+  // Load the assignable profiles once the panel opens, then filter locally.
+  useEffect(() => {
+    if (!open || people.length || loadingPeople) return;
+    setLoadingPeople(true);
+    searchReportAssignees({ data: { q: "" } })
+      .then(setPeople)
+      .catch((e: any) => toast.error(e?.message ?? "Could not load profiles"))
+      .finally(() => setLoadingPeople(false));
+  }, [open, people.length, loadingPeople]);
+
+  const suggestions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const list = q
+      ? people.filter(
+          (p) =>
+            (p.display_name ?? "").toLowerCase().includes(q) ||
+            (p.email ?? "").toLowerCase().includes(q),
+        )
+      : people;
+    return list.slice(0, 8);
+  }, [query, people]);
 
   async function toggleVisible() {
     setBusy(true);
