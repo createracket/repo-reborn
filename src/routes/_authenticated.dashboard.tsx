@@ -127,10 +127,10 @@ function DashboardPage() {
   const [examples, setExamples] = useState<Array<{ id: string; title: string; description: string | null; location: string | null; image_url: string | null }>>([]);
   const [spotlightOpps, setSpotlightOpps] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; section?: string | null; links?: any }>>([]);
   const [plannerBriefs, setPlannerBriefs] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; links?: any }>>([]);
-  const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null }>>([]);
-  const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null }>>([]);
+  const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null; thumb_frame?: any }>>([]);
+  const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null; thumb_frame?: any }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
-  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; thumbnail_url: string | null; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
+  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; thumbnail_url: string | null; thumb_frame: any; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
   const [loading, setLoading] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -331,7 +331,7 @@ function DashboardPage() {
       // Briefs the current user submitted (Project Planner)
       const { data: mineBriefs } = await (supabase as any)
         .from("campaign_briefs")
-        .select("id, title, created_at, status, budget, currency, thumbnail_url, linked_roster_id, linked_report_id")
+        .select("id, title, created_at, status, budget, currency, thumbnail_url, thumb_frame, linked_roster_id, linked_report_id")
         .eq("user_id", u.user.id)
         .order("created_at", { ascending: false });
       const mineBriefRows = (((mineBriefs as any[]) ?? [])).filter((r) => r?.status !== "closed");
@@ -374,6 +374,7 @@ function DashboardPage() {
             budget: r.budget,
             currency: r.currency,
             thumbnail_url: r.thumbnail_url ?? null,
+            thumb_frame: r.thumb_frame ?? null,
             linked_roster_id: r.linked_roster_id ?? null,
             linked_roster_slug: info?.slug ?? null,
             linked_roster_published: !!info?.published,
@@ -729,6 +730,7 @@ function DashboardPage() {
                         <PlannerTile
                           interactive={false}
                           thumb={b.thumbnail_url}
+                          frame={readThumbFrame({ thumb_frame: b.thumb_frame })}
                           title={b.title}
                           label="Your brief"
                           subtitle={
@@ -783,6 +785,7 @@ function DashboardPage() {
                         <PlannerTile
                           interactive={!!(r.published && r.slug)}
                           thumb={thumb}
+                          frame={readThumbFrame({ thumb_frame: (r as any).thumb_frame })}
                           title={r.title}
                           label="Roster"
                           subtitle={`Updated ${new Date(r.updated_at).toLocaleDateString()}${r.published && r.slug ? "" : " · Draft"}`}
@@ -832,6 +835,7 @@ function DashboardPage() {
                         <PlannerTile
                           interactive={!!(r.published && r.slug)}
                           thumb={thumb}
+                          frame={readThumbFrame({ thumb_frame: (r as any).thumb_frame })}
                           title={r.title}
                           label="Report"
                           subtitle={`Updated ${new Date(r.updated_at).toLocaleDateString()}${r.published && r.slug ? "" : " · Draft"}`}
