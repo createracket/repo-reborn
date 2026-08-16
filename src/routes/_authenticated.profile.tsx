@@ -272,6 +272,11 @@ function EditProfilePage() {
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [originalSlug, setOriginalSlug] = useState<string>("");
+  /** Slug of the last successfully saved profile — drives the "View public page" CTA. */
+  const [justSavedSlug, setJustSavedSlug] = useState<string | null>(null);
+  /** Snapshot of the last persisted values, used to describe what changed in the save toast. */
+  const savedSnapshotRef = useRef<Record<string, string> | null>(null);
+
   const [slugStatus, setSlugStatus] = useState<
     | { kind: "idle" }
     | { kind: "checking" }
@@ -344,6 +349,24 @@ function EditProfilePage() {
         const urls = (d.socials?.extra ?? []) as string[];
         const names = (d.socials?.extra_names ?? []) as string[];
         setExtraLinks(urls.map((url, i) => ({ url, name: names[i] ?? "" })));
+        savedSnapshotRef.current = snapshotOf({
+          display_name: d.display_name,
+          artist_name: d.artist_name,
+          location: d.location,
+          bio: d.bio,
+          avatar_url: d.avatar_url,
+          slug: d.slug,
+          socials: d.socials ?? {},
+          media: d.media ?? {},
+          vibe_tags: d.vibe_tags ?? [],
+          total_followers: d.total_followers,
+          total_streams: d.total_streams,
+          monthly_streams: d.monthly_streams,
+          avg_reach: d.avg_reach,
+          avg_engagement: d.avg_engagement,
+          top_audience_location: d.top_audience_location,
+        });
+
       }
 
       // Resolve the archetype from the member's latest vibe check so it can be
@@ -650,12 +673,66 @@ function EditProfilePage() {
 
 
 
+  /**
+   * Parse a hand-typed metric. Accepts plain numbers plus the shorthand people
+   * actually type: "10k", "1.2m", "3,400", "4.2%".
+   */
   function num(v: string): number | null {
-    const t = v.trim();
+    const t = (v ?? "").trim().toLowerCase().replace(/,/g, "").replace(/%$/, "").replace(/\s+/g, "");
     if (!t) return null;
-    const n = Number(t);
-    return Number.isFinite(n) ? n : null;
+    const m = t.match(/^(-?\d*\.?\d+)([kmb])?$/);
+    if (!m) return null;
+    const base = Number(m[1]);
+    if (!Number.isFinite(base)) return null;
+    const mult = m[2] === "k" ? 1_000 : m[2] === "m" ? 1_000_000 : m[2] === "b" ? 1_000_000_000 : 1;
+    return Math.round(base * mult * 100) / 100;
   }
+
+  /** Flatten the saved payload into comparable strings, labelled for the toast. */
+  function snapshotOf(payload: Record<string, any>): Record<string, string> {
+    const s: Record<string, string> = {};
+    const norm = (value: unknown): string => {
+      if (value == null) return "";
+      if (Array.isArray(value)) return JSON.stringify(value.map((v) => String(v ?? "").trim()).filter(Boolean));
+      if (typeof value === "object") {
+        const o = value as Record<string, unknown>;
+        const entries = Object.keys(o)
+          .sort()
+          .map((k) => [k, o[k]] as const)
+          .filter(([, v]) => (Array.isArray(v) ? v.filter(Boolean).length > 0 : String(v ?? "").trim() !== ""));
+        return JSON.stringify(entries.map(([k, v]) => [k, Array.isArray(v) ? v.map((x) => String(x ?? "").trim()).filter(Boolean) : String(v).trim()]));
+      }
+      return String(value).trim();
+    };
+    const put = (label: string, value: unknown) => {
+      s[label] = norm(value);
+    };
+
+    put("your name", payload.display_name);
+    put("your artist name", payload.artist_name);
+    put("your location", payload.location);
+    put("your bio", payload.bio);
+    put("your profile photo", payload.avatar_url);
+    put("your profile URL", payload.slug);
+    put("your social links", payload.socials);
+    put("your featured posts", payload.media);
+    put("your vibe tags", payload.vibe_tags);
+    put("your total social audience", payload.total_followers);
+    put("your total streams", payload.total_streams);
+    put("your monthly streams", payload.monthly_streams);
+    put("your average reach", payload.avg_reach);
+    put("your average engagement", payload.avg_engagement);
+    put("your top audience location", payload.top_audience_location);
+    return s;
+  }
+
+  /** Human summary of what changed since the last save. */
+  function describeChanges(next: Record<string, string>): string[] {
+    const prev = savedSnapshotRef.current;
+    if (!prev) return [];
+    return Object.keys(next).filter((k) => (prev[k] ?? "") !== next[k]);
+  }
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -755,7 +832,27 @@ function EditProfilePage() {
       return;
     }
     setOriginalSlug(slug ?? "");
-    toast.success(form.avatar_url ? "Profile updated with your thumbnail" : "Profile updated");
+    const snapshot = snapshotOf(payload);
+    const changed = describeChanges(snapshot);
+    savedSnapshotRef.current = snapshot;
+    setJustSavedSlug(slug ?? null);
+    // Keep the metric inputs in sync with what was actually stored (e.g. "10k" → 10000).
+    setForm((f) => ({
+      ...f,
+      total_followers: payload.total_followers?.toString() ?? "",
+      total_streams: payload.total_streams?.toString() ?? "",
+      monthly_streams: payload.monthly_streams?.toString() ?? "",
+      avg_reach: payload.avg_reach?.toString() ?? "",
+      avg_engagement: payload.avg_engagement?.toString() ?? "",
+    }));
+    const summary =
+      changed.length === 0
+        ? "Profile saved — nothing changed"
+        : changed.length <= 3
+          ? `Saved ${changed.join(", ")}`
+          : `Saved ${changed.slice(0, 2).join(", ")} and ${changed.length - 2} more updates`;
+    toast.success(summary);
+
   }
 
   if (loading) {
@@ -1141,7 +1238,12 @@ function EditProfilePage() {
 
               <div className="md:col-span-2 pt-2">
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  You can type shorthand like <span className="font-medium">10k</span> or{" "}
+                  <span className="font-medium">1.2m</span>. Manual metrics will be validated.
+                </p>
               </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="tf">Total social audience</Label>
                 <Input id="tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
@@ -1163,9 +1265,17 @@ function EditProfilePage() {
                 <Input id="ae" inputMode="decimal" value={form.avg_engagement} onChange={(e) => set("avg_engagement", e.target.value)} placeholder="e.g. 4.2 (%)" />
               </div>
 
-              <div className="md:col-span-2 pt-2">
+              <div className="md:col-span-2 flex flex-wrap items-center gap-3 pt-2">
                 <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save profile"}</Button>
+                {justSavedSlug ? (
+                  <Button asChild className="bg-coral text-white hover:bg-coral/90">
+                    <Link to="/u/$slug" params={{ slug: justSavedSlug }}>
+                      View public page <ExternalLink className="ml-1.5 size-3.5" />
+                    </Link>
+                  </Button>
+                ) : null}
               </div>
+
             </form>
           </CardContent>
         </Card>
