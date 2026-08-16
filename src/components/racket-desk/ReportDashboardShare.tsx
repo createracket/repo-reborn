@@ -86,16 +86,6 @@ export function ReportDashboardShare({
     }
   }
 
-  async function search() {
-    setSearching(true);
-    try {
-      setResults(await searchReportAssignees({ data: { q: query } }));
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not search profiles");
-    } finally {
-      setSearching(false);
-    }
-  }
 
   async function assign(t: ShareTarget, assigned: boolean) {
     try {
