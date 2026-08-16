@@ -385,9 +385,9 @@ function EditProfilePage() {
     setForm((f) => ({ ...f, socials: { ...f.socials, [k]: v } }));
   }
 
-  function setMedia(k: keyof ProfileMedia, v: string) {
+  const setMedia = useCallback((k: keyof ProfileMedia, v: string) => {
     setForm((f) => ({ ...f, media: { ...f.media, [k]: v } }));
-  }
+  }, []);
 
   function addExtra() {
     setExtraLinks((l) => [...l, { url: "", name: "" }]);
