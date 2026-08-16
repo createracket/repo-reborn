@@ -964,23 +964,44 @@ function EditProfilePage() {
                         included in your totals when you sync.
                       </p>
                     </div>
-                    {extraLinks.map((link, i) => (
-                      <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
-                        <Input
-                          value={link.name}
-                          onChange={(e) => updateExtra(i, { name: e.target.value })}
-                          placeholder="Label (e.g. Band)"
-                        />
-                        <Input
-                          value={link.url}
-                          onChange={(e) => updateExtra(i, { url: e.target.value })}
-                          placeholder="https://…"
-                        />
-                        <Button type="button" size="sm" variant="ghost" onClick={() => removeExtra(i)}>
-                          Remove
-                        </Button>
-                      </div>
-                    ))}
+                    {extraLinks.map((link, i) => {
+                      const fetched = extraFetched[link.url.trim()];
+                      return (
+                        <div key={i} className="space-y-2">
+                          <div className="grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
+                            <Input
+                              value={link.name}
+                              onChange={(e) => updateExtra(i, { name: e.target.value })}
+                              placeholder="Label (e.g. Band)"
+                            />
+                            <Input
+                              value={link.url}
+                              onChange={(e) => updateExtra(i, { url: e.target.value })}
+                              placeholder="https://…"
+                            />
+                            <Button type="button" size="sm" variant="ghost" onClick={() => removeExtra(i)}>
+                              Remove
+                            </Button>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <SyncButton
+                              busy={fetching === `extra:${i}`}
+                              disabled={!!fetching || !link.url.trim()}
+                              onClick={() => runSyncFor(`extra:${i}`)}
+                            />
+                            {fetched ? (
+                              <span className="text-xs text-muted-foreground">
+                                {[
+                                  fetched.followers != null ? `${fetched.followers.toLocaleString()} followers` : null,
+                                  fetched.streams != null ? `${fetched.streams.toLocaleString()} monthly streams` : null,
+                                ].filter(Boolean).join(" · ") || "No numbers returned"}
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                    })}
+
                     <Button type="button" size="sm" variant="outline" onClick={addExtra}>
                       Add link
                     </Button>
