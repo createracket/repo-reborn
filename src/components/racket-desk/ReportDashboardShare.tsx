@@ -167,25 +167,25 @@ export function ReportDashboardShare({
                 )}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && search()}
                   placeholder="Search profiles by name or email"
                   className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm focus:border-lime focus:outline-none"
                 />
-                <button
-                  onClick={search}
-                  className="rounded-full border border-border px-4 py-2 text-xs hover:text-lime"
-                >
-                  {searching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Search"}
-                </button>
+                {loadingPeople && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
               </div>
 
-              {results.length > 0 && (
+              {!loadingPeople && suggestions.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {query.trim() ? "No profiles match that search." : "No profiles available yet."}
+                </p>
+              )}
+
+              {suggestions.length > 0 && (
                 <ul className="max-h-52 space-y-1 overflow-auto text-sm">
-                  {results.map((r) => {
+                  {suggestions.map((r) => {
                     const on = assignees.some((a) => a.user_id === r.user_id);
                     return (
                       <li
