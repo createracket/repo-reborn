@@ -683,7 +683,49 @@ function DashboardPage() {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
+                {plannerBriefs.length > 0 ? (
+                  <div>
+                    <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+                      Briefs for you
+                    </div>
+                    <ul className="grid gap-3 md:grid-cols-2">
+                      {plannerBriefs.map((bp) => {
+                        const thumb = bp.header_image_url || bp.profile_image_url || null;
+                        return (
+                          <li key={bp.id}>
+                            <Link
+                              to="/brief/$slug"
+                              params={{ slug: bp.slug }}
+                              className="group flex h-full gap-3 rounded-xl border border-border/60 bg-card p-3 transition hover:border-primary/60"
+                            >
+                              <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-muted">
+                                {thumb ? (
+                                  <img src={thumb} alt="" className="size-full object-cover object-top" />
+                                ) : (
+                                  <div className="flex size-full items-center justify-center text-[9px] uppercase tracking-wider text-muted-foreground">
+                                    Brief
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <h3 className="truncate text-sm font-medium leading-tight group-hover:text-primary">
+                                  {bp.headline}
+                                </h3>
+                                {bp.subtitle ? (
+                                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{bp.subtitle}</p>
+                                ) : null}
+                                <span className="mt-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
+                                  Brief
+                                </span>
+                              </div>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ) : null}
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
                 ) : myBriefs.length === 0 ? (
