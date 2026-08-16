@@ -330,7 +330,7 @@ function DashboardPage() {
       // Briefs the current user submitted (Project Planner)
       const { data: mineBriefs } = await (supabase as any)
         .from("campaign_briefs")
-        .select("id, title, created_at, status, budget, currency, linked_roster_id, linked_report_id")
+        .select("id, title, created_at, status, budget, currency, thumbnail_url, linked_roster_id, linked_report_id")
         .eq("user_id", u.user.id)
         .order("created_at", { ascending: false });
       const mineBriefRows = (((mineBriefs as any[]) ?? [])).filter((r) => r?.status !== "closed");
