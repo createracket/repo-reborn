@@ -42,6 +42,9 @@ type ProfileSocials = {
   custom_label?: string;
   custom_url?: string;
   website?: string;
+  /** Secondary links (band / podcast / side project) and their labels. */
+  extra?: string[];
+  extra_names?: string[];
 };
 
 
@@ -53,6 +56,8 @@ const emptyForm = {
   bio: "",
   avatar_url: "",
   socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", website: "" } as ProfileSocials,
+  media: {} as ProfileMedia,
+  vibe_tags: "",
   total_followers: "",
   total_streams: "",
   monthly_streams: "",
@@ -63,6 +68,51 @@ const emptyForm = {
   flagged_streaming_reason: "" as string | null,
 };
 
+/** Small upload control shared by the featured video covers and photos. */
+function MediaUploadButton({ label, onUploaded }: { label: string; onUploaded: (url: string) => void }) {
+  const upload = useServerFn(uploadMyProfileImage);
+  const [busy, setBusy] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  async function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be under 8MB");
+      e.target.value = "";
+      return;
+    }
+    setBusy(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Could not read file"));
+        reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+        reader.readAsDataURL(file);
+      });
+      const res = await upload({
+        data: { base64, contentType: file.type as "image/jpeg" | "image/png" | "image/webp" | "image/gif" },
+      });
+      onUploaded(res.publicUrl);
+      toast.success("Image uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={pick} />
+      <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => inputRef.current?.click()}>
+        {busy ? "Uploading…" : label}
+      </Button>
+    </div>
+  );
+}
+
 
 function EditProfilePage() {
   const navigate = useNavigate();
@@ -71,6 +121,10 @@ function EditProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [extraLinks, setExtraLinks] = useState<SecondaryLink[]>([]);
+  const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig | null>(null);
+  const [archetype, setArchetype] = useState<{ key: string; kind: "artist" | "brand" } | null>(null);
+
   const [accountType, setAccountType] = useState<string | null>(null);
 
   const [pendingFile, setPendingFile] = useState<File | null>(null);
