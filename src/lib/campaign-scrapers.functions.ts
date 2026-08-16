@@ -989,6 +989,8 @@ const profileSyncInput = z.object({
   x_url: z.string().nullish(),
   spotify_url: z.string().nullish(),
   apple_music_url: z.string().nullish(),
+  // Secondary links (band / podcast / side project) synced in the same run.
+  extra_urls: z.array(z.string()).max(24).optional(),
 });
 
 export type ProfileSyncResult = {
@@ -1004,7 +1006,9 @@ export type ProfileSyncResult = {
   x?: ProfileResult | null;
   spotify?: SpotifyArtistResult | null;
   apple?: AppleMusicArtistResult | null;
+  extras?: Array<{ url: string; followers: number | null; streams: number | null }>;
 };
+
 
 export async function scrapeProfileByUrl(raw: string): Promise<ProfileResult> {
   const url = normaliseProfileInput(raw);
