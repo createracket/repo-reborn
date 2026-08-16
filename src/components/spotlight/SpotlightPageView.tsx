@@ -140,6 +140,18 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
   const [gateError, setGateError] = useState<string | null>(null);
   const [posters, setPosters] = useState<Record<string, string | null>>({});
 
+  // A brief opened at /spotlight/... (or the reverse) bounces to its own URL.
+  useEffect(() => {
+    if (!page) return;
+    const rowKind = (page.section ?? "spotlight") === "brief" ? "brief" : "spotlight";
+    if (rowKind === kind) return;
+    navigate({
+      to: rowKind === "brief" ? "/brief/$slug" : "/spotlight/$slug",
+      params: { slug },
+      replace: true,
+    });
+  }, [page, kind, slug, navigate]);
+
   // Fetch provider poster thumbnails (TikTok) for clips without a manual cover.
   useEffect(() => {
     const l = page?.links ?? {};
@@ -215,15 +227,6 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
         return;
       }
       const p = data as unknown as PartnerPage;
-      const rowKind = (p.section ?? "spotlight") === "brief" ? "brief" : "spotlight";
-      if (rowKind !== kind) {
-        navigate({
-          to: rowKind === "brief" ? "/brief/$slug" : "/spotlight/$slug",
-          params: { slug },
-          replace: true,
-        });
-        return;
-      }
       setPage(p);
       setStatus("ready");
 
