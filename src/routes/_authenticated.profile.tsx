@@ -1238,7 +1238,12 @@ function EditProfilePage() {
 
               <div className="md:col-span-2 pt-2">
                 <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  You can type shorthand like <span className="font-medium">10k</span> or{" "}
+                  <span className="font-medium">1.2m</span>. Manual metrics will be validated.
+                </p>
               </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="tf">Total social audience</Label>
                 <Input id="tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
