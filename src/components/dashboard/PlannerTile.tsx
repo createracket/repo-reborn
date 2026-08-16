@@ -34,9 +34,8 @@ export function PlannerTile({
 
   return (
     <div
-      className={`group flex h-full items-start gap-3 rounded-xl border border-border/60 bg-card p-3 transition ${
-        interactive ? "hover:border-primary/60" : ""
-      }`}
+      className="group flex h-full items-start gap-3 rounded-xl border border-border/60 bg-card p-3 transition hover:border-lime"
+
     >
       <div
         className={`size-16 shrink-0 overflow-hidden rounded-lg ${thumbFrameBgClass(frame)}`}
