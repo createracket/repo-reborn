@@ -1405,7 +1405,7 @@ const SOUND_BOARD_PLACEHOLDERS: Array<{ title: string; copy: string; gradient: s
   { title: "Feature drop", copy: "How one collab clip became a repeatable content format.", gradient: "linear-gradient(135deg,#BADA55,#5C37D0)" },
 ];
 
-function VibeCard({ loading, vibe }: { loading: boolean; vibe: VibeRow | null }) {
+function VibeCard({ loading, vibe, config }: { loading: boolean; vibe: VibeRow | null; config: VibeCheckConfig }) {
   if (loading) {
     return (
       <Card>
