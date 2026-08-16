@@ -7,6 +7,7 @@ import {
   searchReportAssignees,
   setReportAssignee,
   setReportDashboardVisibility,
+  getMyShareTarget,
   type ShareTarget,
 } from "@/lib/racket-desk/report-sharing.functions";
 
@@ -43,6 +44,23 @@ export function ReportDashboardShare({
       toast.error(e?.message ?? "Could not update");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function shareWithMe() {
+    try {
+      const me = await getMyShareTarget();
+      if (assignees.some((a) => a.user_id === me.user_id)) {
+        toast.info("Already shared with you");
+        setOpen(true);
+        return;
+      }
+      await setReportAssignee({ data: { scanId, targetUserId: me.user_id, assigned: true } });
+      setAssignees((a) => [...a, me]);
+      setOpen(true);
+      toast.success("Shared with your Project planner");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not share with you");
     }
   }
 
@@ -101,12 +119,20 @@ export function ReportDashboardShare({
 
       {visible && (
         <div className="mt-4 border-t border-border pt-4">
-          <button
-            onClick={() => setOpen((o) => !o)}
-            className="text-xs text-lime hover:underline"
-          >
-            {open ? "Hide" : "Manage"} assigned profiles ({assignees.length})
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setOpen((o) => !o)}
+              className="text-xs text-lime hover:underline"
+            >
+              {open ? "Hide" : "Manage"} assigned profiles ({assignees.length})
+            </button>
+            <button
+              onClick={shareWithMe}
+              className="rounded-full border border-border px-3 py-1 text-xs hover:text-lime"
+            >
+              Share with me (admin)
+            </button>
+          </div>
 
           {open && (
             <div className="mt-3 space-y-3">
