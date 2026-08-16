@@ -21,6 +21,14 @@ import {
   calculateBrandVibe,
   getArtistArchetypeDescription,
 } from "@/lib/vibe-check";
+import {
+  DEFAULT_VIBE_CONFIG,
+  loadVibeCheckConfig,
+  artistArchetypeKeyFromLabel,
+  brandArchetypeKeyFromLabel,
+  type VibeCheckConfig,
+} from "@/lib/vibe-check-config";
+
 import { BriefStatusBadge } from "@/components/briefs/BriefStatusBadge";
 import { formatBriefBudget, transparencyLabel } from "@/lib/brief-currency";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
