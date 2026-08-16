@@ -734,7 +734,7 @@ function DashboardPage() {
                           thumb={b.thumbnail_url}
                           frame={readThumbFrame({ thumb_frame: b.thumb_frame })}
                           title={b.title}
-                          label="Your brief"
+                          
                           subtitle={
                             <>
                               Submitted {new Date(b.created_at).toLocaleDateString()}
