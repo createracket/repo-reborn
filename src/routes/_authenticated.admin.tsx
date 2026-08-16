@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
+import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
@@ -1470,6 +1472,7 @@ export function SpotlightForm({
   const sectionKind = section ?? "spotlight";
   const isEditing = !!editData;
   const [sectionOrder, setSectionOrder] = useState<string[]>(() =>
+  const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(() => readThumbFrame(editData?.links));
     normaliseSectionOrder(editData?.links?.section_order),
   );
   const [dragKey, setDragKey] = useState<string | null>(null);
@@ -1897,6 +1900,7 @@ export function SpotlightForm({
         apple_music_name: form.apple_music_name.trim(),
         youtube_extra_names: extraLinks.youtube.map((_, i) => (extraNames.youtube[i] ?? "").trim()),
         colour_thumbnails: form.colour_thumbnails,
+        thumb_frame: thumbFrame,
         section_labels: {
           host_bio: form.label_host_bio.trim(),
           audience: form.label_audience.trim(),
@@ -2107,6 +2111,11 @@ export function SpotlightForm({
                   onCheckedChange={(v) => set("colour_thumbnails", v)}
                 />
               </label>
+              <ThumbFrameControls
+                value={thumbFrame}
+                onChange={setThumbFrame}
+                previewUrl={form.header_image_url || form.profile_image_url || null}
+              />
             </div>
           </details>
           <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
