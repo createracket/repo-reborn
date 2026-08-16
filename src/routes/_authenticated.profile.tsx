@@ -349,6 +349,24 @@ function EditProfilePage() {
         const urls = (d.socials?.extra ?? []) as string[];
         const names = (d.socials?.extra_names ?? []) as string[];
         setExtraLinks(urls.map((url, i) => ({ url, name: names[i] ?? "" })));
+        savedSnapshotRef.current = snapshotOf({
+          display_name: d.display_name,
+          artist_name: d.artist_name,
+          location: d.location,
+          bio: d.bio,
+          avatar_url: d.avatar_url,
+          slug: d.slug,
+          socials: d.socials ?? {},
+          media: d.media ?? {},
+          vibe_tags: d.vibe_tags ?? [],
+          total_followers: d.total_followers,
+          total_streams: d.total_streams,
+          monthly_streams: d.monthly_streams,
+          avg_reach: d.avg_reach,
+          avg_engagement: d.avg_engagement,
+          top_audience_location: d.top_audience_location,
+        });
+
       }
 
       // Resolve the archetype from the member's latest vibe check so it can be
