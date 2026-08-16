@@ -26,6 +26,14 @@ import { findProfanityIn } from "@/lib/profanity";
 import { adminCreateUser, adminDeleteUser, adminUpdateUser } from "@/lib/admin-users.functions";
 import { ACCESS_CODE } from "@/routes/login";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
+import {
+  loadVibeCheckConfig,
+  DEFAULT_VIBE_CONFIG,
+  artistArchetypeOptions,
+  brandArchetypeOptions,
+  type VibeCheckConfig,
+} from "@/lib/vibe-check-config";
+import { calculateVibeScore, calculateBrandVibe } from "@/lib/vibe-check";
 import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
 import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
 import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
