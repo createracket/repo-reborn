@@ -237,8 +237,13 @@ function DashboardPage() {
   }, [rosterFilter, isRosterView, myRosters]);
 
 
+  const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
+  useEffect(() => {
+    loadVibeCheckConfig(true).then(setVibeConfig).catch(() => {});
+  }, []);
 
   useEffect(() => {
+
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       setEmail(u.user?.email ?? null);
