@@ -684,8 +684,7 @@ function DashboardPage() {
                       <Rocket className="size-5 text-primary" /> Project planner
                     </CardTitle>
                     <CardDescription>
-                      Kick off a campaign by submitting a brief. We'll take it from review through to
-                      roster and reporting - track every step here.
+                      Manage your projects here. Submit a brief to start connecting with new collaborators.
                     </CardDescription>
                   </div>
                   <Button asChild size="sm">
@@ -867,9 +866,7 @@ function DashboardPage() {
                       <Megaphone className="size-5 text-pink-accent" /> New opportunities
                     </CardTitle>
                     <CardDescription>
-                      Live briefs from the Racket community. Click to review and express interest, or{" "}
-                      <Link to="/contact" className="text-primary hover:underline">contact us</Link>{" "}
-                      with any questions.
+                      Discover live briefs from like-minded collaborators; from gifted collabs to full-scale brand campaigns.
                     </CardDescription>
                   </div>
                   {isAdmin ? (
@@ -1095,8 +1092,7 @@ function DashboardPage() {
                   <Users className="size-5 text-primary" /> Your roster
                 </CardTitle>
                 <CardDescription>
-                  Artists, brands and creators you've saved. Add people from the community
-                  to keep your shortlist in one place.
+                  Manage your Racket Rosters and build new connections - community search is coming soon!
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1287,8 +1283,7 @@ function DashboardPage() {
                     <h3 className="font-display text-xl">Suggested matches</h3>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    A taste of who's on Racket - sample artists and brands to give you a feel
-                    for the kind of matches we'll surface as the community grows.
+                    A taste of who's on Racket - complete your profile for the chance to be featured here first.
                   </p>
                   <div className="mt-4">
                     {loading ? (
@@ -1341,7 +1336,7 @@ function DashboardPage() {
                       <Megaphone className="size-5 text-primary" /> Sound Board
                     </CardTitle>
                     <CardDescription>
-                      Case studies, campaign moments and social content worth a look — cycle through for inspiration.
+                      Find ideas to fuel your next collab or creative campaign; ft. cultural moments we stopped scrolling for.{" "}
                     </CardDescription>
                   </div>
                   <div className="flex gap-1">
