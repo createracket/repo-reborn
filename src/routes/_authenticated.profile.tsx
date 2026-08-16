@@ -134,6 +134,8 @@ function EditProfilePage() {
           bio: d.bio ?? "",
           avatar_url: d.avatar_url ?? "",
           socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", website: "", ...(d.socials ?? {}) },
+          media: { ...(d.media ?? {}) } as ProfileMedia,
+          vibe_tags: ((d.vibe_tags ?? []) as string[]).join(", "),
           total_followers: d.total_followers?.toString() ?? "",
           total_streams: d.total_streams?.toString() ?? "",
           monthly_streams: d.monthly_streams?.toString() ?? "",
@@ -143,7 +145,39 @@ function EditProfilePage() {
           flagged_streaming_mismatch: d.flagged_streaming_mismatch ?? false,
           flagged_streaming_reason: d.flagged_streaming_reason ?? "",
         });
+
+        const urls = ((d.socials?.extra ?? []) as string[]) ?? [];
+        const names = ((d.socials?.extra_names ?? []) as string[]) ?? [];
+        setExtraLinks(urls.map((url, i) => ({ url, name: names[i] ?? "" })));
       }
+
+      // Resolve the archetype from the member's latest vibe check so it can be
+      // shown here and persisted for the public profile page.
+      try {
+        const [{ data: vibes }, cfg] = await Promise.all([
+          supabase
+            .from("vibe_check_responses")
+            .select("answers, result, created_at")
+            .eq("user_id", u.user.id)
+            .order("created_at", { ascending: false })
+            .limit(1),
+          loadVibeCheckConfig().catch(() => DEFAULT_VIBE_CONFIG),
+        ]);
+        setVibeConfig(cfg);
+        const latest = (vibes?.[0] as any) ?? null;
+        if (latest?.result === "brand") {
+          const scoring: any = calculateBrandVibe(latest.answers ?? {}, cfg);
+          const key = scoring?.brandArchetype?.type ? brandArchetypeKeyFromLabel(scoring.brandArchetype.type, cfg) : null;
+          if (key) setArchetype({ key, kind: "brand" });
+        } else if (latest?.result === "artist") {
+          const scoring: any = calculateVibeScore(latest.answers ?? {}, cfg);
+          const key = scoring?.primary ? artistArchetypeKeyFromLabel(scoring.primary, cfg) : null;
+          if (key) setArchetype({ key, kind: "artist" });
+        }
+      } catch {
+        /* archetype is optional */
+      }
+
       setLoading(false);
     })();
   }, [navigate]);
