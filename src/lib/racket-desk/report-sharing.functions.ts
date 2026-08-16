@@ -121,6 +121,54 @@ export const setReportAssignee = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+/** Admin: save the planner thumbnail + framing for a report. */
+export const setReportThumbnail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        scanId: z.string().uuid(),
+        thumbnailUrl: z.string().url().nullable(),
+        thumbFrame: z
+          .object({
+            fit: z.enum(["cover", "contain"]),
+            bg: z.enum(["card", "black", "white"]),
+            zoom: z.number().min(50).max(150),
+            position: z.enum(["top", "center", "bottom"]),
+          })
+          .nullable(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await requireAdmin(supabase, userId);
+    const { error } = await (supabase as any)
+      .from("social_listening_scans")
+      .update({ thumbnail_url: data.thumbnailUrl, thumb_frame: data.thumbFrame })
+      .eq("id", data.scanId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+/** Admin: the signed-in admin's own share target, so they can share a report with themselves. */
+export const getMyShareTarget = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<ShareTarget> => {
+    const { supabase, userId } = context;
+    await requireAdmin(supabase, userId);
+    const { data: row } = await (supabase as any)
+      .from("profiles")
+      .select("id, display_name, email")
+      .eq("id", userId)
+      .maybeSingle();
+    return {
+      user_id: userId,
+      display_name: row?.display_name ?? "You (admin)",
+      email: row?.email ?? null,
+    };
+  });
+
 export interface DashboardReport {
   id: string;
   artist_name: string;
@@ -129,6 +177,11 @@ export interface DashboardReport {
   report_title: string | null;
   notes: string | null;
   created_at: string;
+  thumbnail_url: string | null;
+  thumb_frame: unknown;
+}
+
+export interface ListeningReportDetail extends DashboardReport {
   analysis: ListeningAnalysis;
   posts: ScannedPost[];
 }
@@ -144,7 +197,7 @@ export const listDashboardReports = createServerFn({ method: "POST" })
     const { data: rows, error } = await supabase
       .from("social_listening_scans")
       .select(
-        "id, artist_name, handle, platform, report_title, notes, created_at, analysis, posts",
+        "id, artist_name, handle, platform, report_title, notes, created_at, thumbnail_url, thumb_frame",
       )
       .eq("dashboard_visible", true)
       .order("created_at", { ascending: false })
@@ -152,3 +205,21 @@ export const listDashboardReports = createServerFn({ method: "POST" })
     if (error) return [];
     return (rows ?? []) as unknown as DashboardReport[];
   });
+
+/** Full report for the detail page. RLS limits this to admins and assigned users. */
+export const getListeningReport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }): Promise<ListeningReportDetail | null> => {
+    const { supabase } = context;
+    const { data: row, error } = await supabase
+      .from("social_listening_scans")
+      .select(
+        "id, artist_name, handle, platform, report_title, notes, created_at, thumbnail_url, thumb_frame, analysis, posts",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error || !row) return null;
+    return row as unknown as ListeningReportDetail;
+  });
+
