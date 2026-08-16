@@ -129,7 +129,7 @@ function DashboardPage() {
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
-  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
+  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; thumbnail_url: string | null; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
   const [loading, setLoading] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
