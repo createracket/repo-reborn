@@ -35,3 +35,19 @@ Bring a light version of the spotlight layout to user profiles: featured videos 
 **Technical notes**
 - Migration adds `vibe_tags text[] not null default '{}'` to `public.profiles` (alongside the `media` column above) and exposes `vibe_tags` plus the resolved archetype on the `public_profiles` view.
 - Archetype is derived, not duplicated: the user's latest `vibe_check_responses` row is scored with `calculateVibeScore` / `calculateBrandVibe` against the live `vibe_check_config`, exactly as the dashboard does, so renamed archetypes stay in sync. For the public page (where the visitor can't read another user's responses), store the resolved archetype key and account kind on `profiles` when the Vibe Check is submitted or the profile is saved, and resolve the display name/description client-side from the live config using the stable key.
+
+## Secondary social links and handle labels
+
+**Profile builder**
+- Inside the "Socials & links" dropdown, each platform gains an "Add another link" control for secondary profiles (band, podcast, side project, label page), matching the `*_extra` pattern used on spotlight pages.
+- Every secondary link has an optional custom name field ("Band", "Personal", "Podcast") shown next to the handle.
+- Follower syncing runs across primary and secondary links; totals roll up into Total social audience, Total fans and streams the same way spotlight pages aggregate, using the shared helpers in `src/lib/audience.ts`.
+
+**Public profile (`/u/<slug>`)**
+- Social buttons display the @handle rather than the platform name (e.g. `@createracket` with the Instagram icon), matching spotlight pages, falling back to the platform name when a handle can't be parsed.
+- Secondary links render beneath the primary row, each prefixed with its custom name where set.
+
+**Technical notes**
+- Extend the `socials` jsonb with `<platform>_extra: string[]` and `<platform>_extra_names: string[]` arrays plus the existing primaries, so no schema change is needed beyond what's already listed.
+- Reuse the spotlight `handleLabel` helper (extract it from `SpotlightPageView` into a shared util) for @handle rendering across both surfaces.
+- Follower sync reuses `src/lib/campaign-scrapers.functions.ts` and counts against the same monthly usage allowance; syncing all links counts as one sync.
