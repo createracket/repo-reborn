@@ -111,7 +111,40 @@ export const setReportAssignee = createServerFn({ method: "POST" })
           { onConflict: "scan_id,target_user_id" },
         );
       if (error) throw new Error(error.message);
+
+      // Only sends when the "Listening report shared" trigger is on.
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const [{ data: profile }, { data: scan }] = await Promise.all([
+          supabaseAdmin
+            .from("profiles")
+            .select("email, display_name")
+            .eq("id", data.targetUserId)
+            .maybeSingle(),
+          supabaseAdmin
+            .from("social_listening_scans")
+            .select("report_title, artist_name")
+            .eq("id", data.scanId)
+            .maybeSingle(),
+        ]);
+        const p = profile as { email: string | null; display_name: string | null } | null;
+        if (p?.email) {
+          const s = scan as { report_title: string | null; artist_name: string | null } | null;
+          const { sendForEvent } = await import("@/lib/email/send.server");
+          await sendForEvent("listening_report_shared", {
+            recipientEmail: p.email,
+            templateData: {
+              name: p.display_name ?? "",
+              page_title: s?.report_title ?? s?.artist_name ?? "Listening report",
+              link: `/listening-report/${data.scanId}`,
+            },
+          });
+        }
+      } catch (e) {
+        console.error("listening_report_shared notify failed", e);
+      }
     } else {
+
       const { error } = await supabase
         .from("social_listening_scan_shares")
         .delete()
