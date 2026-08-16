@@ -670,6 +670,37 @@ function EditProfilePage() {
     return Math.round(base * mult * 100) / 100;
   }
 
+  /** Flatten the saved payload into comparable strings, labelled for the toast. */
+  function snapshotOf(payload: Record<string, any>): Record<string, string> {
+    const s: Record<string, string> = {};
+    const put = (label: string, value: unknown) => {
+      s[label] = value == null ? "" : typeof value === "object" ? JSON.stringify(value) : String(value);
+    };
+    put("your name", payload.display_name);
+    put("your artist name", payload.artist_name);
+    put("your location", payload.location);
+    put("your bio", payload.bio);
+    put("your profile photo", payload.avatar_url);
+    put("your profile URL", payload.slug);
+    put("your social links", payload.socials);
+    put("your featured posts", payload.media);
+    put("your vibe tags", payload.vibe_tags);
+    put("your total social audience", payload.total_followers);
+    put("your total streams", payload.total_streams);
+    put("your monthly streams", payload.monthly_streams);
+    put("your average reach", payload.avg_reach);
+    put("your average engagement", payload.avg_engagement);
+    put("your top audience location", payload.top_audience_location);
+    return s;
+  }
+
+  /** Human summary of what changed since the last save. */
+  function describeChanges(next: Record<string, string>): string[] {
+    const prev = savedSnapshotRef.current;
+    if (!prev) return [];
+    return Object.keys(next).filter((k) => (prev[k] ?? "") !== next[k]);
+  }
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
