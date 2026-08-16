@@ -43,6 +43,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
+import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { normalizeSlug, validateSlug } from "@/lib/slugs";
 import { detectPlatform, formatCount } from "@/lib/youtube-utils";
 import { scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
@@ -86,6 +88,7 @@ type Report = {
   published_at: string | null;
   header_image_url: string | null;
   profile_image_url: string | null;
+  thumb_frame?: any;
   client_email: string | null;
   brand_email: string | null;
   source_roster_id: string | null;
@@ -198,7 +201,7 @@ function CampaignReportsPage() {
     const { data, error } = await sb
       .from("campaign_reports")
       .select(
-        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url",
+        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url, thumb_frame",
       )
       .order("updated_at", { ascending: false });
     if (error) return toast.error(error.message);
@@ -524,6 +527,7 @@ function ReportDetailView({
   const [slug, setSlug] = useState(report.slug);
   const [header, setHeader] = useState(report.header_image_url ?? "");
   const [thumb, setThumb] = useState(report.profile_image_url ?? "");
+  const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(readThumbFrame({ thumb_frame: (report as any).thumb_frame }));
   const [uploadingThumb, setUploadingThumb] = useState(false);
   const [clientEmail, setClientEmail] = useState("");
   const [brandEmail, setBrandEmail] = useState("");
@@ -543,6 +547,7 @@ function ReportDetailView({
     setSlug(report.slug);
     setHeader(report.header_image_url ?? "");
     setThumb(report.profile_image_url ?? "");
+    setThumbFrame(readThumbFrame({ thumb_frame: (report as any).thumb_frame }));
     setCategories(report.categories ?? []);
     setHideCategories(!!report.hide_categories);
     setTemplate(report.template ?? "original");
@@ -596,6 +601,7 @@ function ReportDetailView({
         slug: v.normalized,
         header_image_url: header.trim() || null,
         profile_image_url: thumb.trim() || null,
+        thumb_frame: thumbFrame as any,
         client_email: clientEmail.trim().toLowerCase() || null,
         brand_email: brandEmail.trim().toLowerCase() || null,
       })
@@ -852,6 +858,11 @@ function ReportDetailView({
               value={thumb}
               onChange={(e) => setThumb(e.target.value)}
               placeholder="Or paste an image URL"
+            />
+            <ThumbFrameControls
+              value={thumbFrame}
+              onChange={setThumbFrame}
+              previewUrl={thumb || null}
             />
           </div>
           <div className="space-y-2">

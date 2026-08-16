@@ -30,6 +30,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
+import { DEFAULT_THUMB_FRAME, readThumbFrame } from "@/lib/thumb-frame";
 import { resizeImageFile } from "@/lib/image-resize";
 import { findProfanityIn } from "@/lib/profanity";
 import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
@@ -120,6 +122,7 @@ export type CampaignBrief = {
   linked_report_id: string | null;
   artist_archetypes: string[]; brand_archetypes: string[];
   thumbnail_url?: string | null;
+  thumb_frame?: any;
   display_order?: number | null;
 };
 export type Profile = {
@@ -157,7 +160,7 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr, emailRes] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, thumbnail_url, display_order").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, thumbnail_url, thumb_frame, display_order").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
       (supabase as any).rpc("admin_campaign_brief_emails"),
     ]);
@@ -646,6 +649,7 @@ function EditBriefDialog({
         artist_archetypes: brief.artist_archetypes ?? [],
         brand_archetypes: brief.brand_archetypes ?? [],
         thumbnail_url: (brief as any).thumbnail_url ?? "",
+        thumb_frame: readThumbFrame({ thumb_frame: (brief as any).thumb_frame }),
       });
     } else {
       setForm({
@@ -682,6 +686,7 @@ function EditBriefDialog({
       patch.artist_archetypes = Array.isArray(form.artist_archetypes) ? form.artist_archetypes : [];
       patch.brand_archetypes = Array.isArray(form.brand_archetypes) ? form.brand_archetypes : [];
       patch.thumbnail_url = form.thumbnail_url || null;
+      patch.thumb_frame = form.thumb_frame ?? null;
     }
     if (!isUser) {
       patch.contact_name = form.contact_name || null;
@@ -798,6 +803,11 @@ function EditBriefDialog({
                   </div>
                 </div>
               </div>
+              <ThumbFrameControls
+                value={form.thumb_frame ?? DEFAULT_THUMB_FRAME}
+                onChange={(next) => setForm({ ...form, thumb_frame: next })}
+                previewUrl={form.thumbnail_url || null}
+              />
               <ArchetypePicker
                 label="Artist archetypes (visibility)"
                 help="Only artists whose Vibe Check archetype matches will see this opportunity when published. Leave empty to show to every artist. Manually shared users always see it."

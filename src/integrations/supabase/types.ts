@@ -108,6 +108,7 @@ export type Database = {
           published_at: string | null
           status: string
           target_audience: string | null
+          thumb_frame: Json | null
           thumbnail_url: string | null
           timeline: string | null
           title: string
@@ -132,6 +133,7 @@ export type Database = {
           published_at?: string | null
           status?: string
           target_audience?: string | null
+          thumb_frame?: Json | null
           thumbnail_url?: string | null
           timeline?: string | null
           title: string
@@ -156,6 +158,7 @@ export type Database = {
           published_at?: string | null
           status?: string
           target_audience?: string | null
+          thumb_frame?: Json | null
           thumbnail_url?: string | null
           timeline?: string | null
           title?: string
@@ -394,6 +397,7 @@ export type Database = {
           slug: string
           source_roster_id: string | null
           template: string
+          thumb_frame: Json | null
           title: string
           updated_at: string
         }
@@ -415,6 +419,7 @@ export type Database = {
           slug: string
           source_roster_id?: string | null
           template?: string
+          thumb_frame?: Json | null
           title?: string
           updated_at?: string
         }
@@ -436,6 +441,7 @@ export type Database = {
           slug?: string
           source_roster_id?: string | null
           template?: string
+          thumb_frame?: Json | null
           title?: string
           updated_at?: string
         }
@@ -1401,6 +1407,7 @@ export type Database = {
           published: boolean
           published_at: string | null
           slug: string | null
+          thumb_frame: Json | null
           title: string
           updated_at: string
         }
@@ -1425,6 +1432,7 @@ export type Database = {
           published?: boolean
           published_at?: string | null
           slug?: string | null
+          thumb_frame?: Json | null
           title: string
           updated_at?: string
         }
@@ -1449,6 +1457,7 @@ export type Database = {
           published?: boolean
           published_at?: string | null
           slug?: string | null
+          thumb_frame?: Json | null
           title?: string
           updated_at?: string
         }
@@ -2043,6 +2052,7 @@ export type Database = {
           published: boolean
           published_at: string
           slug: string
+          thumb_frame: Json
           title: string
           updated_at: string
         }[]
@@ -2059,6 +2069,7 @@ export type Database = {
           published: boolean
           published_at: string
           slug: string
+          thumb_frame: Json
           title: string
           updated_at: string
         }[]
