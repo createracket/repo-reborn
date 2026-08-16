@@ -794,7 +794,7 @@ function EditProfilePage() {
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="curl">Other link URL</Label>
-                    <Input id="curl" value={form.socials.custom_url ?? ""} onChange={(e) => setSocial("curl" as any, e.target.value)} placeholder="https://…" />
+                    <Input id="curl" value={form.socials.custom_url ?? ""} onChange={(e) => setSocial("custom_url", e.target.value)} placeholder="https://…" />
                   </div>
                   <div className="space-y-1.5 md:col-span-2">
                     <Label htmlFor="web">Website</Label>
