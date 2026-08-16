@@ -7,6 +7,15 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { handleLabel } from "@/lib/social-links";
+import { FeaturedVideos, FeaturedPhotos, type ProfileMedia } from "@/components/profile/FeaturedMedia";
+import {
+  DEFAULT_VIBE_CONFIG,
+  loadVibeCheckConfig,
+  artistArchetypeOptions,
+  brandArchetypeOptions,
+  type VibeCheckConfig,
+} from "@/lib/vibe-check-config";
 
 type PublicProfile = {
   id: string;
@@ -23,7 +32,12 @@ type PublicProfile = {
   avg_reach: number | null;
   avg_engagement: number | null;
   top_audience_location: string | null;
+  media: ProfileMedia | null;
+  vibe_tags: string[] | null;
+  vibe_archetype_key: string | null;
+  vibe_archetype_kind: string | null;
 };
+
 
 export const Route = createFileRoute("/u/$slug")({
   head: ({ loaderData }) => {
