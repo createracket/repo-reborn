@@ -146,6 +146,10 @@ function DashboardPage() {
   const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
   const [soundBoardItems, setSoundBoardItems] = useState<Array<{ id: string; title: string; copy: string; video_url: string | null; thumbnail_url: string | null; gradient: string | null }>>([]);
 
+  useEffect(() => {
+    loadDashboardConfig().then((cfg) => setFeaturedSpotlightsEnabled(cfg.featuredSpotlightsEnabled));
+  }, []);
+
   // Sound board is the last section on the page — load it only once the rest of the dashboard has settled
   useEffect(() => {
     if (loading) return;
