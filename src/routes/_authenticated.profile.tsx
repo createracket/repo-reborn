@@ -18,6 +18,19 @@ import { runProfileSync } from "@/lib/campaign-scrapers.functions";
 import { getMyUsage } from "@/lib/usage.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 import { toProfileUrl, type SocialPlatform } from "@/lib/social-handles";
+import { type SecondaryLink } from "@/lib/social-links";
+import { uploadMyProfileImage } from "@/lib/profile-images.functions";
+import type { ProfileMedia } from "@/components/profile/FeaturedMedia";
+import { calculateVibeScore, calculateBrandVibe } from "@/lib/vibe-check";
+import {
+  DEFAULT_VIBE_CONFIG,
+  loadVibeCheckConfig,
+  artistArchetypeKeyFromLabel,
+  brandArchetypeKeyFromLabel,
+  artistArchetypeOptions,
+  brandArchetypeOptions,
+  type VibeCheckConfig,
+} from "@/lib/vibe-check-config";
 import { COUNTRIES } from "@/lib/countries";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Loader2, X } from "lucide-react";
@@ -42,6 +55,9 @@ type ProfileSocials = {
   custom_label?: string;
   custom_url?: string;
   website?: string;
+  /** Secondary links (band / podcast / side project) and their labels. */
+  extra?: string[];
+  extra_names?: string[];
 };
 
 
@@ -53,6 +69,8 @@ const emptyForm = {
   bio: "",
   avatar_url: "",
   socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", website: "" } as ProfileSocials,
+  media: {} as ProfileMedia,
+  vibe_tags: "",
   total_followers: "",
   total_streams: "",
   monthly_streams: "",
@@ -63,6 +81,51 @@ const emptyForm = {
   flagged_streaming_reason: "" as string | null,
 };
 
+/** Small upload control shared by the featured video covers and photos. */
+function MediaUploadButton({ label, onUploaded }: { label: string; onUploaded: (url: string) => void }) {
+  const upload = useServerFn(uploadMyProfileImage);
+  const [busy, setBusy] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  async function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be under 8MB");
+      e.target.value = "";
+      return;
+    }
+    setBusy(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Could not read file"));
+        reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+        reader.readAsDataURL(file);
+      });
+      const res = await upload({
+        data: { base64, contentType: file.type as "image/jpeg" | "image/png" | "image/webp" | "image/gif" },
+      });
+      onUploaded(res.publicUrl);
+      toast.success("Image uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={pick} />
+      <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => inputRef.current?.click()}>
+        {busy ? "Uploading…" : label}
+      </Button>
+    </div>
+  );
+}
+
 
 function EditProfilePage() {
   const navigate = useNavigate();
@@ -71,6 +134,10 @@ function EditProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [extraLinks, setExtraLinks] = useState<SecondaryLink[]>([]);
+  const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig | null>(null);
+  const [archetype, setArchetype] = useState<{ key: string; kind: "artist" | "brand" } | null>(null);
+
   const [accountType, setAccountType] = useState<string | null>(null);
 
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -134,6 +201,8 @@ function EditProfilePage() {
           bio: d.bio ?? "",
           avatar_url: d.avatar_url ?? "",
           socials: { instagram: "", tiktok: "", spotify: "", apple_music: "", youtube: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", website: "", ...(d.socials ?? {}) },
+          media: { ...(d.media ?? {}) } as ProfileMedia,
+          vibe_tags: ((d.vibe_tags ?? []) as string[]).join(", "),
           total_followers: d.total_followers?.toString() ?? "",
           total_streams: d.total_streams?.toString() ?? "",
           monthly_streams: d.monthly_streams?.toString() ?? "",
@@ -143,7 +212,39 @@ function EditProfilePage() {
           flagged_streaming_mismatch: d.flagged_streaming_mismatch ?? false,
           flagged_streaming_reason: d.flagged_streaming_reason ?? "",
         });
+
+        const urls = (d.socials?.extra ?? []) as string[];
+        const names = (d.socials?.extra_names ?? []) as string[];
+        setExtraLinks(urls.map((url, i) => ({ url, name: names[i] ?? "" })));
       }
+
+      // Resolve the archetype from the member's latest vibe check so it can be
+      // shown here and persisted for the public profile page.
+      try {
+        const [{ data: vibes }, cfg] = await Promise.all([
+          supabase
+            .from("vibe_check_responses")
+            .select("answers, result, created_at")
+            .eq("user_id", u.user.id)
+            .order("created_at", { ascending: false })
+            .limit(1),
+          loadVibeCheckConfig().catch(() => DEFAULT_VIBE_CONFIG),
+        ]);
+        setVibeConfig(cfg);
+        const latest = (vibes?.[0] as any) ?? null;
+        if (latest?.result === "brand") {
+          const scoring: any = calculateBrandVibe(latest.answers ?? {}, cfg);
+          const key = scoring?.brandArchetype?.type ? brandArchetypeKeyFromLabel(scoring.brandArchetype.type, cfg) : null;
+          if (key) setArchetype({ key, kind: "brand" });
+        } else if (latest?.result === "artist") {
+          const scoring: any = calculateVibeScore(latest.answers ?? {}, cfg);
+          const key = scoring?.primary ? artistArchetypeKeyFromLabel(scoring.primary, cfg) : null;
+          if (key) setArchetype({ key, kind: "artist" });
+        }
+      } catch {
+        /* archetype is optional */
+      }
+
       setLoading(false);
     })();
   }, [navigate]);
@@ -156,10 +257,33 @@ function EditProfilePage() {
     setForm((f) => ({ ...f, socials: { ...f.socials, [k]: v } }));
   }
 
+  function setMedia(k: keyof ProfileMedia, v: string) {
+    setForm((f) => ({ ...f, media: { ...f.media, [k]: v } }));
+  }
+
+  function addExtra() {
+    setExtraLinks((l) => [...l, { url: "", name: "" }]);
+  }
+  function updateExtra(i: number, patch: Partial<SecondaryLink>) {
+    setExtraLinks((l) => l.map((row, idx) => (idx === i ? { ...row, ...patch } : row)));
+  }
+  function removeExtra(i: number) {
+    setExtraLinks((l) => l.filter((_, idx) => idx !== i));
+  }
+
+  const archetypeLabel = (() => {
+    if (!archetype) return "";
+    const cfg = vibeConfig ?? DEFAULT_VIBE_CONFIG;
+    const opts = archetype.kind === "brand" ? brandArchetypeOptions(cfg) : artistArchetypeOptions(cfg);
+    return opts.find((o) => o.key === archetype.key)?.label ?? "";
+  })();
+
+
   const runSync = useServerFn(runProfileSync);
   const loadUsage = useServerFn(getMyUsage);
   const [fetching, setFetching] = useState<string | null>(null);
   const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number; twitch?: number; facebook?: number; x?: number }>({});
+  const [extraTotals, setExtraTotals] = useState<{ followers: number; streams: number }>({ followers: 0, streams: 0 });
   const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
   const [syncQuota, setSyncQuota] = useState<{ remaining: number; limit: number; resets: string } | null>(null);
 
@@ -190,6 +314,7 @@ function EditProfilePage() {
 
   /** One metered run that refreshes every connected platform. */
   async function syncAll() {
+    const extraUrls = extraLinks.map((l) => l.url.trim()).filter(Boolean);
     const payload = {
       instagram_url: normaliseSocial("instagram", form.socials.instagram ?? ""),
       tiktok_url: normaliseSocial("tiktok", form.socials.tiktok ?? ""),
@@ -199,9 +324,10 @@ function EditProfilePage() {
       x_url: normaliseSocial("x", form.socials.x ?? ""),
       spotify_url: (form.socials.spotify ?? "").trim() || null,
       apple_music_url: (form.socials.apple_music ?? "").trim() || null,
+      extra_urls: extraUrls,
     };
 
-    if (!Object.values(payload).some(Boolean)) {
+    if (!Object.values(payload).flat().some(Boolean)) {
       toast.error("Add at least one social or streaming link first");
       return;
     }
@@ -227,6 +353,13 @@ function EditProfilePage() {
         }
       });
       if (Object.keys(counts).length) setFetchedCounts((c) => ({ ...c, ...counts }));
+
+      const extras = r.extras ?? [];
+      const extraFollowers = extras.reduce((sum, e) => sum + (e.followers ?? 0), 0);
+      const extraStreams = extras.reduce((sum, e) => sum + (e.streams ?? 0), 0);
+      setExtraTotals({ followers: extraFollowers, streams: extraStreams });
+      if (extraFollowers > 0) parts.push(`extra links: ${extraFollowers.toLocaleString()}`);
+
 
       let mismatch: string | null = null;
       const sp = r.spotify;
@@ -271,14 +404,20 @@ function EditProfilePage() {
       (fetchedCounts.youtube ?? 0) +
       (fetchedCounts.twitch ?? 0) +
       (fetchedCounts.facebook ?? 0) +
-      (fetchedCounts.x ?? 0);
+      (fetchedCounts.x ?? 0) +
+      extraTotals.followers;
     if (total <= 0) {
       toast.error("Fetch at least one social first");
       return;
     }
     set("total_followers", String(total));
+    if (extraTotals.streams > 0) {
+      const base = Number(form.monthly_streams) || 0;
+      set("monthly_streams", String(base + extraTotals.streams));
+    }
     toast.success(`Total followers set to ${total.toLocaleString()}`);
   }
+
 
 
   function handleAvatarPick(e: React.ChangeEvent<HTMLInputElement>) {
@@ -371,9 +510,19 @@ function EditProfilePage() {
     setSaving(true);
     const cleanSocials: ProfileSocials = {};
     (Object.keys(form.socials) as Array<keyof ProfileSocials>).forEach((k) => {
-      const v = (form.socials[k] || "").trim();
-      if (v) cleanSocials[k] = v;
+      const v = ((form.socials[k] as string) || "").trim();
+      if (v) (cleanSocials as any)[k] = v;
     });
+    const cleanExtras = extraLinks.filter((l) => l.url.trim());
+    (cleanSocials as any).extra = cleanExtras.map((l) => l.url.trim());
+    (cleanSocials as any).extra_names = cleanExtras.map((l) => l.name.trim());
+
+    const cleanMedia: Record<string, string> = {};
+    (Object.keys(form.media) as Array<keyof ProfileMedia>).forEach((k) => {
+      const v = (form.media[k] ?? "").trim();
+      if (v) cleanMedia[k] = v;
+    });
+
     const payload: any = {
       id: userId,
       slug: slug || null,
@@ -383,6 +532,13 @@ function EditProfilePage() {
       bio: form.bio.trim() || null,
       avatar_url: form.avatar_url || null,
       socials: cleanSocials,
+      media: cleanMedia,
+      vibe_tags: form.vibe_tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean),
+      vibe_archetype_key: archetype?.key ?? null,
+      vibe_archetype_kind: archetype?.kind ?? null,
       total_followers: num(form.total_followers),
       total_streams: num(form.total_streams),
       monthly_streams: num(form.monthly_streams),
@@ -392,6 +548,7 @@ function EditProfilePage() {
       flagged_streaming_mismatch: form.flagged_streaming_mismatch,
       flagged_streaming_reason: form.flagged_streaming_reason || null,
     };
+
     const bad = findProfanityIn(payload);
     if (bad) {
       setSaving(false);
@@ -586,77 +743,212 @@ function EditProfilePage() {
                 <Textarea id="bio" rows={4} value={form.bio} onChange={(e) => set("bio", e.target.value)} />
               </div>
 
-              <div className="md:col-span-2 pt-2 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Socials</p>
-                <div className="flex flex-col items-end gap-0.5">
-                  <Button type="button" size="sm" variant="outline" onClick={syncAll} disabled={fetching === "all"}>
-                    <RefreshCw className={`mr-1.5 size-3.5 ${fetching === "all" ? "animate-spin" : ""}`} />
-                    {fetching === "all" ? "Syncing…" : "Sync my numbers"}
-                  </Button>
-                  <p className="text-[11px] text-muted-foreground">{syncAllowanceLabel}</p>
-                </div>
-              </div>
+              <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4" open>
+                <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+                  Socials &amp; links
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">
+                    (primary links, plus band / podcast / side project links)
+                  </span>
+                </summary>
+                <div className="grid gap-5 px-4 md:grid-cols-2">
+                  <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">Shown on your public profile as @handles.</p>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <Button type="button" size="sm" variant="outline" onClick={syncAll} disabled={fetching === "all"}>
+                        <RefreshCw className={`mr-1.5 size-3.5 ${fetching === "all" ? "animate-spin" : ""}`} />
+                        {fetching === "all" ? "Syncing…" : "Sync my numbers"}
+                      </Button>
+                      <p className="text-[11px] text-muted-foreground">{syncAllowanceLabel}</p>
+                    </div>
+                  </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="ig">Instagram</Label>
-                <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
-                {fetchedCounts.instagram != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()}</p> : null}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="tt">TikTok</Label>
-                <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
-                {fetchedCounts.tiktok != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()}</p> : null}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="sp">Spotify</Label>
-                <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
-                <p className="text-[11px] text-muted-foreground">Auto-syncs followers, monthly listeners and total streams.</p>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="am">Apple Music</Label>
-                <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
-                <p className="text-[11px] text-muted-foreground">Verifies the artist name against your profile.</p>
-              </div>
-              {mismatchWarning ? (
-                <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
-                  {mismatchWarning}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="ig">Instagram</Label>
+                    <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
+                    {fetchedCounts.instagram != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()}</p> : null}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tt">TikTok</Label>
+                    <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
+                    {fetchedCounts.tiktok != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()}</p> : null}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="sp">Spotify</Label>
+                    <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
+                    <p className="text-[11px] text-muted-foreground">Auto-syncs followers, monthly listeners and total streams.</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="am">Apple Music</Label>
+                    <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+                    <p className="text-[11px] text-muted-foreground">Verifies the artist name against your profile.</p>
+                  </div>
+                  {mismatchWarning ? (
+                    <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+                      {mismatchWarning}
+                    </div>
+                  ) : null}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="yt">YouTube</Label>
+                    <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
+                    {fetchedCounts.youtube != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()}</p> : null}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="twitch">Twitch</Label>
+                    <Input id="twitch" value={form.socials.twitch ?? ""} onChange={(e) => setSocial("twitch", e.target.value)} placeholder="@handle or full URL" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="fb">Facebook</Label>
+                    <Input id="fb" value={form.socials.facebook ?? ""} onChange={(e) => setSocial("facebook", e.target.value)} placeholder="Page name or full URL" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="xcom">X</Label>
+                    <Input id="xcom" value={form.socials.x ?? ""} onChange={(e) => setSocial("x", e.target.value)} placeholder="@handle or full URL" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="clabel">Other link label</Label>
+                    <Input id="clabel" value={form.socials.custom_label ?? ""} onChange={(e) => setSocial("custom_label", e.target.value)} placeholder="e.g. Bandcamp" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="curl">Other link URL</Label>
+                    <Input id="curl" value={form.socials.custom_url ?? ""} onChange={(e) => setSocial("custom_url", e.target.value)} placeholder="https://…" />
+                  </div>
+                  <div className="space-y-1.5 md:col-span-2">
+                    <Label htmlFor="web">Website</Label>
+                    <Input id="web" value={form.socials.website ?? ""} onChange={(e) => setSocial("website", e.target.value)} placeholder="https://…" />
+                  </div>
+
+                  <div className="md:col-span-2 space-y-3 rounded-md border border-border/60 p-3">
+                    <div>
+                      <p className="text-sm font-medium">Extra links (band, podcast, side project)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Name each link so people know what it is. Followers and streams from these links are
+                        included in your totals when you sync.
+                      </p>
+                    </div>
+                    {extraLinks.map((link, i) => (
+                      <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
+                        <Input
+                          value={link.name}
+                          onChange={(e) => updateExtra(i, { name: e.target.value })}
+                          placeholder="Label (e.g. Band)"
+                        />
+                        <Input
+                          value={link.url}
+                          onChange={(e) => updateExtra(i, { url: e.target.value })}
+                          placeholder="https://…"
+                        />
+                        <Button type="button" size="sm" variant="ghost" onClick={() => removeExtra(i)}>
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" size="sm" variant="outline" onClick={addExtra}>
+                      Add link
+                    </Button>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
+                      Auto calculate your followers
+                    </Button>
+                    <p className="mt-1 text-xs text-muted-foreground">Sums all fetched social counts — including extra links — into Total social audience below. Total fans adds your monthly streams on top.</p>
+                  </div>
                 </div>
-              ) : null}
-              <div className="space-y-1.5">
-                <Label htmlFor="yt">YouTube</Label>
-                <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
-                {fetchedCounts.youtube != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()}</p> : null}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="twitch">Twitch</Label>
-                <Input id="twitch" value={form.socials.twitch ?? ""} onChange={(e) => setSocial("twitch", e.target.value)} placeholder="@handle or full URL" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="fb">Facebook</Label>
-                <Input id="fb" value={form.socials.facebook ?? ""} onChange={(e) => setSocial("facebook", e.target.value)} placeholder="Page name or full URL" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="xcom">X</Label>
-                <Input id="xcom" value={form.socials.x ?? ""} onChange={(e) => setSocial("x", e.target.value)} placeholder="@handle or full URL" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="clabel">Other link label</Label>
-                <Input id="clabel" value={form.socials.custom_label ?? ""} onChange={(e) => setSocial("custom_label", e.target.value)} placeholder="e.g. Bandcamp" />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="curl">Other link URL</Label>
-                <Input id="curl" value={form.socials.custom_url ?? ""} onChange={(e) => setSocial("custom_url", e.target.value)} placeholder="https://…" />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="web">Website</Label>
-                <Input id="web" value={form.socials.website ?? ""} onChange={(e) => setSocial("website", e.target.value)} placeholder="https://…" />
-              </div>
-              <div className="md:col-span-2">
-                <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
-                  Auto calculate your followers
-                </Button>
-                <p className="mt-1 text-xs text-muted-foreground">Sums fetched Instagram, TikTok and YouTube counts into Total social audience below. Total fans adds your monthly streams on top.</p>
-              </div>
+              </details>
+
+              <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+                <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+                  Featured videos
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(up to four TikTok or Instagram URLs)</span>
+                </summary>
+                <div className="flex flex-col gap-4 px-4">
+                  <p className="text-xs text-muted-foreground">
+                    Paste public TikTok or Instagram post/reel URLs. Add a cover image for Instagram clips —
+                    Instagram no longer serves public thumbnails.
+                  </p>
+                  {([1, 2, 3, 4] as const).map((n) => {
+                    const urlKey = `video${n}` as keyof ProfileMedia;
+                    const coverKey = `video${n}_cover` as keyof ProfileMedia;
+                    return (
+                      <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
+                        <Label>Video {n}</Label>
+                        <Input
+                          value={form.media[urlKey] ?? ""}
+                          onChange={(e) => setMedia(urlKey, e.target.value)}
+                          placeholder="https://www.tiktok.com/@user/video/… or Instagram reel URL"
+                        />
+                        <Input
+                          value={form.media[coverKey] ?? ""}
+                          onChange={(e) => setMedia(coverKey, e.target.value)}
+                          placeholder="Cover image URL (optional)"
+                        />
+                        <MediaUploadButton
+                          label="Upload cover"
+                          onUploaded={(url) => setMedia(coverKey, url)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+
+              <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+                <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+                  Featured photos
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(up to four images, 4:5)</span>
+                </summary>
+                <div className="grid gap-4 px-4 sm:grid-cols-2">
+                  {([1, 2, 3, 4] as const).map((n) => {
+                    const key = `photo${n}` as keyof ProfileMedia;
+                    return (
+                      <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
+                        <Label>Photo {n}</Label>
+                        {form.media[key] ? (
+                          <div className="overflow-hidden rounded-md border border-border/60" style={{ aspectRatio: "4 / 5" }}>
+                            <img src={form.media[key]} alt="" className="size-full object-cover" />
+                          </div>
+                        ) : null}
+                        <Input
+                          value={form.media[key] ?? ""}
+                          onChange={(e) => setMedia(key, e.target.value)}
+                          placeholder="Image URL"
+                        />
+                        <MediaUploadButton label="Upload photo" onUploaded={(url) => setMedia(key, url)} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+
+              <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+                <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+                  Vibe check
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(archetype and tags)</span>
+                </summary>
+                <div className="space-y-4 px-4">
+                  <div className="space-y-1.5">
+                    <Label>Your archetype</Label>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Input value={archetypeLabel || "Not taken yet"} readOnly disabled />
+                      <Button asChild type="button" size="sm" variant="outline">
+                        <Link to="/vibe-check">{archetypeLabel ? "Retake" : "Take the vibe check"}</Link>
+                      </Button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">Pulled from your latest vibe check and shown on your public profile.</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="vibetags">Vibe check tags (comma separated)</Label>
+                    <Input
+                      id="vibetags"
+                      value={form.vibe_tags}
+                      onChange={(e) => set("vibe_tags", e.target.value)}
+                      placeholder="Coffee, Travel, Fitness, Vinyl"
+                    />
+                  </div>
+                </div>
+              </details>
+
+
 
 
 
