@@ -800,7 +800,27 @@ function EditProfilePage() {
       return;
     }
     setOriginalSlug(slug ?? "");
-    toast.success(form.avatar_url ? "Profile updated with your thumbnail" : "Profile updated");
+    const snapshot = snapshotOf(payload);
+    const changed = describeChanges(snapshot);
+    savedSnapshotRef.current = snapshot;
+    setJustSavedSlug(slug ?? null);
+    // Keep the metric inputs in sync with what was actually stored (e.g. "10k" → 10000).
+    setForm((f) => ({
+      ...f,
+      total_followers: payload.total_followers?.toString() ?? "",
+      total_streams: payload.total_streams?.toString() ?? "",
+      monthly_streams: payload.monthly_streams?.toString() ?? "",
+      avg_reach: payload.avg_reach?.toString() ?? "",
+      avg_engagement: payload.avg_engagement?.toString() ?? "",
+    }));
+    const summary =
+      changed.length === 0
+        ? "Profile saved — nothing changed"
+        : changed.length <= 3
+          ? `Saved ${changed.join(", ")}`
+          : `Saved ${changed.slice(0, 2).join(", ")} and ${changed.length - 2} more updates`;
+    toast.success(summary);
+
   }
 
   if (loading) {
