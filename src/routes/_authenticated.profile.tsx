@@ -371,9 +371,19 @@ function EditProfilePage() {
     setSaving(true);
     const cleanSocials: ProfileSocials = {};
     (Object.keys(form.socials) as Array<keyof ProfileSocials>).forEach((k) => {
-      const v = (form.socials[k] || "").trim();
-      if (v) cleanSocials[k] = v;
+      const v = ((form.socials[k] as string) || "").trim();
+      if (v) (cleanSocials as any)[k] = v;
     });
+    const cleanExtras = extraLinks.filter((l) => l.url.trim());
+    (cleanSocials as any).extra = cleanExtras.map((l) => l.url.trim());
+    (cleanSocials as any).extra_names = cleanExtras.map((l) => l.name.trim());
+
+    const cleanMedia: Record<string, string> = {};
+    (Object.keys(form.media) as Array<keyof ProfileMedia>).forEach((k) => {
+      const v = (form.media[k] ?? "").trim();
+      if (v) cleanMedia[k] = v;
+    });
+
     const payload: any = {
       id: userId,
       slug: slug || null,
@@ -383,6 +393,13 @@ function EditProfilePage() {
       bio: form.bio.trim() || null,
       avatar_url: form.avatar_url || null,
       socials: cleanSocials,
+      media: cleanMedia,
+      vibe_tags: form.vibe_tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean),
+      vibe_archetype_key: archetype?.key ?? null,
+      vibe_archetype_kind: archetype?.kind ?? null,
       total_followers: num(form.total_followers),
       total_streams: num(form.total_streams),
       monthly_streams: num(form.monthly_streams),
@@ -392,6 +409,7 @@ function EditProfilePage() {
       flagged_streaming_mismatch: form.flagged_streaming_mismatch,
       flagged_streaming_reason: form.flagged_streaming_reason || null,
     };
+
     const bad = findProfanityIn(payload);
     if (bad) {
       setSaving(false);
