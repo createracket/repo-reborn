@@ -103,10 +103,21 @@ export const getRosterForMember = createServerFn({ method: "POST" })
       _role: "admin",
     });
 
-    const allowed =
+    let allowed =
       !!isAdmin ||
       record.owner_id === context.userId ||
       (!!email && [record.client_email, record.brand_email].some((e) => (e ?? "").toLowerCase() === email));
+
+    if (!allowed) {
+      // Users the admin explicitly shared the roster with
+      const { data: share } = await supabaseAdmin
+        .from("roster_shares")
+        .select("id")
+        .eq("roster_id", record.id as string)
+        .eq("user_id", context.userId)
+        .maybeSingle();
+      allowed = !!share;
+    }
     if (!allowed) return { ok: false as const };
 
     const { owner_id: _o, client_email: _c, brand_email: _b, ...roster } = record;
