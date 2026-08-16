@@ -394,14 +394,20 @@ function EditProfilePage() {
       (fetchedCounts.youtube ?? 0) +
       (fetchedCounts.twitch ?? 0) +
       (fetchedCounts.facebook ?? 0) +
-      (fetchedCounts.x ?? 0);
+      (fetchedCounts.x ?? 0) +
+      extraTotals.followers;
     if (total <= 0) {
       toast.error("Fetch at least one social first");
       return;
     }
     set("total_followers", String(total));
+    if (extraTotals.streams > 0) {
+      const base = Number(form.monthly_streams) || 0;
+      set("monthly_streams", String(base + extraTotals.streams));
+    }
     toast.success(`Total followers set to ${total.toLocaleString()}`);
   }
+
 
 
   function handleAvatarPick(e: React.ChangeEvent<HTMLInputElement>) {
