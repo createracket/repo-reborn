@@ -866,21 +866,43 @@ function EditProfilePage() {
                   <div className="space-y-1.5">
                     <Label htmlFor="ig">Instagram</Label>
                     <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
-                    {fetchedCounts.instagram != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()}</p> : null}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "instagram"} disabled={!!fetching || !(form.socials.instagram ?? "").trim()} onClick={() => runSyncFor("instagram")} />
+                      {fetchedCounts.instagram != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()} followers</span> : null}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="tt">TikTok</Label>
                     <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
-                    {fetchedCounts.tiktok != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()}</p> : null}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "tiktok"} disabled={!!fetching || !(form.socials.tiktok ?? "").trim()} onClick={() => runSyncFor("tiktok")} />
+                      {fetchedCounts.tiktok != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()} followers</span> : null}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="sp">Spotify</Label>
                     <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "spotify"} disabled={!!fetching || !(form.socials.spotify ?? "").trim()} onClick={() => runSyncFor("spotify")} />
+                      {spotifyFetched ? (
+                        <span className="text-xs text-muted-foreground">
+                          {[
+                            spotifyFetched.followers != null ? `${spotifyFetched.followers.toLocaleString()} followers` : null,
+                            spotifyFetched.monthly != null ? `${spotifyFetched.monthly.toLocaleString()} monthly listeners` : null,
+                            spotifyFetched.total != null ? `${spotifyFetched.total.toLocaleString()} total streams` : null,
+                          ].filter(Boolean).join(" · ") || "No numbers returned"}
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="text-[11px] text-muted-foreground">Auto-syncs followers, monthly listeners and total streams.</p>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="am">Apple Music</Label>
                     <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "apple_music"} disabled={!!fetching || !(form.socials.apple_music ?? "").trim()} onClick={() => runSyncFor("apple_music")} />
+                      {appleFetched ? <span className="text-xs text-muted-foreground">Matched: {appleFetched}</span> : null}
+                    </div>
                     <p className="text-[11px] text-muted-foreground">Verifies the artist name against your profile.</p>
                   </div>
                   {mismatchWarning ? (
@@ -891,20 +913,36 @@ function EditProfilePage() {
                   <div className="space-y-1.5">
                     <Label htmlFor="yt">YouTube</Label>
                     <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
-                    {fetchedCounts.youtube != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()}</p> : null}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "youtube"} disabled={!!fetching || !(form.socials.youtube ?? "").trim()} onClick={() => runSyncFor("youtube")} />
+                      {fetchedCounts.youtube != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()} subscribers</span> : null}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="twitch">Twitch</Label>
                     <Input id="twitch" value={form.socials.twitch ?? ""} onChange={(e) => setSocial("twitch", e.target.value)} placeholder="@handle or full URL" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "twitch"} disabled={!!fetching || !(form.socials.twitch ?? "").trim()} onClick={() => runSyncFor("twitch")} />
+                      {fetchedCounts.twitch != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.twitch.toLocaleString()} followers</span> : null}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="fb">Facebook</Label>
                     <Input id="fb" value={form.socials.facebook ?? ""} onChange={(e) => setSocial("facebook", e.target.value)} placeholder="Page name or full URL" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "facebook"} disabled={!!fetching || !(form.socials.facebook ?? "").trim()} onClick={() => runSyncFor("facebook")} />
+                      {fetchedCounts.facebook != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.facebook.toLocaleString()} followers</span> : null}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="xcom">X</Label>
                     <Input id="xcom" value={form.socials.x ?? ""} onChange={(e) => setSocial("x", e.target.value)} placeholder="@handle or full URL" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "x"} disabled={!!fetching || !(form.socials.x ?? "").trim()} onClick={() => runSyncFor("x")} />
+                      {fetchedCounts.x != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.x.toLocaleString()} followers</span> : null}
+                    </div>
                   </div>
+
                   <div className="space-y-1.5">
                     <Label htmlFor="clabel">Other link label</Label>
                     <Input id="clabel" value={form.socials.custom_label ?? ""} onChange={(e) => setSocial("custom_label", e.target.value)} placeholder="e.g. Bandcamp" />
