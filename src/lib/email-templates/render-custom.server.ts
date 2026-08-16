@@ -23,15 +23,6 @@ export function renderBodyHtml(bodyMarkdown: string, data: Record<string, any>):
   return sanitizeEmailHtml(rawHtml)
 }
 
-
-export function resolveSubject(subject: string, data: Record<string, any>): string {
-  // Subjects are plain text — no HTML escaping needed in the resolved value.
-  return subject.replace(MERGE_TAG, (_m, key) => {
-    const v = data?.[key]
-    return v === null || v === undefined ? '' : String(v)
-  })
-}
-
 export interface CustomTemplateInput {
   subject: string
   bodyMarkdown: string
