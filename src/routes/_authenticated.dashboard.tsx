@@ -863,7 +863,7 @@ function DashboardPage() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <CardTitle className="font-display text-2xl flex items-center gap-2">
-                      <Megaphone className="size-5 text-pink-accent" /> New opportunities
+                      <Megaphone className="size-5 text-pink-accent" /> New collabs
                     </CardTitle>
                     <CardDescription>
                       Discover live briefs from like-minded collaborators; from gifted collabs to full-scale brand campaigns.
