@@ -1006,7 +1006,7 @@ function DashboardPage() {
                         return (
                           <div
                             key={sp.id}
-                            className="snap-start shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.333%-8px)] lg:w-[calc(25%-9px)]"
+                            className="snap-start shrink-0 w-full sm:w-[calc(33.333%-8px)] lg:w-[calc(25%-9px)]"
                           >
                             <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 h-full">
                               <Link
@@ -1046,10 +1046,10 @@ function DashboardPage() {
                         );
                       })}
                       {examples.map((ex) => (
-                        <div
-                          key={ex.id}
-                          className="snap-start shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.333%-8px)] lg:w-[calc(25%-9px)]"
-                        >
+                          <div
+                            key={ex.id}
+                            className="snap-start shrink-0 w-full sm:w-[calc(33.333%-8px)] lg:w-[calc(25%-9px)]"
+                          >
                           <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 h-full">
                             <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
                               {ex.image_url ? (
