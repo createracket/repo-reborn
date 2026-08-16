@@ -659,6 +659,16 @@ function EditProfilePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    try {
+      await doSubmit();
+    } catch (err) {
+      console.error("[profile] save failed", err);
+      setSaving(false);
+      toast.error(err instanceof Error ? err.message : "Something went wrong saving your profile.");
+    }
+  }
+
+  async function doSubmit() {
     if (!userId) return;
     if (pendingFile) {
       toast.error("Please upload or cancel the selected profile photo before saving.");
