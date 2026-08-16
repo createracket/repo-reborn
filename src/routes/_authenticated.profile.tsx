@@ -1042,11 +1042,23 @@ function EditProfilePage() {
                           onChange={(e) => setMedia(coverKey, e.target.value)}
                           placeholder="Cover image URL (optional)"
                         />
-                        <MediaUploadButton
-                          label="Upload cover"
-                          onUploaded={(url) => setMedia(coverKey, url)}
-                        />
+                        {form.media[coverKey] ? (
+                          <div className="w-24 overflow-hidden rounded-md border border-border/60" style={{ aspectRatio: "9 / 16" }}>
+                            <img src={form.media[coverKey]} alt="" className="size-full object-cover" />
+                          </div>
+                        ) : null}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <FetchPreviewButton
+                            url={form.media[urlKey] ?? ""}
+                            onFetched={(url) => setMedia(coverKey, url)}
+                          />
+                          <MediaUploadButton
+                            label="Upload cover"
+                            onUploaded={(url) => setMedia(coverKey, url)}
+                          />
+                        </div>
                       </div>
+
                     );
                   })}
                 </div>
