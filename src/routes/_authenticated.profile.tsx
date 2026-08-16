@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 import { validateSlug, normalizeSlug } from "@/lib/slugs";
-import { runProfileSync } from "@/lib/campaign-scrapers.functions";
+import { runProfileSync, scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
 import { getMyUsage } from "@/lib/usage.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 import { toProfileUrl, type SocialPlatform } from "@/lib/social-handles";
@@ -125,6 +125,70 @@ function MediaUploadButton({ label, onUploaded }: { label: string; onUploaded: (
     </div>
   );
 }
+
+/** Which input a metered sync run should refresh. */
+type SyncTarget =
+  | "all"
+  | "instagram"
+  | "tiktok"
+  | "youtube"
+  | "twitch"
+  | "facebook"
+  | "x"
+  | "spotify"
+  | "apple_music"
+  | `extra:${number}`;
+
+/** Small per-input "Auto sync" control. */
+function SyncButton({ busy, disabled, onClick, label = "Auto sync" }: {
+  busy: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  label?: string;
+}) {
+  return (
+    <Button type="button" size="sm" variant="outline" disabled={busy || disabled} onClick={onClick}>
+      <RefreshCw className={`mr-1.5 size-3.5 ${busy ? "animate-spin" : ""}`} />
+      {busy ? "Syncing…" : label}
+    </Button>
+  );
+}
+
+/** Pull a preview image from a public TikTok / Instagram / YouTube post URL. */
+function FetchPreviewButton({ url, onFetched }: { url: string; onFetched: (u: string) => void }) {
+  const fetchPreview = useServerFn(scrapePostMetrics);
+  const [busy, setBusy] = useState(false);
+
+  async function run() {
+    const clean = (url ?? "").trim();
+    if (!clean) {
+      toast.error("Add the post URL first");
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await fetchPreview({ data: { url: clean } });
+      if (!result.ok) throw new Error(result.error);
+      const thumb = result.metrics.thumbnail_url;
+      if (!thumb) throw new Error("No preview image available for that link");
+      onFetched(thumb);
+      toast.success("Preview pulled from link");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't fetch preview");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Button type="button" size="sm" variant="outline" disabled={busy || !url?.trim()} onClick={run}>
+      <RefreshCw className={`mr-1.5 size-3.5 ${busy ? "animate-spin" : ""}`} />
+      {busy ? "Fetching…" : "Fetch preview"}
+    </Button>
+  );
+}
+
+
 
 
 function EditProfilePage() {
@@ -283,9 +347,18 @@ function EditProfilePage() {
   const loadUsage = useServerFn(getMyUsage);
   const [fetching, setFetching] = useState<string | null>(null);
   const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number; twitch?: number; facebook?: number; x?: number }>({});
-  const [extraTotals, setExtraTotals] = useState<{ followers: number; streams: number }>({ followers: 0, streams: 0 });
+  const [extraFetched, setExtraFetched] = useState<Record<string, { followers: number | null; streams: number | null }>>({});
+  const [spotifyFetched, setSpotifyFetched] = useState<{ followers: number | null; monthly: number | null; total: number | null } | null>(null);
+  const [appleFetched, setAppleFetched] = useState<string | null>(null);
   const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
   const [syncQuota, setSyncQuota] = useState<{ remaining: number; limit: number; resets: string } | null>(null);
+
+  const extraTotals = Object.values(extraFetched).reduce<{ followers: number; streams: number }>(
+    (acc, v) => ({ followers: acc.followers + (v.followers ?? 0), streams: acc.streams + (v.streams ?? 0) }),
+    { followers: 0, streams: 0 },
+  );
+
+
 
   useEffect(() => {
     loadUsage({ data: {} })
@@ -312,26 +385,37 @@ function EditProfilePage() {
     return toProfileUrl(platform, raw);
   }
 
-  /** One metered run that refreshes every connected platform. */
-  async function syncAll() {
+  /**
+   * One metered run. Pass a target to refresh a single input, or "all" to
+   * refresh everything connected in one go.
+   */
+  async function runSyncFor(target: SyncTarget) {
+    const socialUrl = (p: SocialPlatform) => normaliseSocial(p, form.socials[p as keyof ProfileSocials] as string ?? "");
     const extraUrls = extraLinks.map((l) => l.url.trim()).filter(Boolean);
+    const isAll = target === "all";
+    const extraIndex = target.startsWith("extra:") ? Number(target.slice(6)) : -1;
+
     const payload = {
-      instagram_url: normaliseSocial("instagram", form.socials.instagram ?? ""),
-      tiktok_url: normaliseSocial("tiktok", form.socials.tiktok ?? ""),
-      youtube_url: normaliseSocial("youtube", form.socials.youtube ?? ""),
-      twitch_url: normaliseSocial("twitch", form.socials.twitch ?? ""),
-      facebook_url: normaliseSocial("facebook", form.socials.facebook ?? ""),
-      x_url: normaliseSocial("x", form.socials.x ?? ""),
-      spotify_url: (form.socials.spotify ?? "").trim() || null,
-      apple_music_url: (form.socials.apple_music ?? "").trim() || null,
-      extra_urls: extraUrls,
+      instagram_url: isAll || target === "instagram" ? socialUrl("instagram") : null,
+      tiktok_url: isAll || target === "tiktok" ? socialUrl("tiktok") : null,
+      youtube_url: isAll || target === "youtube" ? socialUrl("youtube") : null,
+      twitch_url: isAll || target === "twitch" ? socialUrl("twitch") : null,
+      facebook_url: isAll || target === "facebook" ? socialUrl("facebook") : null,
+      x_url: isAll || target === "x" ? socialUrl("x") : null,
+      spotify_url: isAll || target === "spotify" ? (form.socials.spotify ?? "").trim() || null : null,
+      apple_music_url: isAll || target === "apple_music" ? (form.socials.apple_music ?? "").trim() || null : null,
+      extra_urls: isAll
+        ? extraUrls
+        : extraIndex >= 0
+          ? [extraLinks[extraIndex]?.url.trim() ?? ""].filter(Boolean)
+          : [],
     };
 
     if (!Object.values(payload).flat().some(Boolean)) {
-      toast.error("Add at least one social or streaming link first");
+      toast.error(isAll ? "Add at least one social or streaming link first" : "Add the link first");
       return;
     }
-    setFetching("all");
+    setFetching(target);
     try {
       const r = await runSync({ data: payload });
       if (!r.ok) {
@@ -355,15 +439,26 @@ function EditProfilePage() {
       if (Object.keys(counts).length) setFetchedCounts((c) => ({ ...c, ...counts }));
 
       const extras = r.extras ?? [];
-      const extraFollowers = extras.reduce((sum, e) => sum + (e.followers ?? 0), 0);
-      const extraStreams = extras.reduce((sum, e) => sum + (e.streams ?? 0), 0);
-      setExtraTotals({ followers: extraFollowers, streams: extraStreams });
-      if (extraFollowers > 0) parts.push(`extra links: ${extraFollowers.toLocaleString()}`);
-
+      if (extras.length) {
+        setExtraFetched((prev) => {
+          const next = { ...prev };
+          extras.forEach((e) => {
+            next[e.url] = { followers: e.followers ?? null, streams: e.streams ?? null };
+          });
+          return next;
+        });
+        const extraFollowers = extras.reduce((sum, e) => sum + (e.followers ?? 0), 0);
+        if (extraFollowers > 0) parts.push(`extra links: ${extraFollowers.toLocaleString()}`);
+      }
 
       let mismatch: string | null = null;
       const sp = r.spotify;
       if (sp && sp.ok) {
+        setSpotifyFetched({
+          followers: sp.followers ?? null,
+          monthly: sp.monthly_listeners ?? null,
+          total: sp.total_streams ?? null,
+        });
         if (sp.followers != null) setForm((f) => ({ ...f, total_followers: String(sp.followers ?? "") }));
         if (sp.monthly_listeners != null) {
           setForm((f) => ({ ...f, monthly_streams: String(sp.monthly_listeners ?? "") }));
@@ -378,13 +473,16 @@ function EditProfilePage() {
         }
       }
       const am = r.apple;
-      if (am && am.ok && am.name && !isNameMatch(am.name, candidateNames())) {
-        mismatch = mismatch ?? `Apple Music artist "${am.name}" does not match profile name.`;
+      if (am && am.ok) {
+        setAppleFetched(am.name ?? null);
+        if (am.name && !isNameMatch(am.name, candidateNames())) {
+          mismatch = mismatch ?? `Apple Music artist "${am.name}" does not match profile name.`;
+        }
       }
       if (mismatch) {
         setForm((f) => ({ ...f, flagged_streaming_mismatch: true, flagged_streaming_reason: mismatch! }));
         setMismatchWarning(MISMATCH_MESSAGE);
-      } else {
+      } else if (isAll) {
         setMismatchWarning(null);
       }
 
@@ -395,6 +493,9 @@ function EditProfilePage() {
       setFetching(null);
     }
   }
+
+  const syncAll = () => runSyncFor("all");
+
 
 
   function applyTotalFromFetched() {
@@ -765,21 +866,43 @@ function EditProfilePage() {
                   <div className="space-y-1.5">
                     <Label htmlFor="ig">Instagram</Label>
                     <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
-                    {fetchedCounts.instagram != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()}</p> : null}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "instagram"} disabled={!!fetching || !(form.socials.instagram ?? "").trim()} onClick={() => runSyncFor("instagram")} />
+                      {fetchedCounts.instagram != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()} followers</span> : null}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="tt">TikTok</Label>
                     <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
-                    {fetchedCounts.tiktok != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()}</p> : null}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "tiktok"} disabled={!!fetching || !(form.socials.tiktok ?? "").trim()} onClick={() => runSyncFor("tiktok")} />
+                      {fetchedCounts.tiktok != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()} followers</span> : null}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="sp">Spotify</Label>
                     <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "spotify"} disabled={!!fetching || !(form.socials.spotify ?? "").trim()} onClick={() => runSyncFor("spotify")} />
+                      {spotifyFetched ? (
+                        <span className="text-xs text-muted-foreground">
+                          {[
+                            spotifyFetched.followers != null ? `${spotifyFetched.followers.toLocaleString()} followers` : null,
+                            spotifyFetched.monthly != null ? `${spotifyFetched.monthly.toLocaleString()} monthly listeners` : null,
+                            spotifyFetched.total != null ? `${spotifyFetched.total.toLocaleString()} total streams` : null,
+                          ].filter(Boolean).join(" · ") || "No numbers returned"}
+                        </span>
+                      ) : null}
+                    </div>
                     <p className="text-[11px] text-muted-foreground">Auto-syncs followers, monthly listeners and total streams.</p>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="am">Apple Music</Label>
                     <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "apple_music"} disabled={!!fetching || !(form.socials.apple_music ?? "").trim()} onClick={() => runSyncFor("apple_music")} />
+                      {appleFetched ? <span className="text-xs text-muted-foreground">Matched: {appleFetched}</span> : null}
+                    </div>
                     <p className="text-[11px] text-muted-foreground">Verifies the artist name against your profile.</p>
                   </div>
                   {mismatchWarning ? (
@@ -790,20 +913,36 @@ function EditProfilePage() {
                   <div className="space-y-1.5">
                     <Label htmlFor="yt">YouTube</Label>
                     <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
-                    {fetchedCounts.youtube != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()}</p> : null}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "youtube"} disabled={!!fetching || !(form.socials.youtube ?? "").trim()} onClick={() => runSyncFor("youtube")} />
+                      {fetchedCounts.youtube != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()} subscribers</span> : null}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="twitch">Twitch</Label>
                     <Input id="twitch" value={form.socials.twitch ?? ""} onChange={(e) => setSocial("twitch", e.target.value)} placeholder="@handle or full URL" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "twitch"} disabled={!!fetching || !(form.socials.twitch ?? "").trim()} onClick={() => runSyncFor("twitch")} />
+                      {fetchedCounts.twitch != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.twitch.toLocaleString()} followers</span> : null}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="fb">Facebook</Label>
                     <Input id="fb" value={form.socials.facebook ?? ""} onChange={(e) => setSocial("facebook", e.target.value)} placeholder="Page name or full URL" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "facebook"} disabled={!!fetching || !(form.socials.facebook ?? "").trim()} onClick={() => runSyncFor("facebook")} />
+                      {fetchedCounts.facebook != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.facebook.toLocaleString()} followers</span> : null}
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="xcom">X</Label>
                     <Input id="xcom" value={form.socials.x ?? ""} onChange={(e) => setSocial("x", e.target.value)} placeholder="@handle or full URL" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <SyncButton busy={fetching === "x"} disabled={!!fetching || !(form.socials.x ?? "").trim()} onClick={() => runSyncFor("x")} />
+                      {fetchedCounts.x != null ? <span className="text-xs text-muted-foreground">Fetched: {fetchedCounts.x.toLocaleString()} followers</span> : null}
+                    </div>
                   </div>
+
                   <div className="space-y-1.5">
                     <Label htmlFor="clabel">Other link label</Label>
                     <Input id="clabel" value={form.socials.custom_label ?? ""} onChange={(e) => setSocial("custom_label", e.target.value)} placeholder="e.g. Bandcamp" />
@@ -825,23 +964,44 @@ function EditProfilePage() {
                         included in your totals when you sync.
                       </p>
                     </div>
-                    {extraLinks.map((link, i) => (
-                      <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
-                        <Input
-                          value={link.name}
-                          onChange={(e) => updateExtra(i, { name: e.target.value })}
-                          placeholder="Label (e.g. Band)"
-                        />
-                        <Input
-                          value={link.url}
-                          onChange={(e) => updateExtra(i, { url: e.target.value })}
-                          placeholder="https://…"
-                        />
-                        <Button type="button" size="sm" variant="ghost" onClick={() => removeExtra(i)}>
-                          Remove
-                        </Button>
-                      </div>
-                    ))}
+                    {extraLinks.map((link, i) => {
+                      const fetched = extraFetched[link.url.trim()];
+                      return (
+                        <div key={i} className="space-y-2">
+                          <div className="grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
+                            <Input
+                              value={link.name}
+                              onChange={(e) => updateExtra(i, { name: e.target.value })}
+                              placeholder="Label (e.g. Band)"
+                            />
+                            <Input
+                              value={link.url}
+                              onChange={(e) => updateExtra(i, { url: e.target.value })}
+                              placeholder="https://…"
+                            />
+                            <Button type="button" size="sm" variant="ghost" onClick={() => removeExtra(i)}>
+                              Remove
+                            </Button>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <SyncButton
+                              busy={fetching === `extra:${i}`}
+                              disabled={!!fetching || !link.url.trim()}
+                              onClick={() => runSyncFor(`extra:${i}`)}
+                            />
+                            {fetched ? (
+                              <span className="text-xs text-muted-foreground">
+                                {[
+                                  fetched.followers != null ? `${fetched.followers.toLocaleString()} followers` : null,
+                                  fetched.streams != null ? `${fetched.streams.toLocaleString()} monthly streams` : null,
+                                ].filter(Boolean).join(" · ") || "No numbers returned"}
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                    })}
+
                     <Button type="button" size="sm" variant="outline" onClick={addExtra}>
                       Add link
                     </Button>
@@ -882,11 +1042,23 @@ function EditProfilePage() {
                           onChange={(e) => setMedia(coverKey, e.target.value)}
                           placeholder="Cover image URL (optional)"
                         />
-                        <MediaUploadButton
-                          label="Upload cover"
-                          onUploaded={(url) => setMedia(coverKey, url)}
-                        />
+                        {form.media[coverKey] ? (
+                          <div className="w-24 overflow-hidden rounded-md border border-border/60" style={{ aspectRatio: "9 / 16" }}>
+                            <img src={form.media[coverKey]} alt="" className="size-full object-cover" />
+                          </div>
+                        ) : null}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <FetchPreviewButton
+                            url={form.media[urlKey] ?? ""}
+                            onFetched={(url) => setMedia(coverKey, url)}
+                          />
+                          <MediaUploadButton
+                            label="Upload cover"
+                            onUploaded={(url) => setMedia(coverKey, url)}
+                          />
+                        </div>
                       </div>
+
                     );
                   })}
                 </div>
