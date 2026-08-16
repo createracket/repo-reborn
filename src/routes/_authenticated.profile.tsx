@@ -313,6 +313,7 @@ function EditProfilePage() {
 
   /** One metered run that refreshes every connected platform. */
   async function syncAll() {
+    const extraUrls = extraLinks.map((l) => l.url.trim()).filter(Boolean);
     const payload = {
       instagram_url: normaliseSocial("instagram", form.socials.instagram ?? ""),
       tiktok_url: normaliseSocial("tiktok", form.socials.tiktok ?? ""),
@@ -322,9 +323,10 @@ function EditProfilePage() {
       x_url: normaliseSocial("x", form.socials.x ?? ""),
       spotify_url: (form.socials.spotify ?? "").trim() || null,
       apple_music_url: (form.socials.apple_music ?? "").trim() || null,
+      extra_urls: extraUrls,
     };
 
-    if (!Object.values(payload).some(Boolean)) {
+    if (!Object.values(payload).flat().some(Boolean)) {
       toast.error("Add at least one social or streaming link first");
       return;
     }
@@ -350,6 +352,13 @@ function EditProfilePage() {
         }
       });
       if (Object.keys(counts).length) setFetchedCounts((c) => ({ ...c, ...counts }));
+
+      const extras = r.extras ?? [];
+      const extraFollowers = extras.reduce((sum, e) => sum + (e.followers ?? 0), 0);
+      const extraStreams = extras.reduce((sum, e) => sum + (e.streams ?? 0), 0);
+      setExtraTotals({ followers: extraFollowers, streams: extraStreams });
+      if (extraFollowers > 0) parts.push(`extra links: ${extraFollowers.toLocaleString()}`);
+
 
       let mismatch: string | null = null;
       const sp = r.spotify;
