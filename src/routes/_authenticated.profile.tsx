@@ -720,9 +720,20 @@ function EditProfilePage() {
       toast.error("Please remove offensive or inappropriate language from your profile before saving.");
       return;
     }
-    const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
+    const startedAt = performance.now();
+    const timeout = AbortSignal.timeout(20_000);
+    const { error } = await supabase
+      .from("profiles")
+      .upsert(payload, { onConflict: "id" })
+      .abortSignal(timeout);
+    const elapsed = Math.round(performance.now() - startedAt);
+    console.debug(`[profile] save took ${elapsed}ms`, { error: error?.message ?? null });
     setSaving(false);
     if (error) {
+      if (timeout.aborted) {
+        toast.error("Saving timed out — check your connection and try again.");
+        return;
+      }
       if (error.message.toLowerCase().includes("duplicate")) {
         toast.error("That URL slug is already taken — try another");
       } else {
