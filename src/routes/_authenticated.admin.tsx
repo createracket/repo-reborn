@@ -641,7 +641,7 @@ function AdminPage() {
               onCreated={async () => {
                 const { data } = await supabase
                   .from("profiles")
-                  .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier")
+                  .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind")
                   .order("created_at", { ascending: false });
                 setProfiles((data as Profile[]) ?? []);
               }}
