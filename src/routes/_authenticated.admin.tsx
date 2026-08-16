@@ -96,6 +96,8 @@ function AdminPage() {
   const [handledOpen, setHandledOpen] = useState(false);
   const [subs, setSubs] = useState<Subscriber[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [vibeByUser, setVibeByUser] = useState<Map<string, VibeRow>>(new Map());
+  const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
   const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
   const [editingSpotlight, setEditingSpotlight] = useState<Record<string, any> | null>(null);
