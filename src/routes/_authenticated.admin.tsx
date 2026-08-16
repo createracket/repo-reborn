@@ -26,6 +26,14 @@ import { findProfanityIn } from "@/lib/profanity";
 import { adminCreateUser, adminDeleteUser, adminUpdateUser } from "@/lib/admin-users.functions";
 import { ACCESS_CODE } from "@/routes/login";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
+import {
+  loadVibeCheckConfig,
+  DEFAULT_VIBE_CONFIG,
+  artistArchetypeOptions,
+  brandArchetypeOptions,
+  type VibeCheckConfig,
+} from "@/lib/vibe-check-config";
+import { calculateVibeScore, calculateBrandVibe } from "@/lib/vibe-check";
 import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
 import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
 import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
@@ -62,7 +70,31 @@ type LeadBrief = {
 };
 type ContactMsg = { id: string; created_at: string; name: string; email: string; message: string; handled: boolean };
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
-type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null };
+type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null; vibe_archetype_key?: string | null; vibe_archetype_kind?: string | null };
+type VibeRow = { user_id: string; result: string | null; answers: any; created_at: string };
+
+/** Resolve a user's vibe check archetype name, or null when they haven't taken it. */
+function vibeArchetypeLabel(p: Profile, vibe: VibeRow | undefined, cfg: VibeCheckConfig): string | null {
+  if (p.vibe_archetype_key) {
+    const opts = p.vibe_archetype_kind === "brand" ? brandArchetypeOptions(cfg) : artistArchetypeOptions(cfg);
+    const hit = opts.find((o) => o.key === p.vibe_archetype_key);
+    if (hit) return hit.label;
+  }
+  if (!vibe) return null;
+  try {
+    if (vibe.result === "brand") {
+      const scoring: any = calculateBrandVibe(vibe.answers ?? {}, cfg);
+      return scoring?.brandArchetype?.type ?? "Completed";
+    }
+    if (vibe.result === "artist") {
+      const scoring: any = calculateVibeScore(vibe.answers ?? {}, cfg);
+      return scoring?.primary ?? "Completed";
+    }
+  } catch {
+    /* fall through */
+  }
+  return "Completed";
+}
 type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null; published: boolean; published_at: string | null; linked_roster_id: string | null; linked_report_id: string | null };
 
 type Spotlight = {
@@ -87,6 +119,8 @@ function AdminPage() {
   const [handledOpen, setHandledOpen] = useState(false);
   const [subs, setSubs] = useState<Subscriber[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [vibeByUser, setVibeByUser] = useState<Map<string, VibeRow>>(new Map());
+  const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
   const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
   const [editingSpotlight, setEditingSpotlight] = useState<Record<string, any> | null>(null);
@@ -130,16 +164,24 @@ function AdminPage() {
       }
       setIsAdmin(true);
 
-      const [lb, cm, ml, pr, cb, sp, si, ce] = await Promise.all([
+      loadVibeCheckConfig().then(setVibeConfig).catch(() => undefined);
+
+      const [lb, cm, ml, pr, cb, sp, si, ce, vc] = await Promise.all([
         supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
-        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, linked_report_id, currency, transparency").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("*").eq("section", "spotlight").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
         (supabase as any).rpc("admin_campaign_brief_emails"),
+        supabase.from("vibe_check_responses").select("user_id, result, answers, created_at").order("created_at", { ascending: false }),
       ]);
+      const vibeMap = new Map<string, VibeRow>();
+      (((vc as any).data as VibeRow[] | null) ?? []).forEach((row) => {
+        if (row.user_id && !vibeMap.has(row.user_id)) vibeMap.set(row.user_id, row);
+      });
+      setVibeByUser(vibeMap);
       const emailById = new Map<string, string | null>();
       (((ce as any).data as any[] | null) ?? []).forEach((r: any) => emailById.set(r.id, r.contact_email ?? null));
       const campaignRows = (((cb as any).data as any[]) ?? []).map((c: any) => ({ ...c, contact_email: emailById.get(c.id) ?? null })) as CampaignBrief[];
@@ -599,7 +641,7 @@ function AdminPage() {
               onCreated={async () => {
                 const { data } = await supabase
                   .from("profiles")
-                  .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier")
+                  .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind")
                   .order("created_at", { ascending: false });
                 setProfiles((data as Profile[]) ?? []);
               }}
@@ -613,7 +655,7 @@ function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <Table headers={["Display name", "Email", "Profile type", "Slug", "Joined", "Subscription", "Featured", ""]}>
+                <Table headers={["Display name", "Email", "Profile type", "Vibe check", "Slug", "Joined", "Subscription", "Featured", ""]}>
                   {profiles.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
@@ -626,6 +668,20 @@ function AdminPage() {
                         ) : (
                           <span className="text-muted-foreground">—</span>
                         )}
+                      </td>
+                      <td className="p-3">
+                        {(() => {
+                          const label = vibeArchetypeLabel(p, vibeByUser.get(p.id), vibeConfig);
+                          return label ? (
+                            <span className="inline-block rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                              {label}
+                            </span>
+                          ) : (
+                            <span className="inline-block rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-xs uppercase tracking-wider text-muted-foreground">
+                              Pending
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="p-3 text-muted-foreground">
                         {p.slug ? <code className="text-xs">/u/{p.slug}</code> : <span className="text-xs italic">no slug</span>}
