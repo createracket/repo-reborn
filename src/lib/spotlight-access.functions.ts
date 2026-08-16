@@ -24,12 +24,12 @@ export const registerSpotlightGuestInterest = createServerFn({ method: "POST" })
 
     const { data: row } = await supabaseAdmin
       .from("partner_pages")
-      .select("id")
+      .select("id, headline, section")
       .eq("slug", data.slug)
       .eq("published", true)
       .maybeSingle();
 
-    const page = row as { id: string } | null;
+    const page = row as { id: string; headline: string; section: string | null } | null;
     if (!page) return { ok: false as const };
 
     const { error } = await supabaseAdmin
@@ -46,8 +46,21 @@ export const registerSpotlightGuestInterest = createServerFn({ method: "POST" })
       return { ok: false as const };
     }
 
+    const { sendForEvent } = await import("@/lib/email/send.server");
+    const link = `${page.section === "brief" ? "/brief/" : "/spotlight/"}${data.slug}`;
+    await sendForEvent("interest_registered", {
+      recipientEmail: data.email,
+      templateData: {
+        name: data.name ?? "",
+        email: data.email,
+        page_title: page.headline,
+        link,
+      },
+    });
+
     return { ok: true as const };
   });
+
 
 
 const PAGE_FIELDS =

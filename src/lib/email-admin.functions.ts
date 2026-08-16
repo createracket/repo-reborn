@@ -211,3 +211,130 @@ export const sendTestEmail = createServerFn({ method: 'POST' })
     return result
   })
 
+/* -------------------------------------------------------------------------- */
+/* Event bindings (template ↔ site action)                                    */
+/* -------------------------------------------------------------------------- */
+
+export const getEventBindings = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data, error } = await supabaseAdmin
+      .from('email_event_bindings')
+      .select('event_key, template_name, enabled, updated_at')
+    if (error) throw new Error(error.message)
+    return { bindings: data ?? [] }
+  })
+
+const BindingSchema = z.object({
+  eventKey: z.string().min(1).max(80),
+  templateName: z.string().min(1).max(120).nullable(),
+  enabled: z.boolean(),
+})
+
+export const setEventBinding = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => BindingSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { EMAIL_EVENT_KEYS } = await import('@/lib/email/events')
+    if (!EMAIL_EVENT_KEYS.includes(data.eventKey)) throw new Error('Unknown event')
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { error } = await supabaseAdmin.from('email_event_bindings').upsert(
+      {
+        event_key: data.eventKey,
+        template_name: data.templateName,
+        enabled: data.templateName ? data.enabled : false,
+        updated_by: context.userId,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'event_key' },
+    )
+    if (error) throw new Error(error.message)
+    return { ok: true }
+  })
+
+/* -------------------------------------------------------------------------- */
+/* Manual sends                                                               */
+/* -------------------------------------------------------------------------- */
+
+export const listEmailRecipients = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, display_name')
+      .not('email', 'is', null)
+      .order('display_name', { ascending: true })
+      .limit(1000)
+    if (error) throw new Error(error.message)
+    return { users: (data ?? []) as { id: string; email: string; display_name: string | null }[] }
+  })
+
+const ManualSendSchema = z.object({
+  templateName: z.string().min(1).max(120),
+  recipients: z.array(z.string().email().max(255)).min(1).max(50),
+  templateData: z.record(z.string(), z.any()).optional(),
+})
+
+export const sendTemplateToRecipients = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => ManualSendSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { enqueueTransactionalEmail } = await import('@/lib/email/send.server')
+
+    const unique = Array.from(new Set(data.recipients.map((r) => r.toLowerCase())))
+    const stamp = Date.now()
+    let queued = 0
+    let skipped = 0
+    const failures: { email: string; error: string }[] = []
+
+    for (const email of unique) {
+      try {
+        const res: any = await enqueueTransactionalEmail({
+          templateName: data.templateName,
+          recipientEmail: email,
+          templateData: { email, ...(data.templateData ?? {}) },
+          idempotencyKey: `manual-${data.templateName}-${email}-${stamp}`,
+        })
+        if (res?.success) queued++
+        else if (res?.reason === 'email_suppressed') skipped++
+        else failures.push({ email, error: res?.error ?? 'Unknown error' })
+      } catch (e: any) {
+        failures.push({ email, error: e?.message ?? 'Send failed' })
+      }
+    }
+
+    return { queued, skipped, failures }
+  })
+
+/* -------------------------------------------------------------------------- */
+/* Event notify — called by admin UI flows (share actions)                    */
+/* -------------------------------------------------------------------------- */
+
+const NotifySchema = z.object({
+  eventKey: z.string().min(1).max(80),
+  recipientEmail: z.string().email().max(255),
+  templateData: z.record(z.string(), z.any()).optional(),
+})
+
+export const notifyEmailEvent = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => NotifySchema.parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { EMAIL_EVENT_KEYS } = await import('@/lib/email/events')
+    if (!EMAIL_EVENT_KEYS.includes(data.eventKey)) throw new Error('Unknown event')
+    const { sendForEvent } = await import('@/lib/email/send.server')
+    const res: any = await sendForEvent(data.eventKey, {
+      recipientEmail: data.recipientEmail,
+      templateData: data.templateData ?? {},
+    })
+    return { sent: !!res?.success, reason: res?.reason ?? null }
+  })
+
+

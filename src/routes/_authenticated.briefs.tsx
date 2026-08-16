@@ -264,7 +264,7 @@ function BriefsPage() {
               </SelectContent>
             </Select>
           </div>
-          <PartnerPageShares partnerPageId={b.id} profiles={profiles} />
+          <PartnerPageShares partnerPageId={b.id} profiles={profiles} pageTitle={b.headline} pageLink={`/brief/${b.slug}`} eventKey="brief_shared" />
         </CardContent>
       ) : null}
     </Card>

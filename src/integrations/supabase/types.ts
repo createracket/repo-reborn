@@ -570,6 +570,30 @@ export type Database = {
         }
         Relationships: []
       }
+      email_event_bindings: {
+        Row: {
+          enabled: boolean
+          event_key: string
+          template_name: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          event_key: string
+          template_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          event_key?: string
+          template_name?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string

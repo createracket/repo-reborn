@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyEmailEvent } from "@/lib/email-admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,9 +24,15 @@ type ShareRow = {
 export function PartnerPageShares({
   partnerPageId,
   profiles,
+  pageTitle,
+  pageLink,
+  eventKey = "brief_shared",
 }: {
   partnerPageId: string;
   profiles: ShareProfile[];
+  pageTitle?: string;
+  pageLink?: string;
+  eventKey?: string;
 }) {
   const [shares, setShares] = useState<ShareRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,6 +90,22 @@ export function PartnerPageShares({
     setEmail("");
     toast.success("Shared");
     load();
+
+    // Fires only if this trigger has a template assigned and is switched on.
+    const target =
+      patch.target_email ??
+      profiles.find((p) => p.id === patch.target_user_id)?.email ??
+      null;
+    if (target) {
+      const name = profiles.find((p) => p.id === patch.target_user_id)?.display_name ?? "";
+      notifyEmailEvent({
+        data: {
+          eventKey,
+          recipientEmail: target,
+          templateData: { name, page_title: pageTitle ?? "", link: pageLink ?? "" },
+        },
+      } as any).catch(() => {});
+    }
   }
 
   async function removeShare(id: string) {

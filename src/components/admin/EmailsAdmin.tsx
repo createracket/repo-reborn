@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { Mail, RefreshCw, Send, AlertCircle, CheckCircle2, Clock, Ban, Plus, Pencil } from "lucide-react";
 import { CustomEmailEditor } from "./CustomEmailEditor";
+import { EmailTriggers } from "./EmailTriggers";
+import { EmailManualSend } from "./EmailManualSend";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -218,6 +220,8 @@ export function EmailsAdmin() {
         <TabsList>
           <TabsTrigger value="logs">Send log ({logsTotal})</TabsTrigger>
           <TabsTrigger value="templates">Templates ({templates.length})</TabsTrigger>
+          <TabsTrigger value="triggers">Triggers</TabsTrigger>
+          <TabsTrigger value="send">Manual send</TabsTrigger>
           <TabsTrigger value="suppressed">Suppressed ({suppressed.length})</TabsTrigger>
         </TabsList>
 
@@ -341,6 +345,14 @@ export function EmailsAdmin() {
           </p>
         </TabsContent>
 
+
+        <TabsContent value="triggers" className="mt-4">
+          <EmailTriggers templates={templates.map((t) => ({ name: t.name, displayName: t.displayName }))} />
+        </TabsContent>
+
+        <TabsContent value="send" className="mt-4">
+          <EmailManualSend templates={templates.map((t) => ({ name: t.name, displayName: t.displayName }))} />
+        </TabsContent>
 
         <TabsContent value="suppressed" className="mt-4">
           <Card>
