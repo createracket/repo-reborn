@@ -152,7 +152,13 @@ function AdminPage() {
         supabase.from("partner_pages" as any).select("*").eq("section", "spotlight").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
         (supabase as any).rpc("admin_campaign_brief_emails"),
+        supabase.from("vibe_check_responses").select("user_id, result, answers, created_at").order("created_at", { ascending: false }),
       ]);
+      const vibeMap = new Map<string, VibeRow>();
+      (((vc as any).data as VibeRow[] | null) ?? []).forEach((row) => {
+        if (row.user_id && !vibeMap.has(row.user_id)) vibeMap.set(row.user_id, row);
+      });
+      setVibeByUser(vibeMap);
       const emailById = new Map<string, string | null>();
       (((ce as any).data as any[] | null) ?? []).forEach((r: any) => emailById.set(r.id, r.contact_email ?? null));
       const campaignRows = (((cb as any).data as any[]) ?? []).map((c: any) => ({ ...c, contact_email: emailById.get(c.id) ?? null })) as CampaignBrief[];
