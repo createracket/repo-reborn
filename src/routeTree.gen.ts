@@ -33,6 +33,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedRacketDeskRouteImport } from './routes/_authenticated.racket-desk'
 import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authenticated.roster-builder'
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
+import { Route as BriefSlugRouteImport } from './routes/brief.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ReportSlugRouteImport } from './routes/report.$slug'
 import { Route as RosterSlugRouteImport } from './routes/roster.$slug'
@@ -177,6 +178,11 @@ const AuthenticatedRosterBuilderRoute =
 const BrandsHowItWorksRoute = BrandsHowItWorksRouteImport.update({
   id: '/brands/how-it-works',
   path: '/brands/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BriefSlugRoute = BriefSlugRouteImport.update({
+  id: '/brief/$slug',
+  path: '/brief/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
@@ -328,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/racket-desk': typeof AuthenticatedRacketDeskRouteWithChildren
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
+  '/brief/$slug': typeof BriefSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/report/$slug': typeof ReportSlugRoute
   '/roster/$slug': typeof RosterSlugRoute
@@ -375,6 +382,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
+  '/brief/$slug': typeof BriefSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/report/$slug': typeof ReportSlugRoute
   '/roster/$slug': typeof RosterSlugRoute
@@ -425,6 +433,7 @@ export interface FileRoutesById {
   '/_authenticated/racket-desk': typeof AuthenticatedRacketDeskRouteWithChildren
   '/_authenticated/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
+  '/brief/$slug': typeof BriefSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/report/$slug': typeof ReportSlugRoute
   '/roster/$slug': typeof RosterSlugRoute
@@ -475,6 +484,7 @@ export interface FileRouteTypes {
     | '/racket-desk'
     | '/roster-builder'
     | '/brands/how-it-works'
+    | '/brief/$slug'
     | '/email/unsubscribe'
     | '/report/$slug'
     | '/roster/$slug'
@@ -522,6 +532,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/roster-builder'
     | '/brands/how-it-works'
+    | '/brief/$slug'
     | '/email/unsubscribe'
     | '/report/$slug'
     | '/roster/$slug'
@@ -571,6 +582,7 @@ export interface FileRouteTypes {
     | '/_authenticated/racket-desk'
     | '/_authenticated/roster-builder'
     | '/brands/how-it-works'
+    | '/brief/$slug'
     | '/email/unsubscribe'
     | '/report/$slug'
     | '/roster/$slug'
@@ -612,6 +624,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   BrandsHowItWorksRoute: typeof BrandsHowItWorksRoute
+  BriefSlugRoute: typeof BriefSlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ReportSlugRoute: typeof ReportSlugRoute
   RosterSlugRoute: typeof RosterSlugRoute
@@ -800,6 +813,13 @@ declare module '@tanstack/react-router' {
       path: '/brands/how-it-works'
       fullPath: '/brands/how-it-works'
       preLoaderRoute: typeof BrandsHowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brief/$slug': {
+      id: '/brief/$slug'
+      path: '/brief/$slug'
+      fullPath: '/brief/$slug'
+      preLoaderRoute: typeof BriefSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -1033,6 +1053,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   BrandsHowItWorksRoute: BrandsHowItWorksRoute,
+  BriefSlugRoute: BriefSlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ReportSlugRoute: ReportSlugRoute,
   RosterSlugRoute: RosterSlugRoute,
