@@ -18,6 +18,19 @@ import { runProfileSync } from "@/lib/campaign-scrapers.functions";
 import { getMyUsage } from "@/lib/usage.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 import { toProfileUrl, type SocialPlatform } from "@/lib/social-handles";
+import { type SecondaryLink } from "@/lib/social-links";
+import { uploadMyProfileImage } from "@/lib/profile-images.functions";
+import type { ProfileMedia } from "@/components/profile/FeaturedMedia";
+import { calculateVibeScore, calculateBrandVibe } from "@/lib/vibe-check";
+import {
+  DEFAULT_VIBE_CONFIG,
+  loadVibeCheckConfig,
+  artistArchetypeKeyFromLabel,
+  brandArchetypeKeyFromLabel,
+  artistArchetypeOptions,
+  brandArchetypeOptions,
+  type VibeCheckConfig,
+} from "@/lib/vibe-check-config";
 import { COUNTRIES } from "@/lib/countries";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Loader2, X } from "lucide-react";
