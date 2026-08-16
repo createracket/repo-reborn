@@ -344,7 +344,12 @@ function RosterBuilderPage() {
   const loadRosters = useCallback(async () => {
     const { data, error } = await supabase
       .from("rosters")
-      .select("*")
+      // NOTE: never use select("*") here — client_email/brand_email are not
+      // SELECTable on the base table (privacy). Read them via the
+      // get_roster_assignment RPC instead. A wildcard select fails outright.
+      .select(
+        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, categories, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
+      )
       .order("updated_at", { ascending: false });
     if (error) {
       toast.error(error.message);
