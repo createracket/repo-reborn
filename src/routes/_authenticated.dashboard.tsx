@@ -411,16 +411,21 @@ function DashboardPage() {
       // If a brief has no archetypes set, it's visible to everyone (backwards compatible).
       // Privately shared briefs (below) always bypass this filter.
       const latestVibe = (vibes?.[0] as VibeRow | undefined) ?? null;
-      let userArchetypeNames: string[] = [];
+      const cfg = await loadVibeCheckConfig().catch(() => DEFAULT_VIBE_CONFIG);
+      let userArchetypeKeys: string[] = [];
       let userVibeKind: "artist" | "brand" | "fan" | null = latestVibe?.result ?? null;
       if (latestVibe) {
         if (latestVibe.result === "brand") {
-          const scoring: any = calculateBrandVibe(latestVibe.answers ?? {});
+          const scoring: any = calculateBrandVibe(latestVibe.answers ?? {}, cfg);
           const name = scoring?.brandArchetype?.type;
-          if (name) userArchetypeNames = [name];
+          const key = name ? brandArchetypeKeyFromLabel(name, cfg) : null;
+          if (key) userArchetypeKeys = [key];
         } else if (latestVibe.result === "artist") {
-          const scoring: any = calculateVibeScore(latestVibe.answers ?? {});
-          userArchetypeNames = [scoring?.primary, scoring?.secondary].filter(Boolean) as string[];
+          const scoring: any = calculateVibeScore(latestVibe.answers ?? {}, cfg);
+          userArchetypeKeys = [scoring?.primary, scoring?.secondary]
+            .filter(Boolean)
+            .map((n) => artistArchetypeKeyFromLabel(n as string, cfg))
+            .filter(Boolean) as string[];
         }
       }
       const publishedRows = publishedRowsAll.filter((r) => {
@@ -428,11 +433,19 @@ function DashboardPage() {
         const brandList = (r.brand_archetypes ?? []) as string[];
         const hasAnyFilter = artistList.length > 0 || brandList.length > 0;
         if (!hasAnyFilter) return true;
-        if (!userVibeKind || userArchetypeNames.length === 0) return false;
+        if (!userVibeKind || userArchetypeKeys.length === 0) return false;
         const relevantList = userVibeKind === "brand" ? brandList : artistList;
         if (relevantList.length === 0) return false;
-        return userArchetypeNames.some((n) => relevantList.includes(n));
+        const relevantKeys = relevantList
+          .map((v) =>
+            userVibeKind === "brand"
+              ? brandArchetypeKeyFromLabel(v, cfg)
+              : artistArchetypeKeyFromLabel(v, cfg),
+          )
+          .filter(Boolean) as string[];
+        return userArchetypeKeys.some((k) => relevantKeys.includes(k));
       });
+
       const sharedRows: Opportunity[] = [
         ...(((sharedUser as any).data ?? []) as any[]).map((r) => ({ ...r, brief_source: "user" as const })),
         ...(((sharedLead as any).data ?? []) as any[]).map((r) => ({ ...r, published_at: null, brief_source: "lead" as const })),
