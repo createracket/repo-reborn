@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { readThumbFrame, thumbFrameBgClass, thumbFrameImgStyle } from "@/lib/thumb-frame";
+import { loadDashboardConfig } from "@/lib/dashboard-config";
 import { PlannerTile } from "@/components/dashboard/PlannerTile";
 import { listDashboardReports, type DashboardReport } from "@/lib/racket-desk/report-sharing.functions";
 import {
