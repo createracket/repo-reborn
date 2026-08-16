@@ -669,6 +669,20 @@ function AdminPage() {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </td>
+                      <td className="p-3">
+                        {(() => {
+                          const label = vibeArchetypeLabel(p, vibeByUser.get(p.id), vibeConfig);
+                          return label ? (
+                            <span className="inline-block rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                              {label}
+                            </span>
+                          ) : (
+                            <span className="inline-block rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-xs uppercase tracking-wider text-muted-foreground">
+                              Pending
+                            </span>
+                          );
+                        })()}
+                      </td>
                       <td className="p-3 text-muted-foreground">
                         {p.slug ? <code className="text-xs">/u/{p.slug}</code> : <span className="text-xs italic">no slug</span>}
                       </td>
