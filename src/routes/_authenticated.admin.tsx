@@ -141,7 +141,9 @@ function AdminPage() {
       }
       setIsAdmin(true);
 
-      const [lb, cm, ml, pr, cb, sp, si, ce] = await Promise.all([
+      loadVibeCheckConfig().then(setVibeConfig).catch(() => undefined);
+
+      const [lb, cm, ml, pr, cb, sp, si, ce, vc] = await Promise.all([
         supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
