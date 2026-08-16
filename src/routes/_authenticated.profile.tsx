@@ -1265,9 +1265,17 @@ function EditProfilePage() {
                 <Input id="ae" inputMode="decimal" value={form.avg_engagement} onChange={(e) => set("avg_engagement", e.target.value)} placeholder="e.g. 4.2 (%)" />
               </div>
 
-              <div className="md:col-span-2 pt-2">
+              <div className="md:col-span-2 flex flex-wrap items-center gap-3 pt-2">
                 <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Save profile"}</Button>
+                {justSavedSlug ? (
+                  <Button asChild className="bg-coral text-white hover:bg-coral/90">
+                    <Link to="/u/$slug" params={{ slug: justSavedSlug }}>
+                      View public page <ExternalLink className="ml-1.5 size-3.5" />
+                    </Link>
+                  </Button>
+                ) : null}
               </div>
+
             </form>
           </CardContent>
         </Card>
