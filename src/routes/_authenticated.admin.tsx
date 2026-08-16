@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
-import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
+import { DEFAULT_THUMB_FRAME, readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
@@ -1967,6 +1967,7 @@ export function SpotlightForm({
         label_host_bio: "", label_audience: "", label_partnership: "", label_eoi: "", label_videos: "",
         label_members: "", youtube_name: "", apple_music_name: "",
       });
+      setThumbFrame(DEFAULT_THUMB_FRAME);
     }
     onCreated();
   }

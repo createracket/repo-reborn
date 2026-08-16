@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { readThumbFrame, thumbFrameBgClass, thumbFrameImgStyle } from "@/lib/thumb-frame";
 import {
   calculateVibeScore,
   calculateBrandVibe,
@@ -123,8 +124,8 @@ function DashboardPage() {
   const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [examples, setExamples] = useState<Array<{ id: string; title: string; description: string | null; location: string | null; image_url: string | null }>>([]);
-  const [spotlightOpps, setSpotlightOpps] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; section?: string | null }>>([]);
-  const [plannerBriefs, setPlannerBriefs] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null }>>([]);
+  const [spotlightOpps, setSpotlightOpps] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; section?: string | null; links?: any }>>([]);
+  const [plannerBriefs, setPlannerBriefs] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; links?: any }>>([]);
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
@@ -470,7 +471,7 @@ function DashboardPage() {
 
       // Spotlights & briefs: live-for-all + privately shared to this user (via RLS)
       const pageCols =
-        "id, slug, headline, subtitle, type, header_image_url, profile_image_url, section, dashboard_placement";
+        "id, slug, headline, subtitle, type, header_image_url, profile_image_url, section, dashboard_placement, links";
       const [{ data: livePages }, { data: spotlightShareRows }] = await Promise.all([
         (supabase as any)
           .from("partner_pages")
@@ -692,6 +693,7 @@ function DashboardPage() {
                     <ul className="grid gap-3 md:grid-cols-2">
                       {plannerBriefs.map((bp) => {
                         const thumb = bp.header_image_url || bp.profile_image_url || null;
+                        const frame = readThumbFrame(bp.links);
                         return (
                           <li key={bp.id}>
                             <Link
@@ -699,9 +701,9 @@ function DashboardPage() {
                               params={{ slug: bp.slug }}
                               className="group flex h-full gap-3 rounded-xl border border-border/60 bg-card p-3 transition hover:border-primary/60"
                             >
-                              <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-muted">
+                              <div className={`size-16 shrink-0 overflow-hidden rounded-lg ${thumbFrameBgClass(frame)}`}>
                                 {thumb ? (
-                                  <img src={thumb} alt="" className="size-full object-cover object-top" />
+                                  <img src={thumb} alt="" className="size-full" style={thumbFrameImgStyle(frame)} />
                                 ) : (
                                   <div className="flex size-full items-center justify-center text-[9px] uppercase tracking-wider text-muted-foreground">
                                     Brief
@@ -1021,6 +1023,7 @@ function DashboardPage() {
                     >
                       {spotlightOpps.map((sp) => {
                         const thumb = sp.header_image_url || sp.profile_image_url || null;
+                        const frame = readThumbFrame(sp.links);
                         return (
                           <div
                             key={sp.id}
@@ -1032,9 +1035,14 @@ function DashboardPage() {
                                 params={{ slug: sp.slug }}
                                 className="group flex flex-1 flex-col gap-2"
                               >
-                                <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
+                                <div className={`aspect-[16/9] w-full overflow-hidden rounded-lg ${thumbFrameBgClass(frame)}`}>
                                   {thumb ? (
-                                    <img src={thumb} alt="" className="size-full object-cover object-top transition group-hover:scale-[1.02]" />
+                                    <img
+                                      src={thumb}
+                                      alt=""
+                                      className="size-full transition"
+                                      style={thumbFrameImgStyle(frame)}
+                                    />
                                   ) : (
                                     <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
                                       {(sp.section ?? "spotlight") === "brief" ? "Brief" : "Spotlight"}
