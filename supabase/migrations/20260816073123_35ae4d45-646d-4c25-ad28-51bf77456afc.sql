@@ -1,0 +1,1 @@
+update public.profiles set media='{}'::jsonb where id='4c72469e-cfef-4bde-872f-9d03b989315c';
