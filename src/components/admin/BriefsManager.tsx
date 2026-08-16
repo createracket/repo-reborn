@@ -996,7 +996,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
             <ArchetypePicker
               label="Artist archetypes (visibility)"
               help="Only artists whose Vibe Check archetype matches will see this opportunity on their dashboard once published. Leave empty to show to every artist. Users added manually below always see it regardless."
-              options={ARTIST_ARCHETYPE_OPTIONS}
+              options={artistArchetypeOptions(vibeConfig)}
+              resolveKey={(v) => artistArchetypeKeyFromLabel(v, vibeConfig)}
               value={artistArchetypes}
               onChange={setArtistArchetypes}
             />
@@ -1005,7 +1006,9 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
             <ArchetypePicker
               label="Brand archetypes (visibility)"
               help="Only brands whose Vibe Check archetype matches will see this opportunity on their dashboard once published. Leave empty to show to every brand."
-              options={BRAND_ARCHETYPE_OPTIONS}
+              options={brandArchetypeOptions(vibeConfig)}
+              resolveKey={(v) => brandArchetypeKeyFromLabel(v, vibeConfig)}
+
               value={brandArchetypes}
               onChange={setBrandArchetypes}
             />
