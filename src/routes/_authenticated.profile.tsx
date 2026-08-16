@@ -673,9 +673,23 @@ function EditProfilePage() {
   /** Flatten the saved payload into comparable strings, labelled for the toast. */
   function snapshotOf(payload: Record<string, any>): Record<string, string> {
     const s: Record<string, string> = {};
-    const put = (label: string, value: unknown) => {
-      s[label] = value == null ? "" : typeof value === "object" ? JSON.stringify(value) : String(value);
+    const norm = (value: unknown): string => {
+      if (value == null) return "";
+      if (Array.isArray(value)) return JSON.stringify(value.map((v) => String(v ?? "").trim()).filter(Boolean));
+      if (typeof value === "object") {
+        const o = value as Record<string, unknown>;
+        const entries = Object.keys(o)
+          .sort()
+          .map((k) => [k, o[k]] as const)
+          .filter(([, v]) => (Array.isArray(v) ? v.filter(Boolean).length > 0 : String(v ?? "").trim() !== ""));
+        return JSON.stringify(entries.map(([k, v]) => [k, Array.isArray(v) ? v.map((x) => String(x ?? "").trim()).filter(Boolean) : String(v).trim()]));
+      }
+      return String(value).trim();
     };
+    const put = (label: string, value: unknown) => {
+      s[label] = norm(value);
+    };
+
     put("your name", payload.display_name);
     put("your artist name", payload.artist_name);
     put("your location", payload.location);
