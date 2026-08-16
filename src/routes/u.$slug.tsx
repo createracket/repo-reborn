@@ -124,6 +124,16 @@ function PublicProfilePage() {
   ].map((s) => ({ ...s, value: (socials as any)[s.key] as string | undefined }))
    .filter((s) => s.value);
 
+  // Secondary links (band / podcast / side project) added on the profile builder.
+  const extraUrls = ((socials as any).extra ?? []) as string[];
+  const extraNames = ((socials as any).extra_names ?? []) as string[];
+  const extraLinks = extraUrls
+    .map((url, i) => ({ url: (url ?? "").trim(), name: (extraNames[i] ?? "").trim() }))
+    .filter((l) => l.url);
+
+  const media = (profile.media ?? {}) as ProfileMedia;
+  const vibeTags = profile.vibe_tags ?? [];
+
   const displayName = profile.artist_name || profile.display_name || "Anonymous";
 
   return (
@@ -144,6 +154,14 @@ function PublicProfilePage() {
             {profile.location ? (
               <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">{profile.location}</p>
             ) : null}
+            {archetypeLabel ? (
+              <p className="text-sm">
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  {profile.vibe_archetype_kind === "brand" ? "Brand archetype" : "Artist archetype"}
+                </span>
+                <span className="ml-2 text-gradient-racket font-display text-lg">{archetypeLabel}</span>
+              </p>
+            ) : null}
           </div>
         </section>
 
@@ -151,18 +169,41 @@ function PublicProfilePage() {
           <p className="mt-8 whitespace-pre-wrap text-muted-foreground">{profile.bio}</p>
         ) : null}
 
-        {socialLinks.length ? (
+        {socialLinks.length || extraLinks.length ? (
           <div className="mt-6 flex flex-wrap gap-2">
             {socialLinks.map((s) => {
               const Icon = s.icon;
+              const href = normalizeUrl(s.value!, s.base);
+              const label = s.key === "website" || s.key === "custom_url" ? s.label : handleLabel(href);
               return (
                 <Button key={s.key} asChild variant="outline" size="sm">
-                  <a href={normalizeUrl(s.value!, s.base)} target="_blank" rel="noreferrer">
-                    <Icon className="mr-1.5 size-3.5" /> {s.label}
+                  <a href={href} target="_blank" rel="noreferrer">
+                    <Icon className="mr-1.5 size-3.5" /> {label}
                   </a>
                 </Button>
               );
             })}
+            {extraLinks.map((l, i) => (
+              <Button key={`extra-${i}`} asChild variant="outline" size="sm">
+                <a href={normalizeUrl(l.url)} target="_blank" rel="noreferrer">
+                  <LinkIcon className="mr-1.5 size-3.5" />
+                  {l.name ? `${l.name} · ${handleLabel(l.url)}` : handleLabel(l.url)}
+                </a>
+              </Button>
+            ))}
+          </div>
+        ) : null}
+
+        {vibeTags.length ? (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {vibeTags.map((t) => (
+              <span
+                key={t}
+                className="rounded-full border border-border/60 px-3 py-1 text-sm transition-colors hover:border-racket-pink"
+              >
+                {t}
+              </span>
+            ))}
           </div>
         ) : null}
 
@@ -181,6 +222,10 @@ function PublicProfilePage() {
             </div>
           </section>
         ) : null}
+
+        <FeaturedVideos media={media} />
+        <FeaturedPhotos media={media} />
+
       </main>
       <SiteFooter />
     </div>
