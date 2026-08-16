@@ -71,12 +71,13 @@ function PublicProfilePage() {
   const { slug } = Route.useParams();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
+  const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
 
   useEffect(() => {
     (async () => {
       const { data, error } = await (supabase as any)
         .from("public_profiles")
-        .select("id, slug, display_name, artist_name, location, bio, avatar_url, socials, total_followers, total_streams, monthly_streams, avg_reach, avg_engagement, top_audience_location")
+        .select("id, slug, display_name, artist_name, location, bio, avatar_url, socials, total_followers, total_streams, monthly_streams, avg_reach, avg_engagement, top_audience_location, media, vibe_tags, vibe_archetype_key, vibe_archetype_kind")
         .eq("slug", slug)
         .maybeSingle();
       if (error || !data) {
@@ -85,8 +86,21 @@ function PublicProfilePage() {
       }
       setProfile(data as unknown as PublicProfile);
       setStatus("ready");
+      loadVibeCheckConfig()
+        .then(setVibeConfig)
+        .catch(() => undefined);
     })();
   }, [slug]);
+
+  const archetypeLabel = (() => {
+    if (!profile?.vibe_archetype_key) return "";
+    const opts =
+      profile.vibe_archetype_kind === "brand"
+        ? brandArchetypeOptions(vibeConfig)
+        : artistArchetypeOptions(vibeConfig);
+    return opts.find((o) => o.key === profile.vibe_archetype_key)?.label ?? "";
+  })();
+
 
   if (status === "loading") {
     return (
