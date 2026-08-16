@@ -57,7 +57,7 @@ export const upsertCustomTemplate = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => TemplateUpsertSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context)
-    const { extractVariables } = await import('@/lib/email-templates/render-custom.server')
+    const { extractVariables } = await import('@/lib/email-templates/merge-tags')
     const variables = extractVariables(data.subject, data.body_markdown)
     // Built-in name collisions are allowed: saving with a built-in name
     // creates an override that the send pipeline prefers over the React
@@ -138,7 +138,7 @@ export const getOrCreateBuiltinOverride = createServerFn({ method: 'POST' })
     if (selErr) throw new Error(selErr.message)
     if (existing) return { id: existing.id as string, created: false }
 
-    const { extractVariables } = await import('@/lib/email-templates/render-custom.server')
+    const { extractVariables } = await import('@/lib/email-templates/merge-tags')
     const variables = extractVariables(seed.subject, seed.body_markdown)
 
     const { data: row, error } = await context.supabase

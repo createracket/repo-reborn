@@ -26,7 +26,7 @@ export const CustomEmail = ({ subject, bodyHtml, preview }: Props) => (
     <Body style={main}>
       <Container style={container}>
         <div
-          // bodyHtml is sanitized server-side via DOMPurify before this point.
+          // bodyHtml is sanitised server-side via the email HTML sanitiser before this point.
           dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
 
