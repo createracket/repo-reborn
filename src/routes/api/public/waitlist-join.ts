@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { enqueueTransactionalEmail, getServerSupabase } from '@/lib/email/send.server'
+import { sendForEvent, getServerSupabase } from '@/lib/email/send.server'
 
 const Schema = z.object({
   email: z.string().email().max(255),
@@ -43,8 +43,7 @@ export const Route = createFileRoute('/api/public/waitlist-join')({
 
         // Fire confirmation email — non-fatal if it fails
         try {
-          await enqueueTransactionalEmail({
-            templateName: 'waitlist-confirmation',
+          await sendForEvent('waitlist_joined', {
             recipientEmail: email,
             templateData: { email },
             idempotencyKey: `waitlist-${email.toLowerCase()}`,

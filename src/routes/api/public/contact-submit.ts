@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { createFileRoute } from '@tanstack/react-router'
-import { enqueueTransactionalEmail, getServerSupabase } from '@/lib/email/send.server'
+import { sendForEvent, getServerSupabase } from '@/lib/email/send.server'
 import { findProfanityIn } from '@/lib/profanity'
 
 const Schema = z.object({
@@ -56,10 +56,9 @@ export const Route = createFileRoute('/api/public/contact-submit')({
         }
 
         try {
-          await enqueueTransactionalEmail({
-            templateName: 'contact-confirmation',
+          await sendForEvent('contact_submitted', {
             recipientEmail: email,
-            templateData: { name, message },
+            templateData: { name, email, message },
             idempotencyKey: `contact-${email.toLowerCase()}-${Date.now()}`,
           })
         } catch (e) {
