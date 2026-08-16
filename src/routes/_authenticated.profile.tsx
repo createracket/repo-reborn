@@ -650,12 +650,21 @@ function EditProfilePage() {
 
 
 
+  /**
+   * Parse a hand-typed metric. Accepts plain numbers plus the shorthand people
+   * actually type: "10k", "1.2m", "3,400", "4.2%".
+   */
   function num(v: string): number | null {
-    const t = v.trim();
+    const t = (v ?? "").trim().toLowerCase().replace(/,/g, "").replace(/%$/, "").replace(/\s+/g, "");
     if (!t) return null;
-    const n = Number(t);
-    return Number.isFinite(n) ? n : null;
+    const m = t.match(/^(-?\d*\.?\d+)([kmb])?$/);
+    if (!m) return null;
+    const base = Number(m[1]);
+    if (!Number.isFinite(base)) return null;
+    const mult = m[2] === "k" ? 1_000 : m[2] === "m" ? 1_000_000 : m[2] === "b" ? 1_000_000_000 : 1;
+    return Math.round(base * mult * 100) / 100;
   }
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
