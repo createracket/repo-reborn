@@ -820,6 +820,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
   const [types, setTypes] = useState<string[]>([]);
   const [artistArchetypes, setArtistArchetypes] = useState<string[]>([]);
   const [brandArchetypes, setBrandArchetypes] = useState<string[]>([]);
+  const vibeConfig = useVibeConfig();
+
   const [form, setForm] = useState({
     title: "",
     description: "",
