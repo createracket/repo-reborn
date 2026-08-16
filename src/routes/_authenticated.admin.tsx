@@ -1472,9 +1472,10 @@ export function SpotlightForm({
   const sectionKind = section ?? "spotlight";
   const isEditing = !!editData;
   const [sectionOrder, setSectionOrder] = useState<string[]>(() =>
-  const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(() => readThumbFrame(editData?.links));
     normaliseSectionOrder(editData?.links?.section_order),
   );
+  const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(() => readThumbFrame(editData?.links));
+
   const [dragKey, setDragKey] = useState<string | null>(null);
 
   function moveSection(from: number, to: number) {
