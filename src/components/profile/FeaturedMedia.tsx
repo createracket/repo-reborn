@@ -59,11 +59,13 @@ export function FeaturedVideos({
     };
   }, [key]);
 
-  const videos = MEDIA_VIDEO_KEYS.map((k) => {
+  type Clip = { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover?: string };
+  const videos: Clip[] = [];
+  for (const k of MEDIA_VIDEO_KEYS) {
     const url = media[k];
     const embed = url ? getSocialEmbed(url) : null;
-    return embed ? { embed, cover: media[`${k}_cover` as keyof ProfileMedia] } : null;
-  }).filter((v): v is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover?: string } => !!v);
+    if (embed) videos.push({ embed, cover: media[`${k}_cover` as keyof ProfileMedia] });
+  }
 
   if (videos.length === 0) return null;
 
