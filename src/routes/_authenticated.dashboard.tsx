@@ -36,7 +36,6 @@ import { formatBriefBudget, transparencyLabel } from "@/lib/brief-currency";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ListeningReportsCard } from "@/components/dashboard/ListeningReportsCard";
 
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -763,9 +762,6 @@ function DashboardPage() {
             </Card>
           </div>
 
-          <div className="lg:col-span-3">
-            <ListeningReportsCard />
-          </div>
 
 
           {assignedRosters.length > 0 && (

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { ListeningAnalysis, ScannedPost } from "./social-listening.functions";
+import type { ThumbFrame } from "@/lib/thumb-frame";
 
 async function requireAdmin(supabase: any, userId: string) {
   const { data, error } = await supabase
@@ -178,7 +179,7 @@ export interface DashboardReport {
   notes: string | null;
   created_at: string;
   thumbnail_url: string | null;
-  thumb_frame: Record<string, unknown> | null;
+  thumb_frame: ThumbFrame | null;
 }
 
 export interface ListeningReportDetail extends DashboardReport {
