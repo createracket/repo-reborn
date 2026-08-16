@@ -1117,6 +1117,18 @@ function DashboardPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {(() => {
+                      if (!isRosterView) return null;
+                      const sel = myRosters.find((r) => r.id === rosterFilter);
+                      if (!sel?.slug || !sel.published) return null;
+                      return (
+                        <Button asChild size="sm" variant="outline" className="h-9">
+                          <Link to="/roster/$slug" params={{ slug: sel.slug }}>
+                            View roster
+                          </Link>
+                        </Button>
+                      );
+                    })()}
                   </div>
                 )}
                 {loading ? (
