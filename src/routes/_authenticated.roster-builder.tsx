@@ -53,6 +53,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
+import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { socialAudience, totalFans } from "@/lib/audience";
 import {
   DndContext,
@@ -97,6 +99,7 @@ type Roster = {
   hide_statuses: boolean;
   header_image_url: string | null;
   profile_image_url: string | null;
+  thumb_frame?: any;
 
   client_email: string | null;
   brand_email: string | null;
@@ -707,6 +710,7 @@ function RosterDetailView({
   const [description, setDescription] = useState(roster.description ?? "");
   const [headerImageUrl, setHeaderImageUrl] = useState(roster.header_image_url ?? "");
   const [profileImageUrl, setProfileImageUrl] = useState(roster.profile_image_url ?? "");
+  const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(readThumbFrame({ thumb_frame: (roster as any).thumb_frame }));
   const [clientEmail, setClientEmail] = useState("");
 
   const [brandEmail, setBrandEmail] = useState("");
@@ -746,6 +750,7 @@ function RosterDetailView({
     setDescription(roster.description ?? "");
     setHeaderImageUrl(roster.header_image_url ?? "");
     setProfileImageUrl(roster.profile_image_url ?? "");
+    setThumbFrame(readThumbFrame({ thumb_frame: (roster as any).thumb_frame }));
 
     setAccessCode(roster.access_code ?? "");
     setAccessCodeLabel(roster.access_code_label ?? "Access code");
@@ -800,6 +805,7 @@ function RosterDetailView({
         description: description.trim() || null,
         header_image_url: headerImageUrl.trim() || null,
         profile_image_url: profileImageUrl.trim() || null,
+        thumb_frame: thumbFrame as any,
 
         client_email: clientEmail.trim().toLowerCase() || null,
         brand_email: brandEmail.trim().toLowerCase() || null,
@@ -1171,11 +1177,11 @@ function RosterDetailView({
                 onChange={(e) => setProfileImageUrl(e.target.value)}
                 placeholder="…or paste an image URL"
               />
-              {profileImageUrl && (
-                <div className="mt-2 size-24 overflow-hidden rounded-lg border border-border/60">
-                  <img src={profileImageUrl} alt="" className="size-full object-cover" />
-                </div>
-              )}
+              <ThumbFrameControls
+                value={thumbFrame}
+                onChange={setThumbFrame}
+                previewUrl={profileImageUrl || null}
+              />
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
