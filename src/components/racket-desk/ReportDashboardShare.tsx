@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Loader2, LayoutDashboard, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,8 +23,8 @@ export function ReportDashboardShare({
   const [open, setOpen] = useState(false);
   const [assignees, setAssignees] = useState<ShareTarget[]>([]);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ShareTarget[]>([]);
-  const [searching, setSearching] = useState(false);
+  const [people, setPeople] = useState<ShareTarget[]>([]);
+  const [loadingPeople, setLoadingPeople] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -32,6 +32,28 @@ export function ReportDashboardShare({
       .then(setAssignees)
       .catch((e: any) => toast.error(e?.message ?? "Could not load assignees"));
   }, [open, scanId]);
+
+  // Load the assignable profiles once the panel opens, then filter locally.
+  useEffect(() => {
+    if (!open || people.length || loadingPeople) return;
+    setLoadingPeople(true);
+    searchReportAssignees({ data: { q: "" } })
+      .then(setPeople)
+      .catch((e: any) => toast.error(e?.message ?? "Could not load profiles"))
+      .finally(() => setLoadingPeople(false));
+  }, [open, people.length, loadingPeople]);
+
+  const suggestions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const list = q
+      ? people.filter(
+          (p) =>
+            (p.display_name ?? "").toLowerCase().includes(q) ||
+            (p.email ?? "").toLowerCase().includes(q),
+        )
+      : people;
+    return list.slice(0, 8);
+  }, [query, people]);
 
   async function toggleVisible() {
     setBusy(true);
@@ -64,16 +86,6 @@ export function ReportDashboardShare({
     }
   }
 
-  async function search() {
-    setSearching(true);
-    try {
-      setResults(await searchReportAssignees({ data: { q: query } }));
-    } catch (e: any) {
-      toast.error(e?.message ?? "Could not search profiles");
-    } finally {
-      setSearching(false);
-    }
-  }
 
   async function assign(t: ShareTarget, assigned: boolean) {
     try {
@@ -155,25 +167,25 @@ export function ReportDashboardShare({
                 )}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && search()}
                   placeholder="Search profiles by name or email"
                   className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm focus:border-lime focus:outline-none"
                 />
-                <button
-                  onClick={search}
-                  className="rounded-full border border-border px-4 py-2 text-xs hover:text-lime"
-                >
-                  {searching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Search"}
-                </button>
+                {loadingPeople && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
               </div>
 
-              {results.length > 0 && (
+              {!loadingPeople && suggestions.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {query.trim() ? "No profiles match that search." : "No profiles available yet."}
+                </p>
+              )}
+
+              {suggestions.length > 0 && (
                 <ul className="max-h-52 space-y-1 overflow-auto text-sm">
-                  {results.map((r) => {
+                  {suggestions.map((r) => {
                     const on = assignees.some((a) => a.user_id === r.user_id);
                     return (
                       <li
