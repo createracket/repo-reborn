@@ -694,35 +694,18 @@ function DashboardPage() {
                     </div>
                     <ul className="grid gap-3 md:grid-cols-2">
                       {plannerBriefs.map((bp) => {
-                        const thumb = bp.header_image_url || bp.profile_image_url || null;
+                        const thumb = bp.profile_image_url || bp.header_image_url || null;
                         const frame = readThumbFrame(bp.links);
                         return (
                           <li key={bp.id}>
-                            <Link
-                              to="/brief/$slug"
-                              params={{ slug: bp.slug }}
-                              className="group flex h-full gap-3 rounded-xl border border-border/60 bg-card p-3 transition hover:border-primary/60"
-                            >
-                              <div className={`size-16 shrink-0 overflow-hidden rounded-lg ${thumbFrameBgClass(frame)}`}>
-                                {thumb ? (
-                                  <img src={thumb} alt="" className="size-full" style={thumbFrameImgStyle(frame)} />
-                                ) : (
-                                  <div className="flex size-full items-center justify-center text-[9px] uppercase tracking-wider text-muted-foreground">
-                                    Brief
-                                  </div>
-                                )}
-                              </div>
-                              <div className="min-w-0">
-                                <h3 className="truncate text-sm font-medium leading-tight group-hover:text-primary">
-                                  {bp.headline}
-                                </h3>
-                                {bp.subtitle ? (
-                                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{bp.subtitle}</p>
-                                ) : null}
-                                <span className="mt-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
-                                  Brief
-                                </span>
-                              </div>
+                            <Link to="/brief/$slug" params={{ slug: bp.slug }} className="block h-full">
+                              <PlannerTile
+                                thumb={thumb}
+                                frame={frame}
+                                title={bp.headline}
+                                subtitle={bp.subtitle}
+                                label="Brief"
+                              />
                             </Link>
                           </li>
                         );
