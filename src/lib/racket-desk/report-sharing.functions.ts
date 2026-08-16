@@ -178,7 +178,7 @@ export interface DashboardReport {
   notes: string | null;
   created_at: string;
   thumbnail_url: string | null;
-  thumb_frame: unknown;
+  thumb_frame: Record<string, unknown> | null;
 }
 
 export interface ListeningReportDetail extends DashboardReport {
