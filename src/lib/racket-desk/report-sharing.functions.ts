@@ -33,9 +33,12 @@ export const searchReportAssignees = createServerFn({ method: "POST" })
     let q = (supabase as any)
       .from("profiles")
       .select("id, display_name, email")
-      .order("display_name", { ascending: true })
-      .limit(20);
-    if (data.q) q = q.or(`display_name.ilike.%${data.q}%,email.ilike.%${data.q}%`);
+      .order("display_name", { ascending: true, nullsFirst: false })
+      .order("email", { ascending: true })
+      .limit(200);
+    // Strip characters that would corrupt the PostgREST filter string.
+    const term = data.q.replace(/[,()"'\\%*]/g, " ").trim();
+    if (term) q = q.or(`display_name.ilike.%${term}%,email.ilike.%${term}%`);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return ((rows ?? []) as any[]).map((r) => ({
