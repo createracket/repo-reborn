@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
+import { DEFAULT_THUMB_FRAME, readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
@@ -1472,6 +1474,8 @@ export function SpotlightForm({
   const [sectionOrder, setSectionOrder] = useState<string[]>(() =>
     normaliseSectionOrder(editData?.links?.section_order),
   );
+  const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(() => readThumbFrame(editData?.links));
+
   const [dragKey, setDragKey] = useState<string | null>(null);
 
   function moveSection(from: number, to: number) {
@@ -1897,6 +1901,7 @@ export function SpotlightForm({
         apple_music_name: form.apple_music_name.trim(),
         youtube_extra_names: extraLinks.youtube.map((_, i) => (extraNames.youtube[i] ?? "").trim()),
         colour_thumbnails: form.colour_thumbnails,
+        thumb_frame: thumbFrame,
         section_labels: {
           host_bio: form.label_host_bio.trim(),
           audience: form.label_audience.trim(),
@@ -1963,6 +1968,7 @@ export function SpotlightForm({
         label_host_bio: "", label_audience: "", label_partnership: "", label_eoi: "", label_videos: "",
         label_members: "", youtube_name: "", apple_music_name: "",
       });
+      setThumbFrame(DEFAULT_THUMB_FRAME);
     }
     onCreated();
   }
@@ -2107,6 +2113,11 @@ export function SpotlightForm({
                   onCheckedChange={(v) => set("colour_thumbnails", v)}
                 />
               </label>
+              <ThumbFrameControls
+                value={thumbFrame}
+                onChange={setThumbFrame}
+                previewUrl={form.header_image_url || form.profile_image_url || null}
+              />
             </div>
           </details>
           <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
