@@ -156,6 +156,28 @@ function EditProfilePage() {
     setForm((f) => ({ ...f, socials: { ...f.socials, [k]: v } }));
   }
 
+  function setMedia(k: keyof ProfileMedia, v: string) {
+    setForm((f) => ({ ...f, media: { ...f.media, [k]: v } }));
+  }
+
+  function addExtra() {
+    setExtraLinks((l) => [...l, { url: "", name: "" }]);
+  }
+  function updateExtra(i: number, patch: Partial<SecondaryLink>) {
+    setExtraLinks((l) => l.map((row, idx) => (idx === i ? { ...row, ...patch } : row)));
+  }
+  function removeExtra(i: number) {
+    setExtraLinks((l) => l.filter((_, idx) => idx !== i));
+  }
+
+  const archetypeLabel = (() => {
+    if (!archetype) return "";
+    const cfg = vibeConfig ?? DEFAULT_VIBE_CONFIG;
+    const opts = archetype.kind === "brand" ? brandArchetypeOptions(cfg) : artistArchetypeOptions(cfg);
+    return opts.find((o) => o.key === archetype.key)?.label ?? "";
+  })();
+
+
   const runSync = useServerFn(runProfileSync);
   const loadUsage = useServerFn(getMyUsage);
   const [fetching, setFetching] = useState<string | null>(null);
