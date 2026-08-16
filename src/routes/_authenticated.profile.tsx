@@ -312,26 +312,37 @@ function EditProfilePage() {
     return toProfileUrl(platform, raw);
   }
 
-  /** One metered run that refreshes every connected platform. */
-  async function syncAll() {
+  /**
+   * One metered run. Pass a target to refresh a single input, or "all" to
+   * refresh everything connected in one go.
+   */
+  async function runSyncFor(target: SyncTarget) {
+    const socialUrl = (p: SocialPlatform) => normaliseSocial(p, form.socials[p as keyof ProfileSocials] as string ?? "");
     const extraUrls = extraLinks.map((l) => l.url.trim()).filter(Boolean);
+    const isAll = target === "all";
+    const extraIndex = target.startsWith("extra:") ? Number(target.slice(6)) : -1;
+
     const payload = {
-      instagram_url: normaliseSocial("instagram", form.socials.instagram ?? ""),
-      tiktok_url: normaliseSocial("tiktok", form.socials.tiktok ?? ""),
-      youtube_url: normaliseSocial("youtube", form.socials.youtube ?? ""),
-      twitch_url: normaliseSocial("twitch", form.socials.twitch ?? ""),
-      facebook_url: normaliseSocial("facebook", form.socials.facebook ?? ""),
-      x_url: normaliseSocial("x", form.socials.x ?? ""),
-      spotify_url: (form.socials.spotify ?? "").trim() || null,
-      apple_music_url: (form.socials.apple_music ?? "").trim() || null,
-      extra_urls: extraUrls,
+      instagram_url: isAll || target === "instagram" ? socialUrl("instagram") : null,
+      tiktok_url: isAll || target === "tiktok" ? socialUrl("tiktok") : null,
+      youtube_url: isAll || target === "youtube" ? socialUrl("youtube") : null,
+      twitch_url: isAll || target === "twitch" ? socialUrl("twitch") : null,
+      facebook_url: isAll || target === "facebook" ? socialUrl("facebook") : null,
+      x_url: isAll || target === "x" ? socialUrl("x") : null,
+      spotify_url: isAll || target === "spotify" ? (form.socials.spotify ?? "").trim() || null : null,
+      apple_music_url: isAll || target === "apple_music" ? (form.socials.apple_music ?? "").trim() || null : null,
+      extra_urls: isAll
+        ? extraUrls
+        : extraIndex >= 0
+          ? [extraLinks[extraIndex]?.url.trim() ?? ""].filter(Boolean)
+          : [],
     };
 
     if (!Object.values(payload).flat().some(Boolean)) {
-      toast.error("Add at least one social or streaming link first");
+      toast.error(isAll ? "Add at least one social or streaming link first" : "Add the link first");
       return;
     }
-    setFetching("all");
+    setFetching(target);
     try {
       const r = await runSync({ data: payload });
       if (!r.ok) {
@@ -355,15 +366,26 @@ function EditProfilePage() {
       if (Object.keys(counts).length) setFetchedCounts((c) => ({ ...c, ...counts }));
 
       const extras = r.extras ?? [];
-      const extraFollowers = extras.reduce((sum, e) => sum + (e.followers ?? 0), 0);
-      const extraStreams = extras.reduce((sum, e) => sum + (e.streams ?? 0), 0);
-      setExtraTotals({ followers: extraFollowers, streams: extraStreams });
-      if (extraFollowers > 0) parts.push(`extra links: ${extraFollowers.toLocaleString()}`);
-
+      if (extras.length) {
+        setExtraFetched((prev) => {
+          const next = { ...prev };
+          extras.forEach((e) => {
+            next[e.url] = { followers: e.followers ?? null, streams: e.streams ?? null };
+          });
+          return next;
+        });
+        const extraFollowers = extras.reduce((sum, e) => sum + (e.followers ?? 0), 0);
+        if (extraFollowers > 0) parts.push(`extra links: ${extraFollowers.toLocaleString()}`);
+      }
 
       let mismatch: string | null = null;
       const sp = r.spotify;
       if (sp && sp.ok) {
+        setSpotifyFetched({
+          followers: sp.followers ?? null,
+          monthly: sp.monthly_listeners ?? null,
+          total: sp.total_streams ?? null,
+        });
         if (sp.followers != null) setForm((f) => ({ ...f, total_followers: String(sp.followers ?? "") }));
         if (sp.monthly_listeners != null) {
           setForm((f) => ({ ...f, monthly_streams: String(sp.monthly_listeners ?? "") }));
@@ -378,13 +400,16 @@ function EditProfilePage() {
         }
       }
       const am = r.apple;
-      if (am && am.ok && am.name && !isNameMatch(am.name, candidateNames())) {
-        mismatch = mismatch ?? `Apple Music artist "${am.name}" does not match profile name.`;
+      if (am && am.ok) {
+        setAppleFetched(am.name ?? null);
+        if (am.name && !isNameMatch(am.name, candidateNames())) {
+          mismatch = mismatch ?? `Apple Music artist "${am.name}" does not match profile name.`;
+        }
       }
       if (mismatch) {
         setForm((f) => ({ ...f, flagged_streaming_mismatch: true, flagged_streaming_reason: mismatch! }));
         setMismatchWarning(MISMATCH_MESSAGE);
-      } else {
+      } else if (isAll) {
         setMismatchWarning(null);
       }
 
@@ -395,6 +420,9 @@ function EditProfilePage() {
       setFetching(null);
     }
   }
+
+  const syncAll = () => runSyncFor("all");
+
 
 
   function applyTotalFromFetched() {
