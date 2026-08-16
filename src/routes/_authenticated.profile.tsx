@@ -126,6 +126,70 @@ function MediaUploadButton({ label, onUploaded }: { label: string; onUploaded: (
   );
 }
 
+/** Which input a metered sync run should refresh. */
+type SyncTarget =
+  | "all"
+  | "instagram"
+  | "tiktok"
+  | "youtube"
+  | "twitch"
+  | "facebook"
+  | "x"
+  | "spotify"
+  | "apple_music"
+  | `extra:${number}`;
+
+/** Small per-input "Auto sync" control. */
+function SyncButton({ busy, disabled, onClick, label = "Auto sync" }: {
+  busy: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  label?: string;
+}) {
+  return (
+    <Button type="button" size="sm" variant="outline" disabled={busy || disabled} onClick={onClick}>
+      <RefreshCw className={`mr-1.5 size-3.5 ${busy ? "animate-spin" : ""}`} />
+      {busy ? "Syncing…" : label}
+    </Button>
+  );
+}
+
+/** Pull a preview image from a public TikTok / Instagram / YouTube post URL. */
+function FetchPreviewButton({ url, onFetched }: { url: string; onFetched: (u: string) => void }) {
+  const fetchPreview = useServerFn(scrapePostMetrics);
+  const [busy, setBusy] = useState(false);
+
+  async function run() {
+    const clean = (url ?? "").trim();
+    if (!clean) {
+      toast.error("Add the post URL first");
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await fetchPreview({ data: { url: clean } });
+      if (!result.ok) throw new Error(result.error);
+      const thumb = result.metrics.thumbnail_url;
+      if (!thumb) throw new Error("No preview image available for that link");
+      onFetched(thumb);
+      toast.success("Preview pulled from link");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't fetch preview");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Button type="button" size="sm" variant="outline" disabled={busy || !url?.trim()} onClick={run}>
+      <RefreshCw className={`mr-1.5 size-3.5 ${busy ? "animate-spin" : ""}`} />
+      {busy ? "Fetching…" : "Fetch preview"}
+    </Button>
+  );
+}
+
+
+
 
 function EditProfilePage() {
   const navigate = useNavigate();
