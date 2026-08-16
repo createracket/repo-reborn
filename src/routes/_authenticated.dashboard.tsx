@@ -627,7 +627,7 @@ function DashboardPage() {
         <div className="grid gap-6 grid-cols-[minmax(0,1fr)] lg:grid-cols-3">
           {/* VIBE CARD (spans 2) */}
           <div className="lg:col-span-2">
-            <VibeCard loading={loading} vibe={latestVibe} />
+            <VibeCard loading={loading} vibe={latestVibe} config={vibeConfig} />
           </div>
 
           {/* QUICK ACTIONS */}
