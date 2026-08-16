@@ -1661,7 +1661,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
               className="h-7 px-3 bg-pink-accent text-primary-foreground hover:bg-pink-accent/90"
               onClick={() => setOpen(true)}
             >
-              <Eye className="mr-1 size-3" /> Suss the vibe
+              <Eye className="mr-1 size-3" /> Tell me more
             </Button>
           </div>
         </div>
