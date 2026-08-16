@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { readThumbFrame, thumbFrameBgClass, thumbFrameImgStyle } from "@/lib/thumb-frame";
+import { loadDashboardConfig } from "@/lib/dashboard-config";
 import { PlannerTile } from "@/components/dashboard/PlannerTile";
 import { listDashboardReports, type DashboardReport } from "@/lib/racket-desk/report-sharing.functions";
 import {
@@ -133,6 +134,7 @@ function DashboardPage() {
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; thumbnail_url: string | null; thumb_frame: any; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
   const [listeningReports, setListeningReports] = useState<DashboardReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [featuredSpotlightsEnabled, setFeaturedSpotlightsEnabled] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<"free" | "paid">("free");
@@ -144,6 +146,10 @@ function DashboardPage() {
   const soundBoardRef = useRef<HTMLDivElement>(null);
   const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
   const [soundBoardItems, setSoundBoardItems] = useState<Array<{ id: string; title: string; copy: string; video_url: string | null; thumbnail_url: string | null; gradient: string | null }>>([]);
+
+  useEffect(() => {
+    loadDashboardConfig().then((cfg) => setFeaturedSpotlightsEnabled(cfg.featuredSpotlightsEnabled));
+  }, []);
 
   // Sound board is the last section on the page — load it only once the rest of the dashboard has settled
   useEffect(() => {
@@ -958,13 +964,13 @@ function DashboardPage() {
 
 
                 {/* Combined spotlights & examples carousel */}
-                {!loading && (spotlightOpps.length > 0 || examples.length > 0) ? (
+                {!loading && featuredSpotlightsEnabled && (spotlightOpps.length > 0 || examples.length > 0) ? (
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
                         Featured spotlights
                       </div>
-                      <div className="flex gap-1">
+                      <div className={`flex gap-1 ${spotlightOpps.length + examples.length >= 5 ? "" : "hidden"}`}>
                         <Button
                           variant="ghost"
                           size="icon"
