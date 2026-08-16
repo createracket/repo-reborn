@@ -137,7 +137,7 @@ function DashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<"free" | "paid">("free");
   const [adminViewAsTier, setAdminViewAsTier] = useState<"free" | "paid">("paid");
-  const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string }>>([]);
+  const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string; slug?: string | null; published?: boolean }>>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
   const oppCarouselRef = useRef<HTMLDivElement>(null);
 
@@ -174,14 +174,14 @@ function DashboardPage() {
       if (isAdmin) {
         const { data } = await (supabase as any)
           .from("rosters")
-          .select("id, title, owner_id")
+          .select("id, title, owner_id, slug, published")
           .order("updated_at", { ascending: false });
         rows = (data ?? []) as any[];
       } else {
         // Own rosters
         const { data: own } = await (supabase as any)
           .from("rosters")
-          .select("id, title, owner_id")
+          .select("id, title, owner_id, slug, published")
           .eq("owner_id", u.user.id)
           .order("updated_at", { ascending: false });
         // Rosters shared with the user via roster_shares (tagged)
@@ -194,7 +194,7 @@ function DashboardPage() {
         if (sharedIds.length) {
           const { data } = await (supabase as any)
             .from("rosters")
-            .select("id, title, owner_id")
+            .select("id, title, owner_id, slug, published")
             .in("id", sharedIds)
             .order("updated_at", { ascending: false });
           shared = (data ?? []) as any[];
