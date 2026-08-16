@@ -123,7 +123,8 @@ function DashboardPage() {
   const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [examples, setExamples] = useState<Array<{ id: string; title: string; description: string | null; location: string | null; image_url: string | null }>>([]);
-  const [spotlightOpps, setSpotlightOpps] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null }>>([]);
+  const [spotlightOpps, setSpotlightOpps] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; section?: string | null }>>([]);
+  const [plannerBriefs, setPlannerBriefs] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null }>>([]);
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
@@ -467,11 +468,13 @@ function DashboardPage() {
         .order("position", { ascending: true });
       setExamples(((exOpps as any[]) ?? []) as any);
 
-      // Spotlights: live-for-all + privately shared to this user (via RLS)
-      const [{ data: liveSpotlights }, { data: spotlightShareRows }] = await Promise.all([
+      // Spotlights & briefs: live-for-all + privately shared to this user (via RLS)
+      const pageCols =
+        "id, slug, headline, subtitle, type, header_image_url, profile_image_url, section, dashboard_placement";
+      const [{ data: livePages }, { data: spotlightShareRows }] = await Promise.all([
         (supabase as any)
           .from("partner_pages")
-          .select("id, slug, headline, subtitle, type, header_image_url, profile_image_url")
+          .select(pageCols)
           .eq("published", true)
           .eq("dashboard_visible", true)
           .order("updated_at", { ascending: false }),
@@ -480,18 +483,22 @@ function DashboardPage() {
           .select("partner_page_id"),
       ]);
       const sharedIds = Array.from(new Set(((spotlightShareRows ?? []) as any[]).map((r) => r.partner_page_id as string)));
-      let sharedSpotlights: any[] = [];
+      let sharedPages: any[] = [];
       if (sharedIds.length) {
         const { data } = await (supabase as any)
           .from("partner_pages")
-          .select("id, slug, headline, subtitle, type, header_image_url, profile_image_url")
+          .select(pageCols)
           .eq("published", true)
           .in("id", sharedIds);
-        sharedSpotlights = (data ?? []) as any[];
+        sharedPages = (data ?? []) as any[];
       }
       const dedupSp = new Map<string, any>();
-      [...((liveSpotlights ?? []) as any[]), ...sharedSpotlights].forEach((s) => dedupSp.set(s.id, s));
-      setSpotlightOpps(Array.from(dedupSp.values()));
+      [...((livePages ?? []) as any[]), ...sharedPages].forEach((s) => dedupSp.set(s.id, s));
+      const allPages = Array.from(dedupSp.values());
+      const isBrief = (r: any) => (r.section ?? "spotlight") === "brief";
+      const placement = (r: any) => (r.dashboard_placement ?? "planner") as string;
+      setSpotlightOpps(allPages.filter((r) => !isBrief(r) || placement(r) !== "planner"));
+      setPlannerBriefs(allPages.filter((r) => isBrief(r) && placement(r) !== "spotlight"));
 
 
 
@@ -676,7 +683,49 @@ function DashboardPage() {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
+                {plannerBriefs.length > 0 ? (
+                  <div>
+                    <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+                      Briefs for you
+                    </div>
+                    <ul className="grid gap-3 md:grid-cols-2">
+                      {plannerBriefs.map((bp) => {
+                        const thumb = bp.header_image_url || bp.profile_image_url || null;
+                        return (
+                          <li key={bp.id}>
+                            <Link
+                              to="/brief/$slug"
+                              params={{ slug: bp.slug }}
+                              className="group flex h-full gap-3 rounded-xl border border-border/60 bg-card p-3 transition hover:border-primary/60"
+                            >
+                              <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-muted">
+                                {thumb ? (
+                                  <img src={thumb} alt="" className="size-full object-cover object-top" />
+                                ) : (
+                                  <div className="flex size-full items-center justify-center text-[9px] uppercase tracking-wider text-muted-foreground">
+                                    Brief
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <h3 className="truncate text-sm font-medium leading-tight group-hover:text-primary">
+                                  {bp.headline}
+                                </h3>
+                                {bp.subtitle ? (
+                                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{bp.subtitle}</p>
+                                ) : null}
+                                <span className="mt-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
+                                  Brief
+                                </span>
+                              </div>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ) : null}
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
                 ) : myBriefs.length === 0 ? (
@@ -979,7 +1028,7 @@ function DashboardPage() {
                           >
                             <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 h-full">
                               <Link
-                                to="/spotlight/$slug"
+                                to={(sp.section ?? "spotlight") === "brief" ? "/brief/$slug" : "/spotlight/$slug"}
                                 params={{ slug: sp.slug }}
                                 className="group flex flex-1 flex-col gap-2"
                               >
@@ -988,7 +1037,7 @@ function DashboardPage() {
                                     <img src={thumb} alt="" className="size-full object-cover object-top transition group-hover:scale-[1.02]" />
                                   ) : (
                                     <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
-                                      Spotlight
+                                      {(sp.section ?? "spotlight") === "brief" ? "Brief" : "Spotlight"}
                                     </div>
                                   )}
                                 </div>
@@ -1001,7 +1050,7 @@ function DashboardPage() {
                                     {sp.type ?? ""}
                                   </p>
                                   <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
-                                    Spotlight
+                                    {(sp.section ?? "spotlight") === "brief" ? "Brief" : "Spotlight"}
                                   </span>
                                 </div>
                               </Link>

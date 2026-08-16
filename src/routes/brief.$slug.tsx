@@ -6,20 +6,18 @@ import { SpotlightNotFound } from "@/components/spotlight/SpotlightNotFound";
 import { SpotlightPageView } from "@/components/spotlight/SpotlightPageView";
 import { Button } from "@/components/ui/button";
 
-export { SPOTLIGHT_SECTIONS } from "@/components/spotlight/SpotlightPageView";
-
-export const Route = createFileRoute("/spotlight/$slug")({
-  // Partner pages are deliberately not indexable.
+export const Route = createFileRoute("/brief/$slug")({
+  // Brief pages are shared by link only and deliberately not indexable.
   head: () => ({
     meta: [
-      { title: "Spotlight — Create Racket" },
+      { title: "Brief — Create Racket" },
       { name: "robots", content: "noindex, nofollow" },
-      { name: "description", content: "Partner spotlight." },
-      { property: "og:title", content: "Spotlight — Create Racket" },
-      { property: "og:description", content: "Partner spotlight." },
+      { name: "description", content: "Campaign brief." },
+      { property: "og:title", content: "Brief — Create Racket" },
+      { property: "og:description", content: "Campaign brief." },
     ],
   }),
-  component: SpotlightRoute,
+  component: BriefRoute,
   notFoundComponent: SpotlightNotFound,
   errorComponent: ({ error }) => (
     <div className="min-h-screen bg-background">
@@ -34,7 +32,7 @@ export const Route = createFileRoute("/spotlight/$slug")({
   ),
 });
 
-function SpotlightRoute() {
+function BriefRoute() {
   const { slug } = Route.useParams();
-  return <SpotlightPageView slug={slug} kind="spotlight" />;
+  return <SpotlightPageView slug={slug} kind="brief" />;
 }

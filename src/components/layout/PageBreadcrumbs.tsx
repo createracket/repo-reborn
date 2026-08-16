@@ -27,6 +27,7 @@ function getPageLabel(pathname: string): string | null {
   if (ROUTE_LABELS[pathname]) return ROUTE_LABELS[pathname];
 
   if (pathname.startsWith("/spotlight/")) return "Spotlight";
+  if (pathname.startsWith("/brief/")) return "Brief";
   if (pathname.startsWith("/roster/")) return "Roster";
   if (pathname.startsWith("/u/")) return "Profile";
   if (pathname.startsWith("/report/")) return "Campaign Report";
@@ -47,7 +48,7 @@ export function PageBreadcrumbs() {
   if (pathname === "/" || pathname === "/dashboard") return null;
 
   // Signed-out visitors on a shared spotlight link shouldn't see app chrome.
-  if (pathname.startsWith("/spotlight/") && !signedIn) return null;
+  if ((pathname.startsWith("/spotlight/") || pathname.startsWith("/brief/")) && !signedIn) return null;
 
   const label = getPageLabel(pathname);
 

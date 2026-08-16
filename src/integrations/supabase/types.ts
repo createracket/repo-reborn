@@ -913,6 +913,7 @@ export type Database = {
           avg_engagement: number | null
           avg_reach: number | null
           created_at: string
+          dashboard_placement: string
           dashboard_visible: boolean
           dos_donts: string[]
           eoi_opportunities: string[]
@@ -945,6 +946,7 @@ export type Database = {
           avg_engagement?: number | null
           avg_reach?: number | null
           created_at?: string
+          dashboard_placement?: string
           dashboard_visible?: boolean
           dos_donts?: string[]
           eoi_opportunities?: string[]
@@ -977,6 +979,7 @@ export type Database = {
           avg_engagement?: number | null
           avg_reach?: number | null
           created_at?: string
+          dashboard_placement?: string
           dashboard_visible?: boolean
           dos_donts?: string[]
           eoi_opportunities?: string[]

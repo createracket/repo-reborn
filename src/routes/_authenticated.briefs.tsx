@@ -8,6 +8,16 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PartnerPageShares, type ShareProfile } from "@/components/admin/PartnerPageShares";
 import { supabase } from "@/integrations/supabase/client";
 import { SpotlightForm } from "@/routes/_authenticated.admin";
 
@@ -24,6 +34,7 @@ export const Route = createFileRoute("/_authenticated/briefs")({
 type Brief = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
   published: boolean; created_at: string; archived?: boolean | null;
+  dashboard_visible?: boolean | null; dashboard_placement?: string | null;
 };
 
 function BriefsPage() {
@@ -35,6 +46,7 @@ function BriefsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [open, setOpen] = useState<Set<string>>(new Set());
+  const [profiles, setProfiles] = useState<ShareProfile[]>([]);
 
   async function refresh() {
     const { data } = await supabase
@@ -63,6 +75,11 @@ function BriefsPage() {
         return;
       }
       setIsAdmin(true);
+      const { data: profileRows } = await supabase
+        .from("profiles")
+        .select("id, email, display_name")
+        .order("display_name", { ascending: true });
+      setProfiles(((profileRows as any[]) ?? []) as ShareProfile[]);
       await refresh();
       setChecking(false);
     })();
@@ -135,7 +152,7 @@ function BriefsPage() {
               </button>
             </CardTitle>
             <CardDescription>
-              /spotlight/{b.slug} · {b.type}{b.subtitle ? ` · ${b.subtitle}` : ""}
+              /brief/{b.slug} · {b.type}{b.subtitle ? ` · ${b.subtitle}` : ""}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -143,7 +160,7 @@ function BriefsPage() {
               {b.archived ? "Archived" : b.published ? "Published" : "Draft"}
             </Badge>
             <Button asChild size="sm" variant="outline">
-              <a href={`/spotlight/${b.slug}`} target="_blank" rel="noreferrer">
+              <a href={`/brief/${b.slug}`} target="_blank" rel="noreferrer">
                 {b.published ? "View" : "Preview"} <ExternalLink className="ml-1 size-3" />
               </a>
             </Button>
@@ -183,8 +200,71 @@ function BriefsPage() {
         </div>
       </CardHeader>
       {open.has(b.id) ? (
-        <CardContent className="text-sm text-muted-foreground">
-          Created {new Date(b.created_at).toLocaleDateString()}
+        <CardContent className="space-y-3 border-t border-border/60 pt-4">
+          <p className="text-sm text-muted-foreground">
+            Created {new Date(b.created_at).toLocaleDateString()}
+          </p>
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+            <div>
+              <Label htmlFor={`br-live-${b.id}`} className="text-sm font-medium">
+                Live on all dashboards
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {b.dashboard_visible
+                  ? "Showing for every signed-in user."
+                  : "Only people this brief is shared with will see it."}
+              </p>
+            </div>
+            <Switch
+              id={`br-live-${b.id}`}
+              checked={!!b.dashboard_visible}
+              disabled={!!b.archived}
+              onCheckedChange={async (checked) => {
+                setBriefs((rows) => rows.map((r) => (r.id === b.id ? { ...r, dashboard_visible: checked } : r)));
+                const { error } = await supabase
+                  .from("partner_pages" as any)
+                  .update({ dashboard_visible: checked } as any)
+                  .eq("id", b.id);
+                if (error) {
+                  setBriefs((rows) => rows.map((r) => (r.id === b.id ? { ...r, dashboard_visible: !checked } : r)));
+                  toast.error(error.message);
+                }
+              }}
+            />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+            <div>
+              <Label className="text-sm font-medium">Where it shows</Label>
+              <p className="text-xs text-muted-foreground">
+                Project planner by default. You can also push it into Featured spotlights.
+              </p>
+            </div>
+            <Select
+              value={b.dashboard_placement ?? "planner"}
+              onValueChange={async (value) => {
+                const prev = b.dashboard_placement ?? "planner";
+                setBriefs((rows) => rows.map((r) => (r.id === b.id ? { ...r, dashboard_placement: value } : r)));
+                const { error } = await supabase
+                  .from("partner_pages" as any)
+                  .update({ dashboard_placement: value } as any)
+                  .eq("id", b.id);
+                if (error) {
+                  setBriefs((rows) => rows.map((r) => (r.id === b.id ? { ...r, dashboard_placement: prev } : r)));
+                  toast.error(error.message);
+                }
+              }}
+            >
+              <SelectTrigger className="w-[210px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="planner">Project planner</SelectItem>
+                <SelectItem value="spotlight">Featured spotlights</SelectItem>
+                <SelectItem value="both">Both sections</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <PartnerPageShares partnerPageId={b.id} profiles={profiles} />
         </CardContent>
       ) : null}
     </Card>
@@ -225,7 +305,7 @@ function BriefsPage() {
                     {editing ? "Edit brief" : "New brief"}
                   </CardTitle>
                   <CardDescription>
-                    {editing ? `Updating /spotlight/${editing.slug}` : "Create a brief page. Lives at /spotlight/<slug>."}
+                    {editing ? `Updating /brief/${editing.slug}` : "Create a brief page. Lives at /brief/<slug>."}
                   </CardDescription>
                 </div>
                 {(formOpen || editing) ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
