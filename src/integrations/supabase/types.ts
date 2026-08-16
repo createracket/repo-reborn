@@ -1517,6 +1517,8 @@ export type Database = {
           posts: Json
           report_title: string | null
           saved: boolean
+          thumb_frame: Json | null
+          thumbnail_url: string | null
           updated_at: string
         }
         Insert: {
@@ -1532,6 +1534,8 @@ export type Database = {
           posts?: Json
           report_title?: string | null
           saved?: boolean
+          thumb_frame?: Json | null
+          thumbnail_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -1547,6 +1551,8 @@ export type Database = {
           posts?: Json
           report_title?: string | null
           saved?: boolean
+          thumb_frame?: Json | null
+          thumbnail_url?: string | null
           updated_at?: string
         }
         Relationships: []
