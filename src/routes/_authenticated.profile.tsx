@@ -272,6 +272,11 @@ function EditProfilePage() {
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [originalSlug, setOriginalSlug] = useState<string>("");
+  /** Slug of the last successfully saved profile — drives the "View public page" CTA. */
+  const [justSavedSlug, setJustSavedSlug] = useState<string | null>(null);
+  /** Snapshot of the last persisted values, used to describe what changed in the save toast. */
+  const savedSnapshotRef = useRef<Record<string, string> | null>(null);
+
   const [slugStatus, setSlugStatus] = useState<
     | { kind: "idle" }
     | { kind: "checking" }
