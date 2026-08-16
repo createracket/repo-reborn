@@ -1052,6 +1052,30 @@ export const runProfileSync = createServerFn({ method: "POST" })
       data.apple_music_url ? appleMusicArtistCore({ url: data.apple_music_url }) : Promise.resolve(null),
     ]);
 
+    const extraUrls = (data.extra_urls ?? []).map((u) => u.trim()).filter(Boolean);
+    const extras = await Promise.all(
+      extraUrls.map(async (url) => {
+        try {
+          if (/spotify\.com/i.test(url)) {
+            const r = await spotifyArtistCore({ url });
+            return r.ok
+              ? { url, followers: r.followers, streams: r.monthly_listeners }
+              : { url, followers: null, streams: null };
+          }
+          if (/music\.apple\.com/i.test(url)) {
+            const r = await appleMusicArtistCore({ url });
+            return r.ok
+              ? { url, followers: r.followers, streams: r.monthly_listeners }
+              : { url, followers: null, streams: null };
+          }
+          const r = await scrapeProfileByUrl(url);
+          return { url, followers: r.ok ? r.followers : null, streams: null };
+        } catch {
+          return { url, followers: null, streams: null };
+        }
+      }),
+    );
+
     await consumeQuota(context.userId, "profile_sync");
     const q = await getQuota(context.userId, "profile_sync");
     return {
@@ -1066,7 +1090,9 @@ export const runProfileSync = createServerFn({ method: "POST" })
       x,
       spotify,
       apple,
+      extras,
     };
+
   });
 
 
