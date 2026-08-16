@@ -1032,6 +1032,7 @@ export type Database = {
           is_featured: boolean
           location: string | null
           marketing_opt_in: boolean
+          media: Json
           monthly_streams: number | null
           notify_direct_messages: boolean
           notify_new_matches: boolean
@@ -1045,6 +1046,9 @@ export type Database = {
           updated_at: string
           usage_blocked: boolean
           values: string[]
+          vibe_archetype_key: string | null
+          vibe_archetype_kind: string | null
+          vibe_tags: string[]
         }
         Insert: {
           account_type?: Database["public"]["Enums"]["account_type"] | null
@@ -1062,6 +1066,7 @@ export type Database = {
           is_featured?: boolean
           location?: string | null
           marketing_opt_in?: boolean
+          media?: Json
           monthly_streams?: number | null
           notify_direct_messages?: boolean
           notify_new_matches?: boolean
@@ -1075,6 +1080,9 @@ export type Database = {
           updated_at?: string
           usage_blocked?: boolean
           values?: string[]
+          vibe_archetype_key?: string | null
+          vibe_archetype_kind?: string | null
+          vibe_tags?: string[]
         }
         Update: {
           account_type?: Database["public"]["Enums"]["account_type"] | null
@@ -1092,6 +1100,7 @@ export type Database = {
           is_featured?: boolean
           location?: string | null
           marketing_opt_in?: boolean
+          media?: Json
           monthly_streams?: number | null
           notify_direct_messages?: boolean
           notify_new_matches?: boolean
@@ -1105,6 +1114,9 @@ export type Database = {
           updated_at?: string
           usage_blocked?: boolean
           values?: string[]
+          vibe_archetype_key?: string | null
+          vibe_archetype_kind?: string | null
+          vibe_tags?: string[]
         }
         Relationships: []
       }
@@ -1921,6 +1933,7 @@ export type Database = {
           id: string | null
           is_featured: boolean | null
           location: string | null
+          media: Json | null
           monthly_streams: number | null
           slug: string | null
           socials: Json | null
@@ -1928,6 +1941,9 @@ export type Database = {
           total_followers: number | null
           total_streams: number | null
           values: string[] | null
+          vibe_archetype_key: string | null
+          vibe_archetype_kind: string | null
+          vibe_tags: string[] | null
         }
         Insert: {
           account_type?: Database["public"]["Enums"]["account_type"] | null
@@ -1941,6 +1957,7 @@ export type Database = {
           id?: string | null
           is_featured?: boolean | null
           location?: string | null
+          media?: Json | null
           monthly_streams?: number | null
           slug?: string | null
           socials?: Json | null
@@ -1948,6 +1965,9 @@ export type Database = {
           total_followers?: number | null
           total_streams?: number | null
           values?: string[] | null
+          vibe_archetype_key?: string | null
+          vibe_archetype_kind?: string | null
+          vibe_tags?: string[] | null
         }
         Update: {
           account_type?: Database["public"]["Enums"]["account_type"] | null
@@ -1961,6 +1981,7 @@ export type Database = {
           id?: string | null
           is_featured?: boolean | null
           location?: string | null
+          media?: Json | null
           monthly_streams?: number | null
           slug?: string | null
           socials?: Json | null
@@ -1968,6 +1989,9 @@ export type Database = {
           total_followers?: number | null
           total_streams?: number | null
           values?: string[] | null
+          vibe_archetype_key?: string | null
+          vibe_archetype_kind?: string | null
+          vibe_tags?: string[] | null
         }
         Relationships: []
       }
