@@ -206,3 +206,44 @@ export async function enqueueTransactionalEmail(
 
   return { success: true, queued: true, messageId }
 }
+
+export type EventSendResult = SendResult | { success: false; reason: 'event_disabled' }
+
+/**
+ * Send the template bound to a site action. No-ops when the action has no
+ * template assigned or is switched off (the default for every action).
+ */
+export async function sendForEvent(
+  eventKey: string,
+  opts: { recipientEmail: string; templateData?: Record<string, any>; idempotencyKey?: string },
+): Promise<EventSendResult> {
+  try {
+    const supabase = getServerSupabase()
+    const { data, error } = await supabase
+      .from('email_event_bindings')
+      .select('template_name, enabled')
+      .eq('event_key', eventKey)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Email event binding lookup failed', { eventKey, error })
+      return { success: false, reason: 'event_disabled' }
+    }
+    const binding = data as { template_name: string | null; enabled: boolean } | null
+    if (!binding?.enabled || !binding.template_name) {
+      return { success: false, reason: 'event_disabled' }
+    }
+    if (!opts.recipientEmail) return { success: false, reason: 'event_disabled' }
+
+    return await enqueueTransactionalEmail({
+      templateName: binding.template_name,
+      recipientEmail: opts.recipientEmail,
+      templateData: opts.templateData ?? {},
+      idempotencyKey: opts.idempotencyKey,
+    })
+  } catch (e) {
+    console.error('sendForEvent failed', { eventKey, error: e })
+    return { success: false, reason: 'event_disabled' }
+  }
+}
+
