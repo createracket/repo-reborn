@@ -36,10 +36,23 @@ import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
 import { BriefReportLink } from "@/components/admin/BriefReportLink";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
 import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS, transparencyLabel } from "@/lib/brief-currency";
-import { DEFAULT_ARTIST_ARCHETYPES, DEFAULT_BRAND_ARCHETYPES } from "@/lib/vibe-check-config";
+import {
+  DEFAULT_VIBE_CONFIG,
+  loadVibeCheckConfig,
+  artistArchetypeOptions,
+  brandArchetypeOptions,
+  artistArchetypeKeyFromLabel,
+  brandArchetypeKeyFromLabel,
+  type VibeCheckConfig,
+} from "@/lib/vibe-check-config";
 
-const ARTIST_ARCHETYPE_OPTIONS = Object.values(DEFAULT_ARTIST_ARCHETYPES).map((a) => a.name);
-const BRAND_ARCHETYPE_OPTIONS = Object.values(DEFAULT_BRAND_ARCHETYPES).map((a) => a.name);
+function useVibeConfig() {
+  const [config, setConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
+  useEffect(() => {
+    loadVibeCheckConfig(true).then(setConfig).catch(() => {});
+  }, []);
+  return config;
+}
 
 function ArchetypePicker({
   label,
@@ -47,12 +60,14 @@ function ArchetypePicker({
   options,
   value,
   onChange,
+  resolveKey,
 }: {
   label: string;
   help?: string;
-  options: string[];
+  options: { key: string; label: string }[];
   value: string[];
   onChange: (next: string[]) => void;
+  resolveKey: (v: string) => string | null;
 }) {
   return (
     <div className="space-y-2">
@@ -60,17 +75,21 @@ function ArchetypePicker({
       {help ? <p className="text-xs text-muted-foreground">{help}</p> : null}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {options.map((opt) => {
-          const checked = value.includes(opt);
+          const checked = value.some((v) => resolveKey(v) === opt.key);
           return (
-            <label key={opt} className="flex cursor-pointer items-center gap-2 rounded-md border border-border/60 p-2 text-sm">
+            <label key={opt.key} className="flex cursor-pointer items-center gap-2 rounded-md border border-border/60 p-2 text-sm">
               <input
                 type="checkbox"
                 checked={checked}
                 onChange={() =>
-                  onChange(checked ? value.filter((v) => v !== opt) : [...value, opt])
+                  onChange(
+                    checked
+                      ? value.filter((v) => resolveKey(v) !== opt.key)
+                      : [...value, opt.key],
+                  )
                 }
               />
-              {opt}
+              {opt.label}
             </label>
           );
         })}
@@ -78,6 +97,7 @@ function ArchetypePicker({
     </div>
   );
 }
+
 
 export type LeadBrief = {
   id: string; created_at: string; title: string; description: string;
@@ -585,6 +605,8 @@ function EditBriefDialog({
 }) {
   const [form, setForm] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
+  const vibeConfig = useVibeConfig();
+
 
   useEffect(() => {
     if (!brief) return;
@@ -705,17 +727,20 @@ function EditBriefDialog({
               <ArchetypePicker
                 label="Artist archetypes (visibility)"
                 help="Only artists whose Vibe Check archetype matches will see this opportunity when published. Leave empty to show to every artist. Manually shared users always see it."
-                options={ARTIST_ARCHETYPE_OPTIONS}
+                options={artistArchetypeOptions(vibeConfig)}
+                resolveKey={(v) => artistArchetypeKeyFromLabel(v, vibeConfig)}
                 value={(form.artist_archetypes as string[]) ?? []}
                 onChange={(next) => setForm({ ...form, artist_archetypes: next })}
               />
               <ArchetypePicker
                 label="Brand archetypes (visibility)"
                 help="Only brands whose Vibe Check archetype matches will see this opportunity when published. Leave empty to show to every brand."
-                options={BRAND_ARCHETYPE_OPTIONS}
+                options={brandArchetypeOptions(vibeConfig)}
+                resolveKey={(v) => brandArchetypeKeyFromLabel(v, vibeConfig)}
                 value={(form.brand_archetypes as string[]) ?? []}
                 onChange={(next) => setForm({ ...form, brand_archetypes: next })}
               />
+
             </>
           ) : null}
           {!isUser ? (
@@ -795,6 +820,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
   const [types, setTypes] = useState<string[]>([]);
   const [artistArchetypes, setArtistArchetypes] = useState<string[]>([]);
   const [brandArchetypes, setBrandArchetypes] = useState<string[]>([]);
+  const vibeConfig = useVibeConfig();
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -971,7 +998,8 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
             <ArchetypePicker
               label="Artist archetypes (visibility)"
               help="Only artists whose Vibe Check archetype matches will see this opportunity on their dashboard once published. Leave empty to show to every artist. Users added manually below always see it regardless."
-              options={ARTIST_ARCHETYPE_OPTIONS}
+              options={artistArchetypeOptions(vibeConfig)}
+              resolveKey={(v) => artistArchetypeKeyFromLabel(v, vibeConfig)}
               value={artistArchetypes}
               onChange={setArtistArchetypes}
             />
@@ -980,7 +1008,9 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
             <ArchetypePicker
               label="Brand archetypes (visibility)"
               help="Only brands whose Vibe Check archetype matches will see this opportunity on their dashboard once published. Leave empty to show to every brand."
-              options={BRAND_ARCHETYPE_OPTIONS}
+              options={brandArchetypeOptions(vibeConfig)}
+              resolveKey={(v) => brandArchetypeKeyFromLabel(v, vibeConfig)}
+
               value={brandArchetypes}
               onChange={setBrandArchetypes}
             />

@@ -21,6 +21,14 @@ import {
   calculateBrandVibe,
   getArtistArchetypeDescription,
 } from "@/lib/vibe-check";
+import {
+  DEFAULT_VIBE_CONFIG,
+  loadVibeCheckConfig,
+  artistArchetypeKeyFromLabel,
+  brandArchetypeKeyFromLabel,
+  type VibeCheckConfig,
+} from "@/lib/vibe-check-config";
+
 import { BriefStatusBadge } from "@/components/briefs/BriefStatusBadge";
 import { formatBriefBudget, transparencyLabel } from "@/lib/brief-currency";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
@@ -237,8 +245,13 @@ function DashboardPage() {
   }, [rosterFilter, isRosterView, myRosters]);
 
 
+  const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
+  useEffect(() => {
+    loadVibeCheckConfig(true).then(setVibeConfig).catch(() => {});
+  }, []);
 
   useEffect(() => {
+
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       setEmail(u.user?.email ?? null);
@@ -398,16 +411,21 @@ function DashboardPage() {
       // If a brief has no archetypes set, it's visible to everyone (backwards compatible).
       // Privately shared briefs (below) always bypass this filter.
       const latestVibe = (vibes?.[0] as VibeRow | undefined) ?? null;
-      let userArchetypeNames: string[] = [];
+      const cfg = await loadVibeCheckConfig().catch(() => DEFAULT_VIBE_CONFIG);
+      let userArchetypeKeys: string[] = [];
       let userVibeKind: "artist" | "brand" | "fan" | null = latestVibe?.result ?? null;
       if (latestVibe) {
         if (latestVibe.result === "brand") {
-          const scoring: any = calculateBrandVibe(latestVibe.answers ?? {});
+          const scoring: any = calculateBrandVibe(latestVibe.answers ?? {}, cfg);
           const name = scoring?.brandArchetype?.type;
-          if (name) userArchetypeNames = [name];
+          const key = name ? brandArchetypeKeyFromLabel(name, cfg) : null;
+          if (key) userArchetypeKeys = [key];
         } else if (latestVibe.result === "artist") {
-          const scoring: any = calculateVibeScore(latestVibe.answers ?? {});
-          userArchetypeNames = [scoring?.primary, scoring?.secondary].filter(Boolean) as string[];
+          const scoring: any = calculateVibeScore(latestVibe.answers ?? {}, cfg);
+          userArchetypeKeys = [scoring?.primary, scoring?.secondary]
+            .filter(Boolean)
+            .map((n) => artistArchetypeKeyFromLabel(n as string, cfg))
+            .filter(Boolean) as string[];
         }
       }
       const publishedRows = publishedRowsAll.filter((r) => {
@@ -415,11 +433,19 @@ function DashboardPage() {
         const brandList = (r.brand_archetypes ?? []) as string[];
         const hasAnyFilter = artistList.length > 0 || brandList.length > 0;
         if (!hasAnyFilter) return true;
-        if (!userVibeKind || userArchetypeNames.length === 0) return false;
+        if (!userVibeKind || userArchetypeKeys.length === 0) return false;
         const relevantList = userVibeKind === "brand" ? brandList : artistList;
         if (relevantList.length === 0) return false;
-        return userArchetypeNames.some((n) => relevantList.includes(n));
+        const relevantKeys = relevantList
+          .map((v) =>
+            userVibeKind === "brand"
+              ? brandArchetypeKeyFromLabel(v, cfg)
+              : artistArchetypeKeyFromLabel(v, cfg),
+          )
+          .filter(Boolean) as string[];
+        return userArchetypeKeys.some((k) => relevantKeys.includes(k));
       });
+
       const sharedRows: Opportunity[] = [
         ...(((sharedUser as any).data ?? []) as any[]).map((r) => ({ ...r, brief_source: "user" as const })),
         ...(((sharedLead as any).data ?? []) as any[]).map((r) => ({ ...r, published_at: null, brief_source: "lead" as const })),
@@ -601,7 +627,7 @@ function DashboardPage() {
         <div className="grid gap-6 grid-cols-[minmax(0,1fr)] lg:grid-cols-3">
           {/* VIBE CARD (spans 2) */}
           <div className="lg:col-span-2">
-            <VibeCard loading={loading} vibe={latestVibe} />
+            <VibeCard loading={loading} vibe={latestVibe} config={vibeConfig} />
           </div>
 
           {/* QUICK ACTIONS */}
@@ -1379,7 +1405,7 @@ const SOUND_BOARD_PLACEHOLDERS: Array<{ title: string; copy: string; gradient: s
   { title: "Feature drop", copy: "How one collab clip became a repeatable content format.", gradient: "linear-gradient(135deg,#BADA55,#5C37D0)" },
 ];
 
-function VibeCard({ loading, vibe }: { loading: boolean; vibe: VibeRow | null }) {
+function VibeCard({ loading, vibe, config }: { loading: boolean; vibe: VibeRow | null; config: VibeCheckConfig }) {
   if (loading) {
     return (
       <Card>
@@ -1413,15 +1439,16 @@ function VibeCard({ loading, vibe }: { loading: boolean; vibe: VibeRow | null })
 
   const isBrand = vibe.result === "brand";
   const scoring = isBrand
-    ? calculateBrandVibe(vibe.answers ?? {})
-    : calculateVibeScore(vibe.answers ?? {});
+    ? calculateBrandVibe(vibe.answers ?? {}, config)
+    : calculateVibeScore(vibe.answers ?? {}, config);
 
   const headline = isBrand
     ? (scoring as any).brandArchetype?.type
     : (scoring as any).primary;
   const description = isBrand
     ? (scoring as any).brandArchetype?.description
-    : getArtistArchetypeDescription((scoring as any).primary);
+    : getArtistArchetypeDescription((scoring as any).primary, config);
+
 
   return (
     <Card className="lg:h-full">

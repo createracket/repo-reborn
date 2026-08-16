@@ -171,7 +171,61 @@ export const DEFAULT_VIBE_CONFIG: VibeCheckConfig = {
   weights: { artist: EMPTY_ARTIST_WEIGHTS, brand: EMPTY_BRAND_WEIGHTS },
 };
 
+// ---------- Key ⇄ label resolution (rename-proof) ----------
+
+const ARTIST_KEYS = Object.keys(DEFAULT_ARTIST_ARCHETYPES) as ArtistArchetypeKey[];
+const BRAND_KEYS = Object.keys(DEFAULT_BRAND_ARCHETYPES) as BrandArchetypeKey[];
+
+const norm = (v: string) => v.trim().toLowerCase();
+
+/** Resolve a stored artist archetype value (key or any past/current display name) to its stable key. */
+export function artistArchetypeKeyFromLabel(
+  label: string,
+  config?: VibeCheckConfig | null,
+): ArtistArchetypeKey | null {
+  if (!label) return null;
+  const v = norm(label);
+  const key = ARTIST_KEYS.find((k) => norm(k) === v);
+  if (key) return key;
+  const fromConfig = config
+    ? ARTIST_KEYS.find((k) => norm(config.artistArchetypes?.[k]?.name ?? "") === v)
+    : undefined;
+  if (fromConfig) return fromConfig;
+  return ARTIST_KEYS.find((k) => norm(DEFAULT_ARTIST_ARCHETYPES[k].name) === v) ?? null;
+}
+
+/** Resolve a stored brand archetype value (key or any past/current display name) to its stable key. */
+export function brandArchetypeKeyFromLabel(
+  label: string,
+  config?: VibeCheckConfig | null,
+): BrandArchetypeKey | null {
+  if (!label) return null;
+  const v = norm(label);
+  const key = BRAND_KEYS.find((k) => norm(k) === v);
+  if (key) return key;
+  const fromConfig = config
+    ? BRAND_KEYS.find((k) => norm(config.brandArchetypes?.[k]?.name ?? "") === v)
+    : undefined;
+  if (fromConfig) return fromConfig;
+  return BRAND_KEYS.find((k) => norm(DEFAULT_BRAND_ARCHETYPES[k].name) === v) ?? null;
+}
+
+export function artistArchetypeOptions(config?: VibeCheckConfig | null) {
+  return ARTIST_KEYS.map((key) => ({
+    key: key as string,
+    label: config?.artistArchetypes?.[key]?.name ?? DEFAULT_ARTIST_ARCHETYPES[key].name,
+  }));
+}
+
+export function brandArchetypeOptions(config?: VibeCheckConfig | null) {
+  return BRAND_KEYS.map((key) => ({
+    key: key as string,
+    label: config?.brandArchetypes?.[key]?.name ?? DEFAULT_BRAND_ARCHETYPES[key].name,
+  }));
+}
+
 // ---------- Merge ----------
+
 
 /**
  * Deep-ish merge: any field missing from overrides falls back to default.
