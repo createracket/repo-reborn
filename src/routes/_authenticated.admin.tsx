@@ -532,6 +532,7 @@ function AdminPage() {
 
 
           <TabsContent value="spotlights" className="mt-6 space-y-6">
+            <FeaturedSpotlightsToggle />
             <Card>
               <CardHeader>
                 <button
