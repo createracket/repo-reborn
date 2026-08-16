@@ -108,6 +108,7 @@ export type Database = {
           published_at: string | null
           status: string
           target_audience: string | null
+          thumbnail_url: string | null
           timeline: string | null
           title: string
           transparency: string | null
@@ -131,6 +132,7 @@ export type Database = {
           published_at?: string | null
           status?: string
           target_audience?: string | null
+          thumbnail_url?: string | null
           timeline?: string | null
           title: string
           transparency?: string | null
@@ -154,6 +156,7 @@ export type Database = {
           published_at?: string | null
           status?: string
           target_audience?: string | null
+          thumbnail_url?: string | null
           timeline?: string | null
           title?: string
           transparency?: string | null
@@ -2036,6 +2039,7 @@ export type Database = {
           header_image_url: string
           id: string
           owner_id: string
+          profile_image_url: string
           published: boolean
           published_at: string
           slug: string
@@ -2051,6 +2055,7 @@ export type Database = {
           header_image_url: string
           id: string
           owner_id: string
+          profile_image_url: string
           published: boolean
           published_at: string
           slug: string
