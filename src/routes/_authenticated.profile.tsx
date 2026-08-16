@@ -1016,53 +1016,7 @@ function EditProfilePage() {
                 </div>
               </details>
 
-              <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
-                <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
-                  Featured posts
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">(up to four TikTok or Instagram URLs)</span>
-                </summary>
-                <div className="flex flex-col gap-4 px-4">
-                  <p className="text-xs text-muted-foreground">
-                    Paste public TikTok or Instagram post/reel URLs. Add a cover image for Instagram clips —
-                    Instagram no longer serves public thumbnails.
-                  </p>
-                  {([1, 2, 3, 4] as const).map((n) => {
-                    const urlKey = `video${n}` as keyof ProfileMedia;
-                    const coverKey = `video${n}_cover` as keyof ProfileMedia;
-                    return (
-                      <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
-                        <Label>Video {n}</Label>
-                        <Input
-                          value={form.media[urlKey] ?? ""}
-                          onChange={(e) => setMedia(urlKey, e.target.value)}
-                          placeholder="https://www.tiktok.com/@user/video/… or Instagram reel URL"
-                        />
-                        <Input
-                          value={form.media[coverKey] ?? ""}
-                          onChange={(e) => setMedia(coverKey, e.target.value)}
-                          placeholder="Cover image URL (optional)"
-                        />
-                        {form.media[coverKey] ? (
-                          <div className="w-24 overflow-hidden rounded-md border border-border/60" style={{ aspectRatio: "9 / 16" }}>
-                            <img src={form.media[coverKey]} alt="" className="size-full object-cover" />
-                          </div>
-                        ) : null}
-                        <div className="flex flex-wrap items-center gap-2">
-                          <FetchPreviewButton
-                            url={form.media[urlKey] ?? ""}
-                            onFetched={(url) => setMedia(coverKey, url)}
-                          />
-                          <MediaUploadButton
-                            label="Upload cover"
-                            onUploaded={(url) => setMedia(coverKey, url)}
-                          />
-                        </div>
-                      </div>
-
-                    );
-                  })}
-                </div>
-              </details>
+              <FeaturedPostsSection media={form.media} setMedia={setMedia} />
 
 
               <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
