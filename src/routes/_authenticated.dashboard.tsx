@@ -725,30 +725,32 @@ function DashboardPage() {
                 ) : (
                   <ul className="grid gap-3 md:grid-cols-2">
                     {myBriefs.map((b) => (
-                      <li
-                        key={b.id}
-                        className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <h3 className="font-medium leading-tight truncate">{b.title}</h3>
-                            <div className="mt-1 text-xs text-muted-foreground">
+                      <li key={b.id}>
+                        <PlannerTile
+                          interactive={false}
+                          thumb={b.thumbnail_url}
+                          title={b.title}
+                          label="Your brief"
+                          subtitle={
+                            <>
                               Submitted {new Date(b.created_at).toLocaleDateString()}
                               {b.budget ? ` · ${formatBriefBudget(b.budget, b.currency)}` : ""}
-                            </div>
-                          </div>
-                          <BriefStatusBadge
-                            status={b.status}
-                            className="bg-secondary !text-white dark:!text-white border-transparent hover:bg-secondary"
-                            href={
-                              b.status === "review_your_roster" && b.linked_roster_slug && b.linked_roster_published
-                                ? `/roster/${b.linked_roster_slug}`
-                                : b.status === "review_your_report" && b.linked_report_slug && b.linked_report_published
-                                  ? `/report/${b.linked_report_slug}`
-                                  : null
-                            }
-                          />
-                        </div>
+                            </>
+                          }
+                          trailing={
+                            <BriefStatusBadge
+                              status={b.status}
+                              className="bg-secondary !text-white dark:!text-white border-transparent hover:bg-secondary"
+                              href={
+                                b.status === "review_your_roster" && b.linked_roster_slug && b.linked_roster_published
+                                  ? `/roster/${b.linked_roster_slug}`
+                                  : b.status === "review_your_report" && b.linked_report_slug && b.linked_report_published
+                                    ? `/report/${b.linked_report_slug}`
+                                    : null
+                              }
+                            />
+                          }
+                        />
                       </li>
                     ))}
                   </ul>
