@@ -343,7 +343,7 @@ function AdminPage() {
                           }}
                         />
                       </div>
-                      <PartnerPageShares partnerPageId={s.id} profiles={profiles} />
+                      <PartnerPageShares partnerPageId={s.id} profiles={profiles} pageTitle={s.headline} pageLink={`/spotlight/${s.slug}`} eventKey="brief_shared" />
                     </CardContent>
                     )}
                     {openSpotlights.has(s.id) && (() => {
