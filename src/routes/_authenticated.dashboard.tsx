@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { readThumbFrame, thumbFrameBgClass, thumbFrameImgStyle } from "@/lib/thumb-frame";
+import { PlannerTile } from "@/components/dashboard/PlannerTile";
 import {
   calculateVibeScore,
   calculateBrandVibe,
@@ -126,10 +127,10 @@ function DashboardPage() {
   const [examples, setExamples] = useState<Array<{ id: string; title: string; description: string | null; location: string | null; image_url: string | null }>>([]);
   const [spotlightOpps, setSpotlightOpps] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; section?: string | null; links?: any }>>([]);
   const [plannerBriefs, setPlannerBriefs] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; links?: any }>>([]);
-  const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string }>>([]);
-  const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string }>>([]);
+  const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null }>>([]);
+  const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
-  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
+  const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; thumbnail_url: string | null; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
   const [loading, setLoading] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -330,7 +331,7 @@ function DashboardPage() {
       // Briefs the current user submitted (Project Planner)
       const { data: mineBriefs } = await (supabase as any)
         .from("campaign_briefs")
-        .select("id, title, created_at, status, budget, currency, linked_roster_id, linked_report_id")
+        .select("id, title, created_at, status, budget, currency, thumbnail_url, linked_roster_id, linked_report_id")
         .eq("user_id", u.user.id)
         .order("created_at", { ascending: false });
       const mineBriefRows = (((mineBriefs as any[]) ?? [])).filter((r) => r?.status !== "closed");
@@ -372,6 +373,7 @@ function DashboardPage() {
             status: r.status,
             budget: r.budget,
             currency: r.currency,
+            thumbnail_url: r.thumbnail_url ?? null,
             linked_roster_id: r.linked_roster_id ?? null,
             linked_roster_slug: info?.slug ?? null,
             linked_roster_published: !!info?.published,
@@ -692,35 +694,18 @@ function DashboardPage() {
                     </div>
                     <ul className="grid gap-3 md:grid-cols-2">
                       {plannerBriefs.map((bp) => {
-                        const thumb = bp.header_image_url || bp.profile_image_url || null;
+                        const thumb = bp.profile_image_url || bp.header_image_url || null;
                         const frame = readThumbFrame(bp.links);
                         return (
                           <li key={bp.id}>
-                            <Link
-                              to="/brief/$slug"
-                              params={{ slug: bp.slug }}
-                              className="group flex h-full gap-3 rounded-xl border border-border/60 bg-card p-3 transition hover:border-primary/60"
-                            >
-                              <div className={`size-16 shrink-0 overflow-hidden rounded-lg ${thumbFrameBgClass(frame)}`}>
-                                {thumb ? (
-                                  <img src={thumb} alt="" className="size-full" style={thumbFrameImgStyle(frame)} />
-                                ) : (
-                                  <div className="flex size-full items-center justify-center text-[9px] uppercase tracking-wider text-muted-foreground">
-                                    Brief
-                                  </div>
-                                )}
-                              </div>
-                              <div className="min-w-0">
-                                <h3 className="truncate text-sm font-medium leading-tight group-hover:text-primary">
-                                  {bp.headline}
-                                </h3>
-                                {bp.subtitle ? (
-                                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{bp.subtitle}</p>
-                                ) : null}
-                                <span className="mt-2 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
-                                  Brief
-                                </span>
-                              </div>
+                            <Link to="/brief/$slug" params={{ slug: bp.slug }} className="block h-full">
+                              <PlannerTile
+                                thumb={thumb}
+                                frame={frame}
+                                title={bp.headline}
+                                subtitle={bp.subtitle}
+                                label="Brief"
+                              />
                             </Link>
                           </li>
                         );
@@ -740,30 +725,32 @@ function DashboardPage() {
                 ) : (
                   <ul className="grid gap-3 md:grid-cols-2">
                     {myBriefs.map((b) => (
-                      <li
-                        key={b.id}
-                        className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <h3 className="font-medium leading-tight truncate">{b.title}</h3>
-                            <div className="mt-1 text-xs text-muted-foreground">
+                      <li key={b.id}>
+                        <PlannerTile
+                          interactive={false}
+                          thumb={b.thumbnail_url}
+                          title={b.title}
+                          label="Your brief"
+                          subtitle={
+                            <>
                               Submitted {new Date(b.created_at).toLocaleDateString()}
                               {b.budget ? ` · ${formatBriefBudget(b.budget, b.currency)}` : ""}
-                            </div>
-                          </div>
-                          <BriefStatusBadge
-                            status={b.status}
-                            className="bg-secondary !text-white dark:!text-white border-transparent hover:bg-secondary"
-                            href={
-                              b.status === "review_your_roster" && b.linked_roster_slug && b.linked_roster_published
-                                ? `/roster/${b.linked_roster_slug}`
-                                : b.status === "review_your_report" && b.linked_report_slug && b.linked_report_published
-                                  ? `/report/${b.linked_report_slug}`
-                                  : null
-                            }
-                          />
-                        </div>
+                            </>
+                          }
+                          trailing={
+                            <BriefStatusBadge
+                              status={b.status}
+                              className="bg-secondary !text-white dark:!text-white border-transparent hover:bg-secondary"
+                              href={
+                                b.status === "review_your_roster" && b.linked_roster_slug && b.linked_roster_published
+                                  ? `/roster/${b.linked_roster_slug}`
+                                  : b.status === "review_your_report" && b.linked_report_slug && b.linked_report_published
+                                    ? `/report/${b.linked_report_slug}`
+                                    : null
+                              }
+                            />
+                          }
+                        />
                       </li>
                     ))}
                   </ul>
@@ -790,35 +777,36 @@ function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="grid gap-3 md:grid-cols-2">
-                    {assignedRosters.map((r) => (
-                      <li
-                        key={r.id}
-                        className={`rounded-xl border border-border/60 bg-card p-4 ${r.published && r.slug ? "hover:bg-muted/50 transition-colors" : ""}`}
-                      >
-                        {r.published && r.slug ? (
-                          <Link to="/roster/$slug" params={{ slug: r.slug }} className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="font-medium">{r.title}</div>
-                              <div className="text-xs text-muted-foreground">
-                                Updated {new Date(r.updated_at).toLocaleDateString()}
-                              </div>
-                            </div>
-                            <ArrowRight className="size-4 text-muted-foreground" />
-                          </Link>
-                        ) : (
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="font-medium">{r.title}</div>
-                              <div className="text-xs text-muted-foreground">
-                                Updated {new Date(r.updated_at).toLocaleDateString()}
-                                {" · Draft"}
-                              </div>
-                            </div>
-                            <span className="text-xs text-muted-foreground">Not yet published</span>
-                          </div>
-                        )}
-                      </li>
-                    ))}
+                    {assignedRosters.map((r) => {
+                      const thumb = r.profile_image_url || r.header_image_url || null;
+                      const tile = (
+                        <PlannerTile
+                          interactive={!!(r.published && r.slug)}
+                          thumb={thumb}
+                          title={r.title}
+                          label="Roster"
+                          subtitle={`Updated ${new Date(r.updated_at).toLocaleDateString()}${r.published && r.slug ? "" : " · Draft"}`}
+                          trailing={
+                            r.published && r.slug ? (
+                              <ArrowRight className="size-4 text-muted-foreground" />
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Not yet published</span>
+                            )
+                          }
+                        />
+                      );
+                      return (
+                        <li key={r.id}>
+                          {r.published && r.slug ? (
+                            <Link to="/roster/$slug" params={{ slug: r.slug }} className="block h-full">
+                              {tile}
+                            </Link>
+                          ) : (
+                            tile
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </CardContent>
               </Card>
@@ -838,35 +826,36 @@ function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="grid gap-3 md:grid-cols-2">
-                    {assignedReports.map((r) => (
-                      <li
-                        key={r.id}
-                        className={`rounded-xl border border-border/60 bg-card p-4 ${r.published && r.slug ? "hover:bg-muted/50 transition-colors" : ""}`}
-                      >
-                        {r.published && r.slug ? (
-                          <Link to="/report/$slug" params={{ slug: r.slug }} className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="font-medium">{r.title}</div>
-                              <div className="text-xs text-muted-foreground">
-                                Updated {new Date(r.updated_at).toLocaleDateString()}
-                              </div>
-                            </div>
-                            <ArrowRight className="size-4 text-muted-foreground" />
-                          </Link>
-                        ) : (
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="font-medium">{r.title}</div>
-                              <div className="text-xs text-muted-foreground">
-                                Updated {new Date(r.updated_at).toLocaleDateString()}
-                                {" · Draft"}
-                              </div>
-                            </div>
-                            <span className="text-xs text-muted-foreground">Not yet published</span>
-                          </div>
-                        )}
-                      </li>
-                    ))}
+                    {assignedReports.map((r) => {
+                      const thumb = r.profile_image_url || r.header_image_url || null;
+                      const tile = (
+                        <PlannerTile
+                          interactive={!!(r.published && r.slug)}
+                          thumb={thumb}
+                          title={r.title}
+                          label="Report"
+                          subtitle={`Updated ${new Date(r.updated_at).toLocaleDateString()}${r.published && r.slug ? "" : " · Draft"}`}
+                          trailing={
+                            r.published && r.slug ? (
+                              <ArrowRight className="size-4 text-muted-foreground" />
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Not yet published</span>
+                            )
+                          }
+                        />
+                      );
+                      return (
+                        <li key={r.id}>
+                          {r.published && r.slug ? (
+                            <Link to="/report/$slug" params={{ slug: r.slug }} className="block h-full">
+                              {tile}
+                            </Link>
+                          ) : (
+                            tile
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </CardContent>
               </Card>

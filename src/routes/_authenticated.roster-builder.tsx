@@ -1105,7 +1105,8 @@ function RosterDetailView({
             <div className="space-y-2">
               <Label>Thumbnail image</Label>
               <p className="text-xs text-muted-foreground">
-                Square image shown next to the roster title, like spotlight pages.
+                Square (1:1) image shown next to the roster title and on the roster's tile in the
+                client's Project planner.
               </p>
               <div className="flex flex-wrap items-center gap-2">
                 <input

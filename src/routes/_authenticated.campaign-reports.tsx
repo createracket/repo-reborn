@@ -811,7 +811,8 @@ function ReportDetailView({
           <div className="space-y-2 md:col-span-2">
             <Label>Thumbnail image</Label>
             <p className="text-xs text-muted-foreground">
-              Square image shown next to the report title, like roster pages.
+              Square (1:1) image shown next to the report title and on the report's tile in the
+              client's Project planner.
             </p>
             <div className="flex flex-wrap items-start gap-3">
               {thumb && (
