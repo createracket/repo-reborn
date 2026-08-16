@@ -21,3 +21,17 @@ Bring a light version of the spotlight layout to user profiles: featured videos 
 - Reuse `ClipCard` and the poster-fetch logic from `SpotlightPageView` for profile clips; extract the small clip/photo grid pieces into a shared component (`src/components/profile/FeaturedMedia.tsx`) rather than duplicating spotlight markup.
 - Profile builder collapsibles use the existing shadcn Collapsible pattern already used in the spotlight builder.
 - `src/routes/u.$slug.tsx` query gains `media`; head metadata unchanged apart from continuing to work when media is absent.
+
+## Vibe check on profiles
+
+**Profile builder**
+- New "Vibe check" input matching the spotlight builder: a comma-separated tags field (e.g. `Coffee, Travel, Fitness, Fashion…`), stored per user.
+- Above it, a read-only line showing the user's archetype from their Vibe Check result ("Artist archetype: <name>" or "Brand archetype: <name>") with a "Retake" link to `/vibe-check`, plus a prompt to take the Vibe Check when they haven't yet.
+
+**Public profile (`/u/<slug>`)**
+- A "Vibe check" section rendering the tags as pills with the same pink hover treatment used on spotlight pages.
+- The archetype name and its short description display above the tags, so the archetype pulls through to the public profile.
+
+**Technical notes**
+- Migration adds `vibe_tags text[] not null default '{}'` to `public.profiles` (alongside the `media` column above) and exposes `vibe_tags` plus the resolved archetype on the `public_profiles` view.
+- Archetype is derived, not duplicated: the user's latest `vibe_check_responses` row is scored with `calculateVibeScore` / `calculateBrandVibe` against the live `vibe_check_config`, exactly as the dashboard does, so renamed archetypes stay in sync. For the public page (where the visitor can't read another user's responses), store the resolved archetype key and account kind on `profiles` when the Vibe Check is submitted or the profile is saved, and resolve the display name/description client-side from the live config using the stable key.
