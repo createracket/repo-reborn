@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
 import { validateSlug, normalizeSlug } from "@/lib/slugs";
-import { runProfileSync } from "@/lib/campaign-scrapers.functions";
+import { runProfileSync, scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
 import { getMyUsage } from "@/lib/usage.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 import { toProfileUrl, type SocialPlatform } from "@/lib/social-handles";
