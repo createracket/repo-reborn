@@ -72,6 +72,29 @@ type ContactMsg = { id: string; created_at: string; name: string; email: string;
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
 type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null; vibe_archetype_key?: string | null; vibe_archetype_kind?: string | null };
 type VibeRow = { user_id: string; result: string | null; answers: any; created_at: string };
+
+/** Resolve a user's vibe check archetype name, or null when they haven't taken it. */
+function vibeArchetypeLabel(p: Profile, vibe: VibeRow | undefined, cfg: VibeCheckConfig): string | null {
+  if (p.vibe_archetype_key) {
+    const opts = p.vibe_archetype_kind === "brand" ? brandArchetypeOptions(cfg) : artistArchetypeOptions(cfg);
+    const hit = opts.find((o) => o.key === p.vibe_archetype_key);
+    if (hit) return hit.label;
+  }
+  if (!vibe) return null;
+  try {
+    if (vibe.result === "brand") {
+      const scoring: any = calculateBrandVibe(vibe.answers ?? {}, cfg);
+      return scoring?.brandArchetype?.type ?? "Completed";
+    }
+    if (vibe.result === "artist") {
+      const scoring: any = calculateVibeScore(vibe.answers ?? {}, cfg);
+      return scoring?.primary ?? "Completed";
+    }
+  } catch {
+    /* fall through */
+  }
+  return "Completed";
+}
 type CampaignBrief = { id: string; created_at: string; title: string; description: string; user_id: string; budget: number | null; status: string; contact_email: string | null; published: boolean; published_at: string | null; linked_roster_id: string | null; linked_report_id: string | null };
 
 type Spotlight = {
