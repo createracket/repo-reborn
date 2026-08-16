@@ -1439,15 +1439,16 @@ function VibeCard({ loading, vibe, config }: { loading: boolean; vibe: VibeRow |
 
   const isBrand = vibe.result === "brand";
   const scoring = isBrand
-    ? calculateBrandVibe(vibe.answers ?? {})
-    : calculateVibeScore(vibe.answers ?? {});
+    ? calculateBrandVibe(vibe.answers ?? {}, config)
+    : calculateVibeScore(vibe.answers ?? {}, config);
 
   const headline = isBrand
     ? (scoring as any).brandArchetype?.type
     : (scoring as any).primary;
   const description = isBrand
     ? (scoring as any).brandArchetype?.description
-    : getArtistArchetypeDescription((scoring as any).primary);
+    : getArtistArchetypeDescription((scoring as any).primary, config);
+
 
   return (
     <Card className="lg:h-full">
