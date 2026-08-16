@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { ThumbFrame } from "@/lib/thumb-frame";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const RunInput = z.object({
@@ -253,7 +254,7 @@ export const listSocialListeningScans = createServerFn({ method: "POST" })
       notes: string | null;
       dashboard_visible: boolean;
       thumbnail_url: string | null;
-      thumb_frame: unknown;
+      thumb_frame: ThumbFrame | null;
     }>;
   });
 

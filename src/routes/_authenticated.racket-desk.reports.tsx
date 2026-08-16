@@ -35,7 +35,7 @@ type Scan = {
   notes: string | null;
   dashboard_visible: boolean;
   thumbnail_url: string | null;
-  thumb_frame: unknown;
+  thumb_frame: unknown | null;
 };
 
 function fmt(n: number) {
