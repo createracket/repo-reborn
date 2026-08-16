@@ -10,6 +10,7 @@ import {
   type ScannedPost,
 } from "@/lib/racket-desk/social-listening.functions";
 import { ReportDashboardShare } from "@/components/racket-desk/ReportDashboardShare";
+import { ReportThumbnail } from "@/components/racket-desk/ReportThumbnail";
 
 export const Route = createFileRoute("/_authenticated/racket-desk/reports")({
   head: () => ({
@@ -33,6 +34,8 @@ type Scan = {
   report_title: string | null;
   notes: string | null;
   dashboard_visible: boolean;
+  thumbnail_url: string | null;
+  thumb_frame: unknown | null;
 };
 
 function fmt(n: number) {
@@ -235,6 +238,13 @@ function ReportCard({
 
         <aside className="space-y-4">
           <ReportDashboardShare scanId={scan.id} initialVisible={!!scan.dashboard_visible} />
+          <ReportThumbnail
+            scanId={scan.id}
+            title={scan.report_title || scan.artist_name}
+            handle={scan.handle}
+            initialUrl={scan.thumbnail_url ?? null}
+            initialFrame={scan.thumb_frame ?? null}
+          />
           <Panel title="What's working" items={a.whatsWorking} />
           <Panel title="Fan signals" items={a.fanSignals} />
           {a.futureIdeas.length > 0 && (

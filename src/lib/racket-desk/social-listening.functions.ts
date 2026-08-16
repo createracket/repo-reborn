@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { ThumbFrame } from "@/lib/thumb-frame";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const RunInput = z.object({
@@ -234,7 +235,7 @@ export const listSocialListeningScans = createServerFn({ method: "POST" })
     await requireAdmin(supabase, userId);
     let q = supabase
       .from("social_listening_scans")
-      .select("id, artist_name, handle, platform, posts, analysis, created_at, saved, report_title, notes, dashboard_visible")
+      .select("id, artist_name, handle, platform, posts, analysis, created_at, saved, report_title, notes, dashboard_visible, thumbnail_url, thumb_frame")
       .order("created_at", { ascending: false })
       .limit(data.savedOnly ? 100 : 25);
     if (data.savedOnly) q = q.eq("saved", true);
@@ -252,6 +253,8 @@ export const listSocialListeningScans = createServerFn({ method: "POST" })
       report_title: string | null;
       notes: string | null;
       dashboard_visible: boolean;
+      thumbnail_url: string | null;
+      thumb_frame: ThumbFrame | null;
     }>;
   });
 

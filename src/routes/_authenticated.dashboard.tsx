@@ -18,6 +18,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { readThumbFrame, thumbFrameBgClass, thumbFrameImgStyle } from "@/lib/thumb-frame";
 import { PlannerTile } from "@/components/dashboard/PlannerTile";
+import { listDashboardReports, type DashboardReport } from "@/lib/racket-desk/report-sharing.functions";
 import {
   calculateVibeScore,
   calculateBrandVibe,
@@ -36,7 +37,6 @@ import { formatBriefBudget, transparencyLabel } from "@/lib/brief-currency";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ListeningReportsCard } from "@/components/dashboard/ListeningReportsCard";
 
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -131,6 +131,7 @@ function DashboardPage() {
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null; thumb_frame?: any }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; thumbnail_url: string | null; thumb_frame: any; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
+  const [listeningReports, setListeningReports] = useState<DashboardReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -394,6 +395,12 @@ function DashboardPage() {
         setAssignedRosters(((assigned as any[]) ?? []) as any);
         const { data: assignedRep } = await (supabase as any).rpc("get_assigned_campaign_reports");
         setAssignedReports(((assignedRep as any[]) ?? []) as any);
+      }
+
+      try {
+        setListeningReports(await listDashboardReports());
+      } catch {
+        setListeningReports([]);
       }
 
       // Merge in privately shared briefs (both user + lead briefs)
@@ -759,13 +766,40 @@ function DashboardPage() {
                     ))}
                   </ul>
                 )}
+
+                {listeningReports.length > 0 ? (
+                  <ul className="grid gap-3 md:grid-cols-2">
+                    {listeningReports.map((r) => (
+                      <li key={r.id}>
+                        <Link
+                          to="/listening-report/$id"
+                          params={{ id: r.id }}
+                          className="block h-full"
+                        >
+                          <PlannerTile
+                            thumb={r.thumbnail_url}
+                            frame={readThumbFrame({ thumb_frame: r.thumb_frame })}
+                            title={r.report_title || r.artist_name}
+                            subtitle={
+                              <>
+                                @{r.handle} · {new Date(r.created_at).toLocaleDateString("en-GB")}
+                              </>
+                            }
+                            trailing={
+                              <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-xs font-medium !text-white">
+                                View your report
+                              </span>
+                            }
+                          />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </CardContent>
             </Card>
           </div>
 
-          <div className="lg:col-span-3">
-            <ListeningReportsCard />
-          </div>
 
 
           {assignedRosters.length > 0 && (

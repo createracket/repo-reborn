@@ -14,5 +14,7 @@ Disallow: /roster/
 Disallow: /report/
 Disallow: /roster-builder
 Disallow: /spotlight/
+Disallow: /listening-report/
+
 
 Sitemap: https://createracket.com/sitemap.xml

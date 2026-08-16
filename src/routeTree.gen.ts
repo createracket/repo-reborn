@@ -42,6 +42,7 @@ import { Route as USlugRouteImport } from './routes/u.$slug'
 import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
+import { Route as AuthenticatedListeningReportIdRouteImport } from './routes/_authenticated.listening-report.$id'
 import { Route as AuthenticatedRacketDeskIndexRouteImport } from './routes/_authenticated.racket-desk.index'
 import { Route as AuthenticatedRacketDeskFanIntelRouteImport } from './routes/_authenticated.racket-desk.fan-intel'
 import { Route as AuthenticatedRacketDeskProfilesRouteImport } from './routes/_authenticated.racket-desk.profiles'
@@ -225,6 +226,12 @@ const VibeCheckMusicianRoute = VibeCheckMusicianRouteImport.update({
   path: '/vibe-check/musician',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedListeningReportIdRoute =
+  AuthenticatedListeningReportIdRouteImport.update({
+    id: '/listening-report/$id',
+    path: '/listening-report/$id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedRacketDeskIndexRoute =
   AuthenticatedRacketDeskIndexRouteImport.update({
     id: '/',
@@ -343,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
+  '/listening-report/$id': typeof AuthenticatedListeningReportIdRoute
   '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
   '/racket-desk/reports': typeof AuthenticatedRacketDeskReportsRoute
@@ -391,6 +399,7 @@ export interface FileRoutesByTo {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check': typeof VibeCheckIndexRoute
+  '/listening-report/$id': typeof AuthenticatedListeningReportIdRoute
   '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
   '/racket-desk/reports': typeof AuthenticatedRacketDeskReportsRoute
@@ -442,6 +451,7 @@ export interface FileRoutesById {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
+  '/_authenticated/listening-report/$id': typeof AuthenticatedListeningReportIdRoute
   '/_authenticated/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/_authenticated/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
   '/_authenticated/racket-desk/reports': typeof AuthenticatedRacketDeskReportsRoute
@@ -493,6 +503,7 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check/'
+    | '/listening-report/$id'
     | '/racket-desk/fan-intel'
     | '/racket-desk/profiles'
     | '/racket-desk/reports'
@@ -541,6 +552,7 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check'
+    | '/listening-report/$id'
     | '/racket-desk/fan-intel'
     | '/racket-desk/profiles'
     | '/racket-desk/reports'
@@ -591,6 +603,7 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check/'
+    | '/_authenticated/listening-report/$id'
     | '/_authenticated/racket-desk/fan-intel'
     | '/_authenticated/racket-desk/profiles'
     | '/_authenticated/racket-desk/reports'
@@ -878,6 +891,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VibeCheckMusicianRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/listening-report/$id': {
+      id: '/_authenticated/listening-report/$id'
+      path: '/listening-report/$id'
+      fullPath: '/listening-report/$id'
+      preLoaderRoute: typeof AuthenticatedListeningReportIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/racket-desk/': {
       id: '/_authenticated/racket-desk/'
       path: '/'
@@ -1019,6 +1039,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedRacketDeskRoute: typeof AuthenticatedRacketDeskRouteWithChildren
   AuthenticatedRosterBuilderRoute: typeof AuthenticatedRosterBuilderRoute
+  AuthenticatedListeningReportIdRoute: typeof AuthenticatedListeningReportIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -1031,6 +1052,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedRacketDeskRoute: AuthenticatedRacketDeskRouteWithChildren,
   AuthenticatedRosterBuilderRoute: AuthenticatedRosterBuilderRoute,
+  AuthenticatedListeningReportIdRoute: AuthenticatedListeningReportIdRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
