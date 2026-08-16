@@ -690,9 +690,6 @@ function DashboardPage() {
               <CardContent className="space-y-6">
                 {plannerBriefs.length > 0 ? (
                   <div>
-                    <div className="mb-2 text-[11px] uppercase tracking-wider text-muted-foreground">
-                      Briefs for you
-                    </div>
                     <ul className="grid gap-3 md:grid-cols-2">
                       {plannerBriefs.map((bp) => {
                         const thumb = bp.profile_image_url || bp.header_image_url || null;
@@ -705,7 +702,11 @@ function DashboardPage() {
                                 frame={frame}
                                 title={bp.headline}
                                 subtitle={bp.subtitle}
-                                label="Brief"
+                                trailing={
+                                  <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-xs font-medium !text-white">
+                                    View your brief
+                                  </span>
+                                }
                               />
                             </Link>
                           </li>
@@ -713,6 +714,7 @@ function DashboardPage() {
                       })}
                     </ul>
                   </div>
+
                 ) : null}
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
