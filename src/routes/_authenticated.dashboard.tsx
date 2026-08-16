@@ -372,6 +372,7 @@ function DashboardPage() {
             status: r.status,
             budget: r.budget,
             currency: r.currency,
+            thumbnail_url: r.thumbnail_url ?? null,
             linked_roster_id: r.linked_roster_id ?? null,
             linked_roster_slug: info?.slug ?? null,
             linked_roster_published: !!info?.published,
