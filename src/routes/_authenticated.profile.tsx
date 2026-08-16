@@ -289,10 +289,11 @@ function EditProfilePage() {
   const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
   const [syncQuota, setSyncQuota] = useState<{ remaining: number; limit: number; resets: string } | null>(null);
 
-  const extraTotals = Object.values(extraFetched).reduce(
+  const extraTotals = Object.values(extraFetched).reduce<{ followers: number; streams: number }>(
     (acc, v) => ({ followers: acc.followers + (v.followers ?? 0), streams: acc.streams + (v.streams ?? 0) }),
     { followers: 0, streams: 0 },
   );
+
 
 
   useEffect(() => {
