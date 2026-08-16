@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { readThumbFrame, thumbFrameBgClass, thumbFrameImgStyle } from "@/lib/thumb-frame";
+import { PlannerTile } from "@/components/dashboard/PlannerTile";
 import {
   calculateVibeScore,
   calculateBrandVibe,
