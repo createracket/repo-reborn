@@ -605,6 +605,8 @@ function EditBriefDialog({
 }) {
   const [form, setForm] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
+  const vibeConfig = useVibeConfig();
+
 
   useEffect(() => {
     if (!brief) return;
