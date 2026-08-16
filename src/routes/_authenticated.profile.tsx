@@ -1018,7 +1018,7 @@ function EditProfilePage() {
 
               <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
                 <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
-                  Featured videos
+                  Featured posts
                   <span className="ml-2 text-xs font-normal text-muted-foreground">(up to four TikTok or Instagram URLs)</span>
                 </summary>
                 <div className="flex flex-col gap-4 px-4">
@@ -1064,33 +1064,6 @@ function EditProfilePage() {
                 </div>
               </details>
 
-              <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
-                <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
-                  Featured photos
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">(up to four images, 4:5)</span>
-                </summary>
-                <div className="grid gap-4 px-4 sm:grid-cols-2">
-                  {([1, 2, 3, 4] as const).map((n) => {
-                    const key = `photo${n}` as keyof ProfileMedia;
-                    return (
-                      <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
-                        <Label>Photo {n}</Label>
-                        {form.media[key] ? (
-                          <div className="overflow-hidden rounded-md border border-border/60" style={{ aspectRatio: "4 / 5" }}>
-                            <img src={form.media[key]} alt="" className="size-full object-cover" />
-                          </div>
-                        ) : null}
-                        <Input
-                          value={form.media[key] ?? ""}
-                          onChange={(e) => setMedia(key, e.target.value)}
-                          placeholder="Image URL"
-                        />
-                        <MediaUploadButton label="Upload photo" onUploaded={(url) => setMedia(key, url)} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </details>
 
               <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
                 <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">

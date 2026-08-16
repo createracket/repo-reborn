@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { handleLabel } from "@/lib/social-links";
-import { FeaturedVideos, FeaturedPhotos, type ProfileMedia } from "@/components/profile/FeaturedMedia";
+import { FeaturedVideos, type ProfileMedia } from "@/components/profile/FeaturedMedia";
 import {
   DEFAULT_VIBE_CONFIG,
   loadVibeCheckConfig,
@@ -251,8 +251,7 @@ function PublicProfilePage() {
           </section>
         ) : null}
 
-        <FeaturedVideos media={media} />
-        <FeaturedPhotos media={media} />
+        <FeaturedVideos media={media} heading="Featured posts" />
 
       </main>
       <SiteFooter />
