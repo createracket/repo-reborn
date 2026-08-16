@@ -283,9 +283,17 @@ function EditProfilePage() {
   const loadUsage = useServerFn(getMyUsage);
   const [fetching, setFetching] = useState<string | null>(null);
   const [fetchedCounts, setFetchedCounts] = useState<{ instagram?: number; tiktok?: number; youtube?: number; twitch?: number; facebook?: number; x?: number }>({});
-  const [extraTotals, setExtraTotals] = useState<{ followers: number; streams: number }>({ followers: 0, streams: 0 });
+  const [extraFetched, setExtraFetched] = useState<Record<string, { followers: number | null; streams: number | null }>>({});
+  const [spotifyFetched, setSpotifyFetched] = useState<{ followers: number | null; monthly: number | null; total: number | null } | null>(null);
+  const [appleFetched, setAppleFetched] = useState<string | null>(null);
   const [mismatchWarning, setMismatchWarning] = useState<string | null>(null);
   const [syncQuota, setSyncQuota] = useState<{ remaining: number; limit: number; resets: string } | null>(null);
+
+  const extraTotals = Object.values(extraFetched).reduce(
+    (acc, v) => ({ followers: acc.followers + (v.followers ?? 0), streams: acc.streams + (v.streams ?? 0) }),
+    { followers: 0, streams: 0 },
+  );
+
 
   useEffect(() => {
     loadUsage({ data: {} })
