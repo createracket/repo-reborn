@@ -586,77 +586,212 @@ function EditProfilePage() {
                 <Textarea id="bio" rows={4} value={form.bio} onChange={(e) => set("bio", e.target.value)} />
               </div>
 
-              <div className="md:col-span-2 pt-2 flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Socials</p>
-                <div className="flex flex-col items-end gap-0.5">
-                  <Button type="button" size="sm" variant="outline" onClick={syncAll} disabled={fetching === "all"}>
-                    <RefreshCw className={`mr-1.5 size-3.5 ${fetching === "all" ? "animate-spin" : ""}`} />
-                    {fetching === "all" ? "Syncing…" : "Sync my numbers"}
-                  </Button>
-                  <p className="text-[11px] text-muted-foreground">{syncAllowanceLabel}</p>
-                </div>
-              </div>
+              <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4" open>
+                <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+                  Socials &amp; links
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">
+                    (primary links, plus band / podcast / side project links)
+                  </span>
+                </summary>
+                <div className="grid gap-5 px-4 md:grid-cols-2">
+                  <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">Shown on your public profile as @handles.</p>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <Button type="button" size="sm" variant="outline" onClick={syncAll} disabled={fetching === "all"}>
+                        <RefreshCw className={`mr-1.5 size-3.5 ${fetching === "all" ? "animate-spin" : ""}`} />
+                        {fetching === "all" ? "Syncing…" : "Sync my numbers"}
+                      </Button>
+                      <p className="text-[11px] text-muted-foreground">{syncAllowanceLabel}</p>
+                    </div>
+                  </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="ig">Instagram</Label>
-                <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
-                {fetchedCounts.instagram != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()}</p> : null}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="tt">TikTok</Label>
-                <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
-                {fetchedCounts.tiktok != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()}</p> : null}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="sp">Spotify</Label>
-                <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
-                <p className="text-[11px] text-muted-foreground">Auto-syncs followers, monthly listeners and total streams.</p>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="am">Apple Music</Label>
-                <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
-                <p className="text-[11px] text-muted-foreground">Verifies the artist name against your profile.</p>
-              </div>
-              {mismatchWarning ? (
-                <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
-                  {mismatchWarning}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="ig">Instagram</Label>
+                    <Input id="ig" value={form.socials.instagram ?? ""} onChange={(e) => setSocial("instagram", e.target.value)} placeholder="@handle or full URL" />
+                    {fetchedCounts.instagram != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.instagram.toLocaleString()}</p> : null}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tt">TikTok</Label>
+                    <Input id="tt" value={form.socials.tiktok ?? ""} onChange={(e) => setSocial("tiktok", e.target.value)} placeholder="@handle or full URL" />
+                    {fetchedCounts.tiktok != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.tiktok.toLocaleString()}</p> : null}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="sp">Spotify</Label>
+                    <Input id="sp" value={form.socials.spotify ?? ""} onChange={(e) => setSocial("spotify", e.target.value)} placeholder="https://open.spotify.com/artist/…" />
+                    <p className="text-[11px] text-muted-foreground">Auto-syncs followers, monthly listeners and total streams.</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="am">Apple Music</Label>
+                    <Input id="am" value={form.socials.apple_music ?? ""} onChange={(e) => setSocial("apple_music", e.target.value)} placeholder="https://music.apple.com/…/artist/…" />
+                    <p className="text-[11px] text-muted-foreground">Verifies the artist name against your profile.</p>
+                  </div>
+                  {mismatchWarning ? (
+                    <div className="md:col-span-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-700 dark:text-amber-300">
+                      {mismatchWarning}
+                    </div>
+                  ) : null}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="yt">YouTube</Label>
+                    <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
+                    {fetchedCounts.youtube != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()}</p> : null}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="twitch">Twitch</Label>
+                    <Input id="twitch" value={form.socials.twitch ?? ""} onChange={(e) => setSocial("twitch", e.target.value)} placeholder="@handle or full URL" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="fb">Facebook</Label>
+                    <Input id="fb" value={form.socials.facebook ?? ""} onChange={(e) => setSocial("facebook", e.target.value)} placeholder="Page name or full URL" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="xcom">X</Label>
+                    <Input id="xcom" value={form.socials.x ?? ""} onChange={(e) => setSocial("x", e.target.value)} placeholder="@handle or full URL" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="clabel">Other link label</Label>
+                    <Input id="clabel" value={form.socials.custom_label ?? ""} onChange={(e) => setSocial("custom_label", e.target.value)} placeholder="e.g. Bandcamp" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="curl">Other link URL</Label>
+                    <Input id="curl" value={form.socials.custom_url ?? ""} onChange={(e) => setSocial("curl" as any, e.target.value)} placeholder="https://…" />
+                  </div>
+                  <div className="space-y-1.5 md:col-span-2">
+                    <Label htmlFor="web">Website</Label>
+                    <Input id="web" value={form.socials.website ?? ""} onChange={(e) => setSocial("website", e.target.value)} placeholder="https://…" />
+                  </div>
+
+                  <div className="md:col-span-2 space-y-3 rounded-md border border-border/60 p-3">
+                    <div>
+                      <p className="text-sm font-medium">Extra links (band, podcast, side project)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Name each link so people know what it is. Followers and streams from these links are
+                        included in your totals when you sync.
+                      </p>
+                    </div>
+                    {extraLinks.map((link, i) => (
+                      <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
+                        <Input
+                          value={link.name}
+                          onChange={(e) => updateExtra(i, { name: e.target.value })}
+                          placeholder="Label (e.g. Band)"
+                        />
+                        <Input
+                          value={link.url}
+                          onChange={(e) => updateExtra(i, { url: e.target.value })}
+                          placeholder="https://…"
+                        />
+                        <Button type="button" size="sm" variant="ghost" onClick={() => removeExtra(i)}>
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                    <Button type="button" size="sm" variant="outline" onClick={addExtra}>
+                      Add link
+                    </Button>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
+                      Auto calculate your followers
+                    </Button>
+                    <p className="mt-1 text-xs text-muted-foreground">Sums all fetched social counts — including extra links — into Total social audience below. Total fans adds your monthly streams on top.</p>
+                  </div>
                 </div>
-              ) : null}
-              <div className="space-y-1.5">
-                <Label htmlFor="yt">YouTube</Label>
-                <Input id="yt" value={form.socials.youtube ?? ""} onChange={(e) => setSocial("youtube", e.target.value)} placeholder="@handle or full URL" />
-                {fetchedCounts.youtube != null ? <p className="text-xs text-muted-foreground">Fetched: {fetchedCounts.youtube.toLocaleString()}</p> : null}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="twitch">Twitch</Label>
-                <Input id="twitch" value={form.socials.twitch ?? ""} onChange={(e) => setSocial("twitch", e.target.value)} placeholder="@handle or full URL" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="fb">Facebook</Label>
-                <Input id="fb" value={form.socials.facebook ?? ""} onChange={(e) => setSocial("facebook", e.target.value)} placeholder="Page name or full URL" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="xcom">X</Label>
-                <Input id="xcom" value={form.socials.x ?? ""} onChange={(e) => setSocial("x", e.target.value)} placeholder="@handle or full URL" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="clabel">Other link label</Label>
-                <Input id="clabel" value={form.socials.custom_label ?? ""} onChange={(e) => setSocial("custom_label", e.target.value)} placeholder="e.g. Bandcamp" />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="curl">Other link URL</Label>
-                <Input id="curl" value={form.socials.custom_url ?? ""} onChange={(e) => setSocial("custom_url", e.target.value)} placeholder="https://…" />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="web">Website</Label>
-                <Input id="web" value={form.socials.website ?? ""} onChange={(e) => setSocial("website", e.target.value)} placeholder="https://…" />
-              </div>
-              <div className="md:col-span-2">
-                <Button type="button" size="sm" variant="outline" onClick={applyTotalFromFetched}>
-                  Auto calculate your followers
-                </Button>
-                <p className="mt-1 text-xs text-muted-foreground">Sums fetched Instagram, TikTok and YouTube counts into Total social audience below. Total fans adds your monthly streams on top.</p>
-              </div>
+              </details>
+
+              <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+                <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+                  Featured videos
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(up to four TikTok or Instagram URLs)</span>
+                </summary>
+                <div className="flex flex-col gap-4 px-4">
+                  <p className="text-xs text-muted-foreground">
+                    Paste public TikTok or Instagram post/reel URLs. Add a cover image for Instagram clips —
+                    Instagram no longer serves public thumbnails.
+                  </p>
+                  {([1, 2, 3, 4] as const).map((n) => {
+                    const urlKey = `video${n}` as keyof ProfileMedia;
+                    const coverKey = `video${n}_cover` as keyof ProfileMedia;
+                    return (
+                      <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
+                        <Label>Video {n}</Label>
+                        <Input
+                          value={form.media[urlKey] ?? ""}
+                          onChange={(e) => setMedia(urlKey, e.target.value)}
+                          placeholder="https://www.tiktok.com/@user/video/… or Instagram reel URL"
+                        />
+                        <Input
+                          value={form.media[coverKey] ?? ""}
+                          onChange={(e) => setMedia(coverKey, e.target.value)}
+                          placeholder="Cover image URL (optional)"
+                        />
+                        <MediaUploadButton
+                          label="Upload cover"
+                          onUploaded={(url) => setMedia(coverKey, url)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+
+              <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+                <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+                  Featured photos
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(up to four images, 4:5)</span>
+                </summary>
+                <div className="grid gap-4 px-4 sm:grid-cols-2">
+                  {([1, 2, 3, 4] as const).map((n) => {
+                    const key = `photo${n}` as keyof ProfileMedia;
+                    return (
+                      <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
+                        <Label>Photo {n}</Label>
+                        {form.media[key] ? (
+                          <div className="overflow-hidden rounded-md border border-border/60" style={{ aspectRatio: "4 / 5" }}>
+                            <img src={form.media[key]} alt="" className="size-full object-cover" />
+                          </div>
+                        ) : null}
+                        <Input
+                          value={form.media[key] ?? ""}
+                          onChange={(e) => setMedia(key, e.target.value)}
+                          placeholder="Image URL"
+                        />
+                        <MediaUploadButton label="Upload photo" onUploaded={(url) => setMedia(key, url)} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+
+              <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+                <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+                  Vibe check
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">(archetype and tags)</span>
+                </summary>
+                <div className="space-y-4 px-4">
+                  <div className="space-y-1.5">
+                    <Label>Your archetype</Label>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Input value={archetypeLabel || "Not taken yet"} readOnly disabled />
+                      <Button asChild type="button" size="sm" variant="outline">
+                        <Link to="/vibe-check">{archetypeLabel ? "Retake" : "Take the vibe check"}</Link>
+                      </Button>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">Pulled from your latest vibe check and shown on your public profile.</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="vibetags">Vibe check tags (comma separated)</Label>
+                    <Input
+                      id="vibetags"
+                      value={form.vibe_tags}
+                      onChange={(e) => set("vibe_tags", e.target.value)}
+                      placeholder="Coffee, Travel, Fitness, Vinyl"
+                    />
+                  </div>
+                </div>
+              </details>
+
+
 
 
 
