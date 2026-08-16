@@ -659,6 +659,16 @@ function EditProfilePage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    try {
+      await doSubmit();
+    } catch (err) {
+      console.error("[profile] save failed", err);
+      setSaving(false);
+      toast.error(err instanceof Error ? err.message : "Something went wrong saving your profile.");
+    }
+  }
+
+  async function doSubmit() {
     if (!userId) return;
     if (pendingFile) {
       toast.error("Please upload or cancel the selected profile photo before saving.");
@@ -675,7 +685,10 @@ function EditProfilePage() {
     setSaving(true);
     const cleanSocials: ProfileSocials = {};
     (Object.keys(form.socials) as Array<keyof ProfileSocials>).forEach((k) => {
-      const v = ((form.socials[k] as string) || "").trim();
+      // `extra` / `extra_names` are arrays — they're rebuilt below, so skip non-strings.
+      const raw = form.socials[k];
+      if (typeof raw !== "string") return;
+      const v = raw.trim();
       if (v) (cleanSocials as any)[k] = v;
     });
     const cleanExtras = extraLinks.filter((l) => l.url.trim());
