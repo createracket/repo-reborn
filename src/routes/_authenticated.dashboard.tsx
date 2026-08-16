@@ -133,6 +133,7 @@ function DashboardPage() {
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; thumbnail_url: string | null; thumb_frame: any; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
   const [listeningReports, setListeningReports] = useState<DashboardReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [featuredSpotlightsEnabled, setFeaturedSpotlightsEnabled] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<"free" | "paid">("free");
