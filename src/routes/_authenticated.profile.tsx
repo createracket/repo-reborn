@@ -213,8 +213,8 @@ function EditProfilePage() {
           flagged_streaming_reason: d.flagged_streaming_reason ?? "",
         });
 
-        const urls = ((d.socials?.extra ?? []) as string[]) ?? [];
-        const names = ((d.socials?.extra_names ?? []) as string[]) ?? [];
+        const urls = (d.socials?.extra ?? []) as string[];
+        const names = (d.socials?.extra_names ?? []) as string[];
         setExtraLinks(urls.map((url, i) => ({ url, name: names[i] ?? "" })));
       }
 
