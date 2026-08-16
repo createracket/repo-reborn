@@ -221,6 +221,8 @@ function DashboardPage() {
         title: r.owner_id !== u.user!.id
           ? `${r.title} — ${ownerNames.get(r.owner_id) ?? "Shared"}`
           : r.title,
+        slug: r.slug ?? null,
+        published: !!r.published,
       })));
     })();
   }, [isAdmin]);
