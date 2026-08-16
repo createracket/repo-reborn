@@ -826,35 +826,36 @@ function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="grid gap-3 md:grid-cols-2">
-                    {assignedReports.map((r) => (
-                      <li
-                        key={r.id}
-                        className={`rounded-xl border border-border/60 bg-card p-4 ${r.published && r.slug ? "hover:bg-muted/50 transition-colors" : ""}`}
-                      >
-                        {r.published && r.slug ? (
-                          <Link to="/report/$slug" params={{ slug: r.slug }} className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="font-medium">{r.title}</div>
-                              <div className="text-xs text-muted-foreground">
-                                Updated {new Date(r.updated_at).toLocaleDateString()}
-                              </div>
-                            </div>
-                            <ArrowRight className="size-4 text-muted-foreground" />
-                          </Link>
-                        ) : (
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="font-medium">{r.title}</div>
-                              <div className="text-xs text-muted-foreground">
-                                Updated {new Date(r.updated_at).toLocaleDateString()}
-                                {" · Draft"}
-                              </div>
-                            </div>
-                            <span className="text-xs text-muted-foreground">Not yet published</span>
-                          </div>
-                        )}
-                      </li>
-                    ))}
+                    {assignedReports.map((r) => {
+                      const thumb = r.profile_image_url || r.header_image_url || null;
+                      const tile = (
+                        <PlannerTile
+                          interactive={!!(r.published && r.slug)}
+                          thumb={thumb}
+                          title={r.title}
+                          label="Report"
+                          subtitle={`Updated ${new Date(r.updated_at).toLocaleDateString()}${r.published && r.slug ? "" : " · Draft"}`}
+                          trailing={
+                            r.published && r.slug ? (
+                              <ArrowRight className="size-4 text-muted-foreground" />
+                            ) : (
+                              <span className="text-xs text-muted-foreground">Not yet published</span>
+                            )
+                          }
+                        />
+                      );
+                      return (
+                        <li key={r.id}>
+                          {r.published && r.slug ? (
+                            <Link to="/report/$slug" params={{ slug: r.slug }} className="block h-full">
+                              {tile}
+                            </Link>
+                          ) : (
+                            tile
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </CardContent>
               </Card>
