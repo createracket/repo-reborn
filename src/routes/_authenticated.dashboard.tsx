@@ -964,13 +964,13 @@ function DashboardPage() {
 
 
                 {/* Combined spotlights & examples carousel */}
-                {!loading && (spotlightOpps.length > 0 || examples.length > 0) ? (
+                {!loading && featuredSpotlightsEnabled && (spotlightOpps.length > 0 || examples.length > 0) ? (
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
                         Featured spotlights
                       </div>
-                      <div className="flex gap-1">
+                      <div className={`flex gap-1 ${spotlightOpps.length + examples.length >= 5 ? "" : "hidden"}`}>
                         <Button
                           variant="ghost"
                           size="icon"
