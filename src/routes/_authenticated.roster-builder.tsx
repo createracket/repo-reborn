@@ -1686,7 +1686,6 @@ function DraggableRosterList({
               onChanged={onChanged}
               categories={categories}
               allowMulti={allowMulti}
-        statusOptions={statusOptions}
               statusOptions={statusOptions}
             />
           ))}
