@@ -891,6 +891,38 @@ function RosterDetailView({
     await saveCategories(rosterCategories.filter((c) => c !== value));
   }
 
+  async function saveStatuses(next: string[]) {
+    const cleaned = Array.from(
+      new Set(next.map((s) => s.trim()).filter((s) => s.length > 0 && s.length <= 40)),
+    );
+    const { error } = await supabase
+      .from("rosters")
+      .update({ statuses: cleaned } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
+  async function addStatus() {
+    const value = newStatus.trim();
+    if (!value) return;
+    if (customStatuses.includes(value) || STATUS_OPTIONS.some((s) => s.label === value)) {
+      setNewStatus("");
+      return;
+    }
+    await saveStatuses([...customStatuses, value]);
+    setNewStatus("");
+  }
+
+  async function removeStatus(value: string) {
+    await saveStatuses(customStatuses.filter((s) => s !== value));
+  }
+
+
+
 
   async function toggleHideStatuses(hide: boolean) {
     const { error } = await supabase
