@@ -1349,6 +1349,53 @@ function RosterDetailView({
                 </Button>
               </div>
             </div>
+            <div className="space-y-2">
+              <Label>Extra statuses</Label>
+              <p className="text-xs text-muted-foreground">
+                The default statuses (In Review, Live, Hold…) always stay available. Add your own here to
+                extend the list for this roster.
+              </p>
+              {customStatuses.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {customStatuses.map((s) => (
+                    <Badge
+                      key={s}
+                      variant="outline"
+                      className="gap-1 border-border/60 pl-2 pr-1 py-1 text-xs"
+                    >
+                      <span>{statusLabel(s)}</span>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${s}`}
+                        className="ml-1 rounded-sm p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        onClick={() => removeStatus(s)}
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No extra statuses yet — defaults only.</p>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void addStatus();
+                    }
+                  }}
+                  placeholder="e.g. Negotiating, Shipped"
+                  maxLength={40}
+                />
+                <Button type="button" variant="outline" onClick={addStatus} disabled={!newStatus.trim()}>
+                  Add
+                </Button>
+              </div>
+            </div>
             <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
               <div>
                 <div className="text-sm font-medium">Hide prospect tags</div>
