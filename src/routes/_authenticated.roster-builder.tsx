@@ -223,6 +223,11 @@ const STATUS_BADGE: Record<string, string> = {
   hold: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
 };
 
+function statusBadgeClass(value: string) {
+  return STATUS_BADGE[value] ?? "border-foreground/25 bg-muted/40 text-foreground";
+}
+
+
 
 // Legacy built-in categories — retained only so existing rows keep pretty
 // labels/colors. Rosters now define their own `categories` list.
