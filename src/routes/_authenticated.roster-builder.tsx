@@ -753,13 +753,24 @@ function RosterDetailView({
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [newCategory, setNewCategory] = useState("");
+  const [newStatus, setNewStatus] = useState("");
   const rosterCategories = roster.categories ?? [];
+  const customStatuses = roster.statuses ?? [];
   // Also surface any category value currently on items (e.g. legacy values) so
   // it stays filterable and editable even if not in the roster's list.
   const itemCategoryValues = Array.from(
     new Set(items.flatMap((it) => itemCategories(it))),
   );
   const filterCategoryOptions = Array.from(new Set([...rosterCategories, ...itemCategoryValues]));
+  // Built-in statuses stay first, then this roster's custom ones (plus any
+  // value already saved on an item so it never disappears from the picker).
+  const statusOptions = Array.from(
+    new Set([
+      ...STATUS_OPTIONS.map((s) => s.value),
+      ...customStatuses,
+      ...items.map((it) => it.status).filter((s): s is string => !!s),
+    ]),
+  );
 
   useEffect(() => {
     setTitle(roster.title);
