@@ -207,6 +207,11 @@ const STATUS_LABEL: Record<string, string> = Object.fromEntries(
   STATUS_OPTIONS.map((s) => [s.value, s.label]),
 );
 
+/** Custom statuses are stored as their own label; fall back to a readable form. */
+function statusLabel(value: string) {
+  return STATUS_LABEL[value] ?? value.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 const STATUS_BADGE: Record<string, string> = {
   in_review: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
   approved: "border-primary/40 bg-primary/10 text-primary",
