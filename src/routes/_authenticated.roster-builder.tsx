@@ -1604,7 +1604,6 @@ function RosterDetailView({
                           categories={filterCategoryOptions}
                           allowMulti={roster.allow_multi_category}
                           statusOptions={statusOptions}
-                      statusOptions={statusOptions}
                         />
                       </div>
                     </details>
