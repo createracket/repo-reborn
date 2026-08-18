@@ -105,6 +105,7 @@ type Roster = {
   brand_email: string | null;
   est_engagement_pct: number | null;
   categories: string[] | null;
+  statuses: string[] | null;
   custom_links: Array<{ label: string; url: string }> | null;
   allow_multi_category: boolean;
   access_code: string | null;
