@@ -93,6 +93,11 @@ const STATUS_LABEL: Record<string, string> = {
   hold: "Hold",
 };
 
+function statusLabel(value: string) {
+  if (!value) return "In Review";
+  return STATUS_LABEL[value] ?? value.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 const CATEGORY_LABEL: Record<string, string> = {
   musician: "Musician",
   ugc: "UGC",
@@ -561,7 +566,7 @@ function PublicRosterPage() {
                             variant="outline"
                             className={`shrink-0 px-3 py-1 text-[10px] uppercase tracking-[0.11em] ${STATUS_BADGE_CLASS}`}
                           >
-                            {STATUS_LABEL[it.status] ?? "In Review"}
+                            {statusLabel(it.status)}
                           </Badge>
                         )}
                       </div>
@@ -668,7 +673,7 @@ function PublicRosterPage() {
                           <SelectItem value="all">All statuses</SelectItem>
                           {statusValues.map((v) => (
                             <SelectItem key={v} value={v}>
-                              {STATUS_LABEL[v] ?? "In Review"}
+                              {statusLabel(v)}
                             </SelectItem>
                           ))}
                         </SelectContent>

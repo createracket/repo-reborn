@@ -105,6 +105,7 @@ type Roster = {
   brand_email: string | null;
   est_engagement_pct: number | null;
   categories: string[] | null;
+  statuses: string[] | null;
   custom_links: Array<{ label: string; url: string }> | null;
   allow_multi_category: boolean;
   access_code: string | null;
@@ -206,6 +207,11 @@ const STATUS_LABEL: Record<string, string> = Object.fromEntries(
   STATUS_OPTIONS.map((s) => [s.value, s.label]),
 );
 
+/** Custom statuses are stored as their own label; fall back to a readable form. */
+function statusLabel(value: string) {
+  return STATUS_LABEL[value] ?? value.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 const STATUS_BADGE: Record<string, string> = {
   in_review: "border-muted-foreground/20 bg-muted/40 text-muted-foreground",
   approved: "border-primary/40 bg-primary/10 text-primary",
@@ -216,6 +222,11 @@ const STATUS_BADGE: Record<string, string> = {
   live: "border-pink-accent/40 bg-pink-accent/10 text-pink-accent",
   hold: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400",
 };
+
+function statusBadgeClass(value: string) {
+  return STATUS_BADGE[value] ?? "border-foreground/25 bg-muted/40 text-foreground";
+}
+
 
 
 // Legacy built-in categories — retained only so existing rows keep pretty
@@ -348,7 +359,7 @@ function RosterBuilderPage() {
       // SELECTable on the base table (privacy). Read them via the
       // get_roster_assignment RPC instead. A wildcard select fails outright.
       .select(
-        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, categories, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
+        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, categories, statuses, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
       )
       .order("updated_at", { ascending: false });
     if (error) {
@@ -742,13 +753,24 @@ function RosterDetailView({
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [newCategory, setNewCategory] = useState("");
+  const [newStatus, setNewStatus] = useState("");
   const rosterCategories = roster.categories ?? [];
+  const customStatuses = roster.statuses ?? [];
   // Also surface any category value currently on items (e.g. legacy values) so
   // it stays filterable and editable even if not in the roster's list.
   const itemCategoryValues = Array.from(
     new Set(items.flatMap((it) => itemCategories(it))),
   );
   const filterCategoryOptions = Array.from(new Set([...rosterCategories, ...itemCategoryValues]));
+  // Built-in statuses stay first, then this roster's custom ones (plus any
+  // value already saved on an item so it never disappears from the picker).
+  const statusOptions = Array.from(
+    new Set([
+      ...STATUS_OPTIONS.map((s) => s.value),
+      ...customStatuses,
+      ...items.map((it) => it.status).filter((s): s is string => !!s),
+    ]),
+  );
 
   useEffect(() => {
     setTitle(roster.title);
@@ -868,6 +890,38 @@ function RosterDetailView({
   async function removeCategory(value: string) {
     await saveCategories(rosterCategories.filter((c) => c !== value));
   }
+
+  async function saveStatuses(next: string[]) {
+    const cleaned = Array.from(
+      new Set(next.map((s) => s.trim()).filter((s) => s.length > 0 && s.length <= 40)),
+    );
+    const { error } = await supabase
+      .from("rosters")
+      .update({ statuses: cleaned } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
+  async function addStatus() {
+    const value = newStatus.trim();
+    if (!value) return;
+    if (customStatuses.includes(value) || STATUS_OPTIONS.some((s) => s.label === value)) {
+      setNewStatus("");
+      return;
+    }
+    await saveStatuses([...customStatuses, value]);
+    setNewStatus("");
+  }
+
+  async function removeStatus(value: string) {
+    await saveStatuses(customStatuses.filter((s) => s !== value));
+  }
+
+
 
 
   async function toggleHideStatuses(hide: boolean) {
@@ -1295,6 +1349,53 @@ function RosterDetailView({
                 </Button>
               </div>
             </div>
+            <div className="space-y-2">
+              <Label>Extra statuses</Label>
+              <p className="text-xs text-muted-foreground">
+                The default statuses (In Review, Live, Hold…) always stay available. Add your own here to
+                extend the list for this roster.
+              </p>
+              {customStatuses.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {customStatuses.map((s) => (
+                    <Badge
+                      key={s}
+                      variant="outline"
+                      className="gap-1 border-border/60 pl-2 pr-1 py-1 text-xs"
+                    >
+                      <span>{statusLabel(s)}</span>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${s}`}
+                        className="ml-1 rounded-sm p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                        onClick={() => removeStatus(s)}
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No extra statuses yet — defaults only.</p>
+              )}
+              <div className="flex gap-2">
+                <Input
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void addStatus();
+                    }
+                  }}
+                  placeholder="e.g. Negotiating, Shipped"
+                  maxLength={40}
+                />
+                <Button type="button" variant="outline" onClick={addStatus} disabled={!newStatus.trim()}>
+                  Add
+                </Button>
+              </div>
+            </div>
             <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
               <div>
                 <div className="text-sm font-medium">Hide prospect tags</div>
@@ -1460,6 +1561,7 @@ function RosterDetailView({
                       onChanged={onChanged}
                       categories={filterCategoryOptions}
                       allowMulti={roster.allow_multi_category}
+                      statusOptions={statusOptions}
                     />
                   )}
 
@@ -1479,6 +1581,7 @@ function RosterDetailView({
                           onChanged={onChanged}
                           categories={filterCategoryOptions}
                           allowMulti={roster.allow_multi_category}
+                          statusOptions={statusOptions}
                         />
                       </div>
                     </details>
@@ -1500,6 +1603,7 @@ function RosterDetailView({
                           onChanged={onChanged}
                           categories={filterCategoryOptions}
                           allowMulti={roster.allow_multi_category}
+                          statusOptions={statusOptions}
                         />
                       </div>
                     </details>
@@ -1546,6 +1650,7 @@ function DraggableRosterList({
   onChanged,
   categories,
   allowMulti,
+  statusOptions,
 }: {
   items: RosterItem[];
   onReorder: (next: RosterItem[]) => void;
@@ -1553,6 +1658,7 @@ function DraggableRosterList({
   onChanged: () => void;
   categories: string[];
   allowMulti: boolean;
+  statusOptions: string[];
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -1580,6 +1686,7 @@ function DraggableRosterList({
               onChanged={onChanged}
               categories={categories}
               allowMulti={allowMulti}
+              statusOptions={statusOptions}
             />
           ))}
         </ul>
@@ -1594,12 +1701,14 @@ function SortableRosterRow({
   onChanged,
   categories,
   allowMulti,
+  statusOptions,
 }: {
   item: RosterItem;
   onRemove: () => void;
   onChanged: () => void;
   categories: string[];
   allowMulti: boolean;
+  statusOptions: string[];
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -1617,6 +1726,7 @@ function SortableRosterRow({
         onChanged={onChanged}
         categories={categories}
         allowMulti={allowMulti}
+        statusOptions={statusOptions}
         dragHandleProps={{ ...attributes, ...listeners }}
       />
     </li>
@@ -1624,7 +1734,13 @@ function SortableRosterRow({
 }
 
 
-function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; categories: string[]; allowMulti: boolean; dragHandleProps?: Record<string, unknown> }) {
+function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, statusOptions, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; categories: string[]; allowMulti: boolean; statusOptions?: string[]; dragHandleProps?: Record<string, unknown> }) {
+  const statusChoices = Array.from(
+    new Set([
+      ...(statusOptions ?? STATUS_OPTIONS.map((s) => s.value)),
+      ...(item.status ? [item.status] : []),
+    ]),
+  );
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -1716,13 +1832,13 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
             else onChanged();
           }}
         >
-          <SelectTrigger className={`h-8 w-[130px] shrink-0 text-xs ${STATUS_BADGE[item.status ?? "in_review"]}`}>
+          <SelectTrigger className={`h-8 w-[130px] shrink-0 text-xs ${statusBadgeClass(item.status ?? "in_review")}`}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {STATUS_OPTIONS.map((s) => (
-              <SelectItem key={s.value} value={s.value} className="text-xs">
-                {s.label}
+            {statusChoices.map((s) => (
+              <SelectItem key={s} value={s} className="text-xs">
+                {statusLabel(s)}
               </SelectItem>
             ))}
           </SelectContent>
