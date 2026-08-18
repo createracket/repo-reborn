@@ -1561,6 +1561,7 @@ function RosterDetailView({
                       onChanged={onChanged}
                       categories={filterCategoryOptions}
                       allowMulti={roster.allow_multi_category}
+                      statusOptions={statusOptions}
                     />
                   )}
 
@@ -1580,6 +1581,8 @@ function RosterDetailView({
                           onChanged={onChanged}
                           categories={filterCategoryOptions}
                           allowMulti={roster.allow_multi_category}
+                          statusOptions={statusOptions}
+                      statusOptions={statusOptions}
                         />
                       </div>
                     </details>
@@ -1601,6 +1604,8 @@ function RosterDetailView({
                           onChanged={onChanged}
                           categories={filterCategoryOptions}
                           allowMulti={roster.allow_multi_category}
+                          statusOptions={statusOptions}
+                      statusOptions={statusOptions}
                         />
                       </div>
                     </details>
@@ -1647,6 +1652,7 @@ function DraggableRosterList({
   onChanged,
   categories,
   allowMulti,
+  statusOptions,
 }: {
   items: RosterItem[];
   onReorder: (next: RosterItem[]) => void;
@@ -1654,6 +1660,7 @@ function DraggableRosterList({
   onChanged: () => void;
   categories: string[];
   allowMulti: boolean;
+  statusOptions: string[];
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -1681,6 +1688,8 @@ function DraggableRosterList({
               onChanged={onChanged}
               categories={categories}
               allowMulti={allowMulti}
+        statusOptions={statusOptions}
+              statusOptions={statusOptions}
             />
           ))}
         </ul>
@@ -1695,12 +1704,14 @@ function SortableRosterRow({
   onChanged,
   categories,
   allowMulti,
+  statusOptions,
 }: {
   item: RosterItem;
   onRemove: () => void;
   onChanged: () => void;
   categories: string[];
   allowMulti: boolean;
+  statusOptions: string[];
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -1718,6 +1729,7 @@ function SortableRosterRow({
         onChanged={onChanged}
         categories={categories}
         allowMulti={allowMulti}
+        statusOptions={statusOptions}
         dragHandleProps={{ ...attributes, ...listeners }}
       />
     </li>
@@ -1725,7 +1737,13 @@ function SortableRosterRow({
 }
 
 
-function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; categories: string[]; allowMulti: boolean; dragHandleProps?: Record<string, unknown> }) {
+function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, statusOptions, dragHandleProps }: { item: RosterItem; onRemove: () => void; onChanged: () => void; categories: string[]; allowMulti: boolean; statusOptions?: string[]; dragHandleProps?: Record<string, unknown> }) {
+  const statusChoices = Array.from(
+    new Set([
+      ...(statusOptions ?? STATUS_OPTIONS.map((s) => s.value)),
+      ...(item.status ? [item.status] : []),
+    ]),
+  );
   const [vibe, setVibe] = useState(item.vibe ?? "");
   const [savingVibe, setSavingVibe] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -1817,13 +1835,13 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, drag
             else onChanged();
           }}
         >
-          <SelectTrigger className={`h-8 w-[130px] shrink-0 text-xs ${STATUS_BADGE[item.status ?? "in_review"]}`}>
+          <SelectTrigger className={`h-8 w-[130px] shrink-0 text-xs ${statusBadgeClass(item.status ?? "in_review")}`}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {STATUS_OPTIONS.map((s) => (
-              <SelectItem key={s.value} value={s.value} className="text-xs">
-                {s.label}
+            {statusChoices.map((s) => (
+              <SelectItem key={s} value={s} className="text-xs">
+                {statusLabel(s)}
               </SelectItem>
             ))}
           </SelectContent>
