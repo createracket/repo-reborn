@@ -51,6 +51,7 @@ import { Route as AuthenticatedRacketDeskSocialListeningRouteImport } from './ro
 import { Route as ApiPublicContactSubmitRouteImport } from './routes/api/public/contact-submit'
 import { Route as ApiPublicTrackPageviewRouteImport } from './routes/api/public/track-pageview'
 import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/public/transcribe-voice-note'
+import { Route as ApiPublicUploadBriefFileRouteImport } from './routes/api/public/upload-brief-file'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -278,6 +279,12 @@ const ApiPublicTranscribeVoiceNoteRoute =
     path: '/api/public/transcribe-voice-note',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicUploadBriefFileRoute =
+  ApiPublicUploadBriefFileRouteImport.update({
+    id: '/api/public/upload-brief-file',
+    path: '/api/public/upload-brief-file',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicWaitlistJoinRoute = ApiPublicWaitlistJoinRouteImport.update({
   id: '/api/public/waitlist-join',
   path: '/api/public/waitlist-join',
@@ -358,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
+  '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
@@ -407,6 +415,7 @@ export interface FileRoutesByTo {
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
+  '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/racket-desk': typeof AuthenticatedRacketDeskIndexRoute
@@ -459,6 +468,7 @@ export interface FileRoutesById {
   '/api/public/contact-submit': typeof ApiPublicContactSubmitRoute
   '/api/public/track-pageview': typeof ApiPublicTrackPageviewRoute
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
+  '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
@@ -511,6 +521,7 @@ export interface FileRouteTypes {
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
     | '/api/public/transcribe-voice-note'
+    | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/racket-desk/'
@@ -560,6 +571,7 @@ export interface FileRouteTypes {
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
     | '/api/public/transcribe-voice-note'
+    | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/racket-desk'
@@ -611,6 +623,7 @@ export interface FileRouteTypes {
     | '/api/public/contact-submit'
     | '/api/public/track-pageview'
     | '/api/public/transcribe-voice-note'
+    | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/_authenticated/racket-desk/'
@@ -649,6 +662,7 @@ export interface RootRouteChildren {
   ApiPublicContactSubmitRoute: typeof ApiPublicContactSubmitRoute
   ApiPublicTrackPageviewRoute: typeof ApiPublicTrackPageviewRoute
   ApiPublicTranscribeVoiceNoteRoute: typeof ApiPublicTranscribeVoiceNoteRoute
+  ApiPublicUploadBriefFileRoute: typeof ApiPublicUploadBriefFileRoute
   ApiPublicWaitlistJoinRoute: typeof ApiPublicWaitlistJoinRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -954,6 +968,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicTranscribeVoiceNoteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/upload-brief-file': {
+      id: '/api/public/upload-brief-file'
+      path: '/api/public/upload-brief-file'
+      fullPath: '/api/public/upload-brief-file'
+      preLoaderRoute: typeof ApiPublicUploadBriefFileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/waitlist-join': {
       id: '/api/public/waitlist-join'
       path: '/api/public/waitlist-join'
@@ -1087,6 +1108,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicContactSubmitRoute: ApiPublicContactSubmitRoute,
   ApiPublicTrackPageviewRoute: ApiPublicTrackPageviewRoute,
   ApiPublicTranscribeVoiceNoteRoute: ApiPublicTranscribeVoiceNoteRoute,
+  ApiPublicUploadBriefFileRoute: ApiPublicUploadBriefFileRoute,
   ApiPublicWaitlistJoinRoute: ApiPublicWaitlistJoinRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
