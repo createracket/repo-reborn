@@ -226,8 +226,37 @@ function ConnectPage() {
       return;
     }
 
+    if (briefFile) {
+      const ext = briefFile.name.split(".").pop()?.toLowerCase() ?? "";
+      if (!BRIEF_FILE_EXTS.includes(ext)) {
+        toast.error("That file type isn't supported. Use PDF, Word, PowerPoint, Excel, text or an image.");
+        return;
+      }
+      if (briefFile.size > MAX_BRIEF_FILE_BYTES) {
+        toast.error("Attachment must be under 8MB.");
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
+      let upload: { path: string; name: string; size: number } | null = null;
+      if (briefFile) {
+        const body = new FormData();
+        body.append("file", briefFile);
+        const res = await fetch("/api/public/upload-brief-file", { method: "POST", body });
+        const json = (await res.json().catch(() => null)) as any;
+        if (!res.ok) {
+          throw new Error(json?.error ?? "Attachment upload failed");
+        }
+        upload = json;
+      }
+      const fileFields = {
+        brief_link: parsed.data.brief_link ?? null,
+        brief_file_path: upload?.path ?? null,
+        brief_file_name: upload?.name ?? null,
+        brief_file_size: upload?.size ?? null,
+      };
       if (authedUserId) {
         const { error } = await supabase.from("campaign_briefs").insert({
           user_id: authedUserId,
