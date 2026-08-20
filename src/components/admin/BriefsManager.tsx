@@ -464,6 +464,12 @@ function UnifiedBriefs({
             <CollapsibleContent>
               <CardContent className="space-y-3 text-sm">
                 <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
+                <BriefAttachments
+                  link={(b as any).brief_link ?? null}
+                  filePath={(b as any).brief_file_path ?? null}
+                  fileName={(b as any).brief_file_name ?? null}
+                  fileSize={(b as any).brief_file_size ?? null}
+                />
                 <div className="text-xs">
                   <span className="uppercase tracking-wider text-muted-foreground">Budget:</span>{" "}
                   <BudgetDisplay amount={b.budget} currency={b.currency} />
