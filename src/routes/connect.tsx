@@ -289,6 +289,7 @@ function ConnectPage() {
           collaboration_types: parsed.data.collaboration_types,
           core_values: parsed.data.core_values,
           additional_info: parsed.data.additional_info ?? null,
+          ...fileFields,
         } as any);
         if (error) throw error;
       }
