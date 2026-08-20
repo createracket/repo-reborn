@@ -128,6 +128,10 @@ export type CampaignBrief = {
   thumbnail_url?: string | null;
   thumb_frame?: any;
   display_order?: number | null;
+  brief_link?: string | null;
+  brief_file_path?: string | null;
+  brief_file_name?: string | null;
+  brief_file_size?: number | null;
 };
 export type Profile = {
   id: string; email: string | null; display_name: string | null;
