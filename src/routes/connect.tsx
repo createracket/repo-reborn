@@ -791,6 +791,51 @@ function ConnectPage() {
                         onChange={(e) => setAdditionalInfo(e.target.value)}
                       />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="brief_link">Link to a brief (optional)</Label>
+                      <Input
+                        id="brief_link"
+                        name="brief_link"
+                        type="url"
+                        inputMode="url"
+                        placeholder="https://docs.google.com/…"
+                        maxLength={2000}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Google Doc, Notion page, Dropbox — make sure sharing is switched on so we can open it.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="brief_file">Or attach a brief (optional)</Label>
+                      <Input
+                        id="brief_file"
+                        name="brief_file"
+                        type="file"
+                        accept={BRIEF_FILE_ACCEPT}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          if (file && file.size > MAX_BRIEF_FILE_BYTES) {
+                            toast.error("Attachment must be under 8MB.");
+                            e.target.value = "";
+                            setBriefFile(null);
+                            return;
+                          }
+                          setBriefFile(file);
+                        }}
+                        className="cursor-pointer file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1 file:text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        One file, up to 8MB. PDF, Word, PowerPoint, Excel, text or image only —
+                        stored privately and only visible to the Racket team.
+                      </p>
+                      {briefFile ? (
+                        <p className="text-xs text-foreground">
+                          Attached: {briefFile.name} ({Math.max(1, Math.round(briefFile.size / 1024))} KB)
+                        </p>
+                      ) : null}
+                    </div>
                   </section>
 
                   <div className="flex justify-end pt-2">
