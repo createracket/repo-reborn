@@ -60,7 +60,21 @@ const briefSchema = z.object({
   collaboration_types: z.array(z.string()).max(20),
   core_values: z.array(z.string()),
   additional_info: z.string().trim().max(5000).optional(),
+  brief_link: z
+    .string()
+    .trim()
+    .max(2000)
+    .url("Enter a valid link (starting with https://)")
+    .refine((u) => /^https?:\/\//i.test(u), "Links must start with http:// or https://")
+    .optional(),
 });
+
+const MAX_BRIEF_FILE_BYTES = 8 * 1024 * 1024;
+const BRIEF_FILE_ACCEPT =
+  ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.webp";
+const BRIEF_FILE_EXTS = [
+  "pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "txt", "jpg", "jpeg", "png", "webp",
+];
 
 type AccountKind = "brand" | "artist";
 type CampaignKind = "seed" | "endorse" | "partner" | "unsure";
