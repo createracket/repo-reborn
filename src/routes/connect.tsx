@@ -271,6 +271,7 @@ function ConnectPage() {
           collaboration_types: parsed.data.collaboration_types,
           core_values: parsed.data.core_values,
           status: "submitted",
+          ...fileFields,
         } as any);
         if (error) throw error;
       } else {
