@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Download, GripVertical, Link2, Pencil, Plus, Trash2 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 import {
@@ -102,6 +102,48 @@ function ArchetypePicker({
 }
 
 
+/** Brief link + private attachment shown to admins only. */
+function BriefAttachments({
+  link, filePath, fileName, fileSize,
+}: { link: string | null; filePath: string | null; fileName: string | null; fileSize: number | null }) {
+  const [loading, setLoading] = useState(false);
+  if (!link && !filePath) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {link ? (
+        <Button size="sm" variant="outline" asChild>
+          <a href={link} target="_blank" rel="noreferrer noopener">
+            <Link2 className="mr-1 h-3 w-3" /> Open brief link
+          </a>
+        </Button>
+      ) : null}
+      {filePath ? (
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={loading}
+          onClick={async () => {
+            setLoading(true);
+            try {
+              const { getBriefFileUrl } = await import("@/lib/brief-files.functions");
+              const res = await getBriefFileUrl({ data: { path: filePath } });
+              window.open(res.url, "_blank", "noopener");
+            } catch (e: any) {
+              toast.error(e?.message ?? "Could not open attachment");
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          <Download className="mr-1 h-3 w-3" />
+          {fileName ?? "Download brief"}
+          {fileSize ? ` (${Math.max(1, Math.round(fileSize / 1024))} KB)` : ""}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
 export type LeadBrief = {
   id: string; created_at: string; title: string; description: string;
   budget: number | null; currency: string | null; transparency: string | null;
@@ -112,6 +154,10 @@ export type LeadBrief = {
   linked_roster_id: string | null;
   linked_report_id: string | null;
   display_order?: number | null;
+  brief_link?: string | null;
+  brief_file_path?: string | null;
+  brief_file_name?: string | null;
+  brief_file_size?: number | null;
 };
 export type CampaignBrief = {
   id: string; created_at: string; title: string; description: string;
@@ -124,6 +170,10 @@ export type CampaignBrief = {
   thumbnail_url?: string | null;
   thumb_frame?: any;
   display_order?: number | null;
+  brief_link?: string | null;
+  brief_file_path?: string | null;
+  brief_file_name?: string | null;
+  brief_file_size?: number | null;
 };
 export type Profile = {
   id: string; email: string | null; display_name: string | null;
@@ -160,7 +210,7 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr, emailRes] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, thumbnail_url, thumb_frame, display_order").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, thumbnail_url, thumb_frame, display_order, brief_link, brief_file_path, brief_file_name, brief_file_size").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
       (supabase as any).rpc("admin_campaign_brief_emails"),
     ]);
@@ -456,6 +506,12 @@ function UnifiedBriefs({
             <CollapsibleContent>
               <CardContent className="space-y-3 text-sm">
                 <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
+                <BriefAttachments
+                  link={(b as any).brief_link ?? null}
+                  filePath={(b as any).brief_file_path ?? null}
+                  fileName={(b as any).brief_file_name ?? null}
+                  fileSize={(b as any).brief_file_size ?? null}
+                />
                 <div className="text-xs">
                   <span className="uppercase tracking-wider text-muted-foreground">Budget:</span>{" "}
                   <BudgetDisplay amount={b.budget} currency={b.currency} />
