@@ -208,6 +208,7 @@ function ConnectPage() {
       collaboration_types: finalTypes,
       core_values: values,
       additional_info: combinedExtra,
+      brief_link: fd.get("brief_link")?.toString().trim() || undefined,
     });
 
     if (!parsed.success) {
