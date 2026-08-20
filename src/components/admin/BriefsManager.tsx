@@ -102,6 +102,48 @@ function ArchetypePicker({
 }
 
 
+/** Brief link + private attachment shown to admins only. */
+function BriefAttachments({
+  link, filePath, fileName, fileSize,
+}: { link: string | null; filePath: string | null; fileName: string | null; fileSize: number | null }) {
+  const [loading, setLoading] = useState(false);
+  if (!link && !filePath) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {link ? (
+        <Button size="sm" variant="outline" asChild>
+          <a href={link} target="_blank" rel="noreferrer noopener">
+            <Link2 className="mr-1 h-3 w-3" /> Open brief link
+          </a>
+        </Button>
+      ) : null}
+      {filePath ? (
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={loading}
+          onClick={async () => {
+            setLoading(true);
+            try {
+              const { getBriefFileUrl } = await import("@/lib/brief-files.functions");
+              const res = await getBriefFileUrl({ data: { path: filePath } });
+              window.open(res.url, "_blank", "noopener");
+            } catch (e: any) {
+              toast.error(e?.message ?? "Could not open attachment");
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          <Download className="mr-1 h-3 w-3" />
+          {fileName ?? "Download brief"}
+          {fileSize ? ` (${Math.max(1, Math.round(fileSize / 1024))} KB)` : ""}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
 export type LeadBrief = {
   id: string; created_at: string; title: string; description: string;
   budget: number | null; currency: string | null; transparency: string | null;
