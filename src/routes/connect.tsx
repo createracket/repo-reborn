@@ -134,6 +134,7 @@ function ConnectPage() {
   const [accountKind, setAccountKind] = useState<AccountKind | null>(null);
   const [campaignKind, setCampaignKind] = useState<CampaignKind | null>(null);
   const [additionalInfo, setAdditionalInfo] = useState("");
+  const [briefFile, setBriefFile] = useState<File | null>(null);
 
   useEffect(() => {
     loadBriefFormConfig().then(setConfig).catch(() => setConfig(DEFAULT_BRIEF_FORM_CONFIG));
