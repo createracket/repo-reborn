@@ -112,6 +112,10 @@ export type LeadBrief = {
   linked_roster_id: string | null;
   linked_report_id: string | null;
   display_order?: number | null;
+  brief_link?: string | null;
+  brief_file_path?: string | null;
+  brief_file_name?: string | null;
+  brief_file_size?: number | null;
 };
 export type CampaignBrief = {
   id: string; created_at: string; title: string; description: string;
