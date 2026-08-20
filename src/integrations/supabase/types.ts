@@ -93,6 +93,10 @@ export type Database = {
         Row: {
           artist_archetypes: string[]
           brand_archetypes: string[]
+          brief_file_name: string | null
+          brief_file_path: string | null
+          brief_file_size: number | null
+          brief_link: string | null
           budget: number | null
           collaboration_types: string[]
           contact_email: string | null
@@ -118,6 +122,10 @@ export type Database = {
         Insert: {
           artist_archetypes?: string[]
           brand_archetypes?: string[]
+          brief_file_name?: string | null
+          brief_file_path?: string | null
+          brief_file_size?: number | null
+          brief_link?: string | null
           budget?: number | null
           collaboration_types?: string[]
           contact_email?: string | null
@@ -143,6 +151,10 @@ export type Database = {
         Update: {
           artist_archetypes?: string[]
           brand_archetypes?: string[]
+          brief_file_name?: string | null
+          brief_file_path?: string | null
+          brief_file_size?: number | null
+          brief_link?: string | null
           budget?: number | null
           collaboration_types?: string[]
           contact_email?: string | null
@@ -747,6 +759,10 @@ export type Database = {
       lead_briefs: {
         Row: {
           additional_info: string | null
+          brief_file_name: string | null
+          brief_file_path: string | null
+          brief_file_size: number | null
+          brief_link: string | null
           budget: number | null
           collaboration_types: string[]
           company: string | null
@@ -768,6 +784,10 @@ export type Database = {
         }
         Insert: {
           additional_info?: string | null
+          brief_file_name?: string | null
+          brief_file_path?: string | null
+          brief_file_size?: number | null
+          brief_link?: string | null
           budget?: number | null
           collaboration_types?: string[]
           company?: string | null
@@ -789,6 +809,10 @@ export type Database = {
         }
         Update: {
           additional_info?: string | null
+          brief_file_name?: string | null
+          brief_file_path?: string | null
+          brief_file_size?: number | null
+          brief_link?: string | null
           budget?: number | null
           collaboration_types?: string[]
           company?: string | null

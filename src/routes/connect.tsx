@@ -60,7 +60,21 @@ const briefSchema = z.object({
   collaboration_types: z.array(z.string()).max(20),
   core_values: z.array(z.string()),
   additional_info: z.string().trim().max(5000).optional(),
+  brief_link: z
+    .string()
+    .trim()
+    .max(2000)
+    .url("Enter a valid link (starting with https://)")
+    .refine((u) => /^https?:\/\//i.test(u), "Links must start with http:// or https://")
+    .optional(),
 });
+
+const MAX_BRIEF_FILE_BYTES = 8 * 1024 * 1024;
+const BRIEF_FILE_ACCEPT =
+  ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.webp";
+const BRIEF_FILE_EXTS = [
+  "pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "txt", "jpg", "jpeg", "png", "webp",
+];
 
 type AccountKind = "brand" | "artist";
 type CampaignKind = "seed" | "endorse" | "partner" | "unsure";
@@ -134,6 +148,7 @@ function ConnectPage() {
   const [accountKind, setAccountKind] = useState<AccountKind | null>(null);
   const [campaignKind, setCampaignKind] = useState<CampaignKind | null>(null);
   const [additionalInfo, setAdditionalInfo] = useState("");
+  const [briefFile, setBriefFile] = useState<File | null>(null);
 
   useEffect(() => {
     loadBriefFormConfig().then(setConfig).catch(() => setConfig(DEFAULT_BRIEF_FORM_CONFIG));
@@ -193,6 +208,7 @@ function ConnectPage() {
       collaboration_types: finalTypes,
       core_values: values,
       additional_info: combinedExtra,
+      brief_link: fd.get("brief_link")?.toString().trim() || undefined,
     });
 
     if (!parsed.success) {
@@ -210,8 +226,37 @@ function ConnectPage() {
       return;
     }
 
+    if (briefFile) {
+      const ext = briefFile.name.split(".").pop()?.toLowerCase() ?? "";
+      if (!BRIEF_FILE_EXTS.includes(ext)) {
+        toast.error("That file type isn't supported. Use PDF, Word, PowerPoint, Excel, text or an image.");
+        return;
+      }
+      if (briefFile.size > MAX_BRIEF_FILE_BYTES) {
+        toast.error("Attachment must be under 8MB.");
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
+      let upload: { path: string; name: string; size: number } | null = null;
+      if (briefFile) {
+        const body = new FormData();
+        body.append("file", briefFile);
+        const res = await fetch("/api/public/upload-brief-file", { method: "POST", body });
+        const json = (await res.json().catch(() => null)) as any;
+        if (!res.ok) {
+          throw new Error(json?.error ?? "Attachment upload failed");
+        }
+        upload = json;
+      }
+      const fileFields = {
+        brief_link: parsed.data.brief_link ?? null,
+        brief_file_path: upload?.path ?? null,
+        brief_file_name: upload?.name ?? null,
+        brief_file_size: upload?.size ?? null,
+      };
       if (authedUserId) {
         const { error } = await supabase.from("campaign_briefs").insert({
           user_id: authedUserId,
@@ -226,6 +271,7 @@ function ConnectPage() {
           collaboration_types: parsed.data.collaboration_types,
           core_values: parsed.data.core_values,
           status: "submitted",
+          ...fileFields,
         } as any);
         if (error) throw error;
       } else {
@@ -243,6 +289,7 @@ function ConnectPage() {
           collaboration_types: parsed.data.collaboration_types,
           core_values: parsed.data.core_values,
           additional_info: parsed.data.additional_info ?? null,
+          ...fileFields,
         } as any);
         if (error) throw error;
       }
