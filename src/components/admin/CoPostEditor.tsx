@@ -5,18 +5,27 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toProfileUrl } from "@/lib/social-handles";
-import { MAX_CO_POSTS_PER_PLATFORM, type CoPost, type CoPostPlatform } from "@/lib/co-posts";
+import { toProfileUrl, type SocialPlatform } from "@/lib/social-handles";
+import {
+  CO_POST_PLATFORMS,
+  CO_POST_PLATFORM_LABEL,
+  MAX_CO_POSTS_PER_PLATFORM,
+  type CoPost,
+  type CoPostPlatform,
+} from "@/lib/co-posts";
 
-const PLATFORMS: Array<{ key: CoPostPlatform; label: string }> = [
-  { key: "instagram", label: "Instagram" },
-  { key: "tiktok", label: "TikTok" },
-];
+/** Spotify links are used as-is; the others can be typed as bare handles. */
+function canonicalUrl(platform: CoPostPlatform, raw: string): string | null {
+  const value = (raw ?? "").trim();
+  if (!value) return null;
+  if (platform === "spotify") return value;
+  return toProfileUrl(platform as SocialPlatform, value);
+}
 
 /**
  * Co-posted entries for a roster creator: the lead creator keeps all the normal
- * inputs, and up to 2 extra Instagram + 2 extra TikTok collaborator links can be
- * attached here.
+ * inputs, and up to 2 extra links per platform (Instagram, TikTok, YouTube and
+ * Spotify) can be attached here.
  */
 export function CoPostEditor({
   value,
@@ -25,7 +34,7 @@ export function CoPostEditor({
 }: {
   value: CoPost[];
   onChange: (next: CoPost[]) => void;
-  onFetch?: (url: string) => Promise<number | null>;
+  onFetch?: (url: string, platform: CoPostPlatform) => Promise<number | null>;
 }) {
   const [fetching, setFetching] = useState<number | null>(null);
 
@@ -40,20 +49,20 @@ export function CoPostEditor({
   async function fetchFollowers(index: number) {
     const row = value[index];
     if (!onFetch) return;
-    const url = toProfileUrl(row.platform, row.url ?? "");
+    const url = canonicalUrl(row.platform, row.url ?? "");
     if (!url) {
       toast.error("Enter a link or handle first");
       return;
     }
     setFetching(index);
     try {
-      const followers = await onFetch(url);
+      const followers = await onFetch(url, row.platform);
       if (followers == null) {
         toast.error("No follower count returned");
         return;
       }
       update(index, { url, followers });
-      toast.success(`Fetched ${followers.toLocaleString()} followers`);
+      toast.success(`Fetched ${followers.toLocaleString()}`);
     } catch (e) {
       toast.error((e as Error).message || "Couldn't fetch followers");
     } finally {
@@ -69,22 +78,22 @@ export function CoPostEditor({
             Co-posted with
           </Label>
           <p className="text-[11px] text-muted-foreground">
-            Optional collaborators on the same post — up to {MAX_CO_POSTS_PER_PLATFORM} Instagram
-            and {MAX_CO_POSTS_PER_PLATFORM} TikTok links. Their followers count towards this
-            creator's totals.
+            Optional collaborators on the same post — up to {MAX_CO_POSTS_PER_PLATFORM} links per
+            platform. Social followers count towards this creator's socials; Spotify monthly
+            listeners count towards fans.
           </p>
         </div>
-        <div className="flex gap-2">
-          {PLATFORMS.map((p) => (
+        <div className="flex flex-wrap gap-2">
+          {CO_POST_PLATFORMS.map((p) => (
             <Button
-              key={p.key}
+              key={p}
               type="button"
               size="sm"
               variant="outline"
-              onClick={() => add(p.key)}
-              disabled={value.filter((c) => c.platform === p.key).length >= MAX_CO_POSTS_PER_PLATFORM}
+              onClick={() => add(p)}
+              disabled={value.filter((c) => c.platform === p).length >= MAX_CO_POSTS_PER_PLATFORM}
             >
-              <Plus className="mr-1 size-3.5" /> {p.label}
+              <Plus className="mr-1 size-3.5" /> {CO_POST_PLATFORM_LABEL[p]}
             </Button>
           ))}
         </div>
@@ -97,7 +106,7 @@ export function CoPostEditor({
           {value.map((c, i) => (
             <div key={i} className="grid gap-2 sm:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1fr)_7rem_auto]">
               <span className="flex items-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {c.platform === "tiktok" ? "TikTok" : "Instagram"}
+                {CO_POST_PLATFORM_LABEL[c.platform]}
               </span>
               <Input
                 value={c.name}
@@ -109,7 +118,7 @@ export function CoPostEditor({
                 <Input
                   value={c.url}
                   onChange={(e) => update(i, { url: e.target.value })}
-                  placeholder="@handle or URL"
+                  placeholder={c.platform === "spotify" ? "Spotify artist URL" : "@handle or URL"}
                   className="text-sm"
                 />
                 {onFetch && (
@@ -118,7 +127,7 @@ export function CoPostEditor({
                     size="sm"
                     variant="outline"
                     className="shrink-0"
-                    title="Auto-sync followers"
+                    title="Auto-sync"
                     onClick={() => fetchFollowers(i)}
                     disabled={fetching === i}
                   >
@@ -135,7 +144,7 @@ export function CoPostEditor({
                     followers: e.target.value.trim() && Number.isFinite(n) ? n : null,
                   });
                 }}
-                placeholder="Followers"
+                placeholder={c.platform === "spotify" ? "Monthly listeners" : "Followers"}
                 className="text-sm"
               />
               <Button
