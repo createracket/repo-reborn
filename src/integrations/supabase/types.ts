@@ -1243,6 +1243,7 @@ export type Database = {
           budget: number | null
           categories: string[]
           category: string | null
+          co_posts: Json
           content_review_label: string | null
           content_review_url: string | null
           created_at: string
@@ -1286,6 +1287,7 @@ export type Database = {
           budget?: number | null
           categories?: string[]
           category?: string | null
+          co_posts?: Json
           content_review_label?: string | null
           content_review_url?: string | null
           created_at?: string
@@ -1329,6 +1331,7 @@ export type Database = {
           budget?: number | null
           categories?: string[]
           category?: string | null
+          co_posts?: Json
           content_review_label?: string | null
           content_review_url?: string | null
           created_at?: string

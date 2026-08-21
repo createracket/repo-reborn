@@ -56,6 +56,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
 import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { socialAudience, totalFans } from "@/lib/audience";
+import { parseCoPosts, coPostLabel, type CoPost } from "@/lib/co-posts";
+import { CoPostEditor } from "@/components/admin/CoPostEditor";
 import {
   DndContext,
   closestCenter,
@@ -175,6 +177,7 @@ type RosterItem = {
   bio_page_url: string | null;
   content_review_url: string | null;
   content_review_label: string | null;
+  co_posts: unknown;
   position: number;
   status: string;
   budget: number | null;
@@ -1777,6 +1780,9 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, stat
     [item.custom_label || "Link", item.custom_followers, item.custom_url],
     ["Spotify streams", item.spotify_monthly_listens, item.spotify_url],
     ["Apple", item.apple_music_followers, item.apple_music_url],
+    ...parseCoPosts(item.co_posts).map(
+      (c) => [coPostLabel(c), c.followers, c.url] as [string, number | null, string | null],
+    ),
   ];
   const rowSocial = socialAudience(item);
   const rowFans = totalFans(item);
@@ -2115,6 +2121,7 @@ function EditProspectPanel({
     budget: item.budget?.toString() ?? "",
     metrics_month: item.metrics_month ?? "",
   });
+  const [coPosts, setCoPosts] = useState<CoPost[]>(() => parseCoPosts(item.co_posts));
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [fetching, setFetching] = useState<string | null>(null);
@@ -2273,6 +2280,14 @@ function EditProspectPanel({
         content_review_label: form.content_review_label.trim() || null,
         budget: toNum(form.budget),
         metrics_month: form.metrics_month.trim() || null,
+        co_posts: coPosts
+          .filter((c) => c.url.trim())
+          .map((c) => ({
+            platform: c.platform,
+            name: c.name.trim(),
+            url: toProfileUrl(c.platform, c.url.trim()) ?? c.url.trim(),
+            followers: c.followers,
+          })),
         ...(flagState.flagged
           ? { flagged_streaming_mismatch: true, flagged_streaming_reason: flagState.reason }
           : {}),
@@ -2412,6 +2427,14 @@ function EditProspectPanel({
         {fld("Content link label (optional)", "content_review_label")}
         {fld("Bio page URL", "bio_page_url")}
       </div>
+      <CoPostEditor
+        value={coPosts}
+        onChange={setCoPosts}
+        onFetch={async (url: string) => {
+          const r = await scrapeProfile({ data: { url } });
+          return r.ok ? (r.followers ?? null) : null;
+        }}
+      />
       {mismatchWarning ? (
         <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-300">
           {mismatchWarning}
