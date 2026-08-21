@@ -58,6 +58,7 @@ type PublicPost = {
   featured_comments: FeaturedComment[];
   hashtags: string[];
   brand_tag: string | null;
+  extra_mention?: boolean | null;
   position: number;
   updated_at: string | null;
 };
