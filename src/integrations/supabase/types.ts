@@ -306,6 +306,7 @@ export type Database = {
           created_at: string
           creator_id: string
           engagement_rate_pct: number | null
+          extra_mention: boolean
           featured_comments: Json
           followers: number | null
           hashtags: string[]
@@ -333,6 +334,7 @@ export type Database = {
           created_at?: string
           creator_id: string
           engagement_rate_pct?: number | null
+          extra_mention?: boolean
           featured_comments?: Json
           followers?: number | null
           hashtags?: string[]
@@ -360,6 +362,7 @@ export type Database = {
           created_at?: string
           creator_id?: string
           engagement_rate_pct?: number | null
+          extra_mention?: boolean
           featured_comments?: Json
           followers?: number | null
           hashtags?: string[]

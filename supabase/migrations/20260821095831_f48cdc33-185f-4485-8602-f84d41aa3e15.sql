@@ -1,0 +1,1 @@
+ALTER TABLE public.campaign_report_posts ADD COLUMN IF NOT EXISTS extra_mention boolean NOT NULL DEFAULT false;
