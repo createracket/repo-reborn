@@ -149,6 +149,7 @@ type Post = {
   featured_comments: FeaturedComment[];
   hashtags: string[];
   brand_tag: string | null;
+  extra_mention: boolean | null;
   position: number;
   metrics_updated_at: string | null;
 };
@@ -1439,8 +1440,10 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
     sentiment_score: post.sentiment_score ?? 50,
     hashtags: (post.hashtags ?? []).join(" "),
     brand_tag: post.brand_tag ?? "",
+    extra_mention: !!post.extra_mention,
     featured_comments: post.featured_comments ?? [],
   });
+
 
   useEffect(() => {
     setForm({
@@ -1462,6 +1465,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
       sentiment_score: post.sentiment_score ?? 50,
       hashtags: (post.hashtags ?? []).join(" "),
       brand_tag: post.brand_tag ?? "",
+      extra_mention: !!post.extra_mention,
       featured_comments: post.featured_comments ?? [],
     });
   }, [post.id]);
@@ -1549,6 +1553,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
           .map((h) => h.replace(/^#/, "").trim())
           .filter(Boolean),
         brand_tag: form.brand_tag.trim() || null,
+        extra_mention: form.extra_mention,
         featured_comments: form.featured_comments,
       })
       .eq("id", post.id);
@@ -1667,7 +1672,14 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
             </a>
           </Button>
         )}
-        <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
+          <label className="flex items-center gap-1.5" title="Hidden from the report by default">
+            <Switch
+              checked={form.extra_mention}
+              onCheckedChange={(v) => set("extra_mention", v)}
+            />
+            <span>Extra mention</span>
+          </label>
           <span>
             {form.posted_at
               ? `${new Date(form.posted_at).toLocaleDateString("en-GB", {

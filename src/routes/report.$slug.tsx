@@ -58,6 +58,7 @@ type PublicPost = {
   featured_comments: FeaturedComment[];
   hashtags: string[];
   brand_tag: string | null;
+  extra_mention?: boolean | null;
   position: number;
   updated_at: string | null;
 };
@@ -105,6 +106,8 @@ function PublicReportPage() {
   const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
   const [monthFilter, setMonthFilter] = useState<string>("all");
   const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
+  const [showExtras, setShowExtras] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(20);
   const [gate, setGate] = useState<{ title: string; header_image_url: string | null; code_label: string } | null>(null);
   const [gateEmail, setGateEmail] = useState("");
   const [gateCode, setGateCode] = useState("");
@@ -181,6 +184,12 @@ function PublicReportPage() {
       setStatus("ready");
     })();
   }, [slug]);
+
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [monthFilter, platformFilter, showExtras]);
+
+
 
   if (status === "loading") {
     return (
@@ -295,7 +304,13 @@ function PublicReportPage() {
     );
   }
 
-  const allPosts = creators.flatMap((c) => c.posts);
+  // Posts tagged as "extra mentions" are hidden (and excluded from every total)
+  // unless the visitor switches the extra mentions toggle on.
+  const scopedCreators = creators
+    .map((c) => ({ ...c, posts: showExtras ? c.posts : c.posts.filter((p) => !p.extra_mention) }))
+    .filter((c) => c.posts.length > 0);
+  const hasExtraMentions = creators.some((c) => c.posts.some((p) => !!p.extra_mention));
+  const allPosts = scopedCreators.flatMap((c) => c.posts);
 
   const monthOptions = (() => {
     const map = new Map<string, string>();
@@ -312,7 +327,7 @@ function PublicReportPage() {
       .map(([key, label]) => ({ key, label }));
   })();
 
-  const filteredCreators = creators
+  const filteredCreators = scopedCreators
     .map((c) => ({
       ...c,
       posts: c.posts.filter((p) => {
@@ -326,6 +341,22 @@ function PublicReportPage() {
       }),
     }))
     .filter((c) => c.posts.length > 0);
+
+  // Only render `visibleCount` posts at a time so long reports stay fast.
+  const filteredPostCount = filteredCreators.reduce((n, c) => n + c.posts.length, 0);
+  const visibleCreators = (() => {
+    let budget = visibleCount;
+    const out: typeof filteredCreators = [];
+    for (const c of filteredCreators) {
+      if (budget <= 0) break;
+      const posts = c.posts.slice(0, budget);
+      budget -= posts.length;
+      out.push({ ...c, posts });
+    }
+    return out;
+  })();
+  const hasMorePosts = filteredPostCount > visibleCount;
+
   // Negative values are "hidden/unavailable" sentinels from social scrapers
   // (e.g. Instagram posts with like counts turned off) — never count them.
   const num = (v: number | null | undefined) => (v == null || v < 0 ? 0 : v);
@@ -460,7 +491,7 @@ function PublicReportPage() {
               label="Est. engagement"
               value={estEngagementPct != null ? `${estEngagementPct.toFixed(2)}%` : "—"}
             />
-            <TotalStat label="Total creators" value={String(creators.length)} />
+            <TotalStat label="Total creators" value={String(scopedCreators.length)} />
             <TotalStat label="Live posts" value={String(allPosts.length)} />
           </div>
         )}
@@ -484,8 +515,21 @@ function PublicReportPage() {
           </div>
         )}
 
-        {monthOptions.length > 0 && (
+        {(monthOptions.length > 0 || hasExtraMentions) && (
           <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
+            {hasExtraMentions && (
+              <button
+                onClick={() => setShowExtras((v) => !v)}
+                aria-pressed={showExtras}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                  showExtras
+                    ? "border-lime bg-lime text-primary-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Extra mentions {showExtras ? "on" : "off"}
+              </button>
+            )}
             <div className="flex items-center gap-1.5">
               {(["all", "instagram", "tiktok"] as const).map((p) => {
                 const active = platformFilter === p;
@@ -505,25 +549,31 @@ function PublicReportPage() {
                 );
               })}
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Filter className="size-4" />
-              <span>Filter by month</span>
-            </div>
-            <Select value={monthFilter} onValueChange={(v) => setMonthFilter(v)}>
-              <SelectTrigger className="w-[180px] text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All months</SelectItem>
-                {monthOptions.map((m) => (
-                  <SelectItem key={m.key} value={m.key}>
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {monthOptions.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Filter className="size-4" />
+                  <span>Filter by month</span>
+                </div>
+                <Select value={monthFilter} onValueChange={(v) => setMonthFilter(v)}>
+                  <SelectTrigger className="w-[180px] text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All months</SelectItem>
+                    {monthOptions.map((m) => (
+                      <SelectItem key={m.key} value={m.key}>
+                        {m.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
           </div>
         )}
+
+
 
         <section className="mt-6 space-y-10">
           {filteredCreators.length === 0 ? (
@@ -534,14 +584,14 @@ function PublicReportPage() {
             </p>
           ) : report.template === "simple" ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {filteredCreators.flatMap((c) =>
+              {visibleCreators.flatMap((c) =>
                 c.posts.map((p) => (
                   <SimplePostCard key={p.id} post={p} creator={c} />
                 )),
               )}
             </div>
           ) : (
-            filteredCreators.map((c) => (
+            visibleCreators.map((c) => (
               <div key={c.id} className="space-y-4">
                 {c.posts.length === 0 ? (
                   <Card>
@@ -576,7 +626,19 @@ function PublicReportPage() {
             ))
 
           )}
+
+          {hasMorePosts && (
+            <div className="flex flex-col items-center gap-2 pt-2">
+              <p className="text-xs text-muted-foreground">
+                Showing {Math.min(visibleCount, filteredPostCount)} of {filteredPostCount} posts
+              </p>
+              <Button variant="outline" onClick={() => setVisibleCount((n) => n + 20)}>
+                Show more
+              </Button>
+            </div>
+          )}
         </section>
+
 
       </main>
       <SiteFooter />
