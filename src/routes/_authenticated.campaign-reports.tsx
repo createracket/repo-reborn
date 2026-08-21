@@ -528,9 +528,21 @@ function ReportListView({
                       Updated {new Date(r.updated_at).toLocaleDateString()}
                     </p>
                   </button>
-                  <Button size="icon" variant="ghost" onClick={() => handleDelete(r.id)}>
-                    <Trash2 className="size-4" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title="Duplicate report"
+                      disabled={duplicatingId === r.id}
+                      onClick={() => handleDuplicate(r)}
+                    >
+                      <Copy className="size-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => handleDelete(r.id)}>
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+
                 </li>
               ))}
             </ul>
