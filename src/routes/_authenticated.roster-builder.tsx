@@ -349,7 +349,17 @@ function RosterBuilderPage() {
         }));
       setCommunity([...brandRows, ...communityRows]);
       setProfiles((pr as ProfileRow[]) ?? []);
-      setBriefs((cb as Brief[]) ?? []);
+      const briefRows = ((cb as Brief[]) ?? []).map((b) => ({ ...b, contact_email: null as string | null }));
+      // Contact emails are not readable through the table; admins fetch them via a secure lookup.
+      const { data: briefEmails } = await (supabase as any).rpc("admin_campaign_brief_emails");
+      if (Array.isArray(briefEmails) && briefEmails.length) {
+        const emailById = new Map<string, string | null>(
+          (briefEmails as Array<{ id: string; contact_email: string | null }>).map((r) => [r.id, r.contact_email]),
+        );
+        for (const b of briefRows) b.contact_email = emailById.get(b.id) ?? null;
+      }
+      setBriefs(briefRows);
+
       setChecking(false);
 
     })();
