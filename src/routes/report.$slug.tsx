@@ -491,7 +491,7 @@ function PublicReportPage() {
         )}
 
         {latestUpdate && (
-          <p className="mt-3 hidden text-xs text-muted-foreground md:block">
+          <p className="mt-3 text-xs text-muted-foreground">
             Last updated: {latestUpdate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
           </p>
         )}
