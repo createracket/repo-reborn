@@ -1465,6 +1465,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
       sentiment_score: post.sentiment_score ?? 50,
       hashtags: (post.hashtags ?? []).join(" "),
       brand_tag: post.brand_tag ?? "",
+      extra_mention: !!post.extra_mention,
       featured_comments: post.featured_comments ?? [],
     });
   }, [post.id]);
