@@ -399,6 +399,89 @@ function ReportListView({
     onCreated(newId);
   }
 
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+
+  async function handleDuplicate(r: Report) {
+    if (!userId) return;
+    setDuplicatingId(r.id);
+    try {
+      const slug = `${r.slug}-copy`;
+      const { data: created, error } = await sb
+        .from("campaign_reports")
+        .insert({
+          owner_id: userId,
+          title: `${r.title} (copy)`,
+          description: r.description,
+          slug,
+          published: false,
+          published_at: null,
+          header_image_url: r.header_image_url,
+          profile_image_url: (r as any).profile_image_url ?? null,
+          source_roster_id: r.source_roster_id,
+          categories: (r as any).categories ?? [],
+          hide_categories: (r as any).hide_categories ?? false,
+          template: (r as any).template ?? "original",
+          access_code: (r as any).access_code ?? null,
+          access_code_label: (r as any).access_code_label ?? null,
+          thumb_frame: (r as any).thumb_frame ?? null,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      const newId = (created as { id: string }).id;
+
+      const { data: cr } = await sb
+        .from("campaign_report_creators")
+        .select("*")
+        .eq("report_id", r.id)
+        .order("position", { ascending: true });
+      const creatorRows = ((cr as any[]) ?? []);
+
+      if (creatorRows.length > 0) {
+        const payload = creatorRows.map(({ id, report_id, created_at, updated_at, ...rest }) => ({
+          ...rest,
+          report_id: newId,
+        }));
+        const { data: inserted, error: cErr } = await sb
+          .from("campaign_report_creators")
+          .insert(payload)
+          .select("id, name, position");
+        if (cErr) throw cErr;
+        const newCreators = (inserted as any[]) ?? [];
+
+        // Map old creator id -> new creator id by (position, name)
+        const key = (c: any) => `${c.position}::${c.name}`;
+        const idMap = new Map<string, string>();
+        for (const oldC of creatorRows) {
+          const match = newCreators.find((n) => key(n) === key(oldC));
+          if (match) idMap.set(oldC.id, match.id);
+        }
+
+        const { data: pr } = await sb
+          .from("campaign_report_posts")
+          .select("*")
+          .in("creator_id", creatorRows.map((c) => c.id));
+        const postRows = ((pr as any[]) ?? [])
+          .map(({ id, creator_id, created_at, updated_at, ...rest }) => {
+            const newCreatorId = idMap.get(creator_id);
+            return newCreatorId ? { ...rest, creator_id: newCreatorId } : null;
+          })
+          .filter(Boolean) as any[];
+        if (postRows.length > 0) {
+          const { error: pErr } = await sb.from("campaign_report_posts").insert(postRows);
+          if (pErr) throw pErr;
+        }
+      }
+
+      toast.success("Report duplicated as a draft");
+      onDeleted();
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not duplicate report");
+    } finally {
+      setDuplicatingId(null);
+    }
+  }
+
   async function handleDelete(id: string) {
     if (!confirm("Delete this campaign report? All creators and posts will be removed.")) return;
     const { error } = await sb.from("campaign_reports").delete().eq("id", id);
@@ -406,6 +489,7 @@ function ReportListView({
     toast.success("Deleted");
     onDeleted();
   }
+
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
