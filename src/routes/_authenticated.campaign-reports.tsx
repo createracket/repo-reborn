@@ -1553,6 +1553,7 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
           .map((h) => h.replace(/^#/, "").trim())
           .filter(Boolean),
         brand_tag: form.brand_tag.trim() || null,
+        extra_mention: form.extra_mention,
         featured_comments: form.featured_comments,
       })
       .eq("id", post.id);
