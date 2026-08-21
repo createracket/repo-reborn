@@ -570,6 +570,10 @@ function PublicReportPage() {
                 </Select>
               </>
             )}
+          </div>
+        )}
+
+
 
         <section className="mt-6 space-y-10">
           {filteredCreators.length === 0 ? (
