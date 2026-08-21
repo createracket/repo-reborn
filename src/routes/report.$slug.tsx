@@ -549,25 +549,27 @@ function PublicReportPage() {
                 );
               })}
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Filter className="size-4" />
-              <span>Filter by month</span>
-            </div>
-            <Select value={monthFilter} onValueChange={(v) => setMonthFilter(v)}>
-              <SelectTrigger className="w-[180px] text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All months</SelectItem>
-                {monthOptions.map((m) => (
-                  <SelectItem key={m.key} value={m.key}>
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+            {monthOptions.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Filter className="size-4" />
+                  <span>Filter by month</span>
+                </div>
+                <Select value={monthFilter} onValueChange={(v) => setMonthFilter(v)}>
+                  <SelectTrigger className="w-[180px] text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All months</SelectItem>
+                    {monthOptions.map((m) => (
+                      <SelectItem key={m.key} value={m.key}>
+                        {m.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
 
         <section className="mt-6 space-y-10">
           {filteredCreators.length === 0 ? (
