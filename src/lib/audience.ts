@@ -1,4 +1,4 @@
-import { coPostAudience } from "./co-posts";
+import { coPostSocialAudience, coPostStreamingAudience } from "./co-posts";
 
 /**
  * Shared audience maths.
