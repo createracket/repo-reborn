@@ -1672,7 +1672,14 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
             </a>
           </Button>
         )}
-        <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
+          <label className="flex items-center gap-1.5" title="Hidden from the report by default">
+            <Switch
+              checked={form.extra_mention}
+              onCheckedChange={(v) => set("extra_mention", v)}
+            />
+            <span>Extra mention</span>
+          </label>
           <span>
             {form.posted_at
               ? `${new Date(form.posted_at).toLocaleDateString("en-GB", {
