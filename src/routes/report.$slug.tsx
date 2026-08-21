@@ -584,14 +584,14 @@ function PublicReportPage() {
             </p>
           ) : report.template === "simple" ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {filteredCreators.flatMap((c) =>
+              {visibleCreators.flatMap((c) =>
                 c.posts.map((p) => (
                   <SimplePostCard key={p.id} post={p} creator={c} />
                 )),
               )}
             </div>
           ) : (
-            filteredCreators.map((c) => (
+            visibleCreators.map((c) => (
               <div key={c.id} className="space-y-4">
                 {c.posts.length === 0 ? (
                   <Card>
@@ -626,7 +626,19 @@ function PublicReportPage() {
             ))
 
           )}
+
+          {hasMorePosts && (
+            <div className="flex flex-col items-center gap-2 pt-2">
+              <p className="text-xs text-muted-foreground">
+                Showing {Math.min(visibleCount, filteredPostCount)} of {filteredPostCount} posts
+              </p>
+              <Button variant="outline" onClick={() => setVisibleCount((n) => n + 20)}>
+                Show more
+              </Button>
+            </div>
+          )}
         </section>
+
 
       </main>
       <SiteFooter />
