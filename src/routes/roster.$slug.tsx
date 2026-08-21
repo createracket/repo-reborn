@@ -569,7 +569,7 @@ function PublicRosterPage() {
                         {!roster.hide_statuses && (
                           <Badge
                             variant="outline"
-                            className={`shrink-0 px-3 py-1 text-[10px] uppercase tracking-[0.11em] ${STATUS_BADGE_CLASS}`}
+                            className={`ml-auto shrink-0 px-3 py-1 text-[10px] uppercase tracking-[0.11em] ${STATUS_BADGE_CLASS}`}
                           >
                             {statusLabel(it.status)}
                           </Badge>
