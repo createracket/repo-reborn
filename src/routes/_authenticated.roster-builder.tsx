@@ -2433,7 +2433,11 @@ function EditProspectPanel({
       <CoPostEditor
         value={coPosts}
         onChange={setCoPosts}
-        onFetch={async (url: string) => {
+        onFetch={async (url: string, platform) => {
+          if (platform === "spotify") {
+            const s = await scrapeSpotify({ data: { url } });
+            return s.ok ? (s.monthly_listeners ?? null) : null;
+          }
           const r = await scrapeProfile({ data: { url } });
           return r.ok ? (r.followers ?? null) : null;
         }}
