@@ -17,6 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { getRosterGate, unlockRoster, getRosterForMember } from "@/lib/roster-access.functions";
 import { socialAudience, totalFans } from "@/lib/audience";
+import { parseCoPosts, coPostLabel } from "@/lib/co-posts";
 
 type PublicRoster = {
   id: string;
@@ -66,6 +67,7 @@ type PublicItem = {
   bio_page_url: string | null;
   content_review_url: string | null;
   content_review_label: string | null;
+  co_posts?: unknown;
   position: number;
   status: string;
   category: string | null;
@@ -194,7 +196,7 @@ function PublicRosterPage() {
       const { data: it } = await supabase
         .from("roster_items")
         .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, twitch_url, twitch_followers, facebook_url, facebook_followers, x_url, x_followers, custom_label, custom_url, custom_followers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, content_review_label, position, status, category, categories, location",
+          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, twitch_url, twitch_followers, facebook_url, facebook_followers, x_url, x_followers, custom_label, custom_url, custom_followers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, content_review_label, co_posts, position, status, category, categories, location",
         )
         .eq("roster_id", pr.id)
         .order("position", { ascending: true });
@@ -454,6 +456,9 @@ function PublicRosterPage() {
               [it.custom_label || "Link", it.custom_followers, it.custom_url],
               ["Spotify", it.spotify_monthly_listens, it.spotify_url],
               ["Apple Music", it.apple_music_followers, it.apple_music_url],
+              ...parseCoPosts(it.co_posts).map(
+                (c) => [coPostLabel(c), c.followers, c.url] as [string, number | null, string | null],
+              ),
 
             ];
             const itemSocial = socialAudience(it);
