@@ -304,7 +304,13 @@ function PublicReportPage() {
     );
   }
 
-  const allPosts = creators.flatMap((c) => c.posts);
+  // Posts tagged as "extra mentions" are hidden (and excluded from every total)
+  // unless the visitor switches the extra mentions toggle on.
+  const scopedCreators = creators
+    .map((c) => ({ ...c, posts: showExtras ? c.posts : c.posts.filter((p) => !p.extra_mention) }))
+    .filter((c) => c.posts.length > 0);
+  const hasExtraMentions = creators.some((c) => c.posts.some((p) => !!p.extra_mention));
+  const allPosts = scopedCreators.flatMap((c) => c.posts);
 
   const monthOptions = (() => {
     const map = new Map<string, string>();
@@ -321,7 +327,7 @@ function PublicReportPage() {
       .map(([key, label]) => ({ key, label }));
   })();
 
-  const filteredCreators = creators
+  const filteredCreators = scopedCreators
     .map((c) => ({
       ...c,
       posts: c.posts.filter((p) => {
@@ -335,6 +341,22 @@ function PublicReportPage() {
       }),
     }))
     .filter((c) => c.posts.length > 0);
+
+  // Only render `visibleCount` posts at a time so long reports stay fast.
+  const filteredPostCount = filteredCreators.reduce((n, c) => n + c.posts.length, 0);
+  const visibleCreators = (() => {
+    let budget = visibleCount;
+    const out: typeof filteredCreators = [];
+    for (const c of filteredCreators) {
+      if (budget <= 0) break;
+      const posts = c.posts.slice(0, budget);
+      budget -= posts.length;
+      out.push({ ...c, posts });
+    }
+    return out;
+  })();
+  const hasMorePosts = filteredPostCount > visibleCount;
+
   // Negative values are "hidden/unavailable" sentinels from social scrapers
   // (e.g. Instagram posts with like counts turned off) — never count them.
   const num = (v: number | null | undefined) => (v == null || v < 0 ? 0 : v);
