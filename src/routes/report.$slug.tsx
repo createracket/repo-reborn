@@ -185,6 +185,12 @@ function PublicReportPage() {
     })();
   }, [slug]);
 
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [monthFilter, platformFilter, showExtras]);
+
+
+
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-background">
