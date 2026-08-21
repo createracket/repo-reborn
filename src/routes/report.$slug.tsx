@@ -515,8 +515,21 @@ function PublicReportPage() {
           </div>
         )}
 
-        {monthOptions.length > 0 && (
+        {(monthOptions.length > 0 || hasExtraMentions) && (
           <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
+            {hasExtraMentions && (
+              <button
+                onClick={() => setShowExtras((v) => !v)}
+                aria-pressed={showExtras}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                  showExtras
+                    ? "border-lime bg-lime text-primary-foreground"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Extra mentions {showExtras ? "on" : "off"}
+              </button>
+            )}
             <div className="flex items-center gap-1.5">
               {(["all", "instagram", "tiktok"] as const).map((p) => {
                 const active = platformFilter === p;
