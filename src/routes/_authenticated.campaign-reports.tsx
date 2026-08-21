@@ -149,6 +149,7 @@ type Post = {
   featured_comments: FeaturedComment[];
   hashtags: string[];
   brand_tag: string | null;
+  extra_mention: boolean | null;
   position: number;
   metrics_updated_at: string | null;
 };
