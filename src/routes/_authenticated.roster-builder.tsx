@@ -56,7 +56,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
 import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { socialAudience, totalFans } from "@/lib/audience";
-import { parseCoPosts, coPostLabel, MAX_CO_POSTS_PER_PLATFORM, type CoPost, type CoPostPlatform } from "@/lib/co-posts";
+import { parseCoPosts, coPostLabel, type CoPost } from "@/lib/co-posts";
+import { CoPostEditor } from "@/components/admin/CoPostEditor";
 import {
   DndContext,
   closestCenter,
@@ -2429,7 +2430,7 @@ function EditProspectPanel({
       <CoPostEditor
         value={coPosts}
         onChange={setCoPosts}
-        onFetch={async (url) => {
+        onFetch={async (url: string) => {
           const r = await scrapeProfile({ data: { url } });
           return r.ok ? (r.followers ?? null) : null;
         }}
