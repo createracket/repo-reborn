@@ -332,8 +332,9 @@ function RosterBuilderPage() {
           .order("display_name"),
         supabase
           .from("campaign_briefs")
-          .select("id, title, description, contact_email, budget, status, created_at")
+          .select("id, title, description, budget, status, created_at")
           .order("created_at", { ascending: false }),
+
       ]);
       const communityRows = ((cm as CommunityRow[]) ?? []).map((c) => ({ ...c, source: "community" as const }));
       const brandRows: CommunityRow[] = (((br as Array<{ id: string; display_name: string | null; avatar_url: string | null; bio: string | null }>) ?? [])
