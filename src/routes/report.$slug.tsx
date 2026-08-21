@@ -491,7 +491,7 @@ function PublicReportPage() {
               label="Est. engagement"
               value={estEngagementPct != null ? `${estEngagementPct.toFixed(2)}%` : "—"}
             />
-            <TotalStat label="Total creators" value={String(creators.length)} />
+            <TotalStat label="Total creators" value={String(scopedCreators.length)} />
             <TotalStat label="Live posts" value={String(allPosts.length)} />
           </div>
         )}
