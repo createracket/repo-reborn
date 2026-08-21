@@ -2285,7 +2285,10 @@ function EditProspectPanel({
           .map((c) => ({
             platform: c.platform,
             name: c.name.trim(),
-            url: toProfileUrl(c.platform, c.url.trim()) ?? c.url.trim(),
+            url:
+              c.platform === "spotify"
+                ? c.url.trim()
+                : toProfileUrl(c.platform, c.url.trim()) ?? c.url.trim(),
             followers: c.followers,
           })),
         ...(flagState.flagged
