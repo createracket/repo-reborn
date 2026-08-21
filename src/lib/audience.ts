@@ -1,4 +1,4 @@
-import { coPostAudience } from "./co-posts";
+import { coPostSocialAudience, coPostStreamingAudience } from "./co-posts";
 
 /**
  * Shared audience maths.
@@ -30,13 +30,17 @@ export function socialAudience(it: AudienceSource): number {
     (it.facebook_followers ?? 0) +
     (it.x_followers ?? 0) +
     (it.custom_followers ?? 0) +
-    coPostAudience(it.co_posts)
+    coPostSocialAudience(it.co_posts)
   );
 }
 
 
 export function streamingAudience(it: AudienceSource): number {
-  return (it.spotify_monthly_listens ?? 0) + (it.apple_music_followers ?? 0);
+  return (
+    (it.spotify_monthly_listens ?? 0) +
+    (it.apple_music_followers ?? 0) +
+    coPostStreamingAudience(it.co_posts)
+  );
 }
 
 export function totalFans(it: AudienceSource): number {

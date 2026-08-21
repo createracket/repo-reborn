@@ -2285,7 +2285,10 @@ function EditProspectPanel({
           .map((c) => ({
             platform: c.platform,
             name: c.name.trim(),
-            url: toProfileUrl(c.platform, c.url.trim()) ?? c.url.trim(),
+            url:
+              c.platform === "spotify"
+                ? c.url.trim()
+                : toProfileUrl(c.platform, c.url.trim()) ?? c.url.trim(),
             followers: c.followers,
           })),
         ...(flagState.flagged
@@ -2430,7 +2433,11 @@ function EditProspectPanel({
       <CoPostEditor
         value={coPosts}
         onChange={setCoPosts}
-        onFetch={async (url: string) => {
+        onFetch={async (url: string, platform) => {
+          if (platform === "spotify") {
+            const s = await scrapeSpotify({ data: { url } });
+            return s.ok ? (s.monthly_listeners ?? null) : null;
+          }
           const r = await scrapeProfile({ data: { url } });
           return r.ok ? (r.followers ?? null) : null;
         }}
