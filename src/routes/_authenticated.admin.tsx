@@ -71,7 +71,7 @@ type LeadBrief = {
 };
 type ContactMsg = { id: string; created_at: string; name: string; email: string; message: string; handled: boolean };
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
-type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null; vibe_archetype_key?: string | null; vibe_archetype_kind?: string | null };
+type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null; vibe_archetype_key?: string | null; vibe_archetype_kind?: string | null; managed?: boolean | null; hidden?: boolean | null };
 type VibeRow = { user_id: string; result: string | null; answers: any; created_at: string };
 
 /** Resolve a user's vibe check archetype name, or null when they haven't taken it. */
