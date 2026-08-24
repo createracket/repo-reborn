@@ -277,8 +277,18 @@ type CommunityRow = {
   account_type: string;
   tagline: string | null;
   avatar_url: string | null;
-  source?: "community" | "brand";
+  source?: "community" | "brand" | "user";
+  // Only present for platform profiles (source: "user" / "brand"), used to
+  // prefill the roster item with their known links + metrics.
+  profile?: {
+    location: string | null;
+    socials: Record<string, any> | null;
+    total_followers: number | null;
+    monthly_streams: number | null;
+    vibe_tags: string[] | null;
+  };
 };
+
 
 
 function RosterBuilderPage() {
