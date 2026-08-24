@@ -354,3 +354,31 @@ export const adminImportRosterCreators = createServerFn({ method: "POST" })
     }
     return { created: rows.length, skipped };
   });
+
+const UpdateCommunitySchema = z.object({
+  profile_id: z.string().uuid(),
+  display_name: z.string().trim().max(120).nullable().optional(),
+  account_type: z.enum(ACCOUNT_TYPES).nullable().optional(),
+  slug: z.string().trim().max(80).nullable().optional(),
+});
+
+/** Edits an account-less profile row (no auth user to update). */
+export const adminUpdateCommunityProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => UpdateCommunitySchema.parse(input))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const patch: Record<string, unknown> = {};
+    if (data.display_name !== undefined) patch.display_name = data.display_name;
+    if (data.account_type !== undefined) patch.account_type = data.account_type;
+    if (data.slug !== undefined) patch.slug = data.slug ? data.slug.toLowerCase() : null;
+    if (Object.keys(patch).length === 0) return { ok: true };
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update(patch as any)
+      .eq("id", data.profile_id)
+      .eq("managed", true);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
