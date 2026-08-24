@@ -128,13 +128,22 @@ const CreateCommunitySchema = z.object({
 
 async function uniqueSlug(base: string, taken: Set<string>): Promise<string> {
   const { normalizeSlug, validateSlug } = await import("@/lib/slugs");
-  let root = normalizeSlug(base) || "creator";
+  // Collapse repeated/edge hyphens and guarantee a valid-shaped root so the
+  // uniqueness loop can always terminate.
+  let root = normalizeSlug(base)
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/^[^a-z0-9]+/, "");
   if (root.length > 26) root = root.slice(0, 26).replace(/-+$/, "");
+  if (root.length < 2) root = `creator-${root}`.replace(/-+$/, "");
   let candidate = root;
   let i = 1;
-  while (taken.has(candidate) || !validateSlug(candidate).ok) {
+  while (i < 500 && (taken.has(candidate) || !validateSlug(candidate).ok)) {
     i += 1;
     candidate = `${root}-${i}`;
+  }
+  if (taken.has(candidate) || !validateSlug(candidate).ok) {
+    candidate = `creator-${crypto.randomUUID().slice(0, 8)}`;
   }
   taken.add(candidate);
   return candidate;
