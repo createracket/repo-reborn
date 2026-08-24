@@ -331,10 +331,13 @@ function RosterBuilderPage() {
           .from("community_profiles")
           .select("id, display_name, account_type, tagline, avatar_url")
           .order("display_name"),
+        // Every platform profile (brands, artists, and managed/hidden
+        // community profiles created without an email) is searchable here.
         supabase
           .from("profiles")
-          .select("id, display_name, avatar_url, bio, account_type")
-          .eq("account_type", "brand")
+          .select(
+            "id, display_name, artist_name, avatar_url, bio, account_type, location, socials, total_followers, monthly_streams, vibe_tags",
+          )
           .order("display_name"),
         supabase
           .from("profiles")
@@ -347,17 +350,25 @@ function RosterBuilderPage() {
 
       ]);
       const communityRows = ((cm as CommunityRow[]) ?? []).map((c) => ({ ...c, source: "community" as const }));
-      const brandRows: CommunityRow[] = (((br as Array<{ id: string; display_name: string | null; avatar_url: string | null; bio: string | null }>) ?? [])
-        .filter((b) => !!b.display_name))
+      const profileRows: CommunityRow[] = ((br as any[]) ?? [])
         .map((b) => ({
-          id: b.id,
-          display_name: b.display_name ?? "",
-          account_type: "BRAND",
-          tagline: b.bio,
-          avatar_url: b.avatar_url,
-          source: "brand" as const,
-        }));
-      setCommunity([...brandRows, ...communityRows]);
+          id: b.id as string,
+          display_name: (b.display_name || b.artist_name || "") as string,
+          account_type: String(b.account_type ?? "profile").toUpperCase(),
+          tagline: (b.bio ?? b.location ?? null) as string | null,
+          avatar_url: (b.avatar_url ?? null) as string | null,
+          source: (b.account_type === "brand" ? "brand" : "user") as "brand" | "user",
+          profile: {
+            location: b.location ?? null,
+            socials: (b.socials ?? null) as Record<string, any> | null,
+            total_followers: b.total_followers ?? null,
+            monthly_streams: b.monthly_streams ?? null,
+            vibe_tags: (Array.isArray(b.vibe_tags) ? b.vibe_tags : null) as string[] | null,
+          },
+        }))
+        .filter((b) => !!b.display_name);
+      setCommunity([...profileRows, ...communityRows]);
+
       setProfiles((pr as ProfileRow[]) ?? []);
       const briefRows = ((cb as Brief[]) ?? []).map((b) => ({ ...b, contact_email: null as string | null }));
       // Contact emails are not readable through the table; admins fetch them via a secure lookup.
