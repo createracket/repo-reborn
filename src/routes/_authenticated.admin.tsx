@@ -2942,8 +2942,63 @@ function EditUserDialog({
 
   if (!profile) return null;
 
+  const isManaged = !!profile.managed;
+
+  async function handleAssignEmail() {
+    if (!profile) return;
+    const email = form.email.trim();
+    if (!email) {
+      toast.error("Enter an email to assign");
+      return;
+    }
+    if (!confirm(`Create a real account for ${profile.display_name ?? email} using ${email}?`)) return;
+    setSaving(true);
+    try {
+      const res: any = await adminAssignEmail({
+        data: { profile_id: profile.id, email, ...(form.password ? { password: form.password } : {}) },
+      });
+      toast.success(
+        res?.temporary_password
+          ? `Account created — temporary password: ${res.temporary_password}`
+          : "Account created",
+      );
+      onSaved({ id: profile.id });
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to assign email");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleSave() {
     if (!profile) return;
+    if (isManaged) {
+      setSaving(true);
+      try {
+        await adminUpdateCommunityProfile({
+          data: {
+            profile_id: profile.id,
+            display_name: form.display_name.trim() || null,
+            account_type: (form.account_type || null) as any,
+            slug: form.slug.trim() || null,
+          },
+        });
+        onSaved({
+          id: profile.id,
+          display_name: form.display_name.trim() || null,
+          account_type: form.account_type || null,
+          slug: form.slug.trim() || null,
+        });
+        toast.success("Profile updated");
+        onOpenChange(false);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to update profile");
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     setSaving(true);
     try {
       const patch: any = { user_id: profile.id };
