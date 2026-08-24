@@ -2714,6 +2714,112 @@ const ACCOUNT_TYPE_OPTIONS = [
   { value: "crew", label: "Crew" },
 ] as const;
 
+/**
+ * Community profiles: people who exist in the community for admin reference
+ * only — no login, no email, hidden from public pages and dashboards.
+ */
+function CommunityProfileForm({ onCreated }: { onCreated: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [form, setForm] = useState({
+    display_name: "",
+    slug: "",
+    location: "",
+    account_type: "artist" as "" | typeof ACCOUNT_TYPE_OPTIONS[number]["value"],
+  });
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.display_name.trim()) {
+      toast.error("A name is required");
+      return;
+    }
+    setSaving(true);
+    try {
+      await adminCreateCommunityProfile({
+        data: {
+          display_name: form.display_name.trim(),
+          slug: form.slug.trim() || undefined,
+          location: form.location.trim() || undefined,
+          account_type: form.account_type || undefined,
+        },
+      });
+      toast.success(`Created ${form.display_name.trim()} — hidden until you make them visible`);
+      setForm({ display_name: "", slug: "", location: "", account_type: "artist" });
+      onCreated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create profile");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleImport() {
+    if (!confirm("Create hidden community profiles for every creator across all rosters?")) return;
+    setImporting(true);
+    try {
+      const res: any = await adminImportRosterCreators();
+      toast.success(`Imported ${res?.created ?? 0} creators (${res?.skipped ?? 0} already existed)`);
+      onCreated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display text-2xl">Add a community profile</CardTitle>
+        <CardDescription>
+          Creates a profile with no email and no login. It stays hidden from public pages, dashboards and
+          suggested matches until you flip Visible on. Assign an email later from Edit to turn it into a real account.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+          <div>
+            <Label htmlFor="cp-name">Name</Label>
+            <Input id="cp-name" value={form.display_name}
+              onChange={(e) => setForm((f) => ({ ...f, display_name: e.target.value }))} required />
+          </div>
+          <div>
+            <Label htmlFor="cp-slug">Slug (optional)</Label>
+            <Input id="cp-slug" value={form.slug} placeholder="auto from name"
+              onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="cp-location">Location (optional)</Label>
+            <Input id="cp-location" value={form.location}
+              onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="cp-type">Profile type</Label>
+            <select
+              id="cp-type"
+              value={form.account_type}
+              onChange={(e) => setForm((f) => ({ ...f, account_type: e.target.value as typeof f.account_type }))}
+              className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            >
+              <option value="">— none —</option>
+              {ACCOUNT_TYPE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-2 flex flex-wrap items-center gap-3">
+            <Button type="submit" disabled={saving}>{saving ? "Creating…" : "Create community profile"}</Button>
+            <Button type="button" variant="outline" onClick={handleImport} disabled={importing}>
+              {importing ? "Importing…" : "Import roster creators"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 function NewUserForm({ onCreated }: { onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
