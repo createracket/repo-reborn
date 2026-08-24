@@ -28,6 +28,7 @@ import {
   adminDeleteUser,
   adminUpdateUser,
   adminCreateCommunityProfile,
+  adminUpdateCommunityProfile,
   adminSetProfileVisibility,
   adminDeleteCommunityProfile,
   adminAssignEmail,
