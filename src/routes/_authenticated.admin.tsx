@@ -3079,10 +3079,10 @@ function EditUserDialog({
               onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
           </div>
           <div>
-            <Label htmlFor="eu-password">New password (optional)</Label>
+            <Label htmlFor="eu-password">{isManaged ? "Password for new account (optional)" : "New password (optional)"}</Label>
             <Input id="eu-password" type="text" autoComplete="off" minLength={8} value={form.password}
               onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              placeholder="Leave blank to keep existing" />
+              placeholder={isManaged ? "Leave blank to auto-generate" : "Leave blank to keep existing"} />
           </div>
         </div>
         <DialogFooter>
