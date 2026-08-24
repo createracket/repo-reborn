@@ -277,8 +277,18 @@ type CommunityRow = {
   account_type: string;
   tagline: string | null;
   avatar_url: string | null;
-  source?: "community" | "brand";
+  source?: "community" | "brand" | "user";
+  // Only present for platform profiles (source: "user" / "brand"), used to
+  // prefill the roster item with their known links + metrics.
+  profile?: {
+    location: string | null;
+    socials: Record<string, any> | null;
+    total_followers: number | null;
+    monthly_streams: number | null;
+    vibe_tags: string[] | null;
+  };
 };
+
 
 
 function RosterBuilderPage() {
@@ -321,10 +331,13 @@ function RosterBuilderPage() {
           .from("community_profiles")
           .select("id, display_name, account_type, tagline, avatar_url")
           .order("display_name"),
+        // Every platform profile (brands, artists, and managed/hidden
+        // community profiles created without an email) is searchable here.
         supabase
           .from("profiles")
-          .select("id, display_name, avatar_url, bio, account_type")
-          .eq("account_type", "brand")
+          .select(
+            "id, display_name, artist_name, avatar_url, bio, account_type, location, socials, total_followers, monthly_streams, vibe_tags",
+          )
           .order("display_name"),
         supabase
           .from("profiles")
@@ -337,17 +350,25 @@ function RosterBuilderPage() {
 
       ]);
       const communityRows = ((cm as CommunityRow[]) ?? []).map((c) => ({ ...c, source: "community" as const }));
-      const brandRows: CommunityRow[] = (((br as Array<{ id: string; display_name: string | null; avatar_url: string | null; bio: string | null }>) ?? [])
-        .filter((b) => !!b.display_name))
+      const profileRows: CommunityRow[] = ((br as any[]) ?? [])
         .map((b) => ({
-          id: b.id,
-          display_name: b.display_name ?? "",
-          account_type: "BRAND",
-          tagline: b.bio,
-          avatar_url: b.avatar_url,
-          source: "brand" as const,
-        }));
-      setCommunity([...brandRows, ...communityRows]);
+          id: b.id as string,
+          display_name: (b.display_name || b.artist_name || "") as string,
+          account_type: String(b.account_type ?? "profile").toUpperCase(),
+          tagline: (b.bio ?? b.location ?? null) as string | null,
+          avatar_url: (b.avatar_url ?? null) as string | null,
+          source: (b.account_type === "brand" ? "brand" : "user") as "brand" | "user",
+          profile: {
+            location: b.location ?? null,
+            socials: (b.socials ?? null) as Record<string, any> | null,
+            total_followers: b.total_followers ?? null,
+            monthly_streams: b.monthly_streams ?? null,
+            vibe_tags: (Array.isArray(b.vibe_tags) ? b.vibe_tags : null) as string[] | null,
+          },
+        }))
+        .filter((b) => !!b.display_name);
+      setCommunity([...profileRows, ...communityRows]);
+
       setProfiles((pr as ProfileRow[]) ?? []);
       const briefRows = ((cb as Brief[]) ?? []).map((b) => ({ ...b, contact_email: null as string | null }));
       // Contact emails are not readable through the table; admins fetch them via a secure lookup.
@@ -2518,17 +2539,38 @@ function AddCommunityCard({
   }, [community, existingProfileIds, query]);
 
   async function add(c: CommunityRow) {
+    // profile_id references community_profiles, so platform profiles (brands
+    // and user/managed profiles) are added as prospects with their links copied.
+    const isCommunity = c.source === "community";
     const isBrand = c.source === "brand";
+    const s = c.profile?.socials ?? {};
+    const links = isCommunity
+      ? {}
+      : {
+          instagram_url: s.instagram ?? null,
+          tiktok_url: s.tiktok ?? null,
+          youtube_url: s.youtube ?? null,
+          spotify_url: s.spotify ?? null,
+          twitch_url: s.twitch ?? null,
+          facebook_url: s.facebook ?? null,
+          x_url: s.x ?? null,
+          custom_url: s.custom_url ?? null,
+          custom_label: s.custom_label ?? null,
+          location: c.profile?.location ?? null,
+          spotify_monthly_listens: c.profile?.monthly_streams ?? null,
+        };
     const { error } = await supabase.from("roster_items").insert({
       roster_id: rosterId,
-      kind: isBrand ? "prospect" : "profile",
-      profile_id: isBrand ? null : c.id,
+      kind: isCommunity ? "profile" : "prospect",
+      profile_id: isCommunity ? c.id : null,
       name: c.display_name,
       avatar_url: c.avatar_url,
       category: isBrand ? "brand" : null,
-      categories: isBrand ? ["brand"] : [],
+      categories: isBrand ? ["brand"] : (c.profile?.vibe_tags ?? []).slice(0, 3),
       position: nextPosition,
+      ...links,
     } as never);
+
     if (error) {
       toast.error(error.message);
       return;
