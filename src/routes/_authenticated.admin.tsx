@@ -822,7 +822,7 @@ function AdminPage() {
               profile={editingProfile}
               open={!!editingProfile}
               onOpenChange={(v) => { if (!v) setEditingProfile(null); }}
-              onSaved={(u) => setProfiles((rows) => rows.map((r) => r.id === u.id ? { ...r, ...u } as Profile : r))}
+              onSaved={(u) => { setProfiles((rows) => rows.map((r) => r.id === u.id ? { ...r, ...u } as Profile : r)); void reloadProfiles(); }}
             />
           </TabsContent>
 
