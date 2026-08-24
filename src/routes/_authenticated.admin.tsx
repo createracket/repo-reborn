@@ -3036,14 +3036,23 @@ function EditUserDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit user</DialogTitle>
-          <DialogDescription>Update profile details for this account.</DialogDescription>
+          <DialogTitle>{isManaged ? "Edit community profile" : "Edit user"}</DialogTitle>
+          <DialogDescription>
+            {isManaged
+              ? "This profile has no login yet. Add an email and assign it to turn it into a real account."
+              : "Update profile details for this account."}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
           <div>
             <Label htmlFor="eu-email">Email</Label>
             <Input id="eu-email" type="email" value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+            {isManaged ? (
+              <Button type="button" size="sm" variant="outline" className="mt-2" onClick={handleAssignEmail} disabled={saving}>
+                Assign email &amp; create account
+              </Button>
+            ) : null}
           </div>
           <div>
             <Label htmlFor="eu-name">Display name</Label>
