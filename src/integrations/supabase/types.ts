@@ -1079,9 +1079,11 @@ export type Database = {
           email: string | null
           flagged_streaming_mismatch: boolean
           flagged_streaming_reason: string | null
+          hidden: boolean
           id: string
           is_featured: boolean
           location: string | null
+          managed: boolean
           marketing_opt_in: boolean
           media: Json
           monthly_streams: number | null
@@ -1113,9 +1115,11 @@ export type Database = {
           email?: string | null
           flagged_streaming_mismatch?: boolean
           flagged_streaming_reason?: string | null
+          hidden?: boolean
           id: string
           is_featured?: boolean
           location?: string | null
+          managed?: boolean
           marketing_opt_in?: boolean
           media?: Json
           monthly_streams?: number | null
@@ -1147,9 +1151,11 @@ export type Database = {
           email?: string | null
           flagged_streaming_mismatch?: boolean
           flagged_streaming_reason?: string | null
+          hidden?: boolean
           id?: string
           is_featured?: boolean
           location?: string | null
+          managed?: boolean
           marketing_opt_in?: boolean
           media?: Json
           monthly_streams?: number | null
