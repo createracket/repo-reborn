@@ -695,7 +695,42 @@ function AdminPage() {
                         })()}
                       </td>
                       <td className="p-3 text-muted-foreground">
-                        {p.slug ? <code className="text-xs">/u/{p.slug}</code> : <span className="text-xs italic">no slug</span>}
+                        {p.slug ? (
+                          <a
+                            href={`/u/${p.slug}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-primary underline-offset-2 hover:underline"
+                          >
+                            <code className="text-xs">/u/{p.slug}</code>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        ) : (
+                          <span className="text-xs italic">no slug</span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={!p.hidden}
+                            onCheckedChange={async (checked) => {
+                              const prev = profiles;
+                              setProfiles((rows) => rows.map((r) => (r.id === p.id ? { ...r, hidden: !checked } : r)));
+                              try {
+                                await adminSetProfileVisibility({ data: { profile_id: p.id, hidden: !checked } });
+                                toast.success(checked ? "Now visible" : "Hidden from public");
+                              } catch (e: any) {
+                                setProfiles(prev);
+                                toast.error(e?.message ?? "Failed to update visibility");
+                              }
+                            }}
+                          />
+                          {p.managed ? (
+                            <span className="rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                              No account
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
                       <td className="p-3 text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
                       <td className="p-3">
