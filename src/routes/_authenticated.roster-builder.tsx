@@ -2539,17 +2539,38 @@ function AddCommunityCard({
   }, [community, existingProfileIds, query]);
 
   async function add(c: CommunityRow) {
+    // profile_id references community_profiles, so platform profiles (brands
+    // and user/managed profiles) are added as prospects with their links copied.
+    const isCommunity = c.source === "community";
     const isBrand = c.source === "brand";
+    const s = c.profile?.socials ?? {};
+    const links = isCommunity
+      ? {}
+      : {
+          instagram_url: s.instagram ?? null,
+          tiktok_url: s.tiktok ?? null,
+          youtube_url: s.youtube ?? null,
+          spotify_url: s.spotify ?? null,
+          twitch_url: s.twitch ?? null,
+          facebook_url: s.facebook ?? null,
+          x_url: s.x ?? null,
+          custom_url: s.custom_url ?? null,
+          custom_label: s.custom_label ?? null,
+          location: c.profile?.location ?? null,
+          spotify_monthly_listens: c.profile?.monthly_streams ?? null,
+        };
     const { error } = await supabase.from("roster_items").insert({
       roster_id: rosterId,
-      kind: isBrand ? "prospect" : "profile",
-      profile_id: isBrand ? null : c.id,
+      kind: isCommunity ? "profile" : "prospect",
+      profile_id: isCommunity ? c.id : null,
       name: c.display_name,
       avatar_url: c.avatar_url,
       category: isBrand ? "brand" : null,
-      categories: isBrand ? ["brand"] : [],
+      categories: isBrand ? ["brand"] : (c.profile?.vibe_tags ?? []).slice(0, 3),
       position: nextPosition,
+      ...links,
     } as never);
+
     if (error) {
       toast.error(error.message);
       return;
