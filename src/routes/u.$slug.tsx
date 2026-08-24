@@ -75,16 +75,28 @@ function PublicProfilePage() {
 
   useEffect(() => {
     (async () => {
+      const cols =
+        "id, slug, display_name, artist_name, location, bio, avatar_url, socials, total_followers, total_streams, monthly_streams, avg_reach, avg_engagement, top_audience_location, media, vibe_tags, vibe_archetype_key, vibe_archetype_kind";
       const { data, error } = await (supabase as any)
         .from("public_profiles")
-        .select("id, slug, display_name, artist_name, location, bio, avatar_url, socials, total_followers, total_streams, monthly_streams, avg_reach, avg_engagement, top_audience_location, media, vibe_tags, vibe_archetype_key, vibe_archetype_kind")
+        .select(cols)
         .eq("slug", slug)
         .maybeSingle();
-      if (error || !data) {
+      let row = error ? null : data;
+      if (!row) {
+        // Hidden / account-less community profiles: only admins can read these.
+        const { data: adminRow } = await (supabase as any)
+          .from("profiles")
+          .select(cols)
+          .eq("slug", slug)
+          .maybeSingle();
+        row = adminRow ?? null;
+      }
+      if (!row) {
         setStatus("missing");
         return;
       }
-      setProfile(data as unknown as PublicProfile);
+      setProfile(row as unknown as PublicProfile);
       setStatus("ready");
       loadVibeCheckConfig()
         .then(setVibeConfig)
