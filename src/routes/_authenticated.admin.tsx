@@ -648,15 +648,8 @@ function AdminPage() {
                 </div>
               </CardContent>
             </Card>
-            <NewUserForm
-              onCreated={async () => {
-                const { data } = await supabase
-                  .from("profiles")
-                  .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden")
-                  .order("created_at", { ascending: false });
-                setProfiles((data as Profile[]) ?? []);
-              }}
-            />
+            <NewUserForm onCreated={reloadProfiles} />
+            <CommunityProfileForm onCreated={reloadProfiles} />
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Featured in Suggested matches</CardTitle>
