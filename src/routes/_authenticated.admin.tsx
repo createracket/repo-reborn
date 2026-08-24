@@ -220,6 +220,14 @@ function AdminPage() {
     })();
   }, [navigate]);
 
+  async function reloadProfiles() {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden")
+      .order("created_at", { ascending: false });
+    setProfiles((data as Profile[]) ?? []);
+  }
+
   async function refreshSpotlights() {
     const { data } = await supabase
       .from("partner_pages" as any)
