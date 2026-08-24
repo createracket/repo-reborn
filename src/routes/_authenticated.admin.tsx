@@ -23,7 +23,16 @@ import { DEFAULT_THUMB_FRAME, readThumbFrame, type ThumbFrame } from "@/lib/thum
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
-import { adminCreateUser, adminDeleteUser, adminUpdateUser } from "@/lib/admin-users.functions";
+import {
+  adminCreateUser,
+  adminDeleteUser,
+  adminUpdateUser,
+  adminCreateCommunityProfile,
+  adminSetProfileVisibility,
+  adminDeleteCommunityProfile,
+  adminAssignEmail,
+  adminImportRosterCreators,
+} from "@/lib/admin-users.functions";
 import { ACCESS_CODE } from "@/routes/login";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 import {
