@@ -797,10 +797,11 @@ function AdminPage() {
                             className="text-destructive hover:text-destructive"
                             onClick={async () => {
                               if (!confirm(`Permanently delete user ${p.email ?? p.display_name ?? p.id}? This cannot be undone.`)) return;
-                              try {
-                                await adminDeleteUser({ data: { user_id: p.id } });
-                                setProfiles((rows) => rows.filter((r) => r.id !== p.id));
-                                toast.success("User removed");
+                               try {
+                                 if (p.managed) await adminDeleteCommunityProfile({ data: { profile_id: p.id } });
+                                 else await adminDeleteUser({ data: { user_id: p.id } });
+                                 setProfiles((rows) => rows.filter((r) => r.id !== p.id));
+                                 toast.success("User removed");
                               } catch (e: any) {
                                 toast.error(e?.message ?? "Failed to remove user");
                               }
