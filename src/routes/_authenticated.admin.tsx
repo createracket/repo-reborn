@@ -23,7 +23,17 @@ import { DEFAULT_THUMB_FRAME, readThumbFrame, type ThumbFrame } from "@/lib/thum
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { findProfanityIn } from "@/lib/profanity";
-import { adminCreateUser, adminDeleteUser, adminUpdateUser } from "@/lib/admin-users.functions";
+import {
+  adminCreateUser,
+  adminDeleteUser,
+  adminUpdateUser,
+  adminCreateCommunityProfile,
+  adminUpdateCommunityProfile,
+  adminSetProfileVisibility,
+  adminDeleteCommunityProfile,
+  adminAssignEmail,
+  adminImportRosterCreators,
+} from "@/lib/admin-users.functions";
 import { ACCESS_CODE } from "@/routes/login";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 import {
@@ -71,7 +81,7 @@ type LeadBrief = {
 };
 type ContactMsg = { id: string; created_at: string; name: string; email: string; message: string; handled: boolean };
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
-type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null; vibe_archetype_key?: string | null; vibe_archetype_kind?: string | null };
+type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null; vibe_archetype_key?: string | null; vibe_archetype_kind?: string | null; managed?: boolean | null; hidden?: boolean | null };
 type VibeRow = { user_id: string; result: string | null; answers: any; created_at: string };
 
 /** Resolve a user's vibe check archetype name, or null when they haven't taken it. */
@@ -171,7 +181,7 @@ function AdminPage() {
         supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
         supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
         supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
-        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden").order("created_at", { ascending: false }),
         supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, linked_report_id, currency, transparency").order("created_at", { ascending: false }),
         supabase.from("partner_pages" as any).select("*").eq("section", "spotlight").order("created_at", { ascending: false }),
         supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
@@ -210,6 +220,14 @@ function AdminPage() {
       setChecking(false);
     })();
   }, [navigate]);
+
+  async function reloadProfiles() {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden")
+      .order("created_at", { ascending: false });
+    setProfiles((data as Profile[]) ?? []);
+  }
 
   async function refreshSpotlights() {
     const { data } = await supabase
@@ -639,15 +657,8 @@ function AdminPage() {
                 </div>
               </CardContent>
             </Card>
-            <NewUserForm
-              onCreated={async () => {
-                const { data } = await supabase
-                  .from("profiles")
-                  .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind")
-                  .order("created_at", { ascending: false });
-                setProfiles((data as Profile[]) ?? []);
-              }}
-            />
+            <NewUserForm onCreated={reloadProfiles} />
+            <CommunityProfileForm onCreated={reloadProfiles} />
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Featured in Suggested matches</CardTitle>
@@ -657,7 +668,7 @@ function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <Table headers={["Display name", "Email", "Profile type", "Vibe check", "Slug", "Joined", "Subscription", "Featured", ""]}>
+                <Table headers={["Display name", "Email", "Profile type", "Vibe check", "Slug", "Visible", "Joined", "Subscription", "Featured", ""]}>
                   {profiles.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
@@ -686,7 +697,42 @@ function AdminPage() {
                         })()}
                       </td>
                       <td className="p-3 text-muted-foreground">
-                        {p.slug ? <code className="text-xs">/u/{p.slug}</code> : <span className="text-xs italic">no slug</span>}
+                        {p.slug ? (
+                          <a
+                            href={`/u/${p.slug}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-primary underline-offset-2 hover:underline"
+                          >
+                            <code className="text-xs">/u/{p.slug}</code>
+                            <ExternalLink className="size-3" />
+                          </a>
+                        ) : (
+                          <span className="text-xs italic">no slug</span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={!p.hidden}
+                            onCheckedChange={async (checked) => {
+                              const prev = profiles;
+                              setProfiles((rows) => rows.map((r) => (r.id === p.id ? { ...r, hidden: !checked } : r)));
+                              try {
+                                await adminSetProfileVisibility({ data: { profile_id: p.id, hidden: !checked } });
+                                toast.success(checked ? "Now visible" : "Hidden from public");
+                              } catch (e: any) {
+                                setProfiles(prev);
+                                toast.error(e?.message ?? "Failed to update visibility");
+                              }
+                            }}
+                          />
+                          {p.managed ? (
+                            <span className="rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                              No account
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
                       <td className="p-3 text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</td>
                       <td className="p-3">
@@ -753,10 +799,11 @@ function AdminPage() {
                             className="text-destructive hover:text-destructive"
                             onClick={async () => {
                               if (!confirm(`Permanently delete user ${p.email ?? p.display_name ?? p.id}? This cannot be undone.`)) return;
-                              try {
-                                await adminDeleteUser({ data: { user_id: p.id } });
-                                setProfiles((rows) => rows.filter((r) => r.id !== p.id));
-                                toast.success("User removed");
+                               try {
+                                 if (p.managed) await adminDeleteCommunityProfile({ data: { profile_id: p.id } });
+                                 else await adminDeleteUser({ data: { user_id: p.id } });
+                                 setProfiles((rows) => rows.filter((r) => r.id !== p.id));
+                                 toast.success("User removed");
                               } catch (e: any) {
                                 toast.error(e?.message ?? "Failed to remove user");
                               }
@@ -775,7 +822,7 @@ function AdminPage() {
               profile={editingProfile}
               open={!!editingProfile}
               onOpenChange={(v) => { if (!v) setEditingProfile(null); }}
-              onSaved={(u) => setProfiles((rows) => rows.map((r) => r.id === u.id ? { ...r, ...u } as Profile : r))}
+              onSaved={(u) => { setProfiles((rows) => rows.map((r) => r.id === u.id ? { ...r, ...u } as Profile : r)); void reloadProfiles(); }}
             />
           </TabsContent>
 
@@ -2668,6 +2715,112 @@ const ACCOUNT_TYPE_OPTIONS = [
   { value: "crew", label: "Crew" },
 ] as const;
 
+/**
+ * Community profiles: people who exist in the community for admin reference
+ * only — no login, no email, hidden from public pages and dashboards.
+ */
+function CommunityProfileForm({ onCreated }: { onCreated: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [form, setForm] = useState({
+    display_name: "",
+    slug: "",
+    location: "",
+    account_type: "artist" as "" | typeof ACCOUNT_TYPE_OPTIONS[number]["value"],
+  });
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.display_name.trim()) {
+      toast.error("A name is required");
+      return;
+    }
+    setSaving(true);
+    try {
+      await adminCreateCommunityProfile({
+        data: {
+          display_name: form.display_name.trim(),
+          slug: form.slug.trim() || undefined,
+          location: form.location.trim() || undefined,
+          account_type: form.account_type || undefined,
+        },
+      });
+      toast.success(`Created ${form.display_name.trim()} — hidden until you make them visible`);
+      setForm({ display_name: "", slug: "", location: "", account_type: "artist" });
+      onCreated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create profile");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleImport() {
+    if (!confirm("Create hidden community profiles for every creator across all rosters?")) return;
+    setImporting(true);
+    try {
+      const res: any = await adminImportRosterCreators();
+      toast.success(`Imported ${res?.created ?? 0} creators (${res?.skipped ?? 0} already existed)`);
+      onCreated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="font-display text-2xl">Add a community profile</CardTitle>
+        <CardDescription>
+          Creates a profile with no email and no login. It stays hidden from public pages, dashboards and
+          suggested matches until you flip Visible on. Assign an email later from Edit to turn it into a real account.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+          <div>
+            <Label htmlFor="cp-name">Name</Label>
+            <Input id="cp-name" value={form.display_name}
+              onChange={(e) => setForm((f) => ({ ...f, display_name: e.target.value }))} required />
+          </div>
+          <div>
+            <Label htmlFor="cp-slug">Slug (optional)</Label>
+            <Input id="cp-slug" value={form.slug} placeholder="auto from name"
+              onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="cp-location">Location (optional)</Label>
+            <Input id="cp-location" value={form.location}
+              onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} />
+          </div>
+          <div>
+            <Label htmlFor="cp-type">Profile type</Label>
+            <select
+              id="cp-type"
+              value={form.account_type}
+              onChange={(e) => setForm((f) => ({ ...f, account_type: e.target.value as typeof f.account_type }))}
+              className="mt-1 flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            >
+              <option value="">— none —</option>
+              {ACCOUNT_TYPE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-2 flex flex-wrap items-center gap-3">
+            <Button type="submit" disabled={saving}>{saving ? "Creating…" : "Create community profile"}</Button>
+            <Button type="button" variant="outline" onClick={handleImport} disabled={importing}>
+              {importing ? "Importing…" : "Import roster creators"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 function NewUserForm({ onCreated }: { onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -2790,8 +2943,63 @@ function EditUserDialog({
 
   if (!profile) return null;
 
+  const isManaged = !!profile.managed;
+
+  async function handleAssignEmail() {
+    if (!profile) return;
+    const email = form.email.trim();
+    if (!email) {
+      toast.error("Enter an email to assign");
+      return;
+    }
+    if (!confirm(`Create a real account for ${profile.display_name ?? email} using ${email}?`)) return;
+    setSaving(true);
+    try {
+      const res: any = await adminAssignEmail({
+        data: { profile_id: profile.id, email, ...(form.password ? { password: form.password } : {}) },
+      });
+      toast.success(
+        res?.temporary_password
+          ? `Account created — temporary password: ${res.temporary_password}`
+          : "Account created",
+      );
+      onSaved({ id: profile.id });
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to assign email");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleSave() {
     if (!profile) return;
+    if (isManaged) {
+      setSaving(true);
+      try {
+        await adminUpdateCommunityProfile({
+          data: {
+            profile_id: profile.id,
+            display_name: form.display_name.trim() || null,
+            account_type: (form.account_type || null) as any,
+            slug: form.slug.trim() || null,
+          },
+        });
+        onSaved({
+          id: profile.id,
+          display_name: form.display_name.trim() || null,
+          account_type: form.account_type || null,
+          slug: form.slug.trim() || null,
+        });
+        toast.success("Profile updated");
+        onOpenChange(false);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to update profile");
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     setSaving(true);
     try {
       const patch: any = { user_id: profile.id };
@@ -2828,14 +3036,23 @@ function EditUserDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit user</DialogTitle>
-          <DialogDescription>Update profile details for this account.</DialogDescription>
+          <DialogTitle>{isManaged ? "Edit community profile" : "Edit user"}</DialogTitle>
+          <DialogDescription>
+            {isManaged
+              ? "This profile has no login yet. Add an email and assign it to turn it into a real account."
+              : "Update profile details for this account."}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
           <div>
             <Label htmlFor="eu-email">Email</Label>
             <Input id="eu-email" type="email" value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+            {isManaged ? (
+              <Button type="button" size="sm" variant="outline" className="mt-2" onClick={handleAssignEmail} disabled={saving}>
+                Assign email &amp; create account
+              </Button>
+            ) : null}
           </div>
           <div>
             <Label htmlFor="eu-name">Display name</Label>
@@ -2862,10 +3079,10 @@ function EditUserDialog({
               onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
           </div>
           <div>
-            <Label htmlFor="eu-password">New password (optional)</Label>
+            <Label htmlFor="eu-password">{isManaged ? "Password for new account (optional)" : "New password (optional)"}</Label>
             <Input id="eu-password" type="text" autoComplete="off" minLength={8} value={form.password}
               onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              placeholder="Leave blank to keep existing" />
+              placeholder={isManaged ? "Leave blank to auto-generate" : "Leave blank to keep existing"} />
           </div>
         </div>
         <DialogFooter>
