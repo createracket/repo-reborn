@@ -2105,6 +2105,10 @@ export type Database = {
           description: string | null
           est_engagement_pct: number | null
           header_image_url: string | null
+          hide_metric_engagement: boolean | null
+          hide_metric_fans: boolean | null
+          hide_metric_reach: boolean | null
+          hide_metric_socials: boolean | null
           hide_prospect_tags: boolean | null
           hide_statuses: boolean | null
           id: string | null
@@ -2112,6 +2116,7 @@ export type Database = {
           profile_image_url: string | null
           published: boolean | null
           published_at: string | null
+          show_metric_creators: boolean | null
           slug: string | null
           title: string | null
           updated_at: string | null
@@ -2123,6 +2128,10 @@ export type Database = {
           description?: string | null
           est_engagement_pct?: number | null
           header_image_url?: string | null
+          hide_metric_engagement?: boolean | null
+          hide_metric_fans?: boolean | null
+          hide_metric_reach?: boolean | null
+          hide_metric_socials?: boolean | null
           hide_prospect_tags?: boolean | null
           hide_statuses?: boolean | null
           id?: string | null
@@ -2130,6 +2139,7 @@ export type Database = {
           profile_image_url?: string | null
           published?: boolean | null
           published_at?: string | null
+          show_metric_creators?: boolean | null
           slug?: string | null
           title?: string | null
           updated_at?: string | null
@@ -2141,6 +2151,10 @@ export type Database = {
           description?: string | null
           est_engagement_pct?: number | null
           header_image_url?: string | null
+          hide_metric_engagement?: boolean | null
+          hide_metric_fans?: boolean | null
+          hide_metric_reach?: boolean | null
+          hide_metric_socials?: boolean | null
           hide_prospect_tags?: boolean | null
           hide_statuses?: boolean | null
           id?: string | null
@@ -2148,6 +2162,7 @@ export type Database = {
           profile_image_url?: string | null
           published?: boolean | null
           published_at?: string | null
+          show_metric_creators?: boolean | null
           slug?: string | null
           title?: string | null
           updated_at?: string | null
