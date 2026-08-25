@@ -642,7 +642,7 @@ function AdminPage() {
 
 
 
-          <TabsContent value="users" className="mt-6 space-y-6">
+          <TabsContent value="users" className="mt-6 min-w-0 max-w-full space-y-6">
             <Card className="border-primary/40 bg-primary/5">
               <CardHeader>
                 <CardTitle className="text-lg">Soft-launch EARLY ACCESS CODE</CardTitle>
@@ -671,7 +671,7 @@ function AdminPage() {
             </Card>
             <NewUserForm onCreated={reloadProfiles} />
             <CommunityProfileForm onCreated={reloadProfiles} />
-            <Card>
+            <Card className="min-w-0 max-w-full overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg">Featured in Suggested matches</CardTitle>
                 <CardDescription>
@@ -1458,7 +1458,7 @@ function ProfileChip({ profile, fallbackEmail }: {
 }
 function Table({ headers, children }: { headers: string[]; children: React.ReactNode }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="w-full min-w-0 max-w-full overflow-x-auto">
       <table className="w-full min-w-max text-left text-sm">
         <thead className="bg-muted/40">
           <tr>{headers.map((h) => <th key={h} className="p-3 font-medium">{h}</th>)}</tr>
