@@ -1502,7 +1502,7 @@ function RosterDetailView({
                 ))}
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm">
-                    Total creators/bands
+                    Total
                     <span className="ml-2 text-xs text-muted-foreground">Off by default</span>
                   </span>
                   <Switch
