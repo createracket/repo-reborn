@@ -33,7 +33,9 @@ import {
   adminDeleteCommunityProfile,
   adminAssignEmail,
   adminImportRosterCreators,
+  adminSetProfileAvatar,
 } from "@/lib/admin-users.functions";
+import { uploadMyProfileImage } from "@/lib/profile-images.functions";
 import { ACCESS_CODE } from "@/routes/login";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 import {
@@ -2958,12 +2960,18 @@ function EditUserDialog({
   onSaved: (updated: Partial<Profile> & { id: string; email?: string | null }) => void;
 }) {
   const [saving, setSaving] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarSource, setAvatarSource] = useState("");
+  const uploadImage = useServerFn(uploadMyProfileImage);
+  const scrapeProfileForAvatar = useServerFn(scrapeProfileFollowers);
+  const scrapeSpotifyForAvatar = useServerFn(scrapeSpotifyArtist);
   const [form, setForm] = useState({
     email: "",
     display_name: "",
     account_type: "" as string,
     slug: "",
     password: "",
+    avatar_url: "",
   });
 
   useEffect(() => {
@@ -2974,9 +2982,59 @@ function EditUserDialog({
         account_type: profile.account_type ?? "",
         slug: profile.slug ?? "",
         password: "",
+        avatar_url: profile.avatar_url ?? "",
       });
+      setAvatarSource("");
     }
   }, [profile]);
+
+  async function handleAvatarFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Pick an image file");
+      return;
+    }
+    setAvatarBusy(true);
+    try {
+      const buffer = await file.arrayBuffer();
+      let binary = "";
+      const bytes = new Uint8Array(buffer);
+      for (let i = 0; i < bytes.length; i += 8192) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+      }
+      const res: any = await uploadImage({
+        data: { base64: btoa(binary), contentType: file.type as any },
+      });
+      setForm((f) => ({ ...f, avatar_url: res.publicUrl }));
+      toast.success("Thumbnail uploaded — save to apply");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
+  async function handleAvatarFromLink() {
+    const url = avatarSource.trim();
+    if (!url) {
+      toast.error("Paste a social profile link first");
+      return;
+    }
+    setAvatarBusy(true);
+    try {
+      const res: any = /spotify\.com|^[A-Za-z0-9]{22}$/.test(url)
+        ? await scrapeSpotifyForAvatar({ data: { url } })
+        : await scrapeProfileForAvatar({ data: { url } });
+      if (!res?.ok) throw new Error(res?.error ?? "Could not read that link");
+      if (!res.avatar_url) throw new Error("No image found on that profile");
+      setForm((f) => ({ ...f, avatar_url: res.avatar_url }));
+      toast.success("Thumbnail pulled — save to apply");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not pull an image");
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
 
   if (!profile) return null;
 
@@ -3020,6 +3078,7 @@ function EditUserDialog({
             display_name: form.display_name.trim() || null,
             account_type: (form.account_type || null) as any,
             slug: form.slug.trim() || null,
+            avatar_url: form.avatar_url.trim() || null,
           },
         });
         onSaved({
@@ -3027,6 +3086,7 @@ function EditUserDialog({
           display_name: form.display_name.trim() || null,
           account_type: form.account_type || null,
           slug: form.slug.trim() || null,
+          avatar_url: form.avatar_url.trim() || null,
         });
         toast.success("Profile updated");
         onOpenChange(false);
@@ -3047,18 +3107,25 @@ function EditUserDialog({
       if ((form.slug.trim() || null) !== (profile.slug ?? null)) patch.slug = form.slug.trim() || null;
       if (form.password) patch.password = form.password;
 
-      if (Object.keys(patch).length === 1) {
+      const avatarChanged = (form.avatar_url.trim() || null) !== (profile.avatar_url ?? null);
+      if (Object.keys(patch).length === 1 && !avatarChanged) {
         toast.info("Nothing to update");
         setSaving(false);
         return;
       }
-      await adminUpdateUser({ data: patch });
+      if (Object.keys(patch).length > 1) await adminUpdateUser({ data: patch });
+      if (avatarChanged) {
+        await adminSetProfileAvatar({
+          data: { profile_id: profile.id, avatar_url: form.avatar_url.trim() || null },
+        });
+      }
       onSaved({
         id: profile.id,
         email: patch.email ?? profile.email,
         display_name: patch.display_name ?? profile.display_name,
         account_type: patch.account_type ?? profile.account_type,
         slug: patch.slug ?? profile.slug,
+        avatar_url: form.avatar_url.trim() || null,
       });
       toast.success("User updated");
       onOpenChange(false);
@@ -3114,6 +3181,56 @@ function EditUserDialog({
             <Label htmlFor="eu-slug">Public slug</Label>
             <Input id="eu-slug" value={form.slug} placeholder="e.g. jane-doe"
               onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
+          </div>
+          <div>
+            <Label>Thumbnail</Label>
+            <div className="mt-1 flex items-start gap-3">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                {form.avatar_url ? (
+                  <img src={form.avatar_url} alt="Profile thumbnail preview" className="h-full w-full object-cover" />
+                ) : null}
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (file) void handleAvatarFile(file);
+                      }}
+                    />
+                    <span className="inline-flex h-8 cursor-pointer items-center rounded-md border border-input px-3 text-sm hover:bg-accent">
+                      {avatarBusy ? "Working…" : "Upload image"}
+                    </span>
+                  </label>
+                  {form.avatar_url ? (
+                    <Button type="button" size="sm" variant="ghost"
+                      onClick={() => setForm((f) => ({ ...f, avatar_url: "" }))}>
+                      Remove
+                    </Button>
+                  ) : null}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={avatarSource}
+                    placeholder="Or paste an Instagram / TikTok / YouTube / Spotify link"
+                    onChange={(e) => setAvatarSource(e.target.value)}
+                  />
+                  <Button type="button" size="sm" variant="outline" disabled={avatarBusy} onClick={handleAvatarFromLink}>
+                    Pull
+                  </Button>
+                </div>
+                <Input
+                  value={form.avatar_url}
+                  placeholder="Image URL"
+                  onChange={(e) => setForm((f) => ({ ...f, avatar_url: e.target.value }))}
+                />
+              </div>
+            </div>
           </div>
           <div>
             <Label htmlFor="eu-password">{isManaged ? "Password for new account (optional)" : "New password (optional)"}</Label>
