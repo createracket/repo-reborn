@@ -781,13 +781,20 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
           return order.map((k) => {
             if (!nodes[k]) return null;
             const border = links.section_borders?.[k] ?? "none";
-            if (border === "none") return <div key={k}>{nodes[k]}</div>;
+            const size = links.section_text_size?.[k] ?? "default";
+            const sizeCls = SECTION_TEXT_SIZE_CLASS[size] ?? "";
+            if (border === "none")
+              return (
+                <div key={k} className={sizeCls}>
+                  {nodes[k]}
+                </div>
+              );
             return (
               <div
                 key={k}
                 className={`mt-12 rounded-3xl border p-5 sm:p-7 [&>section]:mt-0 ${
                   border === "pink" ? "border-pink-accent/70" : "border-primary/70"
-                }`}
+                } ${sizeCls}`}
               >
                 {nodes[k]}
               </div>
