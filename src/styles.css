@@ -220,6 +220,29 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+  /* Always-visible horizontal scrollbar so mouse users can drag to scroll. */
+  .visible-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted-foreground) transparent;
+  }
+  .visible-scrollbar::-webkit-scrollbar {
+    height: 10px;
+    -webkit-appearance: none;
+  }
+  .visible-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .visible-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--muted-foreground);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .visible-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+    background-clip: content-box;
+  }
+
   @keyframes marquee {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
