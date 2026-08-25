@@ -417,7 +417,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             </div>
           </div>
           {page.intro ? (
-            <p className="text-lg text-muted-foreground">{page.intro}</p>
+            <RichText value={page.intro} className="text-lg text-muted-foreground" />
           ) : null}
 
           {/* Metrics */}
