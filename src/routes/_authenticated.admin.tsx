@@ -1624,6 +1624,9 @@ export function SpotlightForm({
   const [sectionBorders, setSectionBorders] = useState<Record<string, "none" | "pink" | "green">>(
     () => (editData?.links?.section_borders ?? {}) as Record<string, "none" | "pink" | "green">,
   );
+  const [sectionTextSizes, setSectionTextSizes] = useState<
+    Record<string, "small" | "default" | "large" | "xl">
+  >(() => (editData?.links?.section_text_size ?? {}) as Record<string, "small" | "default" | "large" | "xl">);
 
   const [dragKey, setDragKey] = useState<string | null>(null);
 
