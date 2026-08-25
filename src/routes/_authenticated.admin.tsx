@@ -2064,6 +2064,7 @@ export function SpotlightForm({
         },
         section_order: sectionOrder,
         section_borders: sectionBorders,
+        section_text_size: sectionTextSizes,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
