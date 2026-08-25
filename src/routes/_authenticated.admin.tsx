@@ -3078,6 +3078,7 @@ function EditUserDialog({
             display_name: form.display_name.trim() || null,
             account_type: (form.account_type || null) as any,
             slug: form.slug.trim() || null,
+            avatar_url: form.avatar_url.trim() || null,
           },
         });
         onSaved({
@@ -3085,6 +3086,7 @@ function EditUserDialog({
           display_name: form.display_name.trim() || null,
           account_type: form.account_type || null,
           slug: form.slug.trim() || null,
+          avatar_url: form.avatar_url.trim() || null,
         });
         toast.success("Profile updated");
         onOpenChange(false);
