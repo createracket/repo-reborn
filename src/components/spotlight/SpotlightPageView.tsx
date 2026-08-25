@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSocialEmbed } from "@/lib/social-embed";
 import { getClipPosters } from "@/lib/clip-poster.functions";
 import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember, registerSpotlightGuestInterest } from "@/lib/spotlight-access.functions";
+import { RichText } from "@/lib/rich-text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
