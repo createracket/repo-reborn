@@ -1480,6 +1480,38 @@ function RosterDetailView({
                 onCheckedChange={toggleHideStatuses}
               />
             </div>
+            <div className="rounded-lg border border-border/60 p-3">
+              <div className="text-sm font-medium">Top metrics</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Choose which totals show at the top of the public roster page.
+              </div>
+              <div className="mt-3 space-y-2">
+                {([
+                  ["hide_metric_socials", "Socials"],
+                  ["hide_metric_fans", "Fans"],
+                  ["hide_metric_reach", "Est. reach"],
+                  ["hide_metric_engagement", "Est. engagement"],
+                ] as const).map(([col, label]) => (
+                  <div key={col} className="flex items-center justify-between gap-3">
+                    <span className="text-sm">{label}</span>
+                    <Switch
+                      checked={!roster[col]}
+                      onCheckedChange={(on) => toggleMetricFlag(col, !on)}
+                    />
+                  </div>
+                ))}
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm">
+                    Total creators/bands
+                    <span className="ml-2 text-xs text-muted-foreground">Off by default</span>
+                  </span>
+                  <Switch
+                    checked={roster.show_metric_creators}
+                    onCheckedChange={(on) => toggleMetricFlag("show_metric_creators", on)}
+                  />
+                </div>
+              </div>
+            </div>
             <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
               <div>
                 <div className="text-sm font-medium">Allow multiple categories per creator</div>
