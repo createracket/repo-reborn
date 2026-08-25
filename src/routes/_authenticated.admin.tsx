@@ -2960,12 +2960,18 @@ function EditUserDialog({
   onSaved: (updated: Partial<Profile> & { id: string; email?: string | null }) => void;
 }) {
   const [saving, setSaving] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarSource, setAvatarSource] = useState("");
+  const uploadImage = useServerFn(uploadMyProfileImage);
+  const scrapeProfileForAvatar = useServerFn(scrapeProfileFollowers);
+  const scrapeSpotifyForAvatar = useServerFn(scrapeSpotifyArtist);
   const [form, setForm] = useState({
     email: "",
     display_name: "",
     account_type: "" as string,
     slug: "",
     password: "",
+    avatar_url: "",
   });
 
   useEffect(() => {
@@ -2976,9 +2982,59 @@ function EditUserDialog({
         account_type: profile.account_type ?? "",
         slug: profile.slug ?? "",
         password: "",
+        avatar_url: profile.avatar_url ?? "",
       });
+      setAvatarSource("");
     }
   }, [profile]);
+
+  async function handleAvatarFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Pick an image file");
+      return;
+    }
+    setAvatarBusy(true);
+    try {
+      const buffer = await file.arrayBuffer();
+      let binary = "";
+      const bytes = new Uint8Array(buffer);
+      for (let i = 0; i < bytes.length; i += 8192) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+      }
+      const res: any = await uploadImage({
+        data: { base64: btoa(binary), contentType: file.type as any },
+      });
+      setForm((f) => ({ ...f, avatar_url: res.publicUrl }));
+      toast.success("Thumbnail uploaded — save to apply");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
+  async function handleAvatarFromLink() {
+    const url = avatarSource.trim();
+    if (!url) {
+      toast.error("Paste a social profile link first");
+      return;
+    }
+    setAvatarBusy(true);
+    try {
+      const res: any = /spotify\.com|^[A-Za-z0-9]{22}$/.test(url)
+        ? await scrapeSpotifyForAvatar({ data: { url } })
+        : await scrapeProfileForAvatar({ data: { url } });
+      if (!res?.ok) throw new Error(res?.error ?? "Could not read that link");
+      if (!res.avatar_url) throw new Error("No image found on that profile");
+      setForm((f) => ({ ...f, avatar_url: res.avatar_url }));
+      toast.success("Thumbnail pulled — save to apply");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not pull an image");
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
 
   if (!profile) return null;
 
