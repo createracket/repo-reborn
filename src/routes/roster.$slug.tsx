@@ -312,6 +312,12 @@ function PublicRosterPage() {
   const visibleForTotals = items.filter((it) => it.status !== "hold");
   const totalSocial = visibleForTotals.reduce((acc, it) => acc + socialAudience(it), 0);
   const totalAll = visibleForTotals.reduce((acc, it) => acc + totalFans(it), 0);
+  const totalCreators = visibleForTotals.length;
+  const showSocials = totalSocial > 0 && !roster.hide_metric_socials;
+  const showFans = totalSocial > 0 && !roster.hide_metric_fans;
+  const showReach = totalSocial > 0 && !roster.hide_metric_reach;
+  const showEngagement = roster.est_engagement_pct != null && !roster.hide_metric_engagement;
+  const showCreators = !!roster.show_metric_creators && totalCreators > 0;
 
   
 
