@@ -243,6 +243,14 @@ function AdminPage() {
   const activeSpotlights = spotlights.filter((s) => !s.archived);
   const archivedSpotlights = spotlights.filter((s) => !!s.archived);
 
+  const filteredProfiles = profiles.filter((p) => {
+    if (userTypeFilter === "none" ? !!p.account_type : userTypeFilter !== "all" && p.account_type !== userTypeFilter) return false;
+    if (userAccountFilter === "managed" && !p.managed) return false;
+    if (userAccountFilter === "account" && !!p.managed) return false;
+    return true;
+  });
+
+
   const unhandledContactCount =
     contacts.filter((c) => !c.handled).length + interests.filter((i) => !i.handled).length;
   const spotlightById = new Map(spotlights.map((s) => [s.id, s]));
