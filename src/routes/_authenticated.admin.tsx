@@ -2446,6 +2446,28 @@ export function SpotlightForm({
                             );
                           })}
                         </div>
+                        <div className="flex items-center gap-1">
+                          {SECTION_TEXT_SIZES.map(({ key: sz, label }) => {
+                            const active = (sectionTextSizes[key] ?? "default") === sz;
+                            return (
+                              <button
+                                key={sz}
+                                type="button"
+                                onClick={() =>
+                                  setSectionTextSizes((prev) => ({ ...prev, [key]: sz }))
+                                }
+                                aria-label={`${meta.label} text size: ${label}`}
+                                className={`rounded-md border px-2 py-0.5 text-[11px] ${
+                                  active
+                                    ? "border-foreground/40 bg-muted font-medium text-foreground"
+                                    : "border-border text-muted-foreground opacity-60 hover:opacity-100"
+                                }`}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
                         <Button
                           type="button"
                           size="sm"
