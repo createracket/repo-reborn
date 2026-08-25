@@ -971,6 +971,26 @@ function RosterDetailView({
     onChanged();
   }
 
+  async function toggleMetricFlag(
+    column:
+      | "hide_metric_socials"
+      | "hide_metric_fans"
+      | "hide_metric_reach"
+      | "hide_metric_engagement"
+      | "show_metric_creators",
+    value: boolean,
+  ) {
+    const { error } = await supabase
+      .from("rosters")
+      .update({ [column]: value } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
   async function saveAccessCode() {
     setSavingAccess(true);
     const code = accessCode.trim();
