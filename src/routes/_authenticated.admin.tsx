@@ -642,7 +642,7 @@ function AdminPage() {
 
 
 
-          <TabsContent value="users" className="mt-6 space-y-6">
+          <TabsContent value="users" className="mt-6 min-w-0 max-w-full space-y-6">
             <Card className="border-primary/40 bg-primary/5">
               <CardHeader>
                 <CardTitle className="text-lg">Soft-launch EARLY ACCESS CODE</CardTitle>
