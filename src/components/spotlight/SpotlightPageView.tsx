@@ -66,8 +66,24 @@ type PartnerLinks = {
   section_labels?: Record<string, string>;
   section_order?: string[];
   section_borders?: Record<string, "none" | "pink" | "green">;
+  section_text_size?: Record<string, "small" | "default" | "large" | "xl">;
   colour_thumbnails?: boolean;
 };
+
+export const SECTION_TEXT_SIZES = [
+  { key: "small", label: "S" },
+  { key: "default", label: "M" },
+  { key: "large", label: "L" },
+  { key: "xl", label: "XL" },
+] as const;
+
+export const SECTION_TEXT_SIZE_CLASS: Record<string, string> = {
+  small: "[&_p]:!text-sm [&_li]:!text-sm",
+  default: "",
+  large: "[&_p]:!text-lg [&_li]:!text-lg",
+  xl: "[&_p]:!text-xl [&_li]:!text-xl",
+};
+
 
 export const SPOTLIGHT_SECTIONS = [
   { key: "host_bio", label: "About the host" },
@@ -781,13 +797,20 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
           return order.map((k) => {
             if (!nodes[k]) return null;
             const border = links.section_borders?.[k] ?? "none";
-            if (border === "none") return <div key={k}>{nodes[k]}</div>;
+            const size = links.section_text_size?.[k] ?? "default";
+            const sizeCls = SECTION_TEXT_SIZE_CLASS[size] ?? "";
+            if (border === "none")
+              return (
+                <div key={k} className={sizeCls}>
+                  {nodes[k]}
+                </div>
+              );
             return (
               <div
                 key={k}
                 className={`mt-12 rounded-3xl border p-5 sm:p-7 [&>section]:mt-0 ${
                   border === "pink" ? "border-pink-accent/70" : "border-primary/70"
-                }`}
+                } ${sizeCls}`}
               >
                 {nodes[k]}
               </div>

@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
 import { RichTextField } from "@/components/admin/RichTextField";
+import { SECTION_TEXT_SIZES } from "@/components/spotlight/SpotlightPageView";
 import { DEFAULT_THUMB_FRAME, readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -1623,6 +1624,9 @@ export function SpotlightForm({
   const [sectionBorders, setSectionBorders] = useState<Record<string, "none" | "pink" | "green">>(
     () => (editData?.links?.section_borders ?? {}) as Record<string, "none" | "pink" | "green">,
   );
+  const [sectionTextSizes, setSectionTextSizes] = useState<
+    Record<string, "small" | "default" | "large" | "xl">
+  >(() => (editData?.links?.section_text_size ?? {}) as Record<string, "small" | "default" | "large" | "xl">);
 
   const [dragKey, setDragKey] = useState<string | null>(null);
 
@@ -2060,6 +2064,7 @@ export function SpotlightForm({
         },
         section_order: sectionOrder,
         section_borders: sectionBorders,
+        section_text_size: sectionTextSizes,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
@@ -2392,10 +2397,11 @@ export function SpotlightForm({
                 </div>
               ))}
               <div className="space-y-2 border-t border-border/60 pt-4">
-                <Label>Section order &amp; borders</Label>
+                <Label>Section order, borders &amp; text size</Label>
                 <p className="text-xs text-muted-foreground">
                   Drag to reorder — each heading moves with its content. Empty sections stay hidden.
-                  Use the border buttons to frame a whole section in pink or green.
+                  Use the border buttons to frame a section in pink or green, and S/M/L/XL to set its
+                  body text size.
                 </p>
                 <div className="space-y-1.5">
                   {sectionOrder.map((key, i) => {
@@ -2439,6 +2445,28 @@ export function SpotlightForm({
                                   active
                                     ? "bg-muted font-medium text-foreground"
                                     : "text-muted-foreground opacity-60 hover:opacity-100"
+                                }`}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {SECTION_TEXT_SIZES.map(({ key: sz, label }) => {
+                            const active = (sectionTextSizes[key] ?? "default") === sz;
+                            return (
+                              <button
+                                key={sz}
+                                type="button"
+                                onClick={() =>
+                                  setSectionTextSizes((prev) => ({ ...prev, [key]: sz }))
+                                }
+                                aria-label={`${meta.label} text size: ${label}`}
+                                className={`rounded-md border px-2 py-0.5 text-[11px] ${
+                                  active
+                                    ? "border-foreground/40 bg-muted font-medium text-foreground"
+                                    : "border-border text-muted-foreground opacity-60 hover:opacity-100"
                                 }`}
                               >
                                 {label}
