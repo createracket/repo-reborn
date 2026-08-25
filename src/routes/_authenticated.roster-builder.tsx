@@ -99,6 +99,11 @@ type Roster = {
   updated_at: string;
   hide_prospect_tags: boolean;
   hide_statuses: boolean;
+  hide_metric_socials: boolean;
+  hide_metric_fans: boolean;
+  hide_metric_reach: boolean;
+  hide_metric_engagement: boolean;
+  show_metric_creators: boolean;
   header_image_url: string | null;
   profile_image_url: string | null;
   thumb_frame?: any;
