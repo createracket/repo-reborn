@@ -671,7 +671,7 @@ function AdminPage() {
             </Card>
             <NewUserForm onCreated={reloadProfiles} />
             <CommunityProfileForm onCreated={reloadProfiles} />
-            <Card>
+            <Card className="min-w-0 max-w-full overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg">Featured in Suggested matches</CardTitle>
                 <CardDescription>
