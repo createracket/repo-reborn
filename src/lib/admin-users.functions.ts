@@ -369,6 +369,7 @@ const UpdateCommunitySchema = z.object({
   display_name: z.string().trim().max(120).nullable().optional(),
   account_type: z.enum(ACCOUNT_TYPES).nullable().optional(),
   slug: z.string().trim().max(80).nullable().optional(),
+  avatar_url: z.string().trim().max(2048).nullable().optional(),
 });
 
 /** Edits an account-less profile row (no auth user to update). */
@@ -382,6 +383,7 @@ export const adminUpdateCommunityProfile = createServerFn({ method: "POST" })
     if (data.display_name !== undefined) patch.display_name = data.display_name;
     if (data.account_type !== undefined) patch.account_type = data.account_type;
     if (data.slug !== undefined) patch.slug = data.slug ? data.slug.toLowerCase() : null;
+    if (data.avatar_url !== undefined) patch.avatar_url = data.avatar_url || null;
     if (Object.keys(patch).length === 0) return { ok: true };
     const { error } = await supabaseAdmin
       .from("profiles")
@@ -391,3 +393,26 @@ export const adminUpdateCommunityProfile = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/** Sets the thumbnail/avatar on any profile (managed or real account). */
+export const adminSetProfileAvatar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        profile_id: z.string().uuid(),
+        avatar_url: z.string().trim().max(2048).nullable(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ avatar_url: data.avatar_url || null } as any)
+      .eq("id", data.profile_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
