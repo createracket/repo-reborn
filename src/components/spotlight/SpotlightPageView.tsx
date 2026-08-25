@@ -66,8 +66,24 @@ type PartnerLinks = {
   section_labels?: Record<string, string>;
   section_order?: string[];
   section_borders?: Record<string, "none" | "pink" | "green">;
+  section_text_size?: Record<string, "small" | "default" | "large" | "xl">;
   colour_thumbnails?: boolean;
 };
+
+export const SECTION_TEXT_SIZES = [
+  { key: "small", label: "S" },
+  { key: "default", label: "M" },
+  { key: "large", label: "L" },
+  { key: "xl", label: "XL" },
+] as const;
+
+export const SECTION_TEXT_SIZE_CLASS: Record<string, string> = {
+  small: "[&_p]:!text-sm [&_li]:!text-sm",
+  default: "",
+  large: "[&_p]:!text-lg [&_li]:!text-lg",
+  xl: "[&_p]:!text-xl [&_li]:!text-xl",
+};
+
 
 export const SPOTLIGHT_SECTIONS = [
   { key: "host_bio", label: "About the host" },
