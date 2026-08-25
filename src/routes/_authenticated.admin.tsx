@@ -3183,6 +3183,56 @@ function EditUserDialog({
               onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
           </div>
           <div>
+            <Label>Thumbnail</Label>
+            <div className="mt-1 flex items-start gap-3">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                {form.avatar_url ? (
+                  <img src={form.avatar_url} alt="Profile thumbnail preview" className="h-full w-full object-cover" />
+                ) : null}
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (file) void handleAvatarFile(file);
+                      }}
+                    />
+                    <span className="inline-flex h-8 cursor-pointer items-center rounded-md border border-input px-3 text-sm hover:bg-accent">
+                      {avatarBusy ? "Working…" : "Upload image"}
+                    </span>
+                  </label>
+                  {form.avatar_url ? (
+                    <Button type="button" size="sm" variant="ghost"
+                      onClick={() => setForm((f) => ({ ...f, avatar_url: "" }))}>
+                      Remove
+                    </Button>
+                  ) : null}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={avatarSource}
+                    placeholder="Or paste an Instagram / TikTok / YouTube / Spotify link"
+                    onChange={(e) => setAvatarSource(e.target.value)}
+                  />
+                  <Button type="button" size="sm" variant="outline" disabled={avatarBusy} onClick={handleAvatarFromLink}>
+                    Pull
+                  </Button>
+                </div>
+                <Input
+                  value={form.avatar_url}
+                  placeholder="Image URL"
+                  onChange={(e) => setForm((f) => ({ ...f, avatar_url: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
+          <div>
             <Label htmlFor="eu-password">{isManaged ? "Password for new account (optional)" : "New password (optional)"}</Label>
             <Input id="eu-password" type="text" autoComplete="off" minLength={8} value={form.password}
               onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
