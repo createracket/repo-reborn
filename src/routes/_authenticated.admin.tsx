@@ -130,6 +130,8 @@ function AdminPage() {
   const [handledOpen, setHandledOpen] = useState(false);
   const [subs, setSubs] = useState<Subscriber[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [userTypeFilter, setUserTypeFilter] = useState<string>("all");
+  const [userAccountFilter, setUserAccountFilter] = useState<"all" | "account" | "managed">("all");
   const [vibeByUser, setVibeByUser] = useState<Map<string, VibeRow>>(new Map());
   const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
@@ -240,6 +242,14 @@ function AdminPage() {
 
   const activeSpotlights = spotlights.filter((s) => !s.archived);
   const archivedSpotlights = spotlights.filter((s) => !!s.archived);
+
+  const filteredProfiles = profiles.filter((p) => {
+    if (userTypeFilter === "none" ? !!p.account_type : userTypeFilter !== "all" && p.account_type !== userTypeFilter) return false;
+    if (userAccountFilter === "managed" && !p.managed) return false;
+    if (userAccountFilter === "account" && !!p.managed) return false;
+    return true;
+  });
+
 
   const unhandledContactCount =
     contacts.filter((c) => !c.handled).length + interests.filter((i) => !i.handled).length;
@@ -666,10 +676,37 @@ function AdminPage() {
                   Toggle a user to surface their public profile on every dashboard's "Suggested matches" card.
                   Users without a public slug won't appear publicly — set one on their profile first.
                 </CardDescription>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <select
+                    aria-label="Filter by profile type"
+                    value={userTypeFilter}
+                    onChange={(e) => setUserTypeFilter(e.target.value)}
+                    className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  >
+                    <option value="all">All profile types</option>
+                    {ACCOUNT_TYPE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                    <option value="none">No type set</option>
+                  </select>
+                  <select
+                    aria-label="Filter by account status"
+                    value={userAccountFilter}
+                    onChange={(e) => setUserAccountFilter(e.target.value as "all" | "account" | "managed")}
+                    className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  >
+                    <option value="all">All accounts</option>
+                    <option value="account">Signed up (active account)</option>
+                    <option value="managed">Added by me (no account)</option>
+                  </select>
+                  <span className="text-xs text-muted-foreground">
+                    {filteredProfiles.length} of {profiles.length} shown
+                  </span>
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 <Table headers={["Display name", "Email", "Profile type", "Vibe check", "Slug", "Visible", "Joined", "Subscription", "Featured", ""]}>
-                  {profiles.map((p) => (
+                  {filteredProfiles.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
                       <td className="p-3">{p.email ?? "—"}</td>
