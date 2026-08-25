@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
 import { RichTextField } from "@/components/admin/RichTextField";
+import { SECTION_TEXT_SIZES } from "@/components/spotlight/SpotlightPageView";
 import { DEFAULT_THUMB_FRAME, readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
