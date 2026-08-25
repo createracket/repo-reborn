@@ -2059,6 +2059,7 @@ export function SpotlightForm({
           members: form.label_members.trim(),
         },
         section_order: sectionOrder,
+        section_borders: sectionBorders,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
