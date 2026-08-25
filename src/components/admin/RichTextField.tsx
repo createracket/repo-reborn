@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { Bold, Italic, Link2, List } from "lucide-react";
+import { useRef, useState } from "react";
+import { Bold, Italic, Link2, List, Maximize2, Minimize2 } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
