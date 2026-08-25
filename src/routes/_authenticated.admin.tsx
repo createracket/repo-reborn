@@ -1620,6 +1620,9 @@ export function SpotlightForm({
     normaliseSectionOrder(editData?.links?.section_order),
   );
   const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(() => readThumbFrame(editData?.links));
+  const [sectionBorders, setSectionBorders] = useState<Record<string, "none" | "pink" | "green">>(
+    () => (editData?.links?.section_borders ?? {}) as Record<string, "none" | "pink" | "green">,
+  );
 
   const [dragKey, setDragKey] = useState<string | null>(null);
 
