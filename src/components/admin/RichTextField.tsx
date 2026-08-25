@@ -25,6 +25,7 @@ export function RichTextField({
   placeholder?: string;
 }) {
   const ref = useRef<HTMLTextAreaElement | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   const wrap = (open: string, close: string, fallback = "text") => {
     const el = ref.current;
