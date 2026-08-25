@@ -2397,10 +2397,11 @@ export function SpotlightForm({
                 </div>
               ))}
               <div className="space-y-2 border-t border-border/60 pt-4">
-                <Label>Section order &amp; borders</Label>
+                <Label>Section order, borders &amp; text size</Label>
                 <p className="text-xs text-muted-foreground">
                   Drag to reorder — each heading moves with its content. Empty sections stay hidden.
-                  Use the border buttons to frame a whole section in pink or green.
+                  Use the border buttons to frame a section in pink or green, and S/M/L/XL to set its
+                  body text size.
                 </p>
                 <div className="space-y-1.5">
                   {sectionOrder.map((key, i) => {
