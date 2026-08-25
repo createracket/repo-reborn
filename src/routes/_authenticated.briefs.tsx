@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PartnerPageShares, type ShareProfile } from "@/components/admin/PartnerPageShares";
+import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
 import { supabase } from "@/integrations/supabase/client";
 import { SpotlightForm } from "@/routes/_authenticated.admin";
 
