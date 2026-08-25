@@ -1495,6 +1495,10 @@ export type Database = {
           description: string | null
           est_engagement_pct: number | null
           header_image_url: string | null
+          hide_metric_engagement: boolean
+          hide_metric_fans: boolean
+          hide_metric_reach: boolean
+          hide_metric_socials: boolean
           hide_prospect_tags: boolean
           hide_statuses: boolean
           id: string
@@ -1502,6 +1506,7 @@ export type Database = {
           profile_image_url: string | null
           published: boolean
           published_at: string | null
+          show_metric_creators: boolean
           slug: string | null
           statuses: string[]
           thumb_frame: Json | null
@@ -1521,6 +1526,10 @@ export type Database = {
           description?: string | null
           est_engagement_pct?: number | null
           header_image_url?: string | null
+          hide_metric_engagement?: boolean
+          hide_metric_fans?: boolean
+          hide_metric_reach?: boolean
+          hide_metric_socials?: boolean
           hide_prospect_tags?: boolean
           hide_statuses?: boolean
           id?: string
@@ -1528,6 +1537,7 @@ export type Database = {
           profile_image_url?: string | null
           published?: boolean
           published_at?: string | null
+          show_metric_creators?: boolean
           slug?: string | null
           statuses?: string[]
           thumb_frame?: Json | null
@@ -1547,6 +1557,10 @@ export type Database = {
           description?: string | null
           est_engagement_pct?: number | null
           header_image_url?: string | null
+          hide_metric_engagement?: boolean
+          hide_metric_fans?: boolean
+          hide_metric_reach?: boolean
+          hide_metric_socials?: boolean
           hide_prospect_tags?: boolean
           hide_statuses?: boolean
           id?: string
@@ -1554,6 +1568,7 @@ export type Database = {
           profile_image_url?: string | null
           published?: boolean
           published_at?: string | null
+          show_metric_creators?: boolean
           slug?: string | null
           statuses?: string[]
           thumb_frame?: Json | null
