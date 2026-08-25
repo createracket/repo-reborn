@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
+import { RichTextField } from "@/components/admin/RichTextField";
 import { DEFAULT_THUMB_FRAME, readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -2284,17 +2285,19 @@ export function SpotlightForm({
                 <Label htmlFor="subtitle">Subtitle</Label>
                 <Input id="subtitle" value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="UNLOCK REAL FAN INSIGHTS" />
               </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="intro">Intro</Label>
-                <Textarea id="intro" rows={3} value={form.intro} onChange={(e) => set("intro", e.target.value)} />
+              <div className="md:col-span-2">
+                <RichTextField id="intro" label="Intro" value={form.intro} onChange={(v) => set("intro", v)} />
               </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="host_bio">Host bio</Label>
-                <Textarea id="host_bio" rows={3} value={form.host_bio} onChange={(e) => set("host_bio", e.target.value)} />
+              <div className="md:col-span-2">
+                <RichTextField id="host_bio" label="Host bio" value={form.host_bio} onChange={(v) => set("host_bio", v)} />
               </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="partnership_pitch">Partnership pitch</Label>
-                <Textarea id="partnership_pitch" rows={3} value={form.partnership_pitch} onChange={(e) => set("partnership_pitch", e.target.value)} />
+              <div className="md:col-span-2">
+                <RichTextField
+                  id="partnership_pitch"
+                  label="Partnership pitch"
+                  value={form.partnership_pitch}
+                  onChange={(v) => set("partnership_pitch", v)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="eoi">EOI opportunities (one per line)</Label>

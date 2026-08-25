@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSocialEmbed } from "@/lib/social-embed";
 import { getClipPosters } from "@/lib/clip-poster.functions";
 import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember, registerSpotlightGuestInterest } from "@/lib/spotlight-access.functions";
+import { RichText } from "@/lib/rich-text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -417,7 +418,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             </div>
           </div>
           {page.intro ? (
-            <p className="text-lg text-muted-foreground">{page.intro}</p>
+            <RichText value={page.intro} className="text-lg text-muted-foreground" />
           ) : null}
 
           {/* Metrics */}
@@ -553,7 +554,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             host_bio: page.host_bio ? (
               <section className="mt-16">
                 <h2 className="font-display text-3xl">{sectionLabel("host_bio", "About the host")}</h2>
-                <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.host_bio}</p>
+                <RichText value={page.host_bio} className="mt-3 whitespace-pre-wrap text-muted-foreground" />
               </section>
             ) : null,
 
@@ -591,7 +592,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             partnership: page.partnership_pitch ? (
               <section className="mt-16">
                 <h2 className="font-display text-3xl">{sectionLabel("partnership", "Partnership")}</h2>
-                <p className="mt-3 whitespace-pre-wrap text-muted-foreground">{page.partnership_pitch}</p>
+                <RichText value={page.partnership_pitch} className="mt-3 whitespace-pre-wrap text-muted-foreground" />
               </section>
             ) : null,
 
