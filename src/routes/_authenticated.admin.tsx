@@ -1620,6 +1620,9 @@ export function SpotlightForm({
     normaliseSectionOrder(editData?.links?.section_order),
   );
   const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(() => readThumbFrame(editData?.links));
+  const [sectionBorders, setSectionBorders] = useState<Record<string, "none" | "pink" | "green">>(
+    () => (editData?.links?.section_borders ?? {}) as Record<string, "none" | "pink" | "green">,
+  );
 
   const [dragKey, setDragKey] = useState<string | null>(null);
 
@@ -2056,6 +2059,7 @@ export function SpotlightForm({
           members: form.label_members.trim(),
         },
         section_order: sectionOrder,
+        section_borders: sectionBorders,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
@@ -2388,9 +2392,10 @@ export function SpotlightForm({
                 </div>
               ))}
               <div className="space-y-2 border-t border-border/60 pt-4">
-                <Label>Section order</Label>
+                <Label>Section order &amp; borders</Label>
                 <p className="text-xs text-muted-foreground">
                   Drag to reorder — each heading moves with its content. Empty sections stay hidden.
+                  Use the border buttons to frame a whole section in pink or green.
                 </p>
                 <div className="space-y-1.5">
                   {sectionOrder.map((key, i) => {
@@ -2415,6 +2420,32 @@ export function SpotlightForm({
                       >
                         <GripVertical className="size-4 cursor-grab text-muted-foreground" />
                         <span className="flex-1">{meta.label}</span>
+                        <div className="flex items-center gap-1">
+                          {([
+                            { v: "none", label: "None", cls: "border-border" },
+                            { v: "pink", label: "Pink", cls: "border-pink-accent" },
+                            { v: "green", label: "Green", cls: "border-primary" },
+                          ] as const).map(({ v, label, cls }) => {
+                            const active = (sectionBorders[key] ?? "none") === v;
+                            return (
+                              <button
+                                key={v}
+                                type="button"
+                                onClick={() =>
+                                  setSectionBorders((prev) => ({ ...prev, [key]: v }))
+                                }
+                                aria-label={`${meta.label} border: ${label}`}
+                                className={`rounded-md border-2 px-2 py-0.5 text-[11px] ${cls} ${
+                                  active
+                                    ? "bg-muted font-medium text-foreground"
+                                    : "text-muted-foreground opacity-60 hover:opacity-100"
+                                }`}
+                              >
+                                {label}
+                              </button>
+                            );
+                          })}
+                        </div>
                         <Button
                           type="button"
                           size="sm"

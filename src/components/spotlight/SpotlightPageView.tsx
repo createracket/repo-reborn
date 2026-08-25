@@ -65,6 +65,7 @@ type PartnerLinks = {
   youtube_extra_names?: string[];
   section_labels?: Record<string, string>;
   section_order?: string[];
+  section_borders?: Record<string, "none" | "pink" | "green">;
   colour_thumbnails?: boolean;
 };
 
@@ -777,7 +778,21 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
           ];
           const given = (links.section_order ?? []).filter((k) => defaults.includes(k));
           const order = [...given, ...defaults.filter((k) => !given.includes(k))];
-          return order.map((k) => (nodes[k] ? <div key={k}>{nodes[k]}</div> : null));
+          return order.map((k) => {
+            if (!nodes[k]) return null;
+            const border = links.section_borders?.[k] ?? "none";
+            if (border === "none") return <div key={k}>{nodes[k]}</div>;
+            return (
+              <div
+                key={k}
+                className={`mt-12 rounded-3xl border p-5 sm:p-7 [&>section]:mt-0 ${
+                  border === "pink" ? "border-pink-accent/70" : "border-primary/70"
+                }`}
+              >
+                {nodes[k]}
+              </div>
+            );
+          });
         })()}
       </main>
       <SiteFooter />
