@@ -32,6 +32,11 @@ type PublicRoster = {
 
   hide_prospect_tags: boolean;
   hide_statuses: boolean;
+  hide_metric_socials?: boolean | null;
+  hide_metric_fans?: boolean | null;
+  hide_metric_reach?: boolean | null;
+  hide_metric_engagement?: boolean | null;
+  show_metric_creators?: boolean | null;
   est_engagement_pct: number | null;
   categories: string[] | null;
   custom_links: Array<{ label: string; url: string }> | null;
@@ -161,7 +166,7 @@ function PublicRosterPage() {
       const { data: r } = await (supabase as any)
         .from("public_rosters")
         .select(
-          "id, title, description, slug, published, published_at, updated_at, header_image_url, profile_image_url, hide_prospect_tags, hide_statuses, est_engagement_pct, categories, custom_links",
+          "id, title, description, slug, published, published_at, updated_at, header_image_url, profile_image_url, hide_prospect_tags, hide_statuses, hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators, est_engagement_pct, categories, custom_links",
         )
         .eq("slug", slug)
         .eq("published", true)
@@ -312,6 +317,12 @@ function PublicRosterPage() {
   const visibleForTotals = items.filter((it) => it.status !== "hold");
   const totalSocial = visibleForTotals.reduce((acc, it) => acc + socialAudience(it), 0);
   const totalAll = visibleForTotals.reduce((acc, it) => acc + totalFans(it), 0);
+  const totalCreators = visibleForTotals.length;
+  const showSocials = totalSocial > 0 && !roster.hide_metric_socials;
+  const showFans = totalSocial > 0 && !roster.hide_metric_fans;
+  const showReach = totalSocial > 0 && !roster.hide_metric_reach;
+  const showEngagement = roster.est_engagement_pct != null && !roster.hide_metric_engagement;
+  const showCreators = !!roster.show_metric_creators && totalCreators > 0;
 
   
 
@@ -380,10 +391,9 @@ function PublicRosterPage() {
           </div>
         )}
 
-        {(totalSocial > 0 || totalAll > 0 || roster.est_engagement_pct != null) && (
+        {(showSocials || showFans || showReach || showCreators || showEngagement) && (
           <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-            {totalSocial > 0 && (
-              <>
+            {showSocials && (
                 <Card className="border-2 border-pink-accent bg-pink-accent/5">
 
 
@@ -397,6 +407,8 @@ function PublicRosterPage() {
                     <p className="mt-0.5 text-[10px] text-muted-foreground">Excludes streaming platforms</p>
                   </CardContent>
                 </Card>
+            )}
+            {showFans && (
                 <Card>
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
@@ -408,6 +420,8 @@ function PublicRosterPage() {
                     <p className="mt-0.5 text-[10px] text-muted-foreground">Socials + streaming</p>
                   </CardContent>
                 </Card>
+            )}
+            {showReach && (
                 <Card>
                   <CardContent className="p-3 sm:p-4">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
@@ -418,10 +432,22 @@ function PublicRosterPage() {
                     </p>
                   </CardContent>
                 </Card>
-              </>
             )}
 
-            {roster.est_engagement_pct != null && (
+            {showCreators && (
+              <Card>
+                <CardContent className="p-3 sm:p-4">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">
+                    Creators / bands
+                  </p>
+                  <p className="mt-1 font-display text-xl sm:text-2xl">
+                    {totalCreators}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {showEngagement && (
               <Card>
                 <CardContent className="p-3 sm:p-4">
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground sm:text-xs">

@@ -99,6 +99,11 @@ type Roster = {
   updated_at: string;
   hide_prospect_tags: boolean;
   hide_statuses: boolean;
+  hide_metric_socials: boolean;
+  hide_metric_fans: boolean;
+  hide_metric_reach: boolean;
+  hide_metric_engagement: boolean;
+  show_metric_creators: boolean;
   header_image_url: string | null;
   profile_image_url: string | null;
   thumb_frame?: any;
@@ -394,7 +399,7 @@ function RosterBuilderPage() {
       // SELECTable on the base table (privacy). Read them via the
       // get_roster_assignment RPC instead. A wildcard select fails outright.
       .select(
-        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, categories, statuses, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
+        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators, categories, statuses, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
       )
       .order("updated_at", { ascending: false });
     if (error) {
@@ -971,6 +976,26 @@ function RosterDetailView({
     onChanged();
   }
 
+  async function toggleMetricFlag(
+    column:
+      | "hide_metric_socials"
+      | "hide_metric_fans"
+      | "hide_metric_reach"
+      | "hide_metric_engagement"
+      | "show_metric_creators",
+    value: boolean,
+  ) {
+    const { error } = await supabase
+      .from("rosters")
+      .update({ [column]: value } as never)
+      .eq("id", roster.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    onChanged();
+  }
+
   async function saveAccessCode() {
     setSavingAccess(true);
     const code = accessCode.trim();
@@ -1454,6 +1479,38 @@ function RosterDetailView({
                 checked={roster.hide_statuses}
                 onCheckedChange={toggleHideStatuses}
               />
+            </div>
+            <div className="rounded-lg border border-border/60 p-3">
+              <div className="text-sm font-medium">Top metrics</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Choose which totals show at the top of the public roster page.
+              </div>
+              <div className="mt-3 space-y-2">
+                {([
+                  ["hide_metric_socials", "Socials"],
+                  ["hide_metric_fans", "Fans"],
+                  ["hide_metric_reach", "Est. reach"],
+                  ["hide_metric_engagement", "Est. engagement"],
+                ] as const).map(([col, label]) => (
+                  <div key={col} className="flex items-center justify-between gap-3">
+                    <span className="text-sm">{label}</span>
+                    <Switch
+                      checked={!roster[col]}
+                      onCheckedChange={(on) => toggleMetricFlag(col, !on)}
+                    />
+                  </div>
+                ))}
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm">
+                    Total creators/bands
+                    <span className="ml-2 text-xs text-muted-foreground">Off by default</span>
+                  </span>
+                  <Switch
+                    checked={roster.show_metric_creators}
+                    onCheckedChange={(on) => toggleMetricFlag("show_metric_creators", on)}
+                  />
+                </div>
+              </div>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
               <div>
