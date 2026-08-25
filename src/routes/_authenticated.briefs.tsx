@@ -181,6 +181,7 @@ function BriefsPage() {
             >
               <Pencil className="size-3" />
             </Button>
+            <PartnerPageHistory pageId={b.id} pageTitle={b.headline} onRestored={refresh} />
             <Button size="sm" variant="outline" onClick={() => setArchived(b, !b.archived)}>
               <Archive className="size-3" />
             </Button>
