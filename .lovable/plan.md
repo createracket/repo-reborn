@@ -1,36 +1,26 @@
-# Brief page history — what's recoverable, and how to stop losing edits
+# Version history for brief and spotlight pages
 
-## The honest current state
+## Why
 
-I checked the database directly. The Tixel social brief (`tixel-social-brief`, a Brief page) exists and was last saved today at 10:08 UTC, with intro, host bio and partnership pitch all populated. But brief/spotlight pages are stored as a **single live row** — every save overwrites the previous text in place. There is no snapshot, revision or audit table anywhere in the backend, so **earlier versions of that page's copy are not stored and cannot be retrieved**. Lovable's project History restores code, not database content, so it won't bring the old wording back either.
+Brief and spotlight pages are stored as a single live row — every save overwrites the previous text in place. There is no snapshot or revision table in the backend, so earlier versions of the Tixel social brief (or any page) can't be recovered. Lovable's project History restores code, not page content.
 
-What I can do is (1) give you a readable snapshot of the page as it stands right now, and (2) make sure this can't happen again.
+This adds automatic version history from now on. It can't reconstruct edits already overwritten.
 
-## Proposed work
+## What gets built
 
-### 1. Export the current brief as a document
-Generate a markdown/PDF-style export of the full Tixel social brief exactly as it renders today — every section in order, with headline, subtitle, intro, host bio, partnership pitch, EOI opportunities, audience segments, links, do's and don'ts, metrics and vibe tags — so you have an off-platform reference copy.
+### 1. Automatic snapshots
+- New `partner_page_versions` table storing a full copy of a page each time it's saved, with a timestamp and the admin who saved it.
+- A database trigger writes the snapshot on every update — nothing to remember, and it captures edits made from anywhere.
+- Keep the 30 most recent versions per page; older ones pruned automatically.
 
-### 2. Version history for brief and spotlight pages
-Add automatic snapshots so past copy is always recoverable:
-
-- New `partner_page_versions` table storing a full JSON copy of a page each time it's saved, with timestamp and the admin who saved it.
-- A database trigger writes the snapshot on every update — nothing for you to remember.
-- Keep the most recent 30 versions per page (older ones pruned automatically).
-
-### 3. "Version history" panel in the builder
+### 2. "History" panel in the builder
 In the spotlight/brief builder, a History button per page opens a panel listing saved versions by date and time. For each version you can:
-
-- Preview the full content of that version side by side with the current one.
-- Restore it (which itself creates a new snapshot, so restoring is never destructive).
+- Preview the full content of that version, so you can compare against what's live now.
+- Restore it. Restoring itself creates a new snapshot first, so it's never destructive and can be undone.
 
 ## Technical notes
 
-- `partner_page_versions`: `id`, `page_id`, `snapshot jsonb`, `saved_by uuid`, `created_at`. Admin-only RLS with the usual grants; pruning via the same trigger.
-- Snapshot capture is a `BEFORE UPDATE` trigger on `partner_pages` storing `to_jsonb(OLD)`, so it captures history regardless of where the edit came from.
-- Restore runs through an admin-only server function that writes the snapshot back into `partner_pages`.
-- No change to how brief/spotlight pages render publicly.
-
-## Note
-
-This only starts capturing versions from the moment it's built — it can't reconstruct the Tixel edits already overwritten. If you have the previous wording in a doc, email or screenshot, send it over and I'll put it straight back into the page.
+- `partner_page_versions`: `id`, `page_id`, `snapshot jsonb`, `saved_by uuid`, `created_at`. Admin-only RLS with the usual grants.
+- Snapshot capture via a `BEFORE UPDATE` trigger on `partner_pages` storing `to_jsonb(OLD)`; the same trigger prunes beyond 30 rows per page.
+- Reads and restores go through admin-only server functions; restore writes the snapshot fields back into `partner_pages`.
+- No change to how brief or spotlight pages render publicly.
