@@ -57,6 +57,7 @@ import { FaqsAdmin } from "@/components/admin/FaqsAdmin";
 import { SoundBoardAdmin } from "@/components/admin/SoundBoardAdmin";
 import { UsageAdmin } from "@/components/admin/UsageAdmin";
 import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
+import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
 import { loadDashboardConfig, saveDashboardConfig } from "@/lib/dashboard-config";
 import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
 import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
