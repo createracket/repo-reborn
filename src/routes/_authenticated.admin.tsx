@@ -3107,18 +3107,25 @@ function EditUserDialog({
       if ((form.slug.trim() || null) !== (profile.slug ?? null)) patch.slug = form.slug.trim() || null;
       if (form.password) patch.password = form.password;
 
-      if (Object.keys(patch).length === 1) {
+      const avatarChanged = (form.avatar_url.trim() || null) !== (profile.avatar_url ?? null);
+      if (Object.keys(patch).length === 1 && !avatarChanged) {
         toast.info("Nothing to update");
         setSaving(false);
         return;
       }
-      await adminUpdateUser({ data: patch });
+      if (Object.keys(patch).length > 1) await adminUpdateUser({ data: patch });
+      if (avatarChanged) {
+        await adminSetProfileAvatar({
+          data: { profile_id: profile.id, avatar_url: form.avatar_url.trim() || null },
+        });
+      }
       onSaved({
         id: profile.id,
         email: patch.email ?? profile.email,
         display_name: patch.display_name ?? profile.display_name,
         account_type: patch.account_type ?? profile.account_type,
         slug: patch.slug ?? profile.slug,
+        avatar_url: form.avatar_url.trim() || null,
       });
       toast.success("User updated");
       onOpenChange(false);
