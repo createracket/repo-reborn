@@ -33,7 +33,9 @@ import {
   adminDeleteCommunityProfile,
   adminAssignEmail,
   adminImportRosterCreators,
+  adminSetProfileAvatar,
 } from "@/lib/admin-users.functions";
+import { uploadMyProfileImage } from "@/lib/profile-images.functions";
 import { ACCESS_CODE } from "@/routes/login";
 import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
 import {
