@@ -1,0 +1,2 @@
+GRANT SELECT (hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators) ON public.rosters TO anon, authenticated;
+GRANT UPDATE (hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators) ON public.rosters TO authenticated;
