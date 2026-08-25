@@ -1459,7 +1459,7 @@ function ProfileChip({ profile, fallbackEmail }: {
 function Table({ headers, children }: { headers: string[]; children: React.ReactNode }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
+      <table className="w-full min-w-max text-left text-sm">
         <thead className="bg-muted/40">
           <tr>{headers.map((h) => <th key={h} className="p-3 font-medium">{h}</th>)}</tr>
         </thead>
