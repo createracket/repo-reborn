@@ -344,6 +344,11 @@ function AdminPage() {
                           >
                             <Pencil className="mr-1 size-3" /> Edit
                           </Button>
+                          <PartnerPageHistory
+                            pageId={s.id}
+                            pageTitle={s.headline}
+                            onRestored={refreshSpotlights}
+                          />
                           {!s.archived ? (
                             <Button
                               size="sm"
