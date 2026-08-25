@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { Bold, Italic, Link2, List } from "lucide-react";
+import { useRef, useState } from "react";
+import { Bold, Italic, Link2, List, Maximize2, Minimize2 } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +25,7 @@ export function RichTextField({
   placeholder?: string;
 }) {
   const ref = useRef<HTMLTextAreaElement | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   const wrap = (open: string, close: string, fallback = "text") => {
     const el = ref.current;
@@ -77,14 +78,23 @@ export function RichTextField({
           <button type="button" className={btn} onClick={bulletList} title="Bullet list">
             <List className="size-3.5" />
           </button>
+          <button
+            type="button"
+            className={btn}
+            onClick={() => setExpanded((v) => !v)}
+            title={expanded ? "Shrink box" : "Expand box"}
+          >
+            {expanded ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
+          </button>
         </div>
       </div>
       <Textarea
         id={id}
         ref={ref}
-        rows={rows}
+        rows={expanded ? Math.max(rows * 3, 16) : rows}
         value={value}
         placeholder={placeholder}
+        className="resize-y"
         onChange={(e) => onChange(e.target.value)}
       />
       {value.trim() ? (
