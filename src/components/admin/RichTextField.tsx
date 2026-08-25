@@ -78,14 +78,23 @@ export function RichTextField({
           <button type="button" className={btn} onClick={bulletList} title="Bullet list">
             <List className="size-3.5" />
           </button>
+          <button
+            type="button"
+            className={btn}
+            onClick={() => setExpanded((v) => !v)}
+            title={expanded ? "Shrink box" : "Expand box"}
+          >
+            {expanded ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
+          </button>
         </div>
       </div>
       <Textarea
         id={id}
         ref={ref}
-        rows={rows}
+        rows={expanded ? Math.max(rows * 3, 16) : rows}
         value={value}
         placeholder={placeholder}
+        className="resize-y"
         onChange={(e) => onChange(e.target.value)}
       />
       {value.trim() ? (
