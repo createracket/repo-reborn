@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PartnerPageShares, type ShareProfile } from "@/components/admin/PartnerPageShares";
+import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
 import { supabase } from "@/integrations/supabase/client";
 import { SpotlightForm } from "@/routes/_authenticated.admin";
 
@@ -180,6 +181,7 @@ function BriefsPage() {
             >
               <Pencil className="size-3" />
             </Button>
+            <PartnerPageHistory pageId={b.id} pageTitle={b.headline} onRestored={refresh} />
             <Button size="sm" variant="outline" onClick={() => setArchived(b, !b.archived)}>
               <Archive className="size-3" />
             </Button>

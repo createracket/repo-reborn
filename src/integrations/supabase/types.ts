@@ -964,6 +964,30 @@ export type Database = {
           },
         ]
       }
+      partner_page_versions: {
+        Row: {
+          created_at: string
+          id: string
+          page_id: string
+          saved_by: string | null
+          snapshot: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_id: string
+          saved_by?: string | null
+          snapshot: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_id?: string
+          saved_by?: string | null
+          snapshot?: Json
+        }
+        Relationships: []
+      }
       partner_pages: {
         Row: {
           access_code: string | null

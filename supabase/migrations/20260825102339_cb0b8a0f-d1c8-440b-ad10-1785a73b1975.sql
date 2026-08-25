@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.capture_partner_page_version() FROM PUBLIC, anon, authenticated;
