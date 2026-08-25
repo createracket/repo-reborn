@@ -65,6 +65,7 @@ type PartnerLinks = {
   youtube_extra_names?: string[];
   section_labels?: Record<string, string>;
   section_order?: string[];
+  section_borders?: Record<string, "none" | "pink" | "green">;
   colour_thumbnails?: boolean;
 };
 
