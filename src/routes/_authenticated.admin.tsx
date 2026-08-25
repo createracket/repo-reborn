@@ -130,6 +130,8 @@ function AdminPage() {
   const [handledOpen, setHandledOpen] = useState(false);
   const [subs, setSubs] = useState<Subscriber[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [userTypeFilter, setUserTypeFilter] = useState<string>("all");
+  const [userAccountFilter, setUserAccountFilter] = useState<"all" | "account" | "managed">("all");
   const [vibeByUser, setVibeByUser] = useState<Map<string, VibeRow>>(new Map());
   const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
