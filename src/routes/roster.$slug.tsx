@@ -32,6 +32,11 @@ type PublicRoster = {
 
   hide_prospect_tags: boolean;
   hide_statuses: boolean;
+  hide_metric_socials?: boolean | null;
+  hide_metric_fans?: boolean | null;
+  hide_metric_reach?: boolean | null;
+  hide_metric_engagement?: boolean | null;
+  show_metric_creators?: boolean | null;
   est_engagement_pct: number | null;
   categories: string[] | null;
   custom_links: Array<{ label: string; url: string }> | null;
