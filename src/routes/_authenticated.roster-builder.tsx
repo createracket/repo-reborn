@@ -21,6 +21,8 @@ import {
   Filter,
   X,
   ChevronDown,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
@@ -190,6 +192,7 @@ type RosterItem = {
   categories: string[];
   metrics_month: string | null;
   location: "GB" | "US" | "NZ" | "AU" | "JP" | null;
+  hidden?: boolean;
 };
 
 const LOCATION_CYCLE: Array<"GB" | "US" | "NZ" | "AU" | "JP" | null> = [null, "GB", "US", "NZ", "AU", "JP"];
@@ -1915,6 +1918,11 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, stat
             </span>
           )}
           {isVerified && <BadgeCheck className="size-4 shrink-0 text-pink-accent" />}
+          {item.hidden && (
+            <span className="shrink-0 rounded-md border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+              Hidden
+            </span>
+          )}
         </button>
         <Select
           value={item.status ?? "in_review"}
@@ -2117,6 +2125,24 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, stat
               </SelectContent>
             </Select>
           )}
+          <Button
+            size="sm"
+            variant="outline"
+            className={`h-8 w-[150px] justify-center gap-1.5 px-2 text-xs ${item.hidden ? "border-muted-foreground/40 bg-muted/40 text-muted-foreground" : ""}`}
+            title={item.hidden ? "Hidden from the live roster page — click to show" : "Visible on the live roster page — click to hide"}
+            onClick={async () => {
+              const next = !item.hidden;
+              const { error } = await supabase
+                .from("roster_items")
+                .update({ hidden: next } as never)
+                .eq("id", item.id);
+              if (error) toast.error(error.message);
+              else onChanged();
+            }}
+          >
+            {item.hidden ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+            <span className="uppercase tracking-wider text-[10px]">{item.hidden ? "Hidden" : "Visible"}</span>
+          </Button>
           <Button
             size="sm"
             variant="outline"

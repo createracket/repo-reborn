@@ -1288,6 +1288,7 @@ export type Database = {
           facebook_url: string | null
           flagged_streaming_mismatch: boolean
           flagged_streaming_reason: string | null
+          hidden: boolean
           id: string
           instagram_followers: number | null
           instagram_url: string | null
@@ -1332,6 +1333,7 @@ export type Database = {
           facebook_url?: string | null
           flagged_streaming_mismatch?: boolean
           flagged_streaming_reason?: string | null
+          hidden?: boolean
           id?: string
           instagram_followers?: number | null
           instagram_url?: string | null
@@ -1376,6 +1378,7 @@ export type Database = {
           facebook_url?: string | null
           flagged_streaming_mismatch?: boolean
           flagged_streaming_reason?: string | null
+          hidden?: boolean
           id?: string
           instagram_followers?: number | null
           instagram_url?: string | null
