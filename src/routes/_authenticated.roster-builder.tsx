@@ -21,6 +21,8 @@ import {
   Filter,
   X,
   ChevronDown,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
@@ -190,6 +192,7 @@ type RosterItem = {
   categories: string[];
   metrics_month: string | null;
   location: "GB" | "US" | "NZ" | "AU" | "JP" | null;
+  hidden?: boolean;
 };
 
 const LOCATION_CYCLE: Array<"GB" | "US" | "NZ" | "AU" | "JP" | null> = [null, "GB", "US", "NZ", "AU", "JP"];
