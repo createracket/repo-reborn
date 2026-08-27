@@ -1918,6 +1918,11 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, stat
             </span>
           )}
           {isVerified && <BadgeCheck className="size-4 shrink-0 text-pink-accent" />}
+          {item.hidden && (
+            <span className="shrink-0 rounded-md border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+              Hidden
+            </span>
+          )}
         </button>
         <Select
           value={item.status ?? "in_review"}

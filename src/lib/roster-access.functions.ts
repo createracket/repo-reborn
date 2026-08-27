@@ -69,6 +69,7 @@ export const unlockRoster = createServerFn({ method: "POST" })
       .from("roster_items")
       .select(ITEM_FIELDS)
       .eq("roster_id", roster.id as string)
+      .eq("hidden", false)
       .order("position", { ascending: true });
 
     await supabaseAdmin
@@ -126,6 +127,7 @@ export const getRosterForMember = createServerFn({ method: "POST" })
       .from("roster_items")
       .select(ITEM_FIELDS)
       .eq("roster_id", roster.id as string)
+      .eq("hidden", false)
       .order("position", { ascending: true });
 
     return { ok: true as const, roster, items: items ?? [] };
