@@ -2123,6 +2123,24 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, stat
           <Button
             size="sm"
             variant="outline"
+            className={`h-8 w-[150px] justify-center gap-1.5 px-2 text-xs ${item.hidden ? "border-muted-foreground/40 bg-muted/40 text-muted-foreground" : ""}`}
+            title={item.hidden ? "Hidden from the live roster page — click to show" : "Visible on the live roster page — click to hide"}
+            onClick={async () => {
+              const next = !item.hidden;
+              const { error } = await supabase
+                .from("roster_items")
+                .update({ hidden: next } as never)
+                .eq("id", item.id);
+              if (error) toast.error(error.message);
+              else onChanged();
+            }}
+          >
+            {item.hidden ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+            <span className="uppercase tracking-wider text-[10px]">{item.hidden ? "Hidden" : "Visible"}</span>
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
             className="h-8 w-[150px] justify-center gap-1.5 px-2 text-sm"
             title={item.location ? `Location: ${LOCATION_LABEL[item.location]} (click to cycle)` : "Set location (click to cycle)"}
             onClick={async () => {
