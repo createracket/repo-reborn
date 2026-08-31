@@ -108,6 +108,7 @@ function PublicReportPage() {
   const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
   const [showExtras, setShowExtras] = useState(false);
   const [visibleCount, setVisibleCount] = useState(20);
+  const [sortMode, setSortMode] = useState<"creator" | "latest">("creator");
   const [gate, setGate] = useState<{ title: string; header_image_url: string | null; code_label: string } | null>(null);
   const [gateEmail, setGateEmail] = useState("");
   const [gateCode, setGateCode] = useState("");
@@ -342,12 +343,43 @@ function PublicReportPage() {
     }))
     .filter((c) => c.posts.length > 0);
 
+  // Recency ordering: undated posts sink to the bottom and keep builder order.
+  const postTime = (p: PublicPost) => {
+    if (!p.posted_at) return null;
+    const t = new Date(p.posted_at).getTime();
+    return Number.isNaN(t) ? null : t;
+  };
+  const byRecency = (a: PublicPost, b: PublicPost) => {
+    const ta = postTime(a);
+    const tb = postTime(b);
+    if (ta == null && tb == null) return a.position - b.position;
+    if (ta == null) return 1;
+    if (tb == null) return -1;
+    return tb - ta;
+  };
+
+  const orderedCreators = filteredCreators
+    .map((c) => ({ ...c, posts: [...c.posts].sort(byRecency) }))
+    .sort((a, b) => {
+      const ta = a.posts.length ? postTime(a.posts[0]) : null;
+      const tb = b.posts.length ? postTime(b.posts[0]) : null;
+      if (ta == null && tb == null) return a.position - b.position;
+      if (ta == null) return 1;
+      if (tb == null) return -1;
+      return tb - ta;
+    });
+
+  // Flat, fully chronological list used by "Latest first" (and the Simple grid).
+  const flatPosts = orderedCreators
+    .flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
+    .sort((a, b) => byRecency(a.post, b.post));
+
   // Only render `visibleCount` posts at a time so long reports stay fast.
   const filteredPostCount = filteredCreators.reduce((n, c) => n + c.posts.length, 0);
   const visibleCreators = (() => {
     let budget = visibleCount;
-    const out: typeof filteredCreators = [];
-    for (const c of filteredCreators) {
+    const out: typeof orderedCreators = [];
+    for (const c of orderedCreators) {
       if (budget <= 0) break;
       const posts = c.posts.slice(0, budget);
       budget -= posts.length;
@@ -355,7 +387,9 @@ function PublicReportPage() {
     }
     return out;
   })();
+  const visibleFlatPosts = flatPosts.slice(0, visibleCount);
   const hasMorePosts = filteredPostCount > visibleCount;
+
 
   // Negative values are "hidden/unavailable" sentinels from social scrapers
   // (e.g. Instagram posts with like counts turned off) — never count them.
@@ -509,8 +543,27 @@ function PublicReportPage() {
           </div>
         )}
 
-        {(monthOptions.length > 0 || hasExtraMentions) && (
+        {(monthOptions.length > 0 || hasExtraMentions || allPosts.length > 0) && (
           <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
+            <div className="flex items-center gap-1.5">
+              {([
+                { key: "creator", label: "By creator" },
+                { key: "latest", label: "Latest first" },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => setSortMode(opt.key)}
+                  aria-pressed={sortMode === opt.key}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                    sortMode === opt.key
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
             {hasExtraMentions && (
               <button
                 onClick={() => setShowExtras((v) => !v)}
@@ -578,11 +631,23 @@ function PublicReportPage() {
             </p>
           ) : report.template === "simple" ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {visibleCreators.flatMap((c) =>
-                c.posts.map((p) => (
-                  <SimplePostCard key={p.id} post={p} creator={c} />
-                )),
-              )}
+              {(sortMode === "latest"
+                ? visibleFlatPosts
+                : visibleCreators.flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
+              ).map(({ post, creator }) => (
+                <SimplePostCard key={post.id} post={post} creator={creator} />
+              ))}
+            </div>
+          ) : sortMode === "latest" ? (
+            <div className="space-y-4">
+              {visibleFlatPosts.map(({ post, creator }) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  creator={creator}
+                  hideCategory={!!report.hide_categories}
+                />
+              ))}
             </div>
           ) : (
             visibleCreators.map((c) => (
