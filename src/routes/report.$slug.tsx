@@ -343,12 +343,43 @@ function PublicReportPage() {
     }))
     .filter((c) => c.posts.length > 0);
 
+  // Recency ordering: undated posts sink to the bottom and keep builder order.
+  const postTime = (p: PublicPost) => {
+    if (!p.posted_at) return null;
+    const t = new Date(p.posted_at).getTime();
+    return Number.isNaN(t) ? null : t;
+  };
+  const byRecency = (a: PublicPost, b: PublicPost) => {
+    const ta = postTime(a);
+    const tb = postTime(b);
+    if (ta == null && tb == null) return a.position - b.position;
+    if (ta == null) return 1;
+    if (tb == null) return -1;
+    return tb - ta;
+  };
+
+  const orderedCreators = filteredCreators
+    .map((c) => ({ ...c, posts: [...c.posts].sort(byRecency) }))
+    .sort((a, b) => {
+      const ta = a.posts.length ? postTime(a.posts[0]) : null;
+      const tb = b.posts.length ? postTime(b.posts[0]) : null;
+      if (ta == null && tb == null) return a.position - b.position;
+      if (ta == null) return 1;
+      if (tb == null) return -1;
+      return tb - ta;
+    });
+
+  // Flat, fully chronological list used by "Latest first" (and the Simple grid).
+  const flatPosts = orderedCreators
+    .flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
+    .sort((a, b) => byRecency(a.post, b.post));
+
   // Only render `visibleCount` posts at a time so long reports stay fast.
   const filteredPostCount = filteredCreators.reduce((n, c) => n + c.posts.length, 0);
   const visibleCreators = (() => {
     let budget = visibleCount;
-    const out: typeof filteredCreators = [];
-    for (const c of filteredCreators) {
+    const out: typeof orderedCreators = [];
+    for (const c of orderedCreators) {
       if (budget <= 0) break;
       const posts = c.posts.slice(0, budget);
       budget -= posts.length;
@@ -356,7 +387,9 @@ function PublicReportPage() {
     }
     return out;
   })();
+  const visibleFlatPosts = flatPosts.slice(0, visibleCount);
   const hasMorePosts = filteredPostCount > visibleCount;
+
 
   // Negative values are "hidden/unavailable" sentinels from social scrapers
   // (e.g. Instagram posts with like counts turned off) — never count them.
