@@ -543,8 +543,27 @@ function PublicReportPage() {
           </div>
         )}
 
-        {(monthOptions.length > 0 || hasExtraMentions) && (
+        {(monthOptions.length > 0 || hasExtraMentions || allPosts.length > 0) && (
           <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
+            <div className="flex items-center gap-1.5">
+              {([
+                { key: "creator", label: "By creator" },
+                { key: "latest", label: "Latest first" },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => setSortMode(opt.key)}
+                  aria-pressed={sortMode === opt.key}
+                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                    sortMode === opt.key
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
             {hasExtraMentions && (
               <button
                 onClick={() => setShowExtras((v) => !v)}
