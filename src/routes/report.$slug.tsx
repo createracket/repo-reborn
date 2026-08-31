@@ -631,11 +631,23 @@ function PublicReportPage() {
             </p>
           ) : report.template === "simple" ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {visibleCreators.flatMap((c) =>
-                c.posts.map((p) => (
-                  <SimplePostCard key={p.id} post={p} creator={c} />
-                )),
-              )}
+              {(sortMode === "latest"
+                ? visibleFlatPosts
+                : visibleCreators.flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
+              ).map(({ post, creator }) => (
+                <SimplePostCard key={post.id} post={post} creator={creator} />
+              ))}
+            </div>
+          ) : sortMode === "latest" ? (
+            <div className="space-y-4">
+              {visibleFlatPosts.map(({ post, creator }) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  creator={creator}
+                  hideCategory={!!report.hide_categories}
+                />
+              ))}
             </div>
           ) : (
             visibleCreators.map((c) => (
