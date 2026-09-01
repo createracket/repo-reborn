@@ -893,6 +893,126 @@ export type Database = {
         }
         Relationships: []
       }
+      metric_job_items: {
+        Row: {
+          attempts: number
+          created_at: string
+          error: string | null
+          id: string
+          job_id: string
+          label: string | null
+          post_id: string
+          post_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          job_id: string
+          label?: string | null
+          post_id: string
+          post_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          job_id?: string
+          label?: string | null
+          post_id?: string
+          post_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metric_job_items_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "metric_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_job_items_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_report_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      metric_jobs: {
+        Row: {
+          cancel_requested: boolean
+          created_at: string
+          created_by: string | null
+          done: number
+          failed: number
+          finished_at: string | null
+          id: string
+          lease_until: string | null
+          notify_email: string | null
+          report_id: string
+          started_at: string
+          status: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          cancel_requested?: boolean
+          created_at?: string
+          created_by?: string | null
+          done?: number
+          failed?: number
+          finished_at?: string | null
+          id?: string
+          lease_until?: string | null
+          notify_email?: string | null
+          report_id: string
+          started_at?: string
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          cancel_requested?: boolean
+          created_at?: string
+          created_by?: string | null
+          done?: number
+          failed?: number
+          finished_at?: string | null
+          id?: string
+          lease_until?: string | null
+          notify_email?: string | null
+          report_id?: string
+          started_at?: string
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metric_jobs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_jobs_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "public_campaign_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_views: {
         Row: {
           bot_reason: string | null
