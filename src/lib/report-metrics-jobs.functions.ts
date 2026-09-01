@@ -200,3 +200,21 @@ export const dismissMetricsJob = createServerFn({ method: "POST" })
     await supabaseAdmin.from("metric_jobs").delete().eq("id", data.jobId);
     return { ok: true };
   });
+
+/**
+ * Processes one batch of the oldest running job. The builder calls this on a
+ * loop so progress never depends on a fire-and-forget self-request (which the
+ * serverless runtime can drop as soon as the response is sent).
+ */
+export const runMetricsBatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context as any);
+    const { processJob } = await import("@/lib/report-metrics-worker.server");
+    const result = await processJob();
+    return {
+      claimed: result.claimed,
+      remaining: "remaining" in result ? result.remaining : 0,
+    };
+  });
+

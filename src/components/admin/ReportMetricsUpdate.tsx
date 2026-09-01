@@ -18,6 +18,7 @@ import {
   getMetricsJob,
   cancelMetricsJob,
   dismissMetricsJob,
+  runMetricsBatch,
   previewMetricsJob,
   type JobProgress,
 } from "@/lib/report-metrics-jobs.functions";
@@ -64,9 +65,32 @@ export function ReportMetricsUpdate({
       return;
     }
     wasRunning.current = true;
+    let stopped = false;
+
+    // Drive the worker from the page so progress doesn't rely on a
+    // background self-request that the server may drop.
+    void (async () => {
+      for (;;) {
+        if (stopped) return;
+        try {
+          const res = await runMetricsBatch();
+          if (stopped) return;
+          await refresh();
+          if (res.claimed && res.remaining === 0) return;
+        } catch {
+          /* keep polling */
+        }
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+    })();
+
     const t = setInterval(() => void refresh(), 5000);
-    return () => clearInterval(t);
+    return () => {
+      stopped = true;
+      clearInterval(t);
+    };
   }, [job?.status, reportId]);
+
 
   async function openConfirm() {
     setBusy(true);
