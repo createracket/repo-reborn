@@ -18,6 +18,7 @@ import {
   getMetricsJob,
   cancelMetricsJob,
   dismissMetricsJob,
+  runMetricsBatch,
   previewMetricsJob,
   type JobProgress,
 } from "@/lib/report-metrics-jobs.functions";
