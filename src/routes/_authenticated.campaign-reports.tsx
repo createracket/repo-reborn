@@ -35,6 +35,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { ReportMetricsUpdate } from "@/components/admin/ReportMetricsUpdate";
+
 import {
   Select,
   SelectContent,
@@ -810,7 +812,9 @@ function ReportDetailView({
 
   return (
     <div className="space-y-6">
+      <ReportMetricsUpdate reportId={report.id} onFinished={onChanged} />
       {/* Meta card */}
+
       <Card>
         <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
           <div>

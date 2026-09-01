@@ -54,6 +54,7 @@ import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/p
 import { Route as ApiPublicUploadBriefFileRouteImport } from './routes/api/public/upload-brief-file'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as ApiPublicHooksReportMetricsWorkerRouteImport } from './routes/api/public/hooks/report-metrics-worker'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -295,6 +296,12 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksReportMetricsWorkerRoute =
+  ApiPublicHooksReportMetricsWorkerRouteImport.update({
+    id: '/api/public/hooks/report-metrics-worker',
+    path: '/api/public/hooks/report-metrics-worker',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -369,6 +376,7 @@ export interface FileRoutesByFullPath {
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
+  '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -419,6 +427,7 @@ export interface FileRoutesByTo {
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/racket-desk': typeof AuthenticatedRacketDeskIndexRoute
+  '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -472,6 +481,7 @@ export interface FileRoutesById {
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
+  '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -525,6 +535,7 @@ export interface FileRouteTypes {
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/racket-desk/'
+    | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -575,6 +586,7 @@ export interface FileRouteTypes {
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/racket-desk'
+    | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -627,6 +639,7 @@ export interface FileRouteTypes {
     | '/api/public/waitlist-join'
     | '/lovable/email/suppression'
     | '/_authenticated/racket-desk/'
+    | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -665,6 +678,7 @@ export interface RootRouteChildren {
   ApiPublicUploadBriefFileRoute: typeof ApiPublicUploadBriefFileRoute
   ApiPublicWaitlistJoinRoute: typeof ApiPublicWaitlistJoinRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksReportMetricsWorkerRoute: typeof ApiPublicHooksReportMetricsWorkerRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -989,6 +1003,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/report-metrics-worker': {
+      id: '/api/public/hooks/report-metrics-worker'
+      path: '/api/public/hooks/report-metrics-worker'
+      fullPath: '/api/public/hooks/report-metrics-worker'
+      preLoaderRoute: typeof ApiPublicHooksReportMetricsWorkerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -1111,6 +1132,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicUploadBriefFileRoute: ApiPublicUploadBriefFileRoute,
   ApiPublicWaitlistJoinRoute: ApiPublicWaitlistJoinRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksReportMetricsWorkerRoute:
+    ApiPublicHooksReportMetricsWorkerRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,

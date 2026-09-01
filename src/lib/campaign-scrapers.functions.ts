@@ -249,20 +249,27 @@ function sanitiseMetrics(result: ScrapeResult): ScrapeResult {
 }
 
 /**
+ * Server-side scrape of a single post URL. Used by the auth-gated server
+ * function below and by the background metrics worker.
+ */
+export async function scrapePostMetricsRaw(url: string): Promise<ScrapeResult> {
+  const platform = detectPlatform(url);
+  if (!platform)
+    return { ok: false, error: "Unrecognised URL — must be Instagram, TikTok, or YouTube." };
+  if (platform === "youtube") return sanitiseMetrics(await scrapeYouTube(url));
+  if (platform === "instagram") return sanitiseMetrics(await scrapeInstagram(url));
+  return sanitiseMetrics(await scrapeTikTok(url));
+}
+
+/**
  * Scrape metrics for a single post URL. Auth-gated. Returns raw metrics —
  * caller decides whether to write them to the DB.
  */
 export const scrapePostMetrics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ url: z.string().url() }).parse)
-  .handler(async ({ data }): Promise<ScrapeResult> => {
-    const platform = detectPlatform(data.url);
-    if (!platform)
-      return { ok: false, error: "Unrecognised URL — must be Instagram, TikTok, or YouTube." };
-    if (platform === "youtube") return sanitiseMetrics(await scrapeYouTube(data.url));
-    if (platform === "instagram") return sanitiseMetrics(await scrapeInstagram(data.url));
-    return sanitiseMetrics(await scrapeTikTok(data.url));
-  });
+  .handler(async ({ data }): Promise<ScrapeResult> => scrapePostMetricsRaw(data.url));
+
 
 // ============================================================
 // Profile-level scraping (for roster / profile pages)
