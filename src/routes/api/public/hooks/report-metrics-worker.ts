@@ -84,7 +84,19 @@ async function processJob() {
       if (!result.ok) throw new Error(result.error);
 
       const m = result.metrics;
-      const patch: Record<string, unknown> = { metrics_updated_at: new Date().toISOString() };
+      const patch: Partial<{
+        views: number;
+        likes: number;
+        comments: number;
+        shares: number;
+        saves: number;
+        followers: number;
+        posted_at: string;
+        caption: string;
+        hashtags: string[];
+        thumbnail_url: string;
+        metrics_updated_at: string;
+      }> = { metrics_updated_at: new Date().toISOString() };
       if (m.views != null) patch.views = m.views;
       if (m.likes != null) patch.likes = m.likes;
       if (m.comments != null) patch.comments = m.comments;
