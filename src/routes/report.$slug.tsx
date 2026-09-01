@@ -108,7 +108,7 @@ function PublicReportPage() {
   const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
   const [showExtras, setShowExtras] = useState(false);
   const [visibleCount, setVisibleCount] = useState(20);
-  const [sortMode, setSortMode] = useState<"creator" | "latest">("creator");
+  const [sortMode, setSortMode] = useState<"creator" | "latest">("latest");
   const [gate, setGate] = useState<{ title: string; header_image_url: string | null; code_label: string } | null>(null);
   const [gateEmail, setGateEmail] = useState("");
   const [gateCode, setGateCode] = useState("");
