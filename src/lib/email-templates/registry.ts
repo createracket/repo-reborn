@@ -1,6 +1,8 @@
 import type { ComponentType } from 'react'
 import { template as waitlistConfirmation } from './waitlist-confirmation'
 import { template as contactConfirmation } from './contact-confirmation'
+import { template as metricsUpdateComplete } from './metrics-update-complete'
+
 
 export interface TemplateEntry {
   component: ComponentType<any>
