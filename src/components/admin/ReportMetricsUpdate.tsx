@@ -73,7 +73,7 @@ export function ReportMetricsUpdate({
       for (;;) {
         if (stopped) return;
         try {
-          const res = await runMetricsBatch({ data: {} });
+          const res = await runMetricsBatch();
           if (stopped) return;
           await refresh();
           if (res.claimed && res.remaining === 0) return;
