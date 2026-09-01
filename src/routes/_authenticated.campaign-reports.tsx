@@ -35,6 +35,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { ReportMetricsUpdate } from "@/components/admin/ReportMetricsUpdate";
+
 import {
   Select,
   SelectContent,
