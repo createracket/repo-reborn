@@ -22,6 +22,7 @@ export interface TemplateEntry {
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-confirmation': waitlistConfirmation,
   'contact-confirmation': contactConfirmation,
+  'metrics-update-complete': metricsUpdateComplete,
 }
 
 export interface ResolvedEmail {
