@@ -6,6 +6,8 @@ const BATCH = 8;
 const ITEM_TIMEOUT_MS = 60_000;
 /** Lease length: another invocation won't touch the job while it's held. */
 const LEASE_MS = 3 * 60_000;
+/** A "running" item older than this was orphaned mid-batch and is retried. */
+const STALE_ITEM_MS = 5 * 60_000;
 
 type Item = {
   id: string;
