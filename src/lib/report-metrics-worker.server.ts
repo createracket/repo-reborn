@@ -59,6 +59,14 @@ export async function processJob() {
     return { claimed: true as const, jobId: job.id, processed: 0, remaining: 0 };
   }
 
+  // Recover items orphaned by an interrupted invocation (navigation, timeout).
+  await supabaseAdmin
+    .from("metric_job_items")
+    .update({ status: "pending", updated_at: new Date().toISOString() })
+    .eq("job_id", job.id)
+    .eq("status", "running")
+    .lt("updated_at", new Date(Date.now() - STALE_ITEM_MS).toISOString());
+
   const { data: pending } = await supabaseAdmin
     .from("metric_job_items")
     .select("id, post_id, post_url, label, attempts")
