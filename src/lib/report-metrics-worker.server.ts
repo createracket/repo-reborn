@@ -84,7 +84,7 @@ export async function processJob() {
   async function runItem(item: Item) {
     await supabaseAdmin
       .from("metric_job_items")
-      .update({ status: "running", attempts: item.attempts + 1 })
+      .update({ status: "running", attempts: item.attempts + 1, updated_at: new Date().toISOString() })
       .eq("id", item.id);
     try {
       const url = item.post_url ?? "";
@@ -124,7 +124,7 @@ export async function processJob() {
 
       await supabaseAdmin
         .from("metric_job_items")
-        .update({ status: "done", error: null })
+        .update({ status: "done", error: null, updated_at: new Date().toISOString() })
         .eq("id", item.id);
       done += 1;
     } catch (e) {
@@ -133,12 +133,12 @@ export async function processJob() {
       if (item.attempts + 1 < 2) {
         await supabaseAdmin
           .from("metric_job_items")
-          .update({ status: "pending", error: message })
+          .update({ status: "pending", error: message, updated_at: new Date().toISOString() })
           .eq("id", item.id);
       } else {
         await supabaseAdmin
           .from("metric_job_items")
-          .update({ status: "failed", error: message })
+          .update({ status: "failed", error: message, updated_at: new Date().toISOString() })
           .eq("id", item.id);
         failed += 1;
       }
