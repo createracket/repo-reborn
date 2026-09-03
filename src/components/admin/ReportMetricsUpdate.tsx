@@ -3,6 +3,7 @@ import { Loader2, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -112,7 +113,10 @@ export function ReportMetricsUpdate({
     setConfirm(null);
     setBusy(true);
     try {
-      const res = await startMetricsJob({ data: { reportId } });
+      const { data: auth } = await supabase.auth.getUser();
+      const res = await startMetricsJob({
+        data: { reportId, notifyEmail: auth.user?.email ?? null },
+      });
       toast.success(`Updating ${res.total} posts — ${mins(res.estimateSeconds)}.`);
       await refresh();
     } catch (e) {

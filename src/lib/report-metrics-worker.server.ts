@@ -6,6 +6,8 @@ const BATCH = 8;
 const ITEM_TIMEOUT_MS = 60_000;
 /** Lease length: another invocation won't touch the job while it's held. */
 const LEASE_MS = 3 * 60_000;
+/** A "running" item older than this was orphaned mid-batch and is retried. */
+const STALE_ITEM_MS = 5 * 60_000;
 
 type Item = {
   id: string;
@@ -59,6 +61,14 @@ export async function processJob() {
     return { claimed: true as const, jobId: job.id, processed: 0, remaining: 0 };
   }
 
+  // Recover items orphaned by an interrupted invocation (navigation, timeout).
+  await supabaseAdmin
+    .from("metric_job_items")
+    .update({ status: "pending", updated_at: new Date().toISOString() })
+    .eq("job_id", job.id)
+    .eq("status", "running")
+    .lt("updated_at", new Date(Date.now() - STALE_ITEM_MS).toISOString());
+
   const { data: pending } = await supabaseAdmin
     .from("metric_job_items")
     .select("id, post_id, post_url, label, attempts")
@@ -74,7 +84,7 @@ export async function processJob() {
   async function runItem(item: Item) {
     await supabaseAdmin
       .from("metric_job_items")
-      .update({ status: "running", attempts: item.attempts + 1 })
+      .update({ status: "running", attempts: item.attempts + 1, updated_at: new Date().toISOString() })
       .eq("id", item.id);
     try {
       const url = item.post_url ?? "";
@@ -114,7 +124,7 @@ export async function processJob() {
 
       await supabaseAdmin
         .from("metric_job_items")
-        .update({ status: "done", error: null })
+        .update({ status: "done", error: null, updated_at: new Date().toISOString() })
         .eq("id", item.id);
       done += 1;
     } catch (e) {
@@ -123,12 +133,12 @@ export async function processJob() {
       if (item.attempts + 1 < 2) {
         await supabaseAdmin
           .from("metric_job_items")
-          .update({ status: "pending", error: message })
+          .update({ status: "pending", error: message, updated_at: new Date().toISOString() })
           .eq("id", item.id);
       } else {
         await supabaseAdmin
           .from("metric_job_items")
-          .update({ status: "failed", error: message })
+          .update({ status: "failed", error: message, updated_at: new Date().toISOString() })
           .eq("id", item.id);
         failed += 1;
       }
