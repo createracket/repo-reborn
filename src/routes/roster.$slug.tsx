@@ -200,7 +200,9 @@ function PublicRosterPage() {
         return;
       }
       const pr = r as unknown as PublicRoster;
+      // Show the roster header/title immediately, then fill in creators.
       setRoster(pr);
+      setStatus("ready");
       const { data: it } = await supabase
         .from("roster_items")
         .select(
@@ -210,7 +212,7 @@ function PublicRosterPage() {
         .eq("hidden", false)
         .order("position", { ascending: true });
       setItems((it as unknown as PublicItem[]) ?? []);
-      setStatus("ready");
+      setItemsLoaded(true);
     })();
   }, [slug]);
 
@@ -218,12 +220,23 @@ function PublicRosterPage() {
     return (
       <div className="min-h-screen bg-background">
         <SiteHeader />
-        <main className="container mx-auto px-4 py-16">
-          <p className="text-sm text-muted-foreground">Loading roster…</p>
+        <main className="container mx-auto max-w-4xl animate-pulse px-3 py-8 sm:px-4 md:py-12">
+          <div className="mb-10 rounded-2xl border border-border/60 bg-muted/40" style={{ aspectRatio: "16 / 9" }} />
+          <div className="h-6 w-24 rounded-full bg-muted/60" />
+          <div className="mt-4 h-12 w-2/3 rounded-lg bg-muted/50" />
+          <div className="mt-4 h-4 w-full rounded bg-muted/40" />
+          <div className="mt-2 h-4 w-5/6 rounded bg-muted/40" />
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-20 rounded-xl border border-border/60 bg-muted/30" />
+            ))}
+          </div>
+          <span className="sr-only">Loading roster…</span>
         </main>
       </div>
     );
   }
+
 
   if (status === "gated" && gate) {
     const submitGate = async (e: React.FormEvent) => {
