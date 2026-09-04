@@ -341,8 +341,17 @@ function PublicRosterPage() {
             style={{ aspectRatio: "16 / 9" }}
           >
             <img
-              src={roster.header_image_url}
+              src={storageImage(roster.header_image_url, { width: 1200, height: 675 })}
               alt={roster.title}
+              width={1200}
+              height={675}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              onError={(e) => {
+                const original = roster.header_image_url;
+                if (original && e.currentTarget.src !== original) e.currentTarget.src = original;
+              }}
               className="size-full object-cover"
             />
           </div>
@@ -351,11 +360,19 @@ function PublicRosterPage() {
         <div className="flex flex-wrap items-start gap-5">
           {roster.profile_image_url ? (
             <img
-              src={roster.profile_image_url}
+              src={storageImage(roster.profile_image_url, { width: 256, height: 256 })}
               alt={roster.title}
+              width={256}
+              height={256}
+              decoding="async"
+              onError={(e) => {
+                const original = roster.profile_image_url;
+                if (original && e.currentTarget.src !== original) e.currentTarget.src = original;
+              }}
               className="size-24 shrink-0 rounded-xl border border-border/60 object-cover md:size-32"
             />
           ) : null}
+
           <div className="min-w-[240px] flex-1">
             <Badge className="border-transparent bg-pink-accent uppercase tracking-[0.2em] text-[#2b2b2b] hover:bg-pink-accent">
               <Users className="mr-1.5 size-3" /> Roster
