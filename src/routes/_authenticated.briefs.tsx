@@ -23,6 +23,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { SpotlightForm } from "@/routes/_authenticated.admin";
 
 export const Route = createFileRoute("/_authenticated/briefs")({
+  validateSearch: (search: Record<string, unknown>): { edit?: string } =>
+    typeof search.edit === "string" ? { edit: search.edit } : {},
   head: () => ({
     meta: [
       { title: "Briefs — Create Racket" },
@@ -40,6 +42,7 @@ type Brief = {
 
 function BriefsPage() {
   const navigate = useNavigate();
+  const { edit: editSlug } = Route.useSearch();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [briefs, setBriefs] = useState<Brief[]>([]);
@@ -82,6 +85,19 @@ function BriefsPage() {
         .order("display_name", { ascending: true });
       setProfiles(((profileRows as any[]) ?? []) as ShareProfile[]);
       await refresh();
+      // Deep-link from a public brief page's admin "Edit brief" button.
+      if (editSlug) {
+        const { data: editRow } = await supabase
+          .from("partner_pages" as any)
+          .select("*")
+          .eq("section", "brief")
+          .eq("slug", editSlug)
+          .maybeSingle();
+        if (editRow) {
+          setEditing(editRow as any);
+          setFormOpen(true);
+        }
+      }
       setChecking(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps

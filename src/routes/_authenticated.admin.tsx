@@ -66,6 +66,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
+  validateSearch: (search: Record<string, unknown>): { tab?: string; edit?: string } => ({
+    ...(typeof search.tab === "string" ? { tab: search.tab } : {}),
+    ...(typeof search.edit === "string" ? { edit: search.edit } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "Admin — Create Racket" },
@@ -128,6 +132,8 @@ type SpotlightInterest = {
 
 function AdminPage() {
   const navigate = useNavigate();
+  const searchParams = Route.useSearch();
+  const [activeTab, setActiveTab] = useState(searchParams.tab ?? "traffic");
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [leadBriefs, setLeadBriefs] = useState<LeadBrief[]>([]);
@@ -209,6 +215,22 @@ function AdminPage() {
       setProfiles((pr.data as Profile[]) ?? []);
       setCampaigns(campaignRows);
       setSpotlights((sp.data as unknown as Spotlight[]) ?? []);
+
+      // Deep-link from a public spotlight page's admin "Edit spotlight" button.
+      if (searchParams.edit) {
+        const target = ((sp.data as unknown as Spotlight[]) ?? []).find((s) => s.slug === searchParams.edit);
+        if (target) {
+          const { data: full } = await supabase
+            .from("partner_pages" as any)
+            .select("*")
+            .eq("id", target.id)
+            .single();
+          if (full) {
+            setEditingSpotlight(full);
+            setSpotlightFormOpen(true);
+          }
+        }
+      }
 
       // Hydrate interests with profile info (display name + email)
       const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
@@ -535,7 +557,7 @@ function AdminPage() {
         </div>
 
 
-        <Tabs defaultValue="traffic">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="flex flex-wrap">
             <TabsTrigger value="traffic">Traffic</TabsTrigger>
             <TabsTrigger value="emails">Emails</TabsTrigger>
