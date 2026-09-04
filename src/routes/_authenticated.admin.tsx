@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check, GripVertical } from "lucide-react";
 import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
@@ -39,7 +39,7 @@ import {
 } from "@/lib/admin-users.functions";
 import { uploadMyProfileImage } from "@/lib/profile-images.functions";
 import { ACCESS_CODE } from "@/routes/login";
-import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
+const VibeCheckAdmin = lazy(() => import("@/components/admin/VibeCheckAdmin").then((m) => ({ default: m.VibeCheckAdmin })));
 import {
   loadVibeCheckConfig,
   DEFAULT_VIBE_CONFIG,
@@ -48,14 +48,16 @@ import {
   type VibeCheckConfig,
 } from "@/lib/vibe-check-config";
 import { calculateVibeScore, calculateBrandVibe } from "@/lib/vibe-check";
-import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
-import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
-import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
-import { TrafficAdmin } from "@/components/admin/TrafficAdmin";
-import { ExampleOpportunitiesAdmin } from "@/components/admin/ExampleOpportunitiesAdmin";
-import { FaqsAdmin } from "@/components/admin/FaqsAdmin";
-import { SoundBoardAdmin } from "@/components/admin/SoundBoardAdmin";
-import { UsageAdmin } from "@/components/admin/UsageAdmin";
+// Heavy tab panels load only when their tab is opened.
+const BriefFormAdmin = lazy(() => import("@/components/admin/BriefFormAdmin").then((m) => ({ default: m.BriefFormAdmin })));
+const CommunityAdmin = lazy(() => import("@/components/admin/CommunityAdmin").then((m) => ({ default: m.CommunityAdmin })));
+const EmailsAdmin = lazy(() => import("@/components/admin/EmailsAdmin").then((m) => ({ default: m.EmailsAdmin })));
+const TrafficAdmin = lazy(() => import("@/components/admin/TrafficAdmin").then((m) => ({ default: m.TrafficAdmin })));
+const ExampleOpportunitiesAdmin = lazy(() => import("@/components/admin/ExampleOpportunitiesAdmin").then((m) => ({ default: m.ExampleOpportunitiesAdmin })));
+const FaqsAdmin = lazy(() => import("@/components/admin/FaqsAdmin").then((m) => ({ default: m.FaqsAdmin })));
+const SoundBoardAdmin = lazy(() => import("@/components/admin/SoundBoardAdmin").then((m) => ({ default: m.SoundBoardAdmin })));
+const UsageAdmin = lazy(() => import("@/components/admin/UsageAdmin").then((m) => ({ default: m.UsageAdmin })));
+
 import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
 import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
 import { loadDashboardConfig, saveDashboardConfig } from "@/lib/dashboard-config";
@@ -129,6 +131,17 @@ type SpotlightInterest = {
   profile?: { display_name: string | null; email: string | null } | null;
 };
 
+/** Skeleton shown while a lazily-loaded tab panel downloads. */
+function TabFallback() {
+  return (
+    <div className="animate-pulse space-y-3" aria-hidden>
+      <div className="h-8 w-48 rounded bg-muted/60" />
+      <div className="h-24 rounded-xl border border-border/60 bg-muted/30" />
+      <div className="h-24 rounded-xl border border-border/60 bg-muted/30" />
+    </div>
+  );
+}
+
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -169,86 +182,127 @@ function AdminPage() {
 
 
 
+  // 1) Fast gate: reuse the session the _authenticated layout already resolved,
+  //    then a single role query. The shell renders as soon as this passes.
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) {
+      const { data: s } = await supabase.auth.getSession();
+      const uid = s.session?.user?.id;
+      if (!uid) {
         navigate({ to: "/login" });
         return;
       }
       const { data: roleRow } = await supabase
         .from("user_roles" as any)
         .select("role")
-        .eq("user_id", u.user.id)
+        .eq("user_id", uid)
         .eq("role", "admin")
         .maybeSingle();
-      if (!roleRow) {
-        setChecking(false);
-        return;
-      }
-      setIsAdmin(true);
-
-      loadVibeCheckConfig().then(setVibeConfig).catch(() => undefined);
-
-      const [lb, cm, ml, pr, cb, sp, si, ce, vc] = await Promise.all([
-        supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-        supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
-        supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
-        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden").order("created_at", { ascending: false }),
-        supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, linked_report_id, currency, transparency").order("created_at", { ascending: false }),
-        supabase.from("partner_pages" as any).select("*").eq("section", "spotlight").order("created_at", { ascending: false }),
-        supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
-        (supabase as any).rpc("admin_campaign_brief_emails"),
-        supabase.from("vibe_check_responses").select("user_id, result, answers, created_at").order("created_at", { ascending: false }),
-      ]);
-      const vibeMap = new Map<string, VibeRow>();
-      (((vc as any).data as VibeRow[] | null) ?? []).forEach((row) => {
-        if (row.user_id && !vibeMap.has(row.user_id)) vibeMap.set(row.user_id, row);
-      });
-      setVibeByUser(vibeMap);
-      const emailById = new Map<string, string | null>();
-      (((ce as any).data as any[] | null) ?? []).forEach((r: any) => emailById.set(r.id, r.contact_email ?? null));
-      const campaignRows = (((cb as any).data as any[]) ?? []).map((c: any) => ({ ...c, contact_email: emailById.get(c.id) ?? null })) as CampaignBrief[];
-      setLeadBriefs((lb.data as LeadBrief[]) ?? []);
-      setContacts((cm.data as ContactMsg[]) ?? []);
-      setSubs((ml.data as Subscriber[]) ?? []);
-      setProfiles((pr.data as Profile[]) ?? []);
-      setCampaigns(campaignRows);
-      setSpotlights((sp.data as unknown as Spotlight[]) ?? []);
-
-      // Deep-link from a public spotlight page's admin "Edit spotlight" button.
-      if (searchParams.edit) {
-        const target = ((sp.data as unknown as Spotlight[]) ?? []).find((s) => s.slug === searchParams.edit);
-        if (target) {
-          const { data: full } = await supabase
-            .from("partner_pages" as any)
-            .select("*")
-            .eq("id", target.id)
-            .single();
-          if (full) {
-            setEditingSpotlight(full);
-            setSpotlightFormOpen(true);
-          }
-        }
-      }
-
-      // Hydrate interests with profile info (display name + email)
-      const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
-      const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id).filter((v): v is string => !!v)));
-      if (userIds.length) {
-        const { data: profs } = await supabase
-          .from("profiles")
-          .select("id, display_name, email")
-          .in("id", userIds);
-        const map = new Map((profs ?? []).map((p: any) => [p.id, { display_name: p.display_name, email: p.email }]));
-        setInterests(rawInterests.map((i) => ({ ...i, profile: (i.user_id ? map.get(i.user_id) : null) ?? null })));
-      } else {
-        setInterests(rawInterests);
-      }
-
+      setIsAdmin(!!roleRow);
       setChecking(false);
     })();
   }, [navigate]);
+
+  // 2) Per-tab data. Each group is fetched once, on first use, then cached.
+  const [loadedGroups, setLoadedGroups] = useState<Set<string>>(new Set());
+  const loadingGroupsRef = useRef<Set<string>>(new Set());
+  const isLoaded = (g: string) => loadedGroups.has(g);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const tab = activeTab;
+    const needed = new Set<string>();
+    if (tab === "users") { needed.add("profiles"); needed.add("vibe"); }
+    if (tab === "contact") { needed.add("profiles"); needed.add("contact"); }
+    if (tab === "spotlights") { needed.add("profiles"); needed.add("spotlights"); }
+    if (tab === "mailing") needed.add("mailing");
+    if (searchParams.edit) needed.add("spotlights");
+
+    let cancelled = false;
+    const started: string[] = [];
+    for (const g of needed) {
+      if (loadingGroupsRef.current.has(g)) continue;
+      loadingGroupsRef.current.add(g);
+      started.push(g);
+    }
+    if (!started.length) return;
+
+    (async () => {
+      await Promise.all(started.map(async (group) => {
+        if (group === "profiles") {
+          const { data } = await supabase
+            .from("profiles")
+            .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden")
+            .order("created_at", { ascending: false });
+          if (!cancelled) setProfiles((data as Profile[]) ?? []);
+          return;
+        }
+        if (group === "vibe") {
+          loadVibeCheckConfig().then((c) => { if (!cancelled) setVibeConfig(c); }).catch(() => undefined);
+          const { data } = await supabase
+            .from("vibe_check_responses")
+            .select("user_id, result, answers, created_at")
+            .order("created_at", { ascending: false });
+          const vibeMap = new Map<string, VibeRow>();
+          ((data as VibeRow[] | null) ?? []).forEach((row) => {
+            if (row.user_id && !vibeMap.has(row.user_id)) vibeMap.set(row.user_id, row);
+          });
+          if (!cancelled) setVibeByUser(vibeMap);
+          return;
+        }
+        if (group === "mailing") {
+          const { data } = await supabase
+            .from("mailing_list_subscribers")
+            .select("id, created_at, email, name, source, marketing_opt_in")
+            .order("created_at", { ascending: false });
+          if (!cancelled) setSubs((data as Subscriber[]) ?? []);
+          return;
+        }
+        if (group === "contact") {
+          const [cm, si] = await Promise.all([
+            supabase.from("contact_messages").select("id, created_at, name, email, message, handled").order("created_at", { ascending: false }),
+            supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
+          ]);
+          if (!cancelled) setContacts((cm.data as ContactMsg[]) ?? []);
+          const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
+          const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id).filter((v): v is string => !!v)));
+          if (userIds.length) {
+            const { data: profs } = await supabase.from("profiles").select("id, display_name, email").in("id", userIds);
+            const map = new Map((profs ?? []).map((p: any) => [p.id, { display_name: p.display_name, email: p.email }]));
+            if (!cancelled) setInterests(rawInterests.map((i) => ({ ...i, profile: (i.user_id ? map.get(i.user_id) : null) ?? null })));
+          } else if (!cancelled) {
+            setInterests(rawInterests);
+          }
+          return;
+        }
+        if (group === "spotlights") {
+          const { data } = await supabase
+            .from("partner_pages" as any)
+            .select("id, slug, type, headline, subtitle, published, dashboard_visible, created_at, links, archived")
+            .eq("section", "spotlight")
+            .order("created_at", { ascending: false });
+          const rows = (data as unknown as Spotlight[]) ?? [];
+          if (!cancelled) setSpotlights(rows);
+
+          // Deep-link from a public spotlight page's admin "Edit spotlight" button.
+          if (searchParams.edit) {
+            const target = rows.find((s) => s.slug === searchParams.edit);
+            if (target) {
+              const { data: full } = await supabase.from("partner_pages" as any).select("*").eq("id", target.id).single();
+              if (full && !cancelled) {
+                setEditingSpotlight(full);
+                setSpotlightFormOpen(true);
+              }
+            }
+          }
+        }
+      }));
+      if (!cancelled) setLoadedGroups((prev) => new Set([...prev, ...started]));
+    })();
+
+    return () => { cancelled = true; };
+  }, [isAdmin, activeTab, searchParams.edit]);
+
 
   async function reloadProfiles() {
     const { data } = await supabase
@@ -562,7 +616,7 @@ function AdminPage() {
             <TabsTrigger value="traffic">Traffic</TabsTrigger>
             <TabsTrigger value="emails">Emails</TabsTrigger>
             <TabsTrigger value="contact" className="relative">
-              Contact ({contacts.length + interests.length})
+              Contact{isLoaded("contact") ? ` (${contacts.length + interests.length})` : ""}
               {unhandledContactCount > 0 && (
                 <span className="absolute -right-1 -top-2 inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold leading-none text-destructive-foreground shadow">
                   {unhandledContactCount}
@@ -571,11 +625,11 @@ function AdminPage() {
             </TabsTrigger>
 
             <TabsTrigger value="community">Community</TabsTrigger>
-            <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
-            <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
+            <TabsTrigger value="users">Users{isLoaded("profiles") ? ` (${profiles.length})` : ""}</TabsTrigger>
+            <TabsTrigger value="mailing">Mailing list{isLoaded("mailing") ? ` (${subs.length})` : ""}</TabsTrigger>
             
             <TabsTrigger value="brief-form">Brief Form</TabsTrigger>
-            <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
+            <TabsTrigger value="spotlights">Spotlights{isLoaded("spotlights") ? ` (${spotlights.length})` : ""}</TabsTrigger>
             
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="faqs">FAQs</TabsTrigger>
@@ -585,7 +639,7 @@ function AdminPage() {
 
 
           <TabsContent value="traffic" className="mt-6">
-            <TrafficAdmin />
+            <Suspense fallback={<TabFallback />}><TrafficAdmin /></Suspense>
           </TabsContent>
 
 
@@ -666,7 +720,7 @@ function AdminPage() {
               </div>
             ) : null}
             <div className="pt-8 border-t border-border">
-              <ExampleOpportunitiesAdmin />
+              <Suspense fallback={<TabFallback />}><ExampleOpportunitiesAdmin /></Suspense>
             </div>
           </TabsContent>
 
@@ -1065,31 +1119,31 @@ function AdminPage() {
           </TabsContent>
 
           <TabsContent value="vibe" className="mt-6">
-            <VibeCheckAdmin />
+            <Suspense fallback={<TabFallback />}><VibeCheckAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="brief-form" className="mt-6">
-            <BriefFormAdmin />
+            <Suspense fallback={<TabFallback />}><BriefFormAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="community" className="mt-6">
-            <CommunityAdmin />
+            <Suspense fallback={<TabFallback />}><CommunityAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="emails" className="mt-6">
-            <EmailsAdmin />
+            <Suspense fallback={<TabFallback />}><EmailsAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="faqs" className="mt-6">
-            <FaqsAdmin />
+            <Suspense fallback={<TabFallback />}><FaqsAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="sound-board" className="mt-6">
-            <SoundBoardAdmin />
+            <Suspense fallback={<TabFallback />}><SoundBoardAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="usage" className="mt-6">
-            <UsageAdmin />
+            <Suspense fallback={<TabFallback />}><UsageAdmin /></Suspense>
           </TabsContent>
         </Tabs>
       </main>
