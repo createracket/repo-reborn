@@ -48,14 +48,16 @@ import {
   type VibeCheckConfig,
 } from "@/lib/vibe-check-config";
 import { calculateVibeScore, calculateBrandVibe } from "@/lib/vibe-check";
-import { BriefFormAdmin } from "@/components/admin/BriefFormAdmin";
-import { CommunityAdmin } from "@/components/admin/CommunityAdmin";
-import { EmailsAdmin } from "@/components/admin/EmailsAdmin";
-import { TrafficAdmin } from "@/components/admin/TrafficAdmin";
-import { ExampleOpportunitiesAdmin } from "@/components/admin/ExampleOpportunitiesAdmin";
-import { FaqsAdmin } from "@/components/admin/FaqsAdmin";
-import { SoundBoardAdmin } from "@/components/admin/SoundBoardAdmin";
-import { UsageAdmin } from "@/components/admin/UsageAdmin";
+// Heavy tab panels load only when their tab is opened.
+const BriefFormAdmin = lazy(() => import("@/components/admin/BriefFormAdmin").then((m) => ({ default: m.BriefFormAdmin })));
+const CommunityAdmin = lazy(() => import("@/components/admin/CommunityAdmin").then((m) => ({ default: m.CommunityAdmin })));
+const EmailsAdmin = lazy(() => import("@/components/admin/EmailsAdmin").then((m) => ({ default: m.EmailsAdmin })));
+const TrafficAdmin = lazy(() => import("@/components/admin/TrafficAdmin").then((m) => ({ default: m.TrafficAdmin })));
+const ExampleOpportunitiesAdmin = lazy(() => import("@/components/admin/ExampleOpportunitiesAdmin").then((m) => ({ default: m.ExampleOpportunitiesAdmin })));
+const FaqsAdmin = lazy(() => import("@/components/admin/FaqsAdmin").then((m) => ({ default: m.FaqsAdmin })));
+const SoundBoardAdmin = lazy(() => import("@/components/admin/SoundBoardAdmin").then((m) => ({ default: m.SoundBoardAdmin })));
+const UsageAdmin = lazy(() => import("@/components/admin/UsageAdmin").then((m) => ({ default: m.UsageAdmin })));
+
 import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
 import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
 import { loadDashboardConfig, saveDashboardConfig } from "@/lib/dashboard-config";
