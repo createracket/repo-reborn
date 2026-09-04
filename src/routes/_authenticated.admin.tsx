@@ -131,6 +131,17 @@ type SpotlightInterest = {
   profile?: { display_name: string | null; email: string | null } | null;
 };
 
+/** Skeleton shown while a lazily-loaded tab panel downloads. */
+function TabFallback() {
+  return (
+    <div className="animate-pulse space-y-3" aria-hidden>
+      <div className="h-8 w-48 rounded bg-muted/60" />
+      <div className="h-24 rounded-xl border border-border/60 bg-muted/30" />
+      <div className="h-24 rounded-xl border border-border/60 bg-muted/30" />
+    </div>
+  );
+}
+
 
 function AdminPage() {
   const navigate = useNavigate();
