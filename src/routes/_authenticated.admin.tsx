@@ -182,86 +182,126 @@ function AdminPage() {
 
 
 
+  // 1) Fast gate: reuse the session the _authenticated layout already resolved,
+  //    then a single role query. The shell renders as soon as this passes.
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) {
+      const { data: s } = await supabase.auth.getSession();
+      const uid = s.session?.user?.id;
+      if (!uid) {
         navigate({ to: "/login" });
         return;
       }
       const { data: roleRow } = await supabase
         .from("user_roles" as any)
         .select("role")
-        .eq("user_id", u.user.id)
+        .eq("user_id", uid)
         .eq("role", "admin")
         .maybeSingle();
-      if (!roleRow) {
-        setChecking(false);
-        return;
-      }
-      setIsAdmin(true);
-
-      loadVibeCheckConfig().then(setVibeConfig).catch(() => undefined);
-
-      const [lb, cm, ml, pr, cb, sp, si, ce, vc] = await Promise.all([
-        supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-        supabase.from("contact_messages").select("*").order("created_at", { ascending: false }),
-        supabase.from("mailing_list_subscribers").select("*").order("created_at", { ascending: false }),
-        supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden").order("created_at", { ascending: false }),
-        supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, status, published, published_at, linked_roster_id, linked_report_id, currency, transparency").order("created_at", { ascending: false }),
-        supabase.from("partner_pages" as any).select("*").eq("section", "spotlight").order("created_at", { ascending: false }),
-        supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
-        (supabase as any).rpc("admin_campaign_brief_emails"),
-        supabase.from("vibe_check_responses").select("user_id, result, answers, created_at").order("created_at", { ascending: false }),
-      ]);
-      const vibeMap = new Map<string, VibeRow>();
-      (((vc as any).data as VibeRow[] | null) ?? []).forEach((row) => {
-        if (row.user_id && !vibeMap.has(row.user_id)) vibeMap.set(row.user_id, row);
-      });
-      setVibeByUser(vibeMap);
-      const emailById = new Map<string, string | null>();
-      (((ce as any).data as any[] | null) ?? []).forEach((r: any) => emailById.set(r.id, r.contact_email ?? null));
-      const campaignRows = (((cb as any).data as any[]) ?? []).map((c: any) => ({ ...c, contact_email: emailById.get(c.id) ?? null })) as CampaignBrief[];
-      setLeadBriefs((lb.data as LeadBrief[]) ?? []);
-      setContacts((cm.data as ContactMsg[]) ?? []);
-      setSubs((ml.data as Subscriber[]) ?? []);
-      setProfiles((pr.data as Profile[]) ?? []);
-      setCampaigns(campaignRows);
-      setSpotlights((sp.data as unknown as Spotlight[]) ?? []);
-
-      // Deep-link from a public spotlight page's admin "Edit spotlight" button.
-      if (searchParams.edit) {
-        const target = ((sp.data as unknown as Spotlight[]) ?? []).find((s) => s.slug === searchParams.edit);
-        if (target) {
-          const { data: full } = await supabase
-            .from("partner_pages" as any)
-            .select("*")
-            .eq("id", target.id)
-            .single();
-          if (full) {
-            setEditingSpotlight(full);
-            setSpotlightFormOpen(true);
-          }
-        }
-      }
-
-      // Hydrate interests with profile info (display name + email)
-      const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
-      const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id).filter((v): v is string => !!v)));
-      if (userIds.length) {
-        const { data: profs } = await supabase
-          .from("profiles")
-          .select("id, display_name, email")
-          .in("id", userIds);
-        const map = new Map((profs ?? []).map((p: any) => [p.id, { display_name: p.display_name, email: p.email }]));
-        setInterests(rawInterests.map((i) => ({ ...i, profile: (i.user_id ? map.get(i.user_id) : null) ?? null })));
-      } else {
-        setInterests(rawInterests);
-      }
-
+      setIsAdmin(!!roleRow);
       setChecking(false);
     })();
   }, [navigate]);
+
+  // 2) Per-tab data. Each group is fetched once, on first use, then cached.
+  const [loadedGroups, setLoadedGroups] = useState<Set<string>>(new Set());
+  const isLoaded = (g: string) => loadedGroups.has(g);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const tab = activeTab;
+    const needed = new Set<string>();
+    if (tab === "users") { needed.add("profiles"); needed.add("vibe"); }
+    if (tab === "contact") { needed.add("profiles"); needed.add("contact"); }
+    if (tab === "spotlights") { needed.add("profiles"); needed.add("spotlights"); }
+    if (tab === "mailing") needed.add("mailing");
+    if (searchParams.edit) needed.add("spotlights");
+
+    let cancelled = false;
+    const started: string[] = [];
+    for (const g of needed) {
+      if (loadingGroups.has(g)) continue;
+      loadingGroups.add(g);
+      started.push(g);
+    }
+    if (!started.length) return;
+
+    (async () => {
+      await Promise.all(started.map(async (group) => {
+        if (group === "profiles") {
+          const { data } = await supabase
+            .from("profiles")
+            .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden")
+            .order("created_at", { ascending: false });
+          if (!cancelled) setProfiles((data as Profile[]) ?? []);
+          return;
+        }
+        if (group === "vibe") {
+          loadVibeCheckConfig().then((c) => { if (!cancelled) setVibeConfig(c); }).catch(() => undefined);
+          const { data } = await supabase
+            .from("vibe_check_responses")
+            .select("user_id, result, answers, created_at")
+            .order("created_at", { ascending: false });
+          const vibeMap = new Map<string, VibeRow>();
+          ((data as VibeRow[] | null) ?? []).forEach((row) => {
+            if (row.user_id && !vibeMap.has(row.user_id)) vibeMap.set(row.user_id, row);
+          });
+          if (!cancelled) setVibeByUser(vibeMap);
+          return;
+        }
+        if (group === "mailing") {
+          const { data } = await supabase
+            .from("mailing_list_subscribers")
+            .select("id, created_at, email, name, source, marketing_opt_in")
+            .order("created_at", { ascending: false });
+          if (!cancelled) setSubs((data as Subscriber[]) ?? []);
+          return;
+        }
+        if (group === "contact") {
+          const [cm, si] = await Promise.all([
+            supabase.from("contact_messages").select("id, created_at, name, email, message, handled").order("created_at", { ascending: false }),
+            supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
+          ]);
+          if (!cancelled) setContacts((cm.data as ContactMsg[]) ?? []);
+          const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
+          const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id).filter((v): v is string => !!v)));
+          if (userIds.length) {
+            const { data: profs } = await supabase.from("profiles").select("id, display_name, email").in("id", userIds);
+            const map = new Map((profs ?? []).map((p: any) => [p.id, { display_name: p.display_name, email: p.email }]));
+            if (!cancelled) setInterests(rawInterests.map((i) => ({ ...i, profile: (i.user_id ? map.get(i.user_id) : null) ?? null })));
+          } else if (!cancelled) {
+            setInterests(rawInterests);
+          }
+          return;
+        }
+        if (group === "spotlights") {
+          const { data } = await supabase
+            .from("partner_pages" as any)
+            .select("id, slug, type, headline, subtitle, published, dashboard_visible, created_at, links, archived")
+            .eq("section", "spotlight")
+            .order("created_at", { ascending: false });
+          const rows = (data as unknown as Spotlight[]) ?? [];
+          if (!cancelled) setSpotlights(rows);
+
+          // Deep-link from a public spotlight page's admin "Edit spotlight" button.
+          if (searchParams.edit) {
+            const target = rows.find((s) => s.slug === searchParams.edit);
+            if (target) {
+              const { data: full } = await supabase.from("partner_pages" as any).select("*").eq("id", target.id).single();
+              if (full && !cancelled) {
+                setEditingSpotlight(full);
+                setSpotlightFormOpen(true);
+              }
+            }
+          }
+        }
+      }));
+      if (!cancelled) setLoadedGroups((prev) => new Set([...prev, ...started]));
+    })();
+
+    return () => { cancelled = true; };
+  }, [isAdmin, activeTab, searchParams.edit, loadingGroups]);
+
 
   async function reloadProfiles() {
     const { data } = await supabase
