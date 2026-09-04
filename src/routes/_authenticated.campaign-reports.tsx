@@ -71,6 +71,8 @@ import { CSS } from "@dnd-kit/utilities";
 const sb = supabase as any;
 
 export const Route = createFileRoute("/_authenticated/campaign-reports")({
+  validateSearch: (search: Record<string, unknown>): { edit?: string } =>
+    typeof search.edit === "string" ? { edit: search.edit } : {},
   head: () => ({
     meta: [
       { title: "Campaign Reports — Create Racket" },
@@ -160,6 +162,7 @@ type RosterOpt = { id: string; title: string };
 
 function CampaignReportsPage() {
   const navigate = useNavigate();
+  const { edit: editReportId } = Route.useSearch();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -190,6 +193,8 @@ function CampaignReportsPage() {
       }
       setIsAdmin(true);
       await loadReports();
+      // Deep-link from a public report page's admin "Edit report" button.
+      if (editReportId) setSelectedId(editReportId);
       const { data: r } = await supabase
         .from("rosters")
         .select("id, title")

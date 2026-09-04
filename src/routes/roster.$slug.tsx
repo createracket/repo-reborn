@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { getRosterGate, unlockRoster, getRosterForMember } from "@/lib/roster-access.functions";
 import { socialAudience, totalFans } from "@/lib/audience";
 import { parseCoPosts, coPostLabel } from "@/lib/co-posts";
@@ -330,6 +331,7 @@ function PublicRosterPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
+      <AdminEditButton href={`/roster-builder?edit=${roster.id}`} label="Edit roster" />
       <main className="container mx-auto max-w-4xl px-3 py-8 sm:px-4 md:py-12">
         {roster.header_image_url ? (
           <div
