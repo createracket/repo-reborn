@@ -39,7 +39,7 @@ import {
 } from "@/lib/admin-users.functions";
 import { uploadMyProfileImage } from "@/lib/profile-images.functions";
 import { ACCESS_CODE } from "@/routes/login";
-import { VibeCheckAdmin } from "@/components/admin/VibeCheckAdmin";
+const VibeCheckAdmin = lazy(() => import("@/components/admin/VibeCheckAdmin").then((m) => ({ default: m.VibeCheckAdmin })));
 import {
   loadVibeCheckConfig,
   DEFAULT_VIBE_CONFIG,
