@@ -79,6 +79,9 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 export const Route = createFileRoute("/_authenticated/roster-builder")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    edit: typeof search.edit === "string" ? search.edit : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Roster Builder — Create Racket" },
@@ -301,6 +304,7 @@ type CommunityRow = {
 
 function RosterBuilderPage() {
   const navigate = useNavigate();
+  const { edit: editRosterId } = Route.useSearch();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -334,6 +338,8 @@ function RosterBuilderPage() {
       }
       setIsAdmin(true);
       await loadRosters();
+      // Deep-link from a public roster page's admin "Edit roster" button.
+      if (editRosterId) setSelectedId(editRosterId);
       const [{ data: cm }, { data: br }, { data: pr }, { data: cb }] = await Promise.all([
         supabase
           .from("community_profiles")
