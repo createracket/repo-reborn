@@ -616,7 +616,7 @@ function AdminPage() {
             <TabsTrigger value="traffic">Traffic</TabsTrigger>
             <TabsTrigger value="emails">Emails</TabsTrigger>
             <TabsTrigger value="contact" className="relative">
-              Contact ({contacts.length + interests.length})
+              Contact{isLoaded("contact") ? ` (${contacts.length + interests.length})` : ""}
               {unhandledContactCount > 0 && (
                 <span className="absolute -right-1 -top-2 inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold leading-none text-destructive-foreground shadow">
                   {unhandledContactCount}
@@ -625,11 +625,11 @@ function AdminPage() {
             </TabsTrigger>
 
             <TabsTrigger value="community">Community</TabsTrigger>
-            <TabsTrigger value="users">Users ({profiles.length})</TabsTrigger>
-            <TabsTrigger value="mailing">Mailing list ({subs.length})</TabsTrigger>
+            <TabsTrigger value="users">Users{isLoaded("profiles") ? ` (${profiles.length})` : ""}</TabsTrigger>
+            <TabsTrigger value="mailing">Mailing list{isLoaded("mailing") ? ` (${subs.length})` : ""}</TabsTrigger>
             
             <TabsTrigger value="brief-form">Brief Form</TabsTrigger>
-            <TabsTrigger value="spotlights">Spotlights ({spotlights.length})</TabsTrigger>
+            <TabsTrigger value="spotlights">Spotlights{isLoaded("spotlights") ? ` (${spotlights.length})` : ""}</TabsTrigger>
             
             <TabsTrigger value="vibe">Vibe Check</TabsTrigger>
             <TabsTrigger value="faqs">FAQs</TabsTrigger>
@@ -639,7 +639,7 @@ function AdminPage() {
 
 
           <TabsContent value="traffic" className="mt-6">
-            <TrafficAdmin />
+            <Suspense fallback={<TabFallback />}><TrafficAdmin /></Suspense>
           </TabsContent>
 
 
@@ -720,7 +720,7 @@ function AdminPage() {
               </div>
             ) : null}
             <div className="pt-8 border-t border-border">
-              <ExampleOpportunitiesAdmin />
+              <Suspense fallback={<TabFallback />}><ExampleOpportunitiesAdmin /></Suspense>
             </div>
           </TabsContent>
 
@@ -1119,31 +1119,31 @@ function AdminPage() {
           </TabsContent>
 
           <TabsContent value="vibe" className="mt-6">
-            <VibeCheckAdmin />
+            <Suspense fallback={<TabFallback />}><VibeCheckAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="brief-form" className="mt-6">
-            <BriefFormAdmin />
+            <Suspense fallback={<TabFallback />}><BriefFormAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="community" className="mt-6">
-            <CommunityAdmin />
+            <Suspense fallback={<TabFallback />}><CommunityAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="emails" className="mt-6">
-            <EmailsAdmin />
+            <Suspense fallback={<TabFallback />}><EmailsAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="faqs" className="mt-6">
-            <FaqsAdmin />
+            <Suspense fallback={<TabFallback />}><FaqsAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="sound-board" className="mt-6">
-            <SoundBoardAdmin />
+            <Suspense fallback={<TabFallback />}><SoundBoardAdmin /></Suspense>
           </TabsContent>
 
           <TabsContent value="usage" className="mt-6">
-            <UsageAdmin />
+            <Suspense fallback={<TabFallback />}><UsageAdmin /></Suspense>
           </TabsContent>
         </Tabs>
       </main>
