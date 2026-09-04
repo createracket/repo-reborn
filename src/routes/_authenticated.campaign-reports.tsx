@@ -71,9 +71,8 @@ import { CSS } from "@dnd-kit/utilities";
 const sb = supabase as any;
 
 export const Route = createFileRoute("/_authenticated/campaign-reports")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    edit: typeof search.edit === "string" ? search.edit : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { edit?: string } =>
+    typeof search.edit === "string" ? { edit: search.edit } : {},
   head: () => ({
     meta: [
       { title: "Campaign Reports — Create Racket" },

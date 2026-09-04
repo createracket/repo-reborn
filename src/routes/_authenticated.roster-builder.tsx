@@ -79,9 +79,8 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 export const Route = createFileRoute("/_authenticated/roster-builder")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    edit: typeof search.edit === "string" ? search.edit : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { edit?: string } =>
+    typeof search.edit === "string" ? { edit: search.edit } : {},
   head: () => ({
     meta: [
       { title: "Roster Builder — Create Racket" },
