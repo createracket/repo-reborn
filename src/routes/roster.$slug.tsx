@@ -162,6 +162,7 @@ function PublicRosterPage() {
   const [gateBusy, setGateBusy] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [itemsLoaded, setItemsLoaded] = useState(false);
 
 
   useEffect(() => {
@@ -183,6 +184,7 @@ function PublicRosterPage() {
             if (mine.ok) {
               setRoster(mine.roster as unknown as PublicRoster);
               setItems((mine.items as unknown as PublicItem[]) ?? []);
+              setItemsLoaded(true);
               setStatus("ready");
               return;
             }
@@ -251,6 +253,7 @@ function PublicRosterPage() {
         }
         setRoster(res.roster as unknown as PublicRoster);
         setItems((res.items as unknown as PublicItem[]) ?? []);
+        setItemsLoaded(true);
         setStatus("ready");
       } catch {
         setGateError("Something went wrong. Please try again.");
