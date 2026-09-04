@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check, GripVertical } from "lucide-react";
 import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
@@ -220,8 +220,8 @@ function AdminPage() {
     let cancelled = false;
     const started: string[] = [];
     for (const g of needed) {
-      if (loadingGroups.has(g)) continue;
-      loadingGroups.add(g);
+      if (loadingGroupsRef.current.has(g)) continue;
+      loadingGroupsRef.current.add(g);
       started.push(g);
     }
     if (!started.length) return;
@@ -300,7 +300,7 @@ function AdminPage() {
     })();
 
     return () => { cancelled = true; };
-  }, [isAdmin, activeTab, searchParams.edit, loadingGroups]);
+  }, [isAdmin, activeTab, searchParams.edit]);
 
 
   async function reloadProfiles() {
