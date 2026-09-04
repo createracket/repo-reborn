@@ -18,7 +18,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { getRosterGate, unlockRoster, getRosterForMember } from "@/lib/roster-access.functions";
 import { socialAudience, totalFans } from "@/lib/audience";
+import { storageImage } from "@/lib/storage-image";
 import { parseCoPosts, coPostLabel } from "@/lib/co-posts";
+
 
 type PublicRoster = {
   id: string;
@@ -160,6 +162,7 @@ function PublicRosterPage() {
   const [gateBusy, setGateBusy] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [itemsLoaded, setItemsLoaded] = useState(false);
 
 
   useEffect(() => {
@@ -181,6 +184,7 @@ function PublicRosterPage() {
             if (mine.ok) {
               setRoster(mine.roster as unknown as PublicRoster);
               setItems((mine.items as unknown as PublicItem[]) ?? []);
+              setItemsLoaded(true);
               setStatus("ready");
               return;
             }
@@ -198,7 +202,9 @@ function PublicRosterPage() {
         return;
       }
       const pr = r as unknown as PublicRoster;
+      // Show the roster header/title immediately, then fill in creators.
       setRoster(pr);
+      setStatus("ready");
       const { data: it } = await supabase
         .from("roster_items")
         .select(
@@ -208,7 +214,7 @@ function PublicRosterPage() {
         .eq("hidden", false)
         .order("position", { ascending: true });
       setItems((it as unknown as PublicItem[]) ?? []);
-      setStatus("ready");
+      setItemsLoaded(true);
     })();
   }, [slug]);
 
@@ -216,12 +222,23 @@ function PublicRosterPage() {
     return (
       <div className="min-h-screen bg-background">
         <SiteHeader />
-        <main className="container mx-auto px-4 py-16">
-          <p className="text-sm text-muted-foreground">Loading roster…</p>
+        <main className="container mx-auto max-w-4xl animate-pulse px-3 py-8 sm:px-4 md:py-12">
+          <div className="mb-10 rounded-2xl border border-border/60 bg-muted/40" style={{ aspectRatio: "16 / 9" }} />
+          <div className="h-6 w-24 rounded-full bg-muted/60" />
+          <div className="mt-4 h-12 w-2/3 rounded-lg bg-muted/50" />
+          <div className="mt-4 h-4 w-full rounded bg-muted/40" />
+          <div className="mt-2 h-4 w-5/6 rounded bg-muted/40" />
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-20 rounded-xl border border-border/60 bg-muted/30" />
+            ))}
+          </div>
+          <span className="sr-only">Loading roster…</span>
         </main>
       </div>
     );
   }
+
 
   if (status === "gated" && gate) {
     const submitGate = async (e: React.FormEvent) => {
@@ -236,6 +253,7 @@ function PublicRosterPage() {
         }
         setRoster(res.roster as unknown as PublicRoster);
         setItems((res.items as unknown as PublicItem[]) ?? []);
+        setItemsLoaded(true);
         setStatus("ready");
       } catch {
         setGateError("Something went wrong. Please try again.");
@@ -250,7 +268,15 @@ function PublicRosterPage() {
         <main className="container mx-auto max-w-2xl px-4 py-12 md:py-20">
           {gate.header_image_url ? (
             <div className="mb-10 overflow-hidden rounded-2xl border border-border/60" style={{ aspectRatio: "16 / 9" }}>
-              <img src={gate.header_image_url} alt={gate.title} className="size-full object-cover" />
+              <img
+                src={storageImage(gate.header_image_url, { width: 1200, height: 675 })}
+                alt={gate.title}
+                width={1200}
+                height={675}
+                decoding="async"
+                className="size-full object-cover"
+              />
+
             </div>
           ) : null}
           <Badge variant="outline" className="uppercase tracking-[0.2em]">
@@ -339,8 +365,17 @@ function PublicRosterPage() {
             style={{ aspectRatio: "16 / 9" }}
           >
             <img
-              src={roster.header_image_url}
+              src={storageImage(roster.header_image_url, { width: 1200, height: 675 })}
               alt={roster.title}
+              width={1200}
+              height={675}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              onError={(e) => {
+                const original = roster.header_image_url;
+                if (original && e.currentTarget.src !== original) e.currentTarget.src = original;
+              }}
               className="size-full object-cover"
             />
           </div>
@@ -349,11 +384,19 @@ function PublicRosterPage() {
         <div className="flex flex-wrap items-start gap-5">
           {roster.profile_image_url ? (
             <img
-              src={roster.profile_image_url}
+              src={storageImage(roster.profile_image_url, { width: 256, height: 256 })}
               alt={roster.title}
+              width={256}
+              height={256}
+              decoding="async"
+              onError={(e) => {
+                const original = roster.profile_image_url;
+                if (original && e.currentTarget.src !== original) e.currentTarget.src = original;
+              }}
               className="size-24 shrink-0 rounded-xl border border-border/60 object-cover md:size-32"
             />
           ) : null}
+
           <div className="min-w-[240px] flex-1">
             <Badge className="border-transparent bg-pink-accent uppercase tracking-[0.2em] text-[#2b2b2b] hover:bg-pink-accent">
               <Users className="mr-1.5 size-3" /> Roster
@@ -508,11 +551,25 @@ function PublicRosterPage() {
                   <div className="flex items-start gap-3 sm:gap-4">
                     <div className="size-12 sm:size-14 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
                       {it.avatar_url ? (
-                        <img src={it.avatar_url} alt="" className="size-full object-cover" />
+                        <img
+                          src={storageImage(it.avatar_url, { width: 112, height: 112 })}
+                          alt=""
+                          width={112}
+                          height={112}
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            if (it.avatar_url && e.currentTarget.src !== it.avatar_url) {
+                              e.currentTarget.src = it.avatar_url;
+                            }
+                          }}
+                          className="size-full object-cover"
+                        />
                       ) : (
                         <span>{initials || "?"}</span>
                       )}
                     </div>
+
                     <div className="min-w-0 flex-1">
                       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
                         <div className="min-w-0">
@@ -718,7 +775,13 @@ function PublicRosterPage() {
               })()}
 
               <section className="mt-4 space-y-3">
-                {items.length === 0 ? (
+                {!itemsLoaded && items.length === 0 ? (
+                  <div className="space-y-3" aria-hidden>
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="h-24 animate-pulse rounded-xl border border-border/60 bg-muted/30" />
+                    ))}
+                  </div>
+                ) : items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No creators on this roster yet.</p>
                 ) : activeItems.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No active creators on this roster.</p>
@@ -726,6 +789,7 @@ function PublicRosterPage() {
                   activeItems.map(renderItem)
                 )}
               </section>
+
 
               {liveItems.length > 0 && (
                 <section className="mt-8">
