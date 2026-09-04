@@ -18,7 +18,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { getRosterGate, unlockRoster, getRosterForMember } from "@/lib/roster-access.functions";
 import { socialAudience, totalFans } from "@/lib/audience";
+import { storageImage } from "@/lib/storage-image";
 import { parseCoPosts, coPostLabel } from "@/lib/co-posts";
+
 
 type PublicRoster = {
   id: string;
