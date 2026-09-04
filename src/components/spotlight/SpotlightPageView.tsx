@@ -136,6 +136,7 @@ function formatMetric(n: number | null | undefined): string | null {
 }
 
 export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlight" | "brief" }) {
+  const editHref = kind === "brief" ? `/briefs?edit=${slug}` : `/admin?tab=spotlights&edit=${slug}`;
   const navigate = useNavigate();
   const noun = kind === "brief" ? "brief" : "spotlight";
   const Noun = kind === "brief" ? "Brief" : "Spotlight";
@@ -401,6 +402,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
+      <AdminEditButton href={editHref} label={kind === "brief" ? "Edit brief" : "Edit spotlight"} />
       {isPreview ? (
         <div className="border-b border-border/60 bg-muted/60 px-4 py-2 text-center text-xs uppercase tracking-[0.2em] text-muted-foreground">
           Draft preview — visible to admins only

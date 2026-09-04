@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { formatCount, formatPct, type Platform } from "@/lib/youtube-utils";
 import { PostThumb } from "@/components/reports/PostThumb";
 import { getReportGate, unlockReport, getReportForMember } from "@/lib/report-access.functions";
@@ -477,6 +478,7 @@ function PublicReportPage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
+      <AdminEditButton href={`/campaign-reports?edit=${report.id}`} label="Edit report" />
       <main className="container mx-auto max-w-5xl px-4 py-12 md:py-20">
         {report.header_image_url && (
           <div
