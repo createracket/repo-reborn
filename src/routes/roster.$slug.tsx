@@ -775,7 +775,13 @@ function PublicRosterPage() {
               })()}
 
               <section className="mt-4 space-y-3">
-                {items.length === 0 ? (
+                {!itemsLoaded && items.length === 0 ? (
+                  <div className="space-y-3" aria-hidden>
+                    {[0, 1, 2].map((i) => (
+                      <div key={i} className="h-24 animate-pulse rounded-xl border border-border/60 bg-muted/30" />
+                    ))}
+                  </div>
+                ) : items.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No creators on this roster yet.</p>
                 ) : activeItems.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No active creators on this roster.</p>
@@ -783,6 +789,7 @@ function PublicRosterPage() {
                   activeItems.map(renderItem)
                 )}
               </section>
+
 
               {liveItems.length > 0 && (
                 <section className="mt-8">
