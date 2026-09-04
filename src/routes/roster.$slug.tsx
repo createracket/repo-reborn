@@ -508,11 +508,25 @@ function PublicRosterPage() {
                   <div className="flex items-start gap-3 sm:gap-4">
                     <div className="size-12 sm:size-14 shrink-0 overflow-hidden rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
                       {it.avatar_url ? (
-                        <img src={it.avatar_url} alt="" className="size-full object-cover" />
+                        <img
+                          src={storageImage(it.avatar_url, { width: 112, height: 112 })}
+                          alt=""
+                          width={112}
+                          height={112}
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            if (it.avatar_url && e.currentTarget.src !== it.avatar_url) {
+                              e.currentTarget.src = it.avatar_url;
+                            }
+                          }}
+                          className="size-full object-cover"
+                        />
                       ) : (
                         <span>{initials || "?"}</span>
                       )}
                     </div>
+
                     <div className="min-w-0 flex-1">
                       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
                         <div className="min-w-0">
