@@ -205,6 +205,7 @@ function AdminPage() {
 
   // 2) Per-tab data. Each group is fetched once, on first use, then cached.
   const [loadedGroups, setLoadedGroups] = useState<Set<string>>(new Set());
+  const loadingGroupsRef = useRef<Set<string>>(new Set());
   const isLoaded = (g: string) => loadedGroups.has(g);
 
   useEffect(() => {
