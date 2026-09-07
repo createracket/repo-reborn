@@ -217,8 +217,9 @@ function AdminPage() {
     if (tab === "spotlights") { needed.add("profiles"); needed.add("spotlights"); }
     if (tab === "mailing") needed.add("mailing");
     if (searchParams.edit) needed.add("spotlights");
+    // Contact data backs the unread badge on the Contact tab — always load it.
+    needed.add("contact");
 
-    let cancelled = false;
     const started: string[] = [];
     for (const g of needed) {
       if (loadingGroupsRef.current.has(g)) continue;
@@ -228,7 +229,11 @@ function AdminPage() {
     if (!started.length) return;
 
     (async () => {
+      // Results are always committed (never cancelled): each group's data is
+      // tab-independent, so a fetch that outlives a tab switch is still valid.
+      // Groups are removed from loadingGroupsRef in all cases so failures retry.
       await Promise.all(started.map(async (group) => {
+        try {
         if (group === "profiles") {
           const { data } = await supabase
             .from("profiles")
