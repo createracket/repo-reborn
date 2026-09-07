@@ -234,78 +234,73 @@ function AdminPage() {
       // Groups are removed from loadingGroupsRef in all cases so failures retry.
       await Promise.all(started.map(async (group) => {
         try {
-        if (group === "profiles") {
-          const { data } = await supabase
-            .from("profiles")
-            .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden")
-            .order("created_at", { ascending: false });
-          if (!cancelled) setProfiles((data as Profile[]) ?? []);
-          return;
-        }
-        if (group === "vibe") {
-          loadVibeCheckConfig().then((c) => { if (!cancelled) setVibeConfig(c); }).catch(() => undefined);
-          const { data } = await supabase
-            .from("vibe_check_responses")
-            .select("user_id, result, answers, created_at")
-            .order("created_at", { ascending: false });
-          const vibeMap = new Map<string, VibeRow>();
-          ((data as VibeRow[] | null) ?? []).forEach((row) => {
-            if (row.user_id && !vibeMap.has(row.user_id)) vibeMap.set(row.user_id, row);
-          });
-          if (!cancelled) setVibeByUser(vibeMap);
-          return;
-        }
-        if (group === "mailing") {
-          const { data } = await supabase
-            .from("mailing_list_subscribers")
-            .select("id, created_at, email, name, source, marketing_opt_in")
-            .order("created_at", { ascending: false });
-          if (!cancelled) setSubs((data as Subscriber[]) ?? []);
-          return;
-        }
-        if (group === "contact") {
-          const [cm, si] = await Promise.all([
-            supabase.from("contact_messages").select("id, created_at, name, email, message, handled").order("created_at", { ascending: false }),
-            supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
-          ]);
-          if (!cancelled) setContacts((cm.data as ContactMsg[]) ?? []);
-          const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
-          const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id).filter((v): v is string => !!v)));
-          if (userIds.length) {
-            const { data: profs } = await supabase.from("profiles").select("id, display_name, email").in("id", userIds);
-            const map = new Map((profs ?? []).map((p: any) => [p.id, { display_name: p.display_name, email: p.email }]));
-            if (!cancelled) setInterests(rawInterests.map((i) => ({ ...i, profile: (i.user_id ? map.get(i.user_id) : null) ?? null })));
-          } else if (!cancelled) {
-            setInterests(rawInterests);
-          }
-          return;
-        }
-        if (group === "spotlights") {
-          const { data } = await supabase
-            .from("partner_pages" as any)
-            .select("id, slug, type, headline, subtitle, published, dashboard_visible, created_at, links, archived")
-            .eq("section", "spotlight")
-            .order("created_at", { ascending: false });
-          const rows = (data as unknown as Spotlight[]) ?? [];
-          if (!cancelled) setSpotlights(rows);
+          if (group === "profiles") {
+            const { data } = await supabase
+              .from("profiles")
+              .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden")
+              .order("created_at", { ascending: false });
+            setProfiles((data as Profile[]) ?? []);
+          } else if (group === "vibe") {
+            loadVibeCheckConfig().then((c) => setVibeConfig(c)).catch(() => undefined);
+            const { data } = await supabase
+              .from("vibe_check_responses")
+              .select("user_id, result, answers, created_at")
+              .order("created_at", { ascending: false });
+            const vibeMap = new Map<string, VibeRow>();
+            ((data as VibeRow[] | null) ?? []).forEach((row) => {
+              if (row.user_id && !vibeMap.has(row.user_id)) vibeMap.set(row.user_id, row);
+            });
+            setVibeByUser(vibeMap);
+          } else if (group === "mailing") {
+            const { data } = await supabase
+              .from("mailing_list_subscribers")
+              .select("id, created_at, email, name, source, marketing_opt_in")
+              .order("created_at", { ascending: false });
+            setSubs((data as Subscriber[]) ?? []);
+          } else if (group === "contact") {
+            const [cm, si] = await Promise.all([
+              supabase.from("contact_messages").select("id, created_at, name, email, message, handled").order("created_at", { ascending: false }),
+              supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
+            ]);
+            setContacts((cm.data as ContactMsg[]) ?? []);
+            const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
+            const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id).filter((v): v is string => !!v)));
+            if (userIds.length) {
+              const { data: profs } = await supabase.from("profiles").select("id, display_name, email").in("id", userIds);
+              const map = new Map((profs ?? []).map((p: any) => [p.id, { display_name: p.display_name, email: p.email }]));
+              setInterests(rawInterests.map((i) => ({ ...i, profile: (i.user_id ? map.get(i.user_id) : null) ?? null })));
+            } else {
+              setInterests(rawInterests);
+            }
+          } else if (group === "spotlights") {
+            const { data } = await supabase
+              .from("partner_pages" as any)
+              .select("id, slug, type, headline, subtitle, published, dashboard_visible, created_at, links, archived")
+              .eq("section", "spotlight")
+              .order("created_at", { ascending: false });
+            const rows = (data as unknown as Spotlight[]) ?? [];
+            setSpotlights(rows);
 
-          // Deep-link from a public spotlight page's admin "Edit spotlight" button.
-          if (searchParams.edit) {
-            const target = rows.find((s) => s.slug === searchParams.edit);
-            if (target) {
-              const { data: full } = await supabase.from("partner_pages" as any).select("*").eq("id", target.id).single();
-              if (full && !cancelled) {
-                setEditingSpotlight(full);
-                setSpotlightFormOpen(true);
+            // Deep-link from a public spotlight page's admin "Edit spotlight" button.
+            if (searchParams.edit) {
+              const target = rows.find((s) => s.slug === searchParams.edit);
+              if (target) {
+                const { data: full } = await supabase.from("partner_pages" as any).select("*").eq("id", target.id).single();
+                if (full) {
+                  setEditingSpotlight(full);
+                  setSpotlightFormOpen(true);
+                }
               }
             }
           }
+          setLoadedGroups((prev) => new Set([...prev, group]));
+        } catch {
+          // leave the group un-loaded so a later tab visit retries
+        } finally {
+          loadingGroupsRef.current.delete(group);
         }
       }));
-      if (!cancelled) setLoadedGroups((prev) => new Set([...prev, ...started]));
     })();
-
-    return () => { cancelled = true; };
   }, [isAdmin, activeTab, searchParams.edit]);
 
 
