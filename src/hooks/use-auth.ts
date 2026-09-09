@@ -2,7 +2,6 @@ import { useSyncExternalStore } from "react";
 import type { Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/integrations/supabase/client";
-import { getAuthUser } from "@/hooks/use-auth";
 
 /**
  * One shared sign-in check for the whole app.
@@ -136,7 +135,7 @@ export async function currentUserIsAdmin(): Promise<boolean> {
 }
 
 /**
- * Drop-in replacement for `getAuthUser()` in client code.
+ * Drop-in replacement for `supabase.auth.getUser()` in client code.
  * Same shape, but reads the shared session instead of a network round-trip.
  * Server-side checks (RLS, `requireSupabaseAuth`) are unaffected.
  */
