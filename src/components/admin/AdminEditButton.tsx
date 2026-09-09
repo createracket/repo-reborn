@@ -2,37 +2,25 @@ import { useEffect, useState } from "react";
 import { Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth, isAdminUser } from "@/hooks/use-auth";
 
 /**
  * Floating "Edit page" shortcut rendered only for admin users.
  * Links a public page (roster, report, brief, spotlight) to its builder.
  */
 export function AdminEditButton({ href, label = "Edit page" }: { href: string; label?: string }) {
+  const { userId } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     let active = true;
-    const check = async (userId: string | undefined) => {
-      if (!userId) {
-        if (active) setIsAdmin(false);
-        return;
-      }
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle();
-      if (active) setIsAdmin(!!data);
-    };
-    supabase.auth.getSession().then(({ data }) => check(data.session?.user.id));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => check(session?.user.id));
+    isAdminUser(userId).then((v) => {
+      if (active) setIsAdmin(v);
+    });
     return () => {
       active = false;
-      sub.subscription.unsubscribe();
     };
-  }, []);
+  }, [userId]);
 
   if (!isAdmin) return null;
 
