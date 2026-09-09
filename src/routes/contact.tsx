@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { findProfanityIn } from "@/lib/profanity";
 
 export const Route = createFileRoute("/contact")({
@@ -33,16 +34,8 @@ function ContactPage() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
-  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const { signedIn } = useAuth();
   const [subscribe, setSubscribe] = useState(true);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setSignedIn(!!session);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
