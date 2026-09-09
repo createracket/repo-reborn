@@ -20,6 +20,7 @@ import {
 import racketNavLogo from "@/assets/logo-singleR-transparent.jpg.asset.json";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth, isAdminUser } from "@/hooks/use-auth";
 
 
 /**
@@ -27,7 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
  * The homepage has its own transparent header rendered inside the hero.
  */
 export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
-  const [signedIn, setSignedIn] = useState(false);
+  const { signedIn, userId } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -38,30 +39,14 @@ export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
   }, [pathname]);
 
   useEffect(() => {
-    const checkAdmin = async (userId: string | undefined) => {
-      if (!userId) {
-        setIsAdmin(false);
-        return;
-      }
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle();
-      setIsAdmin(!!data);
+    let active = true;
+    isAdminUser(userId).then((v) => {
+      if (active) setIsAdmin(v);
+    });
+    return () => {
+      active = false;
     };
-
-    supabase.auth.getSession().then(({ data }) => {
-      setSignedIn(!!data.session);
-      checkAdmin(data.session?.user.id);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setSignedIn(!!session);
-      checkAdmin(session?.user.id);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [userId]);
 
   async function signOut() {
     await supabase.auth.signOut();
