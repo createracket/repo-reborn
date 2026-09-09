@@ -2355,6 +2355,7 @@ export type Database = {
           client_email: string
         }[]
       }
+      get_public_roster: { Args: { p_slug: string }; Returns: Json }
       get_roster_assignment: {
         Args: { _roster_id: string }
         Returns: {
