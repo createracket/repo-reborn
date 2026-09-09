@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { getSocialEmbed } from "@/lib/social-embed";
 import { getClipPosters } from "@/lib/clip-poster.functions";
@@ -250,7 +251,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
       setPage(p);
       setStatus("ready");
 
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (u.user) {
         const { data: existing } = await supabase
           .from("spotlight_interests" as any)
@@ -265,7 +266,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
 
   async function handleRegister() {
     if (!page) return;
-    const { data: u } = await supabase.auth.getUser();
+    const { data: u } = await getAuthUser();
     if (!u.user) {
       setGuestOpen(true);
       return;

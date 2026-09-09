@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import { findProfanityIn } from "@/lib/profanity";
 import {
   loadBriefFormConfig,
@@ -152,7 +153,7 @@ function ConnectPage() {
 
   useEffect(() => {
     loadBriefFormConfig().then(setConfig).catch(() => setConfig(DEFAULT_BRIEF_FORM_CONFIG));
-    supabase.auth.getUser().then(({ data }) => setAuthedUserId(data.user?.id ?? null));
+    getAuthUser().then(({ data }) => setAuthedUserId(data.user?.id ?? null));
   }, []);
 
   function toggle(list: string[], setList: (v: string[]) => void, item: string, max?: number) {

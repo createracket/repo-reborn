@@ -25,6 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import { lovable } from "@/integrations/lovable";
 
 export const ACCESS_CODE = "VERIFIEDFAN";
@@ -159,7 +160,7 @@ function LoginPage() {
       }
     });
 
-    supabase.auth.getUser().then(({ data }) => {
+    getAuthUser().then(({ data }) => {
       if (data.user) navigate({ to: postAuthDestination(), replace: true });
     });
     return () => sub.subscription.unsubscribe();

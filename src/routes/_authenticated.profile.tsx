@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import { findProfanityIn } from "@/lib/profanity";
 import { validateSlug, normalizeSlug } from "@/lib/slugs";
 import { runProfileSync, scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
@@ -310,7 +311,7 @@ function EditProfilePage() {
 
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) {
         navigate({ to: "/login" });
         return;

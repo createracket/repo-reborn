@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { Button } from "@/components/ui/button";
 
@@ -31,7 +32,7 @@ function RacketDeskLayout() {
 
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) {
         navigate({ to: "/login" });
         return;

@@ -55,6 +55,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
 import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { socialAudience, totalFans } from "@/lib/audience";
@@ -319,7 +320,7 @@ function RosterBuilderPage() {
   // bootstrap: verify admin + load rosters
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) {
         navigate({ to: "/login" });
         return;
@@ -1178,7 +1179,7 @@ function RosterDetailView({
                     }
                     setSavingMeta(true);
                     try {
-                      const { data: u } = await supabase.auth.getUser();
+                      const { data: u } = await getAuthUser();
                       if (!u.user) {
                         toast.error("Sign in required");
                         return;
@@ -1261,7 +1262,7 @@ function RosterDetailView({
                     }
                     setSavingMeta(true);
                     try {
-                      const { data: u } = await supabase.auth.getUser();
+                      const { data: u } = await getAuthUser();
                       if (!u.user) {
                         toast.error("Sign in required");
                         return;
@@ -2344,7 +2345,7 @@ function EditProspectPanel({
     }
     setUploading(true);
     try {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) {
         toast.error("Sign in required");
         return;

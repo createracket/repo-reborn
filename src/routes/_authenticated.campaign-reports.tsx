@@ -45,6 +45,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
 import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { normalizeSlug, validateSlug } from "@/lib/slugs";
@@ -175,7 +176,7 @@ function CampaignReportsPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) {
         navigate({ to: "/login" });
         return;
@@ -1283,7 +1284,7 @@ function CreatorRow({
     }
     setUploadingAvatar(true);
     try {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) {
         toast.error("Sign in required");
         return;
