@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthSessionResult } from "@/hooks/use-auth";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { getRosterGate, unlockRoster, getRosterForMember } from "@/lib/roster-access.functions";
 import { socialAudience, totalFans } from "@/lib/audience";
@@ -172,7 +173,7 @@ function PublicRosterPage() {
       const r = (bundle as { roster?: PublicRoster } | null)?.roster ?? null;
       if (!r) {
         // Signed-in owners/admins/assigned users bypass the passcode gate.
-        const { data: sess } = await supabase.auth.getSession();
+        const { data: sess } = await getAuthSessionResult();
         if (sess.session) {
           try {
             const mine = await getRosterForMember({ data: { slug } });

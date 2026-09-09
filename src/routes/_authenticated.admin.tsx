@@ -24,7 +24,7 @@ import { SECTION_TEXT_SIZES } from "@/components/spotlight/SpotlightPageView";
 import { DEFAULT_THUMB_FRAME, readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { getAuthUser } from "@/hooks/use-auth";
+import { getAuthSessionResult, getAuthUser } from "@/hooks/use-auth";
 import { findProfanityIn } from "@/lib/profanity";
 import {
   adminCreateUser,
@@ -187,7 +187,7 @@ function AdminPage() {
   //    then a single role query. The shell renders as soon as this passes.
   useEffect(() => {
     (async () => {
-      const { data: s } = await supabase.auth.getSession();
+      const { data: s } = await getAuthSessionResult();
       const uid = s.session?.user?.id;
       if (!uid) {
         navigate({ to: "/login" });

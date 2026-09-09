@@ -143,3 +143,8 @@ export async function getAuthUser(): Promise<{ data: { user: Session["user"] | n
   const session = await getAuthSession();
   return { data: { user: session?.user ?? null } };
 }
+
+/** Drop-in replacement for `supabase.auth.getSession()` in client code. */
+export async function getAuthSessionResult(): Promise<{ data: { session: Session | null } }> {
+  return { data: { session: await getAuthSession() } };
+}

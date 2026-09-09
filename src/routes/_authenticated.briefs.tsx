@@ -20,6 +20,7 @@ import {
 import { PartnerPageShares, type ShareProfile } from "@/components/admin/PartnerPageShares";
 import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthSessionResult } from "@/hooks/use-auth";
 
 // The builder form lives in the (large) admin route module — load it only when
 // a brief is actually being created or edited.
@@ -73,7 +74,7 @@ function BriefsPage() {
   useEffect(() => {
     (async () => {
       // Reuse the session the _authenticated layout already resolved.
-      const { data: s } = await supabase.auth.getSession();
+      const { data: s } = await getAuthSessionResult();
       const uid = s.session?.user?.id;
       if (!uid) {
         navigate({ to: "/login" });

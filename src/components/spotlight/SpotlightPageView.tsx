@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { getAuthUser } from "@/hooks/use-auth";
+import { getAuthSessionResult, getAuthUser } from "@/hooks/use-auth";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { getSocialEmbed } from "@/lib/social-embed";
 import { getClipPosters } from "@/lib/clip-poster.functions";
@@ -209,7 +209,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
         .maybeSingle();
       if (error || !data) {
         // Admins can preview unpublished drafts.
-        const { data: session } = await supabase.auth.getSession();
+        const { data: session } = await getAuthSessionResult();
         if (session.session) {
           try {
             const prev = await getSpotlightPreview({ data: { slug } });
