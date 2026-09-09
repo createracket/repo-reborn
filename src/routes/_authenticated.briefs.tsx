@@ -348,20 +348,22 @@ function BriefsPage() {
             </button>
             {(formOpen || editing) && (
               <CardContent>
-                <SpotlightForm
-                  key={editing?.id ?? "new"}
-                  section="brief"
-                  editData={editing}
-                  onCreated={() => {
-                    refresh();
-                    setEditing(null);
-                    setFormOpen(false);
-                  }}
-                  onCancel={() => {
-                    setEditing(null);
-                    setFormOpen(false);
-                  }}
-                />
+                <Suspense fallback={<p className="text-sm text-muted-foreground">Loading builder…</p>}>
+                  <SpotlightForm
+                    key={editing?.id ?? "new"}
+                    section="brief"
+                    editData={editing}
+                    onCreated={() => {
+                      refresh();
+                      setEditing(null);
+                      setFormOpen(false);
+                    }}
+                    onCancel={() => {
+                      setEditing(null);
+                      setFormOpen(false);
+                    }}
+                  />
+                </Suspense>
               </CardContent>
             )}
           </Card>
