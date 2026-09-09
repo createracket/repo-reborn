@@ -8,7 +8,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { getAuthUserId } from "@/hooks/use-auth";
+import { getAuthUserId, useAuth } from "@/hooks/use-auth";
 import {
   calculateVibeScore,
   calculateBrandVibe,
@@ -35,7 +35,7 @@ function Results() {
   const navigate = useNavigate();
   const [stored, setStored] = useState<Stored | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
+  const { signedIn } = useAuth();
   const [config, setConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   const savedRef = useRef(false);
 
