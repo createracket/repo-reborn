@@ -48,7 +48,6 @@ export function PageViewTracker() {
     (async () => {
       let token: string | null = null;
       try {
-        const { supabase } = await import("@/integrations/supabase/client");
         const { data } = await getAuthSessionResult();
         token = data.session?.access_token ?? null;
       } catch {}
