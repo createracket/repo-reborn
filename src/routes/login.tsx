@@ -28,8 +28,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAuthUser } from "@/hooks/use-auth";
 import { lovable } from "@/integrations/lovable";
 
-export const ACCESS_CODE = "VERIFIEDFAN";
-export const ACCESS_CODES = ["VERIFIEDFAN", "RACKETISCOOL"] as const;
+export { ACCESS_CODE, ACCESS_CODES } from "@/lib/access-codes";
+import { ACCESS_CODES } from "@/lib/access-codes";
 
 const ACCOUNT_TYPES = [
   { value: "artist", label: "Artist" },
