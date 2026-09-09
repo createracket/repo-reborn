@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import { readThumbFrame, thumbFrameBgClass, thumbFrameImgStyle } from "@/lib/thumb-frame";
 import { loadDashboardConfig } from "@/lib/dashboard-config";
 import { PlannerTile } from "@/components/dashboard/PlannerTile";
@@ -173,7 +174,7 @@ function DashboardPage() {
   // Load rosters available for the toggle — own rosters + rosters shared with the user; admins see all
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) return;
 
       let rows: any[] = [];
@@ -265,7 +266,7 @@ function DashboardPage() {
   useEffect(() => {
 
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       setEmail(u.user?.email ?? null);
       if (!u.user) return;
 
@@ -1599,7 +1600,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
   useEffect(() => {
     if (!open || checked) return;
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) {
         setChecked(true);
         return;
@@ -1618,7 +1619,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
 
   async function handleRegister() {
     setRegistering(true);
-    const { data: u } = await supabase.auth.getUser();
+    const { data: u } = await getAuthUser();
     if (!u.user) {
       toast.info("Sign in to express interest");
       navigate({ to: "/login" });

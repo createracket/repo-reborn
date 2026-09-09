@@ -1,21 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import racketLogoAsset from "@/assets/logo/racket-logo-white.svg.asset.json";
 const racketLogo = racketLogoAsset.url;
 import { Instagram, Linkedin, Mail } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 
 export function SiteFooter() {
-  const [signedIn, setSignedIn] = useState(false);
+  const { signedIn } = useAuth();
   const contactEmail = "community@createracket.com";
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setSignedIn(!!session);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
 
   return (
     <footer className="mt-20 border-t border-border bg-pink-accent text-[#2b2b2b]">

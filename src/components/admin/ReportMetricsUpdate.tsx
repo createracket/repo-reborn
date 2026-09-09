@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -113,7 +114,7 @@ export function ReportMetricsUpdate({
     setConfirm(null);
     setBusy(true);
     try {
-      const { data: auth } = await supabase.auth.getUser();
+      const { data: auth } = await getAuthUser();
       const res = await startMetricsJob({
         data: { reportId, notifyEmail: auth.user?.email ?? null },
       });

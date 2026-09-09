@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
+
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthGate,
@@ -9,29 +9,14 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthGate() {
   const navigate = useNavigate();
-  const [ready, setReady] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  // Shared session — resolved once per visit, not once per component.
+  const { ready, signedIn } = useAuth();
 
   useEffect(() => {
-    // Listen for subsequent changes (sign in/out, token refresh)
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    // Restore session from storage on first load
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
-      setReady(true);
-    });
-
-    return () => sub.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (ready && !user) {
+    if (ready && !signedIn) {
       navigate({ to: "/login", replace: true });
     }
-  }, [ready, user, navigate]);
+  }, [ready, signedIn, navigate]);
 
   if (!ready) {
     return (
@@ -41,7 +26,7 @@ function AuthGate() {
     );
   }
 
-  if (!user) return null;
+  if (!signedIn) return null;
 
   return <Outlet />;
 }

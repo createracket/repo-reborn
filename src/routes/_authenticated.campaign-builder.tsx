@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import { BriefsManager } from "@/components/admin/BriefsManager";
 
 export const Route = createFileRoute("/_authenticated/campaign-builder")({
@@ -16,7 +17,7 @@ function CampaignBuilderPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) {
         setReady(true);
         return;

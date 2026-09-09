@@ -24,6 +24,7 @@ import { SECTION_TEXT_SIZES } from "@/components/spotlight/SpotlightPageView";
 import { DEFAULT_THUMB_FRAME, readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthSessionResult, getAuthUser } from "@/hooks/use-auth";
 import { findProfanityIn } from "@/lib/profanity";
 import {
   adminCreateUser,
@@ -38,7 +39,7 @@ import {
   adminSetProfileAvatar,
 } from "@/lib/admin-users.functions";
 import { uploadMyProfileImage } from "@/lib/profile-images.functions";
-import { ACCESS_CODE } from "@/routes/login";
+import { ACCESS_CODE } from "@/lib/access-codes";
 const VibeCheckAdmin = lazy(() => import("@/components/admin/VibeCheckAdmin").then((m) => ({ default: m.VibeCheckAdmin })));
 import {
   loadVibeCheckConfig,
@@ -186,7 +187,7 @@ function AdminPage() {
   //    then a single role query. The shell renders as soon as this passes.
   useEffect(() => {
     (async () => {
-      const { data: s } = await supabase.auth.getSession();
+      const { data: s } = await getAuthSessionResult();
       const uid = s.session?.user?.id;
       if (!uid) {
         navigate({ to: "/login" });
@@ -3448,7 +3449,7 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
     }
     setSaving(true);
     try {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) throw new Error("Not signed in");
       const { error } = await supabase.from("campaign_briefs").insert({
         user_id: u.user.id,

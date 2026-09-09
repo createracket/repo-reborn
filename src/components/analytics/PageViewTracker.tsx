@@ -1,3 +1,4 @@
+import { getAuthSessionResult } from "@/hooks/use-auth";
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 
@@ -47,8 +48,7 @@ export function PageViewTracker() {
     (async () => {
       let token: string | null = null;
       try {
-        const { supabase } = await import("@/integrations/supabase/client");
-        const { data } = await supabase.auth.getSession();
+        const { data } = await getAuthSessionResult();
         token = data.session?.access_token ?? null;
       } catch {}
       try {

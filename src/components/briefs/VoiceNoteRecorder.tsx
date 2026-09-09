@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthSessionResult } from "@/hooks/use-auth";
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -100,7 +101,7 @@ export function VoiceNoteRecorder({ onTranscribed }: Props) {
       const fd = new FormData();
       const ext = (blob.type.split("/")[1] || "webm").split(";")[0];
       fd.append("file", blob, `voice-note.${ext}`);
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData } = await getAuthSessionResult();
       const token = sessionData.session?.access_token;
       if (!token) {
         toast.error("Sign in to use voice notes.");

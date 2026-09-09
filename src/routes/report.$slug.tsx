@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthSessionResult } from "@/hooks/use-auth";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { formatCount, formatPct, type Platform } from "@/lib/youtube-utils";
 import { PostThumb } from "@/components/reports/PostThumb";
@@ -126,7 +127,7 @@ function PublicReportPage() {
         .maybeSingle();
       if (!r) {
         // Signed-in owners/admins/assigned users bypass the passcode gate.
-        const { data: sess } = await supabase.auth.getSession();
+        const { data: sess } = await getAuthSessionResult();
         if (sess.session) {
           try {
             const mine = await getReportForMember({ data: { slug } });

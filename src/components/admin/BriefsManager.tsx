@@ -30,6 +30,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
 import { DEFAULT_THUMB_FRAME, readThumbFrame } from "@/lib/thumb-frame";
 import { resizeImageFile } from "@/lib/image-resize";
@@ -998,7 +999,7 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
     }
     setSaving(true);
     try {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await getAuthUser();
       if (!u.user) throw new Error("Not signed in");
       const { error } = await supabase.from("campaign_briefs").insert({
         user_id: u.user.id,

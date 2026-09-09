@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUserId, useAuth } from "@/hooks/use-auth";
 import {
   calculateVibeScore,
   calculateBrandVibe,
@@ -34,7 +35,7 @@ function Results() {
   const navigate = useNavigate();
   const [stored, setStored] = useState<Stored | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
+  const { signedIn } = useAuth();
   const [config, setConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   const savedRef = useRef(false);
 
@@ -49,11 +50,6 @@ function Results() {
 
     loadVibeCheckConfig().then(setConfig).catch(() => {});
 
-    supabase.auth.getUser().then(({ data }) => setSignedIn(!!data.user));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setSignedIn(!!session);
-    });
-    return () => sub.subscription.unsubscribe();
   }, []);
 
   // Auto-save once when both a result and a session are available.
@@ -61,8 +57,8 @@ function Results() {
     if (!stored || !signedIn || savedRef.current) return;
     savedRef.current = true;
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) return;
+      const uid = await getAuthUserId();
+      if (!uid) return;
       const scoring =
         stored.flow === "musician"
           ? calculateVibeScore(stored.data, config)
@@ -70,7 +66,7 @@ function Results() {
       const payload =
         stored.flow === "musician"
           ? {
-              user_id: u.user.id,
+              user_id: uid,
               answers: stored.data,
               result: "artist" as const,
               artist_score: (scoring as any).sortedScores?.[0]?.score ?? 0,
@@ -78,7 +74,7 @@ function Results() {
             }
 
           : {
-              user_id: u.user.id,
+              user_id: uid,
               answers: stored.data,
               result: "brand" as const,
               artist_score: 0,

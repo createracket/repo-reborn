@@ -23,6 +23,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 
 import video1 from "@/assets/videos/video-1.mp4.asset.json";
 import video2 from "@/assets/videos/video-2.mp4.asset.json";
@@ -199,14 +200,7 @@ const testimonials = [
 ];
 
 function HeroAuthButton() {
-  const [signedIn, setSignedIn] = useState(false);
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setSignedIn(!!session);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
+  const { signedIn } = useAuth();
   return (
     <Button asChild size="sm" variant="secondary" className="rounded-full">
       <Link to={signedIn ? "/dashboard" : "/login"}>
@@ -217,14 +211,7 @@ function HeroAuthButton() {
 }
 
 function Home() {
-  const [signedIn, setSignedIn] = useState(false);
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setSignedIn(!!session);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
+  const { signedIn } = useAuth();
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">

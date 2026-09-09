@@ -2,7 +2,7 @@ import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 
 const ROUTE_LABELS: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -37,13 +37,7 @@ function getPageLabel(pathname: string): string | null {
 
 export function PageBreadcrumbs() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const [signedIn, setSignedIn] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
-    return () => sub.subscription.unsubscribe();
-  }, []);
+  const { signedIn } = useAuth();
 
   if (pathname === "/" || pathname === "/dashboard") return null;
 

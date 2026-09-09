@@ -5,6 +5,7 @@ import { BookmarkPlus, Loader2, Plus, Sparkles, Trash2, Wand2 } from "lucide-rea
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthUser } from "@/hooks/use-auth";
 import {
   loadCachedIdea,
   saveCachedIdea,
@@ -74,7 +75,7 @@ function ProfilesPage() {
     const handle = draft.handle.trim().replace(/^@/, "");
     if (!handle) return toast.error("Add a handle first");
     if (draft.regions.length === 0) return toast.error("Pick at least one region");
-    const { data: auth } = await supabase.auth.getUser();
+    const { data: auth } = await getAuthUser();
     if (!auth.user) return toast.error("Sign in to save profiles");
     const { data, error } = await supabase
       .from("racket_desk_profiles")
