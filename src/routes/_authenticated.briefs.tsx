@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, Archive } from "lucide-react";
 import { toast } from "sonner";
 
@@ -20,7 +20,12 @@ import {
 import { PartnerPageShares, type ShareProfile } from "@/components/admin/PartnerPageShares";
 import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
 import { supabase } from "@/integrations/supabase/client";
-import { SpotlightForm } from "@/routes/_authenticated.admin";
+
+// The builder form lives in the (large) admin route module — load it only when
+// a brief is actually being created or edited.
+const SpotlightForm = lazy(() =>
+  import("@/routes/_authenticated.admin").then((m) => ({ default: m.SpotlightForm })),
+);
 
 export const Route = createFileRoute("/_authenticated/briefs")({
   validateSearch: (search: Record<string, unknown>): { edit?: string } =>
