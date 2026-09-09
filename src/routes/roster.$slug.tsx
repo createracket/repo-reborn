@@ -167,14 +167,9 @@ function PublicRosterPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: r } = await (supabase as any)
-        .from("public_rosters")
-        .select(
-          "id, title, description, slug, published, published_at, updated_at, header_image_url, profile_image_url, hide_prospect_tags, hide_statuses, hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators, est_engagement_pct, categories, custom_links",
-        )
-        .eq("slug", slug)
-        .eq("published", true)
-        .maybeSingle();
+      // One round-trip: roster + visible creators together (no request waterfall).
+      const { data: bundle } = await (supabase as any).rpc("get_public_roster", { p_slug: slug });
+      const r = (bundle as { roster?: PublicRoster } | null)?.roster ?? null;
       if (!r) {
         // Signed-in owners/admins/assigned users bypass the passcode gate.
         const { data: sess } = await supabase.auth.getSession();
@@ -201,19 +196,9 @@ function PublicRosterPage() {
         }
         return;
       }
-      const pr = r as unknown as PublicRoster;
-      // Show the roster header/title immediately, then fill in creators.
-      setRoster(pr);
+      setRoster(r);
       setStatus("ready");
-      const { data: it } = await supabase
-        .from("roster_items")
-        .select(
-          "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, twitch_url, twitch_followers, facebook_url, facebook_followers, x_url, x_followers, custom_label, custom_url, custom_followers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, content_review_label, co_posts, position, status, category, categories, location",
-        )
-        .eq("roster_id", pr.id)
-        .eq("hidden", false)
-        .order("position", { ascending: true });
-      setItems((it as unknown as PublicItem[]) ?? []);
+      setItems(((bundle as { items?: PublicItem[] }).items as PublicItem[]) ?? []);
       setItemsLoaded(true);
     })();
   }, [slug]);
