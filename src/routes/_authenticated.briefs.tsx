@@ -57,10 +57,14 @@ function BriefsPage() {
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [profiles, setProfiles] = useState<ShareProfile[]>([]);
 
+  // Only the columns the list renders — the full row carries heavy JSON blobs.
+  const LIST_COLUMNS =
+    "id, slug, type, headline, subtitle, published, created_at, archived, dashboard_visible, dashboard_placement";
+
   async function refresh() {
     const { data } = await supabase
       .from("partner_pages" as any)
-      .select("*")
+      .select(LIST_COLUMNS)
       .eq("section", "brief")
       .order("created_at", { ascending: false });
     setBriefs((data as unknown as Brief[]) ?? []);
@@ -68,15 +72,17 @@ function BriefsPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      if (!u.user) {
+      // Reuse the session the _authenticated layout already resolved.
+      const { data: s } = await supabase.auth.getSession();
+      const uid = s.session?.user?.id;
+      if (!uid) {
         navigate({ to: "/login" });
         return;
       }
       const { data: roleRow } = await supabase
         .from("user_roles" as any)
         .select("role")
-        .eq("user_id", u.user.id)
+        .eq("user_id", uid)
         .eq("role", "admin")
         .maybeSingle();
       if (!roleRow) {
@@ -84,12 +90,19 @@ function BriefsPage() {
         return;
       }
       setIsAdmin(true);
-      const { data: profileRows } = await supabase
+
+      // Show the list as soon as it lands; sharing profiles fill in after.
+      await refresh();
+      setChecking(false);
+
+      supabase
         .from("profiles")
         .select("id, email, display_name")
-        .order("display_name", { ascending: true });
-      setProfiles(((profileRows as any[]) ?? []) as ShareProfile[]);
-      await refresh();
+        .order("display_name", { ascending: true })
+        .then(({ data: profileRows }) =>
+          setProfiles(((profileRows as any[]) ?? []) as ShareProfile[]),
+        );
+
       // Deep-link from a public brief page's admin "Edit brief" button.
       if (editSlug) {
         const { data: editRow } = await supabase
@@ -103,7 +116,6 @@ function BriefsPage() {
           setFormOpen(true);
         }
       }
-      setChecking(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
