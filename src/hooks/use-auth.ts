@@ -112,12 +112,14 @@ export function isAdminUser(userId: string | null | undefined): Promise<boolean>
   if (!userId) return Promise.resolve(false);
   const cached = adminCache.get(userId);
   if (cached) return cached;
-  const pending = supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle()
+  const pending = Promise.resolve(
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle(),
+  )
     .then(({ data }) => !!data)
     .catch(() => {
       adminCache.delete(userId);
