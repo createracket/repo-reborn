@@ -641,6 +641,10 @@ function AdminPage() {
           </TabsList>
 
 
+          <TabsContent value="planner" className="mt-6">
+            <Suspense fallback={<TabFallback />}><ProjectPlannerAdmin /></Suspense>
+          </TabsContent>
+
           <TabsContent value="traffic" className="mt-6">
             <Suspense fallback={<TabFallback />}><TrafficAdmin /></Suspense>
           </TabsContent>
