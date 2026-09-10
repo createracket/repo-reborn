@@ -182,8 +182,6 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
     if (tab === "spotlights") { needed.add("profiles"); needed.add("spotlights"); }
     if (tab === "mailing") needed.add("mailing");
     if (searchParams.edit) needed.add("spotlights");
-    // Contact data backs the unread badge on the Contact tab — always load it.
-    needed.add("contact");
 
     const started: string[] = [];
     for (const g of needed) {
@@ -266,7 +264,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
         }
       }));
     })();
-  }, [isAdmin, activeTab, searchParams.edit]);
+  }, [isAdmin, activeTab, editSlug]);
 
 
   async function reloadProfiles() {
