@@ -25,7 +25,7 @@ import { getAuthSessionResult } from "@/hooks/use-auth";
 // The builder form lives in the (large) admin route module — load it only when
 // a brief is actually being created or edited.
 const SpotlightForm = lazy(() =>
-  import("@/routes/_authenticated.admin").then((m) => ({ default: m.SpotlightForm })),
+  import("@/components/admin/AdminLegacyTabs").then((m) => ({ default: m.SpotlightForm })),
 );
 
 export const Route = createFileRoute("/_authenticated/briefs")({
