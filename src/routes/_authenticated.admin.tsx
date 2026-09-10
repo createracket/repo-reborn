@@ -58,6 +58,7 @@ const ExampleOpportunitiesAdmin = lazy(() => import("@/components/admin/ExampleO
 const FaqsAdmin = lazy(() => import("@/components/admin/FaqsAdmin").then((m) => ({ default: m.FaqsAdmin })));
 const SoundBoardAdmin = lazy(() => import("@/components/admin/SoundBoardAdmin").then((m) => ({ default: m.SoundBoardAdmin })));
 const UsageAdmin = lazy(() => import("@/components/admin/UsageAdmin").then((m) => ({ default: m.UsageAdmin })));
+const ProjectPlannerAdmin = lazy(() => import("@/components/admin/ProjectPlannerAdmin").then((m) => ({ default: m.ProjectPlannerAdmin })));
 
 import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
 import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
