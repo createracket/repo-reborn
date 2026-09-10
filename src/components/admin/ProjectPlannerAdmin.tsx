@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Check, ExternalLink, Loader2, Plus, Trash2 } from "lucide-react";
 
@@ -431,7 +430,7 @@ export function ProjectPlannerAdmin() {
                   ) : null}
                   {i.editHref ? (
                     <Button asChild size="sm" variant="outline">
-                      <Link to={i.editHref as any}>Edit</Link>
+                      <a href={i.editHref}>Edit</a>
                     </Button>
                   ) : null}
                   <Button
