@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Check, ExternalLink, Loader2, Plus, Trash2 } from "lucide-react";
+import { Check, ExternalLink, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthUserId } from "@/hooks/use-auth";
@@ -73,6 +73,11 @@ export function ProjectPlannerAdmin() {
   const [taskLink, setTaskLink] = useState("");
   const [saving, setSaving] = useState(false);
   const [showDone, setShowDone] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editNotes, setEditNotes] = useState("");
+  const [editDue, setEditDue] = useState("");
+  const [editLink, setEditLink] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -238,6 +243,29 @@ export function ProjectPlannerAdmin() {
       setTaskLink("");
     }
     toast.success("Task added");
+  }
+
+  function startEdit(task: TaskRow) {
+    setEditingId(task.id);
+    setEditTitle(task.title);
+    setEditNotes(task.notes ?? "");
+    setEditDue(task.due_date ?? "");
+    setEditLink(task.link_url ?? "");
+  }
+
+  async function saveEdit(id: string) {
+    const title = editTitle.trim();
+    if (!title) return;
+    const patch = {
+      title,
+      notes: editNotes.trim() || null,
+      due_date: editDue || null,
+      link_url: editLink.trim() || null,
+    };
+    setTasks((t) => t.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+    setEditingId(null);
+    const { error } = await (supabase as any).from("admin_tasks").update(patch).eq("id", id);
+    if (error) toast.error("Couldn't save that task");
   }
 
   async function toggleTask(task: TaskRow) {
