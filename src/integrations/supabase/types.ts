@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_tasks: {
+        Row: {
+          created_at: string
+          due_date: string | null
+          id: string
+          link_url: string | null
+          notes: string | null
+          position: number
+          related_label: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          link_url?: string | null
+          notes?: string | null
+          position?: number
+          related_label?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          link_url?: string | null
+          notes?: string | null
+          position?: number
+          related_label?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       brief_form_config: {
         Row: {
           config: Json
