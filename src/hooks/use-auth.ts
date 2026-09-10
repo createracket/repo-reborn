@@ -99,8 +99,11 @@ export function useAuth(): AuthSnapshot {
  * instead of firing another `getSession()` / `getUser()` request.
  */
 export async function getAuthSession(): Promise<Session | null> {
-  const snap = await init();
-  return snap.session;
+  // Ensure initialisation has run, then read the LIVE snapshot — the promise
+  // resolves with the value captured at first mount, which would stay
+  // signed-out after a later login until a full page reload.
+  await init();
+  return snapshot.session;
 }
 
 export async function getAuthUserId(): Promise<string | null> {
