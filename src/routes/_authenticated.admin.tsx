@@ -58,6 +58,7 @@ const ExampleOpportunitiesAdmin = lazy(() => import("@/components/admin/ExampleO
 const FaqsAdmin = lazy(() => import("@/components/admin/FaqsAdmin").then((m) => ({ default: m.FaqsAdmin })));
 const SoundBoardAdmin = lazy(() => import("@/components/admin/SoundBoardAdmin").then((m) => ({ default: m.SoundBoardAdmin })));
 const UsageAdmin = lazy(() => import("@/components/admin/UsageAdmin").then((m) => ({ default: m.UsageAdmin })));
+const ProjectPlannerAdmin = lazy(() => import("@/components/admin/ProjectPlannerAdmin").then((m) => ({ default: m.ProjectPlannerAdmin })));
 
 import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
 import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
@@ -614,6 +615,7 @@ function AdminPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="flex flex-wrap">
+            <TabsTrigger value="planner">Project planner</TabsTrigger>
             <TabsTrigger value="traffic">Traffic</TabsTrigger>
             <TabsTrigger value="emails">Emails</TabsTrigger>
             <TabsTrigger value="contact" className="relative">
@@ -638,6 +640,10 @@ function AdminPage() {
             <TabsTrigger value="usage">Usage</TabsTrigger>
           </TabsList>
 
+
+          <TabsContent value="planner" className="mt-6">
+            <Suspense fallback={<TabFallback />}><ProjectPlannerAdmin /></Suspense>
+          </TabsContent>
 
           <TabsContent value="traffic" className="mt-6">
             <Suspense fallback={<TabFallback />}><TrafficAdmin /></Suspense>
