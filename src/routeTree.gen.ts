@@ -42,6 +42,15 @@ import { Route as USlugRouteImport } from './routes/u.$slug'
 import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
 import { Route as VibeCheckMusicianRouteImport } from './routes/vibe-check.musician'
+import { Route as AuthenticatedAdminBriefFormRouteImport } from './routes/_authenticated.admin.brief-form'
+import { Route as AuthenticatedAdminCommunityRouteImport } from './routes/_authenticated.admin.community'
+import { Route as AuthenticatedAdminEmailsRouteImport } from './routes/_authenticated.admin.emails'
+import { Route as AuthenticatedAdminFaqsRouteImport } from './routes/_authenticated.admin.faqs'
+import { Route as AuthenticatedAdminProjectPlannerRouteImport } from './routes/_authenticated.admin.project-planner'
+import { Route as AuthenticatedAdminSoundBoardRouteImport } from './routes/_authenticated.admin.sound-board'
+import { Route as AuthenticatedAdminTrafficRouteImport } from './routes/_authenticated.admin.traffic'
+import { Route as AuthenticatedAdminUsageRouteImport } from './routes/_authenticated.admin.usage'
+import { Route as AuthenticatedAdminVibeCheckRouteImport } from './routes/_authenticated.admin.vibe-check'
 import { Route as AuthenticatedListeningReportIdRouteImport } from './routes/_authenticated.listening-report.$id'
 import { Route as AuthenticatedRacketDeskIndexRouteImport } from './routes/_authenticated.racket-desk.index'
 import { Route as AuthenticatedRacketDeskFanIntelRouteImport } from './routes/_authenticated.racket-desk.fan-intel'
@@ -228,6 +237,58 @@ const VibeCheckMusicianRoute = VibeCheckMusicianRouteImport.update({
   path: '/vibe-check/musician',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminBriefFormRoute =
+  AuthenticatedAdminBriefFormRouteImport.update({
+    id: '/brief-form',
+    path: '/brief-form',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminCommunityRoute =
+  AuthenticatedAdminCommunityRouteImport.update({
+    id: '/community',
+    path: '/community',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminEmailsRoute =
+  AuthenticatedAdminEmailsRouteImport.update({
+    id: '/emails',
+    path: '/emails',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminFaqsRoute = AuthenticatedAdminFaqsRouteImport.update({
+  id: '/faqs',
+  path: '/faqs',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminProjectPlannerRoute =
+  AuthenticatedAdminProjectPlannerRouteImport.update({
+    id: '/project-planner',
+    path: '/project-planner',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminSoundBoardRoute =
+  AuthenticatedAdminSoundBoardRouteImport.update({
+    id: '/sound-board',
+    path: '/sound-board',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminTrafficRoute =
+  AuthenticatedAdminTrafficRouteImport.update({
+    id: '/traffic',
+    path: '/traffic',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminUsageRoute = AuthenticatedAdminUsageRouteImport.update({
+  id: '/usage',
+  path: '/usage',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminVibeCheckRoute =
+  AuthenticatedAdminVibeCheckRouteImport.update({
+    id: '/vibe-check',
+    path: '/vibe-check',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedListeningReportIdRoute =
   AuthenticatedListeningReportIdRouteImport.update({
     id: '/listening-report/$id',
@@ -345,7 +406,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/briefs': typeof AuthenticatedBriefsRoute
   '/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/campaign-reports': typeof AuthenticatedCampaignReportsRoute
@@ -364,6 +425,15 @@ export interface FileRoutesByFullPath {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
+  '/admin/brief-form': typeof AuthenticatedAdminBriefFormRoute
+  '/admin/community': typeof AuthenticatedAdminCommunityRoute
+  '/admin/emails': typeof AuthenticatedAdminEmailsRoute
+  '/admin/faqs': typeof AuthenticatedAdminFaqsRoute
+  '/admin/project-planner': typeof AuthenticatedAdminProjectPlannerRoute
+  '/admin/sound-board': typeof AuthenticatedAdminSoundBoardRoute
+  '/admin/traffic': typeof AuthenticatedAdminTrafficRoute
+  '/admin/usage': typeof AuthenticatedAdminUsageRoute
+  '/admin/vibe-check': typeof AuthenticatedAdminVibeCheckRoute
   '/listening-report/$id': typeof AuthenticatedListeningReportIdRoute
   '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
@@ -397,7 +467,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/briefs': typeof AuthenticatedBriefsRoute
   '/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/campaign-reports': typeof AuthenticatedCampaignReportsRoute
@@ -415,6 +485,15 @@ export interface FileRoutesByTo {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check': typeof VibeCheckIndexRoute
+  '/admin/brief-form': typeof AuthenticatedAdminBriefFormRoute
+  '/admin/community': typeof AuthenticatedAdminCommunityRoute
+  '/admin/emails': typeof AuthenticatedAdminEmailsRoute
+  '/admin/faqs': typeof AuthenticatedAdminFaqsRoute
+  '/admin/project-planner': typeof AuthenticatedAdminProjectPlannerRoute
+  '/admin/sound-board': typeof AuthenticatedAdminSoundBoardRoute
+  '/admin/traffic': typeof AuthenticatedAdminTrafficRoute
+  '/admin/usage': typeof AuthenticatedAdminUsageRoute
+  '/admin/vibe-check': typeof AuthenticatedAdminVibeCheckRoute
   '/listening-report/$id': typeof AuthenticatedListeningReportIdRoute
   '/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
@@ -450,7 +529,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/briefs': typeof AuthenticatedBriefsRoute
   '/_authenticated/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/_authenticated/campaign-reports': typeof AuthenticatedCampaignReportsRoute
@@ -469,6 +548,15 @@ export interface FileRoutesById {
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
   '/vibe-check/': typeof VibeCheckIndexRoute
+  '/_authenticated/admin/brief-form': typeof AuthenticatedAdminBriefFormRoute
+  '/_authenticated/admin/community': typeof AuthenticatedAdminCommunityRoute
+  '/_authenticated/admin/emails': typeof AuthenticatedAdminEmailsRoute
+  '/_authenticated/admin/faqs': typeof AuthenticatedAdminFaqsRoute
+  '/_authenticated/admin/project-planner': typeof AuthenticatedAdminProjectPlannerRoute
+  '/_authenticated/admin/sound-board': typeof AuthenticatedAdminSoundBoardRoute
+  '/_authenticated/admin/traffic': typeof AuthenticatedAdminTrafficRoute
+  '/_authenticated/admin/usage': typeof AuthenticatedAdminUsageRoute
+  '/_authenticated/admin/vibe-check': typeof AuthenticatedAdminVibeCheckRoute
   '/_authenticated/listening-report/$id': typeof AuthenticatedListeningReportIdRoute
   '/_authenticated/racket-desk/fan-intel': typeof AuthenticatedRacketDeskFanIntelRoute
   '/_authenticated/racket-desk/profiles': typeof AuthenticatedRacketDeskProfilesRoute
@@ -523,6 +611,15 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check/'
+    | '/admin/brief-form'
+    | '/admin/community'
+    | '/admin/emails'
+    | '/admin/faqs'
+    | '/admin/project-planner'
+    | '/admin/sound-board'
+    | '/admin/traffic'
+    | '/admin/usage'
+    | '/admin/vibe-check'
     | '/listening-report/$id'
     | '/racket-desk/fan-intel'
     | '/racket-desk/profiles'
@@ -574,6 +671,15 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check'
+    | '/admin/brief-form'
+    | '/admin/community'
+    | '/admin/emails'
+    | '/admin/faqs'
+    | '/admin/project-planner'
+    | '/admin/sound-board'
+    | '/admin/traffic'
+    | '/admin/usage'
+    | '/admin/vibe-check'
     | '/listening-report/$id'
     | '/racket-desk/fan-intel'
     | '/racket-desk/profiles'
@@ -627,6 +733,15 @@ export interface FileRouteTypes {
     | '/vibe-check/brand'
     | '/vibe-check/musician'
     | '/vibe-check/'
+    | '/_authenticated/admin/brief-form'
+    | '/_authenticated/admin/community'
+    | '/_authenticated/admin/emails'
+    | '/_authenticated/admin/faqs'
+    | '/_authenticated/admin/project-planner'
+    | '/_authenticated/admin/sound-board'
+    | '/_authenticated/admin/traffic'
+    | '/_authenticated/admin/usage'
+    | '/_authenticated/admin/vibe-check'
     | '/_authenticated/listening-report/$id'
     | '/_authenticated/racket-desk/fan-intel'
     | '/_authenticated/racket-desk/profiles'
@@ -919,6 +1034,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VibeCheckMusicianRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/brief-form': {
+      id: '/_authenticated/admin/brief-form'
+      path: '/brief-form'
+      fullPath: '/admin/brief-form'
+      preLoaderRoute: typeof AuthenticatedAdminBriefFormRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/community': {
+      id: '/_authenticated/admin/community'
+      path: '/community'
+      fullPath: '/admin/community'
+      preLoaderRoute: typeof AuthenticatedAdminCommunityRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/emails': {
+      id: '/_authenticated/admin/emails'
+      path: '/emails'
+      fullPath: '/admin/emails'
+      preLoaderRoute: typeof AuthenticatedAdminEmailsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/faqs': {
+      id: '/_authenticated/admin/faqs'
+      path: '/faqs'
+      fullPath: '/admin/faqs'
+      preLoaderRoute: typeof AuthenticatedAdminFaqsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/project-planner': {
+      id: '/_authenticated/admin/project-planner'
+      path: '/project-planner'
+      fullPath: '/admin/project-planner'
+      preLoaderRoute: typeof AuthenticatedAdminProjectPlannerRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/sound-board': {
+      id: '/_authenticated/admin/sound-board'
+      path: '/sound-board'
+      fullPath: '/admin/sound-board'
+      preLoaderRoute: typeof AuthenticatedAdminSoundBoardRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/traffic': {
+      id: '/_authenticated/admin/traffic'
+      path: '/traffic'
+      fullPath: '/admin/traffic'
+      preLoaderRoute: typeof AuthenticatedAdminTrafficRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/usage': {
+      id: '/_authenticated/admin/usage'
+      path: '/usage'
+      fullPath: '/admin/usage'
+      preLoaderRoute: typeof AuthenticatedAdminUsageRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/vibe-check': {
+      id: '/_authenticated/admin/vibe-check'
+      path: '/vibe-check'
+      fullPath: '/admin/vibe-check'
+      preLoaderRoute: typeof AuthenticatedAdminVibeCheckRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/listening-report/$id': {
       id: '/_authenticated/listening-report/$id'
       path: '/listening-report/$id'
@@ -1048,6 +1226,33 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminBriefFormRoute: typeof AuthenticatedAdminBriefFormRoute
+  AuthenticatedAdminCommunityRoute: typeof AuthenticatedAdminCommunityRoute
+  AuthenticatedAdminEmailsRoute: typeof AuthenticatedAdminEmailsRoute
+  AuthenticatedAdminFaqsRoute: typeof AuthenticatedAdminFaqsRoute
+  AuthenticatedAdminProjectPlannerRoute: typeof AuthenticatedAdminProjectPlannerRoute
+  AuthenticatedAdminSoundBoardRoute: typeof AuthenticatedAdminSoundBoardRoute
+  AuthenticatedAdminTrafficRoute: typeof AuthenticatedAdminTrafficRoute
+  AuthenticatedAdminUsageRoute: typeof AuthenticatedAdminUsageRoute
+  AuthenticatedAdminVibeCheckRoute: typeof AuthenticatedAdminVibeCheckRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminBriefFormRoute: AuthenticatedAdminBriefFormRoute,
+  AuthenticatedAdminCommunityRoute: AuthenticatedAdminCommunityRoute,
+  AuthenticatedAdminEmailsRoute: AuthenticatedAdminEmailsRoute,
+  AuthenticatedAdminFaqsRoute: AuthenticatedAdminFaqsRoute,
+  AuthenticatedAdminProjectPlannerRoute: AuthenticatedAdminProjectPlannerRoute,
+  AuthenticatedAdminSoundBoardRoute: AuthenticatedAdminSoundBoardRoute,
+  AuthenticatedAdminTrafficRoute: AuthenticatedAdminTrafficRoute,
+  AuthenticatedAdminUsageRoute: AuthenticatedAdminUsageRoute,
+  AuthenticatedAdminVibeCheckRoute: AuthenticatedAdminVibeCheckRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRacketDeskRouteChildren {
   AuthenticatedRacketDeskFanIntelRoute: typeof AuthenticatedRacketDeskFanIntelRoute
   AuthenticatedRacketDeskProfilesRoute: typeof AuthenticatedRacketDeskProfilesRoute
@@ -1072,7 +1277,7 @@ const AuthenticatedRacketDeskRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedBriefsRoute: typeof AuthenticatedBriefsRoute
   AuthenticatedCampaignBuilderRoute: typeof AuthenticatedCampaignBuilderRoute
   AuthenticatedCampaignReportsRoute: typeof AuthenticatedCampaignReportsRoute
@@ -1085,7 +1290,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedBriefsRoute: AuthenticatedBriefsRoute,
   AuthenticatedCampaignBuilderRoute: AuthenticatedCampaignBuilderRoute,
   AuthenticatedCampaignReportsRoute: AuthenticatedCampaignReportsRoute,
