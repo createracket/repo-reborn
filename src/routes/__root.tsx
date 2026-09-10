@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PageViewTracker } from "../components/analytics/PageViewTracker";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider, themeInitScript } from "@/hooks/use-theme";
+import { useAuth } from "@/hooks/use-auth";
 
 
 
@@ -128,12 +129,22 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const { userId } = useAuth();
+
+  // Signing in / out has to reach pages that loaded their data once on mount.
+  // Re-running loaders and clearing cached data isn't enough for those, so the
+  // route tree is keyed on the signed-in user and remounts when it changes.
+  useEffect(() => {
+    queryClient.clear();
+    void router.invalidate();
+  }, [userId, queryClient, router]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        <Outlet key={userId ?? "anon"} />
         <PageViewTracker />
         <Toaster />
       </ThemeProvider>
