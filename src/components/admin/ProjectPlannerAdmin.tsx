@@ -336,23 +336,60 @@ export function ProjectPlannerAdmin() {
                     <Check className="size-3.5" />
                   </Button>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">{t.title}</p>
-                    {t.notes ? <p className="mt-1 text-xs text-muted-foreground">{t.notes}</p> : null}
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      {t.due_date ? <span>Due {fmt(t.due_date)}</span> : null}
-                      {t.related_label ? <Badge variant="secondary">{t.related_label}</Badge> : null}
-                      {t.link_url ? (
-                        <a
-                          href={t.link_url}
-                          className="inline-flex items-center gap-1 underline"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          Open <ExternalLink className="size-3" />
-                        </a>
-                      ) : null}
-                    </div>
+                    {editingId === t.id ? (
+                      <div className="space-y-2">
+                        <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Task" />
+                        <Textarea
+                          value={editNotes}
+                          onChange={(e) => setEditNotes(e.target.value)}
+                          rows={3}
+                          placeholder="Notes"
+                        />
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <Input type="date" value={editDue} onChange={(e) => setEditDue(e.target.value)} />
+                          <Input
+                            value={editLink}
+                            onChange={(e) => setEditLink(e.target.value)}
+                            placeholder="Link (optional)"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => void saveEdit(t.id)} disabled={!editTitle.trim()}>
+                            Save
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm font-medium">{t.title}</p>
+                        {t.notes ? (
+                          <p className="mt-1 whitespace-pre-wrap text-xs text-muted-foreground">{t.notes}</p>
+                        ) : null}
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          {t.due_date ? <span>Due {fmt(t.due_date)}</span> : null}
+                          {t.related_label ? <Badge variant="secondary">{t.related_label}</Badge> : null}
+                          {t.link_url ? (
+                            <a
+                              href={t.link_url}
+                              className="inline-flex items-center gap-1 underline"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open <ExternalLink className="size-3" />
+                            </a>
+                          ) : null}
+                        </div>
+                      </>
+                    )}
                   </div>
+                  {editingId === t.id ? null : (
+                    <Button size="icon" variant="ghost" className="size-7 shrink-0" onClick={() => startEdit(t)}>
+                      <Pencil className="size-3.5" />
+                    </Button>
+                  )}
                   <Button size="icon" variant="ghost" className="size-7 shrink-0" onClick={() => void removeTask(t.id)}>
                     <Trash2 className="size-3.5" />
                   </Button>
