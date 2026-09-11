@@ -23,6 +23,7 @@ export type Database = {
           notes: string | null
           position: number
           related_label: string | null
+          sort_order: number
           status: string
           title: string
           updated_at: string
@@ -36,6 +37,7 @@ export type Database = {
           notes?: string | null
           position?: number
           related_label?: string | null
+          sort_order?: number
           status?: string
           title: string
           updated_at?: string
@@ -49,6 +51,7 @@ export type Database = {
           notes?: string | null
           position?: number
           related_label?: string | null
+          sort_order?: number
           status?: string
           title?: string
           updated_at?: string

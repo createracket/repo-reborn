@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Check, ExternalLink, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, ExternalLink, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthUserId } from "@/hooks/use-auth";
@@ -39,7 +39,16 @@ type TaskRow = {
   link_url: string | null;
   related_label: string | null;
   created_at: string;
+  sort_order: number;
 };
+
+/** True when a due date falls within the next 48 hours (or is overdue). */
+function dueSoon(dueDate: string | null) {
+  if (!dueDate) return false;
+  const due = new Date(`${dueDate}T23:59:59`);
+  const now = new Date();
+  return due.getTime() >= now.getTime() - 24 * 60 * 60 * 1000 && due.getTime() <= now.getTime() + 48 * 60 * 60 * 1000;
+}
 
 const KINDS: Array<PlannerKind | "All"> = [
   "All",
@@ -190,7 +199,8 @@ export function ProjectPlannerAdmin() {
     (async () => {
       const { data } = await (supabase as any)
         .from("admin_tasks")
-        .select("id, title, notes, status, due_date, link_url, related_label, created_at")
+        .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order")
+        .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
       setTasks(((data as TaskRow[]) ?? []));
     })();
@@ -227,8 +237,9 @@ export function ProjectPlannerAdmin() {
         due_date: prefill ? null : taskDue || null,
         link_url: prefill?.link ?? (taskLink.trim() || null),
         related_label: prefill?.label ?? null,
+        sort_order: tasks.length ? Math.min(...tasks.map((t) => t.sort_order ?? 0)) - 1 : 0,
       })
-      .select("id, title, notes, status, due_date, link_url, related_label, created_at")
+      .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order")
       .single();
     setSaving(false);
     if (error) {
@@ -273,6 +284,28 @@ export function ProjectPlannerAdmin() {
     setTasks((t) => t.map((x) => (x.id === task.id ? { ...x, status: next } : x)));
     const { error } = await (supabase as any).from("admin_tasks").update({ status: next }).eq("id", task.id);
     if (error) toast.error("Couldn't update that task");
+  }
+
+  async function moveTask(task: TaskRow, dir: -1 | 1) {
+    // Re-order within the open tasks list.
+    const list = [...openTasks];
+    const idx = list.findIndex((t) => t.id === task.id);
+    const swapWith = idx + dir;
+    if (idx < 0 || swapWith < 0 || swapWith >= list.length) return;
+    const a = list[idx];
+    const b = list[swapWith];
+    const aOrder = a.sort_order ?? 0;
+    const bOrder = b.sort_order ?? 0;
+    setTasks((t) =>
+      t.map((x) =>
+        x.id === a.id ? { ...x, sort_order: bOrder } : x.id === b.id ? { ...x, sort_order: aOrder } : x,
+      ),
+    );
+    const [r1, r2] = await Promise.all([
+      (supabase as any).from("admin_tasks").update({ sort_order: bOrder }).eq("id", a.id),
+      (supabase as any).from("admin_tasks").update({ sort_order: aOrder }).eq("id", b.id),
+    ]);
+    if (r1.error || r2.error) toast.error("Couldn't save the new order");
   }
 
   async function removeTask(id: string) {
@@ -327,11 +360,37 @@ export function ProjectPlannerAdmin() {
             {openTasks.length === 0 ? (
               <p className="text-sm text-muted-foreground">No open tasks.</p>
             ) : (
-              openTasks.map((t) => (
+              openTasks.map((t, idx) => (
                 <div
                   key={t.id}
-                  className="flex items-start gap-3 rounded-lg border border-border/60 bg-card p-3"
+                  className={`flex items-start gap-3 rounded-lg border p-3 ${
+                    dueSoon(t.due_date)
+                      ? "border-green-500/70 bg-green-500/10"
+                      : "border-border/60 bg-card"
+                  }`}
                 >
+                  <div className="flex shrink-0 flex-col gap-0.5">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-6"
+                      disabled={idx === 0}
+                      onClick={() => void moveTask(t, -1)}
+                      aria-label="Move up"
+                    >
+                      <ArrowUp className="size-3.5" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-6"
+                      disabled={idx === openTasks.length - 1}
+                      onClick={() => void moveTask(t, 1)}
+                      aria-label="Move down"
+                    >
+                      <ArrowDown className="size-3.5" />
+                    </Button>
+                  </div>
                   <Button size="icon" variant="outline" className="size-7 shrink-0" onClick={() => void toggleTask(t)}>
                     <Check className="size-3.5" />
                   </Button>
