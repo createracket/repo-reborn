@@ -363,11 +363,7 @@ export function ProjectPlannerAdmin() {
               openTasks.map((t, idx) => (
                 <div
                   key={t.id}
-                  className={`flex items-start gap-3 rounded-lg border p-3 ${
-                    dueSoon(t.due_date)
-                      ? "border-green-500/70 bg-green-500/10"
-                      : "border-border/60 bg-card"
-                  }`}
+                  className="flex items-start gap-3 rounded-lg border border-border/60 bg-card p-3"
                 >
                   <div className="flex shrink-0 flex-col gap-0.5">
                     <Button
@@ -428,7 +424,11 @@ export function ProjectPlannerAdmin() {
                           <p className="mt-1 whitespace-pre-wrap text-xs text-muted-foreground">{t.notes}</p>
                         ) : null}
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          {t.due_date ? <span>Due {fmt(t.due_date)}</span> : null}
+                          {t.due_date ? (
+                            <span className={dueSoon(t.due_date) ? "font-medium text-primary" : ""}>
+                              Due {fmt(t.due_date)}
+                            </span>
+                          ) : null}
                           {t.related_label ? <Badge variant="secondary">{t.related_label}</Badge> : null}
                           {t.link_url ? (
                             <a
