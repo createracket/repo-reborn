@@ -52,12 +52,20 @@ type TaskRow = {
   linked_users: LinkedUser[] | null;
 };
 
-/** True when a due date falls within the next 48 hours (or is overdue). */
-function dueSoon(dueDate: string | null) {
-  if (!dueDate) return false;
-  const due = new Date(`${dueDate}T23:59:59`);
-  const now = new Date();
-  return due.getTime() >= now.getTime() - 24 * 60 * 60 * 1000 && due.getTime() <= now.getTime() + 48 * 60 * 60 * 1000;
+/**
+ * Due-date colouring for the admin task list.
+ *  - Within 24h (or overdue by up to 24h) → brand green.
+ *  - Within 24–48h                    → brand pink.
+ *  - Otherwise                        → muted (no highlight).
+ */
+function dueBucket(dueDate: string | null): "green" | "pink" | null {
+  if (!dueDate) return null;
+  const due = new Date(`${dueDate}T23:59:59`).getTime();
+  const now = Date.now();
+  const day = 24 * 60 * 60 * 1000;
+  if (due >= now - day && due <= now + day) return "green";
+  if (due > now + day && due <= now + 2 * day) return "pink";
+  return null;
 }
 
 const KINDS: Array<PlannerKind | "All"> = [
