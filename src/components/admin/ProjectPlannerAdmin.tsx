@@ -237,6 +237,7 @@ export function ProjectPlannerAdmin() {
         due_date: prefill ? null : taskDue || null,
         link_url: prefill?.link ?? (taskLink.trim() || null),
         related_label: prefill?.label ?? null,
+        sort_order: tasks.length ? Math.min(...tasks.map((t) => t.sort_order ?? 0)) - 1 : 0,
       })
       .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order")
       .single();
@@ -283,6 +284,28 @@ export function ProjectPlannerAdmin() {
     setTasks((t) => t.map((x) => (x.id === task.id ? { ...x, status: next } : x)));
     const { error } = await (supabase as any).from("admin_tasks").update({ status: next }).eq("id", task.id);
     if (error) toast.error("Couldn't update that task");
+  }
+
+  async function moveTask(task: TaskRow, dir: -1 | 1) {
+    // Re-order within the open tasks list.
+    const list = [...openTasks];
+    const idx = list.findIndex((t) => t.id === task.id);
+    const swapWith = idx + dir;
+    if (idx < 0 || swapWith < 0 || swapWith >= list.length) return;
+    const a = list[idx];
+    const b = list[swapWith];
+    const aOrder = a.sort_order ?? 0;
+    const bOrder = b.sort_order ?? 0;
+    setTasks((t) =>
+      t.map((x) =>
+        x.id === a.id ? { ...x, sort_order: bOrder } : x.id === b.id ? { ...x, sort_order: aOrder } : x,
+      ),
+    );
+    const [r1, r2] = await Promise.all([
+      (supabase as any).from("admin_tasks").update({ sort_order: bOrder }).eq("id", a.id),
+      (supabase as any).from("admin_tasks").update({ sort_order: aOrder }).eq("id", b.id),
+    ]);
+    if (r1.error || r2.error) toast.error("Couldn't save the new order");
   }
 
   async function removeTask(id: string) {
