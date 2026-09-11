@@ -296,11 +296,15 @@ export function ProjectPlannerAdmin() {
     const b = list[swapWith];
     const aOrder = a.sort_order ?? 0;
     const bOrder = b.sort_order ?? 0;
-    setTasks((t) =>
-      t.map((x) =>
+    // Swap sort_order values, then re-sort the array so the UI updates immediately.
+    setTasks((t) => {
+      const swapped = t.map((x) =>
         x.id === a.id ? { ...x, sort_order: bOrder } : x.id === b.id ? { ...x, sort_order: aOrder } : x,
-      ),
-    );
+      );
+      return [...swapped].sort(
+        (x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0) || x.created_at.localeCompare(y.created_at),
+      );
+    });
     const [r1, r2] = await Promise.all([
       (supabase as any).from("admin_tasks").update({ sort_order: bOrder }).eq("id", a.id),
       (supabase as any).from("admin_tasks").update({ sort_order: aOrder }).eq("id", b.id),
