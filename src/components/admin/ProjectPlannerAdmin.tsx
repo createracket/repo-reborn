@@ -199,7 +199,8 @@ export function ProjectPlannerAdmin() {
     (async () => {
       const { data } = await (supabase as any)
         .from("admin_tasks")
-        .select("id, title, notes, status, due_date, link_url, related_label, created_at")
+        .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order")
+        .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
       setTasks(((data as TaskRow[]) ?? []));
     })();
@@ -237,7 +238,7 @@ export function ProjectPlannerAdmin() {
         link_url: prefill?.link ?? (taskLink.trim() || null),
         related_label: prefill?.label ?? null,
       })
-      .select("id, title, notes, status, due_date, link_url, related_label, created_at")
+      .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order")
       .single();
     setSaving(false);
     if (error) {
