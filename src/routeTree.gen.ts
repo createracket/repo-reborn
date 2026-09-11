@@ -67,6 +67,7 @@ import { Route as ApiPublicTrackPageviewRouteImport } from './routes/api/public/
 import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/public/transcribe-voice-note'
 import { Route as ApiPublicUploadBriefFileRouteImport } from './routes/api/public/upload-brief-file'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicHooksReportMetricsWorkerRouteImport } from './routes/api/public/hooks/report-metrics-worker'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -385,6 +386,11 @@ const ApiPublicWaitlistJoinRoute = ApiPublicWaitlistJoinRouteImport.update({
   path: '/api/public/waitlist-join',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -481,6 +487,7 @@ export interface FileRoutesByFullPath {
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
@@ -545,6 +552,7 @@ export interface FileRoutesByTo {
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/racket-desk': typeof AuthenticatedRacketDeskIndexRoute
@@ -613,6 +621,7 @@ export interface FileRoutesById {
   '/api/public/transcribe-voice-note': typeof ApiPublicTranscribeVoiceNoteRoute
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
@@ -681,6 +690,7 @@ export interface FileRouteTypes {
     | '/api/public/transcribe-voice-note'
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/admin/'
     | '/racket-desk/'
@@ -745,6 +755,7 @@ export interface FileRouteTypes {
     | '/api/public/transcribe-voice-note'
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/admin'
     | '/racket-desk'
@@ -812,6 +823,7 @@ export interface FileRouteTypes {
     | '/api/public/transcribe-voice-note'
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
     | '/_authenticated/racket-desk/'
@@ -853,6 +865,7 @@ export interface RootRouteChildren {
   ApiPublicTranscribeVoiceNoteRoute: typeof ApiPublicTranscribeVoiceNoteRoute
   ApiPublicUploadBriefFileRoute: typeof ApiPublicUploadBriefFileRoute
   ApiPublicWaitlistJoinRoute: typeof ApiPublicWaitlistJoinRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksReportMetricsWorkerRoute: typeof ApiPublicHooksReportMetricsWorkerRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -1270,6 +1283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWaitlistJoinRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -1442,6 +1462,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicTranscribeVoiceNoteRoute: ApiPublicTranscribeVoiceNoteRoute,
   ApiPublicUploadBriefFileRoute: ApiPublicUploadBriefFileRoute,
   ApiPublicWaitlistJoinRoute: ApiPublicWaitlistJoinRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksReportMetricsWorkerRoute:
     ApiPublicHooksReportMetricsWorkerRoute,
