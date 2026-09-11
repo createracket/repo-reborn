@@ -20,6 +20,7 @@ export type Database = {
           due_date: string | null
           id: string
           link_url: string | null
+          linked_users: Json
           notes: string | null
           position: number
           related_label: string | null
@@ -34,6 +35,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           link_url?: string | null
+          linked_users?: Json
           notes?: string | null
           position?: number
           related_label?: string | null
@@ -48,6 +50,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           link_url?: string | null
+          linked_users?: Json
           notes?: string | null
           position?: number
           related_label?: string | null
