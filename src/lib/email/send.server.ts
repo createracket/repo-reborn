@@ -63,20 +63,13 @@ export async function enqueueTransactionalEmail(
   opts: SendOptions,
 ): Promise<SendResult> {
   const { templateName, templateData = {} } = opts
-  const builtin = TEMPLATES[templateName]
-  // Custom templates (DB-stored) are also supported; check both.
-  if (!builtin) {
-    const custom = await fetchCustomTemplateByName(templateName)
-    if (!custom) {
-      return { success: false, error: `Template '${templateName}' not found`, status: 404 }
-    }
-  }
 
-  // Built-in `to` overrides caller; custom templates always use caller recipient.
-  const effectiveRecipient = builtin?.to || opts.recipientEmail
+  // Built-in fixed recipient overrides the caller's address.
+  const effectiveRecipient = TEMPLATES[templateName]?.to || opts.recipientEmail
   if (!effectiveRecipient) {
     return { success: false, error: 'recipientEmail is required', status: 400 }
   }
+
 
   const apiKey = process.env.LOVABLE_API_KEY
   if (!apiKey) {
