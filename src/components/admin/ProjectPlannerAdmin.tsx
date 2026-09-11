@@ -541,7 +541,15 @@ export function ProjectPlannerAdmin() {
                         ) : null}
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           {t.due_date ? (
-                            <span className={dueSoon(t.due_date) ? "font-medium text-primary" : ""}>
+                            <span
+                              className={
+                                dueBucket(t.due_date) === "green"
+                                  ? "font-medium text-primary"
+                                  : dueBucket(t.due_date) === "pink"
+                                    ? "font-medium text-pink-accent"
+                                    : ""
+                              }
+                            >
                               Due {fmt(t.due_date)}
                             </span>
                           ) : null}
