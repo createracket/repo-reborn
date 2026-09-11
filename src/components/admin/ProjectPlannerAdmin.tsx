@@ -360,11 +360,37 @@ export function ProjectPlannerAdmin() {
             {openTasks.length === 0 ? (
               <p className="text-sm text-muted-foreground">No open tasks.</p>
             ) : (
-              openTasks.map((t) => (
+              openTasks.map((t, idx) => (
                 <div
                   key={t.id}
-                  className="flex items-start gap-3 rounded-lg border border-border/60 bg-card p-3"
+                  className={`flex items-start gap-3 rounded-lg border p-3 ${
+                    dueSoon(t.due_date)
+                      ? "border-green-500/70 bg-green-500/10"
+                      : "border-border/60 bg-card"
+                  }`}
                 >
+                  <div className="flex shrink-0 flex-col gap-0.5">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-6"
+                      disabled={idx === 0}
+                      onClick={() => void moveTask(t, -1)}
+                      aria-label="Move up"
+                    >
+                      <ArrowUp className="size-3.5" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-6"
+                      disabled={idx === openTasks.length - 1}
+                      onClick={() => void moveTask(t, 1)}
+                      aria-label="Move down"
+                    >
+                      <ArrowDown className="size-3.5" />
+                    </Button>
+                  </div>
                   <Button size="icon" variant="outline" className="size-7 shrink-0" onClick={() => void toggleTask(t)}>
                     <Check className="size-3.5" />
                   </Button>
