@@ -424,7 +424,11 @@ export function ProjectPlannerAdmin() {
                           <p className="mt-1 whitespace-pre-wrap text-xs text-muted-foreground">{t.notes}</p>
                         ) : null}
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                          {t.due_date ? <span>Due {fmt(t.due_date)}</span> : null}
+                          {t.due_date ? (
+                            <span className={dueSoon(t.due_date) ? "font-medium text-primary" : ""}>
+                              Due {fmt(t.due_date)}
+                            </span>
+                          ) : null}
                           {t.related_label ? <Badge variant="secondary">{t.related_label}</Badge> : null}
                           {t.link_url ? (
                             <a
