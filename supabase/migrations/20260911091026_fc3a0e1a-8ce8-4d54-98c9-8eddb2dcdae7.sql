@@ -1,0 +1,1 @@
+ALTER TABLE public.admin_tasks ADD COLUMN IF NOT EXISTS linked_users jsonb NOT NULL DEFAULT '[]'::jsonb;

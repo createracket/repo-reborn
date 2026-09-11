@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp, Check, ExternalLink, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { adminSearchProfiles } from "@/lib/admin-users.functions";
 import { getAuthUserId } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +32,13 @@ type PlannerItem = {
   updatedAt?: string | null;
 };
 
+type LinkedUser = {
+  id: string;
+  name: string;
+  avatar_url: string | null;
+  slug: string | null;
+};
+
 type TaskRow = {
   id: string;
   title: string;
@@ -40,6 +49,7 @@ type TaskRow = {
   related_label: string | null;
   created_at: string;
   sort_order: number;
+  linked_users: LinkedUser[] | null;
 };
 
 /** True when a due date falls within the next 48 hours (or is overdue). */
@@ -68,6 +78,117 @@ function fmt(d?: string | null) {
   }
 }
 
+/** Small avatar + name chip; clicks through to the public profile when one exists. */
+function LinkedUserChip({ user }: { user: LinkedUser }) {
+  const inner = (
+    <>
+      {user.avatar_url ? (
+        <img src={user.avatar_url} alt="" className="size-4 rounded-full object-cover" loading="lazy" />
+      ) : (
+        <span className="grid size-4 place-items-center rounded-full bg-muted text-[9px] font-semibold">
+          {user.name.charAt(0).toUpperCase()}
+        </span>
+      )}
+      <span className="max-w-[140px] truncate">{user.name}</span>
+    </>
+  );
+  const cls = "inline-flex items-center gap-1.5 rounded-full border border-border/60 px-2 py-0.5 text-[11px]";
+  return user.slug ? (
+    <a href={`/u/${user.slug}`} target="_blank" rel="noreferrer" className={`${cls} hover:border-primary`}>
+      {inner}
+    </a>
+  ) : (
+    <span className={`${cls} text-muted-foreground`}>{inner}</span>
+  );
+}
+
+/** Admin-only search to attach people to a task. */
+function LinkedUsersPicker({
+  value,
+  onChange,
+}: {
+  value: LinkedUser[];
+  onChange: (next: LinkedUser[]) => void;
+}) {
+  const search = useServerFn(adminSearchProfiles);
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<LinkedUser[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const term = q.trim();
+    if (term.length < 2) {
+      setResults([]);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setBusy(true);
+      try {
+        const res: any = await search({ data: { q: term } });
+        if (!cancelled) setResults((res?.results ?? []) as LinkedUser[]);
+      } catch {
+        if (!cancelled) setResults([]);
+      } finally {
+        if (!cancelled) setBusy(false);
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [q, search]);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {value.map((u) => (
+          <span key={u.id} className="inline-flex items-center gap-1">
+            <LinkedUserChip user={u} />
+            <button
+              type="button"
+              className="text-xs text-muted-foreground hover:text-destructive"
+              onClick={() => onChange(value.filter((x) => x.id !== u.id))}
+              aria-label={`Remove ${u.name}`}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
+      <Input placeholder="Link a user (search by name)" value={q} onChange={(e) => setQ(e.target.value)} />
+      {busy ? <p className="text-xs text-muted-foreground">Searching…</p> : null}
+      {results.length > 0 ? (
+        <div className="max-h-44 space-y-1 overflow-auto rounded-md border border-border/60 p-1">
+          {results
+            .filter((r) => !value.some((v) => v.id === r.id))
+            .map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                className="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-xs hover:bg-muted"
+                onClick={() => {
+                  onChange([...value, r]);
+                  setQ("");
+                  setResults([]);
+                }}
+              >
+                {r.avatar_url ? (
+                  <img src={r.avatar_url} alt="" className="size-5 rounded-full object-cover" loading="lazy" />
+                ) : (
+                  <span className="grid size-5 place-items-center rounded-full bg-muted text-[10px]">
+                    {r.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <span className="truncate">{r.name}</span>
+              </button>
+            ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 /** Admin-only: everything feeding the users' Project planner, plus a private task list. */
 export function ProjectPlannerAdmin() {
   const [items, setItems] = useState<PlannerItem[]>([]);
@@ -87,6 +208,7 @@ export function ProjectPlannerAdmin() {
   const [editNotes, setEditNotes] = useState("");
   const [editDue, setEditDue] = useState("");
   const [editLink, setEditLink] = useState("");
+  const [editUsers, setEditUsers] = useState<LinkedUser[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -199,7 +321,7 @@ export function ProjectPlannerAdmin() {
     (async () => {
       const { data } = await (supabase as any)
         .from("admin_tasks")
-        .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order")
+        .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order, linked_users")
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
       setTasks(((data as TaskRow[]) ?? []));
@@ -237,9 +359,10 @@ export function ProjectPlannerAdmin() {
         due_date: prefill ? null : taskDue || null,
         link_url: prefill?.link ?? (taskLink.trim() || null),
         related_label: prefill?.label ?? null,
+        linked_users: [],
         sort_order: tasks.length ? Math.min(...tasks.map((t) => t.sort_order ?? 0)) - 1 : 0,
       })
-      .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order")
+      .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order, linked_users")
       .single();
     setSaving(false);
     if (error) {
@@ -262,6 +385,7 @@ export function ProjectPlannerAdmin() {
     setEditNotes(task.notes ?? "");
     setEditDue(task.due_date ?? "");
     setEditLink(task.link_url ?? "");
+    setEditUsers(task.linked_users ?? []);
   }
 
   async function saveEdit(id: string) {
@@ -272,6 +396,7 @@ export function ProjectPlannerAdmin() {
       notes: editNotes.trim() || null,
       due_date: editDue || null,
       link_url: editLink.trim() || null,
+      linked_users: editUsers,
     };
     setTasks((t) => t.map((x) => (x.id === id ? { ...x, ...patch } : x)));
     setEditingId(null);
@@ -390,6 +515,7 @@ export function ProjectPlannerAdmin() {
                             placeholder="Link (optional)"
                           />
                         </div>
+                        <LinkedUsersPicker value={editUsers} onChange={setEditUsers} />
                         <div className="flex gap-2">
                           <Button size="sm" onClick={() => void saveEdit(t.id)} disabled={!editTitle.trim()}>
                             Save
@@ -423,6 +549,13 @@ export function ProjectPlannerAdmin() {
                             </a>
                           ) : null}
                         </div>
+                        {t.linked_users && t.linked_users.length > 0 ? (
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                            {t.linked_users.map((u) => (
+                              <LinkedUserChip key={u.id} user={u} />
+                            ))}
+                          </div>
+                        ) : null}
                       </>
                     )}
                   </div>
