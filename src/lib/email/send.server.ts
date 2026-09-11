@@ -1,7 +1,6 @@
 import { EmailAPIError, sendLovableEmail } from '@lovable.dev/email-js'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { resolveRenderedEmail, TEMPLATES } from '@/lib/email-templates/registry'
-import { fetchCustomTemplateByName } from '@/lib/email-templates/custom-store.server'
 
 const SITE_NAME = 'Create Racket'
 const SENDER_DOMAIN = 'tech.createracket.com'
