@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -130,21 +130,38 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
-  const { userId } = useAuth();
+  const { ready, userId } = useAuth();
 
   // Signing in / out has to reach pages that loaded their data once on mount.
   // Re-running loaders and clearing cached data isn't enough for those, so the
   // route tree is keyed on the signed-in user and remounts when it changes.
+  //
+  // The very first resolve of a stored session (null -> id, just after first
+  // paint) is NOT a sign-in: remounting there would throw away every in-flight
+  // request on public pages and fetch it all again. So the baseline is taken
+  // once auth first resolves, and only later changes remount.
+  const baseline = useRef<string | null | undefined>(undefined);
+  const [authKey, setAuthKey] = useState<string>("anon");
+
   useEffect(() => {
+    if (!ready) return;
+    if (baseline.current === undefined) {
+      baseline.current = userId;
+      return;
+    }
+    if (baseline.current === userId) return;
+    baseline.current = userId;
+    setAuthKey(userId ?? "anon");
     queryClient.clear();
     void router.invalidate();
-  }, [userId, queryClient, router]);
+  }, [ready, userId, queryClient, router]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet key={userId ?? "anon"} />
+        <Outlet key={authKey} />
+
         <PageViewTracker />
         <Toaster />
       </ThemeProvider>
