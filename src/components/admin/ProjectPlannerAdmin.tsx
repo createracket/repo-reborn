@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ArrowDown, ArrowUp, Check, ExternalLink, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { adminSearchProfiles } from "@/lib/admin-users.functions";
 import { getAuthUserId } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +32,13 @@ type PlannerItem = {
   updatedAt?: string | null;
 };
 
+type LinkedUser = {
+  id: string;
+  name: string;
+  avatar_url: string | null;
+  slug: string | null;
+};
+
 type TaskRow = {
   id: string;
   title: string;
@@ -40,6 +49,7 @@ type TaskRow = {
   related_label: string | null;
   created_at: string;
   sort_order: number;
+  linked_users: LinkedUser[] | null;
 };
 
 /** True when a due date falls within the next 48 hours (or is overdue). */
@@ -87,6 +97,7 @@ export function ProjectPlannerAdmin() {
   const [editNotes, setEditNotes] = useState("");
   const [editDue, setEditDue] = useState("");
   const [editLink, setEditLink] = useState("");
+  const [editUsers, setEditUsers] = useState<LinkedUser[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -199,7 +210,7 @@ export function ProjectPlannerAdmin() {
     (async () => {
       const { data } = await (supabase as any)
         .from("admin_tasks")
-        .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order")
+        .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order, linked_users")
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
       setTasks(((data as TaskRow[]) ?? []));
@@ -237,9 +248,10 @@ export function ProjectPlannerAdmin() {
         due_date: prefill ? null : taskDue || null,
         link_url: prefill?.link ?? (taskLink.trim() || null),
         related_label: prefill?.label ?? null,
+        linked_users: [],
         sort_order: tasks.length ? Math.min(...tasks.map((t) => t.sort_order ?? 0)) - 1 : 0,
       })
-      .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order")
+      .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order, linked_users")
       .single();
     setSaving(false);
     if (error) {
@@ -262,6 +274,7 @@ export function ProjectPlannerAdmin() {
     setEditNotes(task.notes ?? "");
     setEditDue(task.due_date ?? "");
     setEditLink(task.link_url ?? "");
+    setEditUsers(task.linked_users ?? []);
   }
 
   async function saveEdit(id: string) {
@@ -272,6 +285,7 @@ export function ProjectPlannerAdmin() {
       notes: editNotes.trim() || null,
       due_date: editDue || null,
       link_url: editLink.trim() || null,
+      linked_users: editUsers,
     };
     setTasks((t) => t.map((x) => (x.id === id ? { ...x, ...patch } : x)));
     setEditingId(null);
@@ -390,6 +404,7 @@ export function ProjectPlannerAdmin() {
                             placeholder="Link (optional)"
                           />
                         </div>
+                        <LinkedUsersPicker value={editUsers} onChange={setEditUsers} />
                         <div className="flex gap-2">
                           <Button size="sm" onClick={() => void saveEdit(t.id)} disabled={!editTitle.trim()}>
                             Save
@@ -423,6 +438,13 @@ export function ProjectPlannerAdmin() {
                             </a>
                           ) : null}
                         </div>
+                        {t.linked_users && t.linked_users.length > 0 ? (
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                            {t.linked_users.map((u) => (
+                              <LinkedUserChip key={u.id} user={u} />
+                            ))}
+                          </div>
+                        ) : null}
                       </>
                     )}
                   </div>
