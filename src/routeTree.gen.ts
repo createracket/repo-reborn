@@ -34,7 +34,6 @@ import { Route as AuthenticatedRacketDeskRouteImport } from './routes/_authentic
 import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authenticated.roster-builder'
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
 import { Route as BriefSlugRouteImport } from './routes/brief.$slug'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as ReportSlugRouteImport } from './routes/report.$slug'
 import { Route as RosterSlugRouteImport } from './routes/roster.$slug'
 import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
@@ -68,13 +67,10 @@ import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/p
 import { Route as ApiPublicUploadBriefFileRouteImport } from './routes/api/public/upload-brief-file'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicHooksReportMetricsWorkerRouteImport } from './routes/api/public/hooks/report-metrics-worker'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -201,11 +197,6 @@ const BrandsHowItWorksRoute = BrandsHowItWorksRouteImport.update({
 const BriefSlugRoute = BriefSlugRouteImport.update({
   id: '/brief/$slug',
   path: '/brief/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportSlugRoute = ReportSlugRouteImport.update({
@@ -391,11 +382,6 @@ const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicHooksReportMetricsWorkerRoute =
   ApiPublicHooksReportMetricsWorkerRouteImport.update({
     id: '/api/public/hooks/report-metrics-worker',
@@ -412,22 +398,10 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
     path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -456,7 +430,6 @@ export interface FileRoutesByFullPath {
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/report/$slug': typeof ReportSlugRoute
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
@@ -488,15 +461,12 @@ export interface FileRoutesByFullPath {
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -521,7 +491,6 @@ export interface FileRoutesByTo {
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/report/$slug': typeof ReportSlugRoute
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
@@ -553,15 +522,12 @@ export interface FileRoutesByTo {
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/racket-desk': typeof AuthenticatedRacketDeskIndexRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -590,7 +556,6 @@ export interface FileRoutesById {
   '/_authenticated/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
-  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/report/$slug': typeof ReportSlugRoute
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
@@ -622,15 +587,12 @@ export interface FileRoutesById {
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
-  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
-  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
-  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -659,7 +621,6 @@ export interface FileRouteTypes {
     | '/roster-builder'
     | '/brands/how-it-works'
     | '/brief/$slug'
-    | '/email/unsubscribe'
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
@@ -691,15 +652,12 @@ export interface FileRouteTypes {
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
-    | '/lovable/email/suppression'
     | '/admin/'
     | '/racket-desk/'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -724,7 +682,6 @@ export interface FileRouteTypes {
     | '/roster-builder'
     | '/brands/how-it-works'
     | '/brief/$slug'
-    | '/email/unsubscribe'
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
@@ -756,15 +713,12 @@ export interface FileRouteTypes {
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
-    | '/lovable/email/suppression'
     | '/admin'
     | '/racket-desk'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/'
@@ -792,7 +746,6 @@ export interface FileRouteTypes {
     | '/_authenticated/roster-builder'
     | '/brands/how-it-works'
     | '/brief/$slug'
-    | '/email/unsubscribe'
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
@@ -824,15 +777,12 @@ export interface FileRouteTypes {
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
-    | '/lovable/email/suppression'
     | '/_authenticated/admin/'
     | '/_authenticated/racket-desk/'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
-    | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
-    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -852,7 +802,6 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   BrandsHowItWorksRoute: typeof BrandsHowItWorksRoute
   BriefSlugRoute: typeof BriefSlugRoute
-  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ReportSlugRoute: typeof ReportSlugRoute
   RosterSlugRoute: typeof RosterSlugRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
@@ -866,13 +815,10 @@ export interface RootRouteChildren {
   ApiPublicUploadBriefFileRoute: typeof ApiPublicUploadBriefFileRoute
   ApiPublicWaitlistJoinRoute: typeof ApiPublicWaitlistJoinRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
-  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksReportMetricsWorkerRoute: typeof ApiPublicHooksReportMetricsWorkerRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
-  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
-  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1050,13 +996,6 @@ declare module '@tanstack/react-router' {
       path: '/brief/$slug'
       fullPath: '/brief/$slug'
       preLoaderRoute: typeof BriefSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/report/$slug': {
@@ -1290,13 +1229,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/hooks/report-metrics-worker': {
       id: '/api/public/hooks/report-metrics-worker'
       path: '/api/public/hooks/report-metrics-worker'
@@ -1318,25 +1250,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
       fullPath: '/lovable/email/transactional/preview'
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1449,7 +1367,6 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   BrandsHowItWorksRoute: BrandsHowItWorksRoute,
   BriefSlugRoute: BriefSlugRoute,
-  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ReportSlugRoute: ReportSlugRoute,
   RosterSlugRoute: RosterSlugRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
@@ -1463,14 +1380,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicUploadBriefFileRoute: ApiPublicUploadBriefFileRoute,
   ApiPublicWaitlistJoinRoute: ApiPublicWaitlistJoinRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
-  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksReportMetricsWorkerRoute:
     ApiPublicHooksReportMetricsWorkerRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
-  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
-  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
