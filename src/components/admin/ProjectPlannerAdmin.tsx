@@ -78,6 +78,117 @@ function fmt(d?: string | null) {
   }
 }
 
+/** Small avatar + name chip; clicks through to the public profile when one exists. */
+function LinkedUserChip({ user }: { user: LinkedUser }) {
+  const inner = (
+    <>
+      {user.avatar_url ? (
+        <img src={user.avatar_url} alt="" className="size-4 rounded-full object-cover" loading="lazy" />
+      ) : (
+        <span className="grid size-4 place-items-center rounded-full bg-muted text-[9px] font-semibold">
+          {user.name.charAt(0).toUpperCase()}
+        </span>
+      )}
+      <span className="max-w-[140px] truncate">{user.name}</span>
+    </>
+  );
+  const cls = "inline-flex items-center gap-1.5 rounded-full border border-border/60 px-2 py-0.5 text-[11px]";
+  return user.slug ? (
+    <a href={`/u/${user.slug}`} target="_blank" rel="noreferrer" className={`${cls} hover:border-primary`}>
+      {inner}
+    </a>
+  ) : (
+    <span className={`${cls} text-muted-foreground`}>{inner}</span>
+  );
+}
+
+/** Admin-only search to attach people to a task. */
+function LinkedUsersPicker({
+  value,
+  onChange,
+}: {
+  value: LinkedUser[];
+  onChange: (next: LinkedUser[]) => void;
+}) {
+  const search = useServerFn(adminSearchProfiles);
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<LinkedUser[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const term = q.trim();
+    if (term.length < 2) {
+      setResults([]);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setBusy(true);
+      try {
+        const res: any = await search({ data: { q: term } });
+        if (!cancelled) setResults((res?.results ?? []) as LinkedUser[]);
+      } catch {
+        if (!cancelled) setResults([]);
+      } finally {
+        if (!cancelled) setBusy(false);
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [q, search]);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {value.map((u) => (
+          <span key={u.id} className="inline-flex items-center gap-1">
+            <LinkedUserChip user={u} />
+            <button
+              type="button"
+              className="text-xs text-muted-foreground hover:text-destructive"
+              onClick={() => onChange(value.filter((x) => x.id !== u.id))}
+              aria-label={`Remove ${u.name}`}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
+      <Input placeholder="Link a user (search by name)" value={q} onChange={(e) => setQ(e.target.value)} />
+      {busy ? <p className="text-xs text-muted-foreground">Searching…</p> : null}
+      {results.length > 0 ? (
+        <div className="max-h-44 space-y-1 overflow-auto rounded-md border border-border/60 p-1">
+          {results
+            .filter((r) => !value.some((v) => v.id === r.id))
+            .map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                className="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-xs hover:bg-muted"
+                onClick={() => {
+                  onChange([...value, r]);
+                  setQ("");
+                  setResults([]);
+                }}
+              >
+                {r.avatar_url ? (
+                  <img src={r.avatar_url} alt="" className="size-5 rounded-full object-cover" loading="lazy" />
+                ) : (
+                  <span className="grid size-5 place-items-center rounded-full bg-muted text-[10px]">
+                    {r.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <span className="truncate">{r.name}</span>
+              </button>
+            ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 /** Admin-only: everything feeding the users' Project planner, plus a private task list. */
 export function ProjectPlannerAdmin() {
   const [items, setItems] = useState<PlannerItem[]>([]);
