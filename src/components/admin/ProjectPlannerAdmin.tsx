@@ -363,11 +363,7 @@ export function ProjectPlannerAdmin() {
               openTasks.map((t, idx) => (
                 <div
                   key={t.id}
-                  className={`flex items-start gap-3 rounded-lg border p-3 ${
-                    dueSoon(t.due_date)
-                      ? "border-green-500/70 bg-green-500/10"
-                      : "border-border/60 bg-card"
-                  }`}
+                  className="flex items-start gap-3 rounded-lg border border-border/60 bg-card p-3"
                 >
                   <div className="flex shrink-0 flex-col gap-0.5">
                     <Button
