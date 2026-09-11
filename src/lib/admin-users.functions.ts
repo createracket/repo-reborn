@@ -114,6 +114,33 @@ export const adminUpdateUser = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Admin-only lookup used by the Project planner to attach people to a task. */
+export const adminSearchProfiles = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ q: z.string().trim().max(120) }).parse(input))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, userId);
+    const q = data.q;
+    if (!q) return { results: [] as any[] };
+    const like = `%${q.replace(/[%_]/g, "")}%`;
+    const { data: rows, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id, display_name, artist_name, avatar_url, slug, account_type")
+      .or(`display_name.ilike.${like},artist_name.ilike.${like}`)
+      .limit(12);
+    if (error) throw new Error(error.message);
+    return {
+      results: ((rows ?? []) as any[]).map((r) => ({
+        id: r.id as string,
+        name: (r.artist_name || r.display_name || "Unnamed") as string,
+        avatar_url: (r.avatar_url ?? null) as string | null,
+        slug: (r.slug ?? null) as string | null,
+        account_type: (r.account_type ?? null) as string | null,
+      })),
+    };
+  });
+
 // ---------------------------------------------------------------------------
 // Community profiles: profile rows with no auth account (managed) and hidden
 // from public surfaces until an admin assigns an email / unhides them.
