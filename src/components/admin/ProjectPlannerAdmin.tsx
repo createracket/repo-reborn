@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Check, ExternalLink, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, ExternalLink, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthUserId } from "@/hooks/use-auth";
@@ -39,7 +39,16 @@ type TaskRow = {
   link_url: string | null;
   related_label: string | null;
   created_at: string;
+  sort_order: number;
 };
+
+/** True when a due date falls within the next 48 hours (or is overdue). */
+function dueSoon(dueDate: string | null) {
+  if (!dueDate) return false;
+  const due = new Date(`${dueDate}T23:59:59`);
+  const now = new Date();
+  return due.getTime() >= now.getTime() - 24 * 60 * 60 * 1000 && due.getTime() <= now.getTime() + 48 * 60 * 60 * 1000;
+}
 
 const KINDS: Array<PlannerKind | "All"> = [
   "All",
