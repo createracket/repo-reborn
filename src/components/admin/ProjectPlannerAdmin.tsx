@@ -53,6 +53,17 @@ type TaskRow = {
 };
 
 /**
+ * Pick a sort_order that places a task between two neighbours.
+ * Uses fractional midpoints so only the moved row needs a DB write.
+ */
+function orderBetween(prev: number | null, next: number | null): number {
+  if (prev === null && next === null) return 0;
+  if (prev === null) return (next as number) - 1;
+  if (next === null) return prev + 1;
+  return (prev + next) / 2;
+}
+
+/**
  * Due-date colouring for the admin task list.
  *  - Within 24h (or overdue by up to 24h) → brand green.
  *  - Within 24–48h                    → brand pink.
