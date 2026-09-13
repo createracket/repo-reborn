@@ -8,6 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist, scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
 import { draftSpotlightFromText } from "@/lib/spotlight-draft.functions";
 import { adminUploadSpotlightImage } from "@/lib/spotlight-images.functions";
+import { adminSyncImageFromUrl } from "@/lib/image-sync.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 
 import { Button } from "@/components/ui/button";
