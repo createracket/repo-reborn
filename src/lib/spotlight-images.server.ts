@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import type { Database } from "@/integrations/supabase/types";
 
-const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 const MAX_BASE64_LENGTH = Math.ceil((MAX_UPLOAD_BYTES * 4) / 3) + 8;
 
 export const UploadSpotlightImageSchema = z.object({
@@ -13,11 +13,20 @@ export const UploadSpotlightImageSchema = z.object({
 });
 
 export type UploadSpotlightImageInput = z.infer<typeof UploadSpotlightImageSchema>;
+export type SpotlightImageContentType = UploadSpotlightImageInput["contentType"];
+export type SpotlightImageFolder = UploadSpotlightImageInput["folder"];
 
-export async function uploadSpotlightImage(
+export const EXTENSION_BY_TYPE = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+} as const;
+
+/** Throws unless the caller holds the admin role. */
+export async function assertSpotlightAdmin(
   supabase: SupabaseClient<Database>,
   userId: string,
-  input: UploadSpotlightImageInput,
 ) {
   const { data: role, error: roleError } = await supabase
     .from("user_roles")
@@ -28,19 +37,17 @@ export async function uploadSpotlightImage(
 
   if (roleError) throw new Error(roleError.message);
   if (!role) throw new Error("Admin access required");
+}
 
-  const extensionByType = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp",
-    "image/gif": "gif",
-  } as const;
-  const binary = atob(input.base64);
-  const fileBytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-
+/** Upload raw bytes into the public spotlight-images bucket with the service key. */
+export async function putSpotlightObject(
+  fileBytes: Uint8Array,
+  contentType: SpotlightImageContentType,
+  folder: SpotlightImageFolder,
+) {
   if (fileBytes.byteLength > MAX_UPLOAD_BYTES) throw new Error("Image must be under 8MB");
 
-  const path = `${input.folder}/${crypto.randomUUID()}.${extensionByType[input.contentType]}`;
+  const path = `${folder}/${crypto.randomUUID()}.${EXTENSION_BY_TYPE[contentType]}`;
   const backendUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -53,7 +60,7 @@ export async function uploadSpotlightImage(
   const headers = new Headers({
     apikey: serviceKey,
     "cache-control": "max-age=3600",
-    "content-type": input.contentType,
+    "content-type": contentType,
     "x-upsert": "false",
   });
   if (!serviceKey.startsWith("sb_secret_")) headers.set("Authorization", `Bearer ${serviceKey}`);
@@ -72,4 +79,17 @@ export async function uploadSpotlightImage(
   return {
     publicUrl: `${backendUrl}/storage/v1/object/public/spotlight-images/${objectPath}`,
   };
+}
+
+export async function uploadSpotlightImage(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  input: UploadSpotlightImageInput,
+) {
+  await assertSpotlightAdmin(supabase, userId);
+
+  const binary = atob(input.base64);
+  const fileBytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+
+  return putSpotlightObject(fileBytes, input.contentType, input.folder);
 }
