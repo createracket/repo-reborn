@@ -2355,7 +2355,7 @@ export function SpotlightForm({
             </div>
           </details>
           {sectionKind === "brief" ? (
-            <details open className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+            <details className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
               <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
                 Content &amp; page flow
                 <span className="ml-2 text-xs font-normal text-muted-foreground">
