@@ -2093,7 +2093,7 @@ export function SpotlightForm({
         access_code: "", access_code_label: "Access code",
         total_followers: "", total_streams: "", monthly_streams: "",
         avg_reach: "", avg_engagement: "",
-        label_host_bio: "", label_audience: "", label_partnership: "", label_eoi: "", label_videos: "",
+        label_host_bio: "", label_audience: "", label_partnership: "", label_eoi: "", label_videos: "", label_photos: "",
         label_members: "", youtube_name: "", apple_music_name: "",
       });
       setThumbFrame(DEFAULT_THUMB_FRAME);
