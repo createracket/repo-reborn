@@ -2231,7 +2231,8 @@ export function SpotlightForm({
                 <span className="text-xs text-muted-foreground">Filled: {aiFilled.join(", ")}</span>
               ) : null}
             </div>
-          </div>
+            </div>
+          </details>
 
 
 
