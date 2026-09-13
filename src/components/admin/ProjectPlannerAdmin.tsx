@@ -559,8 +559,42 @@ export function ProjectPlannerAdmin() {
               openTasks.map((t, idx) => (
                 <div
                   key={t.id}
-                  className="flex items-start gap-3 rounded-lg border border-border/60 bg-card p-3"
+                  draggable
+                  onDragStart={(e) => {
+                    setDragId(t.id);
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragOver={(e) => {
+                    if (!dragId) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    setDropIdx(idx);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (dragId) void dropTaskAt(dragId, idx);
+                    setDragId(null);
+                    setDropIdx(null);
+                  }}
+                  onDragEnd={() => {
+                    setDragId(null);
+                    setDropIdx(null);
+                  }}
+                  className={`flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors ${
+                    dragId === t.id
+                      ? "border-dashed border-primary/60 opacity-50"
+                      : dropIdx === idx && dragId
+                        ? "border-primary"
+                        : "border-border/60"
+                  }`}
                 >
+                  <span
+                    className="mt-1 shrink-0 cursor-grab text-muted-foreground/50 active:cursor-grabbing"
+                    aria-label="Drag to reorder"
+                    title="Drag to reorder"
+                  >
+                    <GripVertical className="size-4" />
+                  </span>
                   <Button size="icon" variant="outline" className="size-7 shrink-0" onClick={() => void toggleTask(t)}>
                     <Check className="size-3.5" />
                   </Button>
