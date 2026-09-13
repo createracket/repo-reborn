@@ -2283,13 +2283,15 @@ export function SpotlightForm({
                         className={`rounded-md border border-border/60 bg-background p-3 ${dragKey === key ? "opacity-50" : ""}`}
                       >
                         <div className="mb-3 flex items-center gap-2 border-b border-border/50 pb-2">
-                          <GripVertical
+                          <span
                             draggable
                             onDragStart={() => setDragKey(key)}
                             onDragEnd={() => setDragKey(null)}
-                            className="size-4 shrink-0 cursor-grab text-muted-foreground active:cursor-grabbing"
+                            className="shrink-0 cursor-grab text-muted-foreground active:cursor-grabbing"
                             aria-label={`Drag ${meta.label}`}
-                          />
+                          >
+                            <GripVertical className="size-4" />
+                          </span>
                           <span className="flex-1 text-sm font-medium">{index + 1}. {meta.label}</span>
                           <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${meta.label} up`}><ChevronUp className="size-3.5" /></Button>
                           <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index + 1)} disabled={index === sectionOrder.length - 1} aria-label={`Move ${meta.label} down`}><ChevronDown className="size-3.5" /></Button>
@@ -2343,52 +2345,6 @@ export function SpotlightForm({
                 <Label htmlFor="eoi">EOI opportunities (one per line)</Label>
                 <Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} />
               </div>
-              {sectionKind === "brief" ? (
-                <div className="space-y-1.5 md:col-span-2">
-                  <Label htmlFor="dos_donts">Dos and don'ts (one per line)</Label>
-                  <Textarea
-                    id="dos_donts"
-                    rows={4}
-                    value={form.dos_donts}
-                    onChange={(e) => set("dos_donts", e.target.value)}
-                    placeholder={"+ Tag @brand in the caption\nx Don't mention competitors"}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Use the toggles below to switch each line between a green tick and a yellow cross.
-                  </p>
-                  {form.dos_donts.split("\n").some((l: string) => l.trim()) ? (
-                    <div className="space-y-1.5 pt-1">
-                      {form.dos_donts.split("\n").map((line: string, i: number) => {
-                        const item = parseDoLine(line);
-                        if (!item.text) return null;
-                        return (
-                          <div key={i} className="flex items-center gap-2">
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="h-7 px-2"
-                              onClick={() => {
-                                const lines = form.dos_donts.split("\n");
-                                const cur = parseDoLine(lines[i] ?? "");
-                                lines[i] = `${cur.kind === "do" ? "x" : "+"} ${cur.text}`;
-                                set("dos_donts", lines.join("\n"));
-                              }}
-                            >
-                              {item.kind === "do" ? (
-                                <Check className="size-3.5 text-green-500" />
-                              ) : (
-                                <X className="size-3.5 text-yellow-400" />
-                              )}
-                            </Button>
-                            <span className="text-sm text-muted-foreground">{item.text}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
               <div className="space-y-1.5">
                 <Label htmlFor="audience">Audience segments (one per line)</Label>
                 <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
