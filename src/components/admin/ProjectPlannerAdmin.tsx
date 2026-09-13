@@ -274,7 +274,7 @@ export function ProjectPlannerAdmin() {
             subtitle: p.subtitle ?? null,
             published: !!p.published && !!p.dashboard_visible,
             href: p.slug ? `/brief/${p.slug}` : null,
-            editHref: `/briefs?edit=${p.id}`,
+            editHref: `/briefs/edit/${p.id}`,
             updatedAt: p.updated_at,
           }),
         );
