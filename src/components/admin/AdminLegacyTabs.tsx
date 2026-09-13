@@ -2395,7 +2395,7 @@ export function SpotlightForm({
               </div>
             </div>
           </details>
-          <div className="space-y-1.5 md:col-span-2">
+          {sectionKind !== "brief" ? <div className="space-y-1.5 md:col-span-2">
             <Label htmlFor="vibe_tags">Vibe check tags (comma separated)</Label>
             <Input id="vibe_tags" value={form.vibe_tags} onChange={(e) => set("vibe_tags", e.target.value)} placeholder="Coffee, Sport, Fashion" />
             {form.vibe_tags.trim() ? (
@@ -2405,8 +2405,8 @@ export function SpotlightForm({
                 ))}
               </div>
             ) : null}
-          </div>
-          <details className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+          </div> : null}
+          {sectionKind !== "brief" ? <details className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Section headings
               <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -2708,10 +2708,10 @@ export function SpotlightForm({
               {mismatchWarning}
             </div>
           ) : null}
-          <div className="space-y-1.5">
+          {sectionKind !== "brief" ? <div className="space-y-1.5">
             <Label htmlFor="spotifyEmbed">Spotify embed URL</Label>
             <Input id="spotifyEmbed" value={form.spotifyEmbed} onChange={(e) => set("spotifyEmbed", e.target.value)} placeholder="https://open.spotify.com/embed/show/..." />
-          </div>
+          </div> : null}
           <div className="space-y-1.5">
             <Label htmlFor="contact">Contact (email or URL)</Label>
             <Input id="contact" value={form.contact} onChange={(e) => set("contact", e.target.value)} />
