@@ -857,6 +857,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
           const order: BriefSectionInstance[] = kind === "brief" && links.brief_sections?.length
             ? links.brief_sections
             : legacyOrder.map((type) => ({ id: type, type }));
+          console.log("DBG order", kind, JSON.stringify(order));
           return order.map((instance) => {
             if (instance.hidden) return null;
             const node = instance.id === instance.type ? nodes[instance.type] : duplicateNode(instance);
