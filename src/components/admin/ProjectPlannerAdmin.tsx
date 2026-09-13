@@ -654,11 +654,13 @@ export function ProjectPlannerAdmin() {
                           {t.due_date ? (
                             <span
                               className={
-                                dueBucket(t.due_date) === "green"
-                                  ? "font-medium text-primary"
-                                  : dueBucket(t.due_date) === "pink"
-                                    ? "font-medium text-pink-accent"
-                                    : ""
+                                dueBucket(t.due_date) === "red"
+                                  ? "font-medium text-destructive"
+                                  : dueBucket(t.due_date) === "green"
+                                    ? "font-medium text-primary"
+                                    : dueBucket(t.due_date) === "pink"
+                                      ? "font-medium text-pink-accent"
+                                      : ""
                               }
                             >
                               Due {fmt(t.due_date)}
