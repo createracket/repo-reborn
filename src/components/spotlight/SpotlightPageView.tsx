@@ -69,8 +69,17 @@ type PartnerLinks = {
   section_order?: string[];
   section_borders?: Record<string, "none" | "pink" | "green">;
   section_text_size?: Record<string, "small" | "default" | "large" | "xl">;
+  brief_sections?: Array<{
+    id: string;
+    type: string;
+    hidden?: boolean;
+    label?: string;
+    content?: Record<string, string>;
+  }>;
   colour_thumbnails?: boolean;
 };
+
+type BriefSectionInstance = NonNullable<PartnerLinks["brief_sections"]>[number];
 
 export const SECTION_TEXT_SIZES = [
   { key: "small", label: "S" },
@@ -786,6 +795,52 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             })(),
           };
 
+          const duplicateNode = (instance: NonNullable<PartnerLinks["brief_sections"]>[number]) => {
+            const content = instance.content ?? {};
+            const label = instance.label?.trim();
+            const items = (content.items ?? "").split("\n").map((item) => item.trim()).filter(Boolean);
+            if (instance.type === "host_bio" || instance.type === "partnership") {
+              if (!content.body?.trim()) return null;
+              return <section className="mt-16"><h2 className="font-display text-3xl">{label || (instance.type === "host_bio" ? "About the host" : "Partnership")}</h2><RichText value={content.body} className="mt-3 whitespace-pre-wrap text-muted-foreground" /></section>;
+            }
+            if (instance.type === "audience") {
+              if (!items.length) return null;
+              return <section className="mt-16"><h2 className="font-display text-3xl">{label || "Who's listening"}</h2><div className="mt-4 grid gap-3 md:grid-cols-3">{items.map((item, index) => <Card key={index}><CardContent className="p-5 text-sm">{item}</CardContent></Card>)}</div></section>;
+            }
+            if (instance.type === "spotify") {
+              if (!content.url?.trim()) return null;
+              return <section className="mt-10"><iframe src={content.url} width="100%" height="152" frameBorder={0} allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" className="block rounded-xl" title="Spotify player" /></section>;
+            }
+            if (instance.type === "vibe_check") {
+              const tags = (content.items ?? "").split(",").map((item) => item.trim()).filter(Boolean);
+              if (!tags.length) return null;
+              return <section className="mt-10"><h2 className="font-display text-3xl">{label || "Vibe check"}</h2><div className="mt-4 flex flex-wrap gap-2">{tags.map((tag, index) => <span key={index} className="cursor-default rounded-full border border-border px-4 py-1.5 text-sm text-foreground/80">{tag}</span>)}</div></section>;
+            }
+            if (instance.type === "dos_donts") {
+              if (!items.length) return null;
+              return <section className="mt-10"><Card><CardHeader><CardTitle className="font-display text-2xl">{label || "Dos and don'ts"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((raw, index) => { const item = parseDoLine(raw); return item.text ? <li key={index} className="flex items-start gap-2 text-sm">{item.kind === "do" ? <Check className="mt-0.5 size-4 shrink-0 text-green-500" /> : <X className="mt-0.5 size-4 shrink-0 text-yellow-400" />}<span>{item.text}</span></li> : null; })}</ul></CardContent></Card></section>;
+            }
+            if (instance.type === "eoi") {
+              if (!items.length) return null;
+              return <section className="mt-10"><Card><CardHeader><CardTitle className="font-display text-2xl">{label || "Expressions of interest"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((item, index) => <li key={index} className="flex items-center gap-2 text-sm"><span className="size-1.5 rounded-full bg-primary" />{item}</li>)}</ul></CardContent></Card></section>;
+            }
+            if (instance.type === "videos") {
+              const videos = [1, 2, 3, 4].flatMap((number) => {
+                const url = content[`video${number}`];
+                const embed = url ? getSocialEmbed(url) : null;
+                return embed ? [{ embed, cover: content[`video${number}_cover`] }] : [];
+              });
+              if (!videos.length) return null;
+              return <section className="mt-16"><h2 className="font-display text-3xl">{label || "Watch"}</h2><div className={`mt-4 grid gap-3 sm:gap-6 ${videos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : "md:grid-cols-3"}`}>{videos.map((video, index) => <ClipCard key={index} href={video.embed.href} provider={video.embed.provider} poster={video.cover ?? posters[video.embed.href] ?? null} />)}</div></section>;
+            }
+            if (instance.type === "photos") {
+              const photos = [1, 2, 3, 4].map((number) => content[`photo${number}`]).filter((photo): photo is string => !!photo?.trim());
+              if (!photos.length) return null;
+              return <section className="mt-12"><h2 className="font-display text-3xl">{label || "Photos"}</h2><div className={`mt-4 grid gap-3 sm:gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}>{photos.map((src, index) => <div key={index} className="aspect-[4/5] overflow-hidden rounded-3xl border border-border/60 bg-muted/40"><img src={src} alt="" loading="lazy" className="size-full object-cover" /></div>)}</div></section>;
+            }
+            return null;
+          };
+
           const defaults = [
             "host_bio",
             "audience",
@@ -798,26 +853,31 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             "photos",
           ];
           const given = (links.section_order ?? []).filter((k) => defaults.includes(k));
-          const order = [...given, ...defaults.filter((k) => !given.includes(k))];
-          return order.map((k) => {
-            if (!nodes[k]) return null;
-            const border = links.section_borders?.[k] ?? "none";
-            const size = links.section_text_size?.[k] ?? "default";
+          const legacyOrder = [...given, ...defaults.filter((k) => !given.includes(k))];
+          const order: BriefSectionInstance[] = kind === "brief" && links.brief_sections?.length
+            ? links.brief_sections
+            : legacyOrder.map((type) => ({ id: type, type }));
+          return order.map((instance) => {
+            if (instance.hidden) return null;
+            const node = instance.id === instance.type ? nodes[instance.type] : duplicateNode(instance);
+            if (!node) return null;
+            const border = links.section_borders?.[instance.id] ?? "none";
+            const size = links.section_text_size?.[instance.id] ?? "default";
             const sizeCls = SECTION_TEXT_SIZE_CLASS[size] ?? "";
             if (border === "none")
               return (
-                <div key={k} className={sizeCls}>
-                  {nodes[k]}
+                <div key={instance.id} className={sizeCls}>
+                  {node}
                 </div>
               );
             return (
               <div
-                key={k}
+                key={instance.id}
                 className={`mt-12 rounded-3xl border p-5 sm:p-7 [&>section]:mt-0 ${
                   border === "pink" ? "border-pink-accent/70" : "border-primary/70"
                 } ${sizeCls}`}
               >
-                {nodes[k]}
+                {node}
               </div>
             );
           });

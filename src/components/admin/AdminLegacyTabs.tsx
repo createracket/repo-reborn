@@ -1,6 +1,6 @@
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check, GripVertical } from "lucide-react";
+import { ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check, GripVertical, Copy, Eye, EyeOff, PanelTopClose } from "lucide-react";
 import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -1537,6 +1537,27 @@ function normaliseSectionOrder(raw: unknown): string[] {
   return [...given, ...all.filter((k) => !given.includes(k))];
 }
 
+type BriefSectionInstance = {
+  id: string;
+  type: string;
+  hidden?: boolean;
+  label?: string;
+  content?: Record<string, string>;
+};
+
+function normaliseBriefSections(raw: unknown, legacyOrder: unknown): BriefSectionInstance[] {
+  const validTypes = new Set(SPOTLIGHT_SECTION_ORDER.map((section) => section.key as string));
+  if (Array.isArray(raw)) {
+    const saved = raw.filter((item): item is BriefSectionInstance => {
+      if (!item || typeof item !== "object") return false;
+      const candidate = item as Partial<BriefSectionInstance>;
+      return typeof candidate.id === "string" && typeof candidate.type === "string" && validTypes.has(candidate.type);
+    });
+    if (saved.length > 0) return saved;
+  }
+  return normaliseSectionOrder(legacyOrder).map((type) => ({ id: type, type }));
+}
+
 export function SpotlightForm({
   onCreated,
   editData,
@@ -1553,6 +1574,9 @@ export function SpotlightForm({
   const [sectionOrder, setSectionOrder] = useState<string[]>(() =>
     normaliseSectionOrder(editData?.links?.section_order),
   );
+  const [briefSections, setBriefSections] = useState<BriefSectionInstance[]>(() =>
+    normaliseBriefSections(editData?.links?.brief_sections, editData?.links?.section_order),
+  );
   const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(() => readThumbFrame(editData?.links));
   const [sectionBorders, setSectionBorders] = useState<Record<string, "none" | "pink" | "green">>(
     () => (editData?.links?.section_borders ?? {}) as Record<string, "none" | "pink" | "green">,
@@ -1563,7 +1587,7 @@ export function SpotlightForm({
 
   const [dragKey, setDragKey] = useState<string | null>(null);
   const [collapsedBriefSections, setCollapsedBriefSections] = useState<Set<string>>(
-    () => new Set(sectionOrder),
+    () => new Set(normaliseBriefSections(editData?.links?.brief_sections, editData?.links?.section_order).map((item) => item.id)),
   );
 
   function toggleBriefSection(key: string) {
@@ -1583,6 +1607,35 @@ export function SpotlightForm({
       next.splice(to, 0, item);
       return next;
     });
+  }
+
+  function moveBriefSection(from: number, to: number) {
+    setBriefSections((previous) => {
+      if (to < 0 || to >= previous.length || from === to) return previous;
+      const next = [...previous];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return next;
+    });
+  }
+
+  function updateBriefSection(id: string, updates: Partial<BriefSectionInstance>) {
+    setBriefSections((previous) => previous.map((item) => item.id === id ? { ...item, ...updates } : item));
+  }
+
+  function updateBriefSectionContent(id: string, key: string, value: string) {
+    setBriefSections((previous) => previous.map((item) => item.id === id
+      ? { ...item, content: { ...item.content, [key]: value } }
+      : item));
+  }
+
+  function duplicateBriefSection(source: BriefSectionInstance, index: number) {
+    const id = `${source.type}-${Date.now().toString(36)}`;
+    const duplicate: BriefSectionInstance = { id, type: source.type, label: "", content: {} };
+    setBriefSections((previous) => [...previous.slice(0, index + 1), duplicate, ...previous.slice(index + 1)]);
+    setCollapsedBriefSections((previous) => new Set(previous).add(id));
+    setSectionBorders((previous) => ({ ...previous, [id]: "none" }));
+    setSectionTextSizes((previous) => ({ ...previous, [id]: "default" }));
   }
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -1654,26 +1707,39 @@ export function SpotlightForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
-  function briefSectionContent(key: string) {
+  function briefSectionContent(key: string, instance?: BriefSectionInstance) {
+    const instanceId = instance?.id ?? key;
+    const isDuplicate = instanceId !== key;
+    const instanceValue = (field: string, legacyValue: string) =>
+      isDuplicate ? (instance?.content?.[field] ?? "") : legacyValue;
+    const updateInstanceValue = (field: string, value: string, updateLegacy: () => void) => {
+      if (isDuplicate) updateBriefSectionContent(instanceId, field, value);
+      else updateLegacy();
+    };
+    const heading = (legacyValue: string) => isDuplicate ? (instance?.label ?? "") : legacyValue;
+    const updateHeading = (value: string, updateLegacy: () => void) => {
+      if (isDuplicate) updateBriefSection(instanceId, { label: value });
+      else updateLegacy();
+    };
     switch (key) {
       case "host_bio":
-        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor="label_host_bio">Section heading</Label><Input id="label_host_bio" value={form.label_host_bio} onChange={(e) => set("label_host_bio", e.target.value)} placeholder="About the host" /></div><RichTextField id="host_bio" label="Content" value={form.host_bio} onChange={(v) => set("host_bio", v)} /></div>;
+        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_host_bio)} onChange={(e) => updateHeading(e.target.value, () => set("label_host_bio", e.target.value))} placeholder="About the host" /></div><RichTextField id={`host-bio-${instanceId}`} label="Content" value={instanceValue("body", form.host_bio)} onChange={(v) => updateInstanceValue("body", v, () => set("host_bio", v))} /></div>;
       case "audience":
-        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor="label_audience">Section heading</Label><Input id="label_audience" value={form.label_audience} onChange={(e) => set("label_audience", e.target.value)} placeholder="Who's listening" /></div><div className="space-y-1.5"><Label htmlFor="audience">Audience segments (one per line)</Label><Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} /></div></div>;
+        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_audience)} onChange={(e) => updateHeading(e.target.value, () => set("label_audience", e.target.value))} placeholder="Who's listening" /></div><div className="space-y-1.5"><Label htmlFor={`audience-${instanceId}`}>Audience segments (one per line)</Label><Textarea id={`audience-${instanceId}`} rows={4} value={instanceValue("items", form.audience_segments)} onChange={(e) => updateInstanceValue("items", e.target.value, () => set("audience_segments", e.target.value))} /></div></div>;
       case "spotify":
-        return <div className="space-y-1.5"><Label htmlFor="spotifyEmbed-flow">Spotify embed URL</Label><Input id="spotifyEmbed-flow" value={form.spotifyEmbed} onChange={(e) => set("spotifyEmbed", e.target.value)} placeholder="https://open.spotify.com/embed/show/..." /></div>;
+        return <div className="space-y-1.5"><Label htmlFor={`spotify-${instanceId}`}>Spotify embed URL</Label><Input id={`spotify-${instanceId}`} value={instanceValue("url", form.spotifyEmbed)} onChange={(e) => updateInstanceValue("url", e.target.value, () => set("spotifyEmbed", e.target.value))} placeholder="https://open.spotify.com/embed/show/..." /></div>;
       case "partnership":
-        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor="label_partnership">Section heading</Label><Input id="label_partnership" value={form.label_partnership} onChange={(e) => set("label_partnership", e.target.value)} placeholder="Partnership" /></div><RichTextField id="partnership_pitch" label="Content" value={form.partnership_pitch} onChange={(v) => set("partnership_pitch", v)} /></div>;
+        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_partnership)} onChange={(e) => updateHeading(e.target.value, () => set("label_partnership", e.target.value))} placeholder="Partnership" /></div><RichTextField id={`partnership-${instanceId}`} label="Content" value={instanceValue("body", form.partnership_pitch)} onChange={(v) => updateInstanceValue("body", v, () => set("partnership_pitch", v))} /></div>;
       case "vibe_check":
-        return <div className="space-y-1.5"><Label htmlFor="vibe_tags">Vibe check tags (comma separated)</Label><Input id="vibe_tags" value={form.vibe_tags} onChange={(e) => set("vibe_tags", e.target.value)} placeholder="Coffee, Sport, Fashion" /></div>;
+        return <div className="space-y-1.5"><Label htmlFor={`vibe-${instanceId}`}>Vibe check tags (comma separated)</Label><Input id={`vibe-${instanceId}`} value={instanceValue("items", form.vibe_tags)} onChange={(e) => updateInstanceValue("items", e.target.value, () => set("vibe_tags", e.target.value))} placeholder="Coffee, Sport, Fashion" /></div>;
       case "dos_donts":
-        return <div className="space-y-2"><Label htmlFor="dos_donts">Dos and don'ts (one per line)</Label><Textarea id="dos_donts" rows={4} value={form.dos_donts} onChange={(e) => set("dos_donts", e.target.value)} placeholder={"+ Tag @brand in the caption\nx Don't mention competitors"} />{form.dos_donts.split("\n").some((line: string) => line.trim()) ? <div className="space-y-1.5 pt-1">{form.dos_donts.split("\n").map((line: string, index: number) => { const item = parseDoLine(line); if (!item.text) return null; return <div key={`${item.text}-${index}`} className="flex items-center gap-2"><Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => { const lines = form.dos_donts.split("\n"); const current = parseDoLine(lines[index] ?? ""); lines[index] = `${current.kind === "do" ? "x" : "+"} ${current.text}`; set("dos_donts", lines.join("\n")); }}>{item.kind === "do" ? <Check className="size-3.5 text-green-500" /> : <X className="size-3.5 text-yellow-400" />}</Button><span className="text-sm text-muted-foreground">{item.text}</span></div>; })}</div> : null}</div>;
+        return <div className="space-y-2"><Label htmlFor={`dos-${instanceId}`}>Dos and don'ts (one per line)</Label><Textarea id={`dos-${instanceId}`} rows={4} value={instanceValue("items", form.dos_donts)} onChange={(e) => updateInstanceValue("items", e.target.value, () => set("dos_donts", e.target.value))} placeholder={"+ Tag @brand in the caption\nx Don't mention competitors"} /></div>;
       case "eoi":
-        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor="label_eoi">Section heading</Label><Input id="label_eoi" value={form.label_eoi} onChange={(e) => set("label_eoi", e.target.value)} placeholder="Expressions of interest" /></div><div className="space-y-1.5"><Label htmlFor="eoi">Opportunities (one per line)</Label><Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} /></div></div>;
+        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_eoi)} onChange={(e) => updateHeading(e.target.value, () => set("label_eoi", e.target.value))} placeholder="Expressions of interest" /></div><div className="space-y-1.5"><Label htmlFor={`eoi-${instanceId}`}>Opportunities (one per line)</Label><Textarea id={`eoi-${instanceId}`} rows={4} value={instanceValue("items", form.eoi_opportunities)} onChange={(e) => updateInstanceValue("items", e.target.value, () => set("eoi_opportunities", e.target.value))} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} /></div></div>;
       case "videos":
-        return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor="label_videos">Section heading</Label><Input id="label_videos" value={form.label_videos} onChange={(e) => set("label_videos", e.target.value)} placeholder="Watch" /></div><p className="text-xs text-muted-foreground">Add up to four public TikTok or Instagram post or reel links. A cover image is recommended for Instagram clips.</p>{([1, 2, 3, 4] as const).map((n) => { const urlKey = `video${n}` as "video1" | "video2" | "video3" | "video4"; const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover" | "video4_cover"; return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${urlKey}-flow`}>Video {n}</Label><Input id={`${urlKey}-flow`} value={form[urlKey]} onChange={(e) => set(urlKey, e.target.value)} placeholder="TikTok or Instagram reel URL" /><FetchPreviewButton url={form[urlKey]} onFetched={(url) => set(coverKey, url)} /><Input id={`${coverKey}-flow`} value={form[coverKey]} onChange={(e) => set(coverKey, e.target.value)} placeholder="Cover image URL (optional)" /><ImageUploader label={`Video ${n} cover`} value={form[coverKey]} onChange={(url) => set(coverKey, url)} aspect="9 / 16" hint="9:16 preferred, under 8MB." folder="video-covers" /></div>; })}</div>;
+        return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_videos)} onChange={(e) => updateHeading(e.target.value, () => set("label_videos", e.target.value))} placeholder="Watch" /></div><p className="text-xs text-muted-foreground">Add up to four public TikTok or Instagram post or reel links. A cover image is recommended for Instagram clips.</p>{([1, 2, 3, 4] as const).map((n) => { const urlKey = `video${n}` as "video1" | "video2" | "video3" | "video4"; const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover" | "video4_cover"; const url = instanceValue(urlKey, form[urlKey]); const cover = instanceValue(coverKey, form[coverKey]); return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${urlKey}-${instanceId}`}>Video {n}</Label><Input id={`${urlKey}-${instanceId}`} value={url} onChange={(e) => updateInstanceValue(urlKey, e.target.value, () => set(urlKey, e.target.value))} placeholder="TikTok or Instagram reel URL" /><FetchPreviewButton url={url} onFetched={(value) => updateInstanceValue(coverKey, value, () => set(coverKey, value))} /><Input value={cover} onChange={(e) => updateInstanceValue(coverKey, e.target.value, () => set(coverKey, e.target.value))} placeholder="Cover image URL (optional)" /><ImageUploader label={`Video ${n} cover`} value={cover} onChange={(value) => updateInstanceValue(coverKey, value, () => set(coverKey, value))} aspect="9 / 16" hint="9:16 preferred, under 8MB." folder="video-covers" /></div>; })}</div>;
       case "photos":
-        return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor="label_photos">Section heading</Label><Input id="label_photos" value={form.label_photos} onChange={(e) => set("label_photos", e.target.value)} placeholder="Photos" /></div><p className="text-xs text-muted-foreground">Upload up to four images. Portrait 4:5 images work best.</p>{([1, 2, 3, 4] as const).map((n) => { const photoKey = `photo${n}` as "photo1" | "photo2" | "photo3" | "photo4"; return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${photoKey}-flow`}>Photo {n}</Label><Input id={`${photoKey}-flow`} value={form[photoKey]} onChange={(e) => set(photoKey, e.target.value)} placeholder="Image URL (optional)" /><ImageUploader label={`Photo ${n}`} value={form[photoKey]} onChange={(url) => set(photoKey, url)} aspect="4 / 5" hint="4:5 preferred, under 8MB." folder="spotlights" /></div>; })}</div>;
+        return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_photos)} onChange={(e) => updateHeading(e.target.value, () => set("label_photos", e.target.value))} placeholder="Photos" /></div><p className="text-xs text-muted-foreground">Upload up to four images. Portrait 4:5 images work best.</p>{([1, 2, 3, 4] as const).map((n) => { const photoKey = `photo${n}` as "photo1" | "photo2" | "photo3" | "photo4"; const photo = instanceValue(photoKey, form[photoKey]); return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${photoKey}-${instanceId}`}>Photo {n}</Label><Input id={`${photoKey}-${instanceId}`} value={photo} onChange={(e) => updateInstanceValue(photoKey, e.target.value, () => set(photoKey, e.target.value))} placeholder="Image URL (optional)" /><ImageUploader label={`Photo ${n}`} value={photo} onChange={(value) => updateInstanceValue(photoKey, value, () => set(photoKey, value))} aspect="4 / 5" hint="4:5 preferred, under 8MB." folder="spotlights" /></div>; })}</div>;
       default:
         return null;
     }
@@ -2041,6 +2107,7 @@ export function SpotlightForm({
         section_order: sectionOrder,
         section_borders: sectionBorders,
         section_text_size: sectionTextSizes,
+        ...(sectionKind === "brief" ? { brief_sections: briefSections } : {}),
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
@@ -2281,43 +2348,49 @@ export function SpotlightForm({
                     <Label>Page sections</Label>
                     <p className="text-xs text-muted-foreground">Drag the handle or use the arrows to change the page flow. Empty sections remain hidden.</p>
                   </div>
-                  {sectionOrder.map((key, index) => {
+                  {briefSections.map((instance, index) => {
+                    const key = instance.type;
                     const meta = SPOTLIGHT_SECTION_ORDER.find((sectionMeta) => sectionMeta.key === key);
                     if (!meta) return null;
-                    const isCollapsed = collapsedBriefSections.has(key);
+                    const isCollapsed = collapsedBriefSections.has(instance.id);
+                    const isHidden = instance.hidden === true;
                     return (
                       <div
-                        key={key}
+                        key={instance.id}
                         onDragOver={(event) => event.preventDefault()}
                         onDrop={(event) => {
                           event.preventDefault();
-                          if (!dragKey || dragKey === key) return;
-                          moveSection(sectionOrder.indexOf(dragKey), index);
+                          if (!dragKey || dragKey === instance.id) return;
+                          moveBriefSection(briefSections.findIndex((item) => item.id === dragKey), index);
                           setDragKey(null);
                         }}
-                        className={`rounded-md border border-border/60 bg-background px-3 ${isCollapsed ? "py-2" : "py-3"} ${dragKey === key ? "opacity-50" : ""}`}
+                        className={`rounded-md border bg-background px-3 ${isCollapsed ? "py-2" : "py-3"} ${isHidden ? "border-border/40 opacity-60" : "border-border/60"} ${dragKey === instance.id ? "opacity-50" : ""}`}
                       >
                         <div className={`flex flex-wrap items-center gap-2 ${isCollapsed ? "" : "mb-3 border-b border-border/50 pb-2"}`}>
                           <span
                             draggable
-                            onDragStart={() => setDragKey(key)}
+                            onDragStart={() => setDragKey(instance.id)}
                             onDragEnd={() => setDragKey(null)}
                             className="shrink-0 cursor-grab text-muted-foreground active:cursor-grabbing"
                             aria-label={`Drag ${meta.label}`}
                           >
                             <GripVertical className="size-4" />
                           </span>
-                          <span className="flex-1 text-sm font-medium">{index + 1}. {meta.label}</span>
-                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${meta.label} up`}><ChevronUp className="size-3.5" /></Button>
-                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index + 1)} disabled={index === sectionOrder.length - 1} aria-label={`Move ${meta.label} down`}><ChevronDown className="size-3.5" /></Button>
-                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => toggleBriefSection(key)} aria-expanded={!isCollapsed} aria-label={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`} title={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`}>
-                            {isCollapsed ? <ChevronDown className="size-3.5" /> : <ChevronUp className="size-3.5" />}
+                          <span className="flex-1 text-sm font-medium">{index + 1}. {meta.label}{instance.id !== key ? " (copy)" : ""}</span>
+                          <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => updateBriefSection(instance.id, { hidden: !isHidden })} aria-label={`${isHidden ? "Show" : "Hide"} ${meta.label}`} title={`${isHidden ? "Show" : "Hide"} section`}>
+                            {isHidden ? <EyeOff className="mr-1 size-3.5" /> : <Eye className="mr-1 size-3.5" />}{isHidden ? "Hidden" : "Shown"}
                           </Button>
-                          {isCollapsed ? <div className="order-last w-full border-t border-border/50 pt-2 sm:order-none sm:w-auto sm:border-0 sm:pt-0">{briefSectionStyleControls(key, meta.label)}</div> : null}
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => duplicateBriefSection(instance, index)} aria-label={`Duplicate ${meta.label}`} title="Duplicate section"><Copy className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveBriefSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${meta.label} up`}><ChevronUp className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveBriefSection(index, index + 1)} disabled={index === briefSections.length - 1} aria-label={`Move ${meta.label} down`}><ChevronDown className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="secondary" className="ml-1 size-8 border border-primary/40 text-primary" onClick={() => toggleBriefSection(instance.id)} aria-expanded={!isCollapsed} aria-label={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`} title={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`}>
+                            <PanelTopClose className={`size-4 transition-transform ${isCollapsed ? "rotate-180" : ""}`} />
+                          </Button>
+                          {isCollapsed ? <div className="order-last w-full border-t border-border/50 pt-2 sm:order-none sm:w-auto sm:border-0 sm:pt-0">{briefSectionStyleControls(instance.id, meta.label)}</div> : null}
                         </div>
                         {!isCollapsed ? <div className="space-y-4">
-                          {briefSectionContent(key)}
-                          <div className="border-t border-border/50 pt-3">{briefSectionStyleControls(key, meta.label)}</div>
+                          {briefSectionContent(key, instance)}
+                          <div className="border-t border-border/50 pt-3">{briefSectionStyleControls(instance.id, meta.label)}</div>
                         </div> : null}
                       </div>
                     );
