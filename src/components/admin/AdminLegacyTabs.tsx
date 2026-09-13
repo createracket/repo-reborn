@@ -2107,6 +2107,7 @@ export function SpotlightForm({
         section_order: sectionOrder,
         section_borders: sectionBorders,
         section_text_size: sectionTextSizes,
+        ...(sectionKind === "brief" ? { brief_sections: briefSections } : {}),
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
@@ -2347,43 +2348,49 @@ export function SpotlightForm({
                     <Label>Page sections</Label>
                     <p className="text-xs text-muted-foreground">Drag the handle or use the arrows to change the page flow. Empty sections remain hidden.</p>
                   </div>
-                  {sectionOrder.map((key, index) => {
+                  {briefSections.map((instance, index) => {
+                    const key = instance.type;
                     const meta = SPOTLIGHT_SECTION_ORDER.find((sectionMeta) => sectionMeta.key === key);
                     if (!meta) return null;
-                    const isCollapsed = collapsedBriefSections.has(key);
+                    const isCollapsed = collapsedBriefSections.has(instance.id);
+                    const isHidden = instance.hidden === true;
                     return (
                       <div
-                        key={key}
+                        key={instance.id}
                         onDragOver={(event) => event.preventDefault()}
                         onDrop={(event) => {
                           event.preventDefault();
-                          if (!dragKey || dragKey === key) return;
-                          moveSection(sectionOrder.indexOf(dragKey), index);
+                          if (!dragKey || dragKey === instance.id) return;
+                          moveBriefSection(briefSections.findIndex((item) => item.id === dragKey), index);
                           setDragKey(null);
                         }}
-                        className={`rounded-md border border-border/60 bg-background px-3 ${isCollapsed ? "py-2" : "py-3"} ${dragKey === key ? "opacity-50" : ""}`}
+                        className={`rounded-md border bg-background px-3 ${isCollapsed ? "py-2" : "py-3"} ${isHidden ? "border-border/40 opacity-60" : "border-border/60"} ${dragKey === instance.id ? "opacity-50" : ""}`}
                       >
                         <div className={`flex flex-wrap items-center gap-2 ${isCollapsed ? "" : "mb-3 border-b border-border/50 pb-2"}`}>
                           <span
                             draggable
-                            onDragStart={() => setDragKey(key)}
+                            onDragStart={() => setDragKey(instance.id)}
                             onDragEnd={() => setDragKey(null)}
                             className="shrink-0 cursor-grab text-muted-foreground active:cursor-grabbing"
                             aria-label={`Drag ${meta.label}`}
                           >
                             <GripVertical className="size-4" />
                           </span>
-                          <span className="flex-1 text-sm font-medium">{index + 1}. {meta.label}</span>
-                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${meta.label} up`}><ChevronUp className="size-3.5" /></Button>
-                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index + 1)} disabled={index === sectionOrder.length - 1} aria-label={`Move ${meta.label} down`}><ChevronDown className="size-3.5" /></Button>
-                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => toggleBriefSection(key)} aria-expanded={!isCollapsed} aria-label={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`} title={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`}>
-                            {isCollapsed ? <ChevronDown className="size-3.5" /> : <ChevronUp className="size-3.5" />}
+                          <span className="flex-1 text-sm font-medium">{index + 1}. {meta.label}{instance.id !== key ? " (copy)" : ""}</span>
+                          <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => updateBriefSection(instance.id, { hidden: !isHidden })} aria-label={`${isHidden ? "Show" : "Hide"} ${meta.label}`} title={`${isHidden ? "Show" : "Hide"} section`}>
+                            {isHidden ? <EyeOff className="mr-1 size-3.5" /> : <Eye className="mr-1 size-3.5" />}{isHidden ? "Hidden" : "Shown"}
                           </Button>
-                          {isCollapsed ? <div className="order-last w-full border-t border-border/50 pt-2 sm:order-none sm:w-auto sm:border-0 sm:pt-0">{briefSectionStyleControls(key, meta.label)}</div> : null}
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => duplicateBriefSection(instance, index)} aria-label={`Duplicate ${meta.label}`} title="Duplicate section"><Copy className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveBriefSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${meta.label} up`}><ChevronUp className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveBriefSection(index, index + 1)} disabled={index === briefSections.length - 1} aria-label={`Move ${meta.label} down`}><ChevronDown className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="secondary" className="ml-1 size-8 border border-primary/40 text-primary" onClick={() => toggleBriefSection(instance.id)} aria-expanded={!isCollapsed} aria-label={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`} title={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`}>
+                            <PanelTopClose className={`size-4 transition-transform ${isCollapsed ? "rotate-180" : ""}`} />
+                          </Button>
+                          {isCollapsed ? <div className="order-last w-full border-t border-border/50 pt-2 sm:order-none sm:w-auto sm:border-0 sm:pt-0">{briefSectionStyleControls(instance.id, meta.label)}</div> : null}
                         </div>
                         {!isCollapsed ? <div className="space-y-4">
-                          {briefSectionContent(key)}
-                          <div className="border-t border-border/50 pt-3">{briefSectionStyleControls(key, meta.label)}</div>
+                          {briefSectionContent(key, instance)}
+                          <div className="border-t border-border/50 pt-3">{briefSectionStyleControls(instance.id, meta.label)}</div>
                         </div> : null}
                       </div>
                     );
