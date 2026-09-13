@@ -2844,34 +2844,38 @@ export function SpotlightForm({
               })}
             </div>
           </details></> : null}
-          <div className="md:col-span-2 pt-2">
-            <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics (optional)</p>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="sp-tf">Total social audience</Label>
-            <div className="flex gap-2">
-              <Input id="sp-tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
-              <Button type="button" variant="outline" size="sm" onClick={applyTotalFollowers} disabled={sumSocialCounts(fetchedCounts) <= 0}>
-                Apply sum
-              </Button>
+          <details className="md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+              Key metrics (optional)
+            </summary>
+            <div className="grid gap-4 px-4 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="sp-tf">Total social audience</Label>
+                <div className="flex gap-2">
+                  <Input id="sp-tf" inputMode="numeric" value={form.total_followers} onChange={(e) => set("total_followers", e.target.value)} />
+                  <Button type="button" variant="outline" size="sm" onClick={applyTotalFollowers} disabled={sumSocialCounts(fetchedCounts) <= 0}>
+                    Apply sum
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="sp-ts">Total streams</Label>
+                <Input id="sp-ts" inputMode="numeric" value={form.total_streams} onChange={(e) => set("total_streams", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="sp-ms">Monthly streams</Label>
+                <Input id="sp-ms" inputMode="numeric" value={form.monthly_streams} onChange={(e) => set("monthly_streams", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="sp-ar">Avg. reach</Label>
+                <Input id="sp-ar" inputMode="numeric" value={form.avg_reach} onChange={(e) => set("avg_reach", e.target.value)} />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="sp-ae">Avg. engagement (%)</Label>
+                <Input id="sp-ae" inputMode="decimal" value={form.avg_engagement} onChange={(e) => set("avg_engagement", e.target.value)} placeholder="e.g. 4.2" />
+              </div>
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="sp-ts">Total streams</Label>
-            <Input id="sp-ts" inputMode="numeric" value={form.total_streams} onChange={(e) => set("total_streams", e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="sp-ms">Monthly streams</Label>
-            <Input id="sp-ms" inputMode="numeric" value={form.monthly_streams} onChange={(e) => set("monthly_streams", e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="sp-ar">Avg. reach</Label>
-            <Input id="sp-ar" inputMode="numeric" value={form.avg_reach} onChange={(e) => set("avg_reach", e.target.value)} />
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="sp-ae">Avg. engagement (%)</Label>
-            <Input id="sp-ae" inputMode="decimal" value={form.avg_engagement} onChange={(e) => set("avg_engagement", e.target.value)} placeholder="e.g. 4.2" />
-          </div>
+          </details>
           <div className="flex items-center gap-3 md:col-span-2">
             <Switch id="published" checked={form.published} onCheckedChange={(v) => set("published", v)} />
             <Label htmlFor="published" className="cursor-pointer">Publish immediately</Label>
