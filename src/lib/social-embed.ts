@@ -34,13 +34,15 @@ export function getSocialEmbed(url: string): SocialEmbed | null {
   }
 
   if (host.endsWith("instagram.com")) {
-    const m = u.pathname.match(/\/(p|reel|tv)\/([^/]+)/);
+    // Instagram uses /p/, /reel/, /reels/ and /tv/ for the same media type.
+    const m = u.pathname.match(/\/(p|reels?|tv)\/([^/]+)/);
     if (m) {
+      const kindPath = m[1] === "reels" ? "reel" : m[1];
       return {
         kind: "iframe",
-        src: `https://www.instagram.com/${m[1]}/${m[2]}/embed/captioned/`,
+        src: `https://www.instagram.com/${kindPath}/${m[2]}/embed/captioned/`,
         provider: "instagram",
-        href: `https://www.instagram.com/${m[1]}/${m[2]}/`,
+        href: `https://www.instagram.com/${kindPath}/${m[2]}/`,
       };
     }
     return null;
