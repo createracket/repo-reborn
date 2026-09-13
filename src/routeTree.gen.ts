@@ -73,6 +73,7 @@ import { Route as ApiPublicHooksReportMetricsWorkerRouteImport } from './routes/
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as AuthenticatedAdminSpotlightsEditKeyRouteImport } from './routes/_authenticated.admin.spotlights.edit.$key'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -418,6 +419,12 @@ const LovableEmailTransactionalPreviewRoute =
     path: '/lovable/email/transactional/preview',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAdminSpotlightsEditKeyRoute =
+  AuthenticatedAdminSpotlightsEditKeyRouteImport.update({
+    id: '/edit/$key',
+    path: '/edit/$key',
+    getParentRoute: () => AuthenticatedAdminSpotlightsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -459,7 +466,7 @@ export interface FileRoutesByFullPath {
   '/admin/mailing': typeof AuthenticatedAdminMailingRoute
   '/admin/project-planner': typeof AuthenticatedAdminProjectPlannerRoute
   '/admin/sound-board': typeof AuthenticatedAdminSoundBoardRoute
-  '/admin/spotlights': typeof AuthenticatedAdminSpotlightsRoute
+  '/admin/spotlights': typeof AuthenticatedAdminSpotlightsRouteWithChildren
   '/admin/traffic': typeof AuthenticatedAdminTrafficRoute
   '/admin/usage': typeof AuthenticatedAdminUsageRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -483,6 +490,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/admin/spotlights/edit/$key': typeof AuthenticatedAdminSpotlightsEditKeyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -521,7 +529,7 @@ export interface FileRoutesByTo {
   '/admin/mailing': typeof AuthenticatedAdminMailingRoute
   '/admin/project-planner': typeof AuthenticatedAdminProjectPlannerRoute
   '/admin/sound-board': typeof AuthenticatedAdminSoundBoardRoute
-  '/admin/spotlights': typeof AuthenticatedAdminSpotlightsRoute
+  '/admin/spotlights': typeof AuthenticatedAdminSpotlightsRouteWithChildren
   '/admin/traffic': typeof AuthenticatedAdminTrafficRoute
   '/admin/usage': typeof AuthenticatedAdminUsageRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -545,6 +553,7 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/admin/spotlights/edit/$key': typeof AuthenticatedAdminSpotlightsEditKeyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -588,7 +597,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/mailing': typeof AuthenticatedAdminMailingRoute
   '/_authenticated/admin/project-planner': typeof AuthenticatedAdminProjectPlannerRoute
   '/_authenticated/admin/sound-board': typeof AuthenticatedAdminSoundBoardRoute
-  '/_authenticated/admin/spotlights': typeof AuthenticatedAdminSpotlightsRoute
+  '/_authenticated/admin/spotlights': typeof AuthenticatedAdminSpotlightsRouteWithChildren
   '/_authenticated/admin/traffic': typeof AuthenticatedAdminTrafficRoute
   '/_authenticated/admin/usage': typeof AuthenticatedAdminUsageRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -612,6 +621,7 @@ export interface FileRoutesById {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/_authenticated/admin/spotlights/edit/$key': typeof AuthenticatedAdminSpotlightsEditKeyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -679,6 +689,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/admin/spotlights/edit/$key'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -741,6 +752,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/admin/spotlights/edit/$key'
   id:
     | '__root__'
     | '/'
@@ -807,6 +819,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/_authenticated/admin/spotlights/edit/$key'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1295,8 +1308,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/spotlights/edit/$key': {
+      id: '/_authenticated/admin/spotlights/edit/$key'
+      path: '/edit/$key'
+      fullPath: '/admin/spotlights/edit/$key'
+      preLoaderRoute: typeof AuthenticatedAdminSpotlightsEditKeyRouteImport
+      parentRoute: typeof AuthenticatedAdminSpotlightsRoute
+    }
   }
 }
+
+interface AuthenticatedAdminSpotlightsRouteChildren {
+  AuthenticatedAdminSpotlightsEditKeyRoute: typeof AuthenticatedAdminSpotlightsEditKeyRoute
+}
+
+const AuthenticatedAdminSpotlightsRouteChildren: AuthenticatedAdminSpotlightsRouteChildren =
+  {
+    AuthenticatedAdminSpotlightsEditKeyRoute:
+      AuthenticatedAdminSpotlightsEditKeyRoute,
+  }
+
+const AuthenticatedAdminSpotlightsRouteWithChildren =
+  AuthenticatedAdminSpotlightsRoute._addFileChildren(
+    AuthenticatedAdminSpotlightsRouteChildren,
+  )
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBriefFormRoute: typeof AuthenticatedAdminBriefFormRoute
@@ -1307,7 +1342,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMailingRoute: typeof AuthenticatedAdminMailingRoute
   AuthenticatedAdminProjectPlannerRoute: typeof AuthenticatedAdminProjectPlannerRoute
   AuthenticatedAdminSoundBoardRoute: typeof AuthenticatedAdminSoundBoardRoute
-  AuthenticatedAdminSpotlightsRoute: typeof AuthenticatedAdminSpotlightsRoute
+  AuthenticatedAdminSpotlightsRoute: typeof AuthenticatedAdminSpotlightsRouteWithChildren
   AuthenticatedAdminTrafficRoute: typeof AuthenticatedAdminTrafficRoute
   AuthenticatedAdminUsageRoute: typeof AuthenticatedAdminUsageRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -1324,7 +1359,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminMailingRoute: AuthenticatedAdminMailingRoute,
   AuthenticatedAdminProjectPlannerRoute: AuthenticatedAdminProjectPlannerRoute,
   AuthenticatedAdminSoundBoardRoute: AuthenticatedAdminSoundBoardRoute,
-  AuthenticatedAdminSpotlightsRoute: AuthenticatedAdminSpotlightsRoute,
+  AuthenticatedAdminSpotlightsRoute:
+    AuthenticatedAdminSpotlightsRouteWithChildren,
   AuthenticatedAdminTrafficRoute: AuthenticatedAdminTrafficRoute,
   AuthenticatedAdminUsageRoute: AuthenticatedAdminUsageRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,

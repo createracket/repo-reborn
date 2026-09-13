@@ -4,6 +4,7 @@ import { ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, 
 import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
+import { Link } from "@tanstack/react-router";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist, scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
 import { draftSpotlightFromText } from "@/lib/spotlight-draft.functions";
 import { adminUploadSpotlightImage } from "@/lib/spotlight-images.functions";
@@ -244,17 +245,6 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
             const rows = (data as unknown as Spotlight[]) ?? [];
             setSpotlights(rows);
 
-            // Deep-link from a public spotlight page's admin "Edit spotlight" button.
-            if (searchParams.edit) {
-              const target = rows.find((s) => s.slug === searchParams.edit);
-              if (target) {
-                const { data: full } = await supabase.from("partner_pages" as any).select("*").eq("id", target.id).single();
-                if (full) {
-                  setEditingSpotlight(full);
-                  setSpotlightFormOpen(true);
-                }
-              }
-            }
           }
           setLoadedGroups((prev) => new Set([...prev, group]));
         } catch {
@@ -367,21 +357,10 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                               {s.published ? "View" : "Preview"} <ExternalLink className="ml-1 size-3" />
                             </a>
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={async () => {
-                              const { data, error } = await supabase
-                                .from("partner_pages" as any)
-                                .select("*")
-                                .eq("id", s.id)
-                                .single();
-                              if (error) return toast.error(error.message);
-                              setEditingSpotlight(data);
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                            }}
-                          >
-                            <Pencil className="mr-1 size-3" /> Edit
+                          <Button asChild size="sm" variant="outline">
+                            <Link to="/admin/spotlights/edit/$key" params={{ key: s.slug }}>
+                              <Pencil className="mr-1 size-3" /> Edit
+                            </Link>
                           </Button>
                           <PartnerPageHistory
                             pageId={s.id}
@@ -527,45 +506,30 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
               <CardHeader>
                 <button
                   type="button"
-                  onClick={() => {
-                    if (editingSpotlight) {
-                      setEditingSpotlight(null);
-                      setSpotlightFormOpen(false);
-                    } else {
-                      setSpotlightFormOpen((v) => !v);
-                    }
-                  }}
+                  onClick={() => setSpotlightFormOpen((v) => !v)}
                   className="flex w-full items-center justify-between gap-2 text-left"
                 >
                   <div>
-                    <CardTitle className="text-lg">
-                      {editingSpotlight ? "Edit artist spotlight" : "New artist spotlight"}
-                    </CardTitle>
-                    <CardDescription>
-                      {editingSpotlight
-                        ? `Updating /spotlight/${editingSpotlight.slug}`
-                        : "Create a partner page. Lives at /spotlight/<slug>."}
-                    </CardDescription>
+                    <CardTitle className="text-lg">New artist spotlight</CardTitle>
+                    <CardDescription>Create a partner page. Lives at /spotlight/&lt;slug&gt;.</CardDescription>
                   </div>
-                  {(spotlightFormOpen || editingSpotlight) ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                  {spotlightFormOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
                 </button>
               </CardHeader>
-              {(spotlightFormOpen || editingSpotlight) && (
+              {spotlightFormOpen && (
                 <CardContent>
                   <SpotlightForm
-                    key={editingSpotlight?.id ?? "new"}
-                    editData={editingSpotlight}
+                    key="new"
+                    section="spotlight"
+                    editData={null}
                     onCreated={() => {
                       refreshSpotlights();
-                      setEditingSpotlight(null);
                       setSpotlightFormOpen(false);
                     }}
                     onUpdated={() => {
-                      // Stay on the editor after an update — just refresh the list.
                       refreshSpotlights();
                     }}
                     onCancel={() => {
-                      setEditingSpotlight(null);
                       setSpotlightFormOpen(false);
                     }}
                   />
