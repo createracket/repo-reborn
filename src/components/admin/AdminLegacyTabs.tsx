@@ -1641,6 +1641,35 @@ export function SpotlightForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  function briefSectionContent(key: string) {
+    switch (key) {
+      case "host_bio":
+        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor="label_host_bio">Section heading</Label><Input id="label_host_bio" value={form.label_host_bio} onChange={(e) => set("label_host_bio", e.target.value)} placeholder="About the host" /></div><RichTextField id="host_bio" label="Content" value={form.host_bio} onChange={(v) => set("host_bio", v)} /></div>;
+      case "audience":
+        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor="label_audience">Section heading</Label><Input id="label_audience" value={form.label_audience} onChange={(e) => set("label_audience", e.target.value)} placeholder="Who's listening" /></div><div className="space-y-1.5"><Label htmlFor="audience">Audience segments (one per line)</Label><Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} /></div></div>;
+      case "spotify":
+        return <div className="space-y-1.5"><Label htmlFor="spotifyEmbed-flow">Spotify embed URL</Label><Input id="spotifyEmbed-flow" value={form.spotifyEmbed} onChange={(e) => set("spotifyEmbed", e.target.value)} placeholder="https://open.spotify.com/embed/show/..." /></div>;
+      case "partnership":
+        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor="label_partnership">Section heading</Label><Input id="label_partnership" value={form.label_partnership} onChange={(e) => set("label_partnership", e.target.value)} placeholder="Partnership" /></div><RichTextField id="partnership_pitch" label="Content" value={form.partnership_pitch} onChange={(v) => set("partnership_pitch", v)} /></div>;
+      case "vibe_check":
+        return <div className="space-y-1.5"><Label htmlFor="vibe_tags">Vibe check tags (comma separated)</Label><Input id="vibe_tags" value={form.vibe_tags} onChange={(e) => set("vibe_tags", e.target.value)} placeholder="Coffee, Sport, Fashion" /></div>;
+      case "dos_donts":
+        return <div className="space-y-2"><Label htmlFor="dos_donts">Dos and don'ts (one per line)</Label><Textarea id="dos_donts" rows={4} value={form.dos_donts} onChange={(e) => set("dos_donts", e.target.value)} placeholder={"+ Tag @brand in the caption\nx Don't mention competitors"} />{form.dos_donts.split("\n").some((line: string) => line.trim()) ? <div className="space-y-1.5 pt-1">{form.dos_donts.split("\n").map((line: string, index: number) => { const item = parseDoLine(line); if (!item.text) return null; return <div key={`${item.text}-${index}`} className="flex items-center gap-2"><Button type="button" size="sm" variant="outline" className="h-7 px-2" onClick={() => { const lines = form.dos_donts.split("\n"); const current = parseDoLine(lines[index] ?? ""); lines[index] = `${current.kind === "do" ? "x" : "+"} ${current.text}`; set("dos_donts", lines.join("\n")); }}>{item.kind === "do" ? <Check className="size-3.5 text-green-500" /> : <X className="size-3.5 text-yellow-400" />}</Button><span className="text-sm text-muted-foreground">{item.text}</span></div>; })}</div> : null}</div>;
+      case "eoi":
+        return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor="label_eoi">Section heading</Label><Input id="label_eoi" value={form.label_eoi} onChange={(e) => set("label_eoi", e.target.value)} placeholder="Expressions of interest" /></div><div className="space-y-1.5"><Label htmlFor="eoi">Opportunities (one per line)</Label><Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} /></div></div>;
+      case "videos":
+        return <div className="space-y-1.5"><Label htmlFor="label_videos">Section heading</Label><Input id="label_videos" value={form.label_videos} onChange={(e) => set("label_videos", e.target.value)} placeholder="Watch" /><p className="text-xs text-muted-foreground">Add and edit the clips in Featured videos below.</p></div>;
+      case "photos":
+        return <p className="text-xs text-muted-foreground">Add and edit the images in Featured photos below.</p>;
+      default:
+        return null;
+    }
+  }
+
+  function briefSectionStyleControls(key: string, label: string) {
+    return <div className="flex flex-wrap items-center gap-2"><span className="text-xs text-muted-foreground">Border</span>{([{ value: "none", label: "None", className: "border-border" }, { value: "pink", label: "Pink", className: "border-pink-accent" }, { value: "green", label: "Green", className: "border-primary" }] as const).map((option) => <Button key={option.value} type="button" size="sm" variant="outline" className={`h-7 border-2 px-2 text-[11px] ${option.className} ${(sectionBorders[key] ?? "none") === option.value ? "bg-muted font-medium" : "opacity-60"}`} onClick={() => setSectionBorders((previous) => ({ ...previous, [key]: option.value }))} aria-label={`${label} border: ${option.label}`}>{option.label}</Button>)}<span className="ml-1 text-xs text-muted-foreground">Text</span>{SECTION_TEXT_SIZES.map(({ key: size, label: sizeLabel }) => <Button key={size} type="button" size="sm" variant="outline" className={`h-7 px-2 text-[11px] ${(sectionTextSizes[key] ?? "default") === size ? "border-foreground/40 bg-muted font-medium" : "opacity-60"}`} onClick={() => setSectionTextSizes((previous) => ({ ...previous, [key]: size }))} aria-label={`${label} text size: ${sizeLabel}`}>{sizeLabel}</Button>)}</div>;
+  }
+
   // --- AI draft from a pasted email / info dump (+ live social enrichment) ---
   const draftSpotlight = useServerFn(draftSpotlightFromText);
   const [aiText, setAiText] = useState("");
@@ -2207,7 +2236,78 @@ export function SpotlightForm({
               />
             </div>
           </details>
-          <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+          {sectionKind === "brief" ? (
+            <details open className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+              <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+                Content &amp; page flow
+                <span className="ml-2 text-xs font-normal text-muted-foreground">
+                  (edit, style and reorder sections together)
+                </span>
+              </summary>
+              <div className="space-y-5 px-4">
+                <div className="grid gap-4 border-b border-border/60 pb-5 md:grid-cols-2">
+                  <div className="space-y-1.5 md:col-span-2">
+                    <Label htmlFor="type">Type</Label>
+                    <Input id="type" value={form.type} onChange={(e) => set("type", e.target.value)} placeholder="podcast" />
+                  </div>
+                  <div className="space-y-1.5 md:col-span-2">
+                    <Label htmlFor="headline">Headline *</Label>
+                    <Input id="headline" value={form.headline} onChange={(e) => set("headline", e.target.value)} placeholder="Your Music, Your Business" />
+                  </div>
+                  <div className="space-y-1.5 md:col-span-2">
+                    <Label htmlFor="subtitle">Subtitle</Label>
+                    <Input id="subtitle" value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="UNLOCK REAL FAN INSIGHTS" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <RichTextField id="intro" label="Page intro" value={form.intro} onChange={(value) => set("intro", value)} />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Page sections</Label>
+                    <p className="text-xs text-muted-foreground">Drag the handle or use the arrows to change the page flow. Empty sections remain hidden.</p>
+                  </div>
+                  {sectionOrder.map((key, index) => {
+                    const meta = SPOTLIGHT_SECTION_ORDER.find((sectionMeta) => sectionMeta.key === key);
+                    if (!meta) return null;
+                    return (
+                      <div
+                        key={key}
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={(event) => {
+                          event.preventDefault();
+                          if (!dragKey || dragKey === key) return;
+                          moveSection(sectionOrder.indexOf(dragKey), index);
+                          setDragKey(null);
+                        }}
+                        className={`rounded-md border border-border/60 bg-background p-3 ${dragKey === key ? "opacity-50" : ""}`}
+                      >
+                        <div className="mb-3 flex items-center gap-2 border-b border-border/50 pb-2">
+                          <span
+                            draggable
+                            onDragStart={() => setDragKey(key)}
+                            onDragEnd={() => setDragKey(null)}
+                            className="shrink-0 cursor-grab text-muted-foreground active:cursor-grabbing"
+                            aria-label={`Drag ${meta.label}`}
+                          >
+                            <GripVertical className="size-4" />
+                          </span>
+                          <span className="flex-1 text-sm font-medium">{index + 1}. {meta.label}</span>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${meta.label} up`}><ChevronUp className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index + 1)} disabled={index === sectionOrder.length - 1} aria-label={`Move ${meta.label} down`}><ChevronDown className="size-3.5" /></Button>
+                        </div>
+                        <div className="space-y-4">
+                          {briefSectionContent(key)}
+                          <div className="border-t border-border/50 pt-3">{briefSectionStyleControls(key, meta.label)}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </details>
+          ) : (
+            <>          <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Content
               <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -2245,52 +2345,6 @@ export function SpotlightForm({
                 <Label htmlFor="eoi">EOI opportunities (one per line)</Label>
                 <Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} />
               </div>
-              {sectionKind === "brief" ? (
-                <div className="space-y-1.5 md:col-span-2">
-                  <Label htmlFor="dos_donts">Dos and don'ts (one per line)</Label>
-                  <Textarea
-                    id="dos_donts"
-                    rows={4}
-                    value={form.dos_donts}
-                    onChange={(e) => set("dos_donts", e.target.value)}
-                    placeholder={"+ Tag @brand in the caption\nx Don't mention competitors"}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Use the toggles below to switch each line between a green tick and a yellow cross.
-                  </p>
-                  {form.dos_donts.split("\n").some((l: string) => l.trim()) ? (
-                    <div className="space-y-1.5 pt-1">
-                      {form.dos_donts.split("\n").map((line: string, i: number) => {
-                        const item = parseDoLine(line);
-                        if (!item.text) return null;
-                        return (
-                          <div key={i} className="flex items-center gap-2">
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="h-7 px-2"
-                              onClick={() => {
-                                const lines = form.dos_donts.split("\n");
-                                const cur = parseDoLine(lines[i] ?? "");
-                                lines[i] = `${cur.kind === "do" ? "x" : "+"} ${cur.text}`;
-                                set("dos_donts", lines.join("\n"));
-                              }}
-                            >
-                              {item.kind === "do" ? (
-                                <Check className="size-3.5 text-green-500" />
-                              ) : (
-                                <X className="size-3.5 text-yellow-400" />
-                              )}
-                            </Button>
-                            <span className="text-sm text-muted-foreground">{item.text}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
               <div className="space-y-1.5">
                 <Label htmlFor="audience">Audience segments (one per line)</Label>
                 <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
@@ -2435,7 +2489,8 @@ export function SpotlightForm({
                 </div>
               </div>
             </div>
-          </details>
+          </details></>
+          )}
           <details className="!order-3 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Social links &amp; handles
@@ -2608,10 +2663,10 @@ export function SpotlightForm({
               {mismatchWarning}
             </div>
           ) : null}
-          <div className="space-y-1.5">
+          {sectionKind !== "brief" ? <div className="space-y-1.5">
             <Label htmlFor="spotifyEmbed">Spotify embed URL</Label>
             <Input id="spotifyEmbed" value={form.spotifyEmbed} onChange={(e) => set("spotifyEmbed", e.target.value)} placeholder="https://open.spotify.com/embed/show/..." />
-          </div>
+          </div> : null}
           <div className="space-y-1.5">
             <Label htmlFor="contact">Contact (email or URL)</Label>
             <Input id="contact" value={form.contact} onChange={(e) => set("contact", e.target.value)} />
