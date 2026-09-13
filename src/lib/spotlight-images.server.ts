@@ -68,7 +68,7 @@ export async function putSpotlightObject(
   const response = await fetch(`${backendUrl}/storage/v1/object/spotlight-images/${objectPath}`, {
     method: "POST",
     headers,
-    body: fileBytes,
+    body: fileBytes as unknown as BodyInit,
   });
 
   if (!response.ok) {
