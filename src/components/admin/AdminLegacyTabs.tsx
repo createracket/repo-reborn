@@ -1373,9 +1373,18 @@ function Table({ headers, children }: { headers: string[]; children: React.React
 }
 
 /** Pull the post's preview image from a TikTok / Instagram / YouTube URL. */
-function FetchPreviewButton({ url, onFetched }: { url: string; onFetched: (u: string) => void }) {
+function FetchPreviewButton({
+  url,
+  onFetched,
+  folder = "video-covers",
+}: {
+  url: string;
+  onFetched: (u: string) => void;
+  folder?: "spotlights" | "video-covers";
+}) {
   const [loading, setLoading] = useState(false);
   const fetchPreview = useServerFn(scrapePostMetrics);
+  const syncImage = useServerFn(adminSyncImageFromUrl);
 
   async function run() {
     const clean = (url ?? "").trim();
@@ -1389,7 +1398,9 @@ function FetchPreviewButton({ url, onFetched }: { url: string; onFetched: (u: st
       if (!result.ok) throw new Error(result.error);
       const thumb = result.metrics.thumbnail_url;
       if (!thumb) throw new Error("No preview image available for that link");
-      onFetched(thumb);
+      // Keep a permanent copy so the cover doesn't expire on the source CDN.
+      const saved = await syncImage({ data: { url: thumb, folder } }).catch(() => null);
+      onFetched(saved?.publicUrl ?? thumb);
       toast.success("Preview pulled from link");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Couldn't fetch preview");
