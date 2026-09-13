@@ -120,21 +120,37 @@ export async function syncImageFromUrl(
     return { publicUrl: source };
   }
 
-  let imageUrl = source;
-  let response = await fetch(source, { headers: BROWSER_HEADERS });
-  let contentType = (response.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+  const typeOf = (res: Response) =>
+    (res.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+  const extType = (url: string): string | null => {
+    const ext = url.split("?")[0].split("#")[0].toLowerCase().match(/\.(jpe?g|png|webp|gif)$/)?.[1];
+    if (!ext) return null;
+    return ext === "jpg" || ext === "jpeg" ? "image/jpeg" : `image/${ext}`;
+  };
 
-  if (!contentType.startsWith("image/")) {
-    const preview = await resolvePreviewUrl(source);
-    if (!preview) throw new Error("No preview image found on that link");
+  let imageUrl = source;
+  let response: Response | null = await fetch(source, { headers: BROWSER_HEADERS, redirect: "follow" }).catch(
+    () => null,
+  );
+  let contentType = response ? typeOf(response) : "";
+
+  if (!response?.ok || !(contentType.startsWith("image/") || (!contentType && extType(source)))) {
+    const preview = await resolvePreviewUrl(source).catch(() => null);
+    if (!preview) {
+      throw new Error(
+        "Couldn't find a preview image on that link. Try the direct image address (right-click the image → Copy image address).",
+      );
+    }
     imageUrl = new URL(preview, source).toString();
-    response = await fetch(imageUrl, { headers: BROWSER_HEADERS });
-    contentType = (response.headers.get("content-type") ?? "").split(";")[0].trim().toLowerCase();
+    response = await fetch(imageUrl, { headers: { ...BROWSER_HEADERS, referer: source }, redirect: "follow" }).catch(
+      () => null,
+    );
+    contentType = response ? typeOf(response) : "";
   }
 
-  if (!response.ok) throw new Error("Couldn't download that image");
+  if (!response?.ok) throw new Error("Couldn't download that image");
 
-  const mapped = SUPPORTED[contentType];
+  const mapped = SUPPORTED[contentType] ?? (extType(imageUrl) ? SUPPORTED[extType(imageUrl)!] : undefined);
   if (!mapped) throw new Error("That link isn't a JPG, PNG, WebP or GIF image");
 
   const bytes = new Uint8Array(await response.arrayBuffer());
