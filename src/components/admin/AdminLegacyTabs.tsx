@@ -2172,10 +2172,14 @@ export function SpotlightForm({
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2 [&>*]:order-6">
-          <div className="!order-1 md:col-span-2 space-y-2 rounded-lg border border-pink-accent/40 bg-muted/30 p-3">
-            <Label htmlFor="ai-dump" className="text-sm font-medium">
+          <details className="!order-1 md:col-span-2 rounded-lg border border-pink-accent/40 bg-muted/20 open:pb-4">
+            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Paste artist email / info dump
-            </Label>
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                (AI drafts headline, intro, bio & more from an email)
+              </span>
+            </summary>
+            <div className="space-y-2 px-4">
             <p className="text-xs text-muted-foreground">
               Drop the raw email here and AI will draft the headline, intro, bio, partnership pitch,
               EOI opportunities and audience segments below. Add social handles too and we fetch the
