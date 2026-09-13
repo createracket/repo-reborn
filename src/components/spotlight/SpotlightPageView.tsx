@@ -767,8 +767,9 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
               if (photos.length === 0) return null;
               return (
                 <section className="mt-12">
+                  <h2 className="font-display text-3xl">{sectionLabel("photos", "Photos")}</h2>
                   <div
-                    className={`grid gap-3 sm:gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}
+                    className={`mt-4 grid gap-3 sm:gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}
                   >
                     {photos.map((src, i) => (
                       <div
