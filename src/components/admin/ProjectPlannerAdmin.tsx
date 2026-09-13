@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, Check, ExternalLink, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, ExternalLink, GripVertical, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,6 +51,17 @@ type TaskRow = {
   sort_order: number;
   linked_users: LinkedUser[] | null;
 };
+
+/**
+ * Pick a sort_order that places a task between two neighbours.
+ * Uses fractional midpoints so only the moved row needs a DB write.
+ */
+function orderBetween(prev: number | null, next: number | null): number {
+  if (prev === null && next === null) return 0;
+  if (prev === null) return (next as number) - 1;
+  if (next === null) return prev + 1;
+  return (prev + next) / 2;
+}
 
 /**
  * Due-date colouring for the admin task list.
@@ -217,6 +228,8 @@ export function ProjectPlannerAdmin() {
   const [editDue, setEditDue] = useState("");
   const [editLink, setEditLink] = useState("");
   const [editUsers, setEditUsers] = useState<LinkedUser[]>([]);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropIdx, setDropIdx] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -358,17 +371,36 @@ export function ProjectPlannerAdmin() {
       setSaving(false);
       return;
     }
+    const dueDate = prefill ? null : taskDue || null;
+
+    // Auto-place by due date: slot the task in with other dated tasks,
+    // earliest first; undated tasks sit after dated ones. No date → top.
+    const open = tasks.filter((t) => t.status !== "done");
+    let insertIdx = 0;
+    if (dueDate) {
+      insertIdx = open.length;
+      for (let i = 0; i < open.length; i++) {
+        const other = open[i].due_date;
+        if (!other || other > dueDate) {
+          insertIdx = i;
+          break;
+        }
+      }
+    }
+    const prevOrder = insertIdx > 0 ? (open[insertIdx - 1].sort_order ?? 0) : null;
+    const nextOrder = insertIdx < open.length ? (open[insertIdx].sort_order ?? 0) : null;
+
     const { data, error } = await (supabase as any)
       .from("admin_tasks")
       .insert({
         user_id: userId,
         title,
         notes: prefill ? null : taskNotes.trim() || null,
-        due_date: prefill ? null : taskDue || null,
+        due_date: dueDate,
         link_url: prefill?.link ?? (taskLink.trim() || null),
         related_label: prefill?.label ?? null,
         linked_users: [],
-        sort_order: tasks.length ? Math.min(...tasks.map((t) => t.sort_order ?? 0)) - 1 : 0,
+        sort_order: orderBetween(prevOrder, nextOrder),
       })
       .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order, linked_users")
       .single();
@@ -377,7 +409,11 @@ export function ProjectPlannerAdmin() {
       toast.error("Couldn't add that task");
       return;
     }
-    setTasks((t) => [data as TaskRow, ...t]);
+    setTasks((t) =>
+      [...t, data as TaskRow].sort(
+        (x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0) || x.created_at.localeCompare(y.created_at),
+      ),
+    );
     if (!prefill) {
       setTaskTitle("");
       setTaskNotes("");
@@ -445,6 +481,29 @@ export function ProjectPlannerAdmin() {
     if (r1.error || r2.error) toast.error("Couldn't save the new order");
   }
 
+  /** Drop `dragId` so it sits at position `targetIdx` within the open list. */
+  async function dropTaskAt(dragId: string, targetIdx: number) {
+    const list = tasks.filter((t) => t.status !== "done");
+    const from = list.findIndex((t) => t.id === dragId);
+    if (from < 0) return;
+    let to = targetIdx;
+    if (from < to) to -= 1; // account for removing the dragged item first
+    if (from === to) return;
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    const prevOrder = to > 0 ? (list[to - 1].sort_order ?? 0) : null;
+    const nextOrder = to < list.length - 1 ? (list[to + 1].sort_order ?? 0) : null;
+    const newOrder = orderBetween(prevOrder, nextOrder);
+    setTasks((t) => {
+      const updated = t.map((x) => (x.id === dragId ? { ...x, sort_order: newOrder } : x));
+      return [...updated].sort(
+        (x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0) || x.created_at.localeCompare(y.created_at),
+      );
+    });
+    const { error } = await (supabase as any).from("admin_tasks").update({ sort_order: newOrder }).eq("id", dragId);
+    if (error) toast.error("Couldn't save the new order");
+  }
+
   async function removeTask(id: string) {
     setTasks((t) => t.filter((x) => x.id !== id));
     const { error } = await (supabase as any).from("admin_tasks").delete().eq("id", id);
@@ -493,15 +552,65 @@ export function ProjectPlannerAdmin() {
             />
           </div>
 
-          <div className="space-y-2">
+          <div
+            className="space-y-2"
+            onDragOver={(e) => {
+              if (!dragId) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              setDropIdx(openTasks.length);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (dragId) void dropTaskAt(dragId, openTasks.length);
+              setDragId(null);
+              setDropIdx(null);
+            }}
+          >
             {openTasks.length === 0 ? (
               <p className="text-sm text-muted-foreground">No open tasks.</p>
             ) : (
               openTasks.map((t, idx) => (
                 <div
                   key={t.id}
-                  className="flex items-start gap-3 rounded-lg border border-border/60 bg-card p-3"
+                  draggable
+                  onDragStart={(e) => {
+                    setDragId(t.id);
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragOver={(e) => {
+                    if (!dragId) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.dataTransfer.dropEffect = "move";
+                    setDropIdx(idx);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (dragId) void dropTaskAt(dragId, idx);
+                    setDragId(null);
+                    setDropIdx(null);
+                  }}
+                  onDragEnd={() => {
+                    setDragId(null);
+                    setDropIdx(null);
+                  }}
+                  className={`flex items-start gap-3 rounded-lg border bg-card p-3 transition-colors ${
+                    dragId === t.id
+                      ? "border-dashed border-primary/60 opacity-50"
+                      : dropIdx === idx && dragId
+                        ? "border-primary"
+                        : "border-border/60"
+                  }`}
                 >
+                  <span
+                    className="mt-1 shrink-0 cursor-grab text-muted-foreground/50 active:cursor-grabbing"
+                    aria-label="Drag to reorder"
+                    title="Drag to reorder"
+                  >
+                    <GripVertical className="size-4" />
+                  </span>
                   <Button size="icon" variant="outline" className="size-7 shrink-0" onClick={() => void toggleTask(t)}>
                     <Check className="size-3.5" />
                   </Button>
