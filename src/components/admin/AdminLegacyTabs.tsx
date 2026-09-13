@@ -146,7 +146,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
   const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
   const [spotlights, setSpotlights] = useState<Spotlight[]>([]);
-  const [editingSpotlight, setEditingSpotlight] = useState<Record<string, any> | null>(null);
+  
   const [spotlightFormOpen, setSpotlightFormOpen] = useState(false);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
