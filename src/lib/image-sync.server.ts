@@ -28,34 +28,71 @@ function metaContent(html: string, pattern: RegExp): string | null {
   return match?.[1] ? match[1].replace(/&amp;/g, "&").trim() : null;
 }
 
-/** Find a preview image URL on a page (og:image, twitter:image, oEmbed). */
-async function resolvePreviewUrl(pageUrl: string): Promise<string | null> {
-  if (/tiktok\.com/i.test(pageUrl)) {
+/** Ask a provider's oEmbed endpoint for a thumbnail, when one exists. */
+async function oembedThumbnail(pageUrl: string): Promise<string | null> {
+  const endpoints: string[] = [];
+  if (/tiktok\.com/i.test(pageUrl)) endpoints.push(`https://www.tiktok.com/oembed?url=${encodeURIComponent(pageUrl)}`);
+  if (/youtube\.com|youtu\.be/i.test(pageUrl))
+    endpoints.push(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(pageUrl)}`);
+  if (/vimeo\.com/i.test(pageUrl))
+    endpoints.push(`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(pageUrl)}`);
+  if (/soundcloud\.com/i.test(pageUrl))
+    endpoints.push(`https://soundcloud.com/oembed?format=json&url=${encodeURIComponent(pageUrl)}`);
+  if (/instagram\.com|facebook\.com/i.test(pageUrl))
+    endpoints.push(`https://www.instagram.com/api/v1/oembed/?url=${encodeURIComponent(pageUrl)}`);
+
+  for (const endpoint of endpoints) {
     try {
-      const res = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(pageUrl)}`, {
-        headers: { accept: "application/json" },
-      });
-      if (res.ok) {
-        const json = (await res.json()) as { thumbnail_url?: string };
-        if (json?.thumbnail_url) return json.thumbnail_url;
-      }
+      const res = await fetch(endpoint, { headers: { ...BROWSER_HEADERS, accept: "application/json" } });
+      if (!res.ok) continue;
+      const json = (await res.json()) as { thumbnail_url?: string };
+      if (json?.thumbnail_url) return json.thumbnail_url;
     } catch {
-      /* fall through to HTML scrape */
+      /* try the next one */
     }
   }
+  return null;
+}
 
-  const res = await fetch(pageUrl, { headers: BROWSER_HEADERS });
+/** Find a preview image URL on a page (oEmbed, og:image, JSON-LD, first image). */
+async function resolvePreviewUrl(pageUrl: string): Promise<string | null> {
+  const oembed = await oembedThumbnail(pageUrl);
+  if (oembed) return oembed;
+
+  const res = await fetch(pageUrl, { headers: BROWSER_HEADERS, redirect: "follow" });
   if (!res.ok) return null;
   const contentType = (res.headers.get("content-type") ?? "").toLowerCase();
-  if (!contentType.includes("html")) return null;
-  const html = (await res.text()).slice(0, 400_000);
+  if (contentType && !contentType.includes("html") && !contentType.includes("xml") && !contentType.includes("text")) {
+    return null;
+  }
+  const html = (await res.text()).slice(0, 1_500_000);
 
-  return (
-    metaContent(html, /<meta[^>]+property=["']og:image(?::secure_url)?["'][^>]+content=["']([^"']+)["']/i) ??
-    metaContent(html, /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i) ??
-    metaContent(html, /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i) ??
-    null
-  );
+  const fromMeta =
+    metaContent(html, /<meta[^>]+property=["']og:image(?::secure_url|:url)?["'][^>]+content=["']([^"']+)["']/i) ??
+    metaContent(html, /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image[^"']*["']/i) ??
+    metaContent(html, /<meta[^>]+name=["']twitter:image(?::src)?["'][^>]+content=["']([^"']+)["']/i) ??
+    metaContent(html, /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image(?::src)?["']/i) ??
+    metaContent(html, /<meta[^>]+itemprop=["']image["'][^>]+content=["']([^"']+)["']/i) ??
+    metaContent(html, /<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i);
+  if (fromMeta) return fromMeta;
+
+  // JSON-LD "image" values, either a string or an object/array with a url.
+  const jsonLd =
+    metaContent(html, /"image"\s*:\s*"(https?:\/\/[^"]+)"/i) ??
+    metaContent(html, /"image"\s*:\s*\{[^}]*?"url"\s*:\s*"(https?:\/\/[^"]+)"/i) ??
+    metaContent(html, /"image"\s*:\s*\[\s*"(https?:\/\/[^"]+)"/i) ??
+    metaContent(html, /"thumbnailUrl"\s*:\s*"(https?:\/\/[^"]+)"/i);
+  if (jsonLd) return jsonLd;
+
+  // Last resort: the first reasonably sized <img> on the page.
+  const imgMatches = html.matchAll(/<img[^>]+(?:data-src|src)=["']([^"']+\.(?:jpe?g|png|webp|gif)[^"']*)["']/gi);
+  for (const match of imgMatches) {
+    const candidate = match[1];
+    if (!candidate || /sprite|icon|logo-?\d*\.|pixel|blank|1x1/i.test(candidate)) continue;
+    return candidate.replace(/&amp;/g, "&");
+  }
+
+  return null;
 }
 
 /**
