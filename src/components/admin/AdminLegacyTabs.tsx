@@ -1560,11 +1560,13 @@ function normaliseBriefSections(raw: unknown, legacyOrder: unknown): BriefSectio
 
 export function SpotlightForm({
   onCreated,
+  onUpdated,
   editData,
   onCancel,
   section,
 }: {
   onCreated: () => void;
+  onUpdated?: () => void;
   editData?: Record<string, any> | null;
   onCancel?: () => void;
   section?: "spotlight" | "brief";
@@ -2167,7 +2169,14 @@ export function SpotlightForm({
       });
       setThumbFrame(DEFAULT_THUMB_FRAME);
     }
-    onCreated();
+    // When updating an existing page, stay on the editor by default so the
+    // admin can keep editing; fall back to onCreated only when no onUpdated
+    // handler was supplied.
+    if (isEditing) {
+      (onUpdated ?? onCreated)();
+    } else {
+      onCreated();
+    }
   }
 
   return (
