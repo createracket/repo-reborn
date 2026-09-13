@@ -1562,7 +1562,9 @@ export function SpotlightForm({
   >(() => (editData?.links?.section_text_size ?? {}) as Record<string, "small" | "default" | "large" | "xl">);
 
   const [dragKey, setDragKey] = useState<string | null>(null);
-  const [collapsedBriefSections, setCollapsedBriefSections] = useState<Set<string>>(new Set());
+  const [collapsedBriefSections, setCollapsedBriefSections] = useState<Set<string>>(
+    () => new Set(sectionOrder),
+  );
 
   function toggleBriefSection(key: string) {
     setCollapsedBriefSections((previous) => {
