@@ -479,6 +479,29 @@ export function ProjectPlannerAdmin() {
     if (r1.error || r2.error) toast.error("Couldn't save the new order");
   }
 
+  /** Drop `dragId` so it sits at position `targetIdx` within the open list. */
+  async function dropTaskAt(dragId: string, targetIdx: number) {
+    const list = [...openTasksRef.current];
+    const from = list.findIndex((t) => t.id === dragId);
+    if (from < 0) return;
+    let to = targetIdx;
+    if (from < to) to -= 1; // account for removing the dragged item first
+    if (from === to) return;
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    const prevOrder = to > 0 ? (list[to - 1].sort_order ?? 0) : null;
+    const nextOrder = to < list.length - 1 ? (list[to + 1].sort_order ?? 0) : null;
+    const newOrder = orderBetween(prevOrder, nextOrder);
+    setTasks((t) => {
+      const updated = t.map((x) => (x.id === dragId ? { ...x, sort_order: newOrder } : x));
+      return [...updated].sort(
+        (x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0) || x.created_at.localeCompare(y.created_at),
+      );
+    });
+    const { error } = await (supabase as any).from("admin_tasks").update({ sort_order: newOrder }).eq("id", dragId);
+    if (error) toast.error("Couldn't save the new order");
+  }
+
   async function removeTask(id: string) {
     setTasks((t) => t.filter((x) => x.id !== id));
     const { error } = await (supabase as any).from("admin_tasks").delete().eq("id", id);
