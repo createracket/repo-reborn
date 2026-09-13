@@ -140,6 +140,9 @@ function EditBriefPage() {
               section="brief"
               editData={brief}
               onCreated={() => navigate({ to: "/briefs" })}
+              onUpdated={() => {
+                // Stay on the editor after updating — just keep the page in place.
+              }}
               onCancel={() => navigate({ to: "/briefs" })}
             />
           </Suspense>

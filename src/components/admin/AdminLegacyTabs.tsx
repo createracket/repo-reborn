@@ -560,6 +560,10 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                       setEditingSpotlight(null);
                       setSpotlightFormOpen(false);
                     }}
+                    onUpdated={() => {
+                      // Stay on the editor after an update — just refresh the list.
+                      refreshSpotlights();
+                    }}
                     onCancel={() => {
                       setEditingSpotlight(null);
                       setSpotlightFormOpen(false);
