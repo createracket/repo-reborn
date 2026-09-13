@@ -8,6 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist, scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
 import { draftSpotlightFromText } from "@/lib/spotlight-draft.functions";
 import { adminUploadSpotlightImage } from "@/lib/spotlight-images.functions";
+import { adminSyncImageFromUrl } from "@/lib/image-sync.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 
 import { Button } from "@/components/ui/button";
@@ -1373,9 +1374,18 @@ function Table({ headers, children }: { headers: string[]; children: React.React
 }
 
 /** Pull the post's preview image from a TikTok / Instagram / YouTube URL. */
-function FetchPreviewButton({ url, onFetched }: { url: string; onFetched: (u: string) => void }) {
+function FetchPreviewButton({
+  url,
+  onFetched,
+  folder = "video-covers",
+}: {
+  url: string;
+  onFetched: (u: string) => void;
+  folder?: "spotlights" | "video-covers";
+}) {
   const [loading, setLoading] = useState(false);
   const fetchPreview = useServerFn(scrapePostMetrics);
+  const syncImage = useServerFn(adminSyncImageFromUrl);
 
   async function run() {
     const clean = (url ?? "").trim();
@@ -1389,7 +1399,9 @@ function FetchPreviewButton({ url, onFetched }: { url: string; onFetched: (u: st
       if (!result.ok) throw new Error(result.error);
       const thumb = result.metrics.thumbnail_url;
       if (!thumb) throw new Error("No preview image available for that link");
-      onFetched(thumb);
+      // Keep a permanent copy so the cover doesn't expire on the source CDN.
+      const saved = await syncImage({ data: { url: thumb, folder } }).catch(() => null);
+      onFetched(saved?.publicUrl ?? thumb);
       toast.success("Preview pulled from link");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Couldn't fetch preview");
@@ -1418,7 +1430,31 @@ function ImageUploader({
   folder?: "spotlights" | "video-covers";
 }) {
   const [uploading, setUploading] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [syncing, setSyncing] = useState(false);
   const uploadImage = useServerFn(adminUploadSpotlightImage);
+  const syncImage = useServerFn(adminSyncImageFromUrl);
+
+  async function handleLink() {
+    const clean = linkUrl.trim();
+    if (!clean) {
+      toast.error("Paste a link first");
+      return;
+    }
+    setSyncing(true);
+    try {
+      const { publicUrl } = await syncImage({
+        data: { url: clean, folder: folder ?? "spotlights" },
+      });
+      onChange(publicUrl);
+      setLinkUrl("");
+      toast.success(`${label} saved from link`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't pull an image from that link");
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -1482,6 +1518,24 @@ function ImageUploader({
           ) : null}
           <p className="text-xs text-muted-foreground">{hint}</p>
         </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          value={linkUrl}
+          onChange={(e) => setLinkUrl(e.target.value)}
+          placeholder="Or paste a link (image, post or web page)"
+          className="w-full sm:w-auto sm:flex-1"
+        />
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          disabled={syncing || !linkUrl.trim()}
+          onClick={handleLink}
+        >
+          <RefreshCw className={`mr-1 size-4 ${syncing ? "animate-spin" : ""}`} />
+          {syncing ? "Syncing…" : "Sync from link"}
+        </Button>
       </div>
     </div>
   );
