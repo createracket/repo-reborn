@@ -2395,7 +2395,7 @@ export function SpotlightForm({
               </div>
             </div>
           </details>
-          {sectionKind !== "brief" ? <div className="space-y-1.5 md:col-span-2">
+          <div className="space-y-1.5 md:col-span-2">
             <Label htmlFor="vibe_tags">Vibe check tags (comma separated)</Label>
             <Input id="vibe_tags" value={form.vibe_tags} onChange={(e) => set("vibe_tags", e.target.value)} placeholder="Coffee, Sport, Fashion" />
             {form.vibe_tags.trim() ? (
@@ -2405,8 +2405,8 @@ export function SpotlightForm({
                 ))}
               </div>
             ) : null}
-          </div> : null}
-          {sectionKind !== "brief" ? <details className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+          </div>
+          <details className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Section headings
               <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -2533,8 +2533,7 @@ export function SpotlightForm({
                 </div>
               </div>
             </div>
-          </details>
-</>
+          </details></>
           )}
           <details className="!order-3 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
