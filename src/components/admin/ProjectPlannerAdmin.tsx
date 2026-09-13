@@ -228,6 +228,8 @@ export function ProjectPlannerAdmin() {
   const [editDue, setEditDue] = useState("");
   const [editLink, setEditLink] = useState("");
   const [editUsers, setEditUsers] = useState<LinkedUser[]>([]);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropIdx, setDropIdx] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
