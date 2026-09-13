@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Instagram, Mail, ExternalLink, Mic2, Check, X, Youtube, Twitch, Facebook, Music2 } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Instagram, Mail, ExternalLink, Mic2, Check, X, Youtube, Twitch, Facebook, Music2, ChevronLeft, ChevronRight } from "lucide-react";
 import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
 
@@ -103,6 +103,75 @@ export const SPOTLIGHT_SECTIONS = [
   { key: "eoi", label: "Expressions of interest" },
   { key: "videos", label: "Watch" },
 ] as const;
+
+function MediaCarousel({
+  title,
+  children,
+  count,
+  shape,
+}: {
+  title: string;
+  children: ReactNode[];
+  count: number;
+  shape: "video" | "photo";
+}) {
+  const rowRef = useRef<HTMLDivElement>(null);
+  const scroll = (direction: -1 | 1) => {
+    const row = rowRef.current;
+    if (!row) return;
+    row.scrollBy({ left: direction * row.clientWidth * 0.82, behavior: "smooth" });
+  };
+  const desktopColumns = count >= 4
+    ? "md:grid-cols-4"
+    : count === 3
+      ? "md:grid-cols-3"
+      : "md:grid-cols-2";
+
+  return (
+    <>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <h2 className="min-w-0 font-display text-3xl">{title}</h2>
+        {count > 1 ? (
+          <div className="flex shrink-0 items-center gap-2 md:hidden">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => scroll(-1)}
+              aria-label={`Previous ${shape}`}
+              title={`Previous ${shape}`}
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => scroll(1)}
+              aria-label={`Next ${shape}`}
+              title={`Next ${shape}`}
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        ) : null}
+      </div>
+      <div
+        ref={rowRef}
+        className={`no-scrollbar mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-smooth sm:gap-6 md:grid md:overflow-visible ${desktopColumns}`}
+      >
+        {children.map((child, index) => (
+          <div
+            key={index}
+            className="w-[78vw] max-w-72 shrink-0 snap-start md:w-auto md:max-w-none"
+          >
+            {child}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
 
 function handleLabel(url: string): string {
   try {
@@ -753,17 +822,15 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
               if (videos.length === 0) return null;
               return (
                 <section className="mt-16">
-                  <h2 className="font-display text-3xl">{sectionLabel("videos", "Watch")}</h2>
-                  <div className={`mt-4 grid gap-3 sm:gap-6 ${videos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : "md:grid-cols-3"}`}>
-                    {videos.map((v, i) => (
+                  <MediaCarousel title={sectionLabel("videos", "Watch")} count={videos.length} shape="video">
+                    {videos.map((v) => (
                       <ClipCard
-                        key={i}
                         href={v.embed.href}
                         provider={v.embed.provider}
                         poster={v.cover ?? posters[v.embed.href] ?? null}
                       />
                     ))}
-                  </div>
+                  </MediaCarousel>
                 </section>
               );
             })(),
@@ -776,20 +843,16 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
               if (photos.length === 0) return null;
               return (
                 <section className="mt-12">
-                  <h2 className="font-display text-3xl">{sectionLabel("photos", "Photos")}</h2>
-                  <div
-                    className={`mt-4 grid gap-3 sm:gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}
-                  >
-                    {photos.map((src, i) => (
+                  <MediaCarousel title={sectionLabel("photos", "Photos")} count={photos.length} shape="photo">
+                    {photos.map((src) => (
                       <div
-                        key={i}
                         className="overflow-hidden rounded-3xl border border-border/60 bg-muted/40"
                         style={{ aspectRatio: "4 / 5" }}
                       >
                         <img src={src} alt="" loading="lazy" className="size-full object-cover" />
                       </div>
                     ))}
-                  </div>
+                  </MediaCarousel>
                 </section>
               );
             })(),
@@ -831,12 +894,12 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
                 return embed ? [{ embed, cover: content[`video${number}_cover`] }] : [];
               });
               if (!videos.length) return null;
-              return <section className="mt-16"><h2 className="font-display text-3xl">{label || "Watch"}</h2><div className={`mt-4 grid gap-3 sm:gap-6 ${videos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : "md:grid-cols-3"}`}>{videos.map((video, index) => <ClipCard key={index} href={video.embed.href} provider={video.embed.provider} poster={video.cover ?? posters[video.embed.href] ?? null} />)}</div></section>;
+              return <section className="mt-16"><MediaCarousel title={label || "Watch"} count={videos.length} shape="video">{videos.map((video) => <ClipCard href={video.embed.href} provider={video.embed.provider} poster={video.cover ?? posters[video.embed.href] ?? null} />)}</MediaCarousel></section>;
             }
             if (instance.type === "photos") {
               const photos = [1, 2, 3, 4].map((number) => content[`photo${number}`]).filter((photo): photo is string => !!photo?.trim());
               if (!photos.length) return null;
-              return <section className="mt-12"><h2 className="font-display text-3xl">{label || "Photos"}</h2><div className={`mt-4 grid gap-3 sm:gap-6 ${photos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : photos.length === 3 ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"}`}>{photos.map((src, index) => <div key={index} className="aspect-[4/5] overflow-hidden rounded-3xl border border-border/60 bg-muted/40"><img src={src} alt="" loading="lazy" className="size-full object-cover" /></div>)}</div></section>;
+              return <section className="mt-12"><MediaCarousel title={label || "Photos"} count={photos.length} shape="photo">{photos.map((src) => <div className="aspect-[4/5] overflow-hidden rounded-3xl border border-border/60 bg-muted/40"><img src={src} alt="" loading="lazy" className="size-full object-cover" /></div>)}</MediaCarousel></section>;
             }
             return null;
           };
