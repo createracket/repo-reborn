@@ -120,6 +120,221 @@ type SpotlightInterest = {
 
 /** Skeleton shown while a lazily-loaded tab panel downloads. */
 function TabFallback() {
+  function briefSectionContent(key: string) {
+    switch (key) {
+      case "host_bio":
+        return (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="label_host_bio">Section heading</Label>
+              <Input
+                id="label_host_bio"
+                value={form.label_host_bio}
+                onChange={(e) => set("label_host_bio", e.target.value)}
+                placeholder="About the host"
+              />
+            </div>
+            <RichTextField id="host_bio" label="Content" value={form.host_bio} onChange={(v) => set("host_bio", v)} />
+          </div>
+        );
+      case "audience":
+        return (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="label_audience">Section heading</Label>
+              <Input
+                id="label_audience"
+                value={form.label_audience}
+                onChange={(e) => set("label_audience", e.target.value)}
+                placeholder="Who's listening"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="audience">Audience segments (one per line)</Label>
+              <Textarea
+                id="audience"
+                rows={4}
+                value={form.audience_segments}
+                onChange={(e) => set("audience_segments", e.target.value)}
+              />
+            </div>
+          </div>
+        );
+      case "spotify":
+        return (
+          <div className="space-y-1.5">
+            <Label htmlFor="spotifyEmbed-flow">Spotify embed URL</Label>
+            <Input
+              id="spotifyEmbed-flow"
+              value={form.spotifyEmbed}
+              onChange={(e) => set("spotifyEmbed", e.target.value)}
+              placeholder="https://open.spotify.com/embed/show/..."
+            />
+          </div>
+        );
+      case "partnership":
+        return (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="label_partnership">Section heading</Label>
+              <Input
+                id="label_partnership"
+                value={form.label_partnership}
+                onChange={(e) => set("label_partnership", e.target.value)}
+                placeholder="Partnership"
+              />
+            </div>
+            <RichTextField
+              id="partnership_pitch"
+              label="Content"
+              value={form.partnership_pitch}
+              onChange={(v) => set("partnership_pitch", v)}
+            />
+          </div>
+        );
+      case "vibe_check":
+        return (
+          <div className="space-y-1.5">
+            <Label htmlFor="vibe_tags">Vibe check tags (comma separated)</Label>
+            <Input
+              id="vibe_tags"
+              value={form.vibe_tags}
+              onChange={(e) => set("vibe_tags", e.target.value)}
+              placeholder="Coffee, Sport, Fashion"
+            />
+          </div>
+        );
+      case "dos_donts":
+        return (
+          <div className="space-y-2">
+            <Label htmlFor="dos_donts">Dos and don'ts (one per line)</Label>
+            <Textarea
+              id="dos_donts"
+              rows={4}
+              value={form.dos_donts}
+              onChange={(e) => set("dos_donts", e.target.value)}
+              placeholder={"+ Tag @brand in the caption\nx Don't mention competitors"}
+            />
+            {form.dos_donts.split("\n").some((line: string) => line.trim()) ? (
+              <div className="space-y-1.5 pt-1">
+                {form.dos_donts.split("\n").map((line: string, index: number) => {
+                  const item = parseDoLine(line);
+                  if (!item.text) return null;
+                  return (
+                    <div key={`${item.text}-${index}`} className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2"
+                        onClick={() => {
+                          const lines = form.dos_donts.split("\n");
+                          const current = parseDoLine(lines[index] ?? "");
+                          lines[index] = `${current.kind === "do" ? "x" : "+"} ${current.text}`;
+                          set("dos_donts", lines.join("\n"));
+                        }}
+                      >
+                        {item.kind === "do" ? (
+                          <Check className="size-3.5 text-green-500" />
+                        ) : (
+                          <X className="size-3.5 text-yellow-400" />
+                        )}
+                      </Button>
+                      <span className="text-sm text-muted-foreground">{item.text}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+        );
+      case "eoi":
+        return (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="label_eoi">Section heading</Label>
+              <Input
+                id="label_eoi"
+                value={form.label_eoi}
+                onChange={(e) => set("label_eoi", e.target.value)}
+                placeholder="Expressions of interest"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="eoi">Opportunities (one per line)</Label>
+              <Textarea
+                id="eoi"
+                rows={4}
+                value={form.eoi_opportunities}
+                onChange={(e) => set("eoi_opportunities", e.target.value)}
+                placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"}
+              />
+            </div>
+          </div>
+        );
+      case "videos":
+        return (
+          <div className="space-y-1.5">
+            <Label htmlFor="label_videos">Section heading</Label>
+            <Input
+              id="label_videos"
+              value={form.label_videos}
+              onChange={(e) => set("label_videos", e.target.value)}
+              placeholder="Watch"
+            />
+            <p className="text-xs text-muted-foreground">Add and edit the clips in Featured videos below.</p>
+          </div>
+        );
+      case "photos":
+        return <p className="text-xs text-muted-foreground">Add and edit the images in Featured photos below.</p>;
+      default:
+        return null;
+    }
+  }
+
+  function briefSectionStyleControls(key: string, label: string) {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground">Border</span>
+        {([
+          { value: "none", label: "None", className: "border-border" },
+          { value: "pink", label: "Pink", className: "border-pink-accent" },
+          { value: "green", label: "Green", className: "border-primary" },
+        ] as const).map((option) => (
+          <Button
+            key={option.value}
+            type="button"
+            size="sm"
+            variant="outline"
+            className={`h-7 border-2 px-2 text-[11px] ${option.className} ${
+              (sectionBorders[key] ?? "none") === option.value ? "bg-muted font-medium" : "opacity-60"
+            }`}
+            onClick={() => setSectionBorders((previous) => ({ ...previous, [key]: option.value }))}
+            aria-label={`${label} border: ${option.label}`}
+          >
+            {option.label}
+          </Button>
+        ))}
+        <span className="ml-1 text-xs text-muted-foreground">Text</span>
+        {SECTION_TEXT_SIZES.map(({ key: size, label: sizeLabel }) => (
+          <Button
+            key={size}
+            type="button"
+            size="sm"
+            variant="outline"
+            className={`h-7 px-2 text-[11px] ${
+              (sectionTextSizes[key] ?? "default") === size ? "border-foreground/40 bg-muted font-medium" : "opacity-60"
+            }`}
+            onClick={() => setSectionTextSizes((previous) => ({ ...previous, [key]: size }))}
+            aria-label={`${label} text size: ${sizeLabel}`}
+          >
+            {sizeLabel}
+          </Button>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="animate-pulse space-y-3" aria-hidden>
       <div className="h-8 w-48 rounded bg-muted/60" />
