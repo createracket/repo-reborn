@@ -1562,6 +1562,16 @@ export function SpotlightForm({
   >(() => (editData?.links?.section_text_size ?? {}) as Record<string, "small" | "default" | "large" | "xl">);
 
   const [dragKey, setDragKey] = useState<string | null>(null);
+  const [collapsedBriefSections, setCollapsedBriefSections] = useState<Set<string>>(new Set());
+
+  function toggleBriefSection(key: string) {
+    setCollapsedBriefSections((previous) => {
+      const next = new Set(previous);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   function moveSection(from: number, to: number) {
     setSectionOrder((prev) => {
@@ -1658,9 +1668,9 @@ export function SpotlightForm({
       case "eoi":
         return <div className="space-y-3"><div className="space-y-1.5"><Label htmlFor="label_eoi">Section heading</Label><Input id="label_eoi" value={form.label_eoi} onChange={(e) => set("label_eoi", e.target.value)} placeholder="Expressions of interest" /></div><div className="space-y-1.5"><Label htmlFor="eoi">Opportunities (one per line)</Label><Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} /></div></div>;
       case "videos":
-        return <div className="space-y-1.5"><Label htmlFor="label_videos">Section heading</Label><Input id="label_videos" value={form.label_videos} onChange={(e) => set("label_videos", e.target.value)} placeholder="Watch" /><p className="text-xs text-muted-foreground">Add and edit the clips in Featured videos below.</p></div>;
+        return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor="label_videos">Section heading</Label><Input id="label_videos" value={form.label_videos} onChange={(e) => set("label_videos", e.target.value)} placeholder="Watch" /></div><p className="text-xs text-muted-foreground">Add up to four public TikTok or Instagram post or reel links. A cover image is recommended for Instagram clips.</p>{([1, 2, 3, 4] as const).map((n) => { const urlKey = `video${n}` as "video1" | "video2" | "video3" | "video4"; const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover" | "video4_cover"; return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${urlKey}-flow`}>Video {n}</Label><Input id={`${urlKey}-flow`} value={form[urlKey]} onChange={(e) => set(urlKey, e.target.value)} placeholder="TikTok or Instagram reel URL" /><FetchPreviewButton url={form[urlKey]} onFetched={(url) => set(coverKey, url)} /><Input id={`${coverKey}-flow`} value={form[coverKey]} onChange={(e) => set(coverKey, e.target.value)} placeholder="Cover image URL (optional)" /><ImageUploader label={`Video ${n} cover`} value={form[coverKey]} onChange={(url) => set(coverKey, url)} aspect="9 / 16" hint="9:16 preferred, under 8MB." folder="video-covers" /></div>; })}</div>;
       case "photos":
-        return <p className="text-xs text-muted-foreground">Add and edit the images in Featured photos below.</p>;
+        return <div className="space-y-4"><p className="text-xs text-muted-foreground">Upload up to four images. Portrait 4:5 images work best.</p>{([1, 2, 3, 4] as const).map((n) => { const photoKey = `photo${n}` as "photo1" | "photo2" | "photo3" | "photo4"; return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${photoKey}-flow`}>Photo {n}</Label><Input id={`${photoKey}-flow`} value={form[photoKey]} onChange={(e) => set(photoKey, e.target.value)} placeholder="Image URL (optional)" /><ImageUploader label={`Photo ${n}`} value={form[photoKey]} onChange={(url) => set(photoKey, url)} aspect="4 / 5" hint="4:5 preferred, under 8MB." folder="spotlights" /></div>; })}</div>;
       default:
         return null;
     }
@@ -2270,6 +2280,7 @@ export function SpotlightForm({
                   {sectionOrder.map((key, index) => {
                     const meta = SPOTLIGHT_SECTION_ORDER.find((sectionMeta) => sectionMeta.key === key);
                     if (!meta) return null;
+                    const isCollapsed = collapsedBriefSections.has(key);
                     return (
                       <div
                         key={key}
@@ -2280,9 +2291,9 @@ export function SpotlightForm({
                           moveSection(sectionOrder.indexOf(dragKey), index);
                           setDragKey(null);
                         }}
-                        className={`rounded-md border border-border/60 bg-background p-3 ${dragKey === key ? "opacity-50" : ""}`}
+                        className={`rounded-md border border-border/60 bg-background px-3 ${isCollapsed ? "py-2" : "py-3"} ${dragKey === key ? "opacity-50" : ""}`}
                       >
-                        <div className="mb-3 flex items-center gap-2 border-b border-border/50 pb-2">
+                        <div className={`flex items-center gap-2 ${isCollapsed ? "" : "mb-3 border-b border-border/50 pb-2"}`}>
                           <span
                             draggable
                             onDragStart={() => setDragKey(key)}
@@ -2295,11 +2306,14 @@ export function SpotlightForm({
                           <span className="flex-1 text-sm font-medium">{index + 1}. {meta.label}</span>
                           <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${meta.label} up`}><ChevronUp className="size-3.5" /></Button>
                           <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index + 1)} disabled={index === sectionOrder.length - 1} aria-label={`Move ${meta.label} down`}><ChevronDown className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => toggleBriefSection(key)} aria-expanded={!isCollapsed} aria-label={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`} title={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`}>
+                            {isCollapsed ? <ChevronDown className="size-3.5" /> : <ChevronUp className="size-3.5" />}
+                          </Button>
                         </div>
-                        <div className="space-y-4">
+                        {!isCollapsed ? <div className="space-y-4">
                           {briefSectionContent(key)}
                           <div className="border-t border-border/50 pt-3">{briefSectionStyleControls(key, meta.label)}</div>
-                        </div>
+                        </div> : null}
                       </div>
                     );
                   })}
@@ -2671,7 +2685,7 @@ export function SpotlightForm({
             <Label htmlFor="contact">Contact (email or URL)</Label>
             <Input id="contact" value={form.contact} onChange={(e) => set("contact", e.target.value)} />
           </div>
-          <details className="!order-4 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+          {sectionKind !== "brief" ? <><details className="!order-4 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Featured videos
               <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -2751,7 +2765,7 @@ export function SpotlightForm({
                 );
               })}
             </div>
-          </details>
+          </details></> : null}
           <div className="md:col-span-2 pt-2">
             <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">Key metrics (optional)</p>
           </div>
