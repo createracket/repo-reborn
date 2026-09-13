@@ -28,7 +28,7 @@ const SpotlightForm = lazy(() =>
   import("@/components/admin/AdminLegacyTabs").then((m) => ({ default: m.SpotlightForm })),
 );
 
-export const Route = createFileRoute("/_authenticated/briefs")({
+export const Route = createFileRoute("/_authenticated/briefs/")({
   validateSearch: (search: Record<string, unknown>): { edit?: string } =>
     typeof search.edit === "string" ? { edit: search.edit } : {},
   head: () => ({
