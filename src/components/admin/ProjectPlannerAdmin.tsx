@@ -581,6 +581,7 @@ export function ProjectPlannerAdmin() {
                   onDragOver={(e) => {
                     if (!dragId) return;
                     e.preventDefault();
+                    e.stopPropagation();
                     e.dataTransfer.dropEffect = "move";
                     setDropIdx(idx);
                   }}
