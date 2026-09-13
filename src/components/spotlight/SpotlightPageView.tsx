@@ -116,22 +116,26 @@ function MediaCarousel({
   shape: "video" | "photo";
 }) {
   const rowRef = useRef<HTMLDivElement>(null);
+  const showArrows = count >= 3;
   const scroll = (direction: -1 | 1) => {
     const row = rowRef.current;
     if (!row) return;
-    row.scrollBy({ left: direction * row.clientWidth * 0.82, behavior: "smooth" });
+    // Move roughly one item (half the row width) so two-per-view snaps cleanly.
+    row.scrollBy({ left: direction * row.clientWidth * 0.52, behavior: "smooth" });
   };
   const desktopColumns = count >= 4
     ? "md:grid-cols-4"
     : count === 3
       ? "md:grid-cols-3"
       : "md:grid-cols-2";
+  // One item -> full-width card; two or more -> two cards side by side on mobile.
+  const mobileItemWidth = count <= 1 ? "w-[78vw] max-w-72" : "w-[calc(50%-0.375rem)]";
 
   return (
     <>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <h2 className="min-w-0 font-display text-3xl">{title}</h2>
-        {count > 1 ? (
+        {showArrows ? (
           <div className="flex shrink-0 items-center gap-2 md:hidden">
             <Button
               type="button"
@@ -163,7 +167,7 @@ function MediaCarousel({
         {children.map((child, index) => (
           <div
             key={index}
-            className="w-[78vw] max-w-72 shrink-0 snap-start md:w-auto md:max-w-none"
+            className={`${mobileItemWidth} shrink-0 snap-start md:w-auto md:max-w-none`}
           >
             {child}
           </div>
