@@ -79,6 +79,8 @@ type PartnerLinks = {
   colour_thumbnails?: boolean;
 };
 
+type BriefSectionInstance = NonNullable<PartnerLinks["brief_sections"]>[number];
+
 export const SECTION_TEXT_SIZES = [
   { key: "small", label: "S" },
   { key: "default", label: "M" },
@@ -823,7 +825,11 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
               return <section className="mt-10"><Card><CardHeader><CardTitle className="font-display text-2xl">{label || "Expressions of interest"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((item, index) => <li key={index} className="flex items-center gap-2 text-sm"><span className="size-1.5 rounded-full bg-primary" />{item}</li>)}</ul></CardContent></Card></section>;
             }
             if (instance.type === "videos") {
-              const videos = [1, 2, 3, 4].map((number) => { const url = content[`video${number}`]; const embed = url ? getSocialEmbed(url) : null; return embed ? { embed, cover: content[`video${number}_cover`] } : null; }).filter((video): video is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover: string | undefined } => !!video);
+              const videos = [1, 2, 3, 4].flatMap((number) => {
+                const url = content[`video${number}`];
+                const embed = url ? getSocialEmbed(url) : null;
+                return embed ? [{ embed, cover: content[`video${number}_cover`] }] : [];
+              });
               if (!videos.length) return null;
               return <section className="mt-16"><h2 className="font-display text-3xl">{label || "Watch"}</h2><div className={`mt-4 grid gap-3 sm:gap-6 ${videos.length >= 4 ? "grid-cols-2 md:grid-cols-4" : "md:grid-cols-3"}`}>{videos.map((video, index) => <ClipCard key={index} href={video.embed.href} provider={video.embed.provider} poster={video.cover ?? posters[video.embed.href] ?? null} />)}</div></section>;
             }
@@ -848,7 +854,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
           ];
           const given = (links.section_order ?? []).filter((k) => defaults.includes(k));
           const legacyOrder = [...given, ...defaults.filter((k) => !given.includes(k))];
-          const order = kind === "brief" && links.brief_sections?.length
+          const order: BriefSectionInstance[] = kind === "brief" && links.brief_sections?.length
             ? links.brief_sections
             : legacyOrder.map((type) => ({ id: type, type }));
           return order.map((instance) => {
