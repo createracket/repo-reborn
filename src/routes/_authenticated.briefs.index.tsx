@@ -190,21 +190,10 @@ function BriefsPage() {
                 {b.published ? "View" : "Preview"} <ExternalLink className="ml-1 size-3" />
               </a>
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={async () => {
-                const { data } = await supabase
-                  .from("partner_pages" as any)
-                  .select("*")
-                  .eq("id", b.id)
-                  .maybeSingle();
-                setEditing(data as any);
-                setFormOpen(true);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-            >
-              <Pencil className="size-3" />
+            <Button asChild size="sm" variant="outline">
+              <Link to="/briefs/edit/$key" params={{ key: b.slug }}>
+                <Pencil className="size-3" />
+              </Link>
             </Button>
             <PartnerPageHistory pageId={b.id} pageTitle={b.headline} onRestored={refresh} />
             <Button size="sm" variant="outline" onClick={() => setArchived(b, !b.archived)}>
@@ -317,43 +306,30 @@ function BriefsPage() {
             <button
               type="button"
               className="w-full text-left"
-              onClick={() => {
-                if (editing) {
-                  setEditing(null);
-                  setFormOpen(false);
-                } else {
-                  setFormOpen((v) => !v);
-                }
-              }}
+              onClick={() => setFormOpen((v) => !v)}
             >
               <CardHeader className="flex flex-row items-center justify-between gap-3">
                 <div>
-                  <CardTitle className="font-display text-xl">
-                    {editing ? "Edit brief" : "New brief"}
-                  </CardTitle>
+                  <CardTitle className="font-display text-xl">New brief</CardTitle>
                   <CardDescription>
-                    {editing ? `Updating /brief/${editing.slug}` : "Create a brief page. Lives at /brief/<slug>."}
+                    Create a brief page. Lives at /brief/&lt;slug&gt;.
                   </CardDescription>
                 </div>
-                {(formOpen || editing) ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                {formOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
               </CardHeader>
             </button>
-            {(formOpen || editing) && (
+            {formOpen && (
               <CardContent>
                 <Suspense fallback={<p className="text-sm text-muted-foreground">Loading builder…</p>}>
                   <SpotlightForm
-                    key={editing?.id ?? "new"}
+                    key="new"
                     section="brief"
-                    editData={editing}
+                    editData={null}
                     onCreated={() => {
                       refresh();
-                      setEditing(null);
                       setFormOpen(false);
                     }}
-                    onCancel={() => {
-                      setEditing(null);
-                      setFormOpen(false);
-                    }}
+                    onCancel={() => setFormOpen(false)}
                   />
                 </Suspense>
               </CardContent>
