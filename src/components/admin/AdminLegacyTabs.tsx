@@ -1,6 +1,6 @@
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check, GripVertical } from "lucide-react";
+import { ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check, GripVertical, Copy, Eye, EyeOff, PanelTopClose } from "lucide-react";
 import { parseDoLine } from "@/lib/dos-donts";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -1537,6 +1537,27 @@ function normaliseSectionOrder(raw: unknown): string[] {
   return [...given, ...all.filter((k) => !given.includes(k))];
 }
 
+type BriefSectionInstance = {
+  id: string;
+  type: string;
+  hidden?: boolean;
+  label?: string;
+  content?: Record<string, string>;
+};
+
+function normaliseBriefSections(raw: unknown, legacyOrder: unknown): BriefSectionInstance[] {
+  const validTypes = new Set(SPOTLIGHT_SECTION_ORDER.map((section) => section.key as string));
+  if (Array.isArray(raw)) {
+    const saved = raw.filter((item): item is BriefSectionInstance => {
+      if (!item || typeof item !== "object") return false;
+      const candidate = item as Partial<BriefSectionInstance>;
+      return typeof candidate.id === "string" && typeof candidate.type === "string" && validTypes.has(candidate.type);
+    });
+    if (saved.length > 0) return saved;
+  }
+  return normaliseSectionOrder(legacyOrder).map((type) => ({ id: type, type }));
+}
+
 export function SpotlightForm({
   onCreated,
   editData,
@@ -1553,6 +1574,9 @@ export function SpotlightForm({
   const [sectionOrder, setSectionOrder] = useState<string[]>(() =>
     normaliseSectionOrder(editData?.links?.section_order),
   );
+  const [briefSections, setBriefSections] = useState<BriefSectionInstance[]>(() =>
+    normaliseBriefSections(editData?.links?.brief_sections, editData?.links?.section_order),
+  );
   const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(() => readThumbFrame(editData?.links));
   const [sectionBorders, setSectionBorders] = useState<Record<string, "none" | "pink" | "green">>(
     () => (editData?.links?.section_borders ?? {}) as Record<string, "none" | "pink" | "green">,
@@ -1563,7 +1587,7 @@ export function SpotlightForm({
 
   const [dragKey, setDragKey] = useState<string | null>(null);
   const [collapsedBriefSections, setCollapsedBriefSections] = useState<Set<string>>(
-    () => new Set(sectionOrder),
+    () => new Set(normaliseBriefSections(editData?.links?.brief_sections, editData?.links?.section_order).map((item) => item.id)),
   );
 
   function toggleBriefSection(key: string) {
@@ -1583,6 +1607,35 @@ export function SpotlightForm({
       next.splice(to, 0, item);
       return next;
     });
+  }
+
+  function moveBriefSection(from: number, to: number) {
+    setBriefSections((previous) => {
+      if (to < 0 || to >= previous.length || from === to) return previous;
+      const next = [...previous];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return next;
+    });
+  }
+
+  function updateBriefSection(id: string, updates: Partial<BriefSectionInstance>) {
+    setBriefSections((previous) => previous.map((item) => item.id === id ? { ...item, ...updates } : item));
+  }
+
+  function updateBriefSectionContent(id: string, key: string, value: string) {
+    setBriefSections((previous) => previous.map((item) => item.id === id
+      ? { ...item, content: { ...item.content, [key]: value } }
+      : item));
+  }
+
+  function duplicateBriefSection(source: BriefSectionInstance, index: number) {
+    const id = `${source.type}-${Date.now().toString(36)}`;
+    const duplicate: BriefSectionInstance = { id, type: source.type, label: "", content: {} };
+    setBriefSections((previous) => [...previous.slice(0, index + 1), duplicate, ...previous.slice(index + 1)]);
+    setCollapsedBriefSections((previous) => new Set(previous).add(id));
+    setSectionBorders((previous) => ({ ...previous, [id]: "none" }));
+    setSectionTextSizes((previous) => ({ ...previous, [id]: "default" }));
   }
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
