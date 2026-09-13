@@ -1635,6 +1635,7 @@ export function SpotlightForm({
     label_partnership: editData?.links?.section_labels?.partnership ?? "",
     label_eoi: editData?.links?.section_labels?.eoi ?? "",
     label_videos: editData?.links?.section_labels?.videos ?? "",
+    label_photos: editData?.links?.section_labels?.photos ?? "",
     label_members: editData?.links?.section_labels?.members ?? "",
     youtube_name: editData?.links?.youtube_name ?? "",
     apple_music_name: editData?.links?.apple_music_name ?? "",
@@ -1670,7 +1671,7 @@ export function SpotlightForm({
       case "videos":
         return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor="label_videos">Section heading</Label><Input id="label_videos" value={form.label_videos} onChange={(e) => set("label_videos", e.target.value)} placeholder="Watch" /></div><p className="text-xs text-muted-foreground">Add up to four public TikTok or Instagram post or reel links. A cover image is recommended for Instagram clips.</p>{([1, 2, 3, 4] as const).map((n) => { const urlKey = `video${n}` as "video1" | "video2" | "video3" | "video4"; const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover" | "video4_cover"; return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${urlKey}-flow`}>Video {n}</Label><Input id={`${urlKey}-flow`} value={form[urlKey]} onChange={(e) => set(urlKey, e.target.value)} placeholder="TikTok or Instagram reel URL" /><FetchPreviewButton url={form[urlKey]} onFetched={(url) => set(coverKey, url)} /><Input id={`${coverKey}-flow`} value={form[coverKey]} onChange={(e) => set(coverKey, e.target.value)} placeholder="Cover image URL (optional)" /><ImageUploader label={`Video ${n} cover`} value={form[coverKey]} onChange={(url) => set(coverKey, url)} aspect="9 / 16" hint="9:16 preferred, under 8MB." folder="video-covers" /></div>; })}</div>;
       case "photos":
-        return <div className="space-y-4"><p className="text-xs text-muted-foreground">Upload up to four images. Portrait 4:5 images work best.</p>{([1, 2, 3, 4] as const).map((n) => { const photoKey = `photo${n}` as "photo1" | "photo2" | "photo3" | "photo4"; return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${photoKey}-flow`}>Photo {n}</Label><Input id={`${photoKey}-flow`} value={form[photoKey]} onChange={(e) => set(photoKey, e.target.value)} placeholder="Image URL (optional)" /><ImageUploader label={`Photo ${n}`} value={form[photoKey]} onChange={(url) => set(photoKey, url)} aspect="4 / 5" hint="4:5 preferred, under 8MB." folder="spotlights" /></div>; })}</div>;
+        return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor="label_photos">Section heading</Label><Input id="label_photos" value={form.label_photos} onChange={(e) => set("label_photos", e.target.value)} placeholder="Photos" /></div><p className="text-xs text-muted-foreground">Upload up to four images. Portrait 4:5 images work best.</p>{([1, 2, 3, 4] as const).map((n) => { const photoKey = `photo${n}` as "photo1" | "photo2" | "photo3" | "photo4"; return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${photoKey}-flow`}>Photo {n}</Label><Input id={`${photoKey}-flow`} value={form[photoKey]} onChange={(e) => set(photoKey, e.target.value)} placeholder="Image URL (optional)" /><ImageUploader label={`Photo ${n}`} value={form[photoKey]} onChange={(url) => set(photoKey, url)} aspect="4 / 5" hint="4:5 preferred, under 8MB." folder="spotlights" /></div>; })}</div>;
       default:
         return null;
     }
@@ -2032,6 +2033,7 @@ export function SpotlightForm({
           partnership: form.label_partnership.trim(),
           eoi: form.label_eoi.trim(),
           videos: form.label_videos.trim(),
+          photos: form.label_photos.trim(),
           members: form.label_members.trim(),
         },
         section_order: sectionOrder,
@@ -2293,7 +2295,7 @@ export function SpotlightForm({
                         }}
                         className={`rounded-md border border-border/60 bg-background px-3 ${isCollapsed ? "py-2" : "py-3"} ${dragKey === key ? "opacity-50" : ""}`}
                       >
-                        <div className={`flex items-center gap-2 ${isCollapsed ? "" : "mb-3 border-b border-border/50 pb-2"}`}>
+                        <div className={`flex flex-wrap items-center gap-2 ${isCollapsed ? "" : "mb-3 border-b border-border/50 pb-2"}`}>
                           <span
                             draggable
                             onDragStart={() => setDragKey(key)}
@@ -2309,6 +2311,7 @@ export function SpotlightForm({
                           <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => toggleBriefSection(key)} aria-expanded={!isCollapsed} aria-label={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`} title={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`}>
                             {isCollapsed ? <ChevronDown className="size-3.5" /> : <ChevronUp className="size-3.5" />}
                           </Button>
+                          {isCollapsed ? <div className="order-last w-full border-t border-border/50 pt-2 sm:order-none sm:w-auto sm:border-0 sm:pt-0">{briefSectionStyleControls(key, meta.label)}</div> : null}
                         </div>
                         {!isCollapsed ? <div className="space-y-4">
                           {briefSectionContent(key)}
