@@ -502,7 +502,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
 
         {/* Hero */}
         <section className="space-y-4">
-          <div className="flex flex-wrap items-start gap-6">
+          <div className="flex flex-col gap-6 md:flex-row md:items-start">
             {page.profile_image_url ? (
               <img
                 src={page.profile_image_url}
