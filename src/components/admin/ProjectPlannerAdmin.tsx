@@ -481,7 +481,7 @@ export function ProjectPlannerAdmin() {
 
   /** Drop `dragId` so it sits at position `targetIdx` within the open list. */
   async function dropTaskAt(dragId: string, targetIdx: number) {
-    const list = [...openTasksRef.current];
+    const list = tasks.filter((t) => t.status !== "done");
     const from = list.findIndex((t) => t.id === dragId);
     if (from < 0) return;
     let to = targetIdx;
