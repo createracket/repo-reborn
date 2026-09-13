@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ShieldAlert, ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, Archive } from "lucide-react";
 import { toast } from "sonner";
@@ -31,6 +31,12 @@ const SpotlightForm = lazy(() =>
 export const Route = createFileRoute("/_authenticated/briefs/")({
   validateSearch: (search: Record<string, unknown>): { edit?: string } =>
     typeof search.edit === "string" ? { edit: search.edit } : {},
+  // Old ?edit= deep links now land on the brief's own editor page.
+  beforeLoad: ({ search }) => {
+    if (search.edit) {
+      throw redirect({ to: "/briefs/edit/$key", params: { key: search.edit } });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Briefs — Create Racket" },
