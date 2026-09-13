@@ -552,7 +552,21 @@ export function ProjectPlannerAdmin() {
             />
           </div>
 
-          <div className="space-y-2">
+          <div
+            className="space-y-2"
+            onDragOver={(e) => {
+              if (!dragId) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+              setDropIdx(openTasks.length);
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (dragId) void dropTaskAt(dragId, openTasks.length);
+              setDragId(null);
+              setDropIdx(null);
+            }}
+          >
             {openTasks.length === 0 ? (
               <p className="text-sm text-muted-foreground">No open tasks.</p>
             ) : (
@@ -572,6 +586,7 @@ export function ProjectPlannerAdmin() {
                   }}
                   onDrop={(e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     if (dragId) void dropTaskAt(dragId, idx);
                     setDragId(null);
                     setDropIdx(null);
