@@ -369,17 +369,36 @@ export function ProjectPlannerAdmin() {
       setSaving(false);
       return;
     }
+    const dueDate = prefill ? null : taskDue || null;
+
+    // Auto-place by due date: slot the task in with other dated tasks,
+    // earliest first; undated tasks sit after dated ones. No date → top.
+    const open = tasks.filter((t) => t.status !== "done");
+    let insertIdx = 0;
+    if (dueDate) {
+      insertIdx = open.length;
+      for (let i = 0; i < open.length; i++) {
+        const other = open[i].due_date;
+        if (!other || other > dueDate) {
+          insertIdx = i;
+          break;
+        }
+      }
+    }
+    const prevOrder = insertIdx > 0 ? (open[insertIdx - 1].sort_order ?? 0) : null;
+    const nextOrder = insertIdx < open.length ? (open[insertIdx].sort_order ?? 0) : null;
+
     const { data, error } = await (supabase as any)
       .from("admin_tasks")
       .insert({
         user_id: userId,
         title,
         notes: prefill ? null : taskNotes.trim() || null,
-        due_date: prefill ? null : taskDue || null,
+        due_date: dueDate,
         link_url: prefill?.link ?? (taskLink.trim() || null),
         related_label: prefill?.label ?? null,
         linked_users: [],
-        sort_order: tasks.length ? Math.min(...tasks.map((t) => t.sort_order ?? 0)) - 1 : 0,
+        sort_order: orderBetween(prevOrder, nextOrder),
       })
       .select("id, title, notes, status, due_date, link_url, related_label, created_at, sort_order, linked_users")
       .single();
@@ -388,7 +407,11 @@ export function ProjectPlannerAdmin() {
       toast.error("Couldn't add that task");
       return;
     }
-    setTasks((t) => [data as TaskRow, ...t]);
+    setTasks((t) =>
+      [...t, data as TaskRow].sort(
+        (x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0) || x.created_at.localeCompare(y.created_at),
+      ),
+    );
     if (!prefill) {
       setTaskTitle("");
       setTaskNotes("");
