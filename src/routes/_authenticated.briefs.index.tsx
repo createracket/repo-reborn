@@ -54,11 +54,9 @@ type Brief = {
 
 function BriefsPage() {
   const navigate = useNavigate();
-  const { edit: editSlug } = Route.useSearch();
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [briefs, setBriefs] = useState<Brief[]>([]);
-  const [editing, setEditing] = useState<Record<string, any> | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -110,19 +108,6 @@ function BriefsPage() {
           setProfiles(((profileRows as any[]) ?? []) as ShareProfile[]),
         );
 
-      // Deep-link from a public brief page's admin "Edit brief" button.
-      if (editSlug) {
-        const { data: editRow } = await supabase
-          .from("partner_pages" as any)
-          .select("*")
-          .eq("section", "brief")
-          .eq("slug", editSlug)
-          .maybeSingle();
-        if (editRow) {
-          setEditing(editRow as any);
-          setFormOpen(true);
-        }
-      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
