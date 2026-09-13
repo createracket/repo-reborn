@@ -1731,6 +1731,19 @@ export function SpotlightForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  function sectionDisplayLabel(key: string, fallback: string, instance?: BriefSectionInstance) {
+    if (instance?.id !== key) return instance?.label?.trim() || `${fallback} (copy)`;
+    const customLabels: Partial<Record<string, string>> = {
+      host_bio: form.label_host_bio,
+      audience: form.label_audience,
+      partnership: form.label_partnership,
+      eoi: form.label_eoi,
+      videos: form.label_videos,
+      photos: form.label_photos,
+    };
+    return customLabels[key]?.trim() || fallback;
+  }
+
   function briefSectionContent(key: string, instance?: BriefSectionInstance) {
     const instanceId = instance?.id ?? key;
     const isDuplicate = instanceId !== key;
@@ -2420,6 +2433,7 @@ export function SpotlightForm({
                     const key = instance.type;
                     const meta = SPOTLIGHT_SECTION_ORDER.find((sectionMeta) => sectionMeta.key === key);
                     if (!meta) return null;
+                    const displayLabel = sectionDisplayLabel(key, meta.label, instance);
                     const isCollapsed = collapsedBriefSections.has(instance.id);
                     const isHidden = instance.hidden === true;
                     return (
@@ -2440,25 +2454,25 @@ export function SpotlightForm({
                             onDragStart={() => setDragKey(instance.id)}
                             onDragEnd={() => setDragKey(null)}
                             className="shrink-0 cursor-grab text-muted-foreground active:cursor-grabbing"
-                            aria-label={`Drag ${meta.label}`}
+                            aria-label={`Drag ${displayLabel}`}
                           >
                             <GripVertical className="size-4" />
                           </span>
-                          <span className="flex-1 text-sm font-medium">{index + 1}. {meta.label}{instance.id !== key ? " (copy)" : ""}</span>
-                          <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => updateBriefSection(instance.id, { hidden: !isHidden })} aria-label={`${isHidden ? "Show" : "Hide"} ${meta.label}`} title={`${isHidden ? "Show" : "Hide"} section`}>
+                          <span className="flex-1 text-sm font-medium">{index + 1}. {displayLabel}</span>
+                          <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => updateBriefSection(instance.id, { hidden: !isHidden })} aria-label={`${isHidden ? "Show" : "Hide"} ${displayLabel}`} title={`${isHidden ? "Show" : "Hide"} section`}>
                             {isHidden ? <EyeOff className="mr-1 size-3.5" /> : <Eye className="mr-1 size-3.5" />}{isHidden ? "Hidden" : "Shown"}
                           </Button>
-                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => duplicateBriefSection(instance, index)} aria-label={`Duplicate ${meta.label}`} title="Duplicate section"><Copy className="size-3.5" /></Button>
-                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveBriefSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${meta.label} up`}><ChevronUp className="size-3.5" /></Button>
-                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveBriefSection(index, index + 1)} disabled={index === briefSections.length - 1} aria-label={`Move ${meta.label} down`}><ChevronDown className="size-3.5" /></Button>
-                          <Button type="button" size="icon" variant="secondary" className="ml-1 size-8 border border-primary/40 text-primary" onClick={() => toggleBriefSection(instance.id)} aria-expanded={!isCollapsed} aria-label={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`} title={`${isCollapsed ? "Expand" : "Minimise"} ${meta.label}`}>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => duplicateBriefSection(instance, index)} aria-label={`Duplicate ${displayLabel}`} title="Duplicate section"><Copy className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveBriefSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${displayLabel} up`}><ChevronUp className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveBriefSection(index, index + 1)} disabled={index === briefSections.length - 1} aria-label={`Move ${displayLabel} down`}><ChevronDown className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="secondary" className="ml-1 size-8 border border-primary/40 text-primary" onClick={() => toggleBriefSection(instance.id)} aria-expanded={!isCollapsed} aria-label={`${isCollapsed ? "Expand" : "Minimise"} ${displayLabel}`} title={`${isCollapsed ? "Expand" : "Minimise"} ${displayLabel}`}>
                             <PanelTopClose className={`size-4 transition-transform ${isCollapsed ? "rotate-180" : ""}`} />
                           </Button>
-                          {isCollapsed ? <div className="order-last w-full border-t border-border/50 pt-2 sm:order-none sm:w-auto sm:border-0 sm:pt-0">{briefSectionStyleControls(instance.id, meta.label)}</div> : null}
+                          {isCollapsed ? <div className="order-last w-full border-t border-border/50 pt-2 sm:order-none sm:w-auto sm:border-0 sm:pt-0">{briefSectionStyleControls(instance.id, displayLabel)}</div> : null}
                         </div>
                         {!isCollapsed ? <div className="space-y-4">
                           {briefSectionContent(key, instance)}
-                          <div className="border-t border-border/50 pt-3">{briefSectionStyleControls(instance.id, meta.label)}</div>
+                          <div className="border-t border-border/50 pt-3">{briefSectionStyleControls(instance.id, displayLabel)}</div>
                         </div> : null}
                       </div>
                     );
@@ -2554,6 +2568,7 @@ export function SpotlightForm({
                   {sectionOrder.map((key, i) => {
                     const meta = SPOTLIGHT_SECTION_ORDER.find((s) => s.key === key);
                     if (!meta) return null;
+                    const displayLabel = sectionDisplayLabel(key, meta.label);
                     return (
                       <div
                         key={key}
@@ -2572,7 +2587,7 @@ export function SpotlightForm({
                         }`}
                       >
                         <GripVertical className="size-4 cursor-grab text-muted-foreground" />
-                        <span className="flex-1">{meta.label}</span>
+                        <span className="flex-1">{displayLabel}</span>
                         <div className="flex items-center gap-1">
                           {([
                             { v: "none", label: "None", cls: "border-border" },
