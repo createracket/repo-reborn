@@ -147,7 +147,7 @@ function formatMetric(n: number | null | undefined): string | null {
 }
 
 export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlight" | "brief" }) {
-  const editHref = kind === "brief" ? `/briefs/edit/${slug}` : `/admin/spotlights?edit=${slug}`;
+  const editHref = kind === "brief" ? `/briefs/edit/${slug}` : `/admin/spotlights/edit/${slug}`;
   const navigate = useNavigate();
   const noun = kind === "brief" ? "brief" : "spotlight";
   const Noun = kind === "brief" ? "Brief" : "Spotlight";
