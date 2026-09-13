@@ -55,6 +55,7 @@ import { Route as AuthenticatedAdminTrafficRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminUsageRouteImport } from './routes/_authenticated.admin.usage'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated.admin.users'
 import { Route as AuthenticatedAdminVibeCheckRouteImport } from './routes/_authenticated.admin.vibe-check'
+import { Route as AuthenticatedBriefsIndexRouteImport } from './routes/_authenticated.briefs.index'
 import { Route as AuthenticatedListeningReportIdRouteImport } from './routes/_authenticated.listening-report.$id'
 import { Route as AuthenticatedRacketDeskIndexRouteImport } from './routes/_authenticated.racket-desk.index'
 import { Route as AuthenticatedRacketDeskFanIntelRouteImport } from './routes/_authenticated.racket-desk.fan-intel'
@@ -67,6 +68,7 @@ import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/p
 import { Route as ApiPublicUploadBriefFileRouteImport } from './routes/api/public/upload-brief-file'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
+import { Route as AuthenticatedBriefsEditKeyRouteImport } from './routes/_authenticated.briefs.edit.$key'
 import { Route as ApiPublicHooksReportMetricsWorkerRouteImport } from './routes/api/public/hooks/report-metrics-worker'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -314,6 +316,12 @@ const AuthenticatedAdminVibeCheckRoute =
     path: '/vibe-check',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedBriefsIndexRoute =
+  AuthenticatedBriefsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedBriefsRoute,
+  } as any)
 const AuthenticatedListeningReportIdRoute =
   AuthenticatedListeningReportIdRouteImport.update({
     id: '/listening-report/$id',
@@ -382,6 +390,12 @@ const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBriefsEditKeyRoute =
+  AuthenticatedBriefsEditKeyRouteImport.update({
+    id: '/edit/$key',
+    path: '/edit/$key',
+    getParentRoute: () => AuthenticatedBriefsRoute,
+  } as any)
 const ApiPublicHooksReportMetricsWorkerRoute =
   ApiPublicHooksReportMetricsWorkerRouteImport.update({
     id: '/api/public/hooks/report-metrics-worker',
@@ -420,7 +434,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/briefs': typeof AuthenticatedBriefsRoute
+  '/briefs': typeof AuthenticatedBriefsRouteWithChildren
   '/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -462,7 +476,9 @@ export interface FileRoutesByFullPath {
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/briefs/': typeof AuthenticatedBriefsIndexRoute
   '/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
+  '/briefs/edit/$key': typeof AuthenticatedBriefsEditKeyRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -482,7 +498,6 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
-  '/briefs': typeof AuthenticatedBriefsRoute
   '/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -523,7 +538,9 @@ export interface FileRoutesByTo {
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/briefs': typeof AuthenticatedBriefsIndexRoute
   '/racket-desk': typeof AuthenticatedRacketDeskIndexRoute
+  '/briefs/edit/$key': typeof AuthenticatedBriefsEditKeyRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -546,7 +563,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
-  '/_authenticated/briefs': typeof AuthenticatedBriefsRoute
+  '/_authenticated/briefs': typeof AuthenticatedBriefsRouteWithChildren
   '/_authenticated/campaign-builder': typeof AuthenticatedCampaignBuilderRoute
   '/_authenticated/campaign-reports': typeof AuthenticatedCampaignReportsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -588,7 +605,9 @@ export interface FileRoutesById {
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/briefs/': typeof AuthenticatedBriefsIndexRoute
   '/_authenticated/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
+  '/_authenticated/briefs/edit/$key': typeof AuthenticatedBriefsEditKeyRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -653,7 +672,9 @@ export interface FileRouteTypes {
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
     | '/admin/'
+    | '/briefs/'
     | '/racket-desk/'
+    | '/briefs/edit/$key'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -673,7 +694,6 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/terms'
-    | '/briefs'
     | '/campaign-builder'
     | '/campaign-reports'
     | '/dashboard'
@@ -714,7 +734,9 @@ export interface FileRouteTypes {
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
     | '/admin'
+    | '/briefs'
     | '/racket-desk'
+    | '/briefs/edit/$key'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -778,7 +800,9 @@ export interface FileRouteTypes {
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
     | '/_authenticated/admin/'
+    | '/_authenticated/briefs/'
     | '/_authenticated/racket-desk/'
+    | '/_authenticated/briefs/edit/$key'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -1145,6 +1169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminVibeCheckRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/briefs/': {
+      id: '/_authenticated/briefs/'
+      path: '/'
+      fullPath: '/briefs/'
+      preLoaderRoute: typeof AuthenticatedBriefsIndexRouteImport
+      parentRoute: typeof AuthenticatedBriefsRoute
+    }
     '/_authenticated/listening-report/$id': {
       id: '/_authenticated/listening-report/$id'
       path: '/listening-report/$id'
@@ -1229,6 +1260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/briefs/edit/$key': {
+      id: '/_authenticated/briefs/edit/$key'
+      path: '/edit/$key'
+      fullPath: '/briefs/edit/$key'
+      preLoaderRoute: typeof AuthenticatedBriefsEditKeyRouteImport
+      parentRoute: typeof AuthenticatedBriefsRoute
+    }
     '/api/public/hooks/report-metrics-worker': {
       id: '/api/public/hooks/report-metrics-worker'
       path: '/api/public/hooks/report-metrics-worker'
@@ -1297,6 +1335,19 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedBriefsRouteChildren {
+  AuthenticatedBriefsIndexRoute: typeof AuthenticatedBriefsIndexRoute
+  AuthenticatedBriefsEditKeyRoute: typeof AuthenticatedBriefsEditKeyRoute
+}
+
+const AuthenticatedBriefsRouteChildren: AuthenticatedBriefsRouteChildren = {
+  AuthenticatedBriefsIndexRoute: AuthenticatedBriefsIndexRoute,
+  AuthenticatedBriefsEditKeyRoute: AuthenticatedBriefsEditKeyRoute,
+}
+
+const AuthenticatedBriefsRouteWithChildren =
+  AuthenticatedBriefsRoute._addFileChildren(AuthenticatedBriefsRouteChildren)
+
 interface AuthenticatedRacketDeskRouteChildren {
   AuthenticatedRacketDeskFanIntelRoute: typeof AuthenticatedRacketDeskFanIntelRoute
   AuthenticatedRacketDeskProfilesRoute: typeof AuthenticatedRacketDeskProfilesRoute
@@ -1322,7 +1373,7 @@ const AuthenticatedRacketDeskRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
-  AuthenticatedBriefsRoute: typeof AuthenticatedBriefsRoute
+  AuthenticatedBriefsRoute: typeof AuthenticatedBriefsRouteWithChildren
   AuthenticatedCampaignBuilderRoute: typeof AuthenticatedCampaignBuilderRoute
   AuthenticatedCampaignReportsRoute: typeof AuthenticatedCampaignReportsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -1335,7 +1386,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
-  AuthenticatedBriefsRoute: AuthenticatedBriefsRoute,
+  AuthenticatedBriefsRoute: AuthenticatedBriefsRouteWithChildren,
   AuthenticatedCampaignBuilderRoute: AuthenticatedCampaignBuilderRoute,
   AuthenticatedCampaignReportsRoute: AuthenticatedCampaignReportsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
