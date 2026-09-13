@@ -2236,7 +2236,76 @@ export function SpotlightForm({
               />
             </div>
           </details>
-          <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+          {sectionKind === "brief" ? (
+            <details open className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+              <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
+                Content &amp; page flow
+                <span className="ml-2 text-xs font-normal text-muted-foreground">
+                  (edit, style and reorder sections together)
+                </span>
+              </summary>
+              <div className="space-y-5 px-4">
+                <div className="grid gap-4 border-b border-border/60 pb-5 md:grid-cols-2">
+                  <div className="space-y-1.5 md:col-span-2">
+                    <Label htmlFor="type">Type</Label>
+                    <Input id="type" value={form.type} onChange={(e) => set("type", e.target.value)} placeholder="podcast" />
+                  </div>
+                  <div className="space-y-1.5 md:col-span-2">
+                    <Label htmlFor="headline">Headline *</Label>
+                    <Input id="headline" value={form.headline} onChange={(e) => set("headline", e.target.value)} placeholder="Your Music, Your Business" />
+                  </div>
+                  <div className="space-y-1.5 md:col-span-2">
+                    <Label htmlFor="subtitle">Subtitle</Label>
+                    <Input id="subtitle" value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="UNLOCK REAL FAN INSIGHTS" />
+                  </div>
+                  <div className="md:col-span-2">
+                    <RichTextField id="intro" label="Page intro" value={form.intro} onChange={(value) => set("intro", value)} />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Page sections</Label>
+                    <p className="text-xs text-muted-foreground">Drag the handle or use the arrows to change the page flow. Empty sections remain hidden.</p>
+                  </div>
+                  {sectionOrder.map((key, index) => {
+                    const meta = SPOTLIGHT_SECTION_ORDER.find((sectionMeta) => sectionMeta.key === key);
+                    if (!meta) return null;
+                    return (
+                      <div
+                        key={key}
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={(event) => {
+                          event.preventDefault();
+                          if (!dragKey || dragKey === key) return;
+                          moveSection(sectionOrder.indexOf(dragKey), index);
+                          setDragKey(null);
+                        }}
+                        className={`rounded-md border border-border/60 bg-background p-3 ${dragKey === key ? "opacity-50" : ""}`}
+                      >
+                        <div className="mb-3 flex items-center gap-2 border-b border-border/50 pb-2">
+                          <GripVertical
+                            draggable
+                            onDragStart={() => setDragKey(key)}
+                            onDragEnd={() => setDragKey(null)}
+                            className="size-4 shrink-0 cursor-grab text-muted-foreground active:cursor-grabbing"
+                            aria-label={`Drag ${meta.label}`}
+                          />
+                          <span className="flex-1 text-sm font-medium">{index + 1}. {meta.label}</span>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${meta.label} up`}><ChevronUp className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveSection(index, index + 1)} disabled={index === sectionOrder.length - 1} aria-label={`Move ${meta.label} down`}><ChevronDown className="size-3.5" /></Button>
+                        </div>
+                        <div className="space-y-4">
+                          {briefSectionContent(key)}
+                          <div className="border-t border-border/50 pt-3">{briefSectionStyleControls(key, meta.label)}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </details>
+          ) : (
+            <>          <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Content
               <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -2465,6 +2534,8 @@ export function SpotlightForm({
               </div>
             </div>
           </details>
+</>
+          )}
           <details className="!order-3 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Social links &amp; handles
