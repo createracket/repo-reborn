@@ -1563,6 +1563,7 @@ type BriefSectionInstance = {
   id: string;
   type: string;
   hidden?: boolean;
+  hideTitle?: boolean;
   label?: string;
   content?: Record<string, string>;
 };
@@ -2456,6 +2457,9 @@ export function SpotlightForm({
                           <span className="flex-1 text-sm font-medium">{index + 1}. {displayLabel}</span>
                           <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => updateBriefSection(instance.id, { hidden: !isHidden })} aria-label={`${isHidden ? "Show" : "Hide"} ${displayLabel}`} title={`${isHidden ? "Show" : "Hide"} section`}>
                             {isHidden ? <EyeOff className="mr-1 size-3.5" /> : <Eye className="mr-1 size-3.5" />}{isHidden ? "Hidden" : "Shown"}
+                          </Button>
+                          <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => updateBriefSection(instance.id, { hideTitle: !instance.hideTitle })} aria-pressed={instance.hideTitle === true} aria-label={`${instance.hideTitle ? "Show" : "Hide"} the title for ${displayLabel}`} title="Show or hide this section's title on the live page">
+                            {instance.hideTitle ? "Title hidden" : "Title shown"}
                           </Button>
                           <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => duplicateBriefSection(instance, index)} aria-label={`Duplicate ${displayLabel}`} title="Duplicate section"><Copy className="size-3.5" /></Button>
                           <Button type="button" size="icon" variant="ghost" className="size-7" onClick={() => moveBriefSection(index, index - 1)} disabled={index === 0} aria-label={`Move ${displayLabel} up`}><ChevronUp className="size-3.5" /></Button>
