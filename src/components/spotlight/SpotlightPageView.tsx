@@ -729,8 +729,8 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             dos_donts: page.dos_donts?.length ? (
               <section className="mt-10">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="section-title-card font-display text-2xl">{sectionLabel("dos_donts", "Dos and don'ts")}</CardTitle>
+                  <CardHeader className="section-title-card">
+                    <CardTitle className="font-display text-2xl">{sectionLabel("dos_donts", "Dos and don'ts")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="grid gap-2 md:grid-cols-2">
@@ -758,8 +758,8 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             eoi: page.eoi_opportunities?.length ? (
               <section className="mt-10">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="section-title-card font-display text-2xl">{sectionLabel("eoi", "Expressions of interest")}</CardTitle>
+                  <CardHeader className="section-title-card">
+                    <CardTitle className="font-display text-2xl">{sectionLabel("eoi", "Expressions of interest")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="grid gap-2 md:grid-cols-2">
@@ -894,11 +894,11 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             }
             if (instance.type === "dos_donts") {
               if (!items.length) return null;
-              return <section className="mt-10"><Card><CardHeader><CardTitle className="section-title-card font-display text-2xl">{label || "Dos and don'ts"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((raw, index) => { const item = parseDoLine(raw); return item.text ? <li key={index} className="flex items-start gap-2 text-sm">{item.kind === "do" ? <Check className="mt-0.5 size-4 shrink-0 text-green-500" /> : <X className="mt-0.5 size-4 shrink-0 text-yellow-400" />}<span>{item.text}</span></li> : null; })}</ul></CardContent></Card></section>;
+              return <section className="mt-10"><Card><CardHeader className="section-title-card"><CardTitle className="font-display text-2xl">{label || "Dos and don'ts"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((raw, index) => { const item = parseDoLine(raw); return item.text ? <li key={index} className="flex items-start gap-2 text-sm">{item.kind === "do" ? <Check className="mt-0.5 size-4 shrink-0 text-green-500" /> : <X className="mt-0.5 size-4 shrink-0 text-yellow-400" />}<span>{item.text}</span></li> : null; })}</ul></CardContent></Card></section>;
             }
             if (instance.type === "eoi") {
               if (!items.length) return null;
-              return <section className="mt-10"><Card><CardHeader><CardTitle className="section-title-card font-display text-2xl">{label || "Expressions of interest"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((item, index) => <li key={index} className="flex items-center gap-2 text-sm"><span className="size-1.5 rounded-full bg-primary" />{item}</li>)}</ul></CardContent></Card></section>;
+              return <section className="mt-10"><Card><CardHeader className="section-title-card"><CardTitle className="font-display text-2xl">{label || "Expressions of interest"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((item, index) => <li key={index} className="flex items-center gap-2 text-sm"><span className="size-1.5 rounded-full bg-primary" />{item}</li>)}</ul></CardContent></Card></section>;
             }
             if (instance.type === "videos") {
               const videos = [1, 2, 3, 4].flatMap((number) => {
