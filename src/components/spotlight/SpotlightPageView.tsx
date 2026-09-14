@@ -243,6 +243,11 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
   const [gateError, setGateError] = useState<string | null>(null);
   const [posters, setPosters] = useState<Record<string, string | null>>({});
 
+  useEffect(() => {
+    const pageName = page?.headline?.trim() || gate?.headline?.trim();
+    if (pageName) document.title = `${pageName} — Create Racket`;
+  }, [page?.headline, gate?.headline]);
+
   // A brief opened at /spotlight/... (or the reverse) bounces to its own URL.
   useEffect(() => {
     if (!page) return;

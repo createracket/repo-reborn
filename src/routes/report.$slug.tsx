@@ -118,6 +118,11 @@ function PublicReportPage() {
   const [gateBusy, setGateBusy] = useState(false);
 
   useEffect(() => {
+    const pageName = report?.title?.trim() || gate?.title?.trim();
+    if (pageName) document.title = `${pageName} — Create Racket`;
+  }, [report?.title, gate?.title]);
+
+  useEffect(() => {
     (async () => {
       const { data: r } = await (supabase as any)
         .from("public_campaign_reports")
