@@ -73,7 +73,7 @@ export const getSpotlightGate = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await supabaseAdmin
       .from("partner_pages")
-      .select("headline, subtitle, header_image_url, access_code, access_code_label")
+      .select("headline, subtitle, header_image_url, access_code, access_code_label, links")
       .eq("slug", data.slug)
       .eq("published", true)
       .maybeSingle();
@@ -85,6 +85,7 @@ export const getSpotlightGate = createServerFn({ method: "POST" })
           header_image_url: string | null;
           access_code: string | null;
           access_code_label: string | null;
+           links: Record<string, unknown> | null;
         }
       | null;
 
@@ -96,6 +97,7 @@ export const getSpotlightGate = createServerFn({ method: "POST" })
       subtitle: r.subtitle,
       header_image_url: r.header_image_url,
       code_label: r.access_code_label || "Access code",
+      tab_page_name: typeof r.links?.["tab_page_name"] === "string" ? r.links["tab_page_name"] : null,
     };
   });
 

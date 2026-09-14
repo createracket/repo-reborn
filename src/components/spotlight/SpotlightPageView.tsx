@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 
 type PartnerLinks = {
+  tab_page_name?: string;
   instagram?: string;
   spotify?: string;
   spotifyEmbed?: string;
@@ -236,6 +237,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
     subtitle: string | null;
     header_image_url: string | null;
     code_label: string;
+    tab_page_name: string | null;
   } | null>(null);
   const [gateEmail, setGateEmail] = useState("");
   const [gateCode, setGateCode] = useState("");
@@ -244,9 +246,9 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
   const [posters, setPosters] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
-    const pageName = page?.headline?.trim() || gate?.headline?.trim();
+    const pageName = page?.links?.tab_page_name?.trim() || page?.headline?.trim() || gate?.tab_page_name?.trim() || gate?.headline?.trim();
     if (pageName) document.title = `${pageName} — Create Racket`;
-  }, [page?.headline, gate?.headline]);
+  }, [page?.links?.tab_page_name, page?.headline, gate?.tab_page_name, gate?.headline]);
 
   // A brief opened at /spotlight/... (or the reverse) bounces to its own URL.
   useEffect(() => {
@@ -327,6 +329,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             subtitle: info.subtitle,
             header_image_url: info.header_image_url,
             code_label: info.code_label,
+            tab_page_name: info.tab_page_name,
           });
           setStatus("gated");
         } else {
