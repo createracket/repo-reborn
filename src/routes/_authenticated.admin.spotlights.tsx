@@ -1,10 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { lazy, Suspense } from "react";
-import { AdminTabFallback } from "@/components/admin/AdminTabFallback";
-
-const AdminLegacyTabs = lazy(() =>
-  import("@/components/admin/AdminLegacyTabs").then((m) => ({ default: m.AdminLegacyTabs })),
-);
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/admin/spotlights")({
   validateSearch: (search: Record<string, unknown>): { edit?: string } =>
@@ -15,13 +9,5 @@ export const Route = createFileRoute("/_authenticated/admin/spotlights")({
       throw redirect({ to: "/admin/spotlights/edit/$key", params: { key: search.edit }, replace: true });
     }
   },
-  component: Page,
+  component: () => <Outlet />,
 });
-
-function Page() {
-  return (
-    <Suspense fallback={<AdminTabFallback />}>
-      <AdminLegacyTabs tab="spotlights" />
-    </Suspense>
-  );
-}

@@ -68,6 +68,7 @@ import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/p
 import { Route as ApiPublicUploadBriefFileRouteImport } from './routes/api/public/upload-brief-file'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
+import { Route as AuthenticatedAdminSpotlightsIndexRouteImport } from './routes/_authenticated.admin.spotlights.index'
 import { Route as AuthenticatedBriefsEditKeyRouteImport } from './routes/_authenticated.briefs.edit.$key'
 import { Route as ApiPublicHooksReportMetricsWorkerRouteImport } from './routes/api/public/hooks/report-metrics-worker'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -391,6 +392,12 @@ const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminSpotlightsIndexRoute =
+  AuthenticatedAdminSpotlightsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminSpotlightsRoute,
+  } as any)
 const AuthenticatedBriefsEditKeyRoute =
   AuthenticatedBriefsEditKeyRouteImport.update({
     id: '/edit/$key',
@@ -490,6 +497,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/admin/spotlights/': typeof AuthenticatedAdminSpotlightsIndexRoute
   '/admin/spotlights/edit/$key': typeof AuthenticatedAdminSpotlightsEditKeyRoute
 }
 export interface FileRoutesByTo {
@@ -529,7 +537,6 @@ export interface FileRoutesByTo {
   '/admin/mailing': typeof AuthenticatedAdminMailingRoute
   '/admin/project-planner': typeof AuthenticatedAdminProjectPlannerRoute
   '/admin/sound-board': typeof AuthenticatedAdminSoundBoardRoute
-  '/admin/spotlights': typeof AuthenticatedAdminSpotlightsRouteWithChildren
   '/admin/traffic': typeof AuthenticatedAdminTrafficRoute
   '/admin/usage': typeof AuthenticatedAdminUsageRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -553,6 +560,7 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/admin/spotlights': typeof AuthenticatedAdminSpotlightsIndexRoute
   '/admin/spotlights/edit/$key': typeof AuthenticatedAdminSpotlightsEditKeyRoute
 }
 export interface FileRoutesById {
@@ -621,6 +629,7 @@ export interface FileRoutesById {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/_authenticated/admin/spotlights/': typeof AuthenticatedAdminSpotlightsIndexRoute
   '/_authenticated/admin/spotlights/edit/$key': typeof AuthenticatedAdminSpotlightsEditKeyRoute
 }
 export interface FileRouteTypes {
@@ -689,6 +698,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/admin/spotlights/'
     | '/admin/spotlights/edit/$key'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -728,7 +738,6 @@ export interface FileRouteTypes {
     | '/admin/mailing'
     | '/admin/project-planner'
     | '/admin/sound-board'
-    | '/admin/spotlights'
     | '/admin/traffic'
     | '/admin/usage'
     | '/admin/users'
@@ -752,6 +761,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/admin/spotlights'
     | '/admin/spotlights/edit/$key'
   id:
     | '__root__'
@@ -819,6 +829,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
+    | '/_authenticated/admin/spotlights/'
     | '/_authenticated/admin/spotlights/edit/$key'
   fileRoutesById: FileRoutesById
 }
@@ -1273,6 +1284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/spotlights/': {
+      id: '/_authenticated/admin/spotlights/'
+      path: '/'
+      fullPath: '/admin/spotlights/'
+      preLoaderRoute: typeof AuthenticatedAdminSpotlightsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminSpotlightsRoute
+    }
     '/_authenticated/briefs/edit/$key': {
       id: '/_authenticated/briefs/edit/$key'
       path: '/edit/$key'
@@ -1319,11 +1337,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminSpotlightsRouteChildren {
+  AuthenticatedAdminSpotlightsIndexRoute: typeof AuthenticatedAdminSpotlightsIndexRoute
   AuthenticatedAdminSpotlightsEditKeyRoute: typeof AuthenticatedAdminSpotlightsEditKeyRoute
 }
 
 const AuthenticatedAdminSpotlightsRouteChildren: AuthenticatedAdminSpotlightsRouteChildren =
   {
+    AuthenticatedAdminSpotlightsIndexRoute:
+      AuthenticatedAdminSpotlightsIndexRoute,
     AuthenticatedAdminSpotlightsEditKeyRoute:
       AuthenticatedAdminSpotlightsEditKeyRoute,
   }
