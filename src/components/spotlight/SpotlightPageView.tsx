@@ -237,6 +237,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
     subtitle: string | null;
     header_image_url: string | null;
     code_label: string;
+    tab_page_name: string | null;
   } | null>(null);
   const [gateEmail, setGateEmail] = useState("");
   const [gateCode, setGateCode] = useState("");
@@ -328,6 +329,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             subtitle: info.subtitle,
             header_image_url: info.header_image_url,
             code_label: info.code_label,
+            tab_page_name: info.tab_page_name,
           });
           setStatus("gated");
         } else {
