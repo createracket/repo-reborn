@@ -929,7 +929,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
           ];
           const given = (links.section_order ?? []).filter((k) => defaults.includes(k));
           const legacyOrder = [...given, ...defaults.filter((k) => !given.includes(k))];
-          const order: BriefSectionInstance[] = kind === "brief" && links.brief_sections?.length
+          const order: BriefSectionInstance[] = links.brief_sections?.length
             ? links.brief_sections
             : legacyOrder.map((type) => ({ id: type, type }));
           return order.map((instance) => {

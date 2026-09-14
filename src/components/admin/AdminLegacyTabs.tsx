@@ -1595,9 +1595,6 @@ export function SpotlightForm({
 }) {
   const sectionKind = section ?? "spotlight";
   const isEditing = !!editData;
-  const [sectionOrder, setSectionOrder] = useState<string[]>(() =>
-    normaliseSectionOrder(editData?.links?.section_order),
-  );
   const [briefSections, setBriefSections] = useState<BriefSectionInstance[]>(() =>
     normaliseBriefSections(editData?.links?.brief_sections, editData?.links?.section_order),
   );
@@ -1619,16 +1616,6 @@ export function SpotlightForm({
       const next = new Set(previous);
       if (next.has(key)) next.delete(key);
       else next.add(key);
-      return next;
-    });
-  }
-
-  function moveSection(from: number, to: number) {
-    setSectionOrder((prev) => {
-      if (to < 0 || to >= prev.length || from === to) return prev;
-      const next = [...prev];
-      const [item] = next.splice(from, 1);
-      next.splice(to, 0, item);
       return next;
     });
   }
@@ -2084,12 +2071,8 @@ export function SpotlightForm({
       partnership_pitch: form.partnership_pitch || null,
       eoi_opportunities: form.eoi_opportunities
         .split("\n").map((s: string) => s.trim()).filter(Boolean),
-      ...(sectionKind === "brief"
-        ? {
-            dos_donts: form.dos_donts
-              .split("\n").map((s: string) => s.trim()).filter(Boolean),
-          }
-        : {}),
+      dos_donts: form.dos_donts
+        .split("\n").map((s: string) => s.trim()).filter(Boolean),
       audience_segments: form.audience_segments
         .split("\n").map((s: string) => s.trim()).filter(Boolean),
       vibe_tags: form.vibe_tags
@@ -2143,10 +2126,10 @@ export function SpotlightForm({
           photos: form.label_photos.trim(),
           members: form.label_members.trim(),
         },
-        section_order: sectionOrder,
+        section_order: Array.from(new Set(briefSections.map((instance) => instance.type))),
         section_borders: sectionBorders,
         section_text_size: sectionTextSizes,
-        ...(sectionKind === "brief" ? { brief_sections: briefSections } : {}),
+        brief_sections: briefSections,
       },
       header_image_url: form.header_image_url || null,
       profile_image_url: form.profile_image_url || null,
@@ -2411,8 +2394,7 @@ export function SpotlightForm({
               />
             </div>
           </details>
-          {sectionKind === "brief" ? (
-            <details className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
+          <details className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
               <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
                 Content &amp; page flow
                 <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -2493,192 +2475,6 @@ export function SpotlightForm({
                 </div>
               </div>
             </details>
-          ) : (
-            <>          <details className="!order-5 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
-            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
-              Content
-              <span className="ml-2 text-xs font-normal text-muted-foreground">
-                (type, headline, bio, pitch, EOI &amp; audience)
-              </span>
-            </summary>
-            <div className="grid w-full gap-4 px-4 md:grid-cols-2">
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="type">Type</Label>
-                <Input id="type" value={form.type} onChange={(e) => set("type", e.target.value)} placeholder="podcast" />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="headline">Headline *</Label>
-                <Input id="headline" value={form.headline} onChange={(e) => set("headline", e.target.value)} placeholder="Your Music, Your Business" />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label htmlFor="subtitle">Subtitle</Label>
-                <Input id="subtitle" value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="UNLOCK REAL FAN INSIGHTS" />
-              </div>
-              <div className="md:col-span-2">
-                <RichTextField id="intro" label="Intro" value={form.intro} onChange={(v) => set("intro", v)} />
-              </div>
-              <div className="md:col-span-2">
-                <RichTextField id="host_bio" label="Host bio" value={form.host_bio} onChange={(v) => set("host_bio", v)} />
-              </div>
-              <div className="md:col-span-2">
-                <RichTextField
-                  id="partnership_pitch"
-                  label="Partnership pitch"
-                  value={form.partnership_pitch}
-                  onChange={(v) => set("partnership_pitch", v)}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="eoi">EOI opportunities (one per line)</Label>
-                <Textarea id="eoi" rows={4} value={form.eoi_opportunities} onChange={(e) => set("eoi_opportunities", e.target.value)} placeholder={"Podcast sponsors\nBranded Content\nPodcast guests"} />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="audience">Audience segments (one per line)</Label>
-                <Textarea id="audience" rows={4} value={form.audience_segments} onChange={(e) => set("audience_segments", e.target.value)} />
-              </div>
-            </div>
-          </details>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="vibe_tags">Vibe check tags (comma separated)</Label>
-            <Input id="vibe_tags" value={form.vibe_tags} onChange={(e) => set("vibe_tags", e.target.value)} placeholder="Coffee, Sport, Fashion" />
-            {form.vibe_tags.trim() ? (
-              <div className="flex flex-wrap gap-2 pt-1">
-                {form.vibe_tags.split(",").map((t: string) => t.trim()).filter(Boolean).map((t: string, i: number) => (
-                  <span key={i} className="rounded-full border border-border px-3 py-1 text-xs">{t}</span>
-                ))}
-              </div>
-            ) : null}
-          </div>
-          <details className="!order-2 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
-            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
-              Section headings
-              <span className="ml-2 text-xs font-normal text-muted-foreground">
-                (leave blank to use the default wording)
-              </span>
-            </summary>
-            <div className="flex w-full flex-col gap-4 px-4">
-              {([
-                { k: "label_host_bio", label: "Host bio heading", ph: "About the host" },
-                { k: "label_audience", label: "Audience heading", ph: "Who's listening" },
-                { k: "label_partnership", label: "Partnership heading", ph: "Partnership" },
-                { k: "label_eoi", label: "Expressions of interest heading", ph: "Expressions of interest" },
-                { k: "label_videos", label: "Videos heading", ph: "Watch" },
-                { k: "label_members", label: "Secondary socials heading", ph: "Meet the members" },
-              ] as const).map(({ k, label, ph }) => (
-                <div key={k} className="space-y-1.5">
-                  <Label htmlFor={k}>{label}</Label>
-                  <Input id={k} value={form[k]} onChange={(e) => set(k, e.target.value)} placeholder={ph} />
-                </div>
-              ))}
-              <div className="space-y-2 border-t border-border/60 pt-4">
-                <Label>Section order, borders &amp; text size</Label>
-                <p className="text-xs text-muted-foreground">
-                  Drag to reorder — each heading moves with its content. Empty sections stay hidden.
-                  Use the border buttons to frame a section in pink or green, and S/M/L/XL to set its
-                  body text size.
-                </p>
-                <div className="space-y-1.5">
-                  {sectionOrder.map((key, i) => {
-                    const meta = SPOTLIGHT_SECTION_ORDER.find((s) => s.key === key);
-                    if (!meta) return null;
-                    const displayLabel = sectionDisplayLabel(key, meta.label);
-                    return (
-                      <div
-                        key={key}
-                        draggable
-                        onDragStart={() => setDragKey(key)}
-                        onDragEnd={() => setDragKey(null)}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          if (!dragKey || dragKey === key) return;
-                          moveSection(sectionOrder.indexOf(dragKey), i);
-                          setDragKey(null);
-                        }}
-                        className={`flex items-center gap-2 rounded-md border border-border/60 bg-background px-3 py-2 text-sm ${
-                          dragKey === key ? "opacity-50" : ""
-                        }`}
-                      >
-                        <GripVertical className="size-4 cursor-grab text-muted-foreground" />
-                        <span className="flex-1">{displayLabel}</span>
-                        <div className="flex items-center gap-1">
-                          {([
-                            { v: "none", label: "None", cls: "border-border" },
-                            { v: "pink", label: "Pink", cls: "border-pink-accent" },
-                            { v: "green", label: "Green", cls: "border-primary" },
-                          ] as const).map(({ v, label, cls }) => {
-                            const active = (sectionBorders[key] ?? "none") === v;
-                            return (
-                              <button
-                                key={v}
-                                type="button"
-                                onClick={() =>
-                                  setSectionBorders((prev) => ({ ...prev, [key]: v }))
-                                }
-                                aria-label={`${meta.label} border: ${label}`}
-                                className={`rounded-md border-2 px-2 py-0.5 text-[11px] ${cls} ${
-                                  active
-                                    ? "bg-muted font-medium text-foreground"
-                                    : "text-muted-foreground opacity-60 hover:opacity-100"
-                                }`}
-                              >
-                                {label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {SECTION_TEXT_SIZES.map(({ key: sz, label }) => {
-                            const active = (sectionTextSizes[key] ?? "default") === sz;
-                            return (
-                              <button
-                                key={sz}
-                                type="button"
-                                onClick={() =>
-                                  setSectionTextSizes((prev) => ({ ...prev, [key]: sz }))
-                                }
-                                aria-label={`${meta.label} text size: ${label}`}
-                                className={`rounded-md border px-2 py-0.5 text-[11px] ${
-                                  active
-                                    ? "border-foreground/40 bg-muted font-medium text-foreground"
-                                    : "border-border text-muted-foreground opacity-60 hover:opacity-100"
-                                }`}
-                              >
-                                {label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 px-2"
-                          onClick={() => moveSection(i, i - 1)}
-                          disabled={i === 0}
-                          aria-label={`Move ${meta.label} up`}
-                        >
-                          <ChevronUp className="size-3" />
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          className="h-7 px-2"
-                          onClick={() => moveSection(i, i + 1)}
-                          disabled={i === sectionOrder.length - 1}
-                          aria-label={`Move ${meta.label} down`}
-                        >
-                          <ChevronDown className="size-3" />
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </details></>
-          )}
           <details className="!order-3 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
             <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
               Social links &amp; handles
@@ -2851,95 +2647,10 @@ export function SpotlightForm({
               {mismatchWarning}
             </div>
           ) : null}
-          {sectionKind !== "brief" ? <div className="space-y-1.5">
-            <Label htmlFor="spotifyEmbed">Spotify embed URL</Label>
-            <Input id="spotifyEmbed" value={form.spotifyEmbed} onChange={(e) => set("spotifyEmbed", e.target.value)} placeholder="https://open.spotify.com/embed/show/..." />
-          </div> : null}
           <div className="space-y-1.5">
             <Label htmlFor="contact">Contact (email or URL)</Label>
             <Input id="contact" value={form.contact} onChange={(e) => set("contact", e.target.value)} />
           </div>
-          {sectionKind !== "brief" ? <><details className="!order-4 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
-            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
-              Featured videos
-              <span className="ml-2 text-xs font-normal text-muted-foreground">
-                (up to four TikTok or Instagram URLs)
-              </span>
-            </summary>
-            <div className="flex w-full flex-col gap-4 px-4">
-              <p className="text-xs text-muted-foreground">
-                Paste up to four public TikTok or Instagram post/reel URLs. Each shows as a clip card at the bottom of the
-                spotlight page. Add a cover image for Instagram clips — Instagram no longer serves public thumbnails,
-                so without one the card falls back to a gradient. Uploads land in the{" "}
-                <code>video-covers/</code> folder of the public spotlight images bucket, so you can also drop files
-                there directly and paste the public URL.
-              </p>
-              {([1, 2, 3, 4] as const).map((n) => {
-                const urlKey = `video${n}` as "video1" | "video2" | "video3" | "video4";
-                const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover" | "video4_cover";
-                return (
-                  <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
-                    <Label htmlFor={urlKey}>Video {n}</Label>
-                    <Input
-                      id={urlKey}
-                      value={form[urlKey]}
-                      onChange={(e) => set(urlKey, e.target.value)}
-                      placeholder="https://www.tiktok.com/@user/video/… or Instagram reel URL"
-                    />
-                    <FetchPreviewButton url={form[urlKey]} onFetched={(u) => set(coverKey, u)} />
-                    <Input
-                      id={coverKey}
-                      value={form[coverKey]}
-                      onChange={(e) => set(coverKey, e.target.value)}
-                      placeholder="Cover image URL (optional)"
-                    />
-                    <ImageUploader
-                      label={`Video ${n} cover`}
-                      value={form[coverKey]}
-                      onChange={(url) => set(coverKey, url)}
-                      aspect="9 / 16"
-                      hint="9:16 preferred, under 8MB."
-                      folder="video-covers"
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </details>
-          <details className="!order-4 md:col-span-2 rounded-lg border border-border/60 bg-muted/20 open:pb-4">
-            <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium">
-              Featured photos
-              <span className="ml-2 text-xs font-normal text-muted-foreground">(optional, up to four 4:5 images)</span>
-            </summary>
-            <div className="flex w-full flex-col gap-4 px-4">
-              <p className="text-xs text-muted-foreground">
-                Upload up to four images. They show in a row under the Watch section on the spotlight page. Portrait
-                4:5 works best. Uploads land in the public spotlight images bucket.
-              </p>
-              {([1, 2, 3, 4] as const).map((n) => {
-                const key = `photo${n}` as "photo1" | "photo2" | "photo3" | "photo4";
-                return (
-                  <div key={n} className="space-y-2 rounded-md border border-border/60 p-3">
-                    <Label htmlFor={key}>Photo {n}</Label>
-                    <Input
-                      id={key}
-                      value={form[key]}
-                      onChange={(e) => set(key, e.target.value)}
-                      placeholder="Image URL (optional)"
-                    />
-                    <ImageUploader
-                      label={`Photo ${n}`}
-                      value={form[key]}
-                      onChange={(url) => set(key, url)}
-                      aspect="4 / 5"
-                      hint="4:5 preferred, under 8MB."
-                      folder="spotlights"
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </details></> : null}
           <div className="flex items-center gap-3 md:col-span-2">
             <Switch id="published" checked={form.published} onCheckedChange={(v) => set("published", v)} />
             <Label htmlFor="published" className="cursor-pointer">Publish immediately</Label>
