@@ -507,6 +507,32 @@ export function ProjectPlannerAdmin() {
     if (error) toast.error("Couldn't save the new order");
   }
 
+  /** Re-sort all open tasks by due date (earliest first, undated last). */
+  async function autoOrderTasks() {
+    const open = [...openTasks].sort((a, b) => {
+      if (!a.due_date && !b.due_date) return (a.sort_order ?? 0) - (b.sort_order ?? 0);
+      if (!a.due_date) return 1;
+      if (!b.due_date) return -1;
+      return a.due_date.localeCompare(b.due_date);
+    });
+    const updates = open.map((t, i) => ({ id: t.id, sort_order: (i + 1) * 10 }));
+    setAutoOrdering(true);
+    // Optimistic local update
+    setTasks((prev) => {
+      const map = new Map(updates.map((u) => [u.id, u.sort_order]));
+      return prev
+        .map((t) => (map.has(t.id) ? { ...t, sort_order: map.get(t.id)! } : t))
+        .sort((x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0) || x.created_at.localeCompare(y.created_at));
+    });
+    // Persist to DB
+    const results = await Promise.all(
+      updates.map((u) => (supabase as any).from("admin_tasks").update({ sort_order: u.sort_order }).eq("id", u.id)),
+    );
+    setAutoOrdering(false);
+    if (results.some((r) => r.error)) toast.error("Couldn't save the new order");
+    else toast.success("Tasks ordered by due date");
+  }
+
   async function removeTask(id: string) {
     setTasks((t) => t.filter((x) => x.id !== id));
     const { error } = await (supabase as any).from("admin_tasks").delete().eq("id", id);
