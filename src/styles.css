@@ -252,3 +252,27 @@
     will-change: transform;
   }
 }
+
+/* Sections with their title hidden: keep the heading in the DOM for metadata,
+   but take it out of the layout so no empty gap remains. */
+[data-hide-title="true"] h2,
+[data-hide-title="true"] .section-title-card {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+[data-hide-title="true"] h2 + *,
+[data-hide-title="true"] .media-carousel-head:not(:has(button)) + * {
+  margin-top: 0 !important;
+}
+
+[data-hide-title="true"] .section-title-card + * {
+  padding-top: 1.5rem;
+}
