@@ -74,6 +74,7 @@ type PartnerLinks = {
     id: string;
     type: string;
     hidden?: boolean;
+    hideTitle?: boolean;
     label?: string;
     content?: Record<string, string>;
   }>;
@@ -134,7 +135,7 @@ function MediaCarousel({
 
   return (
     <>
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+      <div className="media-carousel-head grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <h2 className="min-w-0 font-display text-3xl">{title}</h2>
         {showArrows ? (
           <div className="flex shrink-0 items-center gap-2 md:hidden">
@@ -729,7 +730,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
               <section className="mt-10">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="font-display text-2xl">{sectionLabel("dos_donts", "Dos and don'ts")}</CardTitle>
+                    <CardTitle className="section-title-card font-display text-2xl">{sectionLabel("dos_donts", "Dos and don'ts")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="grid gap-2 md:grid-cols-2">
@@ -758,7 +759,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
               <section className="mt-10">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="font-display text-2xl">{sectionLabel("eoi", "Expressions of interest")}</CardTitle>
+                    <CardTitle className="section-title-card font-display text-2xl">{sectionLabel("eoi", "Expressions of interest")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="grid gap-2 md:grid-cols-2">
@@ -893,11 +894,11 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             }
             if (instance.type === "dos_donts") {
               if (!items.length) return null;
-              return <section className="mt-10"><Card><CardHeader><CardTitle className="font-display text-2xl">{label || "Dos and don'ts"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((raw, index) => { const item = parseDoLine(raw); return item.text ? <li key={index} className="flex items-start gap-2 text-sm">{item.kind === "do" ? <Check className="mt-0.5 size-4 shrink-0 text-green-500" /> : <X className="mt-0.5 size-4 shrink-0 text-yellow-400" />}<span>{item.text}</span></li> : null; })}</ul></CardContent></Card></section>;
+              return <section className="mt-10"><Card><CardHeader><CardTitle className="section-title-card font-display text-2xl">{label || "Dos and don'ts"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((raw, index) => { const item = parseDoLine(raw); return item.text ? <li key={index} className="flex items-start gap-2 text-sm">{item.kind === "do" ? <Check className="mt-0.5 size-4 shrink-0 text-green-500" /> : <X className="mt-0.5 size-4 shrink-0 text-yellow-400" />}<span>{item.text}</span></li> : null; })}</ul></CardContent></Card></section>;
             }
             if (instance.type === "eoi") {
               if (!items.length) return null;
-              return <section className="mt-10"><Card><CardHeader><CardTitle className="font-display text-2xl">{label || "Expressions of interest"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((item, index) => <li key={index} className="flex items-center gap-2 text-sm"><span className="size-1.5 rounded-full bg-primary" />{item}</li>)}</ul></CardContent></Card></section>;
+              return <section className="mt-10"><Card><CardHeader><CardTitle className="section-title-card font-display text-2xl">{label || "Expressions of interest"}</CardTitle></CardHeader><CardContent><ul className="grid gap-2 md:grid-cols-2">{items.map((item, index) => <li key={index} className="flex items-center gap-2 text-sm"><span className="size-1.5 rounded-full bg-primary" />{item}</li>)}</ul></CardContent></Card></section>;
             }
             if (instance.type === "videos") {
               const videos = [1, 2, 3, 4].flatMap((number) => {
@@ -941,13 +942,14 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             const sizeCls = SECTION_TEXT_SIZE_CLASS[size] ?? "";
             if (border === "none")
               return (
-                <div key={instance.id} className={sizeCls}>
+                <div key={instance.id} className={sizeCls} data-hide-title={instance.hideTitle ? "true" : undefined}>
                   {node}
                 </div>
               );
             return (
               <div
                 key={instance.id}
+                data-hide-title={instance.hideTitle ? "true" : undefined}
                 className={`mt-12 rounded-3xl border p-5 sm:p-7 [&>section]:mt-0 ${
                   border === "pink" ? "border-pink-accent/70" : "border-primary/70"
                 } ${sizeCls}`}
