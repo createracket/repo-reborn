@@ -546,7 +546,22 @@ export function ProjectPlannerAdmin() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">My tasks</CardTitle>
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-base">My tasks</CardTitle>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={autoOrdering || openTasks.length < 2}
+              onClick={() => void autoOrderTasks()}
+            >
+              {autoOrdering ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <ArrowUpDown className="size-3.5" />
+              )}
+              Auto order
+            </Button>
+          </div>
           <p className="text-sm text-muted-foreground">
             Private to you — nobody else can see these.
           </p>
