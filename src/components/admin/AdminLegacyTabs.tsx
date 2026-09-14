@@ -1664,6 +1664,7 @@ export function SpotlightForm({
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     slug: editData?.slug ?? "",
+    tab_page_name: editData?.links?.tab_page_name ?? "",
     type: editData?.type ?? "podcast",
     headline: editData?.headline ?? "",
     subtitle: editData?.subtitle ?? "",
@@ -2094,6 +2095,7 @@ export function SpotlightForm({
       vibe_tags: form.vibe_tags
         .split(",").map((s: string) => s.trim()).filter(Boolean),
       links: {
+        tab_page_name: form.tab_page_name.trim(),
         instagram: form.instagram,
         tiktok: form.tiktok,
         youtube: form.youtube,
@@ -2189,7 +2191,7 @@ export function SpotlightForm({
       }
       toast.success(`Spotlight created at /spotlight/${slug}`);
       setForm({
-        slug: "", type: "podcast", headline: "", subtitle: "", intro: "",
+        slug: "", tab_page_name: "", type: "podcast", headline: "", subtitle: "", intro: "",
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", dos_donts: "", audience_segments: "", vibe_tags: "",
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "", video4: "",
@@ -2315,6 +2317,17 @@ export function SpotlightForm({
           <div className="space-y-1.5">
             <Label htmlFor="slug">Slug *</Label>
             <Input id="slug" value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="ymyb-spotlight" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="tab-page-name">Tab page name</Label>
+            <Input
+              id="tab-page-name"
+              value={form.tab_page_name}
+              onChange={(e) => set("tab_page_name", e.target.value)}
+              placeholder={form.headline || "Name shown in the browser tab"}
+              maxLength={100}
+            />
+            <p className="text-xs text-muted-foreground">Leave blank to use the page headline.</p>
           </div>
           <div className="space-y-1.5 md:col-span-2 rounded-lg border border-border/60 p-3">
             <div className="flex items-start justify-between gap-3">

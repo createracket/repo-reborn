@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog";
 
 type PartnerLinks = {
+  tab_page_name?: string;
   instagram?: string;
   spotify?: string;
   spotifyEmbed?: string;
@@ -244,9 +245,9 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
   const [posters, setPosters] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
-    const pageName = page?.headline?.trim() || gate?.headline?.trim();
+    const pageName = page?.links?.tab_page_name?.trim() || page?.headline?.trim() || gate?.tab_page_name?.trim() || gate?.headline?.trim();
     if (pageName) document.title = `${pageName} — Create Racket`;
-  }, [page?.headline, gate?.headline]);
+  }, [page?.links?.tab_page_name, page?.headline, gate?.tab_page_name, gate?.headline]);
 
   // A brief opened at /spotlight/... (or the reverse) bounces to its own URL.
   useEffect(() => {
