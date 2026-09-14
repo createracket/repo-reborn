@@ -165,6 +165,11 @@ function PublicRosterPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [itemsLoaded, setItemsLoaded] = useState(false);
 
+  useEffect(() => {
+    const pageName = roster?.title?.trim() || gate?.title?.trim();
+    if (pageName) document.title = `${pageName} — Create Racket`;
+  }, [roster?.title, gate?.title]);
+
 
   useEffect(() => {
     (async () => {
