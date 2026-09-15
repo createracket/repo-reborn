@@ -64,20 +64,25 @@ function orderBetween(prev: number | null, next: number | null): number {
 }
 
 /**
- * Due-date colouring for the admin task list.
- *  - Overdue (more than 24h past)       → red.
- *  - Within 24h (or overdue by up to 24h) → brand green.
- *  - Within 24–48h                      → brand pink.
- *  - Otherwise                          → muted (no highlight).
+ * Due-date colouring for the admin task list, compared by calendar day
+ * (local time) so a date that has passed turns red as soon as the day rolls over.
+ *  - Before today          → red.
+ *  - Today or tomorrow     → brand green.
+ *  - Day after tomorrow    → brand pink.
+ *  - Otherwise             → muted (no highlight).
  */
 function dueBucket(dueDate: string | null): "red" | "green" | "pink" | null {
   if (!dueDate) return null;
-  const due = new Date(`${dueDate}T23:59:59`).getTime();
-  const now = Date.now();
+  const [y, m, d] = dueDate.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  const due = new Date(y, m - 1, d).getTime();
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
   const day = 24 * 60 * 60 * 1000;
-  if (due < now - day) return "red";
-  if (due >= now - day && due <= now + day) return "green";
-  if (due > now + day && due <= now + 2 * day) return "pink";
+  const diffDays = Math.round((due - startOfToday) / day);
+  if (diffDays < 0) return "red";
+  if (diffDays <= 1) return "green";
+  if (diffDays === 2) return "pink";
   return null;
 }
 
