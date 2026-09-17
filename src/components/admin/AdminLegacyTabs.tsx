@@ -829,7 +829,14 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                         <div>
                           <CardTitle className="text-lg">{name}</CardTitle>
                           <CardDescription>
-                            {email ?? "No email"} · Registered interest in {s?.headline ?? "a spotlight"}
+                            {email ?? "No email"} · Registered interest in the {kindLabel}{" "}
+                            {page && pageHref ? (
+                              <a href={pageHref} target="_blank" rel="noreferrer" className="font-medium underline underline-offset-2">
+                                {page.headline}
+                              </a>
+                            ) : (
+                              "(unknown page)"
+                            )}
                             {!i.user_id ? " (not signed in)" : ""}
                           </CardDescription>
                         </div>
