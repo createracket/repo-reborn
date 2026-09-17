@@ -150,6 +150,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
   
   const [spotlightFormOpen, setSpotlightFormOpen] = useState(false);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
+  const [interestPages, setInterestPages] = useState<Map<string, { headline: string; slug: string; section: string | null }>>(new Map());
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
   const [openSpotlights, setOpenSpotlights] = useState<Set<string>>(new Set());
   const [archiveOpen, setArchiveOpen] = useState(false);
