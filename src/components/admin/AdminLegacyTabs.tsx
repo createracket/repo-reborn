@@ -813,7 +813,13 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
           <TabsContent value="contact" className="mt-6 space-y-6">
             {(() => {
               const renderInterest = (i: SpotlightInterest) => {
-                const s = spotlightById.get(i.partner_page_id);
+                const page = interestPages.get(i.partner_page_id) ?? (() => {
+                  const s = spotlightById.get(i.partner_page_id);
+                  return s ? { headline: s.headline, slug: s.slug, section: "spotlight" } : null;
+                })();
+                const isBrief = page?.section === "brief";
+                const kindLabel = page ? (isBrief ? "brief" : "spotlight") : "page";
+                const pageHref = page ? `${isBrief ? "/brief/" : "/spotlight/"}${page.slug}` : null;
                 const name = i.profile?.display_name ?? i.guest_name ?? (i.guest_email ? "Guest" : "Unnamed user");
                 const email = i.profile?.email ?? i.guest_email ?? null;
                 return (
