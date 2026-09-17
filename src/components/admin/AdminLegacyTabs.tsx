@@ -230,6 +230,21 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
             ]);
             setContacts((cm.data as ContactMsg[]) ?? []);
             const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
+            const pageIds = Array.from(new Set(rawInterests.map((i) => i.partner_page_id).filter(Boolean)));
+            if (pageIds.length) {
+              const { data: pages } = await supabase
+                .from("partner_pages" as any)
+                .select("id, headline, slug, section")
+                .in("id", pageIds);
+              setInterestPages(
+                new Map(
+                  ((pages as any[]) ?? []).map((p) => [
+                    p.id as string,
+                    { headline: p.headline as string, slug: p.slug as string, section: (p.section ?? null) as string | null },
+                  ]),
+                ),
+              );
+            }
             const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id).filter((v): v is string => !!v)));
             if (userIds.length) {
               const { data: profs } = await supabase.from("profiles").select("id, display_name, email").in("id", userIds);
