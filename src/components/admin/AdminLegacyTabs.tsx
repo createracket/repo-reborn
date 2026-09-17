@@ -150,6 +150,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
   
   const [spotlightFormOpen, setSpotlightFormOpen] = useState(false);
   const [interests, setInterests] = useState<SpotlightInterest[]>([]);
+  const [interestPages, setInterestPages] = useState<Map<string, { headline: string; slug: string; section: string | null }>>(new Map());
   const [expandedInterests, setExpandedInterests] = useState<Set<string>>(new Set());
   const [openSpotlights, setOpenSpotlights] = useState<Set<string>>(new Set());
   const [archiveOpen, setArchiveOpen] = useState(false);
@@ -229,6 +230,21 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
             ]);
             setContacts((cm.data as ContactMsg[]) ?? []);
             const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
+            const pageIds = Array.from(new Set(rawInterests.map((i) => i.partner_page_id).filter(Boolean)));
+            if (pageIds.length) {
+              const { data: pages } = await supabase
+                .from("partner_pages" as any)
+                .select("id, headline, slug, section")
+                .in("id", pageIds);
+              setInterestPages(
+                new Map(
+                  ((pages as any[]) ?? []).map((p) => [
+                    p.id as string,
+                    { headline: p.headline as string, slug: p.slug as string, section: (p.section ?? null) as string | null },
+                  ]),
+                ),
+              );
+            }
             const userIds = Array.from(new Set(rawInterests.map((i) => i.user_id).filter((v): v is string => !!v)));
             if (userIds.length) {
               const { data: profs } = await supabase.from("profiles").select("id, display_name, email").in("id", userIds);
@@ -797,7 +813,13 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
           <TabsContent value="contact" className="mt-6 space-y-6">
             {(() => {
               const renderInterest = (i: SpotlightInterest) => {
-                const s = spotlightById.get(i.partner_page_id);
+                const page = interestPages.get(i.partner_page_id) ?? (() => {
+                  const s = spotlightById.get(i.partner_page_id);
+                  return s ? { headline: s.headline, slug: s.slug, section: "spotlight" } : null;
+                })();
+                const isBrief = page?.section === "brief";
+                const kindLabel = page ? (isBrief ? "brief" : "spotlight") : "page";
+                const pageHref = page ? `${isBrief ? "/brief/" : "/spotlight/"}${page.slug}` : null;
                 const name = i.profile?.display_name ?? i.guest_name ?? (i.guest_email ? "Guest" : "Unnamed user");
                 const email = i.profile?.email ?? i.guest_email ?? null;
                 return (
@@ -807,7 +829,14 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                         <div>
                           <CardTitle className="text-lg">{name}</CardTitle>
                           <CardDescription>
-                            {email ?? "No email"} · Registered interest in {s?.headline ?? "a spotlight"}
+                            {email ?? "No email"} · Registered interest in the {kindLabel}{" "}
+                            {page && pageHref ? (
+                              <a href={pageHref} target="_blank" rel="noreferrer" className="font-medium underline underline-offset-2">
+                                {page.headline}
+                              </a>
+                            ) : (
+                              "(unknown page)"
+                            )}
                             {!i.user_id ? " (not signed in)" : ""}
                           </CardDescription>
                         </div>
