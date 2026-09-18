@@ -92,11 +92,15 @@ const PLATFORM_LABEL: Record<Platform, string> = {
 };
 
 export const Route = createFileRoute("/report/$slug")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `Campaign Report — ${params.slug}` },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+  loader: ({ params }) =>
+    getSharePreview({ data: { slug: params.slug, kind: "report" } }).catch(() => null),
+  head: ({ loaderData, params }) => ({
+    meta: shareMeta({
+      preview: loaderData,
+      fallbackTitle: `Campaign Report — ${params.slug}`,
+      fallbackDescription: "Campaign report.",
+      noindex: true,
+    }),
   }),
   component: PublicReportPage,
 });

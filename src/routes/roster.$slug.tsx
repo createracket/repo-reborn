@@ -135,11 +135,15 @@ const STATUS_BADGE_CLASS = "border-foreground/50 bg-muted/50 font-semibold text-
 
 
 export const Route = createFileRoute("/roster/$slug")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `Roster — ${params.slug}` },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+  loader: ({ params }) =>
+    getSharePreview({ data: { slug: params.slug, kind: "roster" } }).catch(() => null),
+  head: ({ loaderData, params }) => ({
+    meta: shareMeta({
+      preview: loaderData,
+      fallbackTitle: `Roster — ${params.slug}`,
+      fallbackDescription: "Creator roster.",
+      noindex: true,
+    }),
   }),
   component: PublicRosterPage,
 });
