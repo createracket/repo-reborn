@@ -21,6 +21,8 @@ import { getRosterGate, unlockRoster, getRosterForMember } from "@/lib/roster-ac
 import { socialAudience, totalFans } from "@/lib/audience";
 import { storageImage } from "@/lib/storage-image";
 import { parseCoPosts, coPostLabel } from "@/lib/co-posts";
+import { shareMeta } from "@/lib/share-meta";
+import { getSharePreview } from "@/lib/share-preview.functions";
 
 
 type PublicRoster = {
