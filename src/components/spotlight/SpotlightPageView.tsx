@@ -104,7 +104,53 @@ export const SPOTLIGHT_SECTIONS = [
   { key: "partnership", label: "Partnership" },
   { key: "eoi", label: "Expressions of interest" },
   { key: "videos", label: "Watch" },
+  { key: "partners", label: "Partners" },
 ] as const;
+
+type PartnerItem = { url: string; image: string };
+
+function partnerItems(content: Record<string, string> | undefined): PartnerItem[] {
+  return [1, 2, 3, 4, 5, 6].flatMap((number) => {
+    const url = content?.[`partner${number}_url`]?.trim() ?? "";
+    const image = content?.[`partner${number}_image`]?.trim() ?? "";
+    if (!url || !image) return [];
+    try {
+      const parsed = new URL(url);
+      const host = parsed.hostname.replace(/^www\./, "");
+      if (!/^https?:$/.test(parsed.protocol) || !/(^|\.)(instagram|tiktok|facebook)\.com$/i.test(host)) return [];
+      return [{ url: parsed.toString(), image }];
+    } catch {
+      return [];
+    }
+  });
+}
+
+function PartnersRow({ title, partners }: { title: string; partners: PartnerItem[] }) {
+  return (
+    <section className="mt-12">
+      <h2 className="font-display text-3xl">{title}</h2>
+      <div className="mt-4 flex flex-wrap gap-3 sm:gap-4">
+        {partners.map((partner) => (
+          <a
+            key={partner.url}
+            href={partner.url}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`Visit partner ${handleLabel(partner.url)}`}
+            className="group block size-20 overflow-hidden rounded-lg border border-border/60 bg-muted/40 transition-colors hover:border-primary sm:size-24"
+          >
+            <img
+              src={partner.image}
+              alt=""
+              loading="lazy"
+              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 function MediaCarousel({
   title,
@@ -869,6 +915,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
                 </section>
               );
             })(),
+            partners: null,
           };
 
           const duplicateNode = (instance: NonNullable<PartnerLinks["brief_sections"]>[number]) => {
@@ -914,6 +961,11 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
               if (!photos.length) return null;
               return <section className="mt-12"><MediaCarousel title={label || "Photos"} count={photos.length} shape="photo">{photos.map((src) => <div className="aspect-[4/5] overflow-hidden rounded-3xl border border-border/60 bg-muted/40"><img src={src} alt="" loading="lazy" className="size-full object-cover" /></div>)}</MediaCarousel></section>;
             }
+            if (instance.type === "partners") {
+              const partners = partnerItems(content);
+              if (!partners.length) return null;
+              return <PartnersRow title={label || "Partners"} partners={partners} />;
+            }
             return null;
           };
 
@@ -927,15 +979,23 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             "eoi",
             "videos",
             "photos",
+            ...(kind === "spotlight" ? ["partners"] : []),
           ];
           const given = (links.section_order ?? []).filter((k) => defaults.includes(k));
           const legacyOrder = [...given, ...defaults.filter((k) => !given.includes(k))];
-          const order: BriefSectionInstance[] = links.brief_sections?.length
-            ? links.brief_sections
+          const savedOrder = links.brief_sections?.length
+            ? links.brief_sections.filter((instance) => kind === "spotlight" || instance.type !== "partners")
             : legacyOrder.map((type) => ({ id: type, type }));
+          const order: BriefSectionInstance[] = kind === "spotlight" && !savedOrder.some((instance) => instance.type === "partners")
+            ? [...savedOrder, { id: "partners", type: "partners" }]
+            : savedOrder;
           return order.map((instance) => {
             if (instance.hidden) return null;
-            const node = instance.id === instance.type ? nodes[instance.type] : duplicateNode(instance);
+            const node = instance.type === "partners"
+              ? duplicateNode(instance)
+              : instance.id === instance.type
+                ? nodes[instance.type]
+                : duplicateNode(instance);
             if (!node) return null;
             const border = links.section_borders?.[instance.id] ?? "none";
             const size = links.section_text_size?.[instance.id] ?? "default";

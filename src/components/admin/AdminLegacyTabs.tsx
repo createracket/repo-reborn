@@ -1447,6 +1447,45 @@ function FetchPreviewButton({
   );
 }
 
+function FetchPartnerThumbnailButton({
+  url,
+  onFetched,
+}: {
+  url: string;
+  onFetched: (url: string) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const syncImage = useServerFn(adminSyncImageFromUrl);
+
+  async function run() {
+    const clean = url.trim();
+    if (!clean) return;
+    if (!/(^|\.)((instagram|tiktok|facebook)\.com)$/i.test((() => {
+      try { return new URL(clean).hostname.replace(/^www\./, ""); } catch { return ""; }
+    })())) {
+      toast.error("Use an Instagram, TikTok or Facebook page link");
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await syncImage({ data: { url: clean, folder: "spotlights" } });
+      onFetched(result.publicUrl);
+      toast.success("Partner thumbnail saved");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Couldn't fetch that thumbnail");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Button type="button" variant="outline" size="sm" disabled={loading || !url.trim()} onClick={run}>
+      <RefreshCw className={`mr-1 size-4 ${loading ? "animate-spin" : ""}`} />
+      {loading ? "Fetching…" : "Fetch thumbnail"}
+    </Button>
+  );
+}
+
 
 function ImageUploader({
   label, value, onChange, aspect, hint, folder,
@@ -1580,10 +1619,17 @@ export const SPOTLIGHT_SECTION_ORDER = [
   { key: "eoi", label: "Expressions of interest" },
   { key: "videos", label: "Watch (videos)" },
   { key: "photos", label: "Photos" },
+  { key: "partners", label: "Partners" },
 ] as const;
 
-function normaliseSectionOrder(raw: unknown): string[] {
-  const all = SPOTLIGHT_SECTION_ORDER.map((s) => s.key as string);
+function sectionDefinitions(includePartners: boolean) {
+  return includePartners
+    ? SPOTLIGHT_SECTION_ORDER
+    : SPOTLIGHT_SECTION_ORDER.filter((section) => section.key !== "partners");
+}
+
+function normaliseSectionOrder(raw: unknown, includePartners: boolean): string[] {
+  const all = sectionDefinitions(includePartners).map((s) => s.key as string);
   const given = Array.isArray(raw) ? (raw as string[]).filter((k) => all.includes(k)) : [];
   return [...given, ...all.filter((k) => !given.includes(k))];
 }
@@ -1597,17 +1643,23 @@ type BriefSectionInstance = {
   content?: Record<string, string>;
 };
 
-function normaliseBriefSections(raw: unknown, legacyOrder: unknown): BriefSectionInstance[] {
-  const validTypes = new Set(SPOTLIGHT_SECTION_ORDER.map((section) => section.key as string));
+function normaliseBriefSections(raw: unknown, legacyOrder: unknown, includePartners: boolean): BriefSectionInstance[] {
+  const validTypes = new Set(sectionDefinitions(includePartners).map((section) => section.key as string));
   if (Array.isArray(raw)) {
     const saved = raw.filter((item): item is BriefSectionInstance => {
       if (!item || typeof item !== "object") return false;
       const candidate = item as Partial<BriefSectionInstance>;
       return typeof candidate.id === "string" && typeof candidate.type === "string" && validTypes.has(candidate.type);
     });
-    if (saved.length > 0) return saved;
+    if (saved.length > 0) {
+      const missing = normaliseSectionOrder(legacyOrder, includePartners)
+        .filter((type) => !saved.some((item) => item.type === type))
+        .map((type) => ({ id: type, type }));
+      return [...saved, ...missing];
+    }
   }
-  return normaliseSectionOrder(legacyOrder).map((type) => ({ id: type, type }));
+  return normaliseSectionOrder(legacyOrder, includePartners)
+    .map((type) => ({ id: type, type }));
 }
 
 export function SpotlightForm({
@@ -1624,9 +1676,10 @@ export function SpotlightForm({
   section?: "spotlight" | "brief";
 }) {
   const sectionKind = section ?? "spotlight";
+  const includePartners = sectionKind === "spotlight";
   const isEditing = !!editData;
   const [briefSections, setBriefSections] = useState<BriefSectionInstance[]>(() =>
-    normaliseBriefSections(editData?.links?.brief_sections, editData?.links?.section_order),
+    normaliseBriefSections(editData?.links?.brief_sections, editData?.links?.section_order, includePartners),
   );
   const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(() => readThumbFrame(editData?.links));
   const [sectionBorders, setSectionBorders] = useState<Record<string, "none" | "pink" | "green">>(
@@ -1638,7 +1691,7 @@ export function SpotlightForm({
 
   const [dragKey, setDragKey] = useState<string | null>(null);
   const [collapsedBriefSections, setCollapsedBriefSections] = useState<Set<string>>(
-    () => new Set(normaliseBriefSections(editData?.links?.brief_sections, editData?.links?.section_order).map((item) => item.id)),
+    () => new Set(normaliseBriefSections(editData?.links?.brief_sections, editData?.links?.section_order, includePartners).map((item) => item.id)),
   );
 
   function toggleBriefSection(key: string) {
@@ -1751,6 +1804,7 @@ export function SpotlightForm({
 
   function sectionDisplayLabel(key: string, fallback: string, instance?: BriefSectionInstance) {
     if (instance?.id !== key) return instance?.label?.trim() || `${fallback} (copy)`;
+    if (key === "partners") return instance?.label?.trim() || fallback;
     const customLabels: Partial<Record<string, string>> = {
       host_bio: form.label_host_bio,
       audience: form.label_audience,
@@ -1795,6 +1849,8 @@ export function SpotlightForm({
         return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_videos)} onChange={(e) => updateHeading(e.target.value, () => set("label_videos", e.target.value))} placeholder="Watch" /></div><p className="text-xs text-muted-foreground">Add up to four public TikTok or Instagram post or reel links. A cover image is recommended for Instagram clips.</p>{([1, 2, 3, 4] as const).map((n) => { const urlKey = `video${n}` as "video1" | "video2" | "video3" | "video4"; const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover" | "video4_cover"; const url = instanceValue(urlKey, form[urlKey]); const cover = instanceValue(coverKey, form[coverKey]); return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${urlKey}-${instanceId}`}>Video {n}</Label><Input id={`${urlKey}-${instanceId}`} value={url} onChange={(e) => updateInstanceValue(urlKey, e.target.value, () => set(urlKey, e.target.value))} placeholder="TikTok or Instagram reel URL" /><FetchPreviewButton url={url} onFetched={(value) => updateInstanceValue(coverKey, value, () => set(coverKey, value))} /><Input value={cover} onChange={(e) => updateInstanceValue(coverKey, e.target.value, () => set(coverKey, e.target.value))} placeholder="Cover image URL (optional)" /><ImageUploader label={`Video ${n} cover`} value={cover} onChange={(value) => updateInstanceValue(coverKey, value, () => set(coverKey, value))} aspect="9 / 16" hint="9:16 preferred, under 8MB." folder="video-covers" /></div>; })}</div>;
       case "photos":
         return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_photos)} onChange={(e) => updateHeading(e.target.value, () => set("label_photos", e.target.value))} placeholder="Photos" /></div><p className="text-xs text-muted-foreground">Upload up to four images. Portrait 4:5 images work best.</p>{([1, 2, 3, 4] as const).map((n) => { const photoKey = `photo${n}` as "photo1" | "photo2" | "photo3" | "photo4"; const photo = instanceValue(photoKey, form[photoKey]); return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${photoKey}-${instanceId}`}>Photo {n}</Label><Input id={`${photoKey}-${instanceId}`} value={photo} onChange={(e) => updateInstanceValue(photoKey, e.target.value, () => set(photoKey, e.target.value))} placeholder="Image URL (optional)" /><ImageUploader label={`Photo ${n}`} value={photo} onChange={(value) => updateInstanceValue(photoKey, value, () => set(photoKey, value))} aspect="4 / 5" hint="4:5 preferred, under 8MB." folder="spotlights" /></div>; })}</div>;
+      case "partners":
+        return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={instance?.label ?? ""} onChange={(e) => updateBriefSection(instanceId, { label: e.target.value })} placeholder="Partners" /></div><p className="text-xs text-muted-foreground">Add up to six Instagram, TikTok or Facebook profile links. Fetch the profile image, or upload a logo manually if the platform does not provide one.</p>{([1, 2, 3, 4, 5, 6] as const).map((n) => { const urlKey = `partner${n}_url`; const imageKey = `partner${n}_image`; const url = instance?.content?.[urlKey] ?? ""; const image = instance?.content?.[imageKey] ?? ""; return <div key={n} className="space-y-3 rounded-md border border-border/60 p-3"><Label htmlFor={`${urlKey}-${instanceId}`}>Partner {n}</Label><div className="flex flex-col gap-2 sm:flex-row"><Input id={`${urlKey}-${instanceId}`} value={url} onChange={(e) => updateBriefSectionContent(instanceId, urlKey, e.target.value)} placeholder="Instagram, TikTok or Facebook profile URL" /><FetchPartnerThumbnailButton url={url} onFetched={(value) => updateBriefSectionContent(instanceId, imageKey, value)} /></div><Input value={image} onChange={(e) => updateBriefSectionContent(instanceId, imageKey, e.target.value)} placeholder="Thumbnail or logo URL (optional)" /><ImageUploader label={`Partner ${n} logo`} value={image} onChange={(value) => updateBriefSectionContent(instanceId, imageKey, value)} aspect="1 / 1" hint="Square image preferred, under 8MB." folder="spotlights" /></div>; })}</div>;
       default:
         return null;
     }
