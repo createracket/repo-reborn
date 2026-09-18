@@ -135,10 +135,25 @@ export async function syncImageFromUrl(
   let contentType = response ? typeOf(response) : "";
 
   if (!response?.ok || !(contentType.startsWith("image/") || (!contentType && extType(source)))) {
+    const avatar = await resolveProfileAvatar(target);
+    if (avatar) {
+      const avatarRes = await fetch(avatar, { headers: BROWSER_HEADERS, redirect: "follow" }).catch(() => null);
+      const avatarType = avatarRes ? typeOf(avatarRes) : "";
+      if (avatarRes?.ok && avatarType.startsWith("image/")) {
+        imageUrl = avatar;
+        response = avatarRes;
+        contentType = avatarType;
+      }
+    }
+  }
+
+  if (!response?.ok || !(contentType.startsWith("image/") || (!contentType && extType(imageUrl)))) {
     const preview = await resolvePreviewUrl(source).catch(() => null);
     if (!preview) {
       throw new Error(
-        "Couldn't find a preview image on that link. Try the direct image address (right-click the image → Copy image address).",
+        /instagram\.com/i.test(source)
+          ? "Instagram blocks profile pictures from being fetched. Save the profile picture and upload it here instead."
+          : "Couldn't find a preview image on that link. Try the direct image address (right-click the image → Copy image address).",
       );
     }
     imageUrl = new URL(preview, source).toString();
