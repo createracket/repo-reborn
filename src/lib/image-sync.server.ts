@@ -54,6 +54,24 @@ async function oembedThumbnail(pageUrl: string): Promise<string | null> {
   return null;
 }
 
+/**
+ * Social profile links (a brand's Instagram / TikTok / Facebook page) rarely
+ * expose an og:image, so resolve the profile picture through public endpoints.
+ */
+async function resolveProfileAvatar(target: URL): Promise<string | null> {
+  const host = target.hostname.replace(/^www\./i, "").toLowerCase();
+  const segments = target.pathname.split("/").filter(Boolean);
+  const handle = (segments[0] ?? "").replace(/^@/, "");
+  if (!handle || segments.length > 2) return null;
+
+  if (host.endsWith("tiktok.com")) return `https://unavatar.io/tiktok/${encodeURIComponent(handle)}?fallback=false`;
+  if (host.endsWith("facebook.com")) {
+    if (["profile.php", "pages", "people", "groups", "share"].includes(handle)) return null;
+    return `https://graph.facebook.com/${encodeURIComponent(handle)}/picture?type=large`;
+  }
+  return null;
+}
+
 /** Find a preview image URL on a page (oEmbed, og:image, JSON-LD, first image). */
 async function resolvePreviewUrl(pageUrl: string): Promise<string | null> {
   const oembed = await oembedThumbnail(pageUrl);
@@ -135,10 +153,25 @@ export async function syncImageFromUrl(
   let contentType = response ? typeOf(response) : "";
 
   if (!response?.ok || !(contentType.startsWith("image/") || (!contentType && extType(source)))) {
+    const avatar = await resolveProfileAvatar(target);
+    if (avatar) {
+      const avatarRes = await fetch(avatar, { headers: BROWSER_HEADERS, redirect: "follow" }).catch(() => null);
+      const avatarType = avatarRes ? typeOf(avatarRes) : "";
+      if (avatarRes?.ok && avatarType.startsWith("image/")) {
+        imageUrl = avatar;
+        response = avatarRes;
+        contentType = avatarType;
+      }
+    }
+  }
+
+  if (!response?.ok || !(contentType.startsWith("image/") || (!contentType && extType(imageUrl)))) {
     const preview = await resolvePreviewUrl(source).catch(() => null);
     if (!preview) {
       throw new Error(
-        "Couldn't find a preview image on that link. Try the direct image address (right-click the image → Copy image address).",
+        /instagram\.com/i.test(source)
+          ? "Instagram blocks profile pictures from being fetched. Save the profile picture and upload it here instead."
+          : "Couldn't find a preview image on that link. Try the direct image address (right-click the image → Copy image address).",
       );
     }
     imageUrl = new URL(preview, source).toString();
