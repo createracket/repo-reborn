@@ -5,6 +5,8 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SpotlightNotFound } from "@/components/spotlight/SpotlightNotFound";
 import { SpotlightPageView } from "@/components/spotlight/SpotlightPageView";
 import { Button } from "@/components/ui/button";
+import { shareMeta } from "@/lib/share-meta";
+import { getSharePreview } from "@/lib/share-preview.functions";
 
 export const Route = createFileRoute("/brief/$slug")({
   // Brief pages are shared by link only and deliberately not indexable,
