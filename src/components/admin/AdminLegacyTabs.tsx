@@ -1735,6 +1735,8 @@ export function SpotlightForm({
   const [form, setForm] = useState({
     slug: editData?.slug ?? "",
     tab_page_name: editData?.links?.tab_page_name ?? "",
+    share_image_url: editData?.links?.share_image_url ?? "",
+    share_description: editData?.links?.share_description ?? "",
     type: editData?.type ?? "podcast",
     headline: editData?.headline ?? "",
     subtitle: editData?.subtitle ?? "",
@@ -2165,6 +2167,8 @@ export function SpotlightForm({
         .split(",").map((s: string) => s.trim()).filter(Boolean),
       links: {
         tab_page_name: form.tab_page_name.trim(),
+        share_image_url: form.share_image_url.trim(),
+        share_description: form.share_description.trim(),
         instagram: form.instagram,
         tiktok: form.tiktok,
         youtube: form.youtube,
@@ -2260,7 +2264,7 @@ export function SpotlightForm({
       }
       toast.success(`Spotlight created at /spotlight/${slug}`);
       setForm({
-        slug: "", tab_page_name: "", type: "podcast", headline: "", subtitle: "", intro: "",
+        slug: "", tab_page_name: "", share_image_url: "", share_description: "", type: "podcast", headline: "", subtitle: "", intro: "",
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", dos_donts: "", audience_segments: "", vibe_tags: "",
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "", video4: "",
