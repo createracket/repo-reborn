@@ -54,6 +54,24 @@ async function oembedThumbnail(pageUrl: string): Promise<string | null> {
   return null;
 }
 
+/**
+ * Social profile links (a brand's Instagram / TikTok / Facebook page) rarely
+ * expose an og:image, so resolve the profile picture through public endpoints.
+ */
+async function resolveProfileAvatar(target: URL): Promise<string | null> {
+  const host = target.hostname.replace(/^www\./i, "").toLowerCase();
+  const segments = target.pathname.split("/").filter(Boolean);
+  const handle = (segments[0] ?? "").replace(/^@/, "");
+  if (!handle || segments.length > 2) return null;
+
+  if (host.endsWith("tiktok.com")) return `https://unavatar.io/tiktok/${encodeURIComponent(handle)}?fallback=false`;
+  if (host.endsWith("facebook.com")) {
+    if (["profile.php", "pages", "people", "groups", "share"].includes(handle)) return null;
+    return `https://graph.facebook.com/${encodeURIComponent(handle)}/picture?type=large`;
+  }
+  return null;
+}
+
 /** Find a preview image URL on a page (oEmbed, og:image, JSON-LD, first image). */
 async function resolvePreviewUrl(pageUrl: string): Promise<string | null> {
   const oembed = await oembedThumbnail(pageUrl);
