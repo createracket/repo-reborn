@@ -1735,6 +1735,8 @@ export function SpotlightForm({
   const [form, setForm] = useState({
     slug: editData?.slug ?? "",
     tab_page_name: editData?.links?.tab_page_name ?? "",
+    share_image_url: editData?.links?.share_image_url ?? "",
+    share_description: editData?.links?.share_description ?? "",
     type: editData?.type ?? "podcast",
     headline: editData?.headline ?? "",
     subtitle: editData?.subtitle ?? "",
@@ -2165,6 +2167,8 @@ export function SpotlightForm({
         .split(",").map((s: string) => s.trim()).filter(Boolean),
       links: {
         tab_page_name: form.tab_page_name.trim(),
+        share_image_url: form.share_image_url.trim(),
+        share_description: form.share_description.trim(),
         instagram: form.instagram,
         tiktok: form.tiktok,
         youtube: form.youtube,
@@ -2260,7 +2264,7 @@ export function SpotlightForm({
       }
       toast.success(`Spotlight created at /spotlight/${slug}`);
       setForm({
-        slug: "", tab_page_name: "", type: "podcast", headline: "", subtitle: "", intro: "",
+        slug: "", tab_page_name: "", share_image_url: "", share_description: "", type: "podcast", headline: "", subtitle: "", intro: "",
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", dos_donts: "", audience_segments: "", vibe_tags: "",
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "", video4: "",
@@ -2397,6 +2401,63 @@ export function SpotlightForm({
               maxLength={100}
             />
             <p className="text-xs text-muted-foreground">Leave blank to use the page headline.</p>
+          </div>
+          <div className="space-y-3 md:col-span-2 rounded-lg border border-border/60 p-3">
+            <div>
+              <Label className="text-sm font-medium">Link preview</Label>
+              <p className="text-xs text-muted-foreground">
+                What people see when this link is shared in Slack, WhatsApp, iMessage or email. Leave
+                blank to use the page headline, subtitle and header image.
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="share-description">Preview description</Label>
+              <Textarea
+                id="share-description"
+                rows={2}
+                value={form.share_description}
+                onChange={(e) => set("share_description", e.target.value)}
+                placeholder={form.subtitle || "Short line shown under the link"}
+                maxLength={200}
+              />
+            </div>
+            <Input
+              value={form.share_image_url}
+              onChange={(e) => set("share_image_url", e.target.value)}
+              placeholder="Share image URL (optional)"
+            />
+            <ImageUploader
+              label="Share image"
+              value={form.share_image_url}
+              onChange={(url) => set("share_image_url", url)}
+              aspect="1200 / 630"
+              hint="Landscape image, roughly 1200x630. JPG/PNG, up to 8MB."
+              folder="spotlights"
+            />
+            <div className="rounded-md border border-border/60 bg-muted/30 p-2">
+              <p className="mb-2 text-[11px] uppercase tracking-wide text-muted-foreground">Preview</p>
+              <div className="overflow-hidden rounded-md border border-border/60 bg-background">
+                {(form.share_image_url || form.header_image_url) ? (
+                  <img
+                    src={form.share_image_url || form.header_image_url}
+                    alt=""
+                    className="aspect-[1200/630] w-full object-cover"
+                  />
+                ) : null}
+                <div className="space-y-0.5 p-2">
+                  <p className="text-[11px] uppercase text-muted-foreground">createracket.com</p>
+                  <p className="text-sm font-medium">
+                    {(form.tab_page_name || form.headline || "Page title").trim()} — Create Racket
+                  </p>
+                  <p className="line-clamp-2 text-xs text-muted-foreground">
+                    {form.share_description || form.subtitle || form.intro || "Campaign page."}
+                  </p>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Apps cache old previews — add ?v=2 to the end of a link to force a fresh one.
+              </p>
+            </div>
           </div>
           <div className="space-y-1.5 md:col-span-2 rounded-lg border border-border/60 p-3">
             <div className="flex items-start justify-between gap-3">

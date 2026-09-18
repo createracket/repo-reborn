@@ -43,6 +43,9 @@ const homeVideos = [video1, video2, video3, video4, video5, video6, video7, vide
 import trustedLogos from "@/assets/home/trusted-logos.png.asset.json";
 import communityMap from "@/assets/home/community-map.svg.asset.json";
 
+const HOME_SHARE_IMAGE =
+  "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/de886712-fa2b-4751-9d22-3a70a7ad0f0e/id-preview-312afdf3--8600de53-73c0-4602-8b8c-36b97c35e736.lovable.app-1780385400907.png";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -56,6 +59,9 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Unskippable collabs." },
       { property: "og:url", content: "https://createracket.com/" },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: HOME_SHARE_IMAGE },
+      { name: "twitter:image", content: HOME_SHARE_IMAGE },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://createracket.com/" }],
   }),

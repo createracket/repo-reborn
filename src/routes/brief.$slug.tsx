@@ -5,17 +5,21 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SpotlightNotFound } from "@/components/spotlight/SpotlightNotFound";
 import { SpotlightPageView } from "@/components/spotlight/SpotlightPageView";
 import { Button } from "@/components/ui/button";
+import { shareMeta } from "@/lib/share-meta";
+import { getSharePreview } from "@/lib/share-preview.functions";
 
 export const Route = createFileRoute("/brief/$slug")({
-  // Brief pages are shared by link only and deliberately not indexable.
-  head: () => ({
-    meta: [
-      { title: "Brief — Create Racket" },
-      { name: "robots", content: "noindex, nofollow" },
-      { name: "description", content: "Campaign brief." },
-      { property: "og:title", content: "Brief — Create Racket" },
-      { property: "og:description", content: "Campaign brief." },
-    ],
+  // Brief pages are shared by link only and deliberately not indexable,
+  // but link previews still need this page's own image and copy.
+  loader: ({ params }) =>
+    getSharePreview({ data: { slug: params.slug, kind: "brief" } }).catch(() => null),
+  head: ({ loaderData }) => ({
+    meta: shareMeta({
+      preview: loaderData,
+      fallbackTitle: "Brief — Create Racket",
+      fallbackDescription: "Campaign brief.",
+      noindex: true,
+    }),
   }),
   component: BriefRoute,
   notFoundComponent: SpotlightNotFound,

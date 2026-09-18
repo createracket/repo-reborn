@@ -15,6 +15,8 @@ import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { formatCount, formatPct, type Platform } from "@/lib/youtube-utils";
 import { PostThumb } from "@/components/reports/PostThumb";
 import { getReportGate, unlockReport, getReportForMember } from "@/lib/report-access.functions";
+import { shareMeta } from "@/lib/share-meta";
+import { getSharePreview } from "@/lib/share-preview.functions";
 
 
 type PublicReport = {
@@ -92,11 +94,15 @@ const PLATFORM_LABEL: Record<Platform, string> = {
 };
 
 export const Route = createFileRoute("/report/$slug")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `Campaign Report — ${params.slug}` },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+  loader: ({ params }) =>
+    getSharePreview({ data: { slug: params.slug, kind: "report" } }).catch(() => null),
+  head: ({ loaderData, params }) => ({
+    meta: shareMeta({
+      preview: loaderData,
+      fallbackTitle: `Campaign Report — ${params.slug}`,
+      fallbackDescription: "Campaign report.",
+      noindex: true,
+    }),
   }),
   component: PublicReportPage,
 });

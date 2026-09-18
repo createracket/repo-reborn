@@ -5,19 +5,23 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SpotlightNotFound } from "@/components/spotlight/SpotlightNotFound";
 import { SpotlightPageView } from "@/components/spotlight/SpotlightPageView";
 import { Button } from "@/components/ui/button";
+import { shareMeta } from "@/lib/share-meta";
+import { getSharePreview } from "@/lib/share-preview.functions";
 
 export { SPOTLIGHT_SECTIONS } from "@/components/spotlight/SpotlightPageView";
 
 export const Route = createFileRoute("/spotlight/$slug")({
-  // Partner pages are deliberately not indexable.
-  head: () => ({
-    meta: [
-      { title: "Spotlight — Create Racket" },
-      { name: "robots", content: "noindex, nofollow" },
-      { name: "description", content: "Partner spotlight." },
-      { property: "og:title", content: "Spotlight — Create Racket" },
-      { property: "og:description", content: "Partner spotlight." },
-    ],
+  // Partner pages are deliberately not indexable, but shared links still
+  // show the page's own image and copy.
+  loader: ({ params }) =>
+    getSharePreview({ data: { slug: params.slug, kind: "spotlight" } }).catch(() => null),
+  head: ({ loaderData }) => ({
+    meta: shareMeta({
+      preview: loaderData,
+      fallbackTitle: "Spotlight — Create Racket",
+      fallbackDescription: "Partner spotlight.",
+      noindex: true,
+    }),
   }),
   component: SpotlightRoute,
   notFoundComponent: SpotlightNotFound,
