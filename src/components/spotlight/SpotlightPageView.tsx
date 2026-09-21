@@ -804,7 +804,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
                     <CardTitle className="font-display text-2xl">{sectionLabel("eoi", "Expressions of interest")}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="grid gap-2 md:grid-cols-2">
+                    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       {page.eoi_opportunities.map((eoi, i) => (
                         <li key={i} className="flex items-center gap-2 text-sm">
                           <span className="size-1.5 rounded-full bg-primary" /> {eoi}
