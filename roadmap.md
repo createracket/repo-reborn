@@ -5,4 +5,4 @@
 - [x] Show selected parts in the admin Contact tab.
 - [x] Keep the four opportunity points in one desktop row.
 - [x] Restrict anonymous roster reads from private contact fields.
-- [ ] Verify the public submission flow and admin Contact display.
+- [x] Verify the public submission form, saved field, and admin Contact display path.
