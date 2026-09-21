@@ -15,6 +15,7 @@ import {
   getArtistArchetypeDescription,
 } from "@/lib/vibe-check";
 import { loadVibeCheckConfig, DEFAULT_VIBE_CONFIG, type VibeCheckConfig } from "@/lib/vibe-check-config";
+import { shareImageMeta } from "@/lib/share-meta";
 
 type Stored =
   | { flow: "musician"; data: any; at: number }

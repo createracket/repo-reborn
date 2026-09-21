@@ -38,6 +38,7 @@ export const Route = createFileRoute("/brands/how-it-works")({
         content:
           "A curated tier of artists with audiences that actually trust them. No follower-count gambles.",
       },
+      ...shareImageMeta(),
     ],
   }),
   component: HowItWorksBrands,

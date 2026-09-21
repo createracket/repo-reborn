@@ -32,6 +32,7 @@ export const Route = createFileRoute("/connect")({
         content:
           "Plan your next campaign. Submit a brief and we'll match you with the right creative partners.",
       },
+      ...shareImageMeta(),
     ],
   }),
   component: ConnectPage,

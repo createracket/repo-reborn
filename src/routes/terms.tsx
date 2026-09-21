@@ -11,6 +11,7 @@ export const Route = createFileRoute("/terms")({
         content:
           "The terms and conditions for using Create Racket — the platform connecting artists, brands, creatives, fans and crew.",
       },
+      ...shareImageMeta(),
     ],
   }),
   component: TermsPage,

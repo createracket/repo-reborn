@@ -22,6 +22,7 @@ export const Route = createFileRoute("/contact")({
       { property: "og:title", content: "Contact — Create Racket" },
       { property: "og:description", content: "Questions, collabs, hot takes — get in touch with Create Racket." },
       { property: "og:url", content: "https://createracket.com/contact" },
+      ...shareImageMeta(),
     ],
     links: [{ rel: "canonical", href: "https://createracket.com/contact" }],
   }),

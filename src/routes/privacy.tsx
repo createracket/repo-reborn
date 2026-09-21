@@ -11,6 +11,7 @@ export const Route = createFileRoute("/privacy")({
         content:
           "How Create Racket collects, uses and protects your personal information.",
       },
+      ...shareImageMeta(),
     ],
   }),
   component: PrivacyPage,
