@@ -117,6 +117,7 @@ type Spotlight = {
 type SpotlightInterest = {
   id: string; created_at: string; partner_page_id: string; user_id: string | null;
   guest_email?: string | null; guest_name?: string | null; handled?: boolean | null;
+  selected_parts?: string[] | null;
   profile?: { display_name: string | null; email: string | null } | null;
 };
 
@@ -226,7 +227,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
           } else if (group === "contact") {
             const [cm, si] = await Promise.all([
               supabase.from("contact_messages").select("id, created_at, name, email, message, handled").order("created_at", { ascending: false }),
-              supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled").order("created_at", { ascending: false }),
+               supabase.from("spotlight_interests" as any).select("id, created_at, partner_page_id, user_id, guest_email, guest_name, handled, selected_parts").order("created_at", { ascending: false }),
             ]);
             setContacts((cm.data as ContactMsg[]) ?? []);
             const rawInterests = (si.data as unknown as SpotlightInterest[]) ?? [];
@@ -839,6 +840,11 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                             )}
                             {!i.user_id ? " (not signed in)" : ""}
                           </CardDescription>
+                           {i.selected_parts?.length ? (
+                             <div className="mt-3 flex flex-wrap gap-2">
+                               {i.selected_parts.map((part) => <Badge key={part} variant="secondary">{part}</Badge>)}
+                             </div>
+                           ) : null}
                         </div>
                         <div className="flex items-center gap-2">
                           <Meta date={i.created_at} status={i.handled ? "handled" : "new"} />

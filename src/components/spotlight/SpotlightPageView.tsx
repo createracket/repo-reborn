@@ -16,10 +16,11 @@ import { getAuthSessionResult, getAuthUser } from "@/hooks/use-auth";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { getSocialEmbed } from "@/lib/social-embed";
 import { getClipPosters } from "@/lib/clip-poster.functions";
-import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember, registerSpotlightGuestInterest } from "@/lib/spotlight-access.functions";
+import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember, registerSpotlightGuestInterest, registerSpotlightMemberInterest } from "@/lib/spotlight-access.functions";
 import { RichText } from "@/lib/rich-text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -279,6 +280,8 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
   const [registering, setRegistering] = useState(false);
   const [guestOpen, setGuestOpen] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
+  const [interestSignedIn, setInterestSignedIn] = useState(false);
+  const [selectedParts, setSelectedParts] = useState<string[]>([]);
   const [gate, setGate] = useState<{
     headline: string;
     subtitle: string | null;
@@ -404,32 +407,25 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
   async function handleRegister() {
     if (!page) return;
     const { data: u } = await getAuthUser();
-    if (!u.user) {
-      setGuestOpen(true);
-      return;
-    }
-    setRegistering(true);
-    const { error } = await supabase
-      .from("spotlight_interests" as any)
-      .insert({ partner_page_id: page.id, user_id: u.user.id });
-    setRegistering(false);
-    if (error && !error.message.toLowerCase().includes("duplicate")) {
-      toast.error(error.message);
-      return;
-    }
-    setRegistered(true);
-    toast.success("Interest registered — we'll be in touch.");
+    setInterestSignedIn(Boolean(u.user));
+    setGuestOpen(true);
   }
 
   async function handleGuestRegister() {
+    if (!page || selectedParts.length === 0) {
+      toast.error("Select at least one part");
+      return;
+    }
     const email = guestEmail.trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    if (!interestSignedIn && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       toast.error("Enter a valid email address");
       return;
     }
     setRegistering(true);
     try {
-      const res = await registerSpotlightGuestInterest({ data: { slug, email } });
+      const res = interestSignedIn
+        ? await registerSpotlightMemberInterest({ data: { slug, selectedParts } })
+        : await registerSpotlightGuestInterest({ data: { slug, email, selectedParts } });
       if (!res.ok) throw new Error("Could not register interest");
       setGuestOpen(false);
       setRegistered(true);
@@ -779,7 +775,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
                     <CardTitle className="font-display text-2xl">{sectionLabel("dos_donts", "Dos and don'ts")}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="grid gap-2 md:grid-cols-2">
+                     <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       {page.dos_donts.map((raw, i) => {
                         const item = parseDoLine(raw);
                         if (!item.text) return null;
@@ -808,7 +804,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
                     <CardTitle className="font-display text-2xl">{sectionLabel("eoi", "Expressions of interest")}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ul className="grid gap-2 md:grid-cols-2">
+                    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       {page.eoi_opportunities.map((eoi, i) => (
                         <li key={i} className="flex items-center gap-2 text-sm">
                           <span className="size-1.5 rounded-full bg-primary" /> {eoi}
@@ -825,27 +821,34 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
                         <DialogContent className="sm:max-w-md">
                           <DialogHeader>
                             <DialogTitle className="font-display text-xl">Register your interest</DialogTitle>
-                            <DialogDescription>
-                              Pop in your email and we'll be in touch about this opportunity.
-                            </DialogDescription>
+                             <DialogDescription>Select every part you would like to join.</DialogDescription>
                           </DialogHeader>
-                          <div className="space-y-1.5">
-                            <Label htmlFor="guest-email">Email</Label>
-                            <Input
-                              id="guest-email"
-                              type="email"
-                              maxLength={255}
-                              value={guestEmail}
-                              onChange={(e) => setGuestEmail(e.target.value)}
-                              placeholder="you@example.com"
-                            />
+                           <div className="space-y-3">
+                             {page.eoi_opportunities.map((part) => {
+                               const checked = selectedParts.includes(part);
+                               return (
+                                 <div key={part} className="flex items-start gap-2">
+                                   <Checkbox
+                                     id={`interest-${part}`}
+                                     checked={checked}
+                                     onCheckedChange={(value) => setSelectedParts((current) =>
+                                       value === true ? [...current, part] : current.filter((item) => item !== part)
+                                     )}
+                                   />
+                                   <Label htmlFor={`interest-${part}`} className="font-normal leading-snug">{part}</Label>
+                                 </div>
+                               );
+                             })}
                           </div>
-                          <p className="text-xs text-muted-foreground">
-                            By entering your email, you are giving Racket permission to contact you about this
-                            collab and partnership opportunity.
-                          </p>
+                           {!interestSignedIn ? (
+                             <div className="space-y-1.5">
+                               <Label htmlFor="guest-email">Email</Label>
+                               <Input id="guest-email" type="email" maxLength={255} value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} placeholder="you@example.com" />
+                             </div>
+                           ) : null}
+                           <p className="text-xs text-muted-foreground">By registering, you are giving Racket permission to contact you about the selected collab opportunities.</p>
                           <DialogFooter>
-                            <Button onClick={handleGuestRegister} disabled={registering}>
+                             <Button onClick={handleGuestRegister} disabled={registering || selectedParts.length === 0}>
                               {registering ? "Registering…" : "Register interest"}
                             </Button>
                           </DialogFooter>
