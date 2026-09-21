@@ -109,6 +109,27 @@ export function EmailManualSend({
   async function handleSend() {
     if (!template) return toast.error("Pick a template");
     if (recipients.length === 0) return toast.error("Add at least one recipient");
+
+    if (mode === "later") {
+      const when = new Date(sendAt);
+      if (Number.isNaN(when.getTime())) return toast.error("Pick a valid date and time");
+      if (when.getTime() < Date.now()) return toast.error("Pick a time in the future");
+      setSending(true);
+      try {
+        await schedule({
+          data: { templateName: template, recipients, sendAt: when.toISOString() },
+        } as any);
+        toast.success(`Scheduled for ${format(when, "d MMM yyyy, HH:mm")}`);
+        setRecipients([]);
+        refreshScheduled();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Couldn't schedule that send");
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
+
     setSending(true);
     try {
       const res: any = await send({ data: { templateName: template, recipients } } as any);
@@ -124,6 +145,16 @@ export function EmailManualSend({
       toast.error(e?.message ?? "Send failed");
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleCancel(id: string) {
+    try {
+      await cancelScheduled({ data: { id } } as any);
+      toast.success("Scheduled send cancelled");
+      refreshScheduled();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't cancel that send");
     }
   }
 
