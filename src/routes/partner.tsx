@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { shareImageMeta } from "@/lib/share-meta";
 
 export const Route = createFileRoute("/partner")({
   head: () => ({
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/partner")({
         content: "Curated, contextual campaigns matching brands with artists whose audiences already trust them.",
       },
       { property: "og:type", content: "website" },
+      ...shareImageMeta(),
     ],
   }),
   component: PartnerPage,

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { shareImageMeta } from "@/lib/share-meta";
 import { useEffect, useState } from "react";
 import { Link2, Send, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -32,6 +33,7 @@ export const Route = createFileRoute("/connect")({
         content:
           "Plan your next campaign. Submit a brief and we'll match you with the right creative partners.",
       },
+      ...shareImageMeta(),
     ],
   }),
   component: ConnectPage,

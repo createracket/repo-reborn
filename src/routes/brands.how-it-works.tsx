@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { shareImageMeta } from "@/lib/share-meta";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import {
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/brands/how-it-works")({
         content:
           "A curated tier of artists with audiences that actually trust them. No follower-count gambles.",
       },
+      ...shareImageMeta(),
     ],
   }),
   component: HowItWorksBrands,

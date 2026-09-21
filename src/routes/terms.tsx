@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { shareImageMeta } from "@/lib/share-meta";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/terms")({
         content:
           "The terms and conditions for using Create Racket — the platform connecting artists, brands, creatives, fans and crew.",
       },
+      ...shareImageMeta(),
     ],
   }),
   component: TermsPage,
