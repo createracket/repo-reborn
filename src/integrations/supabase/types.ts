@@ -1919,6 +1919,7 @@ export type Database = {
           id: string
           note: string | null
           partner_page_id: string
+          selected_parts: string[]
           user_id: string | null
         }
         Insert: {
@@ -1929,6 +1930,7 @@ export type Database = {
           id?: string
           note?: string | null
           partner_page_id: string
+          selected_parts?: string[]
           user_id?: string | null
         }
         Update: {
@@ -1939,6 +1941,7 @@ export type Database = {
           id?: string
           note?: string | null
           partner_page_id?: string
+          selected_parts?: string[]
           user_id?: string | null
         }
         Relationships: [
