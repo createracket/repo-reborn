@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Send, X } from "lucide-react";
+import { format } from "date-fns";
+import { CalendarClock, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +14,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { listEmailRecipients, sendTemplateToRecipients } from "@/lib/email-admin.functions";
+import {
+  listEmailRecipients,
+  sendTemplateToRecipients,
+  scheduleTemplateSend,
+  listScheduledSends,
+  cancelScheduledSend,
+} from "@/lib/email-admin.functions";
 
 type UserRow = { id: string; email: string; display_name: string | null };
+
+type ScheduledRow = {
+  id: string;
+  template_name: string;
+  recipients: string[];
+  send_at: string;
+  status: string;
+  result: any;
+  processed_at: string | null;
+};
+
+/** Local datetime string (yyyy-MM-ddTHH:mm) for <input type="datetime-local">. */
+function defaultScheduleValue(): string {
+  const d = new Date(Date.now() + 60 * 60 * 1000);
+  d.setSeconds(0, 0);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export function EmailManualSend({
   templates,
@@ -24,6 +49,9 @@ export function EmailManualSend({
 }) {
   const loadUsers = useServerFn(listEmailRecipients);
   const send = useServerFn(sendTemplateToRecipients);
+  const schedule = useServerFn(scheduleTemplateSend);
+  const loadScheduled = useServerFn(listScheduledSends);
+  const cancelScheduled = useServerFn(cancelScheduledSend);
 
   const [users, setUsers] = useState<UserRow[]>([]);
   const [template, setTemplate] = useState<string>("");
@@ -31,6 +59,18 @@ export function EmailManualSend({
   const [external, setExternal] = useState("");
   const [recipients, setRecipients] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
+  const [mode, setMode] = useState<"now" | "later">("now");
+  const [sendAt, setSendAt] = useState<string>(defaultScheduleValue());
+  const [scheduled, setScheduled] = useState<ScheduledRow[]>([]);
+
+  async function refreshScheduled() {
+    try {
+      const res: any = await loadScheduled({ data: {} } as any);
+      setScheduled((res?.rows ?? []) as ScheduledRow[]);
+    } catch {
+      /* non-blocking */
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -41,6 +81,7 @@ export function EmailManualSend({
         /* non-blocking: external addresses still work */
       }
     })();
+    refreshScheduled();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -68,6 +109,27 @@ export function EmailManualSend({
   async function handleSend() {
     if (!template) return toast.error("Pick a template");
     if (recipients.length === 0) return toast.error("Add at least one recipient");
+
+    if (mode === "later") {
+      const when = new Date(sendAt);
+      if (Number.isNaN(when.getTime())) return toast.error("Pick a valid date and time");
+      if (when.getTime() < Date.now()) return toast.error("Pick a time in the future");
+      setSending(true);
+      try {
+        await schedule({
+          data: { templateName: template, recipients, sendAt: when.toISOString() },
+        } as any);
+        toast.success(`Scheduled for ${format(when, "d MMM yyyy, HH:mm")}`);
+        setRecipients([]);
+        refreshScheduled();
+      } catch (e: any) {
+        toast.error(e?.message ?? "Couldn't schedule that send");
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
+
     setSending(true);
     try {
       const res: any = await send({ data: { templateName: template, recipients } } as any);
@@ -83,6 +145,16 @@ export function EmailManualSend({
       toast.error(e?.message ?? "Send failed");
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleCancel(id: string) {
+    try {
+      await cancelScheduled({ data: { id } } as any);
+      toast.success("Scheduled send cancelled");
+      refreshScheduled();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Couldn't cancel that send");
     }
   }
 
@@ -173,10 +245,91 @@ export function EmailManualSend({
           </div>
         )}
 
+        <div className="space-y-2">
+          <label className="text-sm font-medium">When</label>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1 rounded-md border p-1">
+              <Button
+                type="button"
+                size="sm"
+                variant={mode === "now" ? "default" : "ghost"}
+                onClick={() => setMode("now")}
+              >
+                Send now
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={mode === "later" ? "default" : "ghost"}
+                onClick={() => setMode("later")}
+              >
+                Schedule
+              </Button>
+            </div>
+            {mode === "later" && (
+              <Input
+                type="datetime-local"
+                value={sendAt}
+                onChange={(e) => setSendAt(e.target.value)}
+                className="w-[230px]"
+              />
+            )}
+          </div>
+          {mode === "later" && (
+            <p className="text-xs text-muted-foreground">
+              Uses your local time. Scheduled emails go out within about 15 minutes of the chosen
+              time.
+            </p>
+          )}
+        </div>
+
         <Button onClick={handleSend} disabled={sending}>
-          <Send className="mr-2 h-4 w-4" />
-          {sending ? "Sending…" : `Send to ${recipients.length || 0}`}
+          {mode === "later" ? (
+            <CalendarClock className="mr-2 h-4 w-4" />
+          ) : (
+            <Send className="mr-2 h-4 w-4" />
+          )}
+          {sending
+            ? mode === "later"
+              ? "Scheduling…"
+              : "Sending…"
+            : mode === "later"
+              ? `Schedule for ${recipients.length || 0}`
+              : `Send to ${recipients.length || 0}`}
         </Button>
+
+        {scheduled.length > 0 && (
+          <div className="space-y-2 border-t pt-4">
+            <p className="text-sm font-medium">Scheduled &amp; recent</p>
+            <div className="divide-y rounded-md border">
+              {scheduled.slice(0, 15).map((s) => (
+                <div
+                  key={s.id}
+                  className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{s.template_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(s.send_at), "d MMM yyyy, HH:mm")} ·{" "}
+                      {s.recipients?.length ?? 0} recipient
+                      {(s.recipients?.length ?? 0) === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="capitalize">
+                      {s.status}
+                    </Badge>
+                    {s.status === "scheduled" && (
+                      <Button size="sm" variant="ghost" onClick={() => handleCancel(s.id)}>
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

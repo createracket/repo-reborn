@@ -1756,6 +1756,66 @@ export type Database = {
           },
         ]
       }
+      scheduled_email_cron_token: {
+        Row: {
+          created_at: string
+          id: boolean
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          id?: boolean
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          id?: boolean
+          token?: string
+        }
+        Relationships: []
+      }
+      scheduled_email_sends: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          processed_at: string | null
+          recipients: string[]
+          result: Json | null
+          send_at: string
+          status: string
+          template_data: Json
+          template_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          processed_at?: string | null
+          recipients: string[]
+          result?: Json | null
+          send_at: string
+          status?: string
+          template_data?: Json
+          template_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          processed_at?: string | null
+          recipients?: string[]
+          result?: Json | null
+          send_at?: string
+          status?: string
+          template_data?: Json
+          template_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       social_listening_scan_shares: {
         Row: {
           created_at: string
