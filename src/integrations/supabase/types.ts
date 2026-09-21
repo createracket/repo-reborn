@@ -1756,6 +1756,24 @@ export type Database = {
           },
         ]
       }
+      scheduled_email_cron_token: {
+        Row: {
+          created_at: string
+          id: boolean
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          id?: boolean
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          id?: boolean
+          token?: string
+        }
+        Relationships: []
+      }
       scheduled_email_sends: {
         Row: {
           created_at: string
