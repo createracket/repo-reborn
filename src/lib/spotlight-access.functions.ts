@@ -32,12 +32,18 @@ export const registerSpotlightMemberInterest = createServerFn({ method: "POST" }
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => MemberInterestSchema.parse(input))
   .handler(async ({ data, context }) => {
-    const { data: row } = await context.supabase
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+
+    let pageQuery = context.supabase
       .from("partner_pages")
       .select("id, eoi_opportunities")
-      .eq("slug", data.slug)
-      .eq("published", true)
-      .maybeSingle();
+      .eq("slug", data.slug);
+    if (!isAdmin) pageQuery = pageQuery.eq("published", true);
+
+    const { data: row } = await pageQuery.maybeSingle();
     if (!row) return { ok: false as const };
 
     const selectedParts = validSelectedParts(data.selectedParts, row.eoi_opportunities ?? []);
