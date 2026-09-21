@@ -245,10 +245,91 @@ export function EmailManualSend({
           </div>
         )}
 
+        <div className="space-y-2">
+          <label className="text-sm font-medium">When</label>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1 rounded-md border p-1">
+              <Button
+                type="button"
+                size="sm"
+                variant={mode === "now" ? "default" : "ghost"}
+                onClick={() => setMode("now")}
+              >
+                Send now
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={mode === "later" ? "default" : "ghost"}
+                onClick={() => setMode("later")}
+              >
+                Schedule
+              </Button>
+            </div>
+            {mode === "later" && (
+              <Input
+                type="datetime-local"
+                value={sendAt}
+                onChange={(e) => setSendAt(e.target.value)}
+                className="w-[230px]"
+              />
+            )}
+          </div>
+          {mode === "later" && (
+            <p className="text-xs text-muted-foreground">
+              Uses your local time. Scheduled emails go out within about 15 minutes of the chosen
+              time.
+            </p>
+          )}
+        </div>
+
         <Button onClick={handleSend} disabled={sending}>
-          <Send className="mr-2 h-4 w-4" />
-          {sending ? "Sending…" : `Send to ${recipients.length || 0}`}
+          {mode === "later" ? (
+            <CalendarClock className="mr-2 h-4 w-4" />
+          ) : (
+            <Send className="mr-2 h-4 w-4" />
+          )}
+          {sending
+            ? mode === "later"
+              ? "Scheduling…"
+              : "Sending…"
+            : mode === "later"
+              ? `Schedule for ${recipients.length || 0}`
+              : `Send to ${recipients.length || 0}`}
         </Button>
+
+        {scheduled.length > 0 && (
+          <div className="space-y-2 border-t pt-4">
+            <p className="text-sm font-medium">Scheduled &amp; recent</p>
+            <div className="divide-y rounded-md border">
+              {scheduled.slice(0, 15).map((s) => (
+                <div
+                  key={s.id}
+                  className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{s.template_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(s.send_at), "d MMM yyyy, HH:mm")} ·{" "}
+                      {s.recipients?.length ?? 0} recipient
+                      {(s.recipients?.length ?? 0) === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="capitalize">
+                      {s.status}
+                    </Badge>
+                    {s.status === "scheduled" && (
+                      <Button size="sm" variant="ghost" onClick={() => handleCancel(s.id)}>
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
