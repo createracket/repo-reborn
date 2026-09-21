@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Send, X } from "lucide-react";
+import { format } from "date-fns";
+import { CalendarClock, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +14,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { listEmailRecipients, sendTemplateToRecipients } from "@/lib/email-admin.functions";
+import {
+  listEmailRecipients,
+  sendTemplateToRecipients,
+  scheduleTemplateSend,
+  listScheduledSends,
+  cancelScheduledSend,
+} from "@/lib/email-admin.functions";
 
 type UserRow = { id: string; email: string; display_name: string | null };
+
+type ScheduledRow = {
+  id: string;
+  template_name: string;
+  recipients: string[];
+  send_at: string;
+  status: string;
+  result: any;
+  processed_at: string | null;
+};
+
+/** Local datetime string (yyyy-MM-ddTHH:mm) for <input type="datetime-local">. */
+function defaultScheduleValue(): string {
+  const d = new Date(Date.now() + 60 * 60 * 1000);
+  d.setSeconds(0, 0);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export function EmailManualSend({
   templates,
@@ -24,6 +49,9 @@ export function EmailManualSend({
 }) {
   const loadUsers = useServerFn(listEmailRecipients);
   const send = useServerFn(sendTemplateToRecipients);
+  const schedule = useServerFn(scheduleTemplateSend);
+  const loadScheduled = useServerFn(listScheduledSends);
+  const cancelScheduled = useServerFn(cancelScheduledSend);
 
   const [users, setUsers] = useState<UserRow[]>([]);
   const [template, setTemplate] = useState<string>("");
@@ -31,6 +59,18 @@ export function EmailManualSend({
   const [external, setExternal] = useState("");
   const [recipients, setRecipients] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
+  const [mode, setMode] = useState<"now" | "later">("now");
+  const [sendAt, setSendAt] = useState<string>(defaultScheduleValue());
+  const [scheduled, setScheduled] = useState<ScheduledRow[]>([]);
+
+  async function refreshScheduled() {
+    try {
+      const res: any = await loadScheduled({ data: {} } as any);
+      setScheduled((res?.rows ?? []) as ScheduledRow[]);
+    } catch {
+      /* non-blocking */
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -41,6 +81,7 @@ export function EmailManualSend({
         /* non-blocking: external addresses still work */
       }
     })();
+    refreshScheduled();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
