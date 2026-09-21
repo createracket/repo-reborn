@@ -11,9 +11,21 @@ export const Route = createFileRoute('/api/public/hooks/dispatch-scheduled-email
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const secret = process.env['SCHEDULED_EMAIL_SECRET']
         const provided = request.headers.get('x-scheduled-email-secret') ?? ''
-        if (!secret || !provided || !safeEqual(provided, secret)) {
+        const envSecret = process.env['SCHEDULED_EMAIL_SECRET'] ?? ''
+        let authorized = !!provided && !!envSecret && safeEqual(provided, envSecret)
+
+        if (!authorized && provided) {
+          const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+          const { data: tokenRow } = await supabaseAdmin
+            .from('scheduled_email_cron_token')
+            .select('token')
+            .maybeSingle()
+          const dbToken = (tokenRow?.token as string | undefined) ?? ''
+          authorized = !!dbToken && safeEqual(provided, dbToken)
+        }
+
+        if (!authorized) {
           return new Response(JSON.stringify({ error: 'Unauthorized' }), {
             status: 401,
             headers: { 'Content-Type': 'application/json' },
