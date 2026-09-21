@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { shareImageMeta } from "@/lib/share-meta";
 import { useEffect, useState } from "react";
 import { Link2, Send, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";

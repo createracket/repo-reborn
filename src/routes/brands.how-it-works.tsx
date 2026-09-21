@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { shareImageMeta } from "@/lib/share-meta";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import {
