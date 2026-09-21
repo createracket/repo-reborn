@@ -26,6 +26,7 @@ export const Route = createFileRoute("/results")({
       { title: "Your Vibe — Create Racket" },
       { name: "description", content: "Your Vibe Check results." },
       { name: "robots", content: "noindex, nofollow" },
+      ...shareImageMeta(),
     ],
   }),
   component: Results,
