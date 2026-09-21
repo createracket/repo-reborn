@@ -277,8 +277,8 @@ export function EmailManualSend({
           </div>
           {mode === "later" && (
             <p className="text-xs text-muted-foreground">
-              Uses your local time. Scheduled emails go out within about 15 minutes of the chosen
-              time.
+              Uses your local time. There's one send run each morning at 9am, so anything scheduled
+              for 8am or earlier goes out in that day's 9am run.
             </p>
           )}
         </div>
