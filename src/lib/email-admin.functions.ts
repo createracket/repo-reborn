@@ -285,31 +285,79 @@ export const sendTemplateToRecipients = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => ManualSendSchema.parse(input))
   .handler(async ({ data, context }) => {
     await assertAdmin(context)
-    const { enqueueTransactionalEmail } = await import('@/lib/email/send.server')
+    const { runManualSend } = await import('@/lib/email/manual-send.server')
+    return await runManualSend({
+      templateName: data.templateName,
+      recipients: data.recipients,
+      templateData: data.templateData,
+      idempotencyPrefix: `manual-${Date.now()}`,
+    })
+  })
 
-    const unique = Array.from(new Set(data.recipients.map((r) => r.toLowerCase())))
-    const stamp = Date.now()
-    let queued = 0
-    let skipped = 0
-    const failures: { email: string; error: string }[] = []
+/* -------------------------------------------------------------------------- */
+/* Scheduled sends                                                            */
+/* -------------------------------------------------------------------------- */
 
-    for (const email of unique) {
-      try {
-        const res: any = await enqueueTransactionalEmail({
-          templateName: data.templateName,
-          recipientEmail: email,
-          templateData: { email, ...(data.templateData ?? {}) },
-          idempotencyKey: `manual-${data.templateName}-${email}-${stamp}`,
-        })
-        if (res?.success) queued++
-        else if (res?.reason === 'email_suppressed') skipped++
-        else failures.push({ email, error: res?.error ?? 'Unknown error' })
-      } catch (e: any) {
-        failures.push({ email, error: e?.message ?? 'Send failed' })
-      }
-    }
+const ScheduleSendSchema = ManualSendSchema.extend({
+  sendAt: z.string().datetime(),
+})
 
-    return { queued, skipped, failures }
+export const scheduleTemplateSend = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => ScheduleSendSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const when = new Date(data.sendAt)
+    if (Number.isNaN(when.getTime())) throw new Error('Invalid send time')
+    if (when.getTime() < Date.now() - 60_000) throw new Error('Pick a time in the future')
+
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const recipients = Array.from(new Set(data.recipients.map((r) => r.toLowerCase())))
+    const { data: row, error } = await supabaseAdmin
+      .from('scheduled_email_sends')
+      .insert({
+        template_name: data.templateName,
+        recipients,
+        template_data: data.templateData ?? {},
+        send_at: when.toISOString(),
+        created_by: context.userId,
+      })
+      .select('id, send_at')
+      .single()
+    if (error) throw new Error(error.message)
+    return { id: row.id as string, sendAt: row.send_at as string, recipients: recipients.length }
+  })
+
+export const listScheduledSends = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data, error } = await supabaseAdmin
+      .from('scheduled_email_sends')
+      .select('id, template_name, recipients, send_at, status, result, processed_at')
+      .order('send_at', { ascending: false })
+      .limit(100)
+    if (error) throw new Error(error.message)
+    return { rows: data ?? [] }
+  })
+
+export const cancelScheduledSend = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { data: row, error } = await supabaseAdmin
+      .from('scheduled_email_sends')
+      .update({ status: 'cancelled' })
+      .eq('id', data.id)
+      .eq('status', 'scheduled')
+      .select('id')
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    if (!row) throw new Error('That send has already gone out or was cancelled')
+    return { ok: true }
   })
 
 /* -------------------------------------------------------------------------- */

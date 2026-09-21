@@ -70,6 +70,7 @@ import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/w
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as AuthenticatedAdminSpotlightsIndexRouteImport } from './routes/_authenticated.admin.spotlights.index'
 import { Route as AuthenticatedBriefsEditKeyRouteImport } from './routes/_authenticated.briefs.edit.$key'
+import { Route as ApiPublicHooksDispatchScheduledEmailsRouteImport } from './routes/api/public/hooks/dispatch-scheduled-emails'
 import { Route as ApiPublicHooksReportMetricsWorkerRouteImport } from './routes/api/public/hooks/report-metrics-worker'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -404,6 +405,12 @@ const AuthenticatedBriefsEditKeyRoute =
     path: '/edit/$key',
     getParentRoute: () => AuthenticatedBriefsRoute,
   } as any)
+const ApiPublicHooksDispatchScheduledEmailsRoute =
+  ApiPublicHooksDispatchScheduledEmailsRouteImport.update({
+    id: '/api/public/hooks/dispatch-scheduled-emails',
+    path: '/api/public/hooks/dispatch-scheduled-emails',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksReportMetricsWorkerRoute =
   ApiPublicHooksReportMetricsWorkerRouteImport.update({
     id: '/api/public/hooks/report-metrics-worker',
@@ -493,6 +500,7 @@ export interface FileRoutesByFullPath {
   '/briefs/': typeof AuthenticatedBriefsIndexRoute
   '/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
   '/briefs/edit/$key': typeof AuthenticatedBriefsEditKeyRoute
+  '/api/public/hooks/dispatch-scheduled-emails': typeof ApiPublicHooksDispatchScheduledEmailsRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -556,6 +564,7 @@ export interface FileRoutesByTo {
   '/briefs': typeof AuthenticatedBriefsIndexRoute
   '/racket-desk': typeof AuthenticatedRacketDeskIndexRoute
   '/briefs/edit/$key': typeof AuthenticatedBriefsEditKeyRoute
+  '/api/public/hooks/dispatch-scheduled-emails': typeof ApiPublicHooksDispatchScheduledEmailsRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -625,6 +634,7 @@ export interface FileRoutesById {
   '/_authenticated/briefs/': typeof AuthenticatedBriefsIndexRoute
   '/_authenticated/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
   '/_authenticated/briefs/edit/$key': typeof AuthenticatedBriefsEditKeyRoute
+  '/api/public/hooks/dispatch-scheduled-emails': typeof ApiPublicHooksDispatchScheduledEmailsRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -694,6 +704,7 @@ export interface FileRouteTypes {
     | '/briefs/'
     | '/racket-desk/'
     | '/briefs/edit/$key'
+    | '/api/public/hooks/dispatch-scheduled-emails'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -757,6 +768,7 @@ export interface FileRouteTypes {
     | '/briefs'
     | '/racket-desk'
     | '/briefs/edit/$key'
+    | '/api/public/hooks/dispatch-scheduled-emails'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -825,6 +837,7 @@ export interface FileRouteTypes {
     | '/_authenticated/briefs/'
     | '/_authenticated/racket-desk/'
     | '/_authenticated/briefs/edit/$key'
+    | '/api/public/hooks/dispatch-scheduled-emails'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -863,6 +876,7 @@ export interface RootRouteChildren {
   ApiPublicUploadBriefFileRoute: typeof ApiPublicUploadBriefFileRoute
   ApiPublicWaitlistJoinRoute: typeof ApiPublicWaitlistJoinRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
+  ApiPublicHooksDispatchScheduledEmailsRoute: typeof ApiPublicHooksDispatchScheduledEmailsRoute
   ApiPublicHooksReportMetricsWorkerRoute: typeof ApiPublicHooksReportMetricsWorkerRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1298,6 +1312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBriefsEditKeyRouteImport
       parentRoute: typeof AuthenticatedBriefsRoute
     }
+    '/api/public/hooks/dispatch-scheduled-emails': {
+      id: '/api/public/hooks/dispatch-scheduled-emails'
+      path: '/api/public/hooks/dispatch-scheduled-emails'
+      fullPath: '/api/public/hooks/dispatch-scheduled-emails'
+      preLoaderRoute: typeof ApiPublicHooksDispatchScheduledEmailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/report-metrics-worker': {
       id: '/api/public/hooks/report-metrics-worker'
       path: '/api/public/hooks/report-metrics-worker'
@@ -1488,6 +1509,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicUploadBriefFileRoute: ApiPublicUploadBriefFileRoute,
   ApiPublicWaitlistJoinRoute: ApiPublicWaitlistJoinRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
+  ApiPublicHooksDispatchScheduledEmailsRoute:
+    ApiPublicHooksDispatchScheduledEmailsRoute,
   ApiPublicHooksReportMetricsWorkerRoute:
     ApiPublicHooksReportMetricsWorkerRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
