@@ -759,7 +759,7 @@ function PublicRosterPage() {
                     )}
                     {filterValues.length > 0 && (
                       <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
-                        <SelectTrigger className="w-[180px] text-sm">
+                        <SelectTrigger className="w-[calc(50%-0.375rem)] text-sm sm:w-[180px]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -774,7 +774,7 @@ function PublicRosterPage() {
                     )}
                     {statusValues.length > 0 && (
                       <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
-                        <SelectTrigger className="w-[180px] text-sm">
+                        <SelectTrigger className="w-[calc(50%-0.375rem)] text-sm sm:w-[180px]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
