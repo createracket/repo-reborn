@@ -179,7 +179,7 @@
   --sidebar-ring: oklch(0.86 0.21 125 / 60%);
 }
 
-/* Tixel report preview: neutral grey paper with crisp white data surfaces. */
+/* Campaign reports: neutral grey paper with crisp white data surfaces. */
 .report-light {
   --background: oklch(0.95 0.003 260);
   --foreground: oklch(0.23 0.006 270);

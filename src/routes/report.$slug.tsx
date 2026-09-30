@@ -746,7 +746,7 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
             (post.platform === "instagram"
               ? "text-pink-accent"
               : post.platform === "tiktok"
-                ? "text-lime"
+                ? "text-lime report-light:text-purple"
                 : "")
           }
           aria-label={PLATFORM_LABEL[post.platform]}
