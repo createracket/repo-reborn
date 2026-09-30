@@ -81,6 +81,7 @@ type PublicItem = {
   content_review_url: string | null;
   content_review_label: string | null;
   posting_date?: string | null;
+  extra_posting_dates?: string[] | null;
   co_posts?: unknown;
   position: number;
   status: string;

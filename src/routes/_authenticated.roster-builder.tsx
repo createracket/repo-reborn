@@ -197,6 +197,7 @@ type RosterItem = {
   categories: string[];
   metrics_month: string | null;
   posting_date?: string | null;
+  extra_posting_dates?: string[] | null;
   location: "GB" | "US" | "NZ" | "AU" | "JP" | null;
   hidden?: boolean;
 };
@@ -2260,6 +2261,7 @@ function EditProspectPanel({
     metrics_month: item.metrics_month ?? "",
     posting_date: item.posting_date ?? "",
   });
+  const [extraDates, setExtraDates] = useState<string[]>(() => item.extra_posting_dates ?? []);
   const [coPosts, setCoPosts] = useState<CoPost[]>(() => parseCoPosts(item.co_posts));
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -2420,6 +2422,7 @@ function EditProspectPanel({
         budget: toNum(form.budget),
         metrics_month: form.metrics_month.trim() || null,
         posting_date: form.posting_date.trim() || null,
+        extra_posting_dates: extraDates.map((d) => d.trim()).filter(Boolean),
         co_posts: coPosts
           .filter((c) => c.url.trim())
           .map((c) => ({
@@ -2529,7 +2532,47 @@ function EditProspectPanel({
         {fld("Name", "name")}
         {fld("Photo URL (or use upload above)", "avatar_url", "https://…")}
         {fld("Metrics month", "metrics_month", "e.g. 2026-06", "month")}
-        {fld("Posting date", "posting_date", "", "date")}
+        <div className="space-y-1">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Posting date{extraDates.length ? "s" : ""}
+          </Label>
+          <Input
+            type="date"
+            value={form.posting_date}
+            onChange={(e) => upd("posting_date", e.target.value)}
+            className="text-sm"
+          />
+          {extraDates.map((d, i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <Input
+                type="date"
+                value={d}
+                onChange={(e) =>
+                  setExtraDates((arr) => arr.map((x, j) => (j === i ? e.target.value : x)))
+                }
+                className="text-sm"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-label="Remove posting date"
+                onClick={() => setExtraDates((arr) => arr.filter((_, j) => j !== i))}
+              >
+                ✕
+              </Button>
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => setExtraDates((arr) => [...arr, ""])}
+          >
+            + Add post date
+          </Button>
+        </div>
         {fld("Budget (£)", "budget", "5000")}
         {urlFld("Instagram URL", "instagram_url", "instagram", "instagram_followers")}
         {fld("IG followers", "instagram_followers", "12500")}
