@@ -64,6 +64,8 @@
   --color-blush: var(--pink-accent);
   --color-lime: var(--primary);
   --color-brand-light: var(--brand-light);
+  /* Footer keeps the soft brand pink in every theme (report light overrides --pink-accent). */
+  --color-footer-pink: oklch(0.86 0.07 12);
 }
 
 /* Light mode (opt-in). Dark remains the default — see .dark below, which is
