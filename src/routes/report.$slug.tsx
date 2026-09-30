@@ -588,7 +588,7 @@ function PublicReportPage() {
                     : "border-border text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Extra mentions {showExtras ? "on" : "off"}
+                Extra mentions {showExtras ? "are on" : "are off"}
               </button>
             )}
             <div className="flex items-center gap-1.5">
