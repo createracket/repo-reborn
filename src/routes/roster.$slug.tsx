@@ -343,7 +343,7 @@ function PublicRosterPage() {
     );
   }
 
-  const visibleForTotals = items.filter((it) => it.status !== "hold");
+  const visibleForTotals = items.filter((it) => it.status !== "hold" && it.status !== "live");
   const totalSocial = visibleForTotals.reduce((acc, it) => acc + socialAudience(it), 0);
   const totalAll = visibleForTotals.reduce((acc, it) => acc + totalFans(it), 0);
   const totalCreators = visibleForTotals.length;
