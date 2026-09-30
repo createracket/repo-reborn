@@ -395,7 +395,7 @@ function PublicRosterPage() {
           ) : null}
 
           <div className="min-w-[240px] flex-1">
-            <Badge className="border-transparent bg-pink-accent uppercase tracking-[0.2em] text-[#2b2b2b] report-light:text-destructive-foreground hover:bg-pink-accent">
+            <Badge className="border-transparent bg-pink-accent uppercase tracking-[0.2em] text-[#2b2b2b] hover:bg-pink-accent">
               <Users className="mr-1.5 size-3" /> Roster
             </Badge>
             <h1 className="mt-4 font-display text-5xl leading-tight md:text-6xl">
@@ -582,7 +582,7 @@ function PublicRosterPage() {
                               </span>
                             )}
                             {it.kind === "profile" ? (
-                              <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] report-light:text-destructive-foreground text-[10px] uppercase">
+                              <Badge className="gap-1 border-transparent bg-pink-accent text-[#2b2b2b] text-[10px] uppercase">
                                 <BadgeCheck className="size-3" /> Verified
                               </Badge>
                             ) : showProspect ? (

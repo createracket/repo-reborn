@@ -65,7 +65,7 @@
   --color-blush: var(--pink-accent);
   --color-lime: var(--primary);
   --color-brand-light: var(--brand-light);
-  /* Footer keeps the soft brand pink in every theme (report light overrides --pink-accent). */
+  /* Footer keeps the soft brand pink in every theme. */
   --color-footer-pink: oklch(0.86 0.07 12);
 }
 
@@ -196,7 +196,8 @@
   --border: oklch(0.49 0.008 260);
   --input: oklch(0.54 0.008 260);
   --ring: oklch(0.45 0.21 290);
-  --pink-accent: oklch(0.53 0.19 8);
+  /* Keep the same brand pink on reports, rosters and builders in light mode. */
+  --pink-accent: oklch(0.86 0.07 12);
 }
 
 /* The selected tab needs an edge as well as a shadow against white panels. */
