@@ -1,0 +1,1 @@
+GRANT SELECT (thumb_frame) ON public.campaign_reports TO anon, authenticated;
