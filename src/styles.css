@@ -3,6 +3,7 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant report-light (&:where(.report-light, .report-light *));
 
 /*
  * Create Racket design system — ported from the original brand.
