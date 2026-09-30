@@ -177,6 +177,23 @@
   --sidebar-ring: oklch(0.86 0.21 125 / 60%);
 }
 
+/* Tixel report preview: neutral grey paper with crisp white data surfaces. */
+.report-light {
+  --background: oklch(0.95 0.003 260);
+  --foreground: oklch(0.23 0.006 270);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.23 0.006 270);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.23 0.006 270);
+  --secondary: oklch(0.93 0.004 260);
+  --muted: oklch(0.94 0.004 260);
+  --muted-foreground: oklch(0.43 0.008 260);
+  --accent: oklch(0.93 0.004 260);
+  --border: oklch(0.77 0.008 260 / 55%);
+  --input: oklch(0.77 0.008 260 / 65%);
+  --pink-accent: oklch(0.53 0.19 8);
+}
+
 
 @layer base {
   * {
