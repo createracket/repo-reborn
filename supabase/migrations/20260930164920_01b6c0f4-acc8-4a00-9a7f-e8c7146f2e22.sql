@@ -1,0 +1,1 @@
+GRANT SELECT (show_calendar), UPDATE (show_calendar) ON public.rosters TO authenticated; GRANT SELECT (show_calendar) ON public.rosters TO anon;
