@@ -18,6 +18,11 @@ import { getReportGate, unlockReport, getReportForMember } from "@/lib/report-ac
 import { shareMeta } from "@/lib/share-meta";
 import { getSharePreview } from "@/lib/share-preview.functions";
 
+// Posts load in batches of 18 so the first screen lands on full rows of six.
+const POSTS_PER_LOAD = 18;
+
+
+
 
 type PublicReport = {
   id: string;
