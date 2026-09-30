@@ -8,7 +8,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   const { theme, canUseLight, toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
-  // Light mode is also available to guests on campaign reports.
+  // Light mode is also available to guests on campaign reports and rosters.
   if (!canUseLight) return null;
 
 
