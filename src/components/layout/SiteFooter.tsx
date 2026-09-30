@@ -9,7 +9,7 @@ export function SiteFooter() {
   const contactEmail = "community@createracket.com";
 
   return (
-    <footer className="mt-20 border-t border-border bg-pink-accent text-[#2b2b2b]">
+    <footer className="mt-20 border-t border-border bg-footer-pink text-[#2b2b2b]">
       <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           <div className="lg:col-span-6">
