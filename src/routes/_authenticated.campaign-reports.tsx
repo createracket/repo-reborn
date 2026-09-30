@@ -779,7 +779,7 @@ function ReportDetailView({
     const { error } = await sb.from("campaign_report_creators").insert({
       report_id: report.id,
       name: "New creator",
-      position: creators.length,
+      position: creators.length ? Math.min(...creators.map((creator) => creator.position)) - 1 : 0,
     });
     if (error) return toast.error(error.message);
     await onChanged();
