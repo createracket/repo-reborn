@@ -110,6 +110,7 @@ type Roster = {
   hide_metric_reach: boolean;
   hide_metric_engagement: boolean;
   show_metric_creators: boolean;
+  show_calendar?: boolean;
   header_image_url: string | null;
   profile_image_url: string | null;
   thumb_frame?: any;
@@ -195,6 +196,7 @@ type RosterItem = {
   category: string | null;
   categories: string[];
   metrics_month: string | null;
+  posting_date?: string | null;
   location: "GB" | "US" | "NZ" | "AU" | "JP" | null;
   hidden?: boolean;
 };
@@ -992,7 +994,8 @@ function RosterDetailView({
       | "hide_metric_fans"
       | "hide_metric_reach"
       | "hide_metric_engagement"
-      | "show_metric_creators",
+      | "show_metric_creators"
+      | "show_calendar",
     value: boolean,
   ) {
     const { error } = await supabase
@@ -1488,6 +1491,18 @@ function RosterDetailView({
               <Switch
                 checked={roster.hide_statuses}
                 onCheckedChange={toggleHideStatuses}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Show calendar view</div>
+                <div className="text-xs text-muted-foreground">
+                  Adds a List / Calendar toggle to the public roster page, placing creators on their posting dates.
+                </div>
+              </div>
+              <Switch
+                checked={!!roster.show_calendar}
+                onCheckedChange={(on) => toggleMetricFlag("show_calendar", on)}
               />
             </div>
             <div className="rounded-lg border border-border/60 p-3">
@@ -2243,6 +2258,7 @@ function EditProspectPanel({
     content_review_label: item.content_review_label ?? "",
     budget: item.budget?.toString() ?? "",
     metrics_month: item.metrics_month ?? "",
+    posting_date: item.posting_date ?? "",
   });
   const [coPosts, setCoPosts] = useState<CoPost[]>(() => parseCoPosts(item.co_posts));
   const [saving, setSaving] = useState(false);
@@ -2403,6 +2419,7 @@ function EditProspectPanel({
         content_review_label: form.content_review_label.trim() || null,
         budget: toNum(form.budget),
         metrics_month: form.metrics_month.trim() || null,
+        posting_date: form.posting_date.trim() || null,
         co_posts: coPosts
           .filter((c) => c.url.trim())
           .map((c) => ({
@@ -2512,6 +2529,7 @@ function EditProspectPanel({
         {fld("Name", "name")}
         {fld("Photo URL (or use upload above)", "avatar_url", "https://…")}
         {fld("Metrics month", "metrics_month", "e.g. 2026-06", "month")}
+        {fld("Posting date", "posting_date", "", "date")}
         {fld("Budget (£)", "budget", "5000")}
         {urlFld("Instagram URL", "instagram_url", "instagram", "instagram_followers")}
         {fld("IG followers", "instagram_followers", "12500")}

@@ -1468,6 +1468,7 @@ export type Database = {
           metrics_month: string | null
           name: string
           position: number
+          posting_date: string | null
           profile_id: string | null
           roster_id: string
           spotify_monthly_listens: number | null
@@ -1513,6 +1514,7 @@ export type Database = {
           metrics_month?: string | null
           name: string
           position?: number
+          posting_date?: string | null
           profile_id?: string | null
           roster_id: string
           spotify_monthly_listens?: number | null
@@ -1558,6 +1560,7 @@ export type Database = {
           metrics_month?: string | null
           name?: string
           position?: number
+          posting_date?: string | null
           profile_id?: string | null
           roster_id?: string
           spotify_monthly_listens?: number | null
@@ -1680,6 +1683,7 @@ export type Database = {
           profile_image_url: string | null
           published: boolean
           published_at: string | null
+          show_calendar: boolean
           show_metric_creators: boolean
           slug: string | null
           statuses: string[]
@@ -1711,6 +1715,7 @@ export type Database = {
           profile_image_url?: string | null
           published?: boolean
           published_at?: string | null
+          show_calendar?: boolean
           show_metric_creators?: boolean
           slug?: string | null
           statuses?: string[]
@@ -1742,6 +1747,7 @@ export type Database = {
           profile_image_url?: string | null
           published?: boolean
           published_at?: string | null
+          show_calendar?: boolean
           show_metric_creators?: boolean
           slug?: string | null
           statuses?: string[]
