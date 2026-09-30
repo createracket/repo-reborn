@@ -11,18 +11,22 @@ import { useRouterState } from "@tanstack/react-router";
 export type Theme = "dark" | "light";
 
 const STORAGE_KEY = "cr-theme";
+// Keep the Tixel preference key so existing visitors retain their choice.
 const REPORT_STORAGE_KEY = "cr-tixel-report-theme";
 
 /** Routes that always render dark, whatever the saved preference. */
 const ALWAYS_DARK = ["/", "/auth", "/login", "/signup"];
 
-/** Public/shared pages that always render dark for consistent external viewing. */
-const ALWAYS_DARK_PREFIXES = ["/partner", "/roster/", "/spotlight/", "/report/"];
-const LIGHT_REPORT_PATH = "/report/tixel-report";
+/** Other public/shared pages remain dark; reports have a visitor-facing toggle. */
+const ALWAYS_DARK_PREFIXES = ["/partner", "/roster/", "/spotlight/"];
+const REPORT_PREFIX = "/report/";
+
+function isReportPath(pathname: string) {
+  return pathname.startsWith(REPORT_PREFIX) && pathname.length > REPORT_PREFIX.length;
+}
 
 function isAlwaysDark(pathname: string) {
   const p = pathname.replace(/\/+$/, "") || "/";
-  if (p === LIGHT_REPORT_PATH) return false;
   return ALWAYS_DARK.includes(p) || ALWAYS_DARK_PREFIXES.some((x) => p === x.replace(/\/$/, "") || p.startsWith(x));
 }
 
@@ -48,9 +52,9 @@ function hasSupabaseSession() {
 
 /**
  * Inline script injected into <head> so the correct theme is applied before
- * first paint. The Tixel report has a separate, visitor-accessible preference.
+ * first paint. Campaign reports have a separate, visitor-accessible preference.
  */
-export const themeInitScript = `(function(){try{var d=document.documentElement;var p=location.pathname.replace(/\\/+$/,"")||"/";var r=p==="${LIGHT_REPORT_PATH}";var t=localStorage.getItem(r?"${REPORT_STORAGE_KEY}":"${STORAGE_KEY}");var ad=${JSON.stringify(ALWAYS_DARK)};var ap=${JSON.stringify(ALWAYS_DARK_PREFIXES)};var alwaysDark=ad.indexOf(p)>-1;for(var j=0;j<ap.length&&!alwaysDark&&!r;j++){var pre=ap[j];if(p===pre.replace(/\\/$/,"")||p.indexOf(pre)===0){alwaysDark=true}}var s=false;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"&&localStorage.getItem(k)){s=true;break}}if(t==="light"&&!alwaysDark&&(s||r)){d.classList.remove("dark");d.classList.toggle("report-light",r)}else{d.classList.add("dark");d.classList.remove("report-light")}}catch(e){document.documentElement.classList.add("dark")}})();`;
+export const themeInitScript = `(function(){try{var d=document.documentElement;var p=location.pathname.replace(/\\/+$/,"")||"/";var r=p.indexOf("${REPORT_PREFIX}")===0&&p.length>${REPORT_PREFIX.length};var t=localStorage.getItem(r?"${REPORT_STORAGE_KEY}":"${STORAGE_KEY}");var ad=${JSON.stringify(ALWAYS_DARK)};var ap=${JSON.stringify(ALWAYS_DARK_PREFIXES)};var alwaysDark=ad.indexOf(p)>-1;for(var j=0;j<ap.length&&!alwaysDark&&!r;j++){var pre=ap[j];if(p===pre.replace(/\\/$/,"")||p.indexOf(pre)===0){alwaysDark=true}}var s=false;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"&&localStorage.getItem(k)){s=true;break}}if(t==="light"&&!alwaysDark&&(s||r)){d.classList.remove("dark");d.classList.toggle("report-light",r)}else{d.classList.add("dark");d.classList.remove("report-light")}}catch(e){document.documentElement.classList.add("dark")}})();`;
 
 type ThemeContextValue = {
   theme: Theme;
@@ -65,7 +69,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 function applyTheme(theme: Theme, pathname: string) {
   const root = document.documentElement;
   root.classList.toggle("dark", theme === "dark");
-  root.classList.toggle("report-light", theme === "light" && pathname.replace(/\/+$/, "") === LIGHT_REPORT_PATH);
+  root.classList.toggle("report-light", theme === "light" && isReportPath(pathname));
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -73,21 +77,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [signedIn, setSignedIn] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const isLightReport = pathname.replace(/\/+$/, "") === LIGHT_REPORT_PATH;
-  const canUseLight = isLightReport || (signedIn && !isAlwaysDark(pathname));
+  const isReport = isReportPath(pathname);
+  const canUseLight = isReport || (signedIn && !isAlwaysDark(pathname));
   const theme: Theme = canUseLight && preference === "light" ? "light" : "dark";
 
   // Sync with whatever the pre-hydration script decided.
   useEffect(() => {
     let stored: string | null = null;
     try {
-      stored = localStorage.getItem(isLightReport ? REPORT_STORAGE_KEY : STORAGE_KEY);
+      stored = localStorage.getItem(isReport ? REPORT_STORAGE_KEY : STORAGE_KEY);
     } catch {
       stored = null;
     }
     setPreference(stored === "light" ? "light" : "dark");
     setSignedIn(hasSupabaseSession());
-  }, [pathname, isLightReport]);
+  }, [pathname, isReport]);
 
   // Re-apply on every route/session change so protected pages honour the
   // preference and always-dark pages snap back to dark.
@@ -98,11 +102,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setTheme = useCallback((next: Theme) => {
     setPreference(next);
     try {
-      localStorage.setItem(isLightReport ? REPORT_STORAGE_KEY : STORAGE_KEY, next);
+      localStorage.setItem(isReport ? REPORT_STORAGE_KEY : STORAGE_KEY, next);
     } catch {
       /* storage unavailable — theme still applies for this session */
     }
-  }, [isLightReport]);
+  }, [isReport]);
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
