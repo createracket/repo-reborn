@@ -2656,8 +2656,10 @@ function AddCommunityCard({
       profile_id: isCommunity ? c.id : null,
       name: c.display_name,
       avatar_url: c.avatar_url,
+      // Category and status tags belong to each roster only — never carry
+      // tags over from a profile or another roster; start fresh here.
       category: isBrand ? "brand" : null,
-      categories: isBrand ? ["brand"] : (c.profile?.vibe_tags ?? []).slice(0, 3),
+      categories: isBrand ? ["brand"] : [],
       position: nextPosition,
       ...links,
     } as never);
