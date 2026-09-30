@@ -738,13 +738,13 @@ function PublicRosterPage() {
                 return (
                   <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
                     {calendarOn && (
-                      <div className="mr-auto inline-flex rounded-full border border-border/60 p-0.5 text-sm">
+                      <div className="inline-flex w-full rounded-full border border-border/60 p-0.5 text-sm sm:mr-auto sm:w-auto">
                         {(["list", "calendar"] as const).map((v) => (
                           <button
                             key={v}
                             type="button"
                             onClick={() => setView(v)}
-                            className={`rounded-full px-4 py-1.5 capitalize transition ${view === v ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+                            className={`flex-1 rounded-full px-4 py-1.5 capitalize transition sm:flex-none ${view === v ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
                           >
                             {v}
                           </button>
@@ -752,14 +752,14 @@ function PublicRosterPage() {
                       </div>
                     )}
                     {(filterValues.length > 0 || statusValues.length > 0) && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
                       <Filter className="size-4" />
                       <span>Filter</span>
                     </div>
                     )}
                     {filterValues.length > 0 && (
                       <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
-                        <SelectTrigger className="w-[180px] text-sm">
+                        <SelectTrigger className="w-[calc(50%-0.375rem)] text-sm sm:w-[180px]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -774,7 +774,7 @@ function PublicRosterPage() {
                     )}
                     {statusValues.length > 0 && (
                       <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v)}>
-                        <SelectTrigger className="w-[180px] text-sm">
+                        <SelectTrigger className="w-[calc(50%-0.375rem)] text-sm sm:w-[180px]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
