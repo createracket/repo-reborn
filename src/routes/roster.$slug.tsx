@@ -424,7 +424,7 @@ function PublicRosterPage() {
                   href={l.url}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="inline-flex items-center gap-1.5 rounded-md border border-lime/40 bg-lime/10 px-3 py-1.5 text-sm text-foreground hover:bg-lime/20"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-lime/40 bg-lime/10 px-3 py-1.5 text-sm text-foreground hover:bg-lime/20 report-light:border-lime report-light:bg-lime report-light:text-primary-foreground report-light:hover:bg-lime/85"
                 >
                   {l.label || l.url}
                   <ExternalLink className="size-3.5" />

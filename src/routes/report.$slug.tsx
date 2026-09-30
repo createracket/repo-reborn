@@ -27,6 +27,7 @@ type PublicReport = {
   published: boolean;
   published_at: string | null;
   header_image_url: string | null;
+  custom_links?: Array<{ label: string; url: string }> | null;
   profile_image_url: string | null;
   categories: string[] | null;
   hide_categories: boolean | null;
@@ -132,7 +133,7 @@ function PublicReportPage() {
     (async () => {
       const { data: r } = await (supabase as any)
         .from("public_campaign_reports")
-        .select("id, title, description, slug, published, published_at, header_image_url, profile_image_url, categories, hide_categories, template")
+        .select("id, title, description, slug, published, published_at, header_image_url, profile_image_url, categories, hide_categories, template, custom_links")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
@@ -522,6 +523,24 @@ function PublicReportPage() {
               <p className="mt-4 whitespace-pre-wrap text-lg text-muted-foreground">
                 {report.description}
               </p>
+            )}
+            {report.custom_links && report.custom_links.length > 0 && (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {report.custom_links.map((l, i) =>
+                  l.url ? (
+                    <a
+                      key={i}
+                      href={l.url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex items-center gap-1.5 rounded-md border border-lime/40 bg-lime/10 px-3 py-1.5 text-sm text-foreground hover:bg-lime/20 report-light:border-lime report-light:bg-lime report-light:text-primary-foreground report-light:hover:bg-lime/85"
+                    >
+                      {l.label || l.url}
+                      <ExternalLink className="size-3.5" />
+                    </a>
+                  ) : null,
+                )}
+              </div>
             )}
           </div>
         </div>
