@@ -2215,6 +2215,7 @@ export type Database = {
         Row: {
           categories: string[] | null
           created_at: string | null
+          custom_links: Json | null
           description: string | null
           header_image_url: string | null
           hide_categories: boolean | null
@@ -2230,6 +2231,7 @@ export type Database = {
         Insert: {
           categories?: string[] | null
           created_at?: string | null
+          custom_links?: Json | null
           description?: string | null
           header_image_url?: string | null
           hide_categories?: boolean | null
@@ -2245,6 +2247,7 @@ export type Database = {
         Update: {
           categories?: string[] | null
           created_at?: string | null
+          custom_links?: Json | null
           description?: string | null
           header_image_url?: string | null
           hide_categories?: boolean | null
