@@ -1455,6 +1455,7 @@ export type Database = {
           custom_label: string | null
           custom_url: string | null
           example_video_url: string | null
+          extra_posting_dates: string[]
           facebook_followers: number | null
           facebook_url: string | null
           flagged_streaming_mismatch: boolean
@@ -1501,6 +1502,7 @@ export type Database = {
           custom_label?: string | null
           custom_url?: string | null
           example_video_url?: string | null
+          extra_posting_dates?: string[]
           facebook_followers?: number | null
           facebook_url?: string | null
           flagged_streaming_mismatch?: boolean
@@ -1547,6 +1549,7 @@ export type Database = {
           custom_label?: string | null
           custom_url?: string | null
           example_video_url?: string | null
+          extra_posting_dates?: string[]
           facebook_followers?: number | null
           facebook_url?: string | null
           flagged_streaming_mismatch?: boolean

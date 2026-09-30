@@ -20,15 +20,22 @@ export type CalendarCreator = {
   name: string;
   avatar_url: string | null;
   posting_date?: string | null;
+  extra_posting_dates?: string[] | null;
 };
+
+function datesOf(c: CalendarCreator): string[] {
+  const all = [c.posting_date, ...(c.extra_posting_dates ?? [])]
+    .filter((d): d is string => !!d)
+    .map((d) => d.slice(0, 10));
+  return [...new Set(all)];
+}
 
 const MAX_PER_DAY = 3;
 
 function initialMonth(creators: CalendarCreator[]): Date {
   const today = format(new Date(), "yyyy-MM-dd");
   const dates = creators
-    .map((c) => c.posting_date)
-    .filter((d): d is string => !!d)
+    .flatMap(datesOf)
     .sort();
   const next = dates.find((d) => d >= today);
   return startOfMonth(next ? parseISO(next) : new Date());
@@ -70,9 +77,7 @@ export function RosterCalendar({
   const byDay = useMemo(() => {
     const m = new Map<string, CalendarCreator[]>();
     for (const c of creators) {
-      if (!c.posting_date) continue;
-      const k = c.posting_date.slice(0, 10);
-      m.set(k, [...(m.get(k) ?? []), c]);
+      for (const k of datesOf(c)) m.set(k, [...(m.get(k) ?? []), c]);
     }
     return m;
   }, [creators]);
