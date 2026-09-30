@@ -752,7 +752,7 @@ function PublicRosterPage() {
                       </div>
                     )}
                     {(filterValues.length > 0 || statusValues.length > 0) && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
                       <Filter className="size-4" />
                       <span>Filter</span>
                     </div>
