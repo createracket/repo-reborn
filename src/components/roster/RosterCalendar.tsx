@@ -34,18 +34,18 @@ function initialMonth(creators: CalendarCreator[]): Date {
   return startOfMonth(next ? parseISO(next) : new Date());
 }
 
-function Chip({ c, onPick }: { c: CalendarCreator; onPick: (id: string) => void }) {
+function Chip({ c, onPick, large }: { c: CalendarCreator; onPick: (id: string) => void; large?: boolean }) {
   return (
     <button
       type="button"
       onClick={() => onPick(c.id)}
-      className="flex w-full items-center gap-1.5 rounded-full bg-lime px-1.5 py-0.5 text-left text-[11px] font-medium text-primary-foreground transition hover:bg-lime/85"
+      className={`flex w-full items-center rounded-full bg-lime text-left font-medium text-primary-foreground transition hover:bg-lime/85 report-light:text-foreground ${large ? "gap-2.5 px-2 py-1.5 text-sm" : "gap-1.5 px-1.5 py-0.5 text-[11px]"}`}
       title={c.name}
     >
-      <span className="size-4 shrink-0 overflow-hidden rounded-full bg-background/40">
+      <span className={`shrink-0 overflow-hidden rounded-full bg-background/40 ${large ? "size-8" : "size-4"}`}>
         {c.avatar_url ? (
           <img
-            src={storageImage(c.avatar_url, { width: 32, height: 32 })}
+            src={storageImage(c.avatar_url, { width: 64, height: 64 })}
             alt=""
             className="size-full object-cover"
             loading="lazy"
@@ -84,8 +84,8 @@ export function RosterCalendar({
   const monthDays = days.filter((d) => isSameMonth(d, month) && byDay.has(format(d, "yyyy-MM-dd")));
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-3 sm:p-5">
-      <div className="mb-4 flex items-center justify-center gap-4">
+    <div className="rounded-2xl border border-border/60 bg-card p-3 report-light:border-border/40 report-light:bg-muted/60 sm:p-5">
+      <div className="mb-3 flex items-center justify-between gap-2 sm:mb-4 sm:justify-center sm:gap-4">
         <Button variant="ghost" size="icon" aria-label="Previous month" onClick={() => setMonth((m) => addMonths(m, -1))}>
           <ChevronLeft className="size-4" />
         </Button>
@@ -112,9 +112,9 @@ export function RosterCalendar({
             return (
               <div
                 key={key}
-                className={`min-h-24 rounded-lg border p-1.5 ${inMonth ? "border-border/60 bg-background" : "border-transparent bg-muted/20 opacity-50"} ${isToday(d) ? "ring-2 ring-pink-accent" : ""}`}
+                className={`min-h-24 rounded-lg border p-1.5 ${inMonth ? "border-border/60 bg-background report-light:border-border/30 report-light:bg-card" : "border-transparent bg-muted/20 opacity-50 report-light:bg-muted/40"} ${isToday(d) ? "ring-2 ring-pink-accent report-light:ring-pink-ink" : ""}`}
               >
-                <div className="mb-1 text-xs text-muted-foreground">{format(d, "d")}</div>
+                <div className={`mb-1 text-xs ${isToday(d) ? "font-semibold text-pink-accent report-light:text-pink-ink" : "text-muted-foreground"}`}>{format(d, "d")}</div>
                 <div className="space-y-1">
                   {shown.map((c) => (
                     <Chip key={c.id} c={c} onPick={onPick} />
@@ -136,20 +136,21 @@ export function RosterCalendar({
       </div>
 
       {/* Mobile list */}
-      <div className="space-y-3 sm:hidden">
+      <div className="space-y-2 sm:hidden">
         {monthDays.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">No posts scheduled this month.</p>
         ) : (
           monthDays.map((d) => {
             const key = format(d, "yyyy-MM-dd");
             return (
-              <div key={key}>
-                <div className={`mb-1 text-xs font-medium ${isToday(d) ? "text-pink-accent" : "text-muted-foreground"}`}>
-                  {format(d, "EEE d MMM")}
+              <div key={key} className="flex gap-3 rounded-xl border border-border/60 bg-background p-2.5 report-light:border-border/30 report-light:bg-card">
+                <div className={`flex w-11 shrink-0 flex-col items-center justify-center rounded-lg py-1 ${isToday(d) ? "bg-pink-accent text-foreground report-light:text-pink-ink" : "bg-muted/50"}`}>
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{format(d, "EEE")}</span>
+                  <span className="font-display text-lg leading-none">{format(d, "d")}</span>
                 </div>
-                <div className="space-y-1">
+                <div className="min-w-0 flex-1 space-y-1.5">
                   {(byDay.get(key) ?? []).map((c) => (
-                    <Chip key={c.id} c={c} onPick={onPick} />
+                    <Chip key={c.id} c={c} onPick={onPick} large />
                   ))}
                 </div>
               </div>

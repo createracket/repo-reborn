@@ -738,13 +738,13 @@ function PublicRosterPage() {
                 return (
                   <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
                     {calendarOn && (
-                      <div className="mr-auto inline-flex rounded-full border border-border/60 p-0.5 text-sm">
+                      <div className="inline-flex w-full rounded-full border border-border/60 p-0.5 text-sm sm:mr-auto sm:w-auto">
                         {(["list", "calendar"] as const).map((v) => (
                           <button
                             key={v}
                             type="button"
                             onClick={() => setView(v)}
-                            className={`rounded-full px-4 py-1.5 capitalize transition ${view === v ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+                            className={`flex-1 rounded-full px-4 py-1.5 capitalize transition sm:flex-none ${view === v ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
                           >
                             {v}
                           </button>
