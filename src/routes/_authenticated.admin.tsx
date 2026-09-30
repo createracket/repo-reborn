@@ -125,7 +125,7 @@ function AdminLayout() {
               key={t.path}
               to={t.path}
               className="relative inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors hover:text-foreground"
-              activeProps={{ className: "bg-background text-foreground shadow" }}
+              activeProps={{ className: "bg-background text-foreground shadow report-light:ring-1 report-light:ring-border" }}
             >
               {t.label}
               {t.path === "/admin/contact" && unread > 0 ? (
