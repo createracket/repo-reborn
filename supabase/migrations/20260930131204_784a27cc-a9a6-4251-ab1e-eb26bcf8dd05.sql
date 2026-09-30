@@ -1,0 +1,1 @@
+ALTER VIEW public.public_campaign_reports SET (security_invoker = true); GRANT SELECT ON public.public_campaign_reports TO anon, authenticated; GRANT ALL ON public.public_campaign_reports TO service_role;
