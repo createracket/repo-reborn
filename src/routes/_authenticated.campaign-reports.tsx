@@ -1616,12 +1616,28 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
     return (total / followers) * 100;
   })();
 
-  async function applyErByViews() {
-    if (erByViews == null) {
-      toast.error("Add followers and at least one of views, likes or comments first");
+  const erByInteractions = (() => {
+    const followers = numOrNull(form.followers);
+    if (!followers || followers <= 0) return null;
+    const total =
+      (numOrNull(form.likes) ?? 0) +
+      (numOrNull(form.comments) ?? 0) +
+      (numOrNull(form.shares) ?? 0) +
+      (numOrNull(form.saves) ?? 0);
+    if (total <= 0) return null;
+    return (total / followers) * 100;
+  })();
+
+  async function applyEr(er: number | null, kind: "views" | "interactions") {
+    if (er == null) {
+      toast.error(
+        kind === "views"
+          ? "Add followers and at least one of views, likes or comments first"
+          : "Add followers and at least one of likes, comments, shares or saves first",
+      );
       return;
     }
-    const value = Number(erByViews.toFixed(2));
+    const value = Number(er.toFixed(2));
     set("engagement_rate_pct", String(value));
     const { error } = await sb
       .from("campaign_report_posts")
@@ -1818,12 +1834,21 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button size="sm" variant="outline" onClick={applyErByViews}>
+        <Button size="sm" variant="outline" onClick={() => applyEr(erByViews, "views")}>
           ER by views
         </Button>
         <span className="text-xs text-muted-foreground">
           (views + likes + comments) ÷ followers
           {erByViews != null ? ` = ${erByViews.toFixed(1)}%` : ""}
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button size="sm" variant="outline" onClick={() => applyEr(erByInteractions, "interactions")}>
+          ER by interactions
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          (likes + comments + shares + saves) ÷ followers
+          {erByInteractions != null ? ` = ${erByInteractions.toFixed(1)}%` : ""}
         </span>
       </div>
 
