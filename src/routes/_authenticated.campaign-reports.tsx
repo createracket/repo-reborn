@@ -210,7 +210,7 @@ function CampaignReportsPage() {
     const { data, error } = await sb
       .from("campaign_reports")
       .select(
-        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url, thumb_frame",
+        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url, thumb_frame, custom_links",
       )
       .order("updated_at", { ascending: false });
     if (error) return toast.error(error.message);
@@ -645,6 +645,11 @@ function ReportDetailView({
   const [accessCode, setAccessCode] = useState(report.access_code ?? "");
   const [accessCodeLabel, setAccessCodeLabel] = useState(report.access_code_label ?? "Access code");
   const [savingAccess, setSavingAccess] = useState(false);
+  const readLinks = () => {
+    const src = ((report as any).custom_links ?? []) as Array<{ label: string; url: string }>;
+    return [0, 1, 2].map((i) => ({ label: src[i]?.label ?? "", url: src[i]?.url ?? "" }));
+  };
+  const [customLinks, setCustomLinks] = useState(readLinks);
 
   useEffect(() => {
     setTitle(report.title);
@@ -658,6 +663,7 @@ function ReportDetailView({
     setTemplate(report.template ?? "original");
     setAccessCode(report.access_code ?? "");
     setAccessCodeLabel(report.access_code_label ?? "Access code");
+    setCustomLinks(readLinks());
     // brand_email/client_email are hidden from base-table SELECT; fetch via
     // the owner/admin-only RPC.
     setClientEmail("");
@@ -707,6 +713,9 @@ function ReportDetailView({
         header_image_url: header.trim() || null,
         profile_image_url: thumb.trim() || null,
         thumb_frame: thumbFrame as any,
+        custom_links: customLinks
+          .map((l) => ({ label: l.label.trim(), url: l.url.trim() }))
+          .filter((l) => l.url) as any,
         client_email: clientEmail.trim().toLowerCase() || null,
         brand_email: brandEmail.trim().toLowerCase() || null,
       })
@@ -863,6 +872,27 @@ function ReportDetailView({
           <div className="space-y-2 md:col-span-2">
             <Label>Description</Label>
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+            <div className="space-y-2 pt-2">
+              <Label>Custom links (up to 3)</Label>
+              <p className="text-xs text-muted-foreground">
+                Shown near the top of the public report page, under the description. Leave blank to skip.
+              </p>
+              {customLinks.map((link, i) => (
+                <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr]">
+                  <Input
+                    value={link.label}
+                    onChange={(e) => setCustomLinks((prev) => prev.map((l, idx) => (idx === i ? { ...l, label: e.target.value } : l)))}
+                    placeholder={`Link ${i + 1} title`}
+                    maxLength={60}
+                  />
+                  <Input
+                    value={link.url}
+                    onChange={(e) => setCustomLinks((prev) => prev.map((l, idx) => (idx === i ? { ...l, url: e.target.value } : l)))}
+                    placeholder="https://…"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
           <div className="space-y-2 md:col-span-2">
             <Label>Header image</Label>

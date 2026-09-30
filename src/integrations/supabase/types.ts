@@ -449,6 +449,7 @@ export type Database = {
           categories: string[]
           client_email: string | null
           created_at: string
+          custom_links: Json
           description: string | null
           header_image_url: string | null
           hide_categories: boolean
@@ -471,6 +472,7 @@ export type Database = {
           categories?: string[]
           client_email?: string | null
           created_at?: string
+          custom_links?: Json
           description?: string | null
           header_image_url?: string | null
           hide_categories?: boolean
@@ -493,6 +495,7 @@ export type Database = {
           categories?: string[]
           client_email?: string | null
           created_at?: string
+          custom_links?: Json
           description?: string | null
           header_image_url?: string | null
           hide_categories?: boolean

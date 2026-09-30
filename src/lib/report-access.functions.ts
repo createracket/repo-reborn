@@ -13,7 +13,7 @@ const UnlockSchema = z.object({
 });
 
 const REPORT_FIELDS =
-  "id, title, description, slug, published, published_at, header_image_url, profile_image_url, categories, hide_categories, template";
+  "id, title, description, slug, published, published_at, header_image_url, profile_image_url, categories, hide_categories, template, custom_links";
 
 const CREATOR_FIELDS = "id, name, handle, avatar_url, position, location, category";
 
