@@ -1,3 +1,3 @@
 # Project architecture decisions
 
-- Keep campaign report light mode scoped with `.report-light` semantic tokens on the root and a shared report preference, because other shared client pages retain their dark presentation.
+- Grey/white light mode (`.report-light` tokens) applies to reports plus admin and builder pages via `isGreyLightPath` in use-theme; other shared client pages stay dark.

@@ -21,6 +21,13 @@ const ALWAYS_DARK = ["/", "/auth", "/login", "/signup"];
 const ALWAYS_DARK_PREFIXES = ["/partner", "/roster/", "/spotlight/"];
 const REPORT_PREFIX = "/report/";
 
+/** Admin pages and builders use the same grey/white light theme as reports. */
+const ADMIN_LIGHT_PREFIXES = ["/admin", "/campaign-reports", "/roster-builder", "/campaign-builder", "/briefs"];
+
+function isGreyLightPath(pathname: string) {
+  return isReportPath(pathname) || ADMIN_LIGHT_PREFIXES.some((x) => pathname === x || pathname.startsWith(x + "/"));
+}
+
 function isReportPath(pathname: string) {
   return pathname.startsWith(REPORT_PREFIX) && pathname.length > REPORT_PREFIX.length;
 }
@@ -54,7 +61,7 @@ function hasSupabaseSession() {
  * Inline script injected into <head> so the correct theme is applied before
  * first paint. Campaign reports have a separate, visitor-accessible preference.
  */
-export const themeInitScript = `(function(){try{var d=document.documentElement;var p=location.pathname.replace(/\\/+$/,"")||"/";var r=p.indexOf("${REPORT_PREFIX}")===0&&p.length>${REPORT_PREFIX.length};var t=localStorage.getItem(r?"${REPORT_STORAGE_KEY}":"${STORAGE_KEY}");var ad=${JSON.stringify(ALWAYS_DARK)};var ap=${JSON.stringify(ALWAYS_DARK_PREFIXES)};var alwaysDark=ad.indexOf(p)>-1;for(var j=0;j<ap.length&&!alwaysDark&&!r;j++){var pre=ap[j];if(p===pre.replace(/\\/$/,"")||p.indexOf(pre)===0){alwaysDark=true}}var s=false;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"&&localStorage.getItem(k)){s=true;break}}if(t==="light"&&!alwaysDark&&(s||r)){d.classList.remove("dark");d.classList.toggle("report-light",r)}else{d.classList.add("dark");d.classList.remove("report-light")}}catch(e){document.documentElement.classList.add("dark")}})();`;
+export const themeInitScript = `(function(){try{var d=document.documentElement;var p=location.pathname.replace(/\\/+$/,"")||"/";var r=p.indexOf("${REPORT_PREFIX}")===0&&p.length>${REPORT_PREFIX.length};var t=localStorage.getItem(r?"${REPORT_STORAGE_KEY}":"${STORAGE_KEY}");var ad=${JSON.stringify(ALWAYS_DARK)};var ap=${JSON.stringify(ALWAYS_DARK_PREFIXES)};var alwaysDark=ad.indexOf(p)>-1;for(var j=0;j<ap.length&&!alwaysDark&&!r;j++){var pre=ap[j];if(p===pre.replace(/\\/$/,"")||p.indexOf(pre)===0){alwaysDark=true}}var s=false;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"&&localStorage.getItem(k)){s=true;break}}if(t==="light"&&!alwaysDark&&(s||r)){d.classList.remove("dark");var g=r;var gp=${JSON.stringify(ADMIN_LIGHT_PREFIXES)};for(var m=0;m<gp.length&&!g;m++){if(p===gp[m]||p.indexOf(gp[m]+"/")===0){g=true}}d.classList.toggle("report-light",g)}else{d.classList.add("dark");d.classList.remove("report-light")}}catch(e){document.documentElement.classList.add("dark")}})();`;
 
 type ThemeContextValue = {
   theme: Theme;
@@ -69,7 +76,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 function applyTheme(theme: Theme, pathname: string) {
   const root = document.documentElement;
   root.classList.toggle("dark", theme === "dark");
-  root.classList.toggle("report-light", theme === "light" && isReportPath(pathname));
+  root.classList.toggle("report-light", theme === "light" && isGreyLightPath(pathname));
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
