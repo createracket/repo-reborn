@@ -17,9 +17,11 @@ const ALWAYS_DARK = ["/", "/auth", "/login", "/signup"];
 
 /** Public/shared pages that always render dark for consistent external viewing. */
 const ALWAYS_DARK_PREFIXES = ["/partner", "/roster/", "/spotlight/", "/report/"];
+const LIGHT_REPORT_PATH = "/report/tixel-report";
 
 function isAlwaysDark(pathname: string) {
   const p = pathname.replace(/\/+$/, "") || "/";
+  if (p === LIGHT_REPORT_PATH) return false;
   return ALWAYS_DARK.includes(p) || ALWAYS_DARK_PREFIXES.some((x) => p === x.replace(/\/$/, "") || p.startsWith(x));
 }
 
@@ -48,7 +50,7 @@ function hasSupabaseSession() {
  * first paint. Dark is the default; light is opt-in for signed-in users and
  * never applies to the homepage or auth pages.
  */
-export const themeInitScript = `(function(){try{var d=document.documentElement;var t=localStorage.getItem("${STORAGE_KEY}");var p=location.pathname.replace(/\\/+$/,"")||"/";var ad=${JSON.stringify(ALWAYS_DARK)};var ap=${JSON.stringify(ALWAYS_DARK_PREFIXES)};var alwaysDark=ad.indexOf(p)>-1;for(var j=0;j<ap.length&&!alwaysDark;j++){var pre=ap[j];if(p===pre.replace(/\\/$/,"")||p.indexOf(pre)===0){alwaysDark=true}}var s=false;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"&&localStorage.getItem(k)){s=true;break}}if(t==="light"&&!alwaysDark&&s){d.classList.remove("dark")}else{d.classList.add("dark")}}catch(e){document.documentElement.classList.add("dark")}})();`;
+export const themeInitScript = `(function(){try{var d=document.documentElement;var t=localStorage.getItem("${STORAGE_KEY}");var p=location.pathname.replace(/\\/+$/,"")||"/";var r=p==="${LIGHT_REPORT_PATH}";var ad=${JSON.stringify(ALWAYS_DARK)};var ap=${JSON.stringify(ALWAYS_DARK_PREFIXES)};var alwaysDark=ad.indexOf(p)>-1;for(var j=0;j<ap.length&&!alwaysDark&&!r;j++){var pre=ap[j];if(p===pre.replace(/\\/$/,"")||p.indexOf(pre)===0){alwaysDark=true}}var s=false;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"&&localStorage.getItem(k)){s=true;break}}if(t==="light"&&!alwaysDark&&(s||r)){d.classList.remove("dark");d.classList.toggle("report-light",r)}else{d.classList.add("dark");d.classList.remove("report-light")}}catch(e){document.documentElement.classList.add("dark")}})();`;
 
 type ThemeContextValue = {
   theme: Theme;
@@ -60,9 +62,10 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function applyTheme(theme: Theme) {
+function applyTheme(theme: Theme, pathname: string) {
   const root = document.documentElement;
   root.classList.toggle("dark", theme === "dark");
+  root.classList.toggle("report-light", theme === "light" && pathname.replace(/\/+$/, "") === LIGHT_REPORT_PATH);
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -70,7 +73,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [signedIn, setSignedIn] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const canUseLight = signedIn && !isAlwaysDark(pathname);
+  const canUseLight = pathname.replace(/\/+$/, "") === LIGHT_REPORT_PATH || (signedIn && !isAlwaysDark(pathname));
   const theme: Theme = canUseLight && preference === "light" ? "light" : "dark";
 
   // Sync with whatever the pre-hydration script decided.
@@ -88,8 +91,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Re-apply on every route/session change so protected pages honour the
   // preference and always-dark pages snap back to dark.
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    applyTheme(theme, pathname);
+  }, [theme, pathname]);
 
   const setTheme = useCallback((next: Theme) => {
     setPreference(next);

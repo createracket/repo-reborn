@@ -6,3 +6,4 @@
 - [x] Keep the four opportunity points in one desktop row.
 - [x] Restrict anonymous roster reads from private contact fields.
 - [x] Verify the public submission form, saved field, and admin Contact display path.
+- [ ] Add and preview a light grey, white-box mode for the Tixel report while keeping dark mode.
