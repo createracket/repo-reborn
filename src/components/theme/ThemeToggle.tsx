@@ -8,7 +8,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   const { theme, canUseLight, toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
-  // Light mode is a signed-in-only feature, and never on the homepage/auth pages.
+  // Light mode is also available to guests on the Tixel report.
   if (!canUseLight) return null;
 
 
