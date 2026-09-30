@@ -121,7 +121,7 @@ function PublicReportPage() {
   const [monthFilter, setMonthFilter] = useState<string>("all");
   const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
   const [showExtras, setShowExtras] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(20);
+  const [visibleCount, setVisibleCount] = useState(POSTS_PER_LOAD);
   const [sortMode, setSortMode] = useState<"creator" | "latest">("latest");
   const [gate, setGate] = useState<{ title: string; header_image_url: string | null; code_label: string } | null>(null);
   const [gateEmail, setGateEmail] = useState("");
@@ -206,7 +206,7 @@ function PublicReportPage() {
   }, [slug]);
 
   useEffect(() => {
-    setVisibleCount(20);
+    setVisibleCount(POSTS_PER_LOAD);
   }, [monthFilter, platformFilter, showExtras]);
 
 
@@ -729,7 +729,7 @@ function PublicReportPage() {
               <p className="text-xs text-muted-foreground">
                 Showing {Math.min(visibleCount, filteredPostCount)} of {filteredPostCount} posts
               </p>
-              <Button variant="outline" onClick={() => setVisibleCount((n) => n + 20)}>
+              <Button variant="outline" onClick={() => setVisibleCount((n) => n + POSTS_PER_LOAD)}>
                 Show more
               </Button>
             </div>
