@@ -8,3 +8,4 @@
 - [x] Verify the public submission form, saved field, and admin Contact display path.
 - [x] Add and preview a light grey, white-box mode for the Tixel report while keeping dark mode.
 - [x] Make the TikTok icon brand purple in report light mode and offer that light mode across all campaign reports.
+- [x] Offer the same saved light-mode option to guests on all roster pages.
