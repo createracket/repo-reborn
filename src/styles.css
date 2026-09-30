@@ -304,3 +304,14 @@
 [data-hide-title="true"] .section-title-card + * {
   padding-top: 1.5rem;
 }
+
+/* Light mode: pale pink tints become solid brand pink blocks with dark text */
+.report-light [class*="bg-pink-accent/"] {
+  background-color: var(--pink-accent) !important;
+  border-color: var(--pink-accent) !important;
+  color: oklch(0.23 0.006 270);
+}
+.report-light [class*="bg-pink-accent/"] .text-pink-accent,
+.report-light .text-pink-accent[class*="bg-pink-accent/"] {
+  color: oklch(0.23 0.006 270) !important;
+}
