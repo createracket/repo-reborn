@@ -28,6 +28,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 import { toProfileUrl } from "@/lib/social-handles";
+import { RosterMetricsUpdate } from "@/components/admin/RosterMetricsUpdate";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
 
@@ -1722,6 +1723,7 @@ function RosterDetailView({
 
       {/* Right column: add + share */}
       <div className="space-y-6">
+        <RosterMetricsUpdate items={items as never} onFinished={onChanged} />
         <AddCommunityCard
           community={community}
           existingProfileIds={new Set(items.filter((i) => i.profile_id).map((i) => i.profile_id!))}
