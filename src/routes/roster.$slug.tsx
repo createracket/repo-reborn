@@ -23,6 +23,7 @@ import { storageImage } from "@/lib/storage-image";
 import { parseCoPosts, coPostLabel } from "@/lib/co-posts";
 import { shareMeta } from "@/lib/share-meta";
 import { getSharePreview } from "@/lib/share-preview.functions";
+import { RosterCalendar } from "@/components/roster/RosterCalendar";
 
 
 type PublicRoster = {
@@ -46,6 +47,7 @@ type PublicRoster = {
   est_engagement_pct: number | null;
   categories: string[] | null;
   custom_links: Array<{ label: string; url: string }> | null;
+  show_calendar?: boolean | null;
 };
 
 type PublicItem = {
@@ -78,6 +80,7 @@ type PublicItem = {
   bio_page_url: string | null;
   content_review_url: string | null;
   content_review_label: string | null;
+  posting_date?: string | null;
   co_posts?: unknown;
   position: number;
   status: string;
@@ -170,6 +173,7 @@ function PublicRosterPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [itemsLoaded, setItemsLoaded] = useState(false);
+  const [view, setView] = useState<"list" | "calendar">("list");
 
   useEffect(() => {
     const pageName = roster?.title?.trim() || gate?.title?.trim();
@@ -508,6 +512,7 @@ function PublicRosterPage() {
           const matches = (it: PublicItem) =>
             (categoryFilter === "all" || itemCats(it).includes(categoryFilter)) &&
             (roster.hide_statuses || statusFilter === "all" || (it.status || "in_review") === statusFilter);
+          const calendarOn = !!roster.show_calendar;
           const activeItems = items.filter((it) => it.status !== "hold" && it.status !== "live" && matches(it));
           const liveItems = items.filter((it) => it.status === "live" && matches(it));
           const archivedItems = items.filter((it) => it.status === "hold" && matches(it));
@@ -541,7 +546,7 @@ function PublicRosterPage() {
               .toUpperCase();
             const showProspect = it.kind === "prospect" && !roster.hide_prospect_tags;
             return (
-              <Card key={it.id}>
+              <Card key={it.id} id={`creator-${it.id}`}>
                 <CardContent className="p-4 sm:p-5">
 
                   <div className="flex items-start gap-3 sm:gap-4">
@@ -851,6 +856,8 @@ function PublicRosterPage() {
                     </div>
                   </details>
                 </section>
+              )}
+              </>
               )}
             </>
           );
