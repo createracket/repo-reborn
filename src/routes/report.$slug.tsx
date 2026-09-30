@@ -644,7 +644,7 @@ function PublicReportPage() {
                 : "No posts match this filter."}
             </p>
           ) : report.template === "simple" ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {(sortMode === "latest"
                 ? visibleFlatPosts
                 : visibleCreators.flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
@@ -757,7 +757,7 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
 
   return (
     <Card className="overflow-hidden">
-      <CardContent className="space-y-3 p-3">
+      <CardContent className="space-y-2.5 p-2.5">
         {post.post_url ? (
           <a href={post.post_url} target="_blank" rel="noreferrer noopener" className="block">
             {media}
@@ -766,12 +766,12 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
           media
         )}
         <div className="min-w-0">
-          <p className="truncate font-display text-base leading-tight">{creator.name}</p>
+          <p className="truncate font-display text-sm leading-tight">{creator.name}</p>
           {creator.handle && (
-            <p className="truncate text-xs text-muted-foreground">{creator.handle}</p>
+            <p className="truncate text-[11px] text-muted-foreground">{creator.handle}</p>
           )}
         </div>
-        <div className="grid grid-cols-2 gap-2 border-t border-border/60 pt-3">
+        <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 border-t border-border/60 pt-2.5">
           <SimpleMetric label="Views" value={formatCount(post.views)} />
           <SimpleMetric label="Likes" value={formatCount(post.likes)} />
           <SimpleMetric label="Comments" value={formatCount(post.comments)} />
@@ -784,9 +784,9 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
 
 function SimpleMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-0.5 font-display text-xl leading-none">{value}</p>
+    <div className="min-w-0">
+      <p className="truncate text-[9px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="mt-0.5 font-display text-base leading-none">{value}</p>
     </div>
   );
 }
