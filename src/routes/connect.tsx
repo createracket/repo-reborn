@@ -38,7 +38,7 @@ export const Route = createFileRoute("/connect")({
   }),
   component: ConnectPage,
   errorComponent: ({ error }) => (
-    <div className="p-8 text-sm text-destructive">Couldn't load the brief form: {error.message}</div>
+    <div className="p-8 text-sm text-destructive">Couldn't load the brief form: {error instanceof Error ? error.message : String(error)}</div>
   ),
   notFoundComponent: () => <div className="p-8">Not found</div>,
 });

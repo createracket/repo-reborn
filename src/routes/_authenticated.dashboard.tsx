@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   }),
   component: DashboardPage,
   errorComponent: ({ error }) => (
-    <div className="p-8 text-sm text-destructive">Couldn't load dashboard: {error.message}</div>
+    <div className="p-8 text-sm text-destructive">Couldn't load dashboard: {error instanceof Error ? error.message : String(error)}</div>
   ),
 });
 
@@ -1147,7 +1147,7 @@ function DashboardPage() {
                       (!showItems || rosterItems.length === 0);
                     if (isEmpty) {
                       return (
-                        <div className="rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-8 text-center">
+                        <div className="dashboard-empty-notice rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-8 text-center">
 
                           {isRosterView ? (
                             <p className="text-muted-foreground">

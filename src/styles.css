@@ -96,6 +96,7 @@
 
   /* Racket Pink #FFC0CB */
   --pink-accent: oklch(0.86 0.07 12);
+  --dashboard-notice: oklch(0.95 0.025 12);
   /* Racket Purple #5C37D0 */
   --purple: oklch(0.45 0.21 290);
   --brand-light: oklch(0.93 0.003 260);
@@ -294,4 +295,9 @@
 .report-light [class*="bg-pink-accent/"] .text-pink-accent,
 .report-light .text-pink-accent[class*="bg-pink-accent/"] {
   color: oklch(0.23 0.006 270) !important;
+}
+
+/* The dashboard's empty-state notice is intentionally softer than solid pink labels. */
+.report-light .dashboard-empty-notice {
+  background-color: var(--dashboard-notice) !important;
 }

@@ -28,7 +28,7 @@ export const Route = createFileRoute("/brief/$slug")({
       <SiteHeader />
       <main className="container mx-auto px-4 py-16 text-center">
         <h1 className="font-display text-3xl">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
         <Button asChild className="mt-6"><Link to="/">Go home</Link></Button>
       </main>
       <SiteFooter />
