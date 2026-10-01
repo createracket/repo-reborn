@@ -69,45 +69,45 @@
   --color-footer-pink: oklch(0.86 0.07 12);
 }
 
-/* Light mode (opt-in). Dark remains the default — see .dark below, which is
-   applied to <html> by default and only removed when the user picks light. */
+/* Light mode (opt-in): the same grey paper and white surfaces across the app.
+   Dark remains the default — see .dark below. */
 :root {
   --radius: 0.875rem;
 
-  --background: oklch(0.972 0.012 17);          /* #FFF5F5 — soft blush canvas */
-  --foreground: oklch(0.22 0 0);
+  --background: oklch(0.93 0.003 260);
+  --foreground: oklch(0.23 0.006 270);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0 0);
+  --card-foreground: oklch(0.23 0.006 270);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0 0);
+  --popover-foreground: oklch(0.23 0.006 270);
 
   /* Primary — Racket Green #BADA55 */
   --primary: oklch(0.82 0.19 125);
   --primary-foreground: oklch(0.22 0 0);
 
-  --secondary: oklch(0.955 0.008 17);
+  --secondary: oklch(0.89 0.004 260);
   --secondary-foreground: oklch(0.25 0 0);
 
-  --muted: oklch(0.955 0.008 17);
-  --muted-foreground: oklch(0.48 0.005 17);
+  --muted: oklch(0.89 0.004 260);
+  --muted-foreground: oklch(0.43 0.008 260);
 
-  --accent: oklch(0.955 0.008 17);
+  --accent: oklch(0.89 0.004 260);
   --accent-foreground: oklch(0.25 0 0);
 
   /* Racket Pink #FFC0CB */
-  --pink-accent: oklch(0.84 0.09 12);
+  --pink-accent: oklch(0.86 0.07 12);
   /* Racket Purple #5C37D0 */
   --purple: oklch(0.45 0.21 290);
-  --brand-light: oklch(0.972 0.012 17);
+  --brand-light: oklch(0.93 0.003 260);
 
 
   --destructive: oklch(0.58 0.23 27);
   --destructive-foreground: oklch(0.98 0 0);
 
-  --border: oklch(0.32 0.03 17 / 15%);
-  --input: oklch(0.32 0.03 17 / 18%);
+  --border: oklch(0.49 0.008 260);
+  --input: oklch(0.54 0.008 260);
 
-  --ring: oklch(0.72 0.18 125 / 55%);
+  --ring: oklch(0.45 0.21 290);
 
   --chart-1: oklch(0.78 0.19 125);
   --chart-2: oklch(0.78 0.11 12);
@@ -115,11 +115,11 @@
   --chart-4: oklch(0.75 0.18 70);
   --chart-5: oklch(0.6 0.18 200);
 
-  --sidebar: oklch(0.965 0.010 17);
+  --sidebar: oklch(0.93 0.003 260);
   --sidebar-foreground: oklch(0.22 0 0);
   --sidebar-primary: oklch(0.82 0.19 125);
   --sidebar-primary-foreground: oklch(0.22 0 0);
-  --sidebar-accent: oklch(0.94 0.010 17);
+  --sidebar-accent: oklch(0.89 0.004 260);
 
   --sidebar-accent-foreground: oklch(0.22 0 0);
   --sidebar-border: oklch(0.22 0 0 / 10%);
@@ -178,26 +178,6 @@
   --sidebar-accent-foreground: oklch(0.97 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.86 0.21 125 / 60%);
-}
-
-/* Reports and admin builders: neutral grey paper with clearly outlined white data surfaces. */
-.report-light {
-  --background: oklch(0.93 0.003 260);
-  --foreground: oklch(0.23 0.006 270);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.23 0.006 270);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.23 0.006 270);
-  --secondary: oklch(0.89 0.004 260);
-  --muted: oklch(0.89 0.004 260);
-  --muted-foreground: oklch(0.43 0.008 260);
-  --accent: oklch(0.89 0.004 260);
-  /* Opaque borders also survive the /60 opacity used by nested builder rows. */
-  --border: oklch(0.49 0.008 260);
-  --input: oklch(0.54 0.008 260);
-  --ring: oklch(0.45 0.21 290);
-  /* Keep the same brand pink on reports, rosters and builders in light mode. */
-  --pink-accent: oklch(0.86 0.07 12);
 }
 
 /* The selected tab needs an edge as well as a shadow against white panels. */
