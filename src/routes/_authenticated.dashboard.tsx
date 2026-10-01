@@ -1147,7 +1147,7 @@ function DashboardPage() {
                       (!showItems || rosterItems.length === 0);
                     if (isEmpty) {
                       return (
-                        <div className="rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-8 text-center">
+                        <div className="dashboard-empty-notice rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-8 text-center">
 
                           {isRosterView ? (
                             <p className="text-muted-foreground">
