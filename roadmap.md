@@ -14,3 +14,4 @@
 - [x] Show 18 creators/videos on a report page's first load so the first screen lands on full rows of six.
 - [x] Restore report pages that were showing "Report not found" by exposing the link field to visitors, and verify the link buttons render.
 - [x] Make the dashboard's "View your brief" badge green, with an outline on hover rather than a colour change.
+- [x] CSV export + monthly auto-refresh for campaign reports (Tixel on)
