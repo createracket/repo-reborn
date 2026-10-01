@@ -1,5 +1,6 @@
 # Roadmap
 
+- [x] Replace the original blush light mode with the roster's grey/white light mode throughout eligible pages, including the dashboard.
 - [x] Add multi-select Part 1–4 interest choices to the Tixel submission brief.
 - [x] Store selected parts with interest submissions.
 - [x] Show selected parts in the admin Contact tab.

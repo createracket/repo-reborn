@@ -1,3 +1,3 @@
 # Project architecture decisions
 
-- Grey/white light mode (`.report-light` tokens) applies to reports, rosters, admin and builder pages via `isGreyLightPath` in use-theme; reports and rosters share a guest-accessible saved preference, while other shared client pages stay dark.
+- All eligible light-mode pages use the roster's grey/white palette and `.report-light` variants; reports and rosters share a guest-accessible saved preference while always-dark public pages stay dark, keeping the light experience consistent.
