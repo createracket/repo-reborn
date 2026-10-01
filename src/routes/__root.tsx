@@ -27,7 +27,14 @@ function NotFoundComponent() {
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
         </p>
-        <div className="mt-6">
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <a
+            href="mailto:community@createracket.com?subject=Page%20problem%20on%20Create%20Racket"
+            onClick={(e) => { e.currentTarget.href += "&body=" + encodeURIComponent("Page: " + window.location.href + "\n\nWhat happened:"); }}
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Report this problem
+          </a>
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
@@ -66,6 +73,13 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
           >
             Try again
           </button>
+          <a
+            href="mailto:community@createracket.com?subject=Page%20problem%20on%20Create%20Racket"
+            onClick={(e) => { e.currentTarget.href += "&body=" + encodeURIComponent("Page: " + window.location.href + "\n\nWhat happened:"); }}
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Report this problem
+          </a>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"

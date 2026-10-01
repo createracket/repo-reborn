@@ -315,9 +315,14 @@ function PublicReportPage() {
           <p className="mt-2 text-muted-foreground">
             This report may be unpublished or doesn't exist.
           </p>
-          <Button asChild className="mt-6">
-            <Link to="/">Go home</Link>
-          </Button>
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            <Button asChild>
+              <a href={`mailto:community@createracket.com?subject=${encodeURIComponent("Can't open report: " + slug)}&body=${encodeURIComponent("Page: https://createracket.com/report/" + slug + "\n\nWhat happened:")}`}>Report this problem</a>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/">Go home</Link>
+            </Button>
+          </div>
         </main>
         <SiteFooter />
       </div>
