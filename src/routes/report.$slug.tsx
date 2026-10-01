@@ -606,6 +606,13 @@ function PublicReportPage() {
                 </button>
               ))}
             </div>
+            <a
+              href={`/report/${report.slug}/metrics.csv`}
+              download
+              className="rounded-full border border-lime px-3 py-1.5 text-xs font-medium text-lime transition hover:ring-2 hover:ring-lime/60 report-light:bg-lime report-light:text-primary-foreground"
+            >
+              Download CSV
+            </a>
             {hasExtraMentions && (
               <button
                 onClick={() => setShowExtras((v) => !v)}

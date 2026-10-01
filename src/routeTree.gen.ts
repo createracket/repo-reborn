@@ -68,9 +68,11 @@ import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/p
 import { Route as ApiPublicUploadBriefFileRouteImport } from './routes/api/public/upload-brief-file'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
+import { Route as ReportSlugMetricsDotcsvRouteImport } from './routes/report.$slug.metrics[.]csv'
 import { Route as AuthenticatedAdminSpotlightsIndexRouteImport } from './routes/_authenticated.admin.spotlights.index'
 import { Route as AuthenticatedBriefsEditKeyRouteImport } from './routes/_authenticated.briefs.edit.$key'
 import { Route as ApiPublicHooksDispatchScheduledEmailsRouteImport } from './routes/api/public/hooks/dispatch-scheduled-emails'
+import { Route as ApiPublicHooksMonthlyReportRefreshRouteImport } from './routes/api/public/hooks/monthly-report-refresh'
 import { Route as ApiPublicHooksReportMetricsWorkerRouteImport } from './routes/api/public/hooks/report-metrics-worker'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -393,6 +395,11 @@ const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReportSlugMetricsDotcsvRoute = ReportSlugMetricsDotcsvRouteImport.update({
+  id: '/metrics.csv',
+  path: '/metrics.csv',
+  getParentRoute: () => ReportSlugRoute,
+} as any)
 const AuthenticatedAdminSpotlightsIndexRoute =
   AuthenticatedAdminSpotlightsIndexRouteImport.update({
     id: '/',
@@ -409,6 +416,12 @@ const ApiPublicHooksDispatchScheduledEmailsRoute =
   ApiPublicHooksDispatchScheduledEmailsRouteImport.update({
     id: '/api/public/hooks/dispatch-scheduled-emails',
     path: '/api/public/hooks/dispatch-scheduled-emails',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksMonthlyReportRefreshRoute =
+  ApiPublicHooksMonthlyReportRefreshRouteImport.update({
+    id: '/api/public/hooks/monthly-report-refresh',
+    path: '/api/public/hooks/monthly-report-refresh',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksReportMetricsWorkerRoute =
@@ -465,7 +478,7 @@ export interface FileRoutesByFullPath {
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
-  '/report/$slug': typeof ReportSlugRoute
+  '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
@@ -496,11 +509,13 @@ export interface FileRoutesByFullPath {
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/report/$slug/metrics.csv': typeof ReportSlugMetricsDotcsvRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/briefs/': typeof AuthenticatedBriefsIndexRoute
   '/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
   '/briefs/edit/$key': typeof AuthenticatedBriefsEditKeyRoute
   '/api/public/hooks/dispatch-scheduled-emails': typeof ApiPublicHooksDispatchScheduledEmailsRoute
+  '/api/public/hooks/monthly-report-refresh': typeof ApiPublicHooksMonthlyReportRefreshRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -530,7 +545,7 @@ export interface FileRoutesByTo {
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
-  '/report/$slug': typeof ReportSlugRoute
+  '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
@@ -560,11 +575,13 @@ export interface FileRoutesByTo {
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/report/$slug/metrics.csv': typeof ReportSlugMetricsDotcsvRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/briefs': typeof AuthenticatedBriefsIndexRoute
   '/racket-desk': typeof AuthenticatedRacketDeskIndexRoute
   '/briefs/edit/$key': typeof AuthenticatedBriefsEditKeyRoute
   '/api/public/hooks/dispatch-scheduled-emails': typeof ApiPublicHooksDispatchScheduledEmailsRoute
+  '/api/public/hooks/monthly-report-refresh': typeof ApiPublicHooksMonthlyReportRefreshRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -599,7 +616,7 @@ export interface FileRoutesById {
   '/_authenticated/roster-builder': typeof AuthenticatedRosterBuilderRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
-  '/report/$slug': typeof ReportSlugRoute
+  '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/u/$slug': typeof USlugRoute
@@ -630,11 +647,13 @@ export interface FileRoutesById {
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/report/$slug/metrics.csv': typeof ReportSlugMetricsDotcsvRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/briefs/': typeof AuthenticatedBriefsIndexRoute
   '/_authenticated/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
   '/_authenticated/briefs/edit/$key': typeof AuthenticatedBriefsEditKeyRoute
   '/api/public/hooks/dispatch-scheduled-emails': typeof ApiPublicHooksDispatchScheduledEmailsRoute
+  '/api/public/hooks/monthly-report-refresh': typeof ApiPublicHooksMonthlyReportRefreshRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -700,11 +719,13 @@ export interface FileRouteTypes {
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
+    | '/report/$slug/metrics.csv'
     | '/admin/'
     | '/briefs/'
     | '/racket-desk/'
     | '/briefs/edit/$key'
     | '/api/public/hooks/dispatch-scheduled-emails'
+    | '/api/public/hooks/monthly-report-refresh'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -764,11 +785,13 @@ export interface FileRouteTypes {
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
+    | '/report/$slug/metrics.csv'
     | '/admin'
     | '/briefs'
     | '/racket-desk'
     | '/briefs/edit/$key'
     | '/api/public/hooks/dispatch-scheduled-emails'
+    | '/api/public/hooks/monthly-report-refresh'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -833,11 +856,13 @@ export interface FileRouteTypes {
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
+    | '/report/$slug/metrics.csv'
     | '/_authenticated/admin/'
     | '/_authenticated/briefs/'
     | '/_authenticated/racket-desk/'
     | '/_authenticated/briefs/edit/$key'
     | '/api/public/hooks/dispatch-scheduled-emails'
+    | '/api/public/hooks/monthly-report-refresh'
     | '/api/public/hooks/report-metrics-worker'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -863,7 +888,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   BrandsHowItWorksRoute: typeof BrandsHowItWorksRoute
   BriefSlugRoute: typeof BriefSlugRoute
-  ReportSlugRoute: typeof ReportSlugRoute
+  ReportSlugRoute: typeof ReportSlugRouteWithChildren
   RosterSlugRoute: typeof RosterSlugRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
   USlugRoute: typeof USlugRoute
@@ -877,6 +902,7 @@ export interface RootRouteChildren {
   ApiPublicWaitlistJoinRoute: typeof ApiPublicWaitlistJoinRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   ApiPublicHooksDispatchScheduledEmailsRoute: typeof ApiPublicHooksDispatchScheduledEmailsRoute
+  ApiPublicHooksMonthlyReportRefreshRoute: typeof ApiPublicHooksMonthlyReportRefreshRoute
   ApiPublicHooksReportMetricsWorkerRoute: typeof ApiPublicHooksReportMetricsWorkerRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1298,6 +1324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/report/$slug/metrics.csv': {
+      id: '/report/$slug/metrics.csv'
+      path: '/metrics.csv'
+      fullPath: '/report/$slug/metrics.csv'
+      preLoaderRoute: typeof ReportSlugMetricsDotcsvRouteImport
+      parentRoute: typeof ReportSlugRoute
+    }
     '/_authenticated/admin/spotlights/': {
       id: '/_authenticated/admin/spotlights/'
       path: '/'
@@ -1317,6 +1350,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/dispatch-scheduled-emails'
       fullPath: '/api/public/hooks/dispatch-scheduled-emails'
       preLoaderRoute: typeof ApiPublicHooksDispatchScheduledEmailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/monthly-report-refresh': {
+      id: '/api/public/hooks/monthly-report-refresh'
+      path: '/api/public/hooks/monthly-report-refresh'
+      fullPath: '/api/public/hooks/monthly-report-refresh'
+      preLoaderRoute: typeof ApiPublicHooksMonthlyReportRefreshRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/report-metrics-worker': {
@@ -1479,6 +1519,18 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
+interface ReportSlugRouteChildren {
+  ReportSlugMetricsDotcsvRoute: typeof ReportSlugMetricsDotcsvRoute
+}
+
+const ReportSlugRouteChildren: ReportSlugRouteChildren = {
+  ReportSlugMetricsDotcsvRoute: ReportSlugMetricsDotcsvRoute,
+}
+
+const ReportSlugRouteWithChildren = ReportSlugRoute._addFileChildren(
+  ReportSlugRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
@@ -1496,7 +1548,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   BrandsHowItWorksRoute: BrandsHowItWorksRoute,
   BriefSlugRoute: BriefSlugRoute,
-  ReportSlugRoute: ReportSlugRoute,
+  ReportSlugRoute: ReportSlugRouteWithChildren,
   RosterSlugRoute: RosterSlugRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
   USlugRoute: USlugRoute,
@@ -1511,6 +1563,8 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailEventsRoute: LovableEmailEventsRoute,
   ApiPublicHooksDispatchScheduledEmailsRoute:
     ApiPublicHooksDispatchScheduledEmailsRoute,
+  ApiPublicHooksMonthlyReportRefreshRoute:
+    ApiPublicHooksMonthlyReportRefreshRoute,
   ApiPublicHooksReportMetricsWorkerRoute:
     ApiPublicHooksReportMetricsWorkerRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

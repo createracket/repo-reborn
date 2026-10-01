@@ -445,6 +445,7 @@ export type Database = {
         Row: {
           access_code: string | null
           access_code_label: string | null
+          auto_refresh_monthly: boolean
           brand_email: string | null
           categories: string[]
           client_email: string | null
@@ -468,6 +469,7 @@ export type Database = {
         Insert: {
           access_code?: string | null
           access_code_label?: string | null
+          auto_refresh_monthly?: boolean
           brand_email?: string | null
           categories?: string[]
           client_email?: string | null
@@ -491,6 +493,7 @@ export type Database = {
         Update: {
           access_code?: string | null
           access_code_label?: string | null
+          auto_refresh_monthly?: boolean
           brand_email?: string | null
           categories?: string[]
           client_email?: string | null
