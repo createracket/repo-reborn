@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   }),
   component: DashboardPage,
   errorComponent: ({ error }) => (
-    <div className="p-8 text-sm text-destructive">Couldn't load dashboard: {error.message}</div>
+    <div className="p-8 text-sm text-destructive">Couldn't load dashboard: {error instanceof Error ? error.message : String(error)}</div>
   ),
 });
 
