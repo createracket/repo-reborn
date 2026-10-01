@@ -54,7 +54,7 @@ export function BriefStatusBadge({
       className={cn(
         "font-medium",
         STATUS_CLASSES[s],
-        href ? "cursor-pointer hover:brightness-110 hover:underline" : "",
+        href ? "cursor-pointer transition hover:ring-2 hover:ring-lime/70" : "",
         className,
       )}
     >
