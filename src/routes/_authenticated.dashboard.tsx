@@ -752,7 +752,7 @@ function DashboardPage() {
                           trailing={
                             <BriefStatusBadge
                               status={b.status}
-                              className="bg-secondary !text-white dark:!text-white border-transparent hover:bg-secondary"
+                              className="bg-lime !text-primary-foreground dark:!text-primary-foreground border-transparent"
                               href={
                                 b.status === "review_your_roster" && b.linked_roster_slug && b.linked_roster_published
                                   ? `/roster/${b.linked_roster_slug}`
