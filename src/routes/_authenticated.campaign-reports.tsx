@@ -210,7 +210,7 @@ function CampaignReportsPage() {
     const { data, error } = await sb
       .from("campaign_reports")
       .select(
-        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url, thumb_frame, custom_links",
+        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url, thumb_frame, custom_links, auto_refresh_monthly",
       )
       .order("updated_at", { ascending: false });
     if (error) return toast.error(error.message);
@@ -784,6 +784,16 @@ function ReportDetailView({
     await onChanged();
   }
 
+  async function toggleMonthly(next: boolean) {
+    const { error } = await sb
+      .from("campaign_reports")
+      .update({ auto_refresh_monthly: next } as never)
+      .eq("id", report.id);
+    if (error) return toast.error(error.message);
+    toast.success(next ? "Metrics will refresh on the 1st of each month" : "Monthly refresh off");
+    await onChanged();
+  }
+
   async function addCreator() {
     const { error } = await sb.from("campaign_report_creators").insert({
       report_id: report.id,
@@ -841,6 +851,11 @@ function ReportDetailView({
               {report.published ? "Published" : "Draft"}
             </span>
             <Switch checked={report.published} onCheckedChange={togglePublished} />
+            <span className="ml-3 text-xs text-muted-foreground">Refresh metrics monthly</span>
+            <Switch
+              checked={!!(report as any).auto_refresh_monthly}
+              onCheckedChange={toggleMonthly}
+            />
           </div>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
