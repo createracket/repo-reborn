@@ -727,7 +727,7 @@ function DashboardPage() {
                             title={bp.headline}
                             subtitle={bp.subtitle}
                             trailing={
-                              <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-xs font-medium !text-white">
+                              <span className="inline-flex items-center rounded-full border border-primary bg-primary px-3 py-1 text-xs font-medium text-primary-foreground transition-shadow hover:ring-2 hover:ring-primary/70">
                                 View your brief
                               </span>
                             }
