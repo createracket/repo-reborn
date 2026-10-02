@@ -247,6 +247,5 @@ export function PartnerPageShares({
         </div>
       </div>
     </div>
-    </div>
   );
 }
