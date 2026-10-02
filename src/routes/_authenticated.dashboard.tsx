@@ -678,6 +678,9 @@ function DashboardPage() {
 
           <SpotlightNotifications />
 
+          {/* TREND FEED */}
+          <TrendFeedStrip />
+
           {/* PROJECT PLANNER */}
           <div className="lg:col-span-3">
             <Card className="bg-[#c8c584]/20 border-[#c8c584]/40 planner-card">
@@ -846,8 +849,6 @@ function DashboardPage() {
 
             </Card>
           </div>
-
-          <TrendFeedStrip />
 
           {/* ROSTER (full width) */}
           <div className="lg:col-span-3">
