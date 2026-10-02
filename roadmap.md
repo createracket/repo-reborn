@@ -16,3 +16,4 @@
 - [x] Make the dashboard's "View your brief" badge green, with an outline on hover rather than a colour change.
 - [x] CSV export + monthly auto-refresh for campaign reports (Tixel on)
 - [x] Switch report metrics auto-refresh from monthly to weekly (Mondays 2am Sydney; cron weekly-report-refresh fires Sundays 15/16 UTC, hook gates on Sydney Monday 2am; builder label "Refresh metrics weekly")
+- [x] Talent intake form for spotlights (shareable link, social auto-find, draft spotlight)
