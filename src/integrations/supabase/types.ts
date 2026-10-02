@@ -2055,11 +2055,13 @@ export type Database = {
       }
       talent_intake_requests: {
         Row: {
+          ai_draft_count: number
           answers: Json
           artist_name: string | null
           created_at: string
           created_by: string | null
           id: string
+          mode: string
           note: string | null
           partner_page_id: string | null
           status: string
@@ -2068,11 +2070,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_draft_count?: number
           answers?: Json
           artist_name?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
+          mode?: string
           note?: string | null
           partner_page_id?: string | null
           status?: string
@@ -2081,11 +2085,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_draft_count?: number
           answers?: Json
           artist_name?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
+          mode?: string
           note?: string | null
           partner_page_id?: string | null
           status?: string

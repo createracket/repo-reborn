@@ -228,7 +228,18 @@ export const draftSpotlightFromText = createServerFn({ method: "POST" })
 
     const { assertQuota, consumeQuota } = await import("./usage.server");
     await assertQuota(context.userId, "spotlight_draft");
+    const result = await runSpotlightDraft(data);
+    await consumeQuota(context.userId, "spotlight_draft");
+    return result;
+  });
 
+/** Shared drafting core (server-only callers: admin builder + advanced talent form). */
+export async function runSpotlightDraft(data: {
+  text: string;
+  artistName?: string;
+  socials?: Partial<Record<Platform, string | undefined>>;
+}): Promise<{ draft: SpotlightDraft; enrichment: SpotlightEnrichment }> {
+  {
     const apiKey = process.env["LOVABLE_API_KEY"];
     if (!apiKey) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -308,6 +319,6 @@ export const draftSpotlightFromText = createServerFn({ method: "POST" })
       contact: str(parsed.contact),
     };
 
-    await consumeQuota(context.userId, "spotlight_draft");
     return { draft, enrichment };
-  });
+  }
+}

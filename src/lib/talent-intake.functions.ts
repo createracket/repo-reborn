@@ -17,6 +17,13 @@ export type SocialKey = (typeof SOCIAL_KEYS)[number];
 export type SocialSuggestion = { url: string; source: "website" | "guess" };
 
 const url = z.string().trim().max(500);
+
+/** Press releases: PDF / Word / text, up to 10MB each, max 3. Only the text is kept. */
+export const PRESS_MAX_BYTES = 10 * 1024 * 1024;
+export const MAX_PRESS_FILES = 3;
+const PRESS_TEXT_MAX = 15000;
+const MAX_AI_DRAFTS = 5;
+export type TalentMode = "standard" | "advanced";
 const SocialsSchema = z.object(
   Object.fromEntries(SOCIAL_KEYS.map((k) => [k, url.optional()])) as Record<SocialKey, z.ZodOptional<typeof url>>,
 );
@@ -34,6 +41,23 @@ const AnswersSchema = z.object({
   partners: z.string().trim().max(2000).optional(),
   extra: z.string().trim().max(6000).optional(),
   skipped: z.boolean().optional(),
+  press_releases: z
+    .array(z.object({ name: z.string().trim().max(200), text: z.string().max(PRESS_TEXT_MAX) }))
+    .max(MAX_PRESS_FILES)
+    .optional(),
+  // Advanced forms only: the artist's (possibly edited) AI draft.
+  draft: z
+    .object({
+      subtitle: z.string().trim().max(200).optional(),
+      intro: z.string().trim().max(1500).optional(),
+      host_bio: z.string().trim().max(4000).optional(),
+      partnership_pitch: z.string().trim().max(4000).optional(),
+      eoi_opportunities: z.array(z.string().trim().max(200)).max(10).optional(),
+      audience_segments: z.array(z.string().trim().max(200)).max(10).optional(),
+      total_followers: z.number().int().nonnegative().optional(),
+      monthly_streams: z.number().int().nonnegative().optional(),
+    })
+    .optional(),
 });
 export type TalentAnswers = z.infer<typeof AnswersSchema>;
 
@@ -48,11 +72,11 @@ async function loadPending(token: string) {
   const db = await admin();
   const { data, error } = await db
     .from("talent_intake_requests" as never)
-    .select("id, artist_name, status")
+    .select("id, artist_name, status, mode, ai_draft_count")
     .eq("token", token)
     .maybeSingle();
   if (error) throw new Error("Couldn't load this form.");
-  return data as { id: string; artist_name: string | null; status: string } | null;
+  return data as { id: string; artist_name: string | null; status: string; mode: TalentMode; ai_draft_count: number } | null;
 }
 
 async function assertAdmin(supabase: { rpc: Function }, userId: string) {
@@ -65,13 +89,19 @@ async function assertAdmin(supabase: { rpc: Function }, userId: string) {
 export const adminCreateTalentIntake = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ artistName: z.string().trim().max(200).optional(), note: z.string().trim().max(500).optional() }).parse(d),
+    z
+      .object({
+        artistName: z.string().trim().max(200).optional(),
+        note: z.string().trim().max(500).optional(),
+        mode: z.enum(["standard", "advanced"]).default("standard"),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase as never, context.userId);
     const { data: row, error } = await context.supabase
       .from("talent_intake_requests" as never)
-      .insert({ artist_name: data.artistName || null, note: data.note || null, created_by: context.userId } as never)
+      .insert({ artist_name: data.artistName || null, note: data.note || null, mode: data.mode, created_by: context.userId } as never)
       .select("id, token")
       .single();
     if (error) throw new Error(error.message);
@@ -84,7 +114,7 @@ export const adminListTalentIntakes = createServerFn({ method: "GET" })
     await assertAdmin(context.supabase as never, context.userId);
     const { data, error } = await context.supabase
       .from("talent_intake_requests" as never)
-      .select("id, token, artist_name, note, status, partner_page_id, submitted_at, created_at, answers")
+      .select("id, token, artist_name, note, status, mode, partner_page_id, submitted_at, created_at, answers")
       .order("created_at", { ascending: false })
       .limit(50);
     if (error) throw new Error(error.message);
@@ -94,6 +124,7 @@ export const adminListTalentIntakes = createServerFn({ method: "GET" })
       artist_name: string | null;
       note: string | null;
       status: string;
+      mode: TalentMode;
       partner_page_id: string | null;
       submitted_at: string | null;
       created_at: string;
@@ -118,7 +149,7 @@ export const getTalentIntake = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const row = await loadPending(data.token);
     if (!row) return { found: false as const };
-    return { found: true as const, artistName: row.artist_name ?? "", submitted: row.status !== "pending" };
+    return { found: true as const, artistName: row.artist_name ?? "", submitted: row.status !== "pending", mode: row.mode };
   });
 
 const PATTERNS: Record<SocialKey, RegExp> = {
@@ -247,6 +278,7 @@ function composeInfoDump(a: TalentAnswers): string {
   if (a.audience) lines.push(`\nWho their audience is:\n${a.audience}`);
   if (a.partners) lines.push(`\nPast brand partners:\n${a.partners}`);
   if (a.extra) lines.push(`\nAnything else:\n${a.extra}`);
+  for (const pr of a.press_releases ?? []) if (pr.text.trim()) lines.push(`\nPress release (${pr.name}):\n${pr.text.trim()}`);
   if (a.skipped) lines.push(`\n(The artist skipped the rest of the form — admin to complete.)`);
   return lines.join("\n");
 }
@@ -278,13 +310,21 @@ export const submitTalentIntake = createServerFn({ method: "POST" })
     links.talent_intake_id = row.id;
     links.talent_intake_text = composeInfoDump(a);
 
+    const d = row.mode === "advanced" ? a.draft : undefined;
     const { data: page, error } = await db
       .from("partner_pages")
       .insert({
         slug,
         type: "Artist",
         headline: a.artist_name,
-        host_bio: a.bio || null,
+        host_bio: d?.host_bio || a.bio || null,
+        subtitle: d?.subtitle || null,
+        intro: d?.intro || null,
+        partnership_pitch: d?.partnership_pitch || null,
+        eoi_opportunities: d?.eoi_opportunities ?? [],
+        audience_segments: d?.audience_segments ?? [],
+        total_followers: d?.total_followers ?? null,
+        monthly_streams: d?.monthly_streams ?? null,
         header_image_url: a.photos?.[0] ? clean(a.photos[0]) : null,
         published: false,
         links,
@@ -304,4 +344,99 @@ export const submitTalentIntake = createServerFn({ method: "POST" })
       .eq("id", row.id);
 
     return { ok: true };
+  });
+
+
+// ---------- Press releases ----------
+
+function cleanText(t: string) {
+  return t.replace(/\r/g, "").replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim().slice(0, PRESS_TEXT_MAX);
+}
+
+async function docxText(bytes: Uint8Array): Promise<string> {
+  const { unzipSync, strFromU8 } = await import("fflate");
+  const files = unzipSync(bytes, { filter: (f) => f.name === "word/document.xml" });
+  const xml = files["word/document.xml"];
+  if (!xml) throw new Error("That Word file couldn't be read.");
+  return strFromU8(xml)
+    .replace(/<\/w:p>/g, "\n")
+    .replace(/<w:tab\/>/g, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+}
+
+export const extractTalentPressRelease = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        token: TokenSchema,
+        name: z.string().trim().min(1).max(200),
+        base64: z.string().min(1).max(Math.ceil((PRESS_MAX_BYTES * 4) / 3) + 8),
+        kind: z.enum(["pdf", "docx", "txt"]),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const row = await loadPending(data.token);
+    if (!row || row.status !== "pending") throw new Error("This form is no longer open.");
+    const bytes = Uint8Array.from(atob(data.base64), (c) => c.charCodeAt(0));
+    if (bytes.byteLength > PRESS_MAX_BYTES) throw new Error("Press releases must be under 10MB.");
+    let text = "";
+    try {
+      if (data.kind === "pdf") {
+        const { extractText, getDocumentProxy } = await import("unpdf");
+        const pdf = await getDocumentProxy(bytes);
+        const out = await extractText(pdf, { mergePages: true });
+        text = Array.isArray(out.text) ? out.text.join("\n") : out.text;
+      } else if (data.kind === "docx") {
+        text = await docxText(bytes);
+      } else {
+        text = new TextDecoder().decode(bytes);
+      }
+    } catch {
+      throw new Error("We couldn't read that file — try a PDF or Word document.");
+    }
+    text = cleanText(text);
+    if (text.length < 20) throw new Error("We couldn't find any text in that file (scanned PDFs can't be read).");
+    return { name: data.name, text };
+  });
+
+// ---------- Advanced: AI draft for talent ----------
+
+export const draftTalentSpotlight = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ token: TokenSchema, answers: AnswersSchema }).parse(d))
+  .handler(async ({ data }) => {
+    const row = await loadPending(data.token);
+    if (!row || row.status !== "pending") throw new Error("This form is no longer open.");
+    if (row.mode !== "advanced") throw new Error("AI drafting isn't available on this form.");
+    if (row.ai_draft_count >= MAX_AI_DRAFTS)
+      throw new Error(`You've used all ${MAX_AI_DRAFTS} AI drafts — edit the preview by hand, then send it.`);
+    const db = await admin();
+    await db
+      .from("talent_intake_requests" as never)
+      .update({ ai_draft_count: row.ai_draft_count + 1 } as never)
+      .eq("id", row.id);
+
+    const a = data.answers;
+    const { runSpotlightDraft } = await import("./spotlight-draft.functions");
+    const { draft, enrichment } = await runSpotlightDraft({
+      text: composeInfoDump({ ...a, skipped: false }),
+      artistName: a.artist_name,
+      socials: {
+        instagram: a.socials.instagram,
+        tiktok: a.socials.tiktok,
+        youtube: a.socials.youtube,
+        x: a.socials.x,
+        twitch: a.socials.twitch,
+        spotify: a.socials.spotify,
+      },
+    });
+    return {
+      draft,
+      followers: enrichment.followers,
+      total_followers: enrichment.total_followers ?? null,
+      monthly_streams: enrichment.monthly_streams ?? null,
+      avatar_url: enrichment.avatar_url ?? null,
+      remaining: MAX_AI_DRAFTS - row.ai_draft_count - 1,
+    };
   });
