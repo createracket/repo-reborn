@@ -493,6 +493,7 @@ function DashboardPage() {
           .select(pageCols)
           .eq("published", true)
           .eq("dashboard_visible", true)
+          .eq("archived", false)
           .order("updated_at", { ascending: false }),
         (supabase as any)
           .from("partner_page_shares")
@@ -506,6 +507,7 @@ function DashboardPage() {
           .select(pageCols)
           .eq("published", true)
           .eq("specific_dashboards_enabled", true)
+          .eq("archived", false)
           .in("id", sharedIds);
         sharedPages = (data ?? []) as any[];
       }
