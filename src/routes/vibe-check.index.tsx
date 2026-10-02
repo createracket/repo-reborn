@@ -40,13 +40,13 @@ function VibeCheckLanding() {
         <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
           <FlowCard
             icon={<Mic2 className="size-6 text-primary" />}
-            title="Musician / Creator"
+            title="Artist / Musician"
             blurb="For artists, bands, DJs, songwriters, producers and creators."
             to="/vibe-check/musician"
           />
           <FlowCard
             icon={<Users className="size-6 text-coral" />}
-            title="Brand / Agency"
+            title="Business / Brand"
             blurb="For brands, agencies and labels building a campaign or roster."
             to="/vibe-check/brand"
           />
