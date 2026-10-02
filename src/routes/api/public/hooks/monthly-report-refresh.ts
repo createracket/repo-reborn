@@ -7,7 +7,7 @@ function safeEqual(a: string, b: string) {
   return d === 0;
 }
 
-/** Called by the monthly schedule: queues "Update all metrics" for opted-in reports. */
+/** Called by the weekly schedule: queues "Update all metrics" for opted-in reports. */
 export const Route = createFileRoute("/api/public/hooks/monthly-report-refresh")({
   server: {
     handlers: {
@@ -23,10 +23,10 @@ export const Route = createFileRoute("/api/public/hooks/monthly-report-refresh")
         }
         if (!ok) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-        // Only run on the 1st in Sydney (cron fires at both AEST and AEDT times).
-        const sydDay = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Sydney", day: "numeric" }).format(new Date());
+        // Only run on Mondays at 2am in Sydney (cron fires at both AEST and AEDT times).
+        const sydWeekday = new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Sydney", weekday: "short" }).format(new Date());
         const sydHour = Number(new Intl.DateTimeFormat("en-AU", { timeZone: "Australia/Sydney", hour: "numeric", hour12: false }).format(new Date()));
-        if (sydDay !== "1" || sydHour !== 2) return Response.json({ ok: true, skipped: "not 2am on the 1st in Sydney" });
+        if (sydWeekday !== "Mon" || sydHour !== 2) return Response.json({ ok: true, skipped: "not 2am on a Monday in Sydney" });
 
         const { data: reports } = await supabaseAdmin
           .from("campaign_reports")
