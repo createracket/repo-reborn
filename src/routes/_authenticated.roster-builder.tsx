@@ -1772,10 +1772,10 @@ function RosterDetailView({
           community={community}
           existingProfileIds={new Set(items.filter((i) => i.profile_id).map((i) => i.profile_id!))}
           rosterId={roster.id}
-          nextPosition={items.length}
+          nextPosition={items.length ? Math.min(...items.map((i) => i.position)) - 1 : 0}
           onAdded={onChanged}
         />
-        <AddProspectCard rosterId={roster.id} nextPosition={items.length} onAdded={onChanged} />
+        <AddProspectCard rosterId={roster.id} nextPosition={items.length ? Math.min(...items.map((i) => i.position)) - 1 : 0} onAdded={onChanged} />
         <PublishPanel roster={roster} onChanged={onChanged} />
         <SharePanel
           rosterId={roster.id}
@@ -2750,6 +2750,7 @@ function AddCommunityCard({
       category: isBrand ? "brand" : null,
       categories: isBrand ? ["brand"] : [],
       position: nextPosition,
+      hidden: true,
       ...links,
     } as never);
 
@@ -2984,6 +2985,7 @@ function AddProspectCard({
       content_review_url: form.content_review_url.trim() || null,
       content_review_label: form.content_review_label.trim() || null,
       position: nextPosition,
+      hidden: true,
       ...(flagState.flagged
         ? { flagged_streaming_mismatch: true, flagged_streaming_reason: flagState.reason }
         : {}),
