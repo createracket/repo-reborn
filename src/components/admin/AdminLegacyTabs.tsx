@@ -110,7 +110,7 @@ type CampaignBrief = { id: string; created_at: string; title: string; descriptio
 
 type Spotlight = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
-  published: boolean; dashboard_visible: boolean; created_at: string; links?: Record<string, string> | null;
+  published: boolean; dashboard_visible: boolean; created_at: string; links?: Record<string, string> | null; linked_user_id?: string | null;
   archived?: boolean | null;
 };
 
@@ -257,7 +257,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
           } else if (group === "spotlights") {
             const { data } = await supabase
               .from("partner_pages" as any)
-              .select("id, slug, type, headline, subtitle, published, dashboard_visible, created_at, links, archived")
+              .select("id, slug, type, headline, subtitle, published, dashboard_visible, created_at, links, archived, linked_user_id")
               .eq("section", "spotlight")
               .order("created_at", { ascending: false });
             const rows = (data as unknown as Spotlight[]) ?? [];
@@ -459,6 +459,32 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                             }
                           }}
                         />
+                      </div>
+                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+                        <div>
+                          <Label htmlFor={`sp-user-${s.id}`} className="text-sm font-medium">Linked user</Label>
+                          <p className="text-xs text-muted-foreground">Shows this spotlight on their public profile page.</p>
+                        </div>
+                        <select
+                          id={`sp-user-${s.id}`}
+                          className="h-9 max-w-[260px] rounded-md border border-input bg-background px-2 text-sm"
+                          value={s.linked_user_id ?? ""}
+                          onChange={async (e) => {
+                            const next = e.target.value || null;
+                            const prev = s.linked_user_id ?? null;
+                            setSpotlights((rows) => rows.map((r) => r.id === s.id ? { ...r, linked_user_id: next } : r));
+                            const { error } = await supabase.from("partner_pages" as any).update({ linked_user_id: next } as any).eq("id", s.id);
+                            if (error) {
+                              setSpotlights((rows) => rows.map((r) => r.id === s.id ? { ...r, linked_user_id: prev } : r));
+                              toast.error(error.message);
+                            } else toast.success(next ? "Spotlight linked to user" : "Spotlight unlinked");
+                          }}
+                        >
+                          <option value="">No linked user</option>
+                          {[...profiles].sort((a, b) => (a.display_name ?? a.email ?? "").localeCompare(b.display_name ?? b.email ?? "")).map((p) => (
+                            <option key={p.id} value={p.id}>{p.display_name || p.email || p.id.slice(0, 8)}{p.email && p.display_name ? ` (${p.email})` : ""}</option>
+                          ))}
+                        </select>
                       </div>
                       <PartnerPageShares partnerPageId={s.id} profiles={profiles} pageTitle={s.headline} pageLink={`/spotlight/${s.slug}`} eventKey="brief_shared" />
                     </CardContent>

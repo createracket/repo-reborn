@@ -71,6 +71,7 @@ function PublicProfilePage() {
   const { slug } = Route.useParams();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
+  const [spotlights, setSpotlights] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; header_image_url: string | null }>>([]);
   const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
 
   useEffect(() => {
@@ -97,6 +98,14 @@ function PublicProfilePage() {
         return;
       }
       setProfile(row as unknown as PublicProfile);
+      (supabase as any)
+        .from("partner_pages")
+        .select("id, slug, headline, subtitle, header_image_url")
+        .eq("linked_user_id", (row as any).id)
+        .eq("published", true)
+        .eq("archived", false)
+        .order("created_at", { ascending: false })
+        .then(({ data: sp }: any) => setSpotlights(sp ?? []));
       setStatus("ready");
       loadVibeCheckConfig()
         .then(setVibeConfig)
@@ -258,6 +267,27 @@ function PublicProfilePage() {
                     <p className="mt-1 font-display text-2xl">{m.value}</p>
                   </CardContent>
                 </Card>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {spotlights.length ? (
+          <section className="mt-12">
+            <h2 className="font-display text-2xl">Spotlight</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {spotlights.map((sp) => (
+                <Link key={sp.id} to="/spotlight/$slug" params={{ slug: sp.slug }} className="group">
+                  <Card className="overflow-hidden transition group-hover:ring-2 group-hover:ring-primary/60">
+                    {sp.header_image_url ? (
+                      <img src={sp.header_image_url} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy" />
+                    ) : null}
+                    <CardContent className="p-5">
+                      <p className="font-display text-xl">{sp.headline}</p>
+                      {sp.subtitle ? <p className="mt-1 text-sm text-muted-foreground">{sp.subtitle}</p> : null}
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           </section>
