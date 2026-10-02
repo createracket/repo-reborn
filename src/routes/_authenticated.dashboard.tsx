@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAuthUser } from "@/hooks/use-auth";
 import { readThumbFrame } from "@/lib/thumb-frame";
 import { PlannerTile } from "@/components/dashboard/PlannerTile";
+import { usePlannerArchives, ArchiveToggleButton } from "@/components/dashboard/usePlannerArchives";
 import { MySpotlightCard } from "@/components/dashboard/MySpotlightCard";
 import { SpotlightNotifications } from "@/components/dashboard/SpotlightNotifications";
 import { TrendFeedStrip } from "@/components/dashboard/TrendFeedStrip";
@@ -129,6 +130,9 @@ type Opportunity = {
 
 function DashboardPage() {
   const navigate = useNavigate();
+  const { archived: archivedKeys, toggle: toggleArchive } = usePlannerArchives();
+  const [showArchived, setShowArchived] = useState(false);
+  const inView = (k: string) => archivedKeys.has(k) === showArchived;
   const [email, setEmail] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [profileRow, setProfileRow] = useState<{ slug: string | null; avatar_url: string | null; bio: string | null; display_name: string | null } | null>(null);
@@ -694,12 +698,17 @@ function DashboardPage() {
                       Manage your projects here. Submit a brief to start connecting with new collaborators.
                     </CardDescription>
                   </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setShowArchived((v) => !v)}>
+                    {showArchived ? "Back to planner" : `Archived${archivedKeys.size ? ` (${archivedKeys.size})` : ""}`}
+                  </Button>
                   <Button asChild size="sm">
                     <Link to="/connect">
                       <ClipboardList className="mr-2 size-4" />
                       {myBriefs.length === 0 ? "Submit a brief" : "Submit another brief"}
                     </Link>
                   </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -707,12 +716,16 @@ function DashboardPage() {
                   <p className="text-sm text-muted-foreground">Loading…</p>
                 ) : (
                   <ul className="grid gap-3 md:grid-cols-2">
-                    <MySpotlightCard
+                    {showArchived && archivedKeys.size === 0 && (
+                      <li className="text-sm text-muted-foreground">Nothing archived yet. Use the archive icon on any card to tuck it away here.</li>
+                    )}
+                    {!showArchived && <MySpotlightCard
                       visibleSlugs={plannerPages.filter((p) => (p.section ?? "spotlight") !== "brief").map((p) => p.slug)}
                       showEmptyState={plannerPages.length === 0 && myBriefs.length === 0 && assignedRosters.length === 0 && assignedReports.length === 0 && listeningReports.length === 0}
-                    />
-                    {plannerPages.map((bp) => (
-                      <li key={`page-${bp.id}`}>
+                    />}
+                    {plannerPages.filter((bp) => inView(`page:${bp.id}`)).map((bp) => (
+                      <li key={`page-${bp.id}`} className="relative">
+                        <ArchiveToggleButton archived={showArchived} onClick={() => toggleArchive(`page:${bp.id}`)} />
                         <Link to={(bp.section ?? "spotlight") === "brief" ? "/brief/$slug" : "/spotlight/$slug"} params={{ slug: bp.slug }} className="block h-full">
                           <PlannerTile
                             thumb={bp.profile_image_url || bp.header_image_url || null}
@@ -730,8 +743,9 @@ function DashboardPage() {
                       </li>
                     ))}
 
-                    {myBriefs.map((b) => (
-                      <li key={`mybrief-${b.id}`}>
+                    {myBriefs.filter((b) => inView(`brief:${b.id}`)).map((b) => (
+                      <li key={`mybrief-${b.id}`} className="relative">
+                        <ArchiveToggleButton archived={showArchived} onClick={() => toggleArchive(`brief:${b.id}`)} />
                         <PlannerTile
                           interactive={false}
                           thumb={b.thumbnail_url}
@@ -760,7 +774,7 @@ function DashboardPage() {
                       </li>
                     ))}
 
-                    {assignedRosters.map((r) => {
+                    {assignedRosters.filter((r) => inView(`roster:${r.id}`)).map((r) => {
                       const tile = (
                         <PlannerTile
                           interactive={!!(r.published && r.slug)}
@@ -779,7 +793,8 @@ function DashboardPage() {
                         />
                       );
                       return (
-                        <li key={`roster-${r.id}`}>
+                        <li key={`roster-${r.id}`} className="relative">
+                          <ArchiveToggleButton archived={showArchived} onClick={() => toggleArchive(`roster:${r.id}`)} />
                           {r.published && r.slug ? (
                             <Link to="/roster/$slug" params={{ slug: r.slug }} className="block h-full">
                               {tile}
@@ -791,7 +806,7 @@ function DashboardPage() {
                       );
                     })}
 
-                    {assignedReports.map((r) => {
+                    {assignedReports.filter((r) => inView(`report:${r.id}`)).map((r) => {
                       const tile = (
                         <PlannerTile
                           interactive={!!(r.published && r.slug)}
@@ -810,7 +825,8 @@ function DashboardPage() {
                         />
                       );
                       return (
-                        <li key={`report-${r.id}`}>
+                        <li key={`report-${r.id}`} className="relative">
+                          <ArchiveToggleButton archived={showArchived} onClick={() => toggleArchive(`report:${r.id}`)} />
                           {r.published && r.slug ? (
                             <Link to="/report/$slug" params={{ slug: r.slug }} className="block h-full">
                               {tile}
@@ -822,8 +838,9 @@ function DashboardPage() {
                       );
                     })}
 
-                    {listeningReports.map((r) => (
-                      <li key={`listening-${r.id}`}>
+                    {listeningReports.filter((r) => inView(`listening:${r.id}`)).map((r) => (
+                      <li key={`listening-${r.id}`} className="relative">
+                        <ArchiveToggleButton archived={showArchived} onClick={() => toggleArchive(`listening:${r.id}`)} />
                         <Link to="/listening-report/$id" params={{ id: r.id }} className="block h-full">
                           <PlannerTile
                             thumb={r.thumbnail_url}
