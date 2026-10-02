@@ -2050,6 +2050,75 @@ export type Database = {
           },
         ]
       }
+      spotlight_view_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          id: string
+          owner_id: string | null
+          partner_page_id: string
+          requester_id: string
+          requester_seen: boolean
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          owner_id?: string | null
+          partner_page_id: string
+          requester_id: string
+          requester_seen?: boolean
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          owner_id?: string | null
+          partner_page_id?: string
+          requester_id?: string
+          requester_seen?: boolean
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotlight_view_requests_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spotlight_view_requests_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spotlight_view_requests_partner_page_id_fkey"
+            columns: ["partner_page_id"]
+            isOneToOne: false
+            referencedRelation: "partner_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spotlight_view_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spotlight_view_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -2573,6 +2642,7 @@ export type Database = {
       get_profile_spotlights: {
         Args: { _profile_id: string }
         Returns: {
+          access: string
           header_image_url: string
           headline: string
           id: string
@@ -2604,6 +2674,7 @@ export type Database = {
         Args: { _brief_id: string; _user_id: string }
         Returns: boolean
       }
+      request_spotlight_view: { Args: { _page_id: string }; Returns: string }
     }
     Enums: {
       account_type: "artist" | "brand" | "fan" | "creative" | "crew"
