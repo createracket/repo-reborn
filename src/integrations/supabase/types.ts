@@ -2053,6 +2053,56 @@ export type Database = {
         }
         Relationships: []
       }
+      talent_intake_requests: {
+        Row: {
+          answers: Json
+          artist_name: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          partner_page_id: string | null
+          status: string
+          submitted_at: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          answers?: Json
+          artist_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          partner_page_id?: string | null
+          status?: string
+          submitted_at?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json
+          artist_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          partner_page_id?: string | null
+          status?: string
+          submitted_at?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_intake_requests_partner_page_id_fkey"
+            columns: ["partner_page_id"]
+            isOneToOne: false
+            referencedRelation: "partner_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       usage_events: {
         Row: {
           action: string
