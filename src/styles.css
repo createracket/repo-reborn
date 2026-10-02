@@ -315,3 +315,9 @@
 .report-light .dashboard-empty-notice {
   background-color: var(--dashboard-notice) !important;
 }
+
+/* Light mode: the project planner panel is soft pink instead of olive green. */
+.report-light .planner-card {
+  background-color: var(--planner-surface);
+  border-color: color-mix(in oklch, var(--pink-accent) 60%, var(--border));
+}
