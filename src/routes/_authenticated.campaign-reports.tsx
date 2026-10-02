@@ -851,7 +851,7 @@ function ReportDetailView({
               {report.published ? "Published" : "Draft"}
             </span>
             <Switch checked={report.published} onCheckedChange={togglePublished} />
-            <span className="ml-3 text-xs text-muted-foreground">Refresh metrics monthly</span>
+            <span className="ml-3 text-xs text-muted-foreground">Refresh metrics weekly</span>
             <Switch
               checked={!!(report as any).auto_refresh_monthly}
               onCheckedChange={toggleMonthly}
