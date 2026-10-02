@@ -1795,6 +1795,30 @@ export type Database = {
           },
         ]
       }
+      saved_trends: {
+        Row: {
+          created_at: string
+          id: string
+          trend_id: string
+          trend_title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          trend_id: string
+          trend_title?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          trend_id?: string
+          trend_title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       scheduled_email_cron_token: {
         Row: {
           created_at: string

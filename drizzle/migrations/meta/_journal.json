@@ -8,6 +8,13 @@
       "when": 1790946259638,
       "tag": "0000_partner_pages_specific_dashboards",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790949726552,
+      "tag": "0001_saved_trends",
+      "breakpoints": true
     }
   ]
 }
