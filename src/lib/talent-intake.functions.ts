@@ -437,7 +437,8 @@ export const draftTalentSpotlight = createServerFn({ method: "POST" })
     return {
       draft,
       followers: enrichment.followers,
-      total_followers: enrichment.total_followers ?? null,
+      // Hidden from talent until an admin syncs their accounts.
+      total_followers: null,
       monthly_streams: enrichment.monthly_streams ?? null,
       avatar_url: enrichment.avatar_url ?? null,
       remaining: MAX_AI_DRAFTS - row.ai_draft_count - 1,
