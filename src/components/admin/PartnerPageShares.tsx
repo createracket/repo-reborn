@@ -71,38 +71,50 @@ export function PartnerPageShares({
           ((p.display_name ?? "").toLowerCase().includes(q) ||
             (p.email ?? "").toLowerCase().includes(q)),
       )
-      .slice(0, 6);
+      .slice(0, 8);
   }, [query, profiles, shares]);
 
-  async function addShare(patch: { target_user_id?: string | null; target_email?: string | null }) {
+  const parsedEmails = useMemo(() => {
+    const taken = new Set(shares.map((s) => (s.target_email ?? "").toLowerCase()));
+    return Array.from(
+      new Set(
+        email
+          .split(/[\s,;]+/)
+          .map((e) => e.trim().toLowerCase())
+          .filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e) && !taken.has(e)),
+      ),
+    );
+  }, [email, shares]);
+
+  async function addShares(patches: { target_user_id?: string | null; target_email?: string | null }[]) {
+    if (!patches.length) return;
     setBusy(true);
-    const { error } = await supabase.from("partner_page_shares" as any).insert({
-      partner_page_id: partnerPageId,
-      target_user_id: patch.target_user_id ?? null,
-      target_email: patch.target_email ?? null,
-    } as any);
+    const { error } = await supabase.from("partner_page_shares" as any).insert(
+      patches.map((patch) => ({
+        partner_page_id: partnerPageId,
+        target_user_id: patch.target_user_id ?? null,
+        target_email: patch.target_email ?? null,
+      })) as any,
+    );
     setBusy(false);
     if (error) {
       toast.error(error.message);
       return;
     }
-    setQuery("");
-    setEmail("");
-    toast.success("Shared");
+    if (patches.some((p) => p.target_email)) setEmail("");
+    toast.success(patches.length > 1 ? `Shared with ${patches.length} people` : "Shared");
     load();
 
     // Fires only if this trigger has a template assigned and is switched on.
-    const target =
-      patch.target_email ??
-      profiles.find((p) => p.id === patch.target_user_id)?.email ??
-      null;
-    if (target) {
-      const name = profiles.find((p) => p.id === patch.target_user_id)?.display_name ?? "";
+    for (const patch of patches) {
+      const prof = profiles.find((p) => p.id === patch.target_user_id);
+      const target = patch.target_email ?? prof?.email ?? null;
+      if (!target) continue;
       notifyEmailEvent({
         data: {
           eventKey,
           recipientEmail: target,
-          templateData: { name, page_title: pageTitle ?? "", link: pageLink ?? "" },
+          templateData: { name: prof?.display_name ?? "", page_title: pageTitle ?? "", link: pageLink ?? "" },
         },
       } as any).catch(() => {});
     }
@@ -165,48 +177,71 @@ export function PartnerPageShares({
         </ul>
       )}
 
-      <div className="grid gap-2 sm:grid-cols-2">
-        <div className="relative">
+      <div className="space-y-2">
+        <div>
           <Label className="text-xs">Search accounts</Label>
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Name or email"
+            placeholder="Type a name or email…"
             className="h-8 text-sm"
           />
-          {suggestions.length > 0 ? (
-            <div className="absolute z-10 mt-1 w-full rounded-md border border-border/60 bg-popover shadow">
-              {suggestions.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  className="block w-full truncate px-2 py-1 text-left text-xs hover:bg-muted"
-                  onClick={() => addShare({ target_user_id: p.id })}
-                  disabled={busy}
-                >
-                  {p.display_name ?? "Member"} <span className="text-muted-foreground">{p.email ?? ""}</span>
-                </button>
-              ))}
-            </div>
-          ) : null}
         </div>
+        {suggestions.length > 0 ? (
+          <ul className="space-y-1">
+            {suggestions.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-center justify-between gap-2 rounded-md border border-border/60 bg-background px-2 py-1"
+              >
+                <div className="min-w-0 text-xs">
+                  <div className="truncate font-medium">{p.display_name ?? "Member"}</div>
+                  <div className="truncate text-muted-foreground">{p.email ?? ""}</div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7"
+                  disabled={busy}
+                  onClick={() => addShares([{ target_user_id: p.id }])}
+                >
+                  Add
+                </Button>
+              </li>
+            ))}
+            {suggestions.length > 1 ? (
+              <li>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 text-xs"
+                  disabled={busy}
+                  onClick={() => addShares(suggestions.map((p) => ({ target_user_id: p.id })))}
+                >
+                  Add all {suggestions.length} matches
+                </Button>
+              </li>
+            ) : null}
+          </ul>
+        ) : query.trim() ? (
+          <p className="text-xs text-muted-foreground">No matching accounts — invite by email below.</p>
+        ) : null}
         <div>
-          <Label className="text-xs">Or invite by email</Label>
+          <Label className="text-xs">Or invite by email (separate several with commas)</Label>
           <div className="flex gap-1">
             <Input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              type="email"
-              placeholder="name@example.com"
+              placeholder="name@example.com, other@example.com"
               className="h-8 text-sm"
             />
             <Button
               size="sm"
               type="button"
-              disabled={busy || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)}
-              onClick={() => addShare({ target_email: email.trim().toLowerCase() })}
+              disabled={busy || parsedEmails.length === 0}
+              onClick={() => addShares(parsedEmails.map((e) => ({ target_email: e })))}
             >
-              Add
+              Add{parsedEmails.length > 1 ? ` ${parsedEmails.length}` : ""}
             </Button>
           </div>
         </div>
