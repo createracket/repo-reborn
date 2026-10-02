@@ -255,6 +255,7 @@ export function ProjectPlannerAdmin() {
         (supabase as any)
           .from("rosters")
           .select("id, title, slug, published, updated_at")
+          .eq("archived", false)
           .order("updated_at", { ascending: false }),
         (supabase as any)
           .from("campaign_reports")

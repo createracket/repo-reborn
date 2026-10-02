@@ -412,7 +412,7 @@ function RosterBuilderPage() {
       // SELECTable on the base table (privacy). Read them via the
       // get_roster_assignment RPC instead. A wildcard select fails outright.
       .select(
-        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators, show_calendar, categories, statuses, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
+        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators, show_calendar, archived, categories, statuses, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
       )
       .order("updated_at", { ascending: false });
     if (error) {
@@ -563,7 +563,11 @@ function RosterListView({
   const briefById = useMemo(() => new Map(briefs.map((b) => [b.id, b])), [briefs]);
   const profileById = useMemo(() => new Map(profiles.map((p) => [p.id, p])), [profiles]);
 
-  const visibleRosters = rosters;
+  // Archived rosters sink to the bottom of the list.
+  const visibleRosters = useMemo(
+    () => [...rosters].sort((a, b) => Number(!!(a as any).archived) - Number(!!(b as any).archived)),
+    [rosters],
+  );
 
 
 
@@ -602,6 +606,16 @@ function RosterListView({
     setBriefId("");
     toast.success("Roster created");
     onCreated((data as { id: string }).id);
+  }
+
+  async function handleArchive(id: string, archived: boolean) {
+    const { error } = await supabase.from("rosters").update({ archived } as any).eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success(archived ? "Roster archived — removed from the project planner" : "Roster restored");
+    onDeleted();
   }
 
   async function handleDelete(id: string) {
@@ -652,6 +666,9 @@ function RosterListView({
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium">{r.title}</span>
+                        {(r as any).archived && (
+                          <Badge variant="secondary" className="text-[10px] uppercase">Archived</Badge>
+                        )}
                         {!isMine && ownerLabel && (
                           <Badge variant="secondary" className="text-[10px] uppercase">
                             {ownerLabel}
@@ -676,6 +693,15 @@ function RosterListView({
                         Updated {new Date(r.updated_at).toLocaleDateString()}
                       </p>
                     </button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      title={(r as any).archived ? "Restore roster" : "Archive roster"}
+                      aria-label={(r as any).archived ? "Restore roster" : "Archive roster"}
+                      onClick={() => handleArchive(r.id, !(r as any).archived)}
+                    >
+                      {(r as any).archived ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
+                    </Button>
                     <Button size="icon" variant="ghost" onClick={() => handleDelete(r.id)}>
                       <Trash2 className="size-4" />
                     </Button>
