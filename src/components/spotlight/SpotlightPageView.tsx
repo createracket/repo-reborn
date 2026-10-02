@@ -670,7 +670,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             return (
               <div className="space-y-2 pt-3">
                 <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                  {sectionLabel("members", "Meet the members")}
+                  {sectionLabel("members", "Extended network")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                 {groups.flatMap((g) =>
