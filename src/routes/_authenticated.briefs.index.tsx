@@ -121,6 +121,27 @@ function BriefsPage() {
     refresh();
   }
 
+  async function duplicateBrief(b: Brief) {
+    const { data: full, error } = await supabase
+      .from("partner_pages" as any).select("*").eq("id", b.id).single();
+    if (error || !full) return toast.error(error?.message ?? "Could not load brief");
+    const { id: _id, created_at: _c, updated_at: _u, ...rest } = full as any;
+    const taken = new Set(briefs.map((x) => x.slug));
+    let slug = `${b.slug}-copy`;
+    for (let n = 2; taken.has(slug); n++) slug = `${b.slug}-copy-${n}`;
+    const { error: insErr } = await supabase.from("partner_pages" as any).insert({
+      ...rest,
+      slug,
+      headline: `${rest.headline} (copy)`,
+      published: false,
+      archived: false,
+      dashboard_visible: false,
+    } as any);
+    if (insErr) return toast.error(insErr.message);
+    toast.success("Brief duplicated as a draft");
+    navigate({ to: "/briefs/edit/$key", params: { key: slug } });
+  }
+
   if (checking) {
     return (
       <div className="min-h-screen bg-background">
@@ -193,6 +214,9 @@ function BriefsPage() {
               <Link to="/briefs/edit/$key" params={{ key: b.slug }}>
                 <Pencil className="size-3" />
               </Link>
+            </Button>
+            <Button size="sm" variant="outline" title="Duplicate brief" aria-label="Duplicate brief" onClick={() => duplicateBrief(b)}>
+              <CopyIcon className="size-3" />
             </Button>
             <PartnerPageHistory pageId={b.id} pageTitle={b.headline} onRestored={refresh} />
             <Button size="sm" variant="outline" onClick={() => setArchived(b, !b.archived)}>
