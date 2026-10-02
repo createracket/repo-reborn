@@ -1179,6 +1179,7 @@ export type Database = {
           flagged_streaming_reason: string | null
           header_image_url: string | null
           headline: string
+          hide_from_admin_planner: boolean
           host_bio: string | null
           id: string
           intro: string | null
@@ -1214,6 +1215,7 @@ export type Database = {
           flagged_streaming_reason?: string | null
           header_image_url?: string | null
           headline: string
+          hide_from_admin_planner?: boolean
           host_bio?: string | null
           id?: string
           intro?: string | null
@@ -1249,6 +1251,7 @@ export type Database = {
           flagged_streaming_reason?: string | null
           header_image_url?: string | null
           headline?: string
+          hide_from_admin_planner?: boolean
           host_bio?: string | null
           id?: string
           intro?: string | null

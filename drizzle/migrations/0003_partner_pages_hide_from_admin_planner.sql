@@ -1,0 +1,1 @@
+ALTER TABLE public.partner_pages ADD COLUMN IF NOT EXISTS hide_from_admin_planner boolean NOT NULL DEFAULT false;
