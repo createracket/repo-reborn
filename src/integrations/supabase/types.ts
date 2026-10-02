@@ -1182,6 +1182,7 @@ export type Database = {
           host_bio: string | null
           id: string
           intro: string | null
+          linked_user_id: string | null
           links: Json
           monthly_streams: number | null
           partnership_pitch: string | null
@@ -1215,6 +1216,7 @@ export type Database = {
           host_bio?: string | null
           id?: string
           intro?: string | null
+          linked_user_id?: string | null
           links?: Json
           monthly_streams?: number | null
           partnership_pitch?: string | null
@@ -1248,6 +1250,7 @@ export type Database = {
           host_bio?: string | null
           id?: string
           intro?: string | null
+          linked_user_id?: string | null
           links?: Json
           monthly_streams?: number | null
           partnership_pitch?: string | null
@@ -1262,7 +1265,22 @@ export type Database = {
           updated_at?: string
           vibe_tags?: string[]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "partner_pages_linked_user_id_fkey"
+            columns: ["linked_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_pages_linked_user_id_fkey"
+            columns: ["linked_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
