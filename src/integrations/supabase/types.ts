@@ -1190,6 +1190,7 @@ export type Database = {
           published: boolean
           section: string
           slug: string
+          specific_dashboards_enabled: boolean
           subtitle: string | null
           total_followers: number | null
           total_streams: number | null
@@ -1224,6 +1225,7 @@ export type Database = {
           published?: boolean
           section?: string
           slug: string
+          specific_dashboards_enabled?: boolean
           subtitle?: string | null
           total_followers?: number | null
           total_streams?: number | null
@@ -1258,6 +1260,7 @@ export type Database = {
           published?: boolean
           section?: string
           slug?: string
+          specific_dashboards_enabled?: boolean
           subtitle?: string | null
           total_followers?: number | null
           total_streams?: number | null
