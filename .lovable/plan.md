@@ -11,6 +11,8 @@ On the report builder (detailed "original" template), each post gets a **Request
 
 The creator receives an email from Racket with the post link and a big **Share my stats** button. That opens a simple, no-login page showing the post thumbnail and only the fields you asked for, with an optional screenshot upload (images up to 10MB). One submission per link; they can re-open and correct it until you mark it reviewed.
 
+A copy of every request email goes to **community@createracket.com**, so you have a record in your inbox. It's sent as a separate copy instead of a true CC: the app's email system sends to one person at a time, and this way the creator never sees your internal address. When a creator submits their stats, community@createracket.com also gets a notification.
+
 Back in the builder, each post shows a status chip: **Requested · Viewed · Submitted**. Submitted numbers appear side by side with current values and you click **Apply** to copy them into the post (nothing overwrites automatically). The screenshot is viewable from the same panel.
 
 ## Technical details
@@ -20,4 +22,5 @@ Back in the builder, each post shows a status chip: **Requested · Viewed · Sub
 - New public route `/stats/$token` (noindex) + server fns `getStatsRequest`, `submitStatsRequest` (zod-validated, token must be pending, marks viewed on open). Screenshot stored in a private storage bucket, viewed by admin via signed URL.
 - New app email template `stats-request` (one recipient per request, idempotency key `stats-request-<id>`), sent from an authenticated server fn after the request row is created. Uses existing send helper; Racket branding.
 - Builder UI: button + dialog + status chip in the post editor of `_authenticated.campaign-reports.tsx`; "Apply" maps answers onto `campaign_report_posts` fields (views, reach_pct, watch_time_hours, saves, shares, etc.).
-- Optional notification: email to you when a creator submits (reuses existing admin notify pattern).
+- Copy: after sending to the creator, send a second email to community@createracket.com (idempotency key `stats-request-copy-<id>`) using the same template, with a "Copy of request sent to <creator>" line at the top.
+- Submission notification to community@createracket.com (template `stats-submitted`, key `stats-submitted-<id>`).
