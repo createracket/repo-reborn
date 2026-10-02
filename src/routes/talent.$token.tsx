@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useAuth } from "@/hooks/use-auth";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -237,6 +238,7 @@ function TalentForm() {
       <Shell>
         <h1 className="font-display text-3xl">Thanks — we've got it!</h1>
         <p className="mt-2 text-muted-foreground">The Racket team will build your spotlight and be in touch soon.</p>
+        <DoneNext />
       </Shell>
     );
 
@@ -504,6 +506,21 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <main className="mx-auto max-w-2xl px-4 py-12">{children}</main>
+    </div>
+  );
+}
+
+function DoneNext() {
+  const { ready, signedIn } = useAuth();
+  if (!ready) return null;
+  return signedIn ? (
+    <div className="mt-6">
+      <Button asChild><Link to="/dashboard">Back to your dashboard</Link></Button>
+    </div>
+  ) : (
+    <div className="mt-6 space-y-2">
+      <p className="text-sm text-muted-foreground">Create a free Racket account to see your spotlight on your profile and find brand opportunities.</p>
+      <Button asChild><Link to="/signup">Sign up to Racket</Link></Button>
     </div>
   );
 }
