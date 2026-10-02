@@ -21,9 +21,9 @@ import {
 export const Route = createFileRoute("/talent/$token")({
   head: () => ({
     meta: [
-      { title: "Tell us about you — Create Racket" },
-      { name: "description", content: "Share your socials and a few details so we can build your Create Racket spotlight." },
-      { property: "og:title", content: "Tell us about you — Create Racket" },
+      { title: "Tell us about you — Racket" },
+      { name: "description", content: "Share your socials and a few details so we can build your Racket spotlight." },
+      { property: "og:title", content: "Tell us about you — Racket" },
       { property: "og:description", content: "Share your socials so we can build your spotlight page." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -167,7 +167,7 @@ function TalentForm() {
       <Shell>
         <h1 className="font-display text-3xl">This link isn't working</h1>
         <p className="mt-2 text-muted-foreground">
-          Please ask the Create Racket team for a fresh link, or email{" "}
+          Please ask the Racket team for a fresh link, or email{" "}
           <a className="underline" href="mailto:community@createracket.com">community@createracket.com</a>.
         </p>
       </Shell>
@@ -176,7 +176,7 @@ function TalentForm() {
     return (
       <Shell>
         <h1 className="font-display text-3xl">Thanks — we've got it!</h1>
-        <p className="mt-2 text-muted-foreground">The Create Racket team will build your spotlight and be in touch soon.</p>
+        <p className="mt-2 text-muted-foreground">The Racket team will build your spotlight and be in touch soon.</p>
       </Shell>
     );
 
@@ -184,7 +184,7 @@ function TalentForm() {
     <Shell>
       <h1 className="font-display text-3xl sm:text-4xl">Tell us about you</h1>
       <p className="mt-2 text-muted-foreground">
-        Share your socials and we'll build your Create Racket spotlight. Only your name is required — skip anything
+        Share your socials and we'll build your Racket spotlight. Only your name is required — skip anything
         you like and we'll fill in the rest.
       </p>
 
@@ -285,7 +285,7 @@ function TalentForm() {
 
       <div className="mt-6 flex justify-end">
         <Button type="button" size="lg" onClick={() => send(false)} disabled={sending || uploading}>
-          {sending ? "Sending…" : "Send to Create Racket"}
+          {sending ? "Sending…" : "Send to Racket"}
         </Button>
       </div>
     </Shell>
