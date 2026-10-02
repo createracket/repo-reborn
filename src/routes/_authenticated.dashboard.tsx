@@ -513,7 +513,7 @@ function DashboardPage() {
       }
       const dedupSp = new Map<string, any>();
       [...((livePages ?? []) as any[]), ...sharedPages].forEach((s) => dedupSp.set(s.id, s));
-      const allPages = Array.from(dedupSp.values()).filter((p: any) => !(isAdmin && p.hide_from_admin_planner));
+      const allPages = Array.from(dedupSp.values()).filter((p: any) => !(roleRow && p.hide_from_admin_planner));
       setPlannerPages(allPages);
 
 
