@@ -7,7 +7,7 @@ function safeEqual(a: string, b: string) {
   return d === 0;
 }
 
-/** Called by the monthly schedule: queues "Update all metrics" for opted-in reports. */
+/** Called by the weekly schedule: queues "Update all metrics" for opted-in reports. */
 export const Route = createFileRoute("/api/public/hooks/monthly-report-refresh")({
   server: {
     handlers: {
