@@ -15,11 +15,14 @@ A copy of every request email goes to **community@createracket.com**, so you hav
 
 Back in the builder, each post shows a status chip: **Requested · Viewed · Submitted**. Submitted numbers appear side by side with current values and you click **Apply** to copy them into the post (nothing overwrites automatically). The screenshot is viewable from the same panel.
 
+**Screenshots are read automatically.** Creators can upload a screenshot instead of typing numbers (up to 3 screenshots). AI reads each one, pulls out the stats (views, reach, watch time, saves, shares and so on) and pre-fills them, marked "read from screenshot". If a number on the screenshot and a typed number don't match, it's flagged. You check the numbers and the screenshot side by side before clicking Apply.
+
 ## Technical details
 
 - New table `post_stats_requests` (id, token, report_id, post_id, creator_id, email, requested_fields text[], message, status requested|viewed|submitted|applied, answers jsonb, screenshot_path, sent_at, submitted_at, created_by). GRANTs + RLS: admins/report owners full access; no anon access (public page goes through token-gated server fns using the admin client, same pattern as talent forms).
 - Add `email` column to `campaign_report_creators` (admin-only select, consistent with restricted email columns).
-- New public route `/stats/$token` (noindex) + server fns `getStatsRequest`, `submitStatsRequest` (zod-validated, token must be pending, marks viewed on open). Screenshot stored in a private storage bucket, viewed by admin via signed URL.
+- New public route `/stats/$token` (noindex) + server fns `getStatsRequest`, `submitStatsRequest` (zod-validated, token must be pending, marks viewed on open). Screenshots stored in a private storage bucket, viewed by admin via signed URL.
+- On submit, each screenshot goes to the Lovable AI Gateway (Gemini vision) with a structured-output schema of stat fields. The results are saved in `answers.extracted` alongside typed values, and mismatches are flagged. Limited to 3 images per request.
 - New app email template `stats-request` (one recipient per request, idempotency key `stats-request-<id>`), sent from an authenticated server fn after the request row is created. Uses existing send helper; Racket branding.
 - Builder UI: button + dialog + status chip in the post editor of `_authenticated.campaign-reports.tsx`; "Apply" maps answers onto `campaign_report_posts` fields (views, reach_pct, watch_time_hours, saves, shares, etc.).
 - Copy: after sending to the creator, send a second email to community@createracket.com (idempotency key `stats-request-copy-<id>`) using the same template, with a "Copy of request sent to <creator>" line at the top.
