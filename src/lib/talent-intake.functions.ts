@@ -282,7 +282,7 @@ export const submitTalentIntake = createServerFn({ method: "POST" })
       .from("partner_pages")
       .insert({
         slug,
-        type: "artist",
+        type: "Artist",
         headline: a.artist_name,
         host_bio: a.bio || null,
         header_image_url: a.photos?.[0] ? clean(a.photos[0]) : null,
