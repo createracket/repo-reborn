@@ -31,10 +31,10 @@ export function TalentIntakePanel() {
     toast.success("Link copied — send it to the artist.");
   }
 
-  async function makeLink() {
+  async function makeLink(mode: "standard" | "advanced") {
     setBusy(true);
     try {
-      const row = await create({ data: { artistName: name.trim() || undefined } });
+      const row = await create({ data: { artistName: name.trim() || undefined, mode } });
       setName("");
       await copy(row.token);
       qc.invalidateQueries({ queryKey: ["talent-intakes"] });
@@ -56,10 +56,16 @@ export function TalentIntakePanel() {
       <div className="space-y-4 px-4">
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Artist name (optional — pre-fills the form)" />
-          <Button type="button" onClick={makeLink} disabled={busy}>
+          <Button type="button" onClick={() => makeLink("standard")} disabled={busy}>
             {busy ? "Creating…" : "Create & copy link"}
           </Button>
+          <Button type="button" variant="outline" onClick={() => makeLink("advanced")} disabled={busy}>
+            Create advanced link
+          </Button>
         </div>
+        <p className="text-xs text-muted-foreground">
+          Advanced links let the artist draft their own page with AI and preview it before sending (up to 5 drafts per link).
+        </p>
         {data.length === 0 ? (
           <p className="text-xs text-muted-foreground">No talent forms yet.</p>
         ) : (
@@ -69,6 +75,9 @@ export function TalentIntakePanel() {
                 <span className="min-w-0 flex-1 truncate font-medium">
                   {r.answers?.artist_name || r.artist_name || "Unnamed"}
                 </span>
+                {r.mode === "advanced" ? (
+                  <span className="rounded-full border border-primary px-2 py-0.5 text-[11px] text-primary">Advanced</span>
+                ) : null}
                 <span className={`rounded-full px-2 py-0.5 text-[11px] ${r.status === "pending" ? "bg-muted text-muted-foreground" : "bg-primary text-primary-foreground"}`}>
                   {r.status === "pending" ? "Waiting" : r.answers?.skipped ? "Sent (skipped extras)" : "Sent"}
                 </span>
