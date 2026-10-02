@@ -1968,6 +1968,7 @@ export function SpotlightForm({
     header_image_url: editData?.header_image_url ?? "",
     profile_image_url: editData?.profile_image_url ?? "",
     colour_thumbnails: (editData?.links?.colour_thumbnails ?? false) as boolean,
+    hide_metrics: (editData?.links?.hide_metrics ?? false) as boolean,
     published: editData?.published ?? false,
     access_code: editData?.access_code ?? "",
     access_code_label: editData?.access_code_label ?? "Access code",
@@ -2401,7 +2402,7 @@ export function SpotlightForm({
         apple_music_name: form.apple_music_name.trim(),
         youtube_extra_names: extraLinks.youtube.map((_, i) => (extraNames.youtube[i] ?? "").trim()),
         colour_thumbnails: form.colour_thumbnails,
-        thumb_frame: thumbFrame,
+        hide_metrics: form.hide_metrics,
         section_labels: {
           host_bio: form.label_host_bio.trim(),
           audience: form.label_audience.trim(),
