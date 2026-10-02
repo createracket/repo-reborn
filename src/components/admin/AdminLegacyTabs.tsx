@@ -145,6 +145,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [userTypeFilter, setUserTypeFilter] = useState<string>("all");
   const [userAccountFilter, setUserAccountFilter] = useState<"all" | "account" | "managed">("all");
+  const [userSearch, setUserSearch] = useState("");
   const [vibeByUser, setVibeByUser] = useState<Map<string, VibeRow>>(new Map());
   const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
@@ -300,6 +301,13 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
     if (userTypeFilter === "none" ? !!p.account_type : userTypeFilter !== "all" && p.account_type !== userTypeFilter) return false;
     if (userAccountFilter === "managed" && !p.managed) return false;
     if (userAccountFilter === "account" && !!p.managed) return false;
+    const q = userSearch.trim().toLowerCase();
+    if (q) {
+      const name = (p.display_name ?? "").toLowerCase();
+      const email = (p.email ?? "").toLowerCase();
+      const slug = (p.slug ?? "").toLowerCase();
+      if (!name.includes(q) && !email.includes(q) && !slug.includes(q)) return false;
+    }
     return true;
   });
 
@@ -681,6 +689,14 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                   Users without a public slug won't appear publicly — set one on their profile first.
                 </CardDescription>
                 <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <input
+                    aria-label="Search users by name or email"
+                    type="search"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    placeholder="Search name or email…"
+                    className="h-9 w-full max-w-xs rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                  />
                   <select
                     aria-label="Filter by profile type"
                     value={userTypeFilter}
