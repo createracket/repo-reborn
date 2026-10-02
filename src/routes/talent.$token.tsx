@@ -422,7 +422,7 @@ function draftPayload(d: DraftState) {
     partnership_pitch: d.partnership_pitch.trim() || undefined,
     eoi_opportunities: lines(d.eoi),
     audience_segments: lines(d.audience),
-    total_followers: d.total_followers ?? undefined,
+    // Follower total intentionally omitted — the AI-scraped count can under-count.
     monthly_streams: d.monthly_streams ?? undefined,
   };
 }
@@ -443,10 +443,9 @@ function DraftPreview({ name, photo, draft, onChange }: { name: string; photo?: 
           </div>
         </div>
         <div className="space-y-5 p-5">
-          {draft.total_followers || draft.monthly_streams ? (
+          {draft.monthly_streams ? (
             <div className="flex flex-wrap gap-2">
-              {draft.total_followers ? <span className="rounded-full bg-primary px-3 py-1 text-xs text-primary-foreground">{fmt(draft.total_followers)} followers</span> : null}
-              {draft.monthly_streams ? <span className="rounded-full bg-pink-accent px-3 py-1 text-xs text-foreground">{fmt(draft.monthly_streams)} monthly listeners</span> : null}
+              <span className="rounded-full bg-pink-accent px-3 py-1 text-xs text-foreground">{fmt(draft.monthly_streams)} monthly listeners</span>
             </div>
           ) : null}
           {draft.intro ? <p className="text-lg">{draft.intro}</p> : null}

@@ -323,7 +323,9 @@ export const submitTalentIntake = createServerFn({ method: "POST" })
         partnership_pitch: d?.partnership_pitch || null,
         eoi_opportunities: d?.eoi_opportunities ?? [],
         audience_segments: d?.audience_segments ?? [],
-        total_followers: d?.total_followers ?? null,
+        // Never save the AI-scraped follower total — it can under-count. The
+        // admin fills a verified number in the builder instead.
+        total_followers: null,
         monthly_streams: d?.monthly_streams ?? null,
         header_image_url: a.photos?.[0] ? clean(a.photos[0]) : null,
         published: false,
