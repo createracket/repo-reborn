@@ -511,6 +511,7 @@ function DashboardPage() {
           .from("partner_pages")
           .select(pageCols)
           .eq("published", true)
+          .eq("specific_dashboards_enabled", true)
           .in("id", sharedIds);
         sharedPages = (data ?? []) as any[];
       }

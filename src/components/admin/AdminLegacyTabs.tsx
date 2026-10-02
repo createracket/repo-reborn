@@ -111,7 +111,7 @@ type CampaignBrief = { id: string; created_at: string; title: string; descriptio
 
 type Spotlight = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
-  published: boolean; dashboard_visible: boolean; created_at: string; links?: Record<string, string> | null; linked_user_id?: string | null;
+  published: boolean; dashboard_visible: boolean; specific_dashboards_enabled?: boolean | null; created_at: string; links?: Record<string, string> | null; linked_user_id?: string | null;
   archived?: boolean | null;
 };
 
@@ -258,7 +258,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
           } else if (group === "spotlights") {
             const { data } = await supabase
               .from("partner_pages" as any)
-              .select("id, slug, type, headline, subtitle, published, dashboard_visible, created_at, links, archived, linked_user_id")
+              .select("id, slug, type, headline, subtitle, published, dashboard_visible, specific_dashboards_enabled, created_at, links, archived, linked_user_id")
               .eq("section", "spotlight")
               .order("created_at", { ascending: false });
             const rows = (data as unknown as Spotlight[]) ?? [];
@@ -486,6 +486,36 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                             <option key={p.id} value={p.id}>{p.display_name || p.email || p.id.slice(0, 8)}{p.email && p.display_name ? ` (${p.email})` : ""}</option>
                           ))}
                         </select>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+                        <div>
+                          <Label htmlFor={`sp-specific-${s.id}`} className="text-sm font-medium">
+                            Live on specific dashboards
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            {s.specific_dashboards_enabled !== false
+                              ? "Showing for the people picked below."
+                              : "Hidden from the people picked below."}
+                          </p>
+                        </div>
+                        <Switch
+                          id={`sp-specific-${s.id}`}
+                          checked={s.specific_dashboards_enabled !== false}
+                          disabled={!!s.archived}
+                          onCheckedChange={async (checked) => {
+                            setSpotlights((rows) => rows.map((r) => r.id === s.id ? { ...r, specific_dashboards_enabled: checked } : r));
+                            const { error } = await supabase
+                              .from("partner_pages" as any)
+                              .update({ specific_dashboards_enabled: checked } as any)
+                              .eq("id", s.id);
+                            if (error) {
+                              setSpotlights((rows) => rows.map((r) => r.id === s.id ? { ...r, specific_dashboards_enabled: !checked } : r));
+                              toast.error(error.message);
+                            } else {
+                              toast.success(checked ? "Live on specific dashboards" : "Hidden from specific dashboards");
+                            }
+                          }}
+                        />
                       </div>
                       <PartnerPageShares partnerPageId={s.id} profiles={profiles} pageTitle={s.headline} pageLink={`/spotlight/${s.slug}`} eventKey="brief_shared" />
                     </CardContent>

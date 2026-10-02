@@ -50,6 +50,7 @@ type Brief = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
   published: boolean; created_at: string; archived?: boolean | null;
   dashboard_visible?: boolean | null; dashboard_placement?: string | null;
+  specific_dashboards_enabled?: boolean | null;
 };
 
 function BriefsPage() {
@@ -64,7 +65,7 @@ function BriefsPage() {
 
   // Only the columns the list renders — the full row carries heavy JSON blobs.
   const LIST_COLUMNS =
-    "id, slug, type, headline, subtitle, published, created_at, archived, dashboard_visible, dashboard_placement";
+    "id, slug, type, headline, subtitle, published, created_at, archived, dashboard_visible, dashboard_placement, specific_dashboards_enabled";
 
   async function refresh() {
     const { data } = await supabase
@@ -279,6 +280,34 @@ function BriefsPage() {
                 <SelectItem value="both">Both sections</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+            <div>
+              <Label htmlFor={`br-specific-${b.id}`} className="text-sm font-medium">
+                Live on specific dashboards
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {b.specific_dashboards_enabled !== false
+                  ? "Showing for the people picked below."
+                  : "Hidden from the people picked below."}
+              </p>
+            </div>
+            <Switch
+              id={`br-specific-${b.id}`}
+              checked={b.specific_dashboards_enabled !== false}
+              disabled={!!b.archived}
+              onCheckedChange={async (checked) => {
+                setBriefs((rows) => rows.map((r) => (r.id === b.id ? { ...r, specific_dashboards_enabled: checked } : r)));
+                const { error } = await supabase
+                  .from("partner_pages" as any)
+                  .update({ specific_dashboards_enabled: checked } as any)
+                  .eq("id", b.id);
+                if (error) {
+                  setBriefs((rows) => rows.map((r) => (r.id === b.id ? { ...r, specific_dashboards_enabled: !checked } : r)));
+                  toast.error(error.message);
+                }
+              }}
+            />
           </div>
           <PartnerPageShares partnerPageId={b.id} profiles={profiles} pageTitle={b.headline} pageLink={`/brief/${b.slug}`} eventKey="brief_shared" />
         </CardContent>
