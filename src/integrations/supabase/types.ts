@@ -2570,6 +2570,16 @@ export type Database = {
           client_email: string
         }[]
       }
+      get_profile_spotlights: {
+        Args: { _profile_id: string }
+        Returns: {
+          header_image_url: string
+          headline: string
+          id: string
+          slug: string
+          subtitle: string
+        }[]
+      }
       get_public_roster: { Args: { p_slug: string }; Returns: Json }
       get_roster_assignment: {
         Args: { _roster_id: string }
