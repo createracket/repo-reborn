@@ -95,6 +95,9 @@ function userSearchTerm(raw: string) {
   return raw.trim().replace(/[",()\\]/g, "");
 }
 
+/** The profile types the Users filter offers — matches the database enum exactly. */
+type AccountTypeFilter = (typeof ACCOUNT_TYPE_OPTIONS)[number]["value"];
+
 /** Resolve a user's vibe check archetype name, or null when they haven't taken it. */
 function vibeArchetypeLabel(p: Profile, vibe: VibeRow | undefined, cfg: VibeCheckConfig): string | null {
   if (p.vibe_archetype_key) {
@@ -292,7 +295,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
   function buildUserRowsQuery() {
     let q = supabase.from("profiles").select(PROFILE_ROW_COLUMNS, { count: "exact" });
     if (userTypeFilter === "none") q = q.is("account_type", null);
-    else if (userTypeFilter !== "all") q = q.eq("account_type", userTypeFilter);
+    else if (userTypeFilter !== "all") q = q.eq("account_type", userTypeFilter as AccountTypeFilter);
     if (userAccountFilter === "managed") q = q.eq("managed", true);
     else if (userAccountFilter === "account") q = q.or("managed.eq.false,managed.is.null");
     const term = userSearchTerm(userSearch);
