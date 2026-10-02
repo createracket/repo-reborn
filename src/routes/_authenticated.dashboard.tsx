@@ -930,7 +930,7 @@ function DashboardPage() {
                       );
                     }
                     return (
-                      <ul className="grid max-h-[21rem] gap-3 overflow-y-auto overscroll-contain pr-1 sm:max-h-none sm:overflow-visible sm:pr-0 sm:grid-cols-2 lg:grid-cols-3">
+                      <ul className="dashboard-roster-scroll grid max-h-[15.5rem] auto-rows-min gap-3 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2 lg:grid-cols-3">
                         {showSaved && displayedRoster.map((r) => (
                           <li
                             key={r.id}
