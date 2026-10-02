@@ -97,6 +97,7 @@
   /* Racket Pink #FFC0CB */
   --pink-accent: oklch(0.86 0.07 12);
   --dashboard-notice: oklch(0.95 0.025 12);
+  --planner-surface: oklch(0.945 0.028 12);
   /* Racket Purple #5C37D0 */
   --purple: oklch(0.45 0.21 290);
   --brand-light: oklch(0.93 0.003 260);
