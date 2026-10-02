@@ -265,7 +265,7 @@ export function StatsRequestPanel({
               <p className="text-xs text-muted-foreground">Apply copies views, likes, comments, shares, saves and watch time (typed values win over screenshot values). Reach becomes reach % using the post's follower count.</p>
               <div className="flex flex-wrap justify-end gap-2">
                 {latest.status === "submitted" && (
-                  <Button type="button" className="bg-pink-accent text-primary-foreground hover:bg-pink-accent/90" onClick={() => {
+                  <Button type="button" className="bg-pink-accent text-primary-foreground hover:bg-pink-accent/90" disabled={!latest.email} title={!latest.email ? "No creator email is saved for this request" : undefined} onClick={() => {
                     setCheckMessage(`Thanks for sharing your insights for ${campaignTitle || "the campaign"}. Could you check the stats below are correct before we add them to the report? If anything needs changing, please update your response using the link in this email or reply to let us know.`);
                     setReview(false);
                     setCheckOpen(true);
