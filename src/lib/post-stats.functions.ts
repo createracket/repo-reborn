@@ -129,6 +129,65 @@ export const getStatsScreenshotUrls = createServerFn({ method: "POST" })
     return { urls };
   });
 
+export const sendStatsCheck = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    requestId: z.string().uuid(),
+    message: z.string().trim().min(1).max(3000),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (!isAdmin) throw new Error("Only admins can contact creators about stats.");
+
+    const db = await admin();
+    const { data: row } = await db.from("post_stats_requests")
+      .select("id, token, email, status, requested_fields, answers, post_id")
+      .eq("id", data.requestId).maybeSingle();
+    if (!row || row.status !== "submitted") throw new Error("Only submitted stats can be checked before applying.");
+    if (!row.email || !z.string().email().safeParse(row.email).success) throw new Error("This request has no valid creator email. Add an email when requesting stats.");
+
+    const { data: post } = await db.from("campaign_report_posts")
+      .select("post_url, campaign_report_creators(name, campaign_reports(title))")
+      .eq("id", row.post_id).maybeSingle();
+    if (!post) throw new Error("Post not found.");
+    const creator = (post as any).campaign_report_creators;
+    const answers = (row.answers ?? {}) as StatsAnswers;
+    const statsSummary = (row.requested_fields as string[])
+      .map((key) => {
+        const value = answers.values?.[key as StatsFieldKey] ?? answers.extracted?.[key as StatsFieldKey];
+        return value ? `${labelFor(key)}: ${value}` : null;
+      }).filter(Boolean).join("\n");
+    const templateData = {
+      creatorName: creator?.name ?? undefined,
+      campaignTitle: creator?.campaign_reports?.title ?? undefined,
+      postUrl: post.post_url ?? undefined,
+      formUrl: `${SITE}/stats/${row.token}`,
+      message: data.message,
+      statsSummary,
+    };
+    const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+    const sendId = crypto.randomUUID();
+    const result = await sendTemplateEmail("stats-check", row.email, {
+      templateData,
+      replyTo: COMMUNITY_EMAIL,
+      idempotencyKey: `stats-check-${row.id}-${sendId}`,
+    });
+    if (result.sent) {
+      try {
+        await sendTemplateEmail("stats-check", COMMUNITY_EMAIL, {
+          templateData: { ...templateData, copyNote: `Copy of the stats check sent to ${creator?.name ?? "creator"} (${row.email})` },
+          idempotencyKey: `stats-check-copy-${row.id}-${sendId}`,
+        });
+      } catch (error) {
+        console.error("stats check copy email failed", error);
+      }
+    }
+    return { sent: result.sent };
+  });
+
 /* ---------------- Public: token-gated form ---------------- */
 
 export const getStatsRequestPublic = createServerFn({ method: "POST" })

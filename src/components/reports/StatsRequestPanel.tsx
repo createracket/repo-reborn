@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { createStatsRequest, getStatsScreenshotUrls } from "@/lib/post-stats.functions";
+import { createStatsRequest, getStatsScreenshotUrls, sendStatsCheck } from "@/lib/post-stats.functions";
 import { STATS_FIELDS, DEFAULT_STATS_FIELDS, type StatsAnswers, type StatsFieldKey } from "@/lib/post-stats-fields";
 
 type Req = {
@@ -53,6 +53,7 @@ export function StatsRequestPanel({
 }) {
   const create = useServerFn(createStatsRequest);
   const shots = useServerFn(getStatsScreenshotUrls);
+  const sendCheck = useServerFn(sendStatsCheck);
   const [latest, setLatest] = useState<Req | null>(null);
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -61,6 +62,9 @@ export function StatsRequestPanel({
   const [busy, setBusy] = useState(false);
   const [review, setReview] = useState(false);
   const [urls, setUrls] = useState<string[]>([]);
+  const [checkOpen, setCheckOpen] = useState(false);
+  const [checkMessage, setCheckMessage] = useState("");
+  const [checkBusy, setCheckBusy] = useState(false);
 
   const refresh = useCallback(async () => {
     const { data } = await supabase
@@ -133,6 +137,22 @@ export function StatsRequestPanel({
     setReview(false);
     await refresh();
     await onApplied();
+  }
+
+  async function submitCheck() {
+    if (!latest || checkBusy) return;
+    setCheckBusy(true);
+    try {
+      const result = await sendCheck({ data: { requestId: latest.id, message: checkMessage } });
+      if (result.sent) {
+        toast.success("Stats check sent to the creator");
+        setCheckOpen(false);
+      } else toast.error("This address has unsubscribed; the email was not sent.");
+    } catch (error) {
+      toast.error((error as Error).message);
+    } finally {
+      setCheckBusy(false);
+    }
   }
 
   const status = latest?.status;
@@ -243,11 +263,38 @@ export function StatsRequestPanel({
                 </div>
               )}
               <p className="text-xs text-muted-foreground">Apply copies views, likes, comments, shares, saves and watch time (typed values win over screenshot values). Reach becomes reach % using the post's follower count.</p>
-              <div className="flex justify-end">
+              <div className="flex flex-wrap justify-end gap-2">
+                {latest.status === "submitted" && (
+                  <Button type="button" className="bg-pink-accent text-primary-foreground hover:bg-pink-accent/90" disabled={!latest.email} title={!latest.email ? "No creator email is saved for this request" : undefined} onClick={() => {
+                    setCheckMessage(`Thanks for sharing your insights for ${campaignTitle || "the campaign"}. Could you check the stats below are correct before we add them to the report? If anything needs changing, please update your response using the link in this email or reply to let us know.`);
+                    setReview(false);
+                    setCheckOpen(true);
+                  }}>Check stats - contact creator</Button>
+                )}
                 <Button type="button" onClick={apply}>{latest.status === "applied" ? "Apply again" : "Apply to post"}</Button>
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={checkOpen} onOpenChange={(next) => { setCheckOpen(next); if (!next) setReview(true); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Check stats with {creatorName}</DialogTitle>
+            <DialogDescription>Review the draft before emailing {latest?.email || "the creator"}. They can update their answers using their original link. A copy goes to community@createracket.com.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="stats-check-message">Email message</Label>
+              <Textarea id="stats-check-message" rows={6} value={checkMessage} onChange={(e) => setCheckMessage(e.target.value)} />
+            </div>
+            <p className="text-sm text-muted-foreground">The email also includes the submitted stats, the post link, and a button to correct their response.</p>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setCheckOpen(false)} disabled={checkBusy}>Cancel</Button>
+              <Button type="button" className="bg-pink-accent text-primary-foreground hover:bg-pink-accent/90" onClick={submitCheck} disabled={checkBusy || !checkMessage.trim() || !latest?.email}>{checkBusy ? "Sending…" : "Send email"}</Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
