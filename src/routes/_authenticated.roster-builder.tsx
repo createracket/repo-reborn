@@ -421,7 +421,7 @@ function RosterBuilderPage() {
       toast.error(error.message);
       return;
     }
-    setRosters((data as Roster[]) ?? []);
+    setRosters((data as unknown as Roster[]) ?? []);
   }, []);
 
   const loadDetail = useCallback(async (rosterId: string) => {
