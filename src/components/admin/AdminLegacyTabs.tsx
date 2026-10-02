@@ -1968,6 +1968,7 @@ export function SpotlightForm({
     header_image_url: editData?.header_image_url ?? "",
     profile_image_url: editData?.profile_image_url ?? "",
     colour_thumbnails: (editData?.links?.colour_thumbnails ?? false) as boolean,
+    hide_metrics: (editData?.links?.hide_metrics ?? false) as boolean,
     published: editData?.published ?? false,
     access_code: editData?.access_code ?? "",
     access_code_label: editData?.access_code_label ?? "Access code",
@@ -2401,6 +2402,7 @@ export function SpotlightForm({
         apple_music_name: form.apple_music_name.trim(),
         youtube_extra_names: extraLinks.youtube.map((_, i) => (extraNames.youtube[i] ?? "").trim()),
         colour_thumbnails: form.colour_thumbnails,
+        hide_metrics: form.hide_metrics,
         thumb_frame: thumbFrame,
         section_labels: {
           host_bio: form.label_host_bio.trim(),
@@ -2465,7 +2467,7 @@ export function SpotlightForm({
         video1: "", video2: "", video3: "", video4: "",
         video1_cover: "", video2_cover: "", video3_cover: "", video4_cover: "",
         photo1: "", photo2: "", photo3: "", photo4: "",
-        header_image_url: "", profile_image_url: "", colour_thumbnails: false, published: false,
+        header_image_url: "", profile_image_url: "", colour_thumbnails: false, hide_metrics: false, published: false,
         access_code: "", access_code_label: "Access code",
         total_followers: "", total_streams: "", monthly_streams: "",
         avg_reach: "", avg_engagement: "",
@@ -2560,6 +2562,18 @@ export function SpotlightForm({
               Key metrics (optional)
             </summary>
             <div className="grid gap-4 px-4 md:grid-cols-2">
+              <label className="md:col-span-2 flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3">
+                <span>
+                  <span className="block text-sm font-medium">Hide total metrics</span>
+                  <span className="block text-xs text-muted-foreground">
+                    On = the metric cards below (total fans, audience, streams, reach, engagement) are hidden on the public page.
+                  </span>
+                </span>
+                <Switch
+                  checked={form.hide_metrics}
+                  onCheckedChange={(v) => set("hide_metrics", v)}
+                />
+              </label>
               <div className="space-y-1.5">
                 <Label htmlFor="sp-tf">Total social audience</Label>
                 <div className="flex gap-2">
