@@ -147,7 +147,7 @@ export const sendStatsCheck = createServerFn({ method: "POST" })
       .select("id, token, email, status, requested_fields, answers, post_id")
       .eq("id", data.requestId).maybeSingle();
     if (!row || row.status !== "submitted") throw new Error("Only submitted stats can be checked before applying.");
-    if (!row.email) throw new Error("This request has no creator email. Add an email when requesting stats.");
+    if (!row.email || !z.string().email().safeParse(row.email).success) throw new Error("This request has no valid creator email. Add an email when requesting stats.");
 
     const { data: post } = await db.from("campaign_report_posts")
       .select("post_url, campaign_report_creators(name, campaign_reports(title))")

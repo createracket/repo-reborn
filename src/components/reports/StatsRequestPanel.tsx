@@ -267,6 +267,7 @@ export function StatsRequestPanel({
                 {latest.status === "submitted" && (
                   <Button type="button" className="bg-pink-accent text-primary-foreground hover:bg-pink-accent/90" onClick={() => {
                     setCheckMessage(`Thanks for sharing your insights for ${campaignTitle || "the campaign"}. Could you check the stats below are correct before we add them to the report? If anything needs changing, please update your response using the link in this email or reply to let us know.`);
+                    setReview(false);
                     setCheckOpen(true);
                   }}>Check stats - contact creator</Button>
                 )}
@@ -277,7 +278,7 @@ export function StatsRequestPanel({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={checkOpen} onOpenChange={setCheckOpen}>
+      <Dialog open={checkOpen} onOpenChange={(next) => { setCheckOpen(next); if (!next) setReview(true); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Check stats with {creatorName}</DialogTitle>
@@ -288,6 +289,7 @@ export function StatsRequestPanel({
               <Label htmlFor="stats-check-message">Email message</Label>
               <Textarea id="stats-check-message" rows={6} value={checkMessage} onChange={(e) => setCheckMessage(e.target.value)} />
             </div>
+            <p className="text-sm text-muted-foreground">The email also includes the submitted stats, the post link, and a button to correct their response.</p>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setCheckOpen(false)} disabled={checkBusy}>Cancel</Button>
               <Button type="button" className="bg-pink-accent text-primary-foreground hover:bg-pink-accent/90" onClick={submitCheck} disabled={checkBusy || !checkMessage.trim() || !latest?.email}>{checkBusy ? "Sending…" : "Send email"}</Button>
