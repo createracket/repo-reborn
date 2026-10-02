@@ -81,7 +81,7 @@ type LeadBrief = {
 };
 type ContactMsg = { id: string; created_at: string; name: string; email: string; message: string; handled: boolean };
 type Subscriber = { id: string; created_at: string; email: string; name: string | null; source: string; marketing_opt_in: boolean };
-type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null; vibe_archetype_key?: string | null; vibe_archetype_kind?: string | null; managed?: boolean | null; hidden?: boolean | null };
+type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null; vibe_archetype_key?: string | null; vibe_archetype_kind?: string | null; managed?: boolean | null; hidden?: boolean | null; can_spotlight?: boolean | null };
 type VibeRow = { user_id: string; result: string | null; answers: any; created_at: string };
 
 /** Resolve a user's vibe check archetype name, or null when they haven't taken it. */
@@ -204,7 +204,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
           if (group === "profiles") {
             const { data } = await supabase
               .from("profiles")
-              .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden")
+              .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden, can_spotlight")
               .order("created_at", { ascending: false });
             setProfiles((data as Profile[]) ?? []);
           } else if (group === "vibe") {
@@ -278,7 +278,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
   async function reloadProfiles() {
     const { data } = await supabase
       .from("profiles")
-      .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden")
+      .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden, can_spotlight")
       .order("created_at", { ascending: false });
     setProfiles((data as Profile[]) ?? []);
   }
@@ -678,7 +678,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                 </div>
               </CardHeader>
               <CardContent className="p-0">
-                <Table headers={["Display name", "Email", "Profile type", "Vibe check", "Slug", "Visible", "Joined", "Subscription", "Featured", ""]}>
+                <Table headers={["Display name", "Email", "Profile type", "Vibe check", "Slug", "Visible", "Joined", "Subscription", "Featured", "Spotlight", ""]}>
                   {filteredProfiles.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
@@ -791,6 +791,19 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                             } else {
                               toast.success(checked ? "Now featured" : "Removed from featured");
                             }
+                          }}
+                        />
+                      </td>
+                      <td className="p-3">
+                        <Switch
+                          checked={!!p.can_spotlight}
+                          aria-label="Can add a spotlight"
+                          onCheckedChange={async (checked) => {
+                            const prev = profiles;
+                            setProfiles((rows) => rows.map((r) => r.id === p.id ? { ...r, can_spotlight: checked } : r));
+                            const { error } = await (supabase as any).from("profiles").update({ can_spotlight: checked }).eq("id", p.id);
+                            if (error) { setProfiles(prev); toast.error(error.message); }
+                            else toast.success(checked ? "Can now add a spotlight" : "Spotlight access removed");
                           }}
                         />
                       </td>

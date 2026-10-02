@@ -72,7 +72,7 @@ async function loadPending(token: string) {
   const db = await admin();
   const { data, error } = await db
     .from("talent_intake_requests" as never)
-    .select("id, artist_name, status, mode, ai_draft_count")
+    .select("id, artist_name, status, mode, ai_draft_count, user_id")
     .eq("token", token)
     .maybeSingle();
   if (error) throw new Error("Couldn't load this form.");
@@ -328,6 +328,7 @@ export const submitTalentIntake = createServerFn({ method: "POST" })
         header_image_url: a.photos?.[0] ? clean(a.photos[0]) : null,
         published: false,
         links,
+        linked_user_id: (row as { user_id?: string | null }).user_id ?? null,
       } as never)
       .select("id")
       .single();
@@ -439,4 +440,45 @@ export const draftTalentSpotlight = createServerFn({ method: "POST" })
       avatar_url: enrichment.avatar_url ?? null,
       remaining: MAX_AI_DRAFTS - row.ai_draft_count - 1,
     };
+  });
+
+/** Signed-in user's spotlight: their linked live page, or a personal advanced form link. */
+export const getMySpotlight = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: prof } = await context.supabase
+      .from("profiles")
+      .select("can_spotlight, display_name, artist_name")
+      .eq("id", context.userId)
+      .maybeSingle();
+    const p = prof as { can_spotlight?: boolean; display_name?: string | null; artist_name?: string | null } | null;
+    if (!p?.can_spotlight) return { enabled: false as const };
+    const db = await admin();
+    const { data: pages } = await db
+      .from("partner_pages")
+      .select("slug, headline, subtitle, header_image_url, published, archived")
+      .eq("linked_user_id" as never, context.userId)
+      .eq("archived", false)
+      .order("created_at", { ascending: false });
+    const list = (pages ?? []) as Array<{ slug: string; headline: string; subtitle: string | null; header_image_url: string | null; published: boolean }>;
+    const live = list.find((x) => x.published);
+    if (live) return { enabled: true as const, state: "live" as const, page: live };
+    if (list.length) return { enabled: true as const, state: "review" as const };
+    const { data: existing } = await db
+      .from("talent_intake_requests" as never)
+      .select("token, status")
+      .eq("user_id" as never, context.userId)
+      .order("created_at" as never, { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const ex = existing as { token: string; status: string } | null;
+    if (ex?.status === "submitted") return { enabled: true as const, state: "review" as const };
+    if (ex) return { enabled: true as const, state: "form" as const, token: ex.token };
+    const { data: created, error } = await db
+      .from("talent_intake_requests" as never)
+      .insert({ artist_name: p.artist_name || p.display_name || null, mode: "advanced", user_id: context.userId, created_by: context.userId } as never)
+      .select("token")
+      .single();
+    if (error) throw new Error("Couldn't start your spotlight form.");
+    return { enabled: true as const, state: "form" as const, token: (created as { token: string }).token };
   });
