@@ -17,8 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthUser } from "@/hooks/use-auth";
-import { readThumbFrame, thumbFrameBgClass, thumbFrameImgStyle } from "@/lib/thumb-frame";
-import { loadDashboardConfig } from "@/lib/dashboard-config";
+import { readThumbFrame } from "@/lib/thumb-frame";
 import { PlannerTile } from "@/components/dashboard/PlannerTile";
 import { MySpotlightCard } from "@/components/dashboard/MySpotlightCard";
 import { SpotlightNotifications } from "@/components/dashboard/SpotlightNotifications";
@@ -128,31 +127,23 @@ function DashboardPage() {
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [examples, setExamples] = useState<Array<{ id: string; title: string; description: string | null; location: string | null; image_url: string | null }>>([]);
-  const [spotlightOpps, setSpotlightOpps] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; section?: string | null; links?: any }>>([]);
-  const [plannerBriefs, setPlannerBriefs] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; links?: any }>>([]);
+  const [plannerPages, setPlannerPages] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; section?: string | null; links?: any }>>([]);
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null; thumb_frame?: any }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null; thumb_frame?: any }>>([]);
   const [taggedCreators, setTaggedCreators] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string; roster_slug: string | null; roster_published: boolean }>>([]);
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; thumbnail_url: string | null; thumb_frame: any; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
   const [listeningReports, setListeningReports] = useState<DashboardReport[]>([]);
   const [loading, setLoading] = useState(true);
-  const [featuredSpotlightsEnabled, setFeaturedSpotlightsEnabled] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<"free" | "paid">("free");
   const [adminViewAsTier, setAdminViewAsTier] = useState<"free" | "paid">("paid");
   const [myRosters, setMyRosters] = useState<Array<{ id: string; title: string; slug?: string | null; published?: boolean }>>([]);
-  const carouselRef = useRef<HTMLDivElement>(null);
   const oppCarouselRef = useRef<HTMLDivElement>(null);
 
   const soundBoardRef = useRef<HTMLDivElement>(null);
   const [rosterItems, setRosterItems] = useState<Array<{ id: string; name: string | null; avatar_url: string | null; category: string | null; roster_id: string; roster_title: string }>>([]);
   const [soundBoardItems, setSoundBoardItems] = useState<Array<{ id: string; title: string; copy: string; video_url: string | null; thumbnail_url: string | null; gradient: string | null }>>([]);
-
-  useEffect(() => {
-    loadDashboardConfig().then((cfg) => setFeaturedSpotlightsEnabled(cfg.featuredSpotlightsEnabled));
-  }, []);
 
   // Sound board is the last section on the page — load it only once the rest of the dashboard has settled
   useEffect(() => {
@@ -484,12 +475,6 @@ function DashboardPage() {
         }),
       );
 
-      const { data: exOpps } = await supabase
-        .from("example_opportunities" as any)
-        .select("id, title, description, location, image_url")
-        .order("position", { ascending: true });
-      setExamples(((exOpps as any[]) ?? []) as any);
-
       // Spotlights & briefs: live-for-all + privately shared to this user (via RLS)
       const pageCols =
         "id, slug, headline, subtitle, type, header_image_url, profile_image_url, section, dashboard_placement, links";
@@ -518,10 +503,7 @@ function DashboardPage() {
       const dedupSp = new Map<string, any>();
       [...((livePages ?? []) as any[]), ...sharedPages].forEach((s) => dedupSp.set(s.id, s));
       const allPages = Array.from(dedupSp.values());
-      const isBrief = (r: any) => (r.section ?? "spotlight") === "brief";
-      const placement = (r: any) => (r.dashboard_placement ?? "planner") as string;
-      setSpotlightOpps(allPages.filter((r) => !isBrief(r) || placement(r) !== "planner"));
-      setPlannerBriefs(allPages.filter((r) => isBrief(r) && placement(r) !== "spotlight"));
+      setPlannerPages(allPages);
 
 
 
@@ -652,9 +634,6 @@ function DashboardPage() {
           hasBio={!!profileRow?.bio}
         />
 
-        <MySpotlightCard />
-
-
 
         <div className="grid gap-6 grid-cols-[minmax(0,1fr)] lg:grid-cols-3">
           {/* VIBE CARD (spans 2) */}
@@ -712,7 +691,7 @@ function DashboardPage() {
               <CardContent>
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : plannerBriefs.length === 0 &&
+                ) : plannerPages.length === 0 &&
                   myBriefs.length === 0 &&
                   assignedRosters.length === 0 &&
                   assignedReports.length === 0 &&
@@ -725,17 +704,19 @@ function DashboardPage() {
                   </div>
                 ) : (
                   <ul className="grid gap-3 md:grid-cols-2">
-                    {plannerBriefs.map((bp) => (
-                      <li key={`brief-${bp.id}`}>
-                        <Link to="/brief/$slug" params={{ slug: bp.slug }} className="block h-full">
+                    <MySpotlightCard />
+                    {plannerPages.map((bp) => (
+                      <li key={`page-${bp.id}`}>
+                        <Link to={(bp.section ?? "spotlight") === "brief" ? "/brief/$slug" : "/spotlight/$slug"} params={{ slug: bp.slug }} className="block h-full">
                           <PlannerTile
                             thumb={bp.profile_image_url || bp.header_image_url || null}
                             frame={readThumbFrame(bp.links)}
                             title={bp.headline}
                             subtitle={bp.subtitle}
+                            label={(bp.section ?? "spotlight") === "brief" ? "Brief" : "Spotlight"}
                             trailing={
                               <span className="inline-flex items-center rounded-full border border-primary bg-primary px-3 py-1 text-xs font-medium text-primary-foreground transition-shadow hover:ring-2 hover:ring-primary/70">
-                                View your brief
+                                View {(bp.section ?? "spotlight") === "brief" ? "brief" : "spotlight"}
                               </span>
                             }
                           />
@@ -915,7 +896,7 @@ function DashboardPage() {
                   </div>
                 ) : loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : opportunities.length === 0 && spotlightOpps.length === 0 ? (
+                ) : opportunities.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
                     No open opportunities right now — here are the types of briefs we surface.
                   </div>
@@ -971,126 +952,6 @@ function DashboardPage() {
                 )}
 
 
-                {/* Combined spotlights & examples carousel */}
-                {!loading && featuredSpotlightsEnabled && (spotlightOpps.length > 0 || examples.length > 0) ? (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                        Featured spotlights
-                      </div>
-                      <div className={`flex gap-1 ${spotlightOpps.length + examples.length >= 5 ? "" : "hidden"}`}>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 rounded-full"
-                          onClick={() => {
-                            const el = carouselRef.current;
-                            if (!el || !el.firstElementChild) return;
-                            const tileWidth = (el.firstElementChild as HTMLElement).offsetWidth + 12;
-                            el.scrollBy({ left: -tileWidth, behavior: 'smooth' });
-                          }}
-                        >
-                          <ChevronLeft className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 rounded-full"
-                          onClick={() => {
-                            const el = carouselRef.current;
-                            if (!el || !el.firstElementChild) return;
-                            const tileWidth = (el.firstElementChild as HTMLElement).offsetWidth + 12;
-                            el.scrollBy({ left: tileWidth, behavior: 'smooth' });
-                          }}
-                        >
-                          <ChevronRight className="size-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div
-                      ref={carouselRef}
-                      className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
-                    >
-                      {spotlightOpps.map((sp) => {
-                        const thumb = sp.header_image_url || sp.profile_image_url || null;
-                        const frame = readThumbFrame(sp.links);
-                        return (
-                          <div
-                            key={sp.id}
-                            className="snap-start shrink-0 w-full sm:w-[calc(33.333%-8px)] lg:w-[calc(25%-9px)]"
-                          >
-                            <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 h-full">
-                              <Link
-                                to={(sp.section ?? "spotlight") === "brief" ? "/brief/$slug" : "/spotlight/$slug"}
-                                params={{ slug: sp.slug }}
-                                className="group flex flex-1 flex-col gap-2"
-                              >
-                                <div className={`aspect-[16/9] w-full overflow-hidden rounded-lg ${thumbFrameBgClass(frame)}`}>
-                                  {thumb ? (
-                                    <img
-                                      src={thumb}
-                                      alt=""
-                                      className="size-full transition"
-                                      style={thumbFrameImgStyle(frame)}
-                                    />
-                                  ) : (
-                                    <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
-                                      {(sp.section ?? "spotlight") === "brief" ? "Brief" : "Spotlight"}
-                                    </div>
-                                  )}
-                                </div>
-                                <h3 className="truncate text-sm font-medium leading-tight group-hover:text-primary">{sp.headline}</h3>
-                                {sp.subtitle ? (
-                                  <p className="text-sm text-muted-foreground line-clamp-2">{sp.subtitle}</p>
-                                ) : null}
-                                <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-                                  <p className="truncate text-xs text-muted-foreground">
-                                    {sp.type ?? ""}
-                                  </p>
-                                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[9px] uppercase tracking-wider text-primary">
-                                    {(sp.section ?? "spotlight") === "brief" ? "Brief" : "Spotlight"}
-                                  </span>
-                                </div>
-                              </Link>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {examples.map((ex) => (
-                          <div
-                            key={ex.id}
-                            className="snap-start shrink-0 w-full sm:w-[calc(33.333%-8px)] lg:w-[calc(25%-9px)]"
-                          >
-                          <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-card p-4 h-full">
-                            <div className="aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
-                              {ex.image_url ? (
-                                <img src={ex.image_url} alt="" className="size-full object-cover" />
-                              ) : (
-                                <div className="flex size-full items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground">
-                                  Thumb
-                                </div>
-                              )}
-                            </div>
-                            <h3 className="truncate text-sm font-medium leading-tight">{ex.title}</h3>
-                            {ex.description ? (
-                              <p className="text-sm text-muted-foreground line-clamp-2">
-                                {ex.description}
-                              </p>
-                            ) : null}
-                            <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-                              <p className="truncate text-xs text-muted-foreground">
-                                {ex.location ? ex.location : ""}
-                              </p>
-                              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[9px] uppercase tracking-wider text-muted-foreground">
-                                Example
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
               </CardContent>
             </Card>
               );
