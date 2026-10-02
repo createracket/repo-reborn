@@ -2562,6 +2562,18 @@ export function SpotlightForm({
               Key metrics (optional)
             </summary>
             <div className="grid gap-4 px-4 md:grid-cols-2">
+              <label className="md:col-span-2 flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3">
+                <span>
+                  <span className="block text-sm font-medium">Hide total metrics</span>
+                  <span className="block text-xs text-muted-foreground">
+                    On = the metric cards below (total fans, audience, streams, reach, engagement) are hidden on the public page.
+                  </span>
+                </span>
+                <Switch
+                  checked={form.hide_metrics}
+                  onCheckedChange={(v) => set("hide_metrics", v)}
+                />
+              </label>
               <div className="space-y-1.5">
                 <Label htmlFor="sp-tf">Total social audience</Label>
                 <div className="flex gap-2">
