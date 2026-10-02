@@ -21,6 +21,7 @@ import { readThumbFrame, thumbFrameBgClass, thumbFrameImgStyle } from "@/lib/thu
 import { loadDashboardConfig } from "@/lib/dashboard-config";
 import { PlannerTile } from "@/components/dashboard/PlannerTile";
 import { MySpotlightCard } from "@/components/dashboard/MySpotlightCard";
+import { SpotlightNotifications } from "@/components/dashboard/SpotlightNotifications";
 import { listDashboardReports, type DashboardReport } from "@/lib/racket-desk/report-sharing.functions";
 import {
   calculateVibeScore,
@@ -683,6 +684,8 @@ function DashboardPage() {
               </Button>
             </CardContent>
           </Card>
+
+          <SpotlightNotifications />
 
           {/* PROJECT PLANNER */}
           <div className="lg:col-span-3">

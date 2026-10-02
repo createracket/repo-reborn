@@ -71,7 +71,7 @@ function PublicProfilePage() {
   const { slug } = Route.useParams();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
-  const [spotlights, setSpotlights] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; header_image_url: string | null }>>([]);
+  const [spotlights, setSpotlights] = useState<Array<{ id: string; slug: string | null; headline: string; subtitle: string | null; header_image_url: string | null; access?: string }>>([]);
   const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
 
   useEffect(() => {
@@ -271,8 +271,8 @@ function PublicProfilePage() {
           <section className="mt-12">
             <h2 className="font-display text-2xl">Spotlight</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {spotlights.map((sp) => (
-                <Link key={sp.id} to="/spotlight/$slug" params={{ slug: sp.slug }} className="group">
+              {spotlights.map((sp) => {
+                const card = (
                   <Card className="overflow-hidden transition group-hover:ring-2 group-hover:ring-primary/60">
                     {sp.header_image_url ? (
                       <img src={sp.header_image_url} alt="" className="aspect-[16/9] w-full object-cover" loading="lazy" />
@@ -280,10 +280,30 @@ function PublicProfilePage() {
                     <CardContent className="p-5">
                       <p className="font-display text-xl">{sp.headline}</p>
                       {sp.subtitle ? <p className="mt-1 text-sm text-muted-foreground">{sp.subtitle}</p> : null}
+                      {!sp.slug ? (
+                        <div className="mt-3">
+                          {sp.access === "pending" ? (
+                            <p className="text-sm text-muted-foreground">Request sent — waiting for approval.</p>
+                          ) : sp.access === "declined" ? (
+                            <p className="text-sm text-muted-foreground">Access wasn't approved.</p>
+                          ) : (
+                            <Button size="sm" onClick={async () => {
+                              const { data: st, error } = await (supabase as any).rpc("request_spotlight_view", { _page_id: sp.id });
+                              if (error) return;
+                              setSpotlights((rows) => rows.map((r) => r.id === sp.id ? { ...r, access: st as string } : r));
+                            }}>Request to view</Button>
+                          )}
+                        </div>
+                      ) : null}
                     </CardContent>
                   </Card>
-                </Link>
-              ))}
+                );
+                return sp.slug ? (
+                  <Link key={sp.id} to="/spotlight/$slug" params={{ slug: sp.slug }} className="group">{card}</Link>
+                ) : (
+                  <div key={sp.id}>{card}</div>
+                );
+              })}
             </div>
           </section>
         ) : null}

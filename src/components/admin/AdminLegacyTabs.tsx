@@ -1,3 +1,4 @@
+import { SpotlightAccessPanel } from "@/components/admin/SpotlightAccessPanel";
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, Trash2, Pencil, ChevronDown, ChevronUp, RefreshCw, Plus, X, Archive, Check, GripVertical, Copy, Eye, EyeOff, PanelTopClose } from "lucide-react";
@@ -851,6 +852,7 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
 
 
           <TabsContent value="contact" className="mt-6 space-y-6">
+            <SpotlightAccessPanel />
             {(() => {
               const renderInterest = (i: SpotlightInterest) => {
                 const page = interestPages.get(i.partner_page_id) ?? (() => {
