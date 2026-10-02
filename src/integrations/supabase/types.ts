@@ -1693,6 +1693,7 @@ export type Database = {
           access_code: string | null
           access_code_label: string | null
           allow_multi_category: boolean
+          archived: boolean
           brand_email: string | null
           brief_id: string | null
           categories: string[]
@@ -1725,6 +1726,7 @@ export type Database = {
           access_code?: string | null
           access_code_label?: string | null
           allow_multi_category?: boolean
+          archived?: boolean
           brand_email?: string | null
           brief_id?: string | null
           categories?: string[]
@@ -1757,6 +1759,7 @@ export type Database = {
           access_code?: string | null
           access_code_label?: string | null
           allow_multi_category?: boolean
+          archived?: boolean
           brand_email?: string | null
           brief_id?: string | null
           categories?: string[]
