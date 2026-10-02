@@ -316,8 +316,16 @@
   background-color: var(--dashboard-notice) !important;
 }
 
+/* Light mode: pale pink box outlines become clear grey borders for contrast.
+   Boxes that are solid pink blocks (bg-pink-accent/*) keep their pink outline above. */
+.report-light [class*="border-pink-accent"]:not([class*="bg-pink-accent"]),
+.report-light [class*="border-coral"]:not([class*="bg-coral"]),
+.report-light [class*="border-blush"]:not([class*="bg-blush"]) {
+  border-color: var(--border) !important;
+}
+
 /* Light mode: the project planner panel is soft pink instead of olive green. */
 .report-light .planner-card {
   background-color: var(--planner-surface);
-  border-color: color-mix(in oklch, var(--pink-accent) 60%, var(--border));
+  border-color: var(--border);
 }
