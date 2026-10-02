@@ -579,6 +579,8 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
           {/* Metrics */}
           {(() => {
             const items: Array<{ label: string; value: string }> = [];
+            const links = page.links ?? {};
+            if (links.hide_metrics) return null;
             const fans = (page.total_followers ?? 0) + (page.monthly_streams ?? 0);
             const fansLabel = formatMetric(fans);
             if (fansLabel && fans > (page.total_followers ?? 0)) items.push({ label: "Total fans", value: fansLabel });
