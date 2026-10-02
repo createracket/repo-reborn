@@ -37,6 +37,7 @@ import { Route as BriefSlugRouteImport } from './routes/brief.$slug'
 import { Route as ReportSlugRouteImport } from './routes/report.$slug'
 import { Route as RosterSlugRouteImport } from './routes/roster.$slug'
 import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
+import { Route as TalentTokenRouteImport } from './routes/talent.$token'
 import { Route as USlugRouteImport } from './routes/u.$slug'
 import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
 import { Route as VibeCheckBrandRouteImport } from './routes/vibe-check.brand'
@@ -219,6 +220,11 @@ const RosterSlugRoute = RosterSlugRouteImport.update({
 const SpotlightSlugRoute = SpotlightSlugRouteImport.update({
   id: '/spotlight/$slug',
   path: '/spotlight/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TalentTokenRoute = TalentTokenRouteImport.update({
+  id: '/talent/$token',
+  path: '/talent/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const USlugRoute = USlugRouteImport.update({
@@ -481,6 +487,7 @@ export interface FileRoutesByFullPath {
   '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
+  '/talent/$token': typeof TalentTokenRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
@@ -548,6 +555,7 @@ export interface FileRoutesByTo {
   '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
+  '/talent/$token': typeof TalentTokenRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
@@ -619,6 +627,7 @@ export interface FileRoutesById {
   '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
+  '/talent/$token': typeof TalentTokenRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
   '/vibe-check/musician': typeof VibeCheckMusicianRoute
@@ -691,6 +700,7 @@ export interface FileRouteTypes {
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
+    | '/talent/$token'
     | '/u/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
@@ -758,6 +768,7 @@ export interface FileRouteTypes {
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
+    | '/talent/$token'
     | '/u/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
@@ -828,6 +839,7 @@ export interface FileRouteTypes {
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
+    | '/talent/$token'
     | '/u/$slug'
     | '/vibe-check/brand'
     | '/vibe-check/musician'
@@ -891,6 +903,7 @@ export interface RootRouteChildren {
   ReportSlugRoute: typeof ReportSlugRouteWithChildren
   RosterSlugRoute: typeof RosterSlugRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
+  TalentTokenRoute: typeof TalentTokenRoute
   USlugRoute: typeof USlugRoute
   VibeCheckBrandRoute: typeof VibeCheckBrandRoute
   VibeCheckMusicianRoute: typeof VibeCheckMusicianRoute
@@ -1105,6 +1118,13 @@ declare module '@tanstack/react-router' {
       path: '/spotlight/$slug'
       fullPath: '/spotlight/$slug'
       preLoaderRoute: typeof SpotlightSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/talent/$token': {
+      id: '/talent/$token'
+      path: '/talent/$token'
+      fullPath: '/talent/$token'
+      preLoaderRoute: typeof TalentTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/u/$slug': {
@@ -1551,6 +1571,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportSlugRoute: ReportSlugRouteWithChildren,
   RosterSlugRoute: RosterSlugRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
+  TalentTokenRoute: TalentTokenRoute,
   USlugRoute: USlugRoute,
   VibeCheckBrandRoute: VibeCheckBrandRoute,
   VibeCheckMusicianRoute: VibeCheckMusicianRoute,
