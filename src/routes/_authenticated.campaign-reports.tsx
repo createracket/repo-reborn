@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { resizeImageFile } from "@/lib/image-resize";
 import { useServerFn } from "@tanstack/react-start";
+import { StatsRequestPanel } from "@/components/reports/StatsRequestPanel";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -1530,7 +1531,7 @@ function CreatorRow({
               <SortableContext items={posts.map((p) => p.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-3">
                   {posts.map((p) => (
-                    <PostEditor key={p.id} post={p} onChanged={onChanged} />
+                    <PostEditor key={p.id} post={p} onChanged={onChanged} creatorName={creator.name} />
                   ))}
                 </div>
               </SortableContext>
@@ -1555,7 +1556,7 @@ function numOrNull(v: string): number | null {
   return isNaN(n) ? null : n;
 }
 
-function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<void> }) {
+function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: () => Promise<void>; creatorName: string }) {
   const scrape = useServerFn(scrapePostMetrics);
   const [saving, setSaving] = useState(false);
   const [scraping, setScraping] = useState(false);
@@ -1868,6 +1869,13 @@ function PostEditor({ post, onChanged }: { post: Post; onChanged: () => Promise<
           </button>
         </div>
       </div>
+      <StatsRequestPanel
+        postId={post.id}
+        creatorId={post.creator_id}
+        creatorName={creatorName}
+        followers={post.followers}
+        onApplied={onChanged}
+      />
 
       {open && (
       <>
