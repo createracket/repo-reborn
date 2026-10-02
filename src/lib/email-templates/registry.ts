@@ -2,6 +2,8 @@ import type { ComponentType } from 'react'
 import { template as waitlistConfirmation } from './waitlist-confirmation'
 import { template as contactConfirmation } from './contact-confirmation'
 import { template as metricsUpdateComplete } from './metrics-update-complete'
+import { template as statsRequest } from './stats-request'
+import { template as statsSubmitted } from './stats-submitted'
 
 
 export interface TemplateEntry {
@@ -23,6 +25,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-confirmation': waitlistConfirmation,
   'contact-confirmation': contactConfirmation,
   'metrics-update-complete': metricsUpdateComplete,
+  'stats-request': statsRequest,
+  'stats-submitted': statsSubmitted,
 }
 
 export interface ResolvedEmail {
