@@ -80,6 +80,7 @@ type PartnerLinks = {
     content?: Record<string, string>;
   }>;
   colour_thumbnails?: boolean;
+  hide_metrics?: boolean;
 };
 
 type BriefSectionInstance = NonNullable<PartnerLinks["brief_sections"]>[number];
