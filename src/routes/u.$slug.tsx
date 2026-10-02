@@ -99,12 +99,7 @@ function PublicProfilePage() {
       }
       setProfile(row as unknown as PublicProfile);
       (supabase as any)
-        .from("partner_pages")
-        .select("id, slug, headline, subtitle, header_image_url")
-        .eq("linked_user_id", (row as any).id)
-        .eq("published", true)
-        .eq("archived", false)
-        .order("created_at", { ascending: false })
+        .rpc("get_profile_spotlights", { _profile_id: (row as any).id })
         .then(({ data: sp }: any) => setSpotlights(sp ?? []));
       setStatus("ready");
       loadVibeCheckConfig()
