@@ -84,6 +84,17 @@ type Subscriber = { id: string; created_at: string; email: string; name: string 
 type Profile = { id: string; email: string | null; display_name: string | null; account_type: string | null; created_at: string; slug: string | null; avatar_url: string | null; is_featured?: boolean | null; subscription_tier?: string | null; vibe_archetype_key?: string | null; vibe_archetype_kind?: string | null; managed?: boolean | null; hidden?: boolean | null; can_spotlight?: boolean | null };
 type VibeRow = { user_id: string; result: string | null; answers: any; created_at: string };
 
+/** The Users tab opens with this many people, then loads more on demand so the page isn't blocked. */
+const USERS_FIRST_PAGE = 10;
+const USERS_NEXT_PAGE = 25;
+const PROFILE_ROW_COLUMNS =
+  "id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden, can_spotlight";
+
+/** Strip characters that would break a PostgREST `or=()` search expression. */
+function userSearchTerm(raw: string) {
+  return raw.trim().replace(/[",()\\]/g, "");
+}
+
 /** Resolve a user's vibe check archetype name, or null when they haven't taken it. */
 function vibeArchetypeLabel(p: Profile, vibe: VibeRow | undefined, cfg: VibeCheckConfig): string | null {
   if (p.vibe_archetype_key) {
@@ -141,9 +152,19 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
   const [contacts, setContacts] = useState<ContactMsg[]>([]);
   const [handledOpen, setHandledOpen] = useState(false);
   const [subs, setSubs] = useState<Subscriber[]>([]);
+  /** Just id/email/name for everyone — feeds lookups, share pickers and dropdowns. */
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  /** Users table rows: the first page is 10 people, the rest load when you ask for them. */
+  const [userRows, setUserRows] = useState<Profile[]>([]);
+  const [userRowsTotal, setUserRowsTotal] = useState<number | null>(null);
+  const [userRowsOffset, setUserRowsOffset] = useState(0);
+  const [userRowsLoading, setUserRowsLoading] = useState(false);
+  const userRowsRequestRef = useRef(0);
+  const vibeLoadedForRef = useRef<Set<string>>(new Set());
+  const userFiltersKeyRef = useRef<string | null>(null);
   const [userTypeFilter, setUserTypeFilter] = useState<string>("all");
   const [userAccountFilter, setUserAccountFilter] = useState<"all" | "account" | "managed">("all");
+  const [userSearchInput, setUserSearchInput] = useState("");
   const [userSearch, setUserSearch] = useState("");
   const [vibeByUser, setVibeByUser] = useState<Map<string, VibeRow>>(new Map());
   const [vibeConfig, setVibeConfig] = useState<VibeCheckConfig>(DEFAULT_VIBE_CONFIG);
@@ -182,9 +203,9 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
     if (!isAdmin) return;
     const tab = activeTab;
     const needed = new Set<string>();
-    if (tab === "users") { needed.add("profiles"); needed.add("vibe"); }
-    if (tab === "contact") { needed.add("profiles"); needed.add("contact"); }
-    if (tab === "spotlights") { needed.add("profiles"); needed.add("spotlights"); }
+    if (tab === "users") needed.add("userRows");
+    if (tab === "contact") { needed.add("directory"); needed.add("contact"); }
+    if (tab === "spotlights") { needed.add("directory"); needed.add("spotlights"); }
     if (tab === "mailing") needed.add("mailing");
     if (searchParams.edit) needed.add("spotlights");
 
@@ -202,23 +223,14 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
       // Groups are removed from loadingGroupsRef in all cases so failures retry.
       await Promise.all(started.map(async (group) => {
         try {
-          if (group === "profiles") {
+          if (group === "userRows") {
+            loadVibeCheckConfig().then((c) => setVibeConfig(c)).catch(() => undefined);
+            await loadUserRows(true);
+          } else if (group === "directory") {
             const { data } = await supabase
               .from("profiles")
-              .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden, can_spotlight")
-              .order("created_at", { ascending: false });
+              .select("id, email, display_name");
             setProfiles((data as Profile[]) ?? []);
-          } else if (group === "vibe") {
-            loadVibeCheckConfig().then((c) => setVibeConfig(c)).catch(() => undefined);
-            const { data } = await supabase
-              .from("vibe_check_responses")
-              .select("user_id, result, answers, created_at")
-              .order("created_at", { ascending: false });
-            const vibeMap = new Map<string, VibeRow>();
-            ((data as VibeRow[] | null) ?? []).forEach((row) => {
-              if (row.user_id && !vibeMap.has(row.user_id)) vibeMap.set(row.user_id, row);
-            });
-            setVibeByUser(vibeMap);
           } else if (group === "mailing") {
             const { data } = await supabase
               .from("mailing_list_subscribers")
@@ -276,12 +288,73 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
   }, [isAdmin, activeTab, editSlug]);
 
 
-  async function reloadProfiles() {
+  /** Users table query: filters and search run in the database, so we only ever download one page. */
+  function buildUserRowsQuery() {
+    let q = supabase.from("profiles").select(PROFILE_ROW_COLUMNS, { count: "exact" });
+    if (userTypeFilter === "none") q = q.is("account_type", null);
+    else if (userTypeFilter !== "all") q = q.eq("account_type", userTypeFilter);
+    if (userAccountFilter === "managed") q = q.eq("managed", true);
+    else if (userAccountFilter === "account") q = q.or("managed.eq.false,managed.is.null");
+    const term = userSearchTerm(userSearch);
+    if (term) q = q.or(`display_name.ilike.%${term}%,email.ilike.%${term}%,slug.ilike.%${term}%`);
+    return q;
+  }
+
+  /** Vibe results for the people actually in the table — never the whole response history. */
+  async function loadVibeForUsers(ids: string[]) {
+    const missing = ids.filter((id) => id && !vibeLoadedForRef.current.has(id));
+    if (!missing.length) return;
+    missing.forEach((id) => vibeLoadedForRef.current.add(id));
     const { data } = await supabase
-      .from("profiles")
-      .select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured, subscription_tier, vibe_archetype_key, vibe_archetype_kind, managed, hidden, can_spotlight")
+      .from("vibe_check_responses")
+      .select("user_id, result, answers, created_at")
+      .in("user_id", missing)
       .order("created_at", { ascending: false });
-    setProfiles((data as Profile[]) ?? []);
+    const rows = (data as VibeRow[] | null) ?? [];
+    if (!rows.length) return;
+    setVibeByUser((prev) => {
+      const next = new Map(prev);
+      rows.forEach((row) => {
+        if (row.user_id && !next.has(row.user_id)) next.set(row.user_id, row);
+      });
+      return next;
+    });
+  }
+
+  /** reset = start again from the top (first 10); otherwise append the next chunk of people. */
+  async function loadUserRows(reset: boolean) {
+    const requestId = ++userRowsRequestRef.current;
+    if (reset) userFiltersKeyRef.current = userFiltersKey;
+    setUserRowsLoading(true);
+    try {
+      const offset = reset ? 0 : userRowsOffset;
+      const size = reset ? USERS_FIRST_PAGE : USERS_NEXT_PAGE;
+      const { data, count, error } = await buildUserRowsQuery()
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
+        .range(offset, offset + size - 1);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      if (requestId !== userRowsRequestRef.current) return;
+      const rows = (data as Profile[]) ?? [];
+      setUserRows((prev) => (reset ? rows : [...prev, ...rows]));
+      setUserRowsOffset(offset + rows.length);
+      if (typeof count === "number") setUserRowsTotal(count);
+      void loadVibeForUsers(rows.map((r) => r.id));
+    } finally {
+      if (requestId === userRowsRequestRef.current) setUserRowsLoading(false);
+    }
+  }
+
+  /** After a create/edit/delete: re-read the visible page (plus the directory if something loaded it). */
+  async function refreshUsers() {
+    await loadUserRows(true);
+    if (isLoaded("directory")) {
+      const { data } = await supabase.from("profiles").select("id, email, display_name");
+      setProfiles((data as Profile[]) ?? []);
+    }
   }
 
   async function refreshSpotlights() {
@@ -296,19 +369,19 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
   const activeSpotlights = spotlights.filter((s) => !s.archived);
   const archivedSpotlights = spotlights.filter((s) => !!s.archived);
 
-  const filteredProfiles = profiles.filter((p) => {
-    if (userTypeFilter === "none" ? !!p.account_type : userTypeFilter !== "all" && p.account_type !== userTypeFilter) return false;
-    if (userAccountFilter === "managed" && !p.managed) return false;
-    if (userAccountFilter === "account" && !!p.managed) return false;
-    const q = userSearch.trim().toLowerCase();
-    if (q) {
-      const name = (p.display_name ?? "").toLowerCase();
-      const email = (p.email ?? "").toLowerCase();
-      const slug = (p.slug ?? "").toLowerCase();
-      if (!name.includes(q) && !email.includes(q) && !slug.includes(q)) return false;
-    }
-    return true;
-  });
+  /** Typing shouldn't ask the database on every keystroke. */
+  useEffect(() => {
+    const t = setTimeout(() => setUserSearch(userSearchInput), 300);
+    return () => clearTimeout(t);
+  }, [userSearchInput]);
+
+  /** Any filter or search change starts the list again at the top with the matching people. */
+  const userFiltersKey = `${userTypeFilter}|${userAccountFilter}|${userSearch}`;
+  useEffect(() => {
+    if (activeTab !== "users" || !isLoaded("userRows")) return;
+    if (userFiltersKeyRef.current === userFiltersKey) return;
+    void loadUserRows(true);
+  }, [activeTab, userFiltersKey, loadedGroups]);
 
 
   const unhandledContactCount =
@@ -677,8 +750,8 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                 </div>
               </CardContent>
             </Card>
-            <NewUserForm onCreated={reloadProfiles} />
-            <CommunityProfileForm onCreated={reloadProfiles} />
+            <NewUserForm onCreated={refreshUsers} />
+            <CommunityProfileForm onCreated={refreshUsers} />
             <Card className="min-w-0 max-w-full overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg">Featured in Suggested matches</CardTitle>
@@ -690,8 +763,8 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                   <input
                     aria-label="Search users by name or email"
                     type="search"
-                    value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
+                    value={userSearchInput}
+                    onChange={(e) => setUserSearchInput(e.target.value)}
                     placeholder="Search name or email…"
                     className="h-9 w-full max-w-xs rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
                   />
@@ -718,13 +791,13 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                     <option value="managed">Added by me (no account)</option>
                   </select>
                   <span className="text-xs text-muted-foreground">
-                    {filteredProfiles.length} of {profiles.length} shown
+                    {userRows.length} of {userRowsTotal ?? "…"} shown
                   </span>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
                 <Table headers={["Display name", "Email", "Profile type", "Vibe check", "Slug", "Visible", "Joined", "Subscription", "Featured", "Spotlight", ""]}>
-                  {filteredProfiles.map((p) => (
+                  {userRows.map((p) => (
                     <tr key={p.id} className="border-t border-border/60">
                       <td className="p-3">{p.display_name ?? "—"}</td>
                       <td className="p-3">{p.email ?? "—"}</td>
@@ -771,13 +844,13 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                           <Switch
                             checked={!p.hidden}
                             onCheckedChange={async (checked) => {
-                              const prev = profiles;
-                              setProfiles((rows) => rows.map((r) => (r.id === p.id ? { ...r, hidden: !checked } : r)));
+                              const prev = userRows;
+                              setUserRows((rows) => rows.map((r) => (r.id === p.id ? { ...r, hidden: !checked } : r)));
                               try {
                                 await adminSetProfileVisibility({ data: { profile_id: p.id, hidden: !checked } });
                                 toast.success(checked ? "Now visible" : "Hidden from public");
                               } catch (e: any) {
-                                setProfiles(prev);
+                                setUserRows(prev);
                                 toast.error(e?.message ?? "Failed to update visibility");
                               }
                             }}
@@ -798,14 +871,14 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                               type="button"
                               onClick={async () => {
                                 const next = isPaid ? "free" : "paid";
-                                const prev = profiles;
-                                setProfiles((rows) => rows.map((r) => r.id === p.id ? { ...r, subscription_tier: next } : r));
+                                const prev = userRows;
+                                setUserRows((rows) => rows.map((r) => r.id === p.id ? { ...r, subscription_tier: next } : r));
                                 const { error } = await (supabase as any)
                                   .from("profiles")
                                   .update({ subscription_tier: next })
                                   .eq("id", p.id);
                                 if (error) {
-                                  setProfiles(prev);
+                                  setUserRows(prev);
                                   toast.error(error.message);
                                 } else {
                                   toast.success(next === "paid" ? "Upgraded to Paid" : "Downgraded to Free");
@@ -824,14 +897,14 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                           checked={!!p.is_featured}
                           disabled={!p.slug}
                           onCheckedChange={async (checked) => {
-                            const prev = profiles;
-                            setProfiles((rows) => rows.map((r) => r.id === p.id ? { ...r, is_featured: checked } : r));
+                            const prev = userRows;
+                            setUserRows((rows) => rows.map((r) => r.id === p.id ? { ...r, is_featured: checked } : r));
                             const { error } = await supabase
                               .from("profiles")
                               .update({ is_featured: checked })
                               .eq("id", p.id);
                             if (error) {
-                              setProfiles(prev);
+                              setUserRows(prev);
                               toast.error(error.message);
                             } else {
                               toast.success(checked ? "Now featured" : "Removed from featured");
@@ -844,10 +917,10 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                           checked={!!p.can_spotlight}
                           aria-label="Can add a spotlight"
                           onCheckedChange={async (checked) => {
-                            const prev = profiles;
-                            setProfiles((rows) => rows.map((r) => r.id === p.id ? { ...r, can_spotlight: checked } : r));
+                            const prev = userRows;
+                            setUserRows((rows) => rows.map((r) => r.id === p.id ? { ...r, can_spotlight: checked } : r));
                             const { error } = await (supabase as any).from("profiles").update({ can_spotlight: checked }).eq("id", p.id);
-                            if (error) { setProfiles(prev); toast.error(error.message); }
+                            if (error) { setUserRows(prev); toast.error(error.message); }
                             else toast.success(checked ? "Can now add a spotlight" : "Spotlight access removed");
                           }}
                         />
@@ -870,7 +943,9 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                                try {
                                  if (p.managed) await adminDeleteCommunityProfile({ data: { profile_id: p.id } });
                                  else await adminDeleteUser({ data: { user_id: p.id } });
-                                 setProfiles((rows) => rows.filter((r) => r.id !== p.id));
+                                 setUserRows((rows) => rows.filter((r) => r.id !== p.id));
+                                 setUserRowsOffset((n) => Math.max(0, n - 1));
+                                 setUserRowsTotal((n) => (typeof n === "number" ? Math.max(0, n - 1) : n));
                                  toast.success("User removed");
                               } catch (e: any) {
                                 toast.error(e?.message ?? "Failed to remove user");
@@ -883,14 +958,39 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                       </td>
                     </tr>
                   ))}
+                  {userRows.length === 0 && !userRowsLoading ? (
+                    <tr>
+                      <td colSpan={11} className="p-6 text-center text-sm text-muted-foreground">
+                        No users match this search.
+                      </td>
+                    </tr>
+                  ) : null}
                 </Table>
+                {userRowsTotal != null && userRows.length < userRowsTotal ? (
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 p-4">
+                    <span className="text-xs text-muted-foreground">
+                      Showing the first {userRows.length} of {userRowsTotal}.
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={userRowsLoading}
+                      onClick={() => void loadUserRows(false)}
+                    >
+                      {userRowsLoading
+                        ? "Loading…"
+                        : `Load ${Math.min(USERS_NEXT_PAGE, Math.max(1, userRowsTotal - userRows.length))} more`}
+                    </Button>
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
             <EditUserDialog
               profile={editingProfile}
               open={!!editingProfile}
               onOpenChange={(v) => { if (!v) setEditingProfile(null); }}
-              onSaved={(u) => { setProfiles((rows) => rows.map((r) => r.id === u.id ? { ...r, ...u } as Profile : r)); void reloadProfiles(); }}
+              onSaved={(u) => { setUserRows((rows) => rows.map((r) => r.id === u.id ? { ...r, ...u } as Profile : r)); void refreshUsers(); }}
             />
           </TabsContent>
 
