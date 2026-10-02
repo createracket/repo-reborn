@@ -116,6 +116,7 @@ export const Route = createFileRoute("/report/$slug")({
 function PublicReportPage() {
   const { slug } = Route.useParams();
   const [report, setReport] = useState<PublicReport | null>(null);
+  const [csvAvailable, setCsvAvailable] = useState(false);
   const [creators, setCreators] = useState<PublicCreator[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
   const [monthFilter, setMonthFilter] = useState<string>("all");
@@ -176,6 +177,7 @@ function PublicReportPage() {
         return;
       }
       setReport(r as PublicReport);
+      setCsvAvailable(true); // CSV export only serves public (no access code) reports
       const { data: cr } = await (supabase as any)
         .from("campaign_report_creators")
         .select("id, name, handle, avatar_url, position, location, category")
@@ -606,13 +608,15 @@ function PublicReportPage() {
                 </button>
               ))}
             </div>
-            <a
-              href={`/report/${report.slug}/metrics.csv`}
-              download
-              className="rounded-full border border-lime px-3 py-1.5 text-xs font-medium text-lime transition hover:ring-2 hover:ring-lime/60 report-light:bg-lime report-light:text-primary-foreground"
-            >
-              Download CSV
-            </a>
+            {csvAvailable && (
+              <a
+                href={`/report/${report.slug}/metrics.csv`}
+                download
+                className="rounded-full border border-lime px-3 py-1.5 text-xs font-medium text-lime transition hover:ring-2 hover:ring-lime/60 report-light:bg-lime report-light:text-primary-foreground"
+              >
+                Download CSV
+              </a>
+            )}
             {hasExtraMentions && (
               <button
                 onClick={() => setShowExtras((v) => !v)}
