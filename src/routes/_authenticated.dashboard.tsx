@@ -21,6 +21,7 @@ import { readThumbFrame } from "@/lib/thumb-frame";
 import { PlannerTile } from "@/components/dashboard/PlannerTile";
 import { MySpotlightCard } from "@/components/dashboard/MySpotlightCard";
 import { SpotlightNotifications } from "@/components/dashboard/SpotlightNotifications";
+import { TrendFeedStrip } from "@/components/dashboard/TrendFeedStrip";
 import { listDashboardReports, type DashboardReport } from "@/lib/racket-desk/report-sharing.functions";
 import {
   calculateVibeScore,
@@ -674,6 +675,8 @@ function DashboardPage() {
           </Card>
 
           <SpotlightNotifications />
+
+          <TrendFeedStrip />
 
           {/* PROJECT PLANNER */}
           <div className="lg:col-span-3">
