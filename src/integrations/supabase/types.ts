@@ -1309,6 +1309,95 @@ export type Database = {
         }
         Relationships: []
       }
+      post_stats_requests: {
+        Row: {
+          answers: Json
+          created_at: string
+          created_by: string | null
+          creator_id: string | null
+          email: string | null
+          id: string
+          message: string | null
+          post_id: string
+          report_id: string
+          requested_fields: string[]
+          screenshot_paths: string[]
+          sent_at: string | null
+          status: string
+          submitted_at: string | null
+          token: string
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string | null
+          email?: string | null
+          id?: string
+          message?: string | null
+          post_id: string
+          report_id: string
+          requested_fields?: string[]
+          screenshot_paths?: string[]
+          sent_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          token: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string | null
+          email?: string | null
+          id?: string
+          message?: string | null
+          post_id?: string
+          report_id?: string
+          requested_fields?: string[]
+          screenshot_paths?: string[]
+          sent_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          token?: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_stats_requests_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_report_creators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_stats_requests_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_report_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_stats_requests_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_stats_requests_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "public_campaign_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type"] | null
