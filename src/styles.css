@@ -251,6 +251,19 @@
     background: var(--color-primary);
     background-clip: content-box;
   }
+  .report-light .visible-scrollbar {
+    scrollbar-width: auto;
+    scrollbar-color: oklch(0.45 0.008 260) oklch(0.86 0.004 260);
+  }
+  .report-light .visible-scrollbar::-webkit-scrollbar { height: 12px; }
+  .report-light .visible-scrollbar::-webkit-scrollbar-track {
+    background: oklch(0.86 0.004 260);
+    border-radius: 9999px;
+  }
+  .report-light .visible-scrollbar::-webkit-scrollbar-thumb {
+    background: oklch(0.45 0.008 260);
+    background-clip: content-box;
+  }
 
   @keyframes marquee {
     from { transform: translateX(0); }
