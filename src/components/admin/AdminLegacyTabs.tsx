@@ -2403,6 +2403,7 @@ export function SpotlightForm({
         youtube_extra_names: extraLinks.youtube.map((_, i) => (extraNames.youtube[i] ?? "").trim()),
         colour_thumbnails: form.colour_thumbnails,
         hide_metrics: form.hide_metrics,
+        thumb_frame: thumbFrame,
         section_labels: {
           host_bio: form.label_host_bio.trim(),
           audience: form.label_audience.trim(),
@@ -2466,7 +2467,7 @@ export function SpotlightForm({
         video1: "", video2: "", video3: "", video4: "",
         video1_cover: "", video2_cover: "", video3_cover: "", video4_cover: "",
         photo1: "", photo2: "", photo3: "", photo4: "",
-        header_image_url: "", profile_image_url: "", colour_thumbnails: false, published: false,
+        header_image_url: "", profile_image_url: "", colour_thumbnails: false, hide_metrics: false, published: false,
         access_code: "", access_code_label: "Access code",
         total_followers: "", total_streams: "", monthly_streams: "",
         avg_reach: "", avg_engagement: "",
