@@ -1290,6 +1290,7 @@ export type Database = {
           avg_engagement: number | null
           avg_reach: number | null
           bio: string | null
+          can_spotlight: boolean
           created_at: string
           display_name: string | null
           email: string | null
@@ -1326,6 +1327,7 @@ export type Database = {
           avg_engagement?: number | null
           avg_reach?: number | null
           bio?: string | null
+          can_spotlight?: boolean
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -1362,6 +1364,7 @@ export type Database = {
           avg_engagement?: number | null
           avg_reach?: number | null
           bio?: string | null
+          can_spotlight?: boolean
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -2086,6 +2089,7 @@ export type Database = {
           submitted_at: string | null
           token: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           ai_draft_count?: number
@@ -2101,6 +2105,7 @@ export type Database = {
           submitted_at?: string | null
           token?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           ai_draft_count?: number
@@ -2116,6 +2121,7 @@ export type Database = {
           submitted_at?: string | null
           token?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2123,6 +2129,20 @@ export type Database = {
             columns: ["partner_page_id"]
             isOneToOne: false
             referencedRelation: "partner_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_intake_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_intake_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
