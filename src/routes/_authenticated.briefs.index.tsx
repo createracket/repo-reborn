@@ -10,13 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { PartnerPageShares, type ShareProfile } from "@/components/admin/PartnerPageShares";
 import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +33,11 @@ export const Route = createFileRoute("/_authenticated/briefs/")({
   head: () => ({
     meta: [
       { title: "Briefs — Create Racket" },
+      { name: "description", content: "Manage your Create Racket briefs and dashboard sharing." },
+      { property: "og:title", content: "Briefs — Create Racket" },
+      { property: "og:description", content: "Manage your Create Racket briefs and dashboard sharing." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -49,7 +47,7 @@ export const Route = createFileRoute("/_authenticated/briefs/")({
 type Brief = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
   published: boolean; created_at: string; archived?: boolean | null;
-  dashboard_visible?: boolean | null; dashboard_placement?: string | null;
+  dashboard_visible?: boolean | null;
   specific_dashboards_enabled?: boolean | null;
 };
 
@@ -65,7 +63,7 @@ function BriefsPage() {
 
   // Only the columns the list renders — the full row carries heavy JSON blobs.
   const LIST_COLUMNS =
-    "id, slug, type, headline, subtitle, published, created_at, archived, dashboard_visible, dashboard_placement, specific_dashboards_enabled";
+    "id, slug, type, headline, subtitle, published, created_at, archived, dashboard_visible, specific_dashboards_enabled";
 
   async function refresh() {
     const { data } = await supabase
@@ -248,38 +246,6 @@ function BriefsPage() {
                 }
               }}
             />
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-            <div>
-              <Label className="text-sm font-medium">Where it shows</Label>
-              <p className="text-xs text-muted-foreground">
-                Project planner by default. You can also push it into Featured spotlights.
-              </p>
-            </div>
-            <Select
-              value={b.dashboard_placement ?? "planner"}
-              onValueChange={async (value) => {
-                const prev = b.dashboard_placement ?? "planner";
-                setBriefs((rows) => rows.map((r) => (r.id === b.id ? { ...r, dashboard_placement: value } : r)));
-                const { error } = await supabase
-                  .from("partner_pages" as any)
-                  .update({ dashboard_placement: value } as any)
-                  .eq("id", b.id);
-                if (error) {
-                  setBriefs((rows) => rows.map((r) => (r.id === b.id ? { ...r, dashboard_placement: prev } : r)));
-                  toast.error(error.message);
-                }
-              }}
-            >
-              <SelectTrigger className="w-[210px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="planner">Project planner</SelectItem>
-                <SelectItem value="spotlight">Featured spotlights</SelectItem>
-                <SelectItem value="both">Both sections</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
             <div>

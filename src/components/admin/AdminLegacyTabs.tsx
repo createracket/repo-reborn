@@ -63,7 +63,6 @@ const ProjectPlannerAdmin = lazy(() => import("@/components/admin/ProjectPlanner
 
 import { PartnerPageShares } from "@/components/admin/PartnerPageShares";
 import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
-import { loadDashboardConfig, saveDashboardConfig } from "@/lib/dashboard-config";
 import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus } from "@/components/briefs/BriefStatusBadge";
 import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
 import { BriefReportLink } from "@/components/admin/BriefReportLink";
@@ -584,7 +583,6 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
 
 
           <TabsContent value="spotlights" className="mt-6 space-y-6">
-            <FeaturedSpotlightsToggle />
             <Card>
               <CardHeader>
                 <button
@@ -3579,40 +3577,3 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
 
 
 
-function FeaturedSpotlightsToggle() {
-  const [enabled, setEnabled] = useState(true);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    loadDashboardConfig().then((cfg) => {
-      setEnabled(cfg.featuredSpotlightsEnabled);
-      setLoaded(true);
-    });
-  }, []);
-
-  async function update(next: boolean) {
-    setEnabled(next);
-    try {
-      await saveDashboardConfig({ featuredSpotlightsEnabled: next });
-      toast.success(next ? "Featured spotlights shown on dashboards" : "Featured spotlights hidden on dashboards");
-    } catch (e: any) {
-      setEnabled(!next);
-      toast.error(e?.message ?? "Could not save");
-    }
-  }
-
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
-        <div>
-          <CardTitle className="text-lg">Featured spotlights on dashboards</CardTitle>
-          <CardDescription>
-            Turn off to hide the whole Featured spotlights carousel for every user — this overrides any
-            spotlights or briefs shared to dashboards.
-          </CardDescription>
-        </div>
-        <Switch checked={enabled} disabled={!loaded} onCheckedChange={update} />
-      </CardHeader>
-    </Card>
-  );
-}
