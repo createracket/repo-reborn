@@ -44,7 +44,15 @@ import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
-    meta: [{ title: "Dashboard — Create Racket" }, { name: "robots", content: "noindex, nofollow" }],
+    meta: [
+      { title: "Dashboard — Create Racket" },
+      { name: "description", content: "Your Create Racket project planner, briefs, spotlights and reports." },
+      { property: "og:title", content: "Dashboard — Create Racket" },
+      { property: "og:description", content: "Your Create Racket project planner, briefs, spotlights and reports." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
   }),
   component: DashboardPage,
   errorComponent: ({ error }) => (
@@ -477,7 +485,7 @@ function DashboardPage() {
 
       // Spotlights & briefs: live-for-all + privately shared to this user (via RLS)
       const pageCols =
-        "id, slug, headline, subtitle, type, header_image_url, profile_image_url, section, dashboard_placement, links";
+        "id, slug, headline, subtitle, type, header_image_url, profile_image_url, section, links";
       const [{ data: livePages }, { data: spotlightShareRows }] = await Promise.all([
         (supabase as any)
           .from("partner_pages")

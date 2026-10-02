@@ -33,6 +33,11 @@ export const Route = createFileRoute("/_authenticated/briefs/")({
   head: () => ({
     meta: [
       { title: "Briefs — Create Racket" },
+      { name: "description", content: "Manage your Create Racket briefs and dashboard sharing." },
+      { property: "og:title", content: "Briefs — Create Racket" },
+      { property: "og:description", content: "Manage your Create Racket briefs and dashboard sharing." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -42,7 +47,7 @@ export const Route = createFileRoute("/_authenticated/briefs/")({
 type Brief = {
   id: string; slug: string; type: string; headline: string; subtitle: string | null;
   published: boolean; created_at: string; archived?: boolean | null;
-  dashboard_visible?: boolean | null; dashboard_placement?: string | null;
+  dashboard_visible?: boolean | null;
   specific_dashboards_enabled?: boolean | null;
 };
 
@@ -58,7 +63,7 @@ function BriefsPage() {
 
   // Only the columns the list renders — the full row carries heavy JSON blobs.
   const LIST_COLUMNS =
-    "id, slug, type, headline, subtitle, published, created_at, archived, dashboard_visible, dashboard_placement, specific_dashboards_enabled";
+    "id, slug, type, headline, subtitle, published, created_at, archived, dashboard_visible, specific_dashboards_enabled";
 
   async function refresh() {
     const { data } = await supabase

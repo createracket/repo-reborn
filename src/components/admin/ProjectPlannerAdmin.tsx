@@ -246,7 +246,7 @@ export function ProjectPlannerAdmin() {
       const [pages, briefs, rosters, reports, scans] = await Promise.all([
         (supabase as any)
           .from("partner_pages")
-          .select("id, slug, headline, subtitle, section, dashboard_placement, dashboard_visible, published, archived, updated_at")
+          .select("id, slug, headline, subtitle, section, dashboard_visible, published, archived, updated_at")
           .order("updated_at", { ascending: false }),
         (supabase as any)
           .from("campaign_briefs")
