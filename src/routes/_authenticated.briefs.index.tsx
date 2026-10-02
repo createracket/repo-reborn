@@ -10,13 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { PartnerPageShares, type ShareProfile } from "@/components/admin/PartnerPageShares";
 import { PartnerPageHistory } from "@/components/admin/PartnerPageHistory";
 import { supabase } from "@/integrations/supabase/client";
@@ -248,38 +241,6 @@ function BriefsPage() {
                 }
               }}
             />
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
-            <div>
-              <Label className="text-sm font-medium">Where it shows</Label>
-              <p className="text-xs text-muted-foreground">
-                Project planner by default. You can also push it into Featured spotlights.
-              </p>
-            </div>
-            <Select
-              value={b.dashboard_placement ?? "planner"}
-              onValueChange={async (value) => {
-                const prev = b.dashboard_placement ?? "planner";
-                setBriefs((rows) => rows.map((r) => (r.id === b.id ? { ...r, dashboard_placement: value } : r)));
-                const { error } = await supabase
-                  .from("partner_pages" as any)
-                  .update({ dashboard_placement: value } as any)
-                  .eq("id", b.id);
-                if (error) {
-                  setBriefs((rows) => rows.map((r) => (r.id === b.id ? { ...r, dashboard_placement: prev } : r)));
-                  toast.error(error.message);
-                }
-              }}
-            >
-              <SelectTrigger className="w-[210px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="planner">Project planner</SelectItem>
-                <SelectItem value="spotlight">Featured spotlights</SelectItem>
-                <SelectItem value="both">Both sections</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
             <div>

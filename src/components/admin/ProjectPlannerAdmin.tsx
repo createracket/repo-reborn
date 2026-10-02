@@ -273,7 +273,6 @@ export function ProjectPlannerAdmin() {
 
       ((pages?.data ?? []) as any[])
         .filter((p) => (p.section ?? "spotlight") === "brief" && !p.archived)
-        .filter((p) => (p.dashboard_placement ?? "planner") !== "spotlight")
         .forEach((p) =>
           rows.push({
             id: p.id,
