@@ -544,6 +544,34 @@ export function AdminLegacyTabs({ tab, editSlug }: { tab: string; editSlug?: str
                           }}
                         />
                       </div>
+                      <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+                        <div>
+                          <Label htmlFor={`sp-myplanner-${s.id}`} className="text-sm font-medium">
+                            Show in my Project planner
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            Only affects your admin dashboard — users still see it as set above.
+                          </p>
+                        </div>
+                        <Switch
+                          id={`sp-myplanner-${s.id}`}
+                          checked={!(s as any).hide_from_admin_planner}
+                          onCheckedChange={async (checked) => {
+                            const hide = !checked;
+                            setSpotlights((rows) => rows.map((r) => r.id === s.id ? ({ ...r, hide_from_admin_planner: hide } as any) : r));
+                            const { error } = await supabase
+                              .from("partner_pages" as any)
+                              .update({ hide_from_admin_planner: hide } as any)
+                              .eq("id", s.id);
+                            if (error) {
+                              setSpotlights((rows) => rows.map((r) => r.id === s.id ? ({ ...r, hide_from_admin_planner: !hide } as any) : r));
+                              toast.error(error.message);
+                            } else {
+                              toast.success(checked ? "Showing in your Project planner" : "Removed from your Project planner");
+                            }
+                          }}
+                        />
+                      </div>
                       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
                         <div>
                           <Label htmlFor={`sp-user-${s.id}`} className="text-sm font-medium">Linked user</Label>

@@ -486,7 +486,7 @@ function DashboardPage() {
 
       // Spotlights & briefs: live-for-all + privately shared to this user (via RLS)
       const pageCols =
-        "id, slug, headline, subtitle, type, header_image_url, profile_image_url, section, links";
+        "id, slug, headline, subtitle, type, header_image_url, profile_image_url, section, links, hide_from_admin_planner";
       const [{ data: livePages }, { data: spotlightShareRows }] = await Promise.all([
         (supabase as any)
           .from("partner_pages")
@@ -513,7 +513,7 @@ function DashboardPage() {
       }
       const dedupSp = new Map<string, any>();
       [...((livePages ?? []) as any[]), ...sharedPages].forEach((s) => dedupSp.set(s.id, s));
-      const allPages = Array.from(dedupSp.values());
+      const allPages = Array.from(dedupSp.values()).filter((p: any) => !(roleRow && p.hide_from_admin_planner));
       setPlannerPages(allPages);
 
 
