@@ -37,6 +37,7 @@ import { Route as BriefSlugRouteImport } from './routes/brief.$slug'
 import { Route as ReportSlugRouteImport } from './routes/report.$slug'
 import { Route as RosterSlugRouteImport } from './routes/roster.$slug'
 import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
+import { Route as StatsTokenRouteImport } from './routes/stats.$token'
 import { Route as TalentTokenRouteImport } from './routes/talent.$token'
 import { Route as USlugRouteImport } from './routes/u.$slug'
 import { Route as VibeCheckIndexRouteImport } from './routes/vibe-check.index'
@@ -220,6 +221,11 @@ const RosterSlugRoute = RosterSlugRouteImport.update({
 const SpotlightSlugRoute = SpotlightSlugRouteImport.update({
   id: '/spotlight/$slug',
   path: '/spotlight/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatsTokenRoute = StatsTokenRouteImport.update({
+  id: '/stats/$token',
+  path: '/stats/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TalentTokenRoute = TalentTokenRouteImport.update({
@@ -487,6 +493,7 @@ export interface FileRoutesByFullPath {
   '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
+  '/stats/$token': typeof StatsTokenRoute
   '/talent/$token': typeof TalentTokenRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -555,6 +562,7 @@ export interface FileRoutesByTo {
   '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
+  '/stats/$token': typeof StatsTokenRoute
   '/talent/$token': typeof TalentTokenRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -627,6 +635,7 @@ export interface FileRoutesById {
   '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
+  '/stats/$token': typeof StatsTokenRoute
   '/talent/$token': typeof TalentTokenRoute
   '/u/$slug': typeof USlugRoute
   '/vibe-check/brand': typeof VibeCheckBrandRoute
@@ -700,6 +709,7 @@ export interface FileRouteTypes {
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
+    | '/stats/$token'
     | '/talent/$token'
     | '/u/$slug'
     | '/vibe-check/brand'
@@ -768,6 +778,7 @@ export interface FileRouteTypes {
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
+    | '/stats/$token'
     | '/talent/$token'
     | '/u/$slug'
     | '/vibe-check/brand'
@@ -839,6 +850,7 @@ export interface FileRouteTypes {
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
+    | '/stats/$token'
     | '/talent/$token'
     | '/u/$slug'
     | '/vibe-check/brand'
@@ -903,6 +915,7 @@ export interface RootRouteChildren {
   ReportSlugRoute: typeof ReportSlugRouteWithChildren
   RosterSlugRoute: typeof RosterSlugRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
+  StatsTokenRoute: typeof StatsTokenRoute
   TalentTokenRoute: typeof TalentTokenRoute
   USlugRoute: typeof USlugRoute
   VibeCheckBrandRoute: typeof VibeCheckBrandRoute
@@ -1118,6 +1131,13 @@ declare module '@tanstack/react-router' {
       path: '/spotlight/$slug'
       fullPath: '/spotlight/$slug'
       preLoaderRoute: typeof SpotlightSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stats/$token': {
+      id: '/stats/$token'
+      path: '/stats/$token'
+      fullPath: '/stats/$token'
+      preLoaderRoute: typeof StatsTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/talent/$token': {
@@ -1571,6 +1591,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportSlugRoute: ReportSlugRouteWithChildren,
   RosterSlugRoute: RosterSlugRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
+  StatsTokenRoute: StatsTokenRoute,
   TalentTokenRoute: TalentTokenRoute,
   USlugRoute: USlugRoute,
   VibeCheckBrandRoute: VibeCheckBrandRoute,

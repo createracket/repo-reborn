@@ -36,6 +36,13 @@
       "when": 1790954445465,
       "tag": "0004_planner_archives",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790959781290,
+      "tag": "0005_post_stats_requests",
+      "breakpoints": true
     }
   ]
 }
