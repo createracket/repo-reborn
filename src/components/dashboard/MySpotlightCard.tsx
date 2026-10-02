@@ -8,14 +8,10 @@ import { PlannerTile } from "@/components/dashboard/PlannerTile";
 import { getMySpotlight } from "@/lib/talent-intake.functions";
 
 /** Dashboard card for users an admin has allowed to have a spotlight. */
-export function MySpotlightCard({ visibleSlugs, showEmptyState }: { visibleSlugs: string[]; showEmptyState: boolean }) {
+export function MySpotlightCard({ visibleSlugs }: { visibleSlugs: string[] }) {
   const fetchIt = useServerFn(getMySpotlight);
   const { data } = useQuery({ queryKey: ["my-spotlight"], queryFn: () => fetchIt() });
-  if (!data?.enabled) return showEmptyState ? (
-    <li className="md:col-span-2 rounded-lg border border-dashed border-border/60 p-8 text-center text-muted-foreground">
-      You haven't submitted a brief yet. Start your first project — it takes a couple of minutes.
-    </li>
-  ) : null;
+  if (!data?.enabled) return null;
 
   if (data.state === "live") {
     const p = data.page;

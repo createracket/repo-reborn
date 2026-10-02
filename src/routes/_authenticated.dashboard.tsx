@@ -691,20 +691,14 @@ function DashboardPage() {
               <CardContent>
                 {loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : plannerPages.length === 0 &&
-                  myBriefs.length === 0 &&
-                  assignedRosters.length === 0 &&
-                  assignedReports.length === 0 &&
-                  listeningReports.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-border/60 p-8 text-center">
-                    <p className="text-muted-foreground">
-                      You haven't submitted a brief yet. Start your first project — it takes a couple
-                      of minutes.
-                    </p>
-                  </div>
                 ) : (
                   <ul className="grid gap-3 md:grid-cols-2">
-                    <MySpotlightCard />
+                    <MySpotlightCard visibleSlugs={plannerPages.filter((p) => (p.section ?? "spotlight") !== "brief").map((p) => p.slug)} />
+                    {plannerPages.length === 0 && myBriefs.length === 0 && assignedRosters.length === 0 && assignedReports.length === 0 && listeningReports.length === 0 ? (
+                      <li className="md:col-span-2 rounded-lg border border-dashed border-border/60 p-8 text-center text-muted-foreground">
+                        You haven't submitted a brief yet. Start your first project — it takes a couple of minutes.
+                      </li>
+                    ) : null}
                     {plannerPages.map((bp) => (
                       <li key={`page-${bp.id}`}>
                         <Link to={(bp.section ?? "spotlight") === "brief" ? "/brief/$slug" : "/spotlight/$slug"} params={{ slug: bp.slug }} className="block h-full">
@@ -900,7 +894,7 @@ function DashboardPage() {
                   <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
                     No open opportunities right now — here are the types of briefs we surface.
                   </div>
-                ) : opportunities.length === 0 ? null : (
+                ) : (
                   <div>
                     <div className="mb-2 flex items-center justify-between">
                       <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
