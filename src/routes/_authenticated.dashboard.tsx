@@ -20,6 +20,7 @@ import { getAuthUser } from "@/hooks/use-auth";
 import { readThumbFrame, thumbFrameBgClass, thumbFrameImgStyle } from "@/lib/thumb-frame";
 import { loadDashboardConfig } from "@/lib/dashboard-config";
 import { PlannerTile } from "@/components/dashboard/PlannerTile";
+import { MySpotlightCard } from "@/components/dashboard/MySpotlightCard";
 import { listDashboardReports, type DashboardReport } from "@/lib/racket-desk/report-sharing.functions";
 import {
   calculateVibeScore,
@@ -648,6 +649,8 @@ function DashboardPage() {
           hasAvatar={!!profileRow?.avatar_url}
           hasBio={!!profileRow?.bio}
         />
+
+        <MySpotlightCard />
 
 
 
