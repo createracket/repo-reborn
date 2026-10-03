@@ -53,12 +53,12 @@ export const getAdCodeRequestPublic = createServerFn({ method: 'POST' })
   .inputValidator((d) => z.object({ token: tokenSchema }).parse(d))
   .handler(async ({ data }) => {
     const admin = await db()
-    const { data: row } = await admin.from('post_ad_code_requests').select('id, status, platform, message, code, permission_confirmed, expires_on, note, viewed_at, post_id').eq('token', data.token).maybeSingle()
+    const { data: row } = await admin.from('post_ad_code_requests').select('id, status, platform, message, code, permission_confirmed, expires_on, note, viewed_at, post_id, screenshot_paths').eq('token', data.token).maybeSingle()
     if (!row) return { found: false as const }
     const { data: post } = await admin.from('campaign_report_posts').select('post_url, thumbnail_url, campaign_report_creators(name, campaign_reports(title))').eq('id', row.post_id).maybeSingle()
     if (!row.viewed_at) await admin.from('post_ad_code_requests').update({ viewed_at: new Date().toISOString(), status: row.status === 'requested' ? 'viewed' : row.status }).eq('id', row.id)
     const creator = post?.campaign_report_creators as any
-    return { found: true as const, locked: row.status === 'reviewed', platform: row.platform, message: row.message, code: row.code, permissionConfirmed: row.permission_confirmed, expiresOn: row.expires_on, note: row.note, postUrl: post?.post_url, thumbnailUrl: post?.thumbnail_url, creatorName: creator?.name, campaignTitle: creator?.campaign_reports?.title }
+    return { found: true as const, locked: row.status === 'reviewed', platform: row.platform, message: row.message, code: row.code, permissionConfirmed: row.permission_confirmed, expiresOn: row.expires_on, note: row.note, screenshotCount: row.screenshot_paths.length, postUrl: post?.post_url, thumbnailUrl: post?.thumbnail_url, creatorName: creator?.name, campaignTitle: creator?.campaign_reports?.title }
   })
 
 export const submitAdCodeRequestPublic = createServerFn({ method: 'POST' })

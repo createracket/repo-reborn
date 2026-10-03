@@ -74,7 +74,7 @@ function AdCodeForm() {
         const chosen = Array.from(e.target.files ?? [])
         if (chosen.length > 3 || chosen.some(f => f.size > 10 * 1024 * 1024 || !['image/png', 'image/jpeg', 'image/webp'].includes(f.type))) { toast.error('Choose up to 3 PNG, JPEG or WebP images under 10MB each.'); e.target.value = ''; return }
         setFiles(chosen)
-      }} />{files.length > 0 && <p className="text-xs text-muted-foreground">{files.length} selected</p>}</div>
+      }} />{files.length > 0 ? <p className="text-xs text-muted-foreground">{files.length} selected</p> : req?.screenshotCount ? <p className="text-xs text-muted-foreground">{req.screenshotCount} previously submitted. New uploads replace these.</p> : null}</div>
       <p className="text-xs text-muted-foreground">Sharing a code or confirmation does not grant permission for other posts, platforms or uses.</p>
       <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Sending…' : 'Send response'}</Button>
     </form>
