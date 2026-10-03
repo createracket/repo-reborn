@@ -597,7 +597,7 @@ function DashboardPage() {
         setTaggedCreators([]);
       }
       setLoading(false);
-    })();
+    })().catch((e) => console.error("DASH_LOAD_FAIL", e));
   }, []);
 
   // Live-update the suggested matches when an admin edits community profiles
