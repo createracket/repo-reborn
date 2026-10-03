@@ -1228,6 +1228,7 @@ function DashboardPage() {
             {(() => {
               const effectiveTier: "free" | "paid" = isAdmin ? adminViewAsTier : subscriptionTier;
               const isFreeView = effectiveTier === "free";
+              const visibleOpps = isFreeView ? freeOpportunities : opportunities;
               return (
             <Card>
               <CardHeader>
@@ -1261,7 +1262,7 @@ function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {isFreeView ? (
+                {isFreeView && visibleOpps.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-6 text-center">
                     <p className="font-display text-lg">Unlock access to collabs as a priority subscriber</p>
                     <div className="mt-3">
@@ -1272,7 +1273,7 @@ function DashboardPage() {
                   </div>
                 ) : loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : opportunities.length === 0 ? (
+                ) : visibleOpps.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
                     No open opportunities right now — here are the types of briefs we surface.
                   </div>
@@ -1315,7 +1316,7 @@ function DashboardPage() {
                       ref={oppCarouselRef}
                       className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
                     >
-                      {opportunities.map((o) => (
+                      {visibleOpps.map((o) => (
                         <div
                           key={`${o.brief_source}:${o.id}`}
                           className="snap-start shrink-0 w-full sm:w-[calc(50%-6px)]"
@@ -1324,6 +1325,15 @@ function DashboardPage() {
                         </div>
                       ))}
                     </div>
+                    {isFreeView ? (
+                      <p className="mt-3 text-center text-xs text-muted-foreground">
+                        A few more collabs open up with a priority subscription —{" "}
+                        <Link to="/pricing" className="text-pink-accent underline">
+                          see plans
+                        </Link>
+                        .
+                      </p>
+                    ) : null}
                   </div>
                 )}
 
