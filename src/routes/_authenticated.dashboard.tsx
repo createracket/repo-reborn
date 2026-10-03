@@ -426,9 +426,9 @@ function DashboardPage() {
         .from("campaign_brief_shares")
         .select("brief_source, brief_id, target_user_id, target_email");
       // Admins can read every share row; only keep the ones aimed at this person.
-      const myEmail = (u.user.email ?? "").toLowerCase();
+      const myEmail = (u.user?.email ?? "").toLowerCase();
       const myShares = ((shares ?? []) as any[]).filter(
-        (s) => s.target_user_id === u.user.id || (!!myEmail && (s.target_email ?? "").toLowerCase() === myEmail),
+        (s) => s.target_user_id === u.user?.id || (!!myEmail && (s.target_email ?? "").toLowerCase() === myEmail),
       );
       const shareUserIds = myShares.filter((s) => s.brief_source === "user").map((s) => s.brief_id as string);
       const shareLeadIds = myShares.filter((s) => s.brief_source === "lead").map((s) => s.brief_id as string);
