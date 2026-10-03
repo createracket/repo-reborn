@@ -274,7 +274,6 @@ function DashboardPage() {
   useEffect(() => {
 
     (async () => {
-      console.log("DASH_START");
       const { data: u } = await getAuthUser();
       setEmail(u.user?.email ?? null);
       if (!u.user) return;
@@ -353,7 +352,6 @@ function DashboardPage() {
         .select("id, title, created_at, status, budget, currency, thumbnail_url, thumb_frame, linked_roster_id, linked_report_id")
         .eq("user_id", u.user.id)
         .order("created_at", { ascending: false });
-      console.log("DASH_MARK_A");
       const mineBriefRows = (((mineBriefs as any[]) ?? [])).filter((r) => r?.status !== "closed");
 
       const linkedRosterIds = Array.from(
