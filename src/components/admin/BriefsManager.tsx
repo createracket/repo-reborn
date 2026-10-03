@@ -537,6 +537,7 @@ function UnifiedBriefs({
                   </>
                 ) : null}
                 {isUser ? (
+                  <>
                   <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
                     <div>
                       <Label htmlFor={`pub-${b.id}`} className="text-sm font-medium">
@@ -601,6 +602,7 @@ function UnifiedBriefs({
                       }}
                     />
                   </div>
+                  </>
                 ) : null}
                 <BriefShares
                   briefSource={isUser ? "user" : "lead"}
