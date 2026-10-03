@@ -149,6 +149,7 @@ function DashboardPage() {
   const [myBriefs, setMyBriefs] = useState<Array<{ id: string; title: string; created_at: string; status: string | null; budget: number | null; currency: string | null; thumbnail_url: string | null; thumb_frame: any; linked_roster_id: string | null; linked_roster_slug: string | null; linked_roster_published: boolean; linked_report_slug: string | null; linked_report_published: boolean }>>([]);
   const [listeningReports, setListeningReports] = useState<DashboardReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [oppsLoading, setOppsLoading] = useState(true);
   const [rosterFilter, setRosterFilter] = useState<string>("mine");
   const [isAdmin, setIsAdmin] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<"free" | "paid">("free");
@@ -423,9 +424,14 @@ function DashboardPage() {
       // Merge in privately shared briefs (both user + lead briefs)
       const { data: shares } = await supabase
         .from("campaign_brief_shares")
-        .select("brief_source, brief_id");
-      const shareUserIds = ((shares ?? []) as any[]).filter((s) => s.brief_source === "user").map((s) => s.brief_id as string);
-      const shareLeadIds = ((shares ?? []) as any[]).filter((s) => s.brief_source === "lead").map((s) => s.brief_id as string);
+        .select("brief_source, brief_id, target_user_id, target_email");
+      // Admins can read every share row; only keep the ones aimed at this person.
+      const myEmail = (u.user.email ?? "").toLowerCase();
+      const myShares = ((shares ?? []) as any[]).filter(
+        (s) => s.target_user_id === u.user.id || (!!myEmail && (s.target_email ?? "").toLowerCase() === myEmail),
+      );
+      const shareUserIds = myShares.filter((s) => s.brief_source === "user").map((s) => s.brief_id as string);
+      const shareLeadIds = myShares.filter((s) => s.brief_source === "lead").map((s) => s.brief_id as string);
       const [sharedUser, sharedLead] = await Promise.all([
         shareUserIds.length
           ? supabase.from("campaign_briefs").select("id, title, description, budget, currency, transparency, published_at, created_at, status, display_order").in("id", shareUserIds).neq("status", "closed")
@@ -497,6 +503,7 @@ function DashboardPage() {
         freeDedup.set(`${o.brief_source}:${o.id}`, o),
       );
       setFreeOpportunities(sortOpps(Array.from(freeDedup.values())));
+      setOppsLoading(false);
 
       // Spotlights & briefs: live-for-all + privately shared to this user (via RLS)
       const pageCols =
@@ -1262,7 +1269,9 @@ function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {isFreeView && visibleOpps.length === 0 ? (
+                {oppsLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading…</p>
+                ) : isFreeView && visibleOpps.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-6 text-center">
                     <p className="font-display text-lg">Unlock access to collabs as a priority subscriber</p>
                     <div className="mt-3">
@@ -1271,8 +1280,6 @@ function DashboardPage() {
                       </Button>
                     </div>
                   </div>
-                ) : loading ? (
-                  <p className="text-sm text-muted-foreground">Loading…</p>
                 ) : visibleOpps.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
                     No open opportunities right now — here are the types of briefs we surface.
