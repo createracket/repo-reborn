@@ -88,7 +88,7 @@ export const reviewAdCodeRequest = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     await assertAdmin(context)
     const admin = await db()
-    const { data, error } = await admin.from('post_ad_code_requests').update({ status: 'reviewed', reviewed_at: new Date().toISOString() }).eq('id', data.requestId).eq('status', 'submitted').select('id').maybeSingle()
-    if (error || !data) throw new Error('Only a submitted response can be reviewed.')
+    const { data: reviewed, error } = await admin.from('post_ad_code_requests').update({ status: 'reviewed', reviewed_at: new Date().toISOString() }).eq('id', data.requestId).eq('status', 'submitted').select('id').maybeSingle()
+    if (error || !reviewed) throw new Error('Only a submitted response can be reviewed.')
     return { reviewed: true }
   })
