@@ -57,6 +57,13 @@
       "when": 1790988570794,
       "tag": "0007_add_ad_code_response_screenshots",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790989748125,
+      "tag": "0008_add_brief_visible_to_free",
+      "breakpoints": true
     }
   ]
 }
