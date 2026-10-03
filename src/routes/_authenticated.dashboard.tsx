@@ -126,6 +126,7 @@ type Opportunity = {
   artist_archetypes?: string[] | null;
   brand_archetypes?: string[] | null;
   display_order?: number | null;
+  visible_to_free?: boolean | null;
 };
 
 function DashboardPage() {
@@ -140,6 +141,7 @@ function DashboardPage() {
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [freeOpportunities, setFreeOpportunities] = useState<Opportunity[]>([]);
   const [plannerPages, setPlannerPages] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; section?: string | null; links?: any }>>([]);
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null; thumb_frame?: any }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null; thumb_frame?: any }>>([]);
@@ -336,7 +338,7 @@ function DashboardPage() {
           .single(),
         supabase
           .from("campaign_briefs")
-          .select("id, title, description, budget, currency, transparency, published_at, created_at, artist_archetypes, brand_archetypes, status, display_order")
+          .select("id, title, description, budget, currency, transparency, published_at, created_at, artist_archetypes, brand_archetypes, status, display_order, visible_to_free")
           .eq("published", true)
           .neq("status", "closed")
           .order("display_order", { ascending: true })
@@ -479,14 +481,22 @@ function DashboardPage() {
       ];
       const dedup = new Map<string, Opportunity>();
       [...publishedRows, ...sharedRows].forEach((o) => dedup.set(`${o.brief_source}:${o.id}`, o));
-      setOpportunities(
-        Array.from(dedup.values()).sort((a, b) => {
+      const sortOpps = (rows: Opportunity[]) =>
+        rows.sort((a, b) => {
           const ao = a.display_order ?? 0;
           const bo = b.display_order ?? 0;
           if (ao !== bo) return ao - bo;
           return (a.published_at ?? a.created_at) < (b.published_at ?? b.created_at) ? 1 : -1;
-        }),
+        });
+      setOpportunities(sortOpps(Array.from(dedup.values())));
+
+      // Free members see only briefs switched on with "Show to free members",
+      // plus anything shared with them directly.
+      const freeDedup = new Map<string, Opportunity>();
+      [...publishedRows.filter((o) => o.visible_to_free), ...sharedRows].forEach((o) =>
+        freeDedup.set(`${o.brief_source}:${o.id}`, o),
       );
+      setFreeOpportunities(sortOpps(Array.from(freeDedup.values())));
 
       // Spotlights & briefs: live-for-all + privately shared to this user (via RLS)
       const pageCols =
