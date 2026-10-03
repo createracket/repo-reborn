@@ -166,6 +166,7 @@ export type Database = {
           title: string
           transparency: string | null
           user_id: string
+          visible_to_free: boolean
         }
         Insert: {
           artist_archetypes?: string[]
@@ -195,6 +196,7 @@ export type Database = {
           title: string
           transparency?: string | null
           user_id: string
+          visible_to_free?: boolean
         }
         Update: {
           artist_archetypes?: string[]
@@ -224,6 +226,7 @@ export type Database = {
           title?: string
           transparency?: string | null
           user_id?: string
+          visible_to_free?: boolean
         }
         Relationships: [
           {
