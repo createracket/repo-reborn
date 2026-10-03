@@ -126,6 +126,7 @@ type Opportunity = {
   artist_archetypes?: string[] | null;
   brand_archetypes?: string[] | null;
   display_order?: number | null;
+  visible_to_free?: boolean | null;
 };
 
 function DashboardPage() {
@@ -140,6 +141,7 @@ function DashboardPage() {
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [community, setCommunity] = useState<CommunityMember[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [freeOpportunities, setFreeOpportunities] = useState<Opportunity[]>([]);
   const [plannerPages, setPlannerPages] = useState<Array<{ id: string; slug: string; headline: string; subtitle: string | null; type: string | null; header_image_url: string | null; profile_image_url: string | null; section?: string | null; links?: any }>>([]);
   const [assignedRosters, setAssignedRosters] = useState<Array<{ id: string; title: string; slug: string | null; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null; thumb_frame?: any }>>([]);
   const [assignedReports, setAssignedReports] = useState<Array<{ id: string; title: string; slug: string; published: boolean; updated_at: string; header_image_url?: string | null; profile_image_url?: string | null; thumb_frame?: any }>>([]);
@@ -336,7 +338,7 @@ function DashboardPage() {
           .single(),
         supabase
           .from("campaign_briefs")
-          .select("id, title, description, budget, currency, transparency, published_at, created_at, artist_archetypes, brand_archetypes, status, display_order")
+          .select("id, title, description, budget, currency, transparency, published_at, created_at, artist_archetypes, brand_archetypes, status, display_order, visible_to_free")
           .eq("published", true)
           .neq("status", "closed")
           .order("display_order", { ascending: true })
@@ -479,14 +481,22 @@ function DashboardPage() {
       ];
       const dedup = new Map<string, Opportunity>();
       [...publishedRows, ...sharedRows].forEach((o) => dedup.set(`${o.brief_source}:${o.id}`, o));
-      setOpportunities(
-        Array.from(dedup.values()).sort((a, b) => {
+      const sortOpps = (rows: Opportunity[]) =>
+        rows.sort((a, b) => {
           const ao = a.display_order ?? 0;
           const bo = b.display_order ?? 0;
           if (ao !== bo) return ao - bo;
           return (a.published_at ?? a.created_at) < (b.published_at ?? b.created_at) ? 1 : -1;
-        }),
+        });
+      setOpportunities(sortOpps(Array.from(dedup.values())));
+
+      // Free members see only briefs switched on with "Show to free members",
+      // plus anything shared with them directly.
+      const freeDedup = new Map<string, Opportunity>();
+      [...publishedRows.filter((o) => o.visible_to_free), ...sharedRows].forEach((o) =>
+        freeDedup.set(`${o.brief_source}:${o.id}`, o),
       );
+      setFreeOpportunities(sortOpps(Array.from(freeDedup.values())));
 
       // Spotlights & briefs: live-for-all + privately shared to this user (via RLS)
       const pageCols =
@@ -1218,6 +1228,7 @@ function DashboardPage() {
             {(() => {
               const effectiveTier: "free" | "paid" = isAdmin ? adminViewAsTier : subscriptionTier;
               const isFreeView = effectiveTier === "free";
+              const visibleOpps = isFreeView ? freeOpportunities : opportunities;
               return (
             <Card>
               <CardHeader>
@@ -1251,7 +1262,7 @@ function DashboardPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {isFreeView ? (
+                {isFreeView && visibleOpps.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-6 text-center">
                     <p className="font-display text-lg">Unlock access to collabs as a priority subscriber</p>
                     <div className="mt-3">
@@ -1262,7 +1273,7 @@ function DashboardPage() {
                   </div>
                 ) : loading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : opportunities.length === 0 ? (
+                ) : visibleOpps.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
                     No open opportunities right now — here are the types of briefs we surface.
                   </div>
@@ -1305,7 +1316,7 @@ function DashboardPage() {
                       ref={oppCarouselRef}
                       className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none]"
                     >
-                      {opportunities.map((o) => (
+                      {visibleOpps.map((o) => (
                         <div
                           key={`${o.brief_source}:${o.id}`}
                           className="snap-start shrink-0 w-full sm:w-[calc(50%-6px)]"
@@ -1314,6 +1325,15 @@ function DashboardPage() {
                         </div>
                       ))}
                     </div>
+                    {isFreeView ? (
+                      <p className="mt-3 text-center text-xs text-muted-foreground">
+                        A few more collabs open up with a priority subscription —{" "}
+                        <Link to="/pricing" className="text-pink-accent underline">
+                          see plans
+                        </Link>
+                        .
+                      </p>
+                    ) : null}
                   </div>
                 )}
 

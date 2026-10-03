@@ -8,3 +8,6 @@
 - The admin Users table pages through `profiles` in the database (small first page, more on demand, filters and search as PostgREST queries) so opening the tab never downloads every account; panels that only need names read a separate lightweight id/email/name directory group.
 - Creator stats requests are token links (/stats/<token>, no login) backed by post_stats_requests; screenshots go to a private bucket and are AI-read server-side, and admins must click Apply before any post metrics change, so creator input never overwrites report data unreviewed.
 - Ad-code requests use separate token-gated links and an admin-only table; codes are returned only to the creator holding the link and admins, never added to public reports or emails, so post-specific advertising permission remains private.
+- Free-member dashboards render a second opportunity feed from the same briefs query, filtered by `campaign_briefs.visible_to_free` plus anything privately shared, so paid feeds stay untouched and free visibility is opt-in per brief.
+- `campaign_briefs` is protected by column-level GRANTs, so every new column needs its own explicit GRANT in the same migration or authenticated reads of the whole table fail with 403.
+

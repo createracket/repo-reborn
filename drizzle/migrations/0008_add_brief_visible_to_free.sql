@@ -1,0 +1,1 @@
+ALTER TABLE public.campaign_briefs ADD COLUMN visible_to_free boolean NOT NULL DEFAULT false;

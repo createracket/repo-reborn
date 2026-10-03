@@ -175,6 +175,7 @@ export type CampaignBrief = {
   brief_file_path?: string | null;
   brief_file_name?: string | null;
   brief_file_size?: number | null;
+  visible_to_free?: boolean | null;
 };
 export type Profile = {
   id: string; email: string | null; display_name: string | null;
@@ -211,7 +212,7 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr, emailRes] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, thumbnail_url, thumb_frame, display_order, brief_link, brief_file_path, brief_file_name, brief_file_size").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, thumbnail_url, thumb_frame, display_order, brief_link, brief_file_path, brief_file_name, brief_file_size, visible_to_free").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
       (supabase as any).rpc("admin_campaign_brief_emails"),
     ]);
@@ -246,7 +247,9 @@ export function BriefsManager() {
           total right now — no cap, every brief is shown). Change the status to keep the user's
           Project Planner in sync. Toggle{" "}
           <span className="font-medium text-foreground">Publish as opportunity</span> to surface
-          a user brief on every signed-in artist's dashboard.
+          a user brief on every signed-in artist's dashboard. Switch{" "}
+          <span className="font-medium text-foreground">Show to free members</span> to let free
+          members see that brief too.
         </p>
       </div>
 
@@ -420,6 +423,11 @@ function UnifiedBriefs({
                         Live opportunity
                       </Badge>
                     ) : null}
+                    {isUser && camp!.published && camp!.visible_to_free ? (
+                      <Badge className="bg-pink-accent/15 text-pink-accent border-pink-accent/30">
+                        Free
+                      </Badge>
+                    ) : null}
                   </div>
                   <button
                     type="button"
@@ -529,6 +537,7 @@ function UnifiedBriefs({
                   </>
                 ) : null}
                 {isUser ? (
+                  <>
                   <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
                     <div>
                       <Label htmlFor={`pub-${b.id}`} className="text-sm font-medium">
@@ -559,6 +568,41 @@ function UnifiedBriefs({
                       }}
                     />
                   </div>
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+                    <div>
+                      <Label htmlFor={`free-${b.id}`} className="text-sm font-medium">
+                        Show to free members
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {camp!.published
+                          ? camp!.visible_to_free
+                            ? "Free members can see this brief in New collabs."
+                            : "Hidden from free members — priority subscribers only."
+                          : "Turn on Publish as opportunity first."}
+                      </p>
+                    </div>
+                    <Switch
+                      id={`free-${b.id}`}
+                      disabled={!camp!.published}
+                      checked={!!camp!.visible_to_free}
+                      onCheckedChange={async (checked) => {
+                        onCampaignUpdated?.(b.id, { visible_to_free: checked });
+                        const { error } = await supabase
+                          .from("campaign_briefs")
+                          .update({ visible_to_free: checked })
+                          .eq("id", b.id);
+                        if (error) {
+                          onCampaignUpdated?.(b.id, { visible_to_free: !checked });
+                          toast.error(error.message);
+                        } else {
+                          toast.success(
+                            checked ? "Free members can now see this brief" : "Hidden from free members",
+                          );
+                        }
+                      }}
+                    />
+                  </div>
+                  </>
                 ) : null}
                 <BriefShares
                   briefSource={isUser ? "user" : "lead"}
