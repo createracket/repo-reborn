@@ -1325,6 +1325,7 @@ export type Database = {
           post_id: string
           report_id: string
           reviewed_at: string | null
+          screenshot_paths: string[]
           sent_at: string | null
           status: string
           submitted_at: string | null
@@ -1347,6 +1348,7 @@ export type Database = {
           post_id: string
           report_id: string
           reviewed_at?: string | null
+          screenshot_paths?: string[]
           sent_at?: string | null
           status?: string
           submitted_at?: string | null
@@ -1369,6 +1371,7 @@ export type Database = {
           post_id?: string
           report_id?: string
           reviewed_at?: string | null
+          screenshot_paths?: string[]
           sent_at?: string | null
           status?: string
           submitted_at?: string | null
