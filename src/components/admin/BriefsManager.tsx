@@ -567,6 +567,40 @@ function UnifiedBriefs({
                       }}
                     />
                   </div>
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-3 py-2">
+                    <div>
+                      <Label htmlFor={`free-${b.id}`} className="text-sm font-medium">
+                        Show to free members
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {camp!.published
+                          ? camp!.visible_to_free
+                            ? "Free members can see this brief in New collabs."
+                            : "Hidden from free members — priority subscribers only."
+                          : "Turn on Publish as opportunity first."}
+                      </p>
+                    </div>
+                    <Switch
+                      id={`free-${b.id}`}
+                      disabled={!camp!.published}
+                      checked={!!camp!.visible_to_free}
+                      onCheckedChange={async (checked) => {
+                        onCampaignUpdated?.(b.id, { visible_to_free: checked });
+                        const { error } = await supabase
+                          .from("campaign_briefs")
+                          .update({ visible_to_free: checked })
+                          .eq("id", b.id);
+                        if (error) {
+                          onCampaignUpdated?.(b.id, { visible_to_free: !checked });
+                          toast.error(error.message);
+                        } else {
+                          toast.success(
+                            checked ? "Free members can now see this brief" : "Hidden from free members",
+                          );
+                        }
+                      }}
+                    />
+                  </div>
                 ) : null}
                 <BriefShares
                   briefSource={isUser ? "user" : "lead"}
