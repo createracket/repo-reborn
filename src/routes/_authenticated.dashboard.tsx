@@ -596,9 +596,8 @@ function DashboardPage() {
       } else {
         setTaggedCreators([]);
       }
-      console.log("DASH_DONE", Array.from(dedup.values()).length, Array.from(freeDedup.values()).length);
       setLoading(false);
-    })().catch((e) => console.error("DASH_LOAD_FAIL", e));
+    })();
   }, []);
 
   // Live-update the suggested matches when an admin edits community profiles
