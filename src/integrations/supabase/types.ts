@@ -1309,6 +1309,107 @@ export type Database = {
         }
         Relationships: []
       }
+      post_ad_code_requests: {
+        Row: {
+          code: string | null
+          created_at: string
+          created_by: string | null
+          creator_id: string | null
+          email: string | null
+          expires_on: string | null
+          id: string
+          message: string | null
+          note: string | null
+          permission_confirmed: boolean
+          platform: string
+          post_id: string
+          report_id: string
+          reviewed_at: string | null
+          screenshot_paths: string[]
+          sent_at: string | null
+          status: string
+          submitted_at: string | null
+          token: string
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string | null
+          email?: string | null
+          expires_on?: string | null
+          id?: string
+          message?: string | null
+          note?: string | null
+          permission_confirmed?: boolean
+          platform: string
+          post_id: string
+          report_id: string
+          reviewed_at?: string | null
+          screenshot_paths?: string[]
+          sent_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          token: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string | null
+          email?: string | null
+          expires_on?: string | null
+          id?: string
+          message?: string | null
+          note?: string | null
+          permission_confirmed?: boolean
+          platform?: string
+          post_id?: string
+          report_id?: string
+          reviewed_at?: string | null
+          screenshot_paths?: string[]
+          sent_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          token?: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_ad_code_requests_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_report_creators"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_ad_code_requests_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_report_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_ad_code_requests_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_ad_code_requests_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "public_campaign_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_stats_requests: {
         Row: {
           answers: Json

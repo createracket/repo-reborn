@@ -19,6 +19,7 @@ import {
 import { resizeImageFile } from "@/lib/image-resize";
 import { useServerFn } from "@tanstack/react-start";
 import { StatsRequestPanel } from "@/components/reports/StatsRequestPanel";
+import { AdCodeRequestPanel } from "@/components/reports/AdCodeRequestPanel";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -1876,6 +1877,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         followers={post.followers}
         onApplied={onChanged}
       />
+      <AdCodeRequestPanel postId={post.id} creatorId={post.creator_id} creatorName={creatorName} platform={post.platform} postUrl={post.post_url} postedAt={post.posted_at} />
 
       {open && (
       <>

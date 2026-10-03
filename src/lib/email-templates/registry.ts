@@ -5,6 +5,8 @@ import { template as metricsUpdateComplete } from './metrics-update-complete'
 import { template as statsRequest } from './stats-request'
 import { template as statsSubmitted } from './stats-submitted'
 import { template as statsCheck } from './stats-check'
+import { template as adCodeRequest } from './ad-code-request'
+import { template as adCodeSubmitted } from './ad-code-submitted'
 
 
 export interface TemplateEntry {
@@ -29,6 +31,8 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'stats-request': statsRequest,
   'stats-submitted': statsSubmitted,
   'stats-check': statsCheck,
+  'ad-code-request': adCodeRequest,
+  'ad-code-submitted': adCodeSubmitted,
 }
 
 export interface ResolvedEmail {

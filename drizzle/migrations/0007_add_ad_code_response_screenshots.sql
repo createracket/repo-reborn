@@ -1,0 +1,1 @@
+ALTER TABLE public.post_ad_code_requests ADD COLUMN screenshot_paths text[] NOT NULL DEFAULT '{}';

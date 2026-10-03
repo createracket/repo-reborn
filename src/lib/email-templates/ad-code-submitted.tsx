@@ -1,0 +1,6 @@
+import * as React from 'react'
+import { Body, Container, Head, Heading, Html, Link, Preview, Text } from '@react-email/components'
+import type { TemplateEntry } from './registry'
+interface Props { campaignTitle?: string; platform?: string; builderUrl?: string }
+const Email = ({ campaignTitle, platform, builderUrl }: Props) => <Html lang="en"><Head /><Preview>Ad-code response received</Preview><Body style={{ backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }}><Container style={{ maxWidth: '560px', padding: '32px 28px' }}><Heading>Ad-code response received</Heading><Text>A creator responded to a {platform === 'tiktok' ? 'TikTok' : 'Instagram'} ad-code request for {campaignTitle || 'a report'}.</Text><Text>The code is private. Open the report builder to review it.</Text>{builderUrl && <Link href={builderUrl}>Review response</Link>}</Container></Body></Html>
+export const template = { component: Email, subject: (d: Record<string, any>) => `Ad-code response received — ${d.campaignTitle || 'report'}`, displayName: 'Ad-code response received', to: 'community@createracket.com', previewData: { campaignTitle: 'Tixel', platform: 'tiktok', builderUrl: 'https://createracket.com/campaign-reports' } } satisfies TemplateEntry
