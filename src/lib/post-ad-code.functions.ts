@@ -6,6 +6,7 @@ import { COMMUNITY_EMAIL } from './post-stats-fields'
 const SITE = 'https://createracket.com'
 const tokenSchema = z.string().regex(/^[a-f0-9]{40}$/)
 const platformSchema = z.enum(['tiktok', 'instagram'])
+const imageSchema = z.object({ type: z.enum(['image/jpeg', 'image/png', 'image/webp']), base64: z.string().max(14_000_000) })
 
 async function db() {
   const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
@@ -61,17 +62,30 @@ export const getAdCodeRequestPublic = createServerFn({ method: 'POST' })
   })
 
 export const submitAdCodeRequestPublic = createServerFn({ method: 'POST' })
-  .inputValidator((d) => z.object({ token: tokenSchema, code: z.string().trim().max(500), permissionConfirmed: z.boolean(), expiresOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')), note: z.string().trim().max(2000) }).parse(d))
+  .inputValidator((d) => z.object({ token: tokenSchema, code: z.string().trim().max(500), permissionConfirmed: z.boolean(), expiresOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')), note: z.string().trim().max(2000), images: z.array(imageSchema).max(3) }).parse(d))
   .handler(async ({ data }) => {
     const admin = await db()
-    const { data: row } = await admin.from('post_ad_code_requests').select('id, status, platform, report_id, post_id').eq('token', data.token).maybeSingle()
+    const { data: row } = await admin.from('post_ad_code_requests').select('id, status, platform, report_id, post_id, screenshot_paths').eq('token', data.token).maybeSingle()
     if (!row || row.status === 'reviewed') throw new Error('This link is no longer open. Reply to the email for a new link.')
     if (row.platform === 'tiktok' && !data.code) throw new Error('Please enter your Spark Ads code.')
     if (row.platform === 'instagram' && !data.code && !data.permissionConfirmed) throw new Error('Enter a partnership ad code or confirm content-level permission.')
     if (data.expiresOn && data.expiresOn < new Date().toISOString().slice(0, 10)) throw new Error('Choose a future expiry date.')
+    let paths = row.screenshot_paths
+    if (data.images.length) {
+      paths = []
+      for (const [index, image] of data.images.entries()) {
+        const bytes = Uint8Array.from(atob(image.base64), char => char.charCodeAt(0))
+        if (bytes.byteLength > 10 * 1024 * 1024) throw new Error('Each screenshot must be under 10MB.')
+        const ext = image.type === 'image/png' ? 'png' : image.type === 'image/webp' ? 'webp' : 'jpg'
+        const path = `${row.id}/${crypto.randomUUID()}-${index}.${ext}`
+        const { error: uploadError } = await admin.storage.from('ad-code-screenshots').upload(path, bytes, { contentType: image.type })
+        if (uploadError) throw new Error('Could not upload the screenshot. Please try again.')
+        paths.push(path)
+      }
+    }
     const first = row.status !== 'submitted'
-    const { error } = await admin.from('post_ad_code_requests').update({ code: data.code || null, permission_confirmed: data.permissionConfirmed, expires_on: data.expiresOn || null, note: data.note || null, status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', row.id).neq('status', 'reviewed')
-    if (error) throw new Error('Could not save your response. Please try again.')
+    const { data: updated, error } = await admin.from('post_ad_code_requests').update({ code: data.code || null, permission_confirmed: data.permissionConfirmed, expires_on: data.expiresOn || null, note: data.note || null, screenshot_paths: paths, status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', row.id).neq('status', 'reviewed').select('id').maybeSingle()
+    if (error || !updated) throw new Error('Could not save your response. Please try again.')
     if (first) {
       try {
         const { data: report } = await admin.from('campaign_reports').select('title').eq('id', row.report_id).maybeSingle()
@@ -91,4 +105,20 @@ export const reviewAdCodeRequest = createServerFn({ method: 'POST' })
     const { data: reviewed, error } = await admin.from('post_ad_code_requests').update({ status: 'reviewed', reviewed_at: new Date().toISOString() }).eq('id', data.requestId).eq('status', 'submitted').select('id').maybeSingle()
     if (error || !reviewed) throw new Error('Only a submitted response can be reviewed.')
     return { reviewed: true }
+  })
+
+export const getAdCodeScreenshotUrls = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ requestId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context)
+    const admin = await db()
+    const { data: row } = await admin.from('post_ad_code_requests').select('screenshot_paths').eq('id', data.requestId).maybeSingle()
+    if (!row) throw new Error('Request not found.')
+    const urls: string[] = []
+    for (const path of row.screenshot_paths) {
+      const { data: signed, error } = await admin.storage.from('ad-code-screenshots').createSignedUrl(path, 300)
+      if (!error && signed?.signedUrl) urls.push(signed.signedUrl)
+    }
+    return { urls }
   })

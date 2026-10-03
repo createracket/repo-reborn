@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { getAdCodeRequestPublic, submitAdCodeRequestPublic } from '@/lib/post-ad-code.functions'
+import { resizeImageFile } from '@/lib/image-resize'
 
 export const Route = createFileRoute('/ad-code/$token')({
   head: () => ({ meta: [
@@ -31,6 +32,7 @@ function AdCodeForm() {
   const [permission, setPermission] = useState(false)
   const [expires, setExpires] = useState('')
   const [note, setNote] = useState('')
+  const [files, setFiles] = useState<File[]>([])
   const [busy, setBusy] = useState(false)
   useEffect(() => { load({ data: { token } }).then(r => {
     if (!r.found) { setState('missing'); return }
@@ -38,7 +40,20 @@ function AdCodeForm() {
   }).catch(() => setState('missing')) }, [token])
   async function onSubmit(e: FormEvent) {
     e.preventDefault(); setBusy(true)
-    try { await submit({ data: { token, code, permissionConfirmed: permission, expiresOn: expires, note } }); setState('done') }
+    try {
+      const images: { type: 'image/jpeg'; base64: string }[] = []
+      for (const file of files) {
+        const resized = await resizeImageFile(file, 1800)
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '')
+          reader.onerror = () => reject(reader.error)
+          reader.readAsDataURL(resized)
+        })
+        images.push({ type: 'image/jpeg', base64 })
+      }
+      await submit({ data: { token, code, permissionConfirmed: permission, expiresOn: expires, note, images } }); setState('done')
+    }
     catch (err) { toast.error((err as Error).message) } finally { setBusy(false) }
   }
   if (state === 'loading') return <Shell><p>Loading…</p></Shell>
@@ -55,6 +70,11 @@ function AdCodeForm() {
       {req?.platform === 'instagram' && <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={permission} onChange={e => setPermission(e.target.checked)} className="mt-1" />I enabled content-level permission for the brand partner to boost this specific post.</label>}
       <div><Label htmlFor="expires">Code expiry (if known)</Label><Input id="expires" type="date" value={expires} onChange={e => setExpires(e.target.value)} min={new Date().toISOString().slice(0, 10)} /></div>
       <div><Label htmlFor="ad-note">Anything else? (optional)</Label><Textarea id="ad-note" value={note} onChange={e => setNote(e.target.value)} maxLength={2000} /></div>
+      <div><Label htmlFor="ad-shots">Screenshots (optional, up to 3 × 10MB)</Label><Input id="ad-shots" type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={e => {
+        const chosen = Array.from(e.target.files ?? [])
+        if (chosen.length > 3 || chosen.some(f => f.size > 10 * 1024 * 1024 || !['image/png', 'image/jpeg', 'image/webp'].includes(f.type))) { toast.error('Choose up to 3 PNG, JPEG or WebP images under 10MB each.'); e.target.value = ''; return }
+        setFiles(chosen)
+      }} />{files.length > 0 && <p className="text-xs text-muted-foreground">{files.length} selected</p>}</div>
       <p className="text-xs text-muted-foreground">Sharing a code or confirmation does not grant permission for other posts, platforms or uses.</p>
       <Button type="submit" className="w-full" disabled={busy}>{busy ? 'Sending…' : 'Send response'}</Button>
     </form>
