@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 
 type Request = { id: string; token: string; status: string; email: string | null; code: string | null; permission_confirmed: boolean; expires_on: string | null; note: string | null; created_at: string }
 
-export function AdCodeRequestPanel({ postId, creatorId, creatorName, platform, postUrl }: { postId: string; creatorId: string; creatorName: string; platform: string; postUrl: string | null }) {
+export function AdCodeRequestPanel({ postId, creatorId, creatorName, platform, postUrl, postedAt }: { postId: string; creatorId: string; creatorName: string; platform: string; postUrl: string | null; postedAt: string | null }) {
   const create = useServerFn(createAdCodeRequest)
   const markReviewed = useServerFn(reviewAdCodeRequest)
   const [latest, setLatest] = useState<Request | null>(null)
@@ -26,7 +26,7 @@ export function AdCodeRequestPanel({ postId, creatorId, creatorName, platform, p
     setLatest((data?.[0] as Request | undefined) ?? null)
   }, [postId])
   useEffect(() => { void refresh() }, [refresh])
-  if (!['instagram', 'tiktok'].includes(platform) || !postUrl) return null
+  if (!['instagram', 'tiktok'].includes(platform) || !postUrl || !postedAt || new Date(postedAt) > new Date()) return null
   async function openDraft() {
     const { data } = await supabase.from('post_ad_code_requests').select('email').eq('creator_id', creatorId).not('email', 'is', null).order('created_at', { ascending: false }).limit(1)
     setEmail(latest?.email ?? data?.[0]?.email ?? '')
@@ -45,7 +45,7 @@ export function AdCodeRequestPanel({ postId, creatorId, creatorName, platform, p
   }
   async function copyLink() {
     if (!latest) return
-    try { await navigator.clipboard.writeText(`${window.location.origin}/ad-code/${latest.token}`); toast.success('Creator link copied') } catch { toast.error('Could not copy link') }
+    try { await navigator.clipboard.writeText(`https://createracket.com/ad-code/${latest.token}`); toast.success('Creator link copied') } catch { toast.error('Could not copy link') }
   }
   async function copyCode() {
     if (!latest?.code) return

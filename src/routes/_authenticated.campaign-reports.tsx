@@ -1877,7 +1877,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         followers={post.followers}
         onApplied={onChanged}
       />
-      <AdCodeRequestPanel postId={post.id} creatorId={post.creator_id} creatorName={creatorName} platform={form.platform} postUrl={form.post_url} />
+      <AdCodeRequestPanel postId={post.id} creatorId={post.creator_id} creatorName={creatorName} platform={post.platform} postUrl={post.post_url} postedAt={post.posted_at} />
 
       {open && (
       <>
