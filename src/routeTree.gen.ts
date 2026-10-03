@@ -32,6 +32,7 @@ import { Route as AuthenticatedPricingRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedRacketDeskRouteImport } from './routes/_authenticated.racket-desk'
 import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authenticated.roster-builder'
+import { Route as AdCodeTokenRouteImport } from './routes/ad-code.$token'
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
 import { Route as BriefSlugRouteImport } from './routes/brief.$slug'
 import { Route as ReportSlugRouteImport } from './routes/report.$slug'
@@ -198,6 +199,11 @@ const AuthenticatedRosterBuilderRoute =
     path: '/roster-builder',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AdCodeTokenRoute = AdCodeTokenRouteImport.update({
+  id: '/ad-code/$token',
+  path: '/ad-code/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BrandsHowItWorksRoute = BrandsHowItWorksRouteImport.update({
   id: '/brands/how-it-works',
   path: '/brands/how-it-works',
@@ -488,6 +494,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/racket-desk': typeof AuthenticatedRacketDeskRouteWithChildren
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
+  '/ad-code/$token': typeof AdCodeTokenRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
   '/report/$slug': typeof ReportSlugRouteWithChildren
@@ -557,6 +564,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof AuthenticatedPricingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/roster-builder': typeof AuthenticatedRosterBuilderRoute
+  '/ad-code/$token': typeof AdCodeTokenRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
   '/report/$slug': typeof ReportSlugRouteWithChildren
@@ -630,6 +638,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/racket-desk': typeof AuthenticatedRacketDeskRouteWithChildren
   '/_authenticated/roster-builder': typeof AuthenticatedRosterBuilderRoute
+  '/ad-code/$token': typeof AdCodeTokenRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
   '/report/$slug': typeof ReportSlugRouteWithChildren
@@ -704,6 +713,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/racket-desk'
     | '/roster-builder'
+    | '/ad-code/$token'
     | '/brands/how-it-works'
     | '/brief/$slug'
     | '/report/$slug'
@@ -773,6 +783,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/profile'
     | '/roster-builder'
+    | '/ad-code/$token'
     | '/brands/how-it-works'
     | '/brief/$slug'
     | '/report/$slug'
@@ -845,6 +856,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/racket-desk'
     | '/_authenticated/roster-builder'
+    | '/ad-code/$token'
     | '/brands/how-it-works'
     | '/brief/$slug'
     | '/report/$slug'
@@ -910,6 +922,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  AdCodeTokenRoute: typeof AdCodeTokenRoute
   BrandsHowItWorksRoute: typeof BrandsHowItWorksRoute
   BriefSlugRoute: typeof BriefSlugRoute
   ReportSlugRoute: typeof ReportSlugRouteWithChildren
@@ -1097,6 +1110,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/roster-builder'
       preLoaderRoute: typeof AuthenticatedRosterBuilderRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/ad-code/$token': {
+      id: '/ad-code/$token'
+      path: '/ad-code/$token'
+      fullPath: '/ad-code/$token'
+      preLoaderRoute: typeof AdCodeTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/brands/how-it-works': {
       id: '/brands/how-it-works'
@@ -1586,6 +1606,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  AdCodeTokenRoute: AdCodeTokenRoute,
   BrandsHowItWorksRoute: BrandsHowItWorksRoute,
   BriefSlugRoute: BriefSlugRoute,
   ReportSlugRoute: ReportSlugRouteWithChildren,

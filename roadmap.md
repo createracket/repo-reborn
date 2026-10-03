@@ -20,3 +20,5 @@
 - [x] Talent intake form for spotlights (shareable link, social auto-find, draft spotlight)
 - [x] Users tab loads only the first 10 people on open (backend search/filters, Load more button)
 - [x] Add a creator stats verification email draft beside Apply to post, with a correction link and copy to community.
+- [x] Add separate per-post TikTok/Instagram ad-code requests, private response links, community email copies, and admin review.
+- [ ] Enable direct creator account syncing after Instagram and TikTok provider app registration, permissions, and a real-account pilot; no provider credentials or approval are available yet.
