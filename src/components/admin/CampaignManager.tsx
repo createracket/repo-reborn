@@ -112,7 +112,7 @@ export function CampaignManager() {
 
   async function createCampaign() {
     if (!newTitle.trim()) return;
-    const { error } = await sb.from("campaigns").insert({ title: newTitle.trim(), client_name: newClient.trim() || null });
+    const { error } = await sb.from("campaigns").insert({ title: newTitle.trim(), client_name: newClient.trim() || null, status: "draft" });
     if (error) return toast.error(error.message);
     setNewTitle("");
     setNewClient("");
