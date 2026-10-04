@@ -214,7 +214,7 @@ export function CampaignManager() {
 
                 <section className="space-y-3">
                   <h3 className="text-sm font-semibold">Collab briefs</h3>
-                  <BriefsManager campaignId={c.id} onChanged={refresh} />
+                  <BriefsManager key={linked.filter((i) => i.kind === "collab").map((i) => i.id).join(",")} campaignId={c.id} onChanged={refresh} />
                   <select
                     aria-label={`Link existing collab brief to ${c.title}`}
                     className="h-8 max-w-xs rounded-md border border-input bg-background px-2 text-xs"
@@ -292,7 +292,7 @@ export function CampaignManager() {
         </CardContent>
         <CardContent className="border-t pt-4">
           <h3 className="mb-3 text-sm font-semibold">Unassigned collab briefs and lead submissions</h3>
-          <BriefsManager campaignId={null} onChanged={refresh} />
+          <BriefsManager key={unassigned.filter((i) => i.kind === "collab").map((i) => i.id).join(",")} campaignId={null} onChanged={refresh} />
         </CardContent>
       </Card>
     </div>

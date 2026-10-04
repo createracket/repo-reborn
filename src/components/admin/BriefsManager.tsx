@@ -385,7 +385,7 @@ function UnifiedBriefs({
         const rowKey = `${b.source}-${b.id}`;
         const isOpen = openIds.has(rowKey);
         return (
-          <Card key={rowKey}>
+          <div key={rowKey} className="border-t border-border/60">
             <Collapsible open={isOpen} onOpenChange={() => toggleOpen(rowKey)}>
             <CardHeader>
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -596,7 +596,7 @@ function UnifiedBriefs({
               </CardContent>
             </CollapsibleContent>
             </Collapsible>
-          </Card>
+          </div>
         );
   };
 
