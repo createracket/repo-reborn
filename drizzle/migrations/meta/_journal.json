@@ -78,6 +78,13 @@
       "when": 1791098714549,
       "tag": "0010_campaign_manager",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791100489880,
+      "tag": "0011_default_campaign_status_draft",
+      "breakpoints": true
     }
   ]
 }
