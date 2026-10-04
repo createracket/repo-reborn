@@ -27,12 +27,14 @@ export function PartnerPageShares({
   pageTitle,
   pageLink,
   eventKey = "brief_shared",
+  itemNoun = "spotlight",
 }: {
   partnerPageId: string;
   profiles: ShareProfile[];
   pageTitle?: string;
   pageLink?: string;
   eventKey?: string;
+  itemNoun?: string;
 }) {
   const [shares, setShares] = useState<ShareRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,7 +138,7 @@ export function PartnerPageShares({
         <div>
           <div className="text-sm font-medium">Show on specific user dashboards</div>
           <p className="text-xs text-muted-foreground">
-            Recipients see this spotlight in their dashboard opportunities, even if it isn't live for everyone.
+            Recipients see this {itemNoun} in their dashboard opportunities, even if it isn't live for everyone.
           </p>
         </div>
         {shares.length > 0 ? (
