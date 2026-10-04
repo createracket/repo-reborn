@@ -203,7 +203,7 @@ const BRIEF_CORE_VALUES = [
   "Inclusivity",
 ];
 
-export function BriefsManager() {
+export function BriefsManager({ campaignId, onChanged }: { campaignId: string | null; onChanged?: () => void }) {
   const [leadBriefs, setLeadBriefs] = useState<LeadBrief[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -212,15 +212,15 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr, emailRes] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, thumbnail_url, thumb_frame, display_order, brief_link, brief_file_path, brief_file_name, brief_file_size, visible_to_free").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, thumbnail_url, thumb_frame, display_order, brief_link, brief_file_path, brief_file_name, brief_file_size, visible_to_free, campaign_id").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
       (supabase as any).rpc("admin_campaign_brief_emails"),
     ]);
     const emailById = new Map<string, string | null>();
     ((emailRes.data as any[] | null) ?? []).forEach((r: any) => emailById.set(r.id, r.contact_email ?? null));
     const campaignRows = ((cb.data as any[]) ?? []).map((c) => ({ ...c, contact_email: emailById.get(c.id) ?? null })) as CampaignBrief[];
-    setLeadBriefs((lb.data as LeadBrief[]) ?? []);
-    setCampaigns(campaignRows);
+    setLeadBriefs(campaignId === null ? (lb.data as LeadBrief[]) ?? [] : []);
+    setCampaigns(campaignRows.filter((c) => c.campaign_id === campaignId));
     setProfiles((pr.data as Profile[]) ?? []);
     setLoading(false);
   }
@@ -235,25 +235,9 @@ export function BriefsManager() {
   const lookupProfile = (email?: string | null) =>
     email ? profileByEmail.get(email.trim().toLowerCase()) ?? null : null;
 
-  const totalCount = leadBriefs.length + campaigns.length;
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl">Collab briefs</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage every brief in one place — briefs from signed-in users and lead submissions
-          both appear here (<span className="font-medium text-foreground">{totalCount}</span> in
-          total right now — no cap, every brief is shown). Change the status to keep the user's
-          Project Planner in sync. Toggle{" "}
-          <span className="font-medium text-foreground">Publish as opportunity</span> to surface
-          a user brief on every signed-in artist's dashboard. Switch{" "}
-          <span className="font-medium text-foreground">Show to free members</span> to let free
-          members see that brief too.
-        </p>
-      </div>
-
-      <NewCampaignBriefForm onCreated={loadAll} />
+    <div className="space-y-3">
+      {campaignId && <NewCampaignBriefForm campaignId={campaignId} onCreated={() => { loadAll(); onChanged?.(); }} />}
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading briefs…</p>
@@ -281,7 +265,7 @@ export function BriefsManager() {
             setCampaigns((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } as CampaignBrief : r)))
           }
           onLeadDeleted={(id) => setLeadBriefs((rows) => rows.filter((r) => r.id !== id))}
-          onCampaignDeleted={(id) => setCampaigns((rows) => rows.filter((r) => r.id !== id))}
+          onCampaignDeleted={(id) => { setCampaigns((rows) => rows.filter((r) => r.id !== id)); onChanged?.(); }}
         />
       )}
     </div>
