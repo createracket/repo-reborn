@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 const ROUTE_LABELS: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/roster-builder": "Roster Builder",
-  "/campaign-builder": "Campaign Builder",
+  "/campaign-builder": "Campaign Manager",
   "/campaign-reports": "Campaign Reports",
   "/profile": "Edit Profile",
   "/admin": "Admin",

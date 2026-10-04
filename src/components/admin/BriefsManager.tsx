@@ -240,7 +240,7 @@ export function BriefsManager() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-3xl">Campaign Builder</h1>
+        <h2 className="font-display text-2xl">Collab briefs</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Manage every brief in one place — briefs from signed-in users and lead submissions
           both appear here (<span className="font-medium text-foreground">{totalCount}</span> in

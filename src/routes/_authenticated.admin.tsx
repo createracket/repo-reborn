@@ -101,6 +101,9 @@ function AdminLayout() {
             <p className="mt-2 text-muted-foreground">Backend records across the platform.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link to="/campaign-builder">Campaign Manager →</Link>
+            </Button>
             <Button asChild variant="outline">
               <Link to="/roster-builder">Roster Builder →</Link>
             </Button>
@@ -109,9 +112,6 @@ function AdminLayout() {
             </Button>
             <Button asChild variant="outline">
               <Link to="/campaign-reports">Campaign Reports →</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/campaign-builder">Campaign Builder →</Link>
             </Button>
             <Button asChild variant="outline">
               <Link to="/racket-desk">Racket Desk →</Link>
