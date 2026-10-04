@@ -176,6 +176,7 @@ export type CampaignBrief = {
   brief_file_name?: string | null;
   brief_file_size?: number | null;
   visible_to_free?: boolean | null;
+  campaign_id?: string | null;
 };
 export type Profile = {
   id: string; email: string | null; display_name: string | null;
@@ -203,7 +204,7 @@ const BRIEF_CORE_VALUES = [
   "Inclusivity",
 ];
 
-export function BriefsManager() {
+export function BriefsManager({ campaignId, onChanged }: { campaignId: string | null; onChanged?: () => void }) {
   const [leadBriefs, setLeadBriefs] = useState<LeadBrief[]>([]);
   const [campaigns, setCampaigns] = useState<CampaignBrief[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -212,15 +213,15 @@ export function BriefsManager() {
   async function loadAll() {
     const [lb, cb, pr, emailRes] = await Promise.all([
       supabase.from("lead_briefs").select("*").order("created_at", { ascending: false }),
-      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, thumbnail_url, thumb_frame, display_order, brief_link, brief_file_path, brief_file_name, brief_file_size, visible_to_free").order("created_at", { ascending: false }),
+      supabase.from("campaign_briefs").select("id, created_at, title, description, user_id, budget, currency, transparency, status, published, published_at, linked_roster_id, linked_report_id, artist_archetypes, brand_archetypes, thumbnail_url, thumb_frame, display_order, brief_link, brief_file_path, brief_file_name, brief_file_size, visible_to_free, campaign_id").order("created_at", { ascending: false }),
       supabase.from("profiles").select("id, email, display_name, account_type, created_at, slug, avatar_url, is_featured").order("created_at", { ascending: false }),
       (supabase as any).rpc("admin_campaign_brief_emails"),
     ]);
     const emailById = new Map<string, string | null>();
     ((emailRes.data as any[] | null) ?? []).forEach((r: any) => emailById.set(r.id, r.contact_email ?? null));
     const campaignRows = ((cb.data as any[]) ?? []).map((c) => ({ ...c, contact_email: emailById.get(c.id) ?? null })) as CampaignBrief[];
-    setLeadBriefs((lb.data as LeadBrief[]) ?? []);
-    setCampaigns(campaignRows);
+    setLeadBriefs(campaignId === null ? (lb.data as LeadBrief[]) ?? [] : []);
+    setCampaigns(campaignRows.filter((c) => c.campaign_id === campaignId));
     setProfiles((pr.data as Profile[]) ?? []);
     setLoading(false);
   }
@@ -235,25 +236,9 @@ export function BriefsManager() {
   const lookupProfile = (email?: string | null) =>
     email ? profileByEmail.get(email.trim().toLowerCase()) ?? null : null;
 
-  const totalCount = leadBriefs.length + campaigns.length;
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl">Collab briefs</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage every brief in one place — briefs from signed-in users and lead submissions
-          both appear here (<span className="font-medium text-foreground">{totalCount}</span> in
-          total right now — no cap, every brief is shown). Change the status to keep the user's
-          Project Planner in sync. Toggle{" "}
-          <span className="font-medium text-foreground">Publish as opportunity</span> to surface
-          a user brief on every signed-in artist's dashboard. Switch{" "}
-          <span className="font-medium text-foreground">Show to free members</span> to let free
-          members see that brief too.
-        </p>
-      </div>
-
-      <NewCampaignBriefForm onCreated={loadAll} />
+    <div className="space-y-3">
+      {campaignId && <NewCampaignBriefForm campaignId={campaignId} onCreated={() => { loadAll(); onChanged?.(); }} />}
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading briefs…</p>
@@ -281,7 +266,7 @@ export function BriefsManager() {
             setCampaigns((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } as CampaignBrief : r)))
           }
           onLeadDeleted={(id) => setLeadBriefs((rows) => rows.filter((r) => r.id !== id))}
-          onCampaignDeleted={(id) => setCampaigns((rows) => rows.filter((r) => r.id !== id))}
+          onCampaignDeleted={(id) => { setCampaigns((rows) => rows.filter((r) => r.id !== id)); onChanged?.(); }}
         />
       )}
     </div>
@@ -401,7 +386,7 @@ function UnifiedBriefs({
         const rowKey = `${b.source}-${b.id}`;
         const isOpen = openIds.has(rowKey);
         return (
-          <Card key={rowKey}>
+          <div key={rowKey} className="border-t border-border/60">
             <Collapsible open={isOpen} onOpenChange={() => toggleOpen(rowKey)}>
             <CardHeader>
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -612,7 +597,7 @@ function UnifiedBriefs({
               </CardContent>
             </CollapsibleContent>
             </Collapsible>
-          </Card>
+          </div>
         );
   };
 
@@ -640,7 +625,7 @@ function UnifiedBriefs({
         <Collapsible>
           <CollapsibleTrigger asChild>
             <Button variant="outline" className="w-full justify-between">
-              <span>Closed campaigns ({closedRows.length})</span>
+              <span>Closed briefs ({closedRows.length})</span>
               <ChevronDown className="h-4 w-4" />
             </Button>
           </CollapsibleTrigger>
@@ -998,7 +983,7 @@ function ProfileChip({ profile, fallbackEmail }: {
   ) : inner;
 }
 
-function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
+function NewCampaignBriefForm({ campaignId, onCreated }: { campaignId: string; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [values, setValues] = useState<string[]>([]);
@@ -1047,6 +1032,7 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
       if (!u.user) throw new Error("Not signed in");
       const { error } = await supabase.from("campaign_briefs").insert({
         user_id: u.user.id,
+        campaign_id: campaignId,
         title: form.title.trim(),
         description: form.description.trim(),
         contact_email: form.contact_email.trim() || null,
@@ -1062,12 +1048,13 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
         status: form.status || "in_review",
       } as any);
       if (error) throw error;
-      toast.success("Campaign brief added");
+      toast.success("Brief added to campaign");
       setForm({ title: "", description: "", contact_email: "", budget: "", currency: "GBP", transparency: "", timeline: "", target_audience: "", status: "in_review" });
       setValues([]);
       setTypes([]);
       setArtistArchetypes([]);
       setBrandArchetypes([]);
+      setOpen(false);
       onCreated();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to add brief");
@@ -1077,23 +1064,17 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
   }
 
   return (
-    <Card>
+    <div className="border-t pt-3">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger asChild>
-          <button type="button" className="flex w-full items-center justify-between gap-3 p-6 text-left">
+          <Button type="button" size="sm" variant="outline" className="justify-start">
             <div>
-              <CardTitle className="font-display text-2xl flex items-center gap-2">
-                <Plus className="h-5 w-5" /> Add a campaign brief
-              </CardTitle>
-              <CardDescription className="mt-1">
-                Manually create a brief using the same fields as the public submission form.
-              </CardDescription>
+              <span className="flex items-center gap-2"><Plus className="h-4 w-4" /> New collab brief</span>
             </div>
-            {open ? <ChevronDown className="h-5 w-5 shrink-0" /> : <ChevronRight className="h-5 w-5 shrink-0" />}
-          </button>
+          </Button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent>
+          <div className="pt-4">
             <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
             <Label htmlFor="cb-title">Campaign title *</Label>
@@ -1204,10 +1185,10 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
             <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Add brief"}</Button>
           </div>
             </form>
-          </CardContent>
+          </div>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </div>
   );
 }
 

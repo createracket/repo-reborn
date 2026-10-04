@@ -1,5 +1,6 @@
 # Roadmap
 
+- [x] Merge campaign and collab brief cards so campaign creation and brief editing begin in one campaign card.
 - [x] Move dashboard spotlights into Project planner tiles and remove the large spotlight sections.
 - [x] Replace the original blush light mode with the roster's grey/white light mode throughout eligible pages, including the dashboard.
 - [x] Add multi-select Part 1–4 interest choices to the Tixel submission brief.
