@@ -176,6 +176,7 @@ export type CampaignBrief = {
   brief_file_name?: string | null;
   brief_file_size?: number | null;
   visible_to_free?: boolean | null;
+  campaign_id?: string | null;
 };
 export type Profile = {
   id: string; email: string | null; display_name: string | null;

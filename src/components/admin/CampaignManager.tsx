@@ -282,7 +282,7 @@ export function CampaignManager() {
           <p className="text-xs text-muted-foreground">Not in a campaign yet. Use "Link existing" on a campaign to sort these.</p>
         </CardHeader>
         <CardContent>
-          {unassigned.length === 0 ? (
+          {unassigned.filter((it) => it.kind !== "collab").length === 0 ? (
             <p className="text-xs text-muted-foreground">Everything is assigned.</p>
           ) : (
             <ul className="divide-y rounded-md border">
