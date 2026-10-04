@@ -299,7 +299,7 @@ function BriefsPage() {
               }}
             />
           </div>
-          <PartnerPageShares partnerPageId={b.id} profiles={profiles} pageTitle={b.headline} pageLink={`/brief/${b.slug}`} eventKey="brief_shared" />
+          <PartnerPageShares partnerPageId={b.id} profiles={profiles} pageTitle={b.headline} pageLink={`/brief/${b.slug}`} eventKey="brief_shared" itemNoun="brief" />
         </CardContent>
       ) : null}
     </Card>
