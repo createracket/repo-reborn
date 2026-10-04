@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthUser } from "@/hooks/use-auth";
+import { BriefsManager } from "@/components/admin/BriefsManager";
 
 type Campaign = {
   id: string;
@@ -211,7 +212,25 @@ export function CampaignManager() {
                   <Textarea className="md:col-span-3" rows={2} placeholder="Notes" defaultValue={c.notes ?? ""} onBlur={(e) => updateCampaign(c.id, { notes: e.target.value || null })} />
                 </div>
 
-                {(["collab", "page", "roster", "report"] as Kind[]).map((kind) => {
+                <section className="space-y-3">
+                  <h3 className="text-sm font-semibold">Collab briefs</h3>
+                  <BriefsManager campaignId={c.id} onChanged={refresh} />
+                  <select
+                    aria-label={`Link existing collab brief to ${c.title}`}
+                    className="h-8 max-w-xs rounded-md border border-input bg-background px-2 text-xs"
+                    value=""
+                    onChange={(e) => {
+                      const it = items.find((a) => a.kind === "collab" && a.id === e.target.value);
+                      if (it) setLink(it, c.id);
+                    }}
+                  >
+                    <option value="">Link existing collab brief…</option>
+                    {items.filter((i) => i.kind === "collab" && i.campaign_id !== c.id).map((i) => (
+                      <option key={i.id} value={i.id}>{i.title}{i.campaign_id ? " (move)" : ""}</option>
+                    ))}
+                  </select>
+                </section>
+                {(["page", "roster", "report"] as Kind[]).map((kind) => {
                   const rows = linked.filter((i) => i.kind === kind);
                   const available = items.filter((i) => i.kind === kind && i.campaign_id !== c.id);
                   return (
@@ -226,9 +245,6 @@ export function CampaignManager() {
                         )}
                         {kind === "page" && (
                           <Button size="sm" variant="outline" asChild><Link to="/briefs"><Plus className="mr-1 h-3 w-3" />New brief page</Link></Button>
-                        )}
-                        {kind === "collab" && (
-                          <Button size="sm" variant="outline" asChild><a href="#collab-briefs"><Plus className="mr-1 h-3 w-3" />New collab brief</a></Button>
                         )}
                         <select
                           className="h-8 max-w-xs rounded-md border border-input bg-background px-2 text-xs"
@@ -270,9 +286,13 @@ export function CampaignManager() {
             <p className="text-xs text-muted-foreground">Everything is assigned.</p>
           ) : (
             <ul className="divide-y rounded-md border">
-              {unassigned.map((it) => <ItemRow key={`${it.kind}-${it.id}`} it={it} onFlag={setFlag} showKind />)}
+              {unassigned.filter((it) => it.kind !== "collab").map((it) => <ItemRow key={`${it.kind}-${it.id}`} it={it} onFlag={setFlag} showKind />)}
             </ul>
           )}
+        </CardContent>
+        <CardContent className="border-t pt-4">
+          <h3 className="mb-3 text-sm font-semibold">Unassigned collab briefs and lead submissions</h3>
+          <BriefsManager campaignId={null} onChanged={refresh} />
         </CardContent>
       </Card>
     </div>

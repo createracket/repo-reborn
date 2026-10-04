@@ -5,11 +5,10 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthUser } from "@/hooks/use-auth";
-import { BriefsManager } from "@/components/admin/BriefsManager";
 import { CampaignManager } from "@/components/admin/CampaignManager";
 
 export const Route = createFileRoute("/_authenticated/campaign-builder")({
-  head: () => ({ meta: [{ title: "Campaign Manager — Create Racket" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Campaign Manager — Create Racket" }, { name: "description", content: "Manage campaigns, briefs, rosters and reports." }, { property: "og:title", content: "Campaign Manager — Create Racket" }, { property: "og:description", content: "Manage campaigns, briefs, rosters and reports." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
   component: CampaignBuilderPage,
 });
 
@@ -44,7 +43,7 @@ function CampaignBuilderPage() {
         ) : !allowed ? (
           <p className="text-sm text-muted-foreground">You need admin access to view the campaign manager.</p>
         ) : (
-          <div className="space-y-12"><CampaignManager /><div id="collab-briefs" className="border-t pt-10"><BriefsManager /></div></div>
+          <CampaignManager />
         )}
       </main>
       <SiteFooter />
