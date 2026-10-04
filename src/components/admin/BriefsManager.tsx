@@ -982,7 +982,7 @@ function ProfileChip({ profile, fallbackEmail }: {
   ) : inner;
 }
 
-function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
+function NewCampaignBriefForm({ campaignId, onCreated }: { campaignId: string; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [values, setValues] = useState<string[]>([]);
@@ -1031,6 +1031,7 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
       if (!u.user) throw new Error("Not signed in");
       const { error } = await supabase.from("campaign_briefs").insert({
         user_id: u.user.id,
+        campaign_id: campaignId,
         title: form.title.trim(),
         description: form.description.trim(),
         contact_email: form.contact_email.trim() || null,
@@ -1046,12 +1047,13 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
         status: form.status || "in_review",
       } as any);
       if (error) throw error;
-      toast.success("Campaign brief added");
+      toast.success("Brief added to campaign");
       setForm({ title: "", description: "", contact_email: "", budget: "", currency: "GBP", transparency: "", timeline: "", target_audience: "", status: "in_review" });
       setValues([]);
       setTypes([]);
       setArtistArchetypes([]);
       setBrandArchetypes([]);
+      setOpen(false);
       onCreated();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to add brief");
@@ -1061,23 +1063,17 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
   }
 
   return (
-    <Card>
+    <div className="border-t pt-3">
       <Collapsible open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger asChild>
-          <button type="button" className="flex w-full items-center justify-between gap-3 p-6 text-left">
+          <Button type="button" size="sm" variant="outline" className="justify-start">
             <div>
-              <CardTitle className="font-display text-2xl flex items-center gap-2">
-                <Plus className="h-5 w-5" /> Add a campaign brief
-              </CardTitle>
-              <CardDescription className="mt-1">
-                Manually create a brief using the same fields as the public submission form.
-              </CardDescription>
+              <span className="flex items-center gap-2"><Plus className="h-4 w-4" /> New collab brief</span>
             </div>
-            {open ? <ChevronDown className="h-5 w-5 shrink-0" /> : <ChevronRight className="h-5 w-5 shrink-0" />}
-          </button>
+          </Button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent>
+          <div className="pt-4">
             <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
             <Label htmlFor="cb-title">Campaign title *</Label>
@@ -1188,10 +1184,10 @@ function NewCampaignBriefForm({ onCreated }: { onCreated: () => void }) {
             <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Add brief"}</Button>
           </div>
             </form>
-          </CardContent>
+          </div>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </div>
   );
 }
 
