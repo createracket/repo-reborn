@@ -6,8 +6,10 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthUser } from "@/hooks/use-auth";
 import { BriefsManager } from "@/components/admin/BriefsManager";
+import { CampaignManager } from "@/components/admin/CampaignManager";
 
 export const Route = createFileRoute("/_authenticated/campaign-builder")({
+  head: () => ({ meta: [{ title: "Campaign Manager — Create Racket" }, { name: "robots", content: "noindex" }] }),
   component: CampaignBuilderPage,
 });
 
@@ -40,9 +42,9 @@ function CampaignBuilderPage() {
         {!ready ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : !allowed ? (
-          <p className="text-sm text-muted-foreground">You need admin access to view the campaign builder.</p>
+          <p className="text-sm text-muted-foreground">You need admin access to view the campaign manager.</p>
         ) : (
-          <BriefsManager />
+          <div className="space-y-12"><CampaignManager /><div id="collab-briefs" className="border-t pt-10"><BriefsManager /></div></div>
         )}
       </main>
       <SiteFooter />

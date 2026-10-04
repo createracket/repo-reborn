@@ -11,3 +11,4 @@
 - Free-member dashboards render a second opportunity feed from the same briefs query, filtered by `campaign_briefs.visible_to_free` plus anything privately shared, so paid feeds stay untouched and free visibility is opt-in per brief.
 - `campaign_briefs` is protected by column-level GRANTs, so every new column needs its own explicit GRANT in the same migration or authenticated reads of the whole table fail with 403.
 
+- Campaigns (`campaigns` table) group briefs, brief pages, rosters and reports via nullable `campaign_id` columns layered over the legacy brief→roster/report links, so grouping never changes live sharing or access.
