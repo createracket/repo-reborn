@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronDown, ChevronRight, Plus, Unlink } from "lucide-react";
+import { Archive, ArchiveRestore, ChevronDown, ChevronRight, Plus, Unlink } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -179,15 +179,20 @@ export function CampaignManager() {
         </CardContent>
       </Card>
 
-      {campaigns.map((c) => {
+      {[...campaigns.filter((c) => c.status !== "archived"), ...campaigns.filter((c) => c.status === "archived")].map((c, idx, arr) => {
         const linked = byCampaign[c.id] ?? [];
         const isOpen = !!open[c.id];
+        const isArchived = c.status === "archived";
+        const firstArchived = isArchived && (idx === 0 || arr[idx - 1].status !== "archived");
         return (
-          <Card key={c.id}>
+          <div key={c.id} className="space-y-3">
+          {firstArchived && <h2 className="pt-4 text-sm font-semibold text-muted-foreground">Archived campaigns</h2>}
+          <Card className={isArchived ? "opacity-70" : undefined}>
             <CardHeader className="pb-3">
+              <div className="flex w-full items-center gap-2">
               <button
                 type="button"
-                className="flex w-full items-center gap-2 text-left"
+                className="flex flex-1 items-center gap-2 text-left"
                 onClick={() => setOpen((o) => ({ ...o, [c.id]: !isOpen }))}
               >
                 {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -196,6 +201,19 @@ export function CampaignManager() {
                 <Badge variant="outline" className="ml-auto capitalize">{c.status}</Badge>
                 <span className="text-xs text-muted-foreground">{linked.length} linked</span>
               </button>
+              <Button
+                size="sm"
+                variant="ghost"
+                title={isArchived ? "Restore campaign" : "Archive campaign"}
+                onClick={() => {
+                  updateCampaign(c.id, { status: isArchived ? "draft" : "archived" });
+                  toast.success(isArchived ? "Campaign restored as Draft" : "Campaign archived");
+                }}
+              >
+                {isArchived ? <ArchiveRestore className="mr-1 h-4 w-4" /> : <Archive className="mr-1 h-4 w-4" />}
+                {isArchived ? "Restore" : "Archive"}
+              </Button>
+              </div>
             </CardHeader>
             {isOpen && (
               <CardContent className="space-y-5">
@@ -273,6 +291,7 @@ export function CampaignManager() {
               </CardContent>
             )}
           </Card>
+          </div>
         );
       })}
 
