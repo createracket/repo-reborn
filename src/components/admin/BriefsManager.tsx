@@ -625,7 +625,7 @@ function UnifiedBriefs({
         <Collapsible>
           <CollapsibleTrigger asChild>
             <Button variant="outline" className="w-full justify-between">
-              <span>Closed campaigns ({closedRows.length})</span>
+              <span>Closed briefs ({closedRows.length})</span>
               <ChevronDown className="h-4 w-4" />
             </Button>
           </CollapsibleTrigger>
