@@ -146,6 +146,7 @@ export type Database = {
           brief_file_size: number | null
           brief_link: string | null
           budget: number | null
+          campaign_id: string | null
           collaboration_types: string[]
           contact_email: string | null
           core_values: string[]
@@ -176,6 +177,7 @@ export type Database = {
           brief_file_size?: number | null
           brief_link?: string | null
           budget?: number | null
+          campaign_id?: string | null
           collaboration_types?: string[]
           contact_email?: string | null
           core_values?: string[]
@@ -206,6 +208,7 @@ export type Database = {
           brief_file_size?: number | null
           brief_link?: string | null
           budget?: number | null
+          campaign_id?: string | null
           collaboration_types?: string[]
           contact_email?: string | null
           core_values?: string[]
@@ -229,6 +232,13 @@ export type Database = {
           visible_to_free?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "campaign_briefs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "campaign_briefs_linked_report_id_fkey"
             columns: ["linked_report_id"]
@@ -450,6 +460,7 @@ export type Database = {
           access_code_label: string | null
           auto_refresh_monthly: boolean
           brand_email: string | null
+          campaign_id: string | null
           categories: string[]
           client_email: string | null
           created_at: string
@@ -474,6 +485,7 @@ export type Database = {
           access_code_label?: string | null
           auto_refresh_monthly?: boolean
           brand_email?: string | null
+          campaign_id?: string | null
           categories?: string[]
           client_email?: string | null
           created_at?: string
@@ -498,6 +510,7 @@ export type Database = {
           access_code_label?: string | null
           auto_refresh_monthly?: boolean
           brand_email?: string | null
+          campaign_id?: string | null
           categories?: string[]
           client_email?: string | null
           created_at?: string
@@ -519,6 +532,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "campaign_reports_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "campaign_reports_source_roster_id_fkey"
             columns: ["source_roster_id"]
             isOneToOne: false
@@ -533,6 +553,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      campaigns: {
+        Row: {
+          client_name: string | null
+          created_at: string
+          display_order: number
+          id: string
+          notes: string | null
+          owner_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_name?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       community_profiles: {
         Row: {
@@ -1173,6 +1229,7 @@ export type Database = {
           audience_segments: string[]
           avg_engagement: number | null
           avg_reach: number | null
+          campaign_id: string | null
           created_at: string
           dashboard_placement: string
           dashboard_visible: boolean
@@ -1209,6 +1266,7 @@ export type Database = {
           audience_segments?: string[]
           avg_engagement?: number | null
           avg_reach?: number | null
+          campaign_id?: string | null
           created_at?: string
           dashboard_placement?: string
           dashboard_visible?: boolean
@@ -1245,6 +1303,7 @@ export type Database = {
           audience_segments?: string[]
           avg_engagement?: number | null
           avg_reach?: number | null
+          campaign_id?: string | null
           created_at?: string
           dashboard_placement?: string
           dashboard_visible?: boolean
@@ -1275,6 +1334,13 @@ export type Database = {
           vibe_tags?: string[]
         }
         Relationships: [
+          {
+            foreignKeyName: "partner_pages_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "partner_pages_linked_user_id_fkey"
             columns: ["linked_user_id"]
@@ -1913,6 +1979,7 @@ export type Database = {
           archived: boolean
           brand_email: string | null
           brief_id: string | null
+          campaign_id: string | null
           categories: string[]
           client_email: string | null
           created_at: string
@@ -1946,6 +2013,7 @@ export type Database = {
           archived?: boolean
           brand_email?: string | null
           brief_id?: string | null
+          campaign_id?: string | null
           categories?: string[]
           client_email?: string | null
           created_at?: string
@@ -1979,6 +2047,7 @@ export type Database = {
           archived?: boolean
           brand_email?: string | null
           brief_id?: string | null
+          campaign_id?: string | null
           categories?: string[]
           client_email?: string | null
           created_at?: string
@@ -2011,6 +2080,13 @@ export type Database = {
             columns: ["brief_id"]
             isOneToOne: false
             referencedRelation: "campaign_briefs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rosters_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
             referencedColumns: ["id"]
           },
         ]

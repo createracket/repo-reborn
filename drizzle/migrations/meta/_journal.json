@@ -71,6 +71,13 @@
       "when": 1790990038070,
       "tag": "0009_grant_brief_visible_to_free",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791098714549,
+      "tag": "0010_campaign_manager",
+      "breakpoints": true
     }
   ]
 }
