@@ -1620,7 +1620,7 @@ function OpportunityCard({ opp, onApplied }: { opp: Opportunity; onApplied?: () 
         </p>
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v && registered) onApplied?.(); }}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-2xl leading-tight pr-6">
