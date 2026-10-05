@@ -792,12 +792,12 @@ function EditBriefDialog({
 
   return (
     <Dialog open={!!brief} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
+      <DialogContent className="max-h-[85vh] overflow-hidden">
+        <DialogHeader className="pb-1">
           <DialogTitle>Edit brief</DialogTitle>
           <DialogDescription>Update the brief details below.</DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
+        <div className="-mr-2 max-h-[calc(85vh-8rem)] space-y-3 overflow-y-auto pr-2">
           <div>
             <Label>Title</Label>
             <Input value={form.title ?? ""} onChange={(e) => setForm({ ...form, title: e.target.value })} />
