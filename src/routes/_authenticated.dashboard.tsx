@@ -1650,7 +1650,7 @@ function OpportunityCard({ opp, onApplied }: { opp: Opportunity; onApplied?: () 
           </div>
 
           <DialogFooter className="mt-4 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button variant="ghost" onClick={() => setOpen(false)}>
+            <Button variant="ghost" onClick={() => { setOpen(false); if (registered) onApplied?.(); }}>
               Close
             </Button>
             <Button
