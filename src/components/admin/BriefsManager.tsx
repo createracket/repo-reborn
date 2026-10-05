@@ -797,7 +797,7 @@ function EditBriefDialog({
           <DialogTitle>Edit brief</DialogTitle>
           <DialogDescription>Update the brief details below.</DialogDescription>
         </DialogHeader>
-        <div className="-mr-2 max-h-[calc(85vh-8rem)] space-y-3 overflow-y-auto pr-2">
+        <div className="-mr-2 max-h-[calc(85vh-11rem)] space-y-3 overflow-y-auto pr-2">
           <div>
             <Label>Title</Label>
             <Input value={form.title ?? ""} onChange={(e) => setForm({ ...form, title: e.target.value })} />
