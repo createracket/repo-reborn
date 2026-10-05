@@ -1297,7 +1297,11 @@ function DashboardPage() {
               <CardContent className="space-y-6">
                 {oppsLoading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : isFreeView && visibleOpps.length === 0 ? (
+                ) : showApplied && visibleOpps.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
+                    Collabs you express interest in will appear here.
+                  </div>
+                ) : isFreeView && tierOpps.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-6 text-center">
                     <p className="font-display text-lg">Unlock access to collabs as a priority subscriber</p>
                     <div className="mt-3">
@@ -1354,7 +1358,12 @@ function DashboardPage() {
                           key={`${o.brief_source}:${o.id}`}
                           className="snap-start shrink-0 w-full sm:w-[calc(50%-6px)]"
                         >
-                          <OpportunityCard opp={o} />
+                          <OpportunityCard
+                            opp={o}
+                            onApplied={() =>
+                              setAppliedKeys((prev) => new Set(prev).add(`${o.brief_source}:${o.id}`))
+                            }
+                          />
                         </div>
                       ))}
                     </div>
@@ -1530,7 +1539,7 @@ function SetupChecklist({
   );
 }
 
-function OpportunityCard({ opp }: { opp: Opportunity }) {
+function OpportunityCard({ opp, onApplied }: { opp: Opportunity; onApplied?: () => void }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [registered, setRegistered] = useState(false);
@@ -1574,7 +1583,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
       return;
     }
     setRegistered(true);
-    toast.success("Interest registered — we'll be in touch.");
+    toast.success("Interest registered — moved to your Applied tab.");
   }
 
   const posted = new Date(opp.published_at ?? opp.created_at).toLocaleDateString();
