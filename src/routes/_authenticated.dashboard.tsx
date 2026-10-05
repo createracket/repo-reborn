@@ -134,6 +134,23 @@ function DashboardPage() {
   const { archived: archivedKeys, toggle: toggleArchive } = usePlannerArchives();
   const [showArchived, setShowArchived] = useState(false);
   const inView = (k: string) => archivedKeys.has(k) === showArchived;
+  const [appliedKeys, setAppliedKeys] = useState<Set<string>>(new Set());
+  const [showApplied, setShowApplied] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { data: u } = await getAuthUser();
+      if (!u.user) return;
+      const { data } = await (supabase as any)
+        .from("brief_interests")
+        .select("brief_id, brief_source")
+        .eq("user_id", u.user.id);
+      if (alive) setAppliedKeys(new Set((data ?? []).map((r: any) => `${r.brief_source}:${r.brief_id}`)));
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
   const [email, setEmail] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [profileRow, setProfileRow] = useState<{ slug: string | null; avatar_url: string | null; bio: string | null; display_name: string | null } | null>(null);
@@ -1235,7 +1252,9 @@ function DashboardPage() {
             {(() => {
               const effectiveTier: "free" | "paid" = isAdmin ? adminViewAsTier : subscriptionTier;
               const isFreeView = effectiveTier === "free";
-              const visibleOpps = isFreeView ? freeOpportunities : opportunities;
+              const tierOpps = isFreeView ? freeOpportunities : opportunities;
+              const appliedCount = tierOpps.filter((o) => appliedKeys.has(`${o.brief_source}:${o.id}`)).length;
+              const visibleOpps = tierOpps.filter((o) => appliedKeys.has(`${o.brief_source}:${o.id}`) === showApplied);
               return (
             <Card>
               <CardHeader>
@@ -1248,6 +1267,12 @@ function DashboardPage() {
                       Discover live briefs from like-minded collaborators; from gifted collabs to full-scale brand campaigns.
                     </CardDescription>
                   </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                  {tierOpps.length > 0 || showApplied ? (
+                    <Button size="sm" variant="outline" onClick={() => setShowApplied((v) => !v)}>
+                      {showApplied ? "Back to collabs" : `Applied${appliedCount ? ` (${appliedCount})` : ""}`}
+                    </Button>
+                  ) : null}
                   {isAdmin ? (
                     <div className="flex items-center gap-1 rounded-full border border-border/60 bg-muted/40 p-0.5 text-[11px] uppercase tracking-wider">
                       <button
@@ -1266,12 +1291,17 @@ function DashboardPage() {
                       </button>
                     </div>
                   ) : null}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 {oppsLoading ? (
                   <p className="text-sm text-muted-foreground">Loading…</p>
-                ) : isFreeView && visibleOpps.length === 0 ? (
+                ) : showApplied && visibleOpps.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
+                    Collabs you express interest in will appear here.
+                  </div>
+                ) : isFreeView && tierOpps.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-pink-accent/60 bg-pink-accent/5 p-6 text-center">
                     <p className="font-display text-lg">Unlock access to collabs as a priority subscriber</p>
                     <div className="mt-3">
@@ -1328,7 +1358,12 @@ function DashboardPage() {
                           key={`${o.brief_source}:${o.id}`}
                           className="snap-start shrink-0 w-full sm:w-[calc(50%-6px)]"
                         >
-                          <OpportunityCard opp={o} />
+                          <OpportunityCard
+                            opp={o}
+                            onApplied={() =>
+                              setAppliedKeys((prev) => new Set(prev).add(`${o.brief_source}:${o.id}`))
+                            }
+                          />
                         </div>
                       ))}
                     </div>
@@ -1504,7 +1539,7 @@ function SetupChecklist({
   );
 }
 
-function OpportunityCard({ opp }: { opp: Opportunity }) {
+function OpportunityCard({ opp, onApplied }: { opp: Opportunity; onApplied?: () => void }) {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [registered, setRegistered] = useState(false);
@@ -1548,7 +1583,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
       return;
     }
     setRegistered(true);
-    toast.success("Interest registered — we'll be in touch.");
+    toast.success("Interest registered — moved to your Applied tab.");
   }
 
   const posted = new Date(opp.published_at ?? opp.created_at).toLocaleDateString();
@@ -1585,7 +1620,7 @@ function OpportunityCard({ opp }: { opp: Opportunity }) {
         </p>
       </div>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v && registered) onApplied?.(); }}>
         <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-display text-2xl leading-tight pr-6">
