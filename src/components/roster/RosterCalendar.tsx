@@ -52,7 +52,8 @@ export function initialMonth(creators: CalendarCreator[]): Date {
   return startOfMonth(next ? parseISO(next) : new Date());
 }
 
-function Chip({ c, onPick, large }: { c: CalendarCreator; onPick: (id: string) => void; large?: boolean }) {
+function Chip({ c, onPick, large, clamp = 2 }: { c: CalendarCreator; onPick: (id: string) => void; large?: boolean; clamp?: 2 | 3 }) {
+  const clampClass = clamp === 3 ? "line-clamp-3" : "line-clamp-2";
   return (
     <button
       type="button"
