@@ -40,7 +40,8 @@ export function eventDatesOf(e: CalendarEvent): string[] {
 }
 
 const MAX_PER_DAY = 3;
-const MAX_SNAPSHOT_PER_DAY = 4;
+// Two-line labels need vertical room in the fixed-height snapshot cells, so show fewer.
+const MAX_SNAPSHOT_PER_DAY = 3;
 
 export function initialMonth(creators: CalendarCreator[]): Date {
   const today = format(new Date(), "yyyy-MM-dd");
@@ -285,7 +286,7 @@ export function CalendarSnapshotContent({
                 {dayEvents.slice(0, 2).map((e, i) => (
                   <div
                     key={`ev-${i}`}
-                    className="truncate rounded-full border border-pink-accent px-2 py-0.5 text-[11px] font-medium text-pink-accent"
+                    className="line-clamp-2 break-words rounded-lg border border-pink-accent px-2 py-0.5 text-[11px] font-medium leading-tight text-pink-accent"
                   >
                     {(e.label ?? "").trim() || "Event"}
                   </div>
@@ -293,7 +294,7 @@ export function CalendarSnapshotContent({
                 {shown.map((c) => (
                   <div
                     key={c.id}
-                    className="truncate rounded-full bg-lime px-2 py-0.5 text-[11px] font-medium text-primary-foreground"
+                    className="line-clamp-2 break-words rounded-lg bg-lime px-2 py-0.5 text-[11px] font-medium leading-tight text-primary-foreground"
                     title={c.name}
                   >
                     {c.name}
