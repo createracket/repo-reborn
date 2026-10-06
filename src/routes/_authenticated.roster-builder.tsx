@@ -23,6 +23,7 @@ import {
   Filter,
   X,
   ChevronDown,
+  ImagePlus,
   Eye,
   EyeOff,
 } from "lucide-react";
@@ -61,6 +62,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditConflictBanner } from "@/components/EditConflictBanner";
 import { getAuthUser } from "@/hooks/use-auth";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { socialAudience, totalFans } from "@/lib/audience";
 import { parseCoPosts, coPostLabel, type CoPost } from "@/lib/co-posts";
@@ -820,6 +822,7 @@ function RosterDetailView({
   const [thumbFrame, setThumbFrame] = useState<ThumbFrame>(readThumbFrame({ thumb_frame: (roster as any).thumb_frame }));
   const [clientEmail, setClientEmail] = useState("");
 
+  const [mediaOpen, setMediaOpen] = useState(false);
   const [brandEmail, setBrandEmail] = useState("");
   const [estEngagement, setEstEngagement] = useState(
     roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
@@ -1231,6 +1234,27 @@ function RosterDetailView({
                 maxLength={2000}
               />
             </div>
+            <Collapsible open={mediaOpen} onOpenChange={setMediaOpen}>
+              <CollapsibleTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-between gap-3"
+                  aria-expanded={mediaOpen}
+                >
+                  <span className="flex items-center gap-2">
+                    <ImagePlus className="size-4" />
+                    <span className="text-sm font-medium">Images &amp; contact emails</span>
+                  </span>
+                  <span className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground">
+                      {headerImageUrl ? "Header ✓" : "No header"} · {profileImageUrl ? "Thumbnail ✓" : "No thumbnail"}
+                    </span>
+                    <ChevronDown className={`size-4 transition-transform ${mediaOpen ? "rotate-180" : ""}`} />
+                  </span>
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-3 pt-3">
             <div className="space-y-2">
               <Label>Header image</Label>
               <div className="flex flex-wrap items-center gap-2">
@@ -1409,6 +1433,8 @@ function RosterDetailView({
             <p className="text-xs text-muted-foreground">
               Assigned client/brand emails will see this roster on their dashboard once they sign in with that email.
             </p>
+            </CollapsibleContent>
+          </Collapsible>
             <div className="space-y-2">
               <Label>Est. engagement (%)</Label>
               <Input
