@@ -113,6 +113,7 @@ type Roster = {
   hide_metric_engagement: boolean;
   show_metric_creators: boolean;
   show_calendar?: boolean;
+  calendar_events?: Array<{ date?: string | null; label?: string | null }> | null;
   header_image_url: string | null;
   profile_image_url: string | null;
   thumb_frame?: any;
@@ -414,7 +415,7 @@ function RosterBuilderPage() {
       // SELECTable on the base table (privacy). Read them via the
       // get_roster_assignment RPC instead. A wildcard select fails outright.
       .select(
-        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators, show_calendar, archived, categories, statuses, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
+        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators, show_calendar, calendar_events, archived, categories, statuses, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
       )
       .order("updated_at", { ascending: false });
     if (error) {
@@ -831,6 +832,13 @@ function RosterDetailView({
   const [accessCode, setAccessCode] = useState(roster.access_code ?? "");
   const [accessCodeLabel, setAccessCodeLabel] = useState(roster.access_code_label ?? "Access code");
   const [savingAccess, setSavingAccess] = useState(false);
+  const [calendarEventsDraft, setCalendarEventsDraft] = useState<Array<{ date: string; label: string }>>(() =>
+    ((roster.calendar_events ?? []) as Array<{ date?: string | null; label?: string | null }>).map((e) => ({
+      date: e.date ?? "",
+      label: e.label ?? "",
+    })),
+  );
+  const [savingEvents, setSavingEvents] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [newCategory, setNewCategory] = useState("");
@@ -862,6 +870,12 @@ function RosterDetailView({
 
     setAccessCode(roster.access_code ?? "");
     setAccessCodeLabel(roster.access_code_label ?? "Access code");
+    setCalendarEventsDraft(
+      ((roster.calendar_events ?? []) as Array<{ date?: string | null; label?: string | null }>).map((e) => ({
+        date: e.date ?? "",
+        label: e.label ?? "",
+      })),
+    );
     setEstEngagement(
       roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
     );
@@ -1038,7 +1052,23 @@ function RosterDetailView({
     onChanged();
   }
 
-  async function saveAccessCode() {
+  async function saveCalendarEvents(events: Array<{ date: string; label: string }>) {
+    setSavingEvents(true);
+    const cleaned = events
+      .filter((e) => e.date && e.label.trim())
+      .map((e) => ({ date: e.date, label: e.label.trim() }));
+    const { error } = await supabase
+      .from("rosters")
+      .update({ calendar_events: cleaned } as never)
+      .eq("id", roster.id);
+    setSavingEvents(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setCalendarEventsDraft(cleaned.map((e) => ({ ...e })));
+    onChanged();
+  }
     setSavingAccess(true);
     const code = accessCode.trim();
     const { error } = await supabase
