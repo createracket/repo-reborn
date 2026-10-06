@@ -71,20 +71,21 @@ function Chip({ c, onPick, large, clamp = 2 }: { c: CalendarCreator; onPick: (id
           />
         ) : null}
       </span>
-      <span className="line-clamp-2 break-words leading-tight">{c.name}</span>
+      <span className={`${clampClass} break-words leading-tight`}>{c.name}</span>
     </button>
   );
 }
 
 /** Key event marker — a moment to cover without a creator attached. */
-function EventChip({ e, large }: { e: CalendarEvent; large?: boolean }) {
+function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean; clamp?: 2 | 3 }) {
   const label = (e.label ?? "").trim() || "Event";
+  const clampClass = clamp === 3 ? "line-clamp-3" : "line-clamp-2";
   return (
     <div
       className={`flex w-full items-center rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent report-light:border-pink-ink report-light:text-pink-ink ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`}
       title={label}
     >
-      <span className="line-clamp-2 break-words leading-tight">{label}</span>
+      <span className={`${clampClass} break-words leading-tight`}>{label}</span>
     </div>
   );
 }
@@ -168,10 +169,10 @@ export function RosterCalendar({
                 <div className={`mb-1 text-xs ${isToday(d) ? "font-semibold text-pink-accent report-light:text-pink-ink" : "text-muted-foreground"}`}>{format(d, "d")}</div>
                 <div className="space-y-1">
                   {dayEvents.map((e, i) => (
-                    <EventChip key={`ev-${i}`} e={e} />
+                    <EventChip key={`ev-${i}`} e={e} clamp={3} />
                   ))}
                   {shown.map((c) => (
-                    <Chip key={c.id} c={c} onPick={onPick} />
+                    <Chip key={c.id} c={c} onPick={onPick} clamp={3} />
                   ))}
                   {overflow > 0 && (
                     <button
