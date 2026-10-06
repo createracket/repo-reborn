@@ -889,13 +889,15 @@ function PublicRosterPage() {
                       }, 50);
                     }}
                   />
-                  <div ref={snapRef} aria-hidden style={{ position: "fixed", top: 0, left: -10000 }}>
-                    <CalendarSnapshotContent
-                      title={roster.title}
-                      month={snapMonth}
-                      creators={calendarCreators}
-                      events={calendarEvents}
-                    />
+                  <div aria-hidden style={{ position: "fixed", top: 0, left: -10000 }}>
+                    <div ref={snapRef}>
+                      <CalendarSnapshotContent
+                        title={roster.title}
+                        month={snapMonth}
+                        creators={calendarCreators}
+                        events={calendarEvents}
+                      />
+                    </div>
                   </div>
                 </section>
               ) : calendarOn && view === "notes" ? (
