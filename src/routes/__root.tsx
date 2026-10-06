@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PageViewTracker } from "../components/analytics/PageViewTracker";
 import { Toaster } from "@/components/ui/sonner";
+import { NewVersionBanner } from "@/components/NewVersionBanner";
 import { ThemeProvider, themeInitScript } from "@/hooks/use-theme";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -176,6 +177,7 @@ function RootComponent() {
 
         <PageViewTracker />
         <Toaster />
+        <NewVersionBanner />
       </ThemeProvider>
     </QueryClientProvider>
 
