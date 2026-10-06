@@ -546,27 +546,38 @@ function PublicRosterPage() {
           const calendarEvents = (roster.calendar_events ?? []) as CalendarEvent[];
           const snapMonth = calMonth ?? initialMonth(calendarCreators);
           const fmtNoteDate = (d: string) => format(parseISO(d), "EEE d MMM");
+          const notesRows = activeItems.map((it) => {
+            const cats = itemCats(it).map(categoryLabel).join(" / ");
+            const dates = [
+              ...new Set(
+                [it.posting_date, ...(it.extra_posting_dates ?? [])]
+                  .filter((d): d is string => !!d)
+                  .map((d) => d.slice(0, 10)),
+              ),
+            ]
+              .sort()
+              .map(fmtNoteDate)
+              .join(", ");
+            return {
+              id: it.id,
+              name: it.name,
+              cats,
+              fans: formatCount(totalFans(it)),
+              followers: formatCount(socialAudience(it)),
+              dates: dates || "TBC",
+              notes: it.vibe?.trim() || "",
+            };
+          });
           const notesText = [
             `${roster.title} — notes (${format(new Date(), "d MMM yyyy")})`,
             "",
-            ...activeItems.map((it) => {
-              const cats = itemCats(it).map(categoryLabel).join(" / ");
-              const dates = [
-                ...new Set(
-                  [it.posting_date, ...(it.extra_posting_dates ?? [])]
-                    .filter((d): d is string => !!d)
-                    .map((d) => d.slice(0, 10)),
-                ),
-              ]
-                .sort()
-                .map(fmtNoteDate)
-                .join(", ");
-              return [
-                `- ${it.name}${cats ? ` — ${cats}` : ""} — ${formatCount(totalFans(it))} total fans · ${formatCount(socialAudience(it))} social followers`,
-                `  Posting: ${dates || "TBC"}`,
-                ...(it.vibe?.trim() ? [`  Notes: ${it.vibe.trim()}`] : []),
-              ].join("\n");
-            }),
+            ...notesRows.map((r) =>
+              [
+                `- ${r.name}${r.cats ? ` — ${r.cats}` : ""} — ${r.fans} total fans · ${r.followers} social followers`,
+                `  Posting: ${r.dates}`,
+                ...(r.notes ? [`  Notes: ${r.notes}`] : []),
+              ].join("\n"),
+            ),
           ].join("\n");
 
           async function downloadSnapshot() {
