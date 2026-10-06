@@ -943,7 +943,7 @@ function PublicRosterPage() {
                               <p className="flex items-start gap-2.5 text-sm leading-relaxed">
                                 <span
                                   aria-hidden
-                                  className="mt-[7px] size-1.5 shrink-0 rounded-full bg-pink-accent"
+                                  className="notes-bullet mt-[7px] size-1.5 shrink-0 rounded-full bg-pink-accent"
                                 />
                                 <span>
                                   <span className="font-semibold text-foreground">{r.name}</span>

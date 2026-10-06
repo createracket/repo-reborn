@@ -329,3 +329,8 @@
   background-color: var(--planner-surface);
   border-color: var(--border);
 }
+
+/* Light mode: the roster notes bullet is pale pink on white, so use brand purple for contrast. */
+.report-light .notes-bullet {
+  background-color: var(--purple) !important;
+}
