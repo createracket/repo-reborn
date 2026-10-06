@@ -141,8 +141,8 @@ export async function discoverReportPosts(admin: Admin, reportId: string): Promi
       const handle = (rawHandle.includes("/") ? rawHandle.split("/").pop() ?? "" : rawHandle).replace(/^@/, "");
       if (!handle) { result.skipped_no_handle++; continue; }
       const mine = (posts ?? []).filter((p) => p.creator_id === c.id);
-      const platforms = new Set(mine.map((p) => p.platform).filter((p) => p === "instagram" || p === "tiktok"));
-      if (!platforms.size) { platforms.add("instagram"); platforms.add("tiktok"); }
+      // Always check both channels so a creator's first TikTok/Instagram post is caught too.
+      const platforms = new Set<"instagram" | "tiktok">(["instagram", "tiktok"]);
 
       let minPos = mine.length ? Math.min(...mine.map((p) => p.position ?? 0)) : 0;
       for (const platform of platforms) {
