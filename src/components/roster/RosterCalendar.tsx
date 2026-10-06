@@ -40,7 +40,8 @@ export function eventDatesOf(e: CalendarEvent): string[] {
 }
 
 const MAX_PER_DAY = 3;
-const MAX_SNAPSHOT_PER_DAY = 4;
+// Two-line labels need vertical room in the fixed-height snapshot cells, so show fewer.
+const MAX_SNAPSHOT_PER_DAY = 3;
 
 export function initialMonth(creators: CalendarCreator[]): Date {
   const today = format(new Date(), "yyyy-MM-dd");
@@ -51,12 +52,13 @@ export function initialMonth(creators: CalendarCreator[]): Date {
   return startOfMonth(next ? parseISO(next) : new Date());
 }
 
-function Chip({ c, onPick, large }: { c: CalendarCreator; onPick: (id: string) => void; large?: boolean }) {
+function Chip({ c, onPick, large, clamp = 2 }: { c: CalendarCreator; onPick: (id: string) => void; large?: boolean; clamp?: 2 | 3 }) {
+  const clampClass = clamp === 3 ? "line-clamp-3" : "line-clamp-2";
   return (
     <button
       type="button"
       onClick={() => onPick(c.id)}
-      className={`flex w-full items-center rounded-full bg-lime text-left font-medium text-primary-foreground transition hover:bg-lime/85 report-light:text-foreground ${large ? "gap-2.5 px-2 py-1.5 text-sm" : "gap-1.5 px-1.5 py-0.5 text-[11px]"}`}
+      className={`flex w-full items-center rounded-lg bg-lime text-left font-medium text-primary-foreground transition hover:bg-lime/85 report-light:text-foreground ${large ? "gap-2.5 px-2 py-1.5 text-sm" : "gap-1.5 px-1.5 py-0.5 text-[11px]"}`}
       title={c.name}
     >
       <span className={`shrink-0 overflow-hidden rounded-full bg-background/40 ${large ? "size-8" : "size-4"}`}>
@@ -69,20 +71,21 @@ function Chip({ c, onPick, large }: { c: CalendarCreator; onPick: (id: string) =
           />
         ) : null}
       </span>
-      <span className="truncate">{c.name}</span>
+      <span className={`${clampClass} break-words leading-tight`}>{c.name}</span>
     </button>
   );
 }
 
 /** Key event marker — a moment to cover without a creator attached. */
-function EventChip({ e, large }: { e: CalendarEvent; large?: boolean }) {
+function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean; clamp?: 2 | 3 }) {
   const label = (e.label ?? "").trim() || "Event";
+  const clampClass = clamp === 3 ? "line-clamp-3" : "line-clamp-2";
   return (
     <div
-      className={`flex w-full items-center rounded-full border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent report-light:border-pink-ink report-light:text-pink-ink ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`}
+      className={`flex w-full items-center rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent report-light:border-pink-ink report-light:text-pink-ink ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`}
       title={label}
     >
-      <span className="truncate">{label}</span>
+      <span className={`${clampClass} break-words leading-tight`}>{label}</span>
     </div>
   );
 }
@@ -166,10 +169,10 @@ export function RosterCalendar({
                 <div className={`mb-1 text-xs ${isToday(d) ? "font-semibold text-pink-accent report-light:text-pink-ink" : "text-muted-foreground"}`}>{format(d, "d")}</div>
                 <div className="space-y-1">
                   {dayEvents.map((e, i) => (
-                    <EventChip key={`ev-${i}`} e={e} />
+                    <EventChip key={`ev-${i}`} e={e} clamp={3} />
                   ))}
                   {shown.map((c) => (
-                    <Chip key={c.id} c={c} onPick={onPick} />
+                    <Chip key={c.id} c={c} onPick={onPick} clamp={3} />
                   ))}
                   {overflow > 0 && (
                     <button
@@ -285,7 +288,7 @@ export function CalendarSnapshotContent({
                 {dayEvents.slice(0, 2).map((e, i) => (
                   <div
                     key={`ev-${i}`}
-                    className="truncate rounded-full border border-pink-accent px-2 py-0.5 text-[11px] font-medium text-pink-accent"
+                    className="line-clamp-2 break-words rounded-lg border border-pink-accent px-2 py-0.5 text-[11px] font-medium leading-tight text-pink-accent"
                   >
                     {(e.label ?? "").trim() || "Event"}
                   </div>
@@ -293,7 +296,7 @@ export function CalendarSnapshotContent({
                 {shown.map((c) => (
                   <div
                     key={c.id}
-                    className="truncate rounded-full bg-lime px-2 py-0.5 text-[11px] font-medium text-primary-foreground"
+                    className="line-clamp-2 break-words rounded-lg bg-lime px-2 py-0.5 text-[11px] font-medium leading-tight text-primary-foreground"
                     title={c.name}
                   >
                     {c.name}
