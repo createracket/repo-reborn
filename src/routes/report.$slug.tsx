@@ -582,11 +582,18 @@ function PublicReportPage() {
           </div>
         )}
 
-        {latestUpdate && (
-          <p className="mt-3 text-xs text-muted-foreground">
-            Last updated: {latestUpdate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
-          </p>
-        )}
+        {latestUpdate && (() => {
+          const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+          const times = allPosts
+            .map((p: any) => (p.posted_at ? new Date(p.posted_at).getTime() : NaN))
+            .filter((t: number) => Number.isFinite(t));
+          const since = times.length ? new Date(Math.min(...times)) : null;
+          return (
+            <p className="mt-3 text-xs text-muted-foreground">
+              {since && <>Since: {fmt(since)} · </>}Last updated: {fmt(latestUpdate)}
+            </p>
+          );
+        })()}
 
         {monthFilter !== "all" && filteredCreators.length > 0 && (
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
