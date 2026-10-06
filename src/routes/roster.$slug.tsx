@@ -775,39 +775,7 @@ function PublicRosterPage() {
                       </div>
 
                       <div className="mt-2.5 flex flex-wrap items-end justify-between gap-2">
-                        <div className="flex flex-wrap gap-1.5 text-xs">
-
-                        {stats.map(([label, count, url]) => {
-                          if (count == null && !url) return null;
-                          const content = (
-                            <>
-                              <span className="text-[0.7rem] font-semibold tracking-wider">{label}</span>
-                              {count != null ? (
-                                <span className="text-muted-foreground">{formatCount(count)}</span>
-                              ) : null}
-                            </>
-                          );
-                          return url ? (
-                            <a
-                              key={label}
-                              href={url}
-                              target="_blank"
-                              rel="noreferrer noopener"
-                              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-foreground transition-colors hover:border-foreground/40 hover:bg-muted/40"
-                            >
-                              {content}
-                            </a>
-                          ) : (
-                            <span
-                              key={label}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-muted-foreground"
-                            >
-                              {content}
-                            </span>
-                          );
-                        })}
-
-                        </div>
+                        <CreatorStats stats={stats} />
                         {!roster.hide_statuses && (
                           <Badge
                             variant="outline"
