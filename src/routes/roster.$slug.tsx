@@ -889,16 +889,14 @@ function PublicRosterPage() {
                       }, 50);
                     }}
                   />
-                  {snapping && (
-                    <div ref={snapRef} aria-hidden style={{ position: "fixed", top: 0, left: -10000 }}>
-                      <CalendarSnapshotContent
-                        title={roster.title}
-                        month={snapMonth}
-                        creators={calendarCreators}
-                        events={calendarEvents}
-                      />
-                    </div>
-                  )}
+                  <div ref={snapRef} aria-hidden style={{ position: "fixed", top: 0, left: -10000 }}>
+                    <CalendarSnapshotContent
+                      title={roster.title}
+                      month={snapMonth}
+                      creators={calendarCreators}
+                      events={calendarEvents}
+                    />
+                  </div>
                 </section>
               ) : calendarOn && view === "notes" ? (
                 <section className="mt-4 space-y-3">
