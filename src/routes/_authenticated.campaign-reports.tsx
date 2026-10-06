@@ -73,6 +73,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { ReportAutoPull } from "@/components/reports/ReportAutoPull";
+import { dismissReportPost } from "@/lib/report-post-discovery.functions";
 
 const sb = supabase as any;
 
@@ -215,7 +217,7 @@ function CampaignReportsPage() {
     const { data, error } = await sb
       .from("campaign_reports")
       .select(
-        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url, thumb_frame, custom_links, auto_refresh_monthly, show_calendar, calendar_events",
+        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url, thumb_frame, custom_links, auto_refresh_monthly, show_calendar, calendar_events, auto_pull_posts, auto_pull_start, auto_pull_end, auto_pull_last_run, auto_pull_last_result",
       )
       .order("updated_at", { ascending: false });
     if (error) return toast.error(error.message);
@@ -853,6 +855,11 @@ function ReportDetailView({
   return (
     <div className="space-y-6">
       <ReportMetricsUpdate reportId={report.id} onFinished={onChanged} />
+      <ReportAutoPull
+        report={report as any}
+        creatorsWithoutHandle={creators.filter((c) => !c.handle?.trim()).map((c) => c.name)}
+        onChanged={onChanged}
+      />
       {/* Meta card */}
 
       <Card>
@@ -1608,6 +1615,7 @@ function numOrNull(v: string): number | null {
 
 function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: () => Promise<void>; creatorName: string }) {
   const scrape = useServerFn(scrapePostMetrics);
+  const dismiss = useServerFn(dismissReportPost);
   const [saving, setSaving] = useState(false);
   const [scraping, setScraping] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -1783,8 +1791,11 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
 
   async function deletePost() {
     if (!confirm("Delete this post?")) return;
-    const { error } = await sb.from("campaign_report_posts").delete().eq("id", post.id);
-    if (error) return toast.error(error.message);
+    try {
+      await dismiss({ data: { postId: post.id } });
+    } catch (e) {
+      return toast.error((e as Error).message);
+    }
     await onChanged();
   }
 
@@ -2054,6 +2065,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
       <div className="flex justify-between pt-2 border-t border-border/60">
         {post.metrics_updated_at ? (
           <p className="text-[10px] text-muted-foreground">
+            {(post as any).auto_added && <span className="mr-2 rounded bg-primary px-1.5 py-0.5 font-semibold text-primary-foreground">Auto-added</span>}
             Metrics fetched {new Date(post.metrics_updated_at).toLocaleString()}
           </p>
         ) : <span />}

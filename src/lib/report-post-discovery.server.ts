@@ -137,7 +137,8 @@ export async function discoverReportPosts(admin: Admin, reportId: string): Promi
     for (const d of dismissed ?? []) known.add(d.post_key);
 
     for (const c of (creators ?? []).slice(0, 25)) {
-      const handle = (c.handle ?? "").trim().replace(/^@/, "");
+      const rawHandle = (c.handle ?? "").trim().replace(/[?#].*$/, "").replace(/\/+$/, "");
+      const handle = (rawHandle.includes("/") ? rawHandle.split("/").pop() ?? "" : rawHandle).replace(/^@/, "");
       if (!handle) { result.skipped_no_handle++; continue; }
       const mine = (posts ?? []).filter((p) => p.creator_id === c.id);
       const platforms = new Set(mine.map((p) => p.platform).filter((p) => p === "instagram" || p === "tiktok"));
