@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { EditConflictBanner } from "@/components/EditConflictBanner";
 import { getAuthSessionResult } from "@/hooks/use-auth";
 
 // Heavy builder — only downloaded on this route.
@@ -118,6 +119,7 @@ function EditBriefPage() {
 
   return (
     <Shell>
+      <EditConflictBanner watches={[{ table: "partner_pages", column: "id", value: brief.id }]} />
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">Admin</p>

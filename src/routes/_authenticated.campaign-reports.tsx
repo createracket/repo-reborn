@@ -48,6 +48,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { EditConflictBanner } from "@/components/EditConflictBanner";
 import { getAuthUser } from "@/hooks/use-auth";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
 import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
@@ -294,6 +295,14 @@ function CampaignReportsPage() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <main className="container mx-auto px-4 py-12">
+        {selected && (
+          <EditConflictBanner
+            watches={[
+              { table: "campaign_reports", column: "id", value: selected.id },
+              { table: "campaign_report_creators", column: "report_id", value: selected.id },
+            ]}
+          />
+        )}
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
