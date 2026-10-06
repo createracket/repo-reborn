@@ -12,3 +12,4 @@
 - `campaign_briefs` is protected by column-level GRANTs, so every new column needs its own explicit GRANT in the same migration or authenticated reads of the whole table fail with 403.
 
 - Campaigns (`campaigns` table) group briefs, brief pages, rosters and reports via nullable `campaign_id` columns layered over the legacy brief→roster/report links; collab brief editing and creation live within the campaign card, so grouping never changes live sharing or access and campaign creation remains the starting point.
+- Utility actions that export or copy page content use the shared `purple` Button variant (semantic `--color-purple` / `--color-purple-foreground`) instead of per-page colour classes, so they stay legible in both themes.
