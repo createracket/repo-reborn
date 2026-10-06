@@ -172,6 +172,67 @@ function formatCount(n: number) {
   return String(n);
 }
 
+// Per-creator platform stats, collapsed behind a toggle so roster cards stay clean.
+function CreatorStats({
+  stats,
+}: {
+  stats: Array<[string, number | null, string | null]>;
+}) {
+  const [open, setOpen] = useState(false);
+  const rows = stats.filter(([, count, url]) => count != null || !!url);
+  if (rows.length === 0) return null;
+
+  return (
+    <div className="min-w-0 flex-1">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:border-foreground/40 hover:bg-muted/40 hover:text-foreground"
+      >
+        Platform stats
+        <span className="font-normal normal-case tracking-normal">{rows.length}</span>
+        <ChevronDown
+          className={`size-3.5 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+          {rows.map(([label, count, url]) => {
+            const content = (
+              <>
+                <span className="text-[0.7rem] font-semibold tracking-wider">{label}</span>
+                {count != null ? (
+                  <span className="text-muted-foreground">{formatCount(count)}</span>
+                ) : null}
+              </>
+            );
+            return url ? (
+              <a
+                key={label}
+                href={url}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-foreground transition-colors hover:border-foreground/40 hover:bg-muted/40"
+              >
+                {content}
+              </a>
+            ) : (
+              <span
+                key={label}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-muted-foreground"
+              >
+                {content}
+              </span>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 function PublicRosterPage() {
   const { slug } = Route.useParams();
@@ -713,40 +774,8 @@ function PublicRosterPage() {
                         </div>
                       </div>
 
-                      <div className="mt-2.5 flex flex-wrap items-end justify-between gap-2">
-                        <div className="flex flex-wrap gap-1.5 text-xs">
-
-                        {stats.map(([label, count, url]) => {
-                          if (count == null && !url) return null;
-                          const content = (
-                            <>
-                              <span className="text-[0.7rem] font-semibold tracking-wider">{label}</span>
-                              {count != null ? (
-                                <span className="text-muted-foreground">{formatCount(count)}</span>
-                              ) : null}
-                            </>
-                          );
-                          return url ? (
-                            <a
-                              key={label}
-                              href={url}
-                              target="_blank"
-                              rel="noreferrer noopener"
-                              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-foreground transition-colors hover:border-foreground/40 hover:bg-muted/40"
-                            >
-                              {content}
-                            </a>
-                          ) : (
-                            <span
-                              key={label}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-3 py-1 text-muted-foreground"
-                            >
-                              {content}
-                            </span>
-                          );
-                        })}
-
-                        </div>
+                      <div className="mt-2.5 flex flex-wrap items-start justify-between gap-2">
+                        <CreatorStats stats={stats} />
                         {!roster.hide_statuses && (
                           <Badge
                             variant="outline"
