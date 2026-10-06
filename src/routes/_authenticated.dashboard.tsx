@@ -132,7 +132,7 @@ type Opportunity = {
 
 function DashboardPage() {
   const navigate = useNavigate();
-  const refreshTick = useRefreshTick(2.5 * 60_000);
+  const refreshTick = useRefreshTick(5 * 60_000);
   const { archived: archivedKeys, toggle: toggleArchive } = usePlannerArchives();
   const [showArchived, setShowArchived] = useState(false);
   const inView = (k: string) => archivedKeys.has(k) === showArchived;

@@ -175,7 +175,7 @@ function formatCount(n: number) {
 
 function PublicRosterPage() {
   const { slug } = Route.useParams();
-  const refreshTick = useRefreshTick(5 * 60_000);
+  const refreshTick = useRefreshTick(15 * 60_000);
   const [roster, setRoster] = useState<PublicRoster | null>(null);
   const [items, setItems] = useState<PublicItem[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");

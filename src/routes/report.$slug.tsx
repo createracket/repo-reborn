@@ -124,7 +124,7 @@ export const Route = createFileRoute("/report/$slug")({
 
 function PublicReportPage() {
   const { slug } = Route.useParams();
-  const refreshTick = useRefreshTick(5 * 60_000);
+  const refreshTick = useRefreshTick(15 * 60_000);
   const { view: viewParam } = Route.useSearch();
   const navigate = Route.useNavigate();
   const setView = (v: "posts" | "calendar") =>
