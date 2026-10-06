@@ -590,7 +590,8 @@ function PublicReportPage() {
           const since = times.length ? new Date(Math.min(...times)) : null;
           return (
             <p className="mt-3 text-xs text-muted-foreground">
-              {since && <>Since: {fmt(since)} · </>}Last updated: {fmt(latestUpdate)}
+              {since && <>Since: {fmt(since)} · </>}
+              <span className="text-purple-soft">Last updated: {fmt(latestUpdate)}</span>
             </p>
           );
         })()}
