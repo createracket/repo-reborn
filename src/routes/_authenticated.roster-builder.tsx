@@ -1567,6 +1567,64 @@ function RosterDetailView({
               />
             </div>
             <div className="rounded-lg border border-border/60 p-3">
+              <div className="text-sm font-medium">Key events</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Moments you'll cover without a creator attached. They appear on the calendar view only, in their own style.
+              </div>
+              <div className="mt-3 space-y-2">
+                {calendarEventsDraft.map((ev, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Input
+                      type="date"
+                      className="w-40"
+                      value={ev.date}
+                      onChange={(e) =>
+                        setCalendarEventsDraft((d) => d.map((x, j) => (j === i ? { ...x, date: e.target.value } : x)))
+                      }
+                    />
+                    <Input
+                      placeholder="Event label"
+                      value={ev.label}
+                      onChange={(e) =>
+                        setCalendarEventsDraft((d) => d.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Remove key event"
+                      onClick={() => setCalendarEventsDraft((d) => d.filter((_, j) => j !== i))}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                ))}
+                {calendarEventsDraft.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No key events yet.</p>
+                )}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCalendarEventsDraft((d) => [...d, { date: "", label: "" }])}
+                  >
+                    Add key event
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={savingEvents}
+                    onClick={() => saveCalendarEvents(calendarEventsDraft)}
+                  >
+                    {savingEvents ? "Saving…" : "Save key events"}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">Each event needs a date and a label to save.</span>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-lg border border-border/60 p-3">
               <div className="text-sm font-medium">Top metrics</div>
               <div className="mt-1 text-xs text-muted-foreground">
                 Choose which totals show at the top of the public roster page.
