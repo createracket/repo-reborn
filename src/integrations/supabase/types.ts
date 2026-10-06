@@ -365,8 +365,45 @@ export type Database = {
           },
         ]
       }
+      campaign_report_dismissed_posts: {
+        Row: {
+          created_at: string
+          id: string
+          post_key: string
+          report_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_key: string
+          report_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_key?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_report_dismissed_posts_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_report_dismissed_posts_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "public_campaign_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_report_posts: {
         Row: {
+          auto_added: boolean
           brand_tag: string | null
           caption: string | null
           comments: number | null
@@ -395,6 +432,7 @@ export type Database = {
           watch_time_hours: number | null
         }
         Insert: {
+          auto_added?: boolean
           brand_tag?: string | null
           caption?: string | null
           comments?: number | null
@@ -423,6 +461,7 @@ export type Database = {
           watch_time_hours?: number | null
         }
         Update: {
+          auto_added?: boolean
           brand_tag?: string | null
           caption?: string | null
           comments?: number | null
@@ -464,6 +503,12 @@ export type Database = {
         Row: {
           access_code: string | null
           access_code_label: string | null
+          auto_pull_end: string | null
+          auto_pull_last_result: Json | null
+          auto_pull_last_run: string | null
+          auto_pull_lease_until: string | null
+          auto_pull_posts: boolean
+          auto_pull_start: string | null
           auto_refresh_monthly: boolean
           brand_email: string | null
           calendar_events: Json
@@ -491,6 +536,12 @@ export type Database = {
         Insert: {
           access_code?: string | null
           access_code_label?: string | null
+          auto_pull_end?: string | null
+          auto_pull_last_result?: Json | null
+          auto_pull_last_run?: string | null
+          auto_pull_lease_until?: string | null
+          auto_pull_posts?: boolean
+          auto_pull_start?: string | null
           auto_refresh_monthly?: boolean
           brand_email?: string | null
           calendar_events?: Json
@@ -518,6 +569,12 @@ export type Database = {
         Update: {
           access_code?: string | null
           access_code_label?: string | null
+          auto_pull_end?: string | null
+          auto_pull_last_result?: Json | null
+          auto_pull_last_run?: string | null
+          auto_pull_lease_until?: string | null
+          auto_pull_posts?: boolean
+          auto_pull_start?: string | null
           auto_refresh_monthly?: boolean
           brand_email?: string | null
           calendar_events?: Json
