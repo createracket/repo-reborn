@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useRefreshTick } from "@/hooks/use-refresh-tick";
 import { getAuthUser } from "@/hooks/use-auth";
 import { readThumbFrame } from "@/lib/thumb-frame";
 import { PlannerTile } from "@/components/dashboard/PlannerTile";
@@ -131,6 +132,7 @@ type Opportunity = {
 
 function DashboardPage() {
   const navigate = useNavigate();
+  const refreshTick = useRefreshTick(2.5 * 60_000);
   const { archived: archivedKeys, toggle: toggleArchive } = usePlannerArchives();
   const [showArchived, setShowArchived] = useState(false);
   const inView = (k: string) => archivedKeys.has(k) === showArchived;
@@ -150,7 +152,7 @@ function DashboardPage() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [refreshTick]);
   const [email, setEmail] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [profileRow, setProfileRow] = useState<{ slug: string | null; avatar_url: string | null; bio: string | null; display_name: string | null } | null>(null);
@@ -622,7 +624,7 @@ function DashboardPage() {
       }
       setLoading(false);
     })();
-  }, []);
+  }, [refreshTick]);
 
   // Live-update the suggested matches when an admin edits community profiles
   useEffect(() => {
