@@ -20,6 +20,7 @@ import { resizeImageFile } from "@/lib/image-resize";
 import { useServerFn } from "@tanstack/react-start";
 import { StatsRequestPanel } from "@/components/reports/StatsRequestPanel";
 import { AdCodeRequestPanel } from "@/components/reports/AdCodeRequestPanel";
+import { ReportCalendarSettings, CreatorPostingDates } from "@/components/reports/ReportCalendarSettings";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -212,7 +213,7 @@ function CampaignReportsPage() {
     const { data, error } = await sb
       .from("campaign_reports")
       .select(
-        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url, thumb_frame, custom_links, auto_refresh_monthly",
+        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url, thumb_frame, custom_links, auto_refresh_monthly, show_calendar, calendar_events",
       )
       .order("updated_at", { ascending: false });
     if (error) return toast.error(error.message);
@@ -1243,7 +1244,12 @@ function ReportDetailView({
         </CardContent>
       </Card>
 
-
+      <ReportCalendarSettings
+        reportId={report.id}
+        showCalendar={!!(report as any).show_calendar}
+        events={(report as any).calendar_events}
+        onChanged={onChanged}
+      />
 
       {/* Creators */}
       <Card>
@@ -1525,6 +1531,12 @@ function CreatorRow({
       </div>
       {open && (
         <div className="border-t border-border/60 p-4 space-y-4">
+          <CreatorPostingDates
+            creatorId={creator.id}
+            postingDate={(creator as any).posting_date}
+            extraDates={(creator as any).extra_posting_dates}
+            onChanged={onChanged}
+          />
           {posts.length === 0 ? (
             <p className="text-sm text-muted-foreground">No live posts yet.</p>
           ) : (
