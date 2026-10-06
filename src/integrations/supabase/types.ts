@@ -1979,6 +1979,7 @@ export type Database = {
           archived: boolean
           brand_email: string | null
           brief_id: string | null
+          calendar_events: Json
           campaign_id: string | null
           categories: string[]
           client_email: string | null
@@ -2013,6 +2014,7 @@ export type Database = {
           archived?: boolean
           brand_email?: string | null
           brief_id?: string | null
+          calendar_events?: Json
           campaign_id?: string | null
           categories?: string[]
           client_email?: string | null
@@ -2047,6 +2049,7 @@ export type Database = {
           archived?: boolean
           brand_email?: string | null
           brief_id?: string | null
+          calendar_events?: Json
           campaign_id?: string | null
           categories?: string[]
           client_email?: string | null

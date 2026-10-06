@@ -85,6 +85,13 @@
       "when": 1791100489880,
       "tag": "0011_default_campaign_status_draft",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791249991297,
+      "tag": "0012_calendar_events_on_rosters",
+      "breakpoints": true
     }
   ]
 }

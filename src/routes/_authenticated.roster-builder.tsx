@@ -113,6 +113,7 @@ type Roster = {
   hide_metric_engagement: boolean;
   show_metric_creators: boolean;
   show_calendar?: boolean;
+  calendar_events?: Array<{ date?: string | null; label?: string | null }> | null;
   header_image_url: string | null;
   profile_image_url: string | null;
   thumb_frame?: any;
@@ -414,7 +415,7 @@ function RosterBuilderPage() {
       // SELECTable on the base table (privacy). Read them via the
       // get_roster_assignment RPC instead. A wildcard select fails outright.
       .select(
-        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators, show_calendar, archived, categories, statuses, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
+        "id, owner_id, title, description, created_at, updated_at, brief_id, slug, published, published_at, hide_prospect_tags, header_image_url, est_engagement_pct, hide_statuses, hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators, show_calendar, calendar_events, archived, categories, statuses, custom_links, allow_multi_category, access_code, access_code_label, profile_image_url, thumb_frame",
       )
       .order("updated_at", { ascending: false });
     if (error) {
@@ -831,6 +832,13 @@ function RosterDetailView({
   const [accessCode, setAccessCode] = useState(roster.access_code ?? "");
   const [accessCodeLabel, setAccessCodeLabel] = useState(roster.access_code_label ?? "Access code");
   const [savingAccess, setSavingAccess] = useState(false);
+  const [calendarEventsDraft, setCalendarEventsDraft] = useState<Array<{ date: string; label: string }>>(() =>
+    ((roster.calendar_events ?? []) as Array<{ date?: string | null; label?: string | null }>).map((e) => ({
+      date: e.date ?? "",
+      label: e.label ?? "",
+    })),
+  );
+  const [savingEvents, setSavingEvents] = useState(false);
   const [orderedItems, setOrderedItems] = useState<RosterItem[]>(items);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [newCategory, setNewCategory] = useState("");
@@ -862,6 +870,12 @@ function RosterDetailView({
 
     setAccessCode(roster.access_code ?? "");
     setAccessCodeLabel(roster.access_code_label ?? "Access code");
+    setCalendarEventsDraft(
+      ((roster.calendar_events ?? []) as Array<{ date?: string | null; label?: string | null }>).map((e) => ({
+        date: e.date ?? "",
+        label: e.label ?? "",
+      })),
+    );
     setEstEngagement(
       roster.est_engagement_pct != null ? String(roster.est_engagement_pct) : "",
     );
@@ -1035,6 +1049,24 @@ function RosterDetailView({
       toast.error(error.message);
       return;
     }
+    onChanged();
+  }
+
+  async function saveCalendarEvents(events: Array<{ date: string; label: string }>) {
+    setSavingEvents(true);
+    const cleaned = events
+      .filter((e) => e.date && e.label.trim())
+      .map((e) => ({ date: e.date, label: e.label.trim() }));
+    const { error } = await supabase
+      .from("rosters")
+      .update({ calendar_events: cleaned } as never)
+      .eq("id", roster.id);
+    setSavingEvents(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setCalendarEventsDraft(cleaned.map((e) => ({ ...e })));
     onChanged();
   }
 
@@ -1533,6 +1565,64 @@ function RosterDetailView({
                 checked={!!roster.show_calendar}
                 onCheckedChange={(on) => toggleMetricFlag("show_calendar", on)}
               />
+            </div>
+            <div className="rounded-lg border border-border/60 p-3">
+              <div className="text-sm font-medium">Key events</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                Moments you'll cover without a creator attached. They appear on the calendar view only, in their own style.
+              </div>
+              <div className="mt-3 space-y-2">
+                {calendarEventsDraft.map((ev, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Input
+                      type="date"
+                      className="w-40"
+                      value={ev.date}
+                      onChange={(e) =>
+                        setCalendarEventsDraft((d) => d.map((x, j) => (j === i ? { ...x, date: e.target.value } : x)))
+                      }
+                    />
+                    <Input
+                      placeholder="Event label"
+                      value={ev.label}
+                      onChange={(e) =>
+                        setCalendarEventsDraft((d) => d.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Remove key event"
+                      onClick={() => setCalendarEventsDraft((d) => d.filter((_, j) => j !== i))}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                ))}
+                {calendarEventsDraft.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No key events yet.</p>
+                )}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCalendarEventsDraft((d) => [...d, { date: "", label: "" }])}
+                  >
+                    Add key event
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={savingEvents}
+                    onClick={() => saveCalendarEvents(calendarEventsDraft)}
+                  >
+                    {savingEvents ? "Saving…" : "Save key events"}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">Each event needs a date and a label to save.</span>
+                </div>
+              </div>
             </div>
             <div className="rounded-lg border border-border/60 p-3">
               <div className="text-sm font-medium">Top metrics</div>

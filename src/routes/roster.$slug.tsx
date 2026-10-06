@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Users, BadgeCheck, ChevronDown, Filter } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Users, BadgeCheck, ChevronDown, Filter, Copy, Camera } from "lucide-react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -23,7 +23,14 @@ import { storageImage } from "@/lib/storage-image";
 import { parseCoPosts, coPostLabel } from "@/lib/co-posts";
 import { shareMeta } from "@/lib/share-meta";
 import { getSharePreview } from "@/lib/share-preview.functions";
-import { RosterCalendar } from "@/components/roster/RosterCalendar";
+import {
+  RosterCalendar,
+  CalendarSnapshotContent,
+  initialMonth,
+  type CalendarEvent,
+} from "@/components/roster/RosterCalendar";
+import { format, parseISO } from "date-fns";
+import { toast } from "sonner";
 
 
 type PublicRoster = {
@@ -48,6 +55,7 @@ type PublicRoster = {
   categories: string[] | null;
   custom_links: Array<{ label: string; url: string }> | null;
   show_calendar?: boolean | null;
+  calendar_events?: CalendarEvent[] | null;
 };
 
 type PublicItem = {
@@ -151,6 +159,9 @@ export const Route = createFileRoute("/roster/$slug")({
       noindex: true,
     }),
   }),
+  validateSearch: (search: Record<string, unknown>): { view?: "calendar" | "notes" } => ({
+    view: search.view === "calendar" || search.view === "notes" ? search.view : undefined,
+  }),
   component: PublicRosterPage,
 });
 
@@ -174,7 +185,16 @@ function PublicRosterPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [itemsLoaded, setItemsLoaded] = useState(false);
-  const [view, setView] = useState<"list" | "calendar">("list");
+  const { view: viewParam } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const view: "list" | "calendar" | "notes" = viewParam ?? "list";
+  const setView = (v: "list" | "calendar" | "notes") =>
+    navigate({
+      search: (prev: Record<string, unknown>) => ({ ...prev, view: v === "list" ? undefined : v }),
+    });
+  const [calMonth, setCalMonth] = useState<Date | null>(null);
+  const [snapping, setSnapping] = useState(false);
+  const snapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const pageName = roster?.title?.trim() || gate?.title?.trim();
@@ -522,6 +542,56 @@ function PublicRosterPage() {
           const activeItems = items.filter((it) => it.status !== "hold" && it.status !== "live" && matches(it));
           const liveItems = items.filter((it) => it.status === "live" && matches(it));
           const archivedItems = items.filter((it) => it.status === "hold" && matches(it));
+          const calendarCreators = items.filter(matches);
+          const calendarEvents = (roster.calendar_events ?? []) as CalendarEvent[];
+          const snapMonth = calMonth ?? initialMonth(calendarCreators);
+          const fmtNoteDate = (d: string) => format(parseISO(d), "EEE d MMM");
+          const notesText = [
+            `${roster.title} — notes (${format(new Date(), "d MMM yyyy")})`,
+            "",
+            ...activeItems.map((it) => {
+              const cats = itemCats(it).map(categoryLabel).join(" / ");
+              const dates = [
+                ...new Set(
+                  [it.posting_date, ...(it.extra_posting_dates ?? [])]
+                    .filter((d): d is string => !!d)
+                    .map((d) => d.slice(0, 10)),
+                ),
+              ]
+                .sort()
+                .map(fmtNoteDate)
+                .join(", ");
+              return [
+                `- ${it.name}${cats ? ` — ${cats}` : ""} — ${formatCount(totalFans(it))} total fans · ${formatCount(socialAudience(it))} social followers`,
+                `  Posting: ${dates || "TBC"}`,
+                ...(it.vibe?.trim() ? [`  Notes: ${it.vibe.trim()}`] : []),
+              ].join("\n");
+            }),
+          ].join("\n");
+
+          async function downloadSnapshot() {
+            if (!roster || !snapRef.current) return;
+            setSnapping(true);
+            try {
+              await new Promise((r) => setTimeout(r, 80));
+              const { toPng } = await import("html-to-image");
+              const dataUrl = await toPng(snapRef.current, {
+                width: 1080,
+                height: 1080,
+                pixelRatio: 1,
+                skipFonts: true,
+              });
+              const a = document.createElement("a");
+              a.href = dataUrl;
+              a.download = `${roster.slug || "roster"}-calendar-${format(snapMonth, "yyyy-MM")}.png`;
+              a.click();
+              toast.success("Calendar snapshot downloaded");
+            } catch {
+              toast.error("Couldn't create the snapshot — try again");
+            } finally {
+              setSnapping(false);
+            }
+          }
 
 
           const renderItem = (it: PublicItem) => {
@@ -745,7 +815,7 @@ function PublicRosterPage() {
                   <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
                     {calendarOn && (
                       <div className="inline-flex w-full rounded-full border border-border/60 p-0.5 text-sm sm:mr-auto sm:w-auto">
-                        {(["list", "calendar"] as const).map((v) => (
+                        {(["list", "calendar", "notes"] as const).map((v) => (
                           <button
                             key={v}
                             type="button"
@@ -799,8 +869,17 @@ function PublicRosterPage() {
 
               {calendarOn && view === "calendar" ? (
                 <section className="mt-4">
+                  <div className="mb-3 flex justify-end">
+                    <Button size="sm" variant="outline" onClick={downloadSnapshot} disabled={snapping}>
+                      <Camera className="mr-1.5 size-3.5" />
+                      {snapping ? "Creating image…" : "Download snapshot"}
+                    </Button>
+                  </div>
                   <RosterCalendar
-                    creators={items.filter(matches)}
+                    creators={calendarCreators}
+                    events={calendarEvents}
+                    month={calMonth}
+                    onMonthChange={setCalMonth}
                     onPick={(id) => {
                       setView("list");
                       setTimeout(() => {
@@ -810,6 +889,47 @@ function PublicRosterPage() {
                       }, 50);
                     }}
                   />
+                  <div aria-hidden style={{ position: "fixed", top: 0, left: -10000 }}>
+                    <div ref={snapRef}>
+                      <CalendarSnapshotContent
+                        title={roster.title}
+                        month={snapMonth}
+                        creators={calendarCreators}
+                        events={calendarEvents}
+                      />
+                    </div>
+                  </div>
+                </section>
+              ) : calendarOn && view === "notes" ? (
+                <section className="mt-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm text-muted-foreground">
+                      {activeItems.length} creator{activeItems.length === 1 ? "" : "s"} — copy this rundown for internal updates.
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(notesText);
+                          toast.success("Notes copied to clipboard");
+                        } catch {
+                          toast.error("Couldn't copy — select the text below instead");
+                        }
+                      }}
+                    >
+                      <Copy className="mr-1.5 size-3.5" /> Copy notes
+                    </Button>
+                  </div>
+                  {activeItems.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No creators match the current filters.</p>
+                  ) : (
+                    <Card>
+                      <CardContent className="p-4 sm:p-5">
+                        <div className="whitespace-pre-wrap text-sm leading-relaxed">{notesText}</div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </section>
               ) : (
               <>
