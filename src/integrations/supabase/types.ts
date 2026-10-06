@@ -310,11 +310,13 @@ export type Database = {
           avatar_url: string | null
           category: string | null
           created_at: string
+          extra_posting_dates: string[]
           handle: string | null
           id: string
           location: string | null
           name: string
           position: number
+          posting_date: string | null
           report_id: string
           updated_at: string
         }
@@ -322,11 +324,13 @@ export type Database = {
           avatar_url?: string | null
           category?: string | null
           created_at?: string
+          extra_posting_dates?: string[]
           handle?: string | null
           id?: string
           location?: string | null
           name?: string
           position?: number
+          posting_date?: string | null
           report_id: string
           updated_at?: string
         }
@@ -334,11 +338,13 @@ export type Database = {
           avatar_url?: string | null
           category?: string | null
           created_at?: string
+          extra_posting_dates?: string[]
           handle?: string | null
           id?: string
           location?: string | null
           name?: string
           position?: number
+          posting_date?: string | null
           report_id?: string
           updated_at?: string
         }
@@ -460,6 +466,7 @@ export type Database = {
           access_code_label: string | null
           auto_refresh_monthly: boolean
           brand_email: string | null
+          calendar_events: Json
           campaign_id: string | null
           categories: string[]
           client_email: string | null
@@ -473,6 +480,7 @@ export type Database = {
           profile_image_url: string | null
           published: boolean
           published_at: string | null
+          show_calendar: boolean
           slug: string
           source_roster_id: string | null
           template: string
@@ -485,6 +493,7 @@ export type Database = {
           access_code_label?: string | null
           auto_refresh_monthly?: boolean
           brand_email?: string | null
+          calendar_events?: Json
           campaign_id?: string | null
           categories?: string[]
           client_email?: string | null
@@ -498,6 +507,7 @@ export type Database = {
           profile_image_url?: string | null
           published?: boolean
           published_at?: string | null
+          show_calendar?: boolean
           slug: string
           source_roster_id?: string | null
           template?: string
@@ -510,6 +520,7 @@ export type Database = {
           access_code_label?: string | null
           auto_refresh_monthly?: boolean
           brand_email?: string | null
+          calendar_events?: Json
           campaign_id?: string | null
           categories?: string[]
           client_email?: string | null
@@ -523,6 +534,7 @@ export type Database = {
           profile_image_url?: string | null
           published?: boolean
           published_at?: string | null
+          show_calendar?: boolean
           slug?: string
           source_roster_id?: string | null
           template?: string
@@ -2714,6 +2726,7 @@ export type Database = {
       }
       public_campaign_reports: {
         Row: {
+          calendar_events: Json | null
           categories: string[] | null
           created_at: string | null
           custom_links: Json | null
@@ -2724,12 +2737,14 @@ export type Database = {
           profile_image_url: string | null
           published: boolean | null
           published_at: string | null
+          show_calendar: boolean | null
           slug: string | null
           template: string | null
           title: string | null
           updated_at: string | null
         }
         Insert: {
+          calendar_events?: Json | null
           categories?: string[] | null
           created_at?: string | null
           custom_links?: Json | null
@@ -2740,12 +2755,14 @@ export type Database = {
           profile_image_url?: string | null
           published?: boolean | null
           published_at?: string | null
+          show_calendar?: boolean | null
           slug?: string | null
           template?: string | null
           title?: string | null
           updated_at?: string | null
         }
         Update: {
+          calendar_events?: Json | null
           categories?: string[] | null
           created_at?: string | null
           custom_links?: Json | null
@@ -2756,6 +2773,7 @@ export type Database = {
           profile_image_url?: string | null
           published?: boolean | null
           published_at?: string | null
+          show_calendar?: boolean | null
           slug?: string | null
           template?: string | null
           title?: string | null
