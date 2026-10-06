@@ -937,7 +937,36 @@ function PublicRosterPage() {
                   ) : (
                     <Card>
                       <CardContent className="p-4 sm:p-5">
-                        <div className="whitespace-pre-wrap text-sm leading-relaxed">{notesText}</div>
+                        <ul className="divide-y divide-border/60">
+                          {notesRows.map((r) => (
+                            <li key={r.id} className="py-5 first:pt-0 last:pb-0">
+                              <p className="flex items-start gap-2.5 text-sm leading-relaxed">
+                                <span
+                                  aria-hidden
+                                  className="mt-[7px] size-1.5 shrink-0 rounded-full bg-pink-accent"
+                                />
+                                <span>
+                                  <span className="font-semibold text-foreground">{r.name}</span>
+                                  {r.cats ? (
+                                    <span className="text-muted-foreground"> — {r.cats}</span>
+                                  ) : null}
+                                  <span className="text-muted-foreground">
+                                    {" "}
+                                    — {r.fans} total fans · {r.followers} social followers
+                                  </span>
+                                </span>
+                              </p>
+                              <p className="mt-2 pl-4 text-sm text-muted-foreground">
+                                <span className="text-foreground/80">Posting:</span> {r.dates}
+                              </p>
+                              {r.notes ? (
+                                <p className="mt-1 pl-4 text-sm text-muted-foreground">
+                                  <span className="text-foreground/80">Notes:</span> {r.notes}
+                                </p>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
                       </CardContent>
                     </Card>
                   )}
