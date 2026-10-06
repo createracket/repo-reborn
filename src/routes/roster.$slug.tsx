@@ -539,7 +539,13 @@ function PublicRosterPage() {
             (categoryFilter === "all" || itemCats(it).includes(categoryFilter)) &&
             (roster.hide_statuses || statusFilter === "all" || (it.status || "in_review") === statusFilter);
           const calendarOn = !!roster.show_calendar;
-          const activeItems = items.filter((it) => it.status !== "hold" && it.status !== "live" && matches(it));
+          const firstDate = (it: PublicItem) =>
+            [it.posting_date, ...(it.extra_posting_dates ?? [])].filter((d): d is string => !!d).sort()[0] ?? "9999-99-99";
+          const activeItems = items
+            .filter((it) => it.status !== "hold" && it.status !== "live" && matches(it))
+            .map((it, i) => ({ it, i }))
+            .sort((a, b) => firstDate(a.it).localeCompare(firstDate(b.it)) || a.i - b.i)
+            .map((x) => x.it);
           const liveItems = items.filter((it) => it.status === "live" && matches(it));
           const archivedItems = items.filter((it) => it.status === "hold" && matches(it));
           const calendarCreators = items.filter(matches);

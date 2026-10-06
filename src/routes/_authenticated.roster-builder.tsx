@@ -1738,6 +1738,24 @@ function RosterDetailView({
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  title="Sort creators by earliest posting date (undated at the end)"
+                  onClick={() => {
+                    const first = (it: RosterItem) =>
+                      [it.posting_date, ...(it.extra_posting_dates ?? [])].filter((d): d is string => !!d).sort()[0] ?? "9999-99-99";
+                    const byDate = (arr: RosterItem[]) =>
+                      arr.map((it, i) => ({ it, i })).sort((a, b) => first(a.it).localeCompare(first(b.it)) || a.i - b.i).map((x) => x.it);
+                    const main = orderedItems.filter((it) => it.status !== "hold" && it.status !== "live");
+                    const live = orderedItems.filter((it) => it.status === "live");
+                    const arch = orderedItems.filter((it) => it.status === "hold");
+                    void persistOrder([...byDate(main), ...byDate(live), ...byDate(arch)]).then(() => toast.success("Ordered by posting date"));
+                  }}
+                >
+                  Order by date
+                </Button>
                 <Filter className="size-4 text-muted-foreground" />
                 <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v)}>
                   <SelectTrigger className="w-[160px] text-sm">
