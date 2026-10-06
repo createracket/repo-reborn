@@ -41,7 +41,7 @@ async function apify(actor: string, input: unknown, token: string): Promise<unkn
 async function latestInstagram(handle: string, token: string): Promise<Found[]> {
   const rows = (await apify(
     "apify~instagram-post-scraper",
-    { username: [handle], resultsLimit: 12, addParentData: false },
+    { username: [handle], resultsLimit: 40, addParentData: false },
     token,
   )) as Array<Record<string, any>>;
   return rows
@@ -65,7 +65,7 @@ async function latestInstagram(handle: string, token: string): Promise<Found[]> 
 async function latestTikTok(handle: string, token: string): Promise<Found[]> {
   const rows = (await apify(
     "clockworks~free-tiktok-scraper",
-    { profiles: [handle], resultsPerPage: 12, shouldDownloadVideos: false },
+    { profiles: [handle], resultsPerPage: 40, shouldDownloadVideos: false },
     token,
   )) as Array<Record<string, any>>;
   return rows
