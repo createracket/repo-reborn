@@ -1069,6 +1069,8 @@ function RosterDetailView({
     setCalendarEventsDraft(cleaned.map((e) => ({ ...e })));
     onChanged();
   }
+
+  async function saveAccessCode() {
     setSavingAccess(true);
     const code = accessCode.trim();
     const { error } = await supabase
