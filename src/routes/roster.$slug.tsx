@@ -570,7 +570,6 @@ function PublicRosterPage() {
           });
           const notesText = [
             `${roster.title} — notes (${format(new Date(), "d MMM yyyy")})`,
-            "",
             ...notesRows.map((r) =>
               [
                 `- ${r.name}${r.cats ? ` — ${r.cats}` : ""} — ${r.fans} total fans · ${r.followers} social followers`,
@@ -578,7 +577,7 @@ function PublicRosterPage() {
                 ...(r.notes ? [`  Notes: ${r.notes}`] : []),
               ].join("\n"),
             ),
-          ].join("\n");
+          ].join("\n\n");
 
           async function downloadSnapshot() {
             if (!roster || !snapRef.current) return;
@@ -937,9 +936,9 @@ function PublicRosterPage() {
                   ) : (
                     <Card>
                       <CardContent className="p-4 sm:p-5">
-                        <ul className="divide-y divide-border/60">
+                        <ul className="space-y-8">
                           {notesRows.map((r) => (
-                            <li key={r.id} className="py-5 first:pt-0 last:pb-0">
+                            <li key={r.id}>
                               <p className="flex items-start gap-2.5 text-sm leading-relaxed">
                                 <span
                                   aria-hidden
