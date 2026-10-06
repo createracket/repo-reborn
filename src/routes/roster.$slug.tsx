@@ -546,27 +546,38 @@ function PublicRosterPage() {
           const calendarEvents = (roster.calendar_events ?? []) as CalendarEvent[];
           const snapMonth = calMonth ?? initialMonth(calendarCreators);
           const fmtNoteDate = (d: string) => format(parseISO(d), "EEE d MMM");
+          const notesRows = activeItems.map((it) => {
+            const cats = itemCats(it).map(categoryLabel).join(" / ");
+            const dates = [
+              ...new Set(
+                [it.posting_date, ...(it.extra_posting_dates ?? [])]
+                  .filter((d): d is string => !!d)
+                  .map((d) => d.slice(0, 10)),
+              ),
+            ]
+              .sort()
+              .map(fmtNoteDate)
+              .join(", ");
+            return {
+              id: it.id,
+              name: it.name,
+              cats,
+              fans: formatCount(totalFans(it)),
+              followers: formatCount(socialAudience(it)),
+              dates: dates || "TBC",
+              notes: it.vibe?.trim() || "",
+            };
+          });
           const notesText = [
             `${roster.title} — notes (${format(new Date(), "d MMM yyyy")})`,
             "",
-            ...activeItems.map((it) => {
-              const cats = itemCats(it).map(categoryLabel).join(" / ");
-              const dates = [
-                ...new Set(
-                  [it.posting_date, ...(it.extra_posting_dates ?? [])]
-                    .filter((d): d is string => !!d)
-                    .map((d) => d.slice(0, 10)),
-                ),
-              ]
-                .sort()
-                .map(fmtNoteDate)
-                .join(", ");
-              return [
-                `- ${it.name}${cats ? ` — ${cats}` : ""} — ${formatCount(totalFans(it))} total fans · ${formatCount(socialAudience(it))} social followers`,
-                `  Posting: ${dates || "TBC"}`,
-                ...(it.vibe?.trim() ? [`  Notes: ${it.vibe.trim()}`] : []),
-              ].join("\n");
-            }),
+            ...notesRows.map((r) =>
+              [
+                `- ${r.name}${r.cats ? ` — ${r.cats}` : ""} — ${r.fans} total fans · ${r.followers} social followers`,
+                `  Posting: ${r.dates}`,
+                ...(r.notes ? [`  Notes: ${r.notes}`] : []),
+              ].join("\n"),
+            ),
           ].join("\n");
 
           async function downloadSnapshot() {
@@ -926,7 +937,36 @@ function PublicRosterPage() {
                   ) : (
                     <Card>
                       <CardContent className="p-4 sm:p-5">
-                        <div className="whitespace-pre-wrap text-sm leading-relaxed">{notesText}</div>
+                        <ul className="divide-y divide-border/60">
+                          {notesRows.map((r) => (
+                            <li key={r.id} className="py-5 first:pt-0 last:pb-0">
+                              <p className="flex items-start gap-2.5 text-sm leading-relaxed">
+                                <span
+                                  aria-hidden
+                                  className="notes-bullet mt-[7px] size-1.5 shrink-0 rounded-full bg-pink-accent"
+                                />
+                                <span>
+                                  <span className="font-semibold text-foreground">{r.name}</span>
+                                  {r.cats ? (
+                                    <span className="text-muted-foreground"> — {r.cats}</span>
+                                  ) : null}
+                                  <span className="text-muted-foreground">
+                                    {" "}
+                                    — {r.fans} total fans · {r.followers} social followers
+                                  </span>
+                                </span>
+                              </p>
+                              <p className="mt-2 pl-4 text-sm text-muted-foreground">
+                                <span className="text-foreground/80">Posting:</span> {r.dates}
+                              </p>
+                              {r.notes ? (
+                                <p className="mt-1 pl-4 text-sm text-muted-foreground">
+                                  <span className="text-foreground/80">Notes:</span> {r.notes}
+                                </p>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
                       </CardContent>
                     </Card>
                   )}
