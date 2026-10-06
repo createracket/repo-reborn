@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { useRefreshTick } from "@/hooks/use-refresh-tick";
 import { getAuthSessionResult } from "@/hooks/use-auth";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { getRosterGate, unlockRoster, getRosterForMember } from "@/lib/roster-access.functions";
@@ -174,6 +175,7 @@ function formatCount(n: number) {
 
 function PublicRosterPage() {
   const { slug } = Route.useParams();
+  const refreshTick = useRefreshTick(5 * 60_000);
   const [roster, setRoster] = useState<PublicRoster | null>(null);
   const [items, setItems] = useState<PublicItem[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
@@ -238,7 +240,7 @@ function PublicRosterPage() {
       setItems(((bundle as { items?: PublicItem[] }).items as PublicItem[]) ?? []);
       setItemsLoaded(true);
     })();
-  }, [slug]);
+  }, [slug, refreshTick]);
 
   if (status === "loading") {
     return (

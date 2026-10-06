@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useRefreshTick } from "@/hooks/use-refresh-tick";
 import { getAuthSessionResult } from "@/hooks/use-auth";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { formatCount, formatPct, type Platform } from "@/lib/youtube-utils";
@@ -123,6 +124,7 @@ export const Route = createFileRoute("/report/$slug")({
 
 function PublicReportPage() {
   const { slug } = Route.useParams();
+  const refreshTick = useRefreshTick(5 * 60_000);
   const { view: viewParam } = Route.useSearch();
   const navigate = Route.useNavigate();
   const setView = (v: "posts" | "calendar") =>
@@ -217,7 +219,7 @@ function PublicReportPage() {
       setCreators(creatorRows.map((c) => ({ ...c, posts: byCreator.get(c.id) ?? [] })));
       setStatus("ready");
     })();
-  }, [slug]);
+  }, [slug, refreshTick]);
 
   useEffect(() => {
     setVisibleCount(POSTS_PER_LOAD);
