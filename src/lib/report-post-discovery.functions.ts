@@ -17,16 +17,21 @@ export const checkReportForNewPosts = createServerFn({ method: "POST" })
 /** Removing an auto-added post remembers it so it is never re-added. */
 export const dismissReportPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ reportId: z.string().uuid(), postId: z.string().uuid(), postUrl: z.string().nullable() }).parse)
+  .inputValidator(z.object({ postId: z.string().uuid() }).parse)
   .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (!isAdmin) throw new Error("Forbidden");
     const { postKey } = await import("./report-post-discovery.server");
-    const key = postKey(data.postUrl);
-    if (key) {
+    const { data: post } = await context.supabase
+      .from("campaign_report_posts").select("post_url, creator_id").eq("id", data.postId).maybeSingle();
+    const { data: creator } = post
+      ? await context.supabase.from("campaign_report_creators").select("report_id").eq("id", post.creator_id).maybeSingle()
+      : { data: null };
+    const key = postKey(post?.post_url);
+    if (key && creator) {
       await context.supabase
         .from("campaign_report_dismissed_posts")
-        .upsert({ report_id: data.reportId, post_key: key }, { onConflict: "report_id,post_key" });
+        .upsert({ report_id: creator.report_id, post_key: key }, { onConflict: "report_id,post_key" });
     }
     const { error } = await context.supabase.from("campaign_report_posts").delete().eq("id", data.postId);
     if (error) throw new Error(error.message);
