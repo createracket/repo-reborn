@@ -13,6 +13,7 @@
 
 - Campaigns (`campaigns` table) group briefs, brief pages, rosters and reports via nullable `campaign_id` columns layered over the legacy brief→roster/report links; collab brief editing and creation live within the campaign card, so grouping never changes live sharing or access and campaign creation remains the starting point.
 - Utility actions that export or copy page content use the shared `purple` Button variant (semantic `--color-purple` / `--color-purple-foreground`) instead of per-page colour classes, so they stay legible in both themes.
+- Brand purple *text* uses the `text-purple-soft` token (`--purple-soft`), which lifts to a lighter purple on the dark canvas and stays brand purple in light mode, so purple copy never drops below readable contrast.
 - Read-only live pages (dashboard, public roster, public report) re-run their load effects via useRefreshTick (interval while visible + on tab return), never on edit screens, so viewers see fresh data without reloads or losing unsaved input.
 - Builder pages show an "updated elsewhere — Refresh" bar (EditConflictBanner polls updated_at, ignores this tab's own saves) and the root shows a "New version available" pill comparing bundled script names; neither reloads automatically, so unsaved input is never lost.
 - Report post auto-discovery is opt-in per report (auto_pull_posts + date window), runs from a daily secret-gated cron hook with a per-report lease, inserts posts with auto_added=true, and remembers deletions in campaign_report_dismissed_posts so removed posts never return.
