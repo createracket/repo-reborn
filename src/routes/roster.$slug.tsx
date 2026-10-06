@@ -886,7 +886,7 @@ function PublicRosterPage() {
               {calendarOn && view === "calendar" ? (
                 <section className="mt-4">
                   <div className="mb-3 flex justify-end">
-                    <Button size="sm" variant="outline" onClick={downloadSnapshot} disabled={snapping}>
+                    <Button size="sm" variant="purple" onClick={downloadSnapshot} disabled={snapping}>
                       <Camera className="mr-1.5 size-3.5" />
                       {snapping ? "Creating image…" : "Download snapshot"}
                     </Button>
@@ -924,7 +924,7 @@ function PublicRosterPage() {
                     </p>
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="purple"
                       onClick={async () => {
                         try {
                           await navigator.clipboard.writeText(notesText);
