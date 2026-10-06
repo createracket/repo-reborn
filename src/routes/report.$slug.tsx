@@ -17,6 +17,7 @@ import { PostThumb } from "@/components/reports/PostThumb";
 import { getReportGate, unlockReport, getReportForMember } from "@/lib/report-access.functions";
 import { shareMeta } from "@/lib/share-meta";
 import { getSharePreview } from "@/lib/share-preview.functions";
+import { RosterCalendar, type CalendarEvent } from "@/components/roster/RosterCalendar";
 
 // Posts load in batches of 18 so the first screen lands on full rows of six.
 const POSTS_PER_LOAD = 18;
@@ -37,6 +38,8 @@ type PublicReport = {
   categories: string[] | null;
   hide_categories: boolean | null;
   template: string | null;
+  show_calendar?: boolean | null;
+  calendar_events?: CalendarEvent[] | null;
 };
 
 type FeaturedComment = {
@@ -81,6 +84,8 @@ type PublicCreator = {
   position: number;
   location: string | null;
   category: string | null;
+  posting_date?: string | null;
+  extra_posting_dates?: string[] | null;
   posts: PublicPost[];
 };
 
@@ -110,11 +115,18 @@ export const Route = createFileRoute("/report/$slug")({
       noindex: true,
     }),
   }),
+  validateSearch: (search: Record<string, unknown>): { view?: "calendar" } => ({
+    view: search.view === "calendar" ? "calendar" : undefined,
+  }),
   component: PublicReportPage,
 });
 
 function PublicReportPage() {
   const { slug } = Route.useParams();
+  const { view: viewParam } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const setView = (v: "posts" | "calendar") =>
+    navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, view: v === "posts" ? undefined : v }), replace: true });
   const [report, setReport] = useState<PublicReport | null>(null);
   const [csvAvailable, setCsvAvailable] = useState(false);
   const [creators, setCreators] = useState<PublicCreator[]>([]);
@@ -139,7 +151,7 @@ function PublicReportPage() {
     (async () => {
       const { data: r } = await (supabase as any)
         .from("public_campaign_reports")
-        .select("id, title, description, slug, published, published_at, header_image_url, profile_image_url, categories, hide_categories, template, custom_links")
+        .select("id, title, description, slug, published, published_at, header_image_url, profile_image_url, categories, hide_categories, template, custom_links, show_calendar, calendar_events")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
@@ -180,7 +192,7 @@ function PublicReportPage() {
       setCsvAvailable(true); // CSV export only serves public (no access code) reports
       const { data: cr } = await (supabase as any)
         .from("campaign_report_creators")
-        .select("id, name, handle, avatar_url, position, location, category")
+        .select("id, name, handle, avatar_url, position, location, category, posting_date, extra_posting_dates")
         .eq("report_id", (r as PublicReport).id)
         .order("position", { ascending: true });
       const creatorRows = ((cr as any[]) ?? []) as Omit<PublicCreator, "posts">[];
@@ -587,6 +599,36 @@ function PublicReportPage() {
           </div>
         )}
 
+        {report.show_calendar && (
+          <div className="mt-10 inline-flex w-full rounded-full border border-border/60 p-0.5 text-sm sm:w-auto">
+            {(["posts", "calendar"] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setView(v)}
+                className={`flex-1 rounded-full px-4 py-1.5 capitalize transition sm:flex-none ${(viewParam ?? "posts") === v ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {report.show_calendar && viewParam === "calendar" ? (
+          <section className="mt-6">
+            <RosterCalendar
+              creators={creators}
+              events={(report.calendar_events ?? []) as CalendarEvent[]}
+              onPick={(id) => {
+                setSortMode("creator");
+                setView("posts");
+                setTimeout(() => {
+                  document.getElementById(`creator-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 80);
+              }}
+            />
+          </section>
+        ) : (<>
         {(monthOptions.length > 0 || hasExtraMentions || allPosts.length > 0) && (
           <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
             <div className="flex items-center gap-1.5">
@@ -750,8 +792,7 @@ function PublicReportPage() {
             </div>
           )}
         </section>
-
-
+        </>)}
       </main>
       <SiteFooter />
     </div>
