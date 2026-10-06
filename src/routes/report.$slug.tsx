@@ -746,7 +746,7 @@ function PublicReportPage() {
             </div>
           ) : (
             visibleCreators.map((c) => (
-              <div key={c.id} className="space-y-4">
+              <div key={c.id} id={`creator-${c.id}`} className="scroll-mt-24 space-y-4">
                 {c.posts.length === 0 ? (
                   <Card>
                     <CardContent className="flex items-center gap-3 p-5">
