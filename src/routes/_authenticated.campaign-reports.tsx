@@ -51,6 +51,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditConflictBanner } from "@/components/EditConflictBanner";
 import { getAuthUser } from "@/hooks/use-auth";
 import { ThumbFrameControls } from "@/components/admin/ThumbFrameControls";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { normalizeSlug, validateSlug } from "@/lib/slugs";
 import { detectPlatform, formatCount } from "@/lib/youtube-utils";
@@ -844,6 +845,8 @@ function ReportDetailView({
     void reorderCreators(next.map((c) => c.id));
   }
 
+  const [mediaOpen, setMediaOpen] = useState(false);
+
   const publicUrl = typeof window !== "undefined" ? `${window.location.origin}/report/${report.slug}` : `/report/${report.slug}`;
 
 
@@ -921,6 +924,28 @@ function ReportDetailView({
               ))}
             </div>
           </div>
+          <Collapsible className="md:col-span-2" open={mediaOpen} onOpenChange={setMediaOpen}>
+            <CollapsibleTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-between gap-3"
+                aria-expanded={mediaOpen}
+              >
+                <span className="flex items-center gap-2">
+                  <ImagePlus className="size-4" />
+                  <span className="text-sm font-medium">Images &amp; contact emails</span>
+                </span>
+                <span className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground">
+                    {header ? "Header ✓" : "No header"} · {thumb ? "Thumbnail ✓" : "No thumbnail"}
+                  </span>
+                  <ChevronDown className={`size-4 transition-transform ${mediaOpen ? "rotate-180" : ""}`} />
+                </span>
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-4">
+              <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2 md:col-span-2">
             <Label>Header image</Label>
             <div className="flex flex-wrap items-start gap-3">
@@ -1037,6 +1062,9 @@ function ReportDetailView({
             <Label>Brand email</Label>
             <Input value={brandEmail} onChange={(e) => setBrandEmail(e.target.value)} type="email" />
           </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
           <div className="md:col-span-2 flex justify-between gap-2">
             <Button asChild variant="outline">
               <a href={publicUrl} target="_blank" rel="noreferrer">
