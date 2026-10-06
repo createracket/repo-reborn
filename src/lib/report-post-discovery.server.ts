@@ -41,7 +41,7 @@ async function apify(actor: string, input: unknown, token: string): Promise<unkn
 async function latestInstagram(handle: string, token: string): Promise<Found[]> {
   const rows = (await apify(
     "apify~instagram-post-scraper",
-    { username: [handle], resultsLimit: 12, addParentData: false },
+    { username: [handle], resultsLimit: 40, addParentData: false },
     token,
   )) as Array<Record<string, any>>;
   return rows
@@ -65,7 +65,7 @@ async function latestInstagram(handle: string, token: string): Promise<Found[]> 
 async function latestTikTok(handle: string, token: string): Promise<Found[]> {
   const rows = (await apify(
     "clockworks~free-tiktok-scraper",
-    { profiles: [handle], resultsPerPage: 12, shouldDownloadVideos: false },
+    { profiles: [handle], resultsPerPage: 40, shouldDownloadVideos: false },
     token,
   )) as Array<Record<string, any>>;
   return rows
@@ -141,8 +141,8 @@ export async function discoverReportPosts(admin: Admin, reportId: string): Promi
       const handle = (rawHandle.includes("/") ? rawHandle.split("/").pop() ?? "" : rawHandle).replace(/^@/, "");
       if (!handle) { result.skipped_no_handle++; continue; }
       const mine = (posts ?? []).filter((p) => p.creator_id === c.id);
-      const platforms = new Set(mine.map((p) => p.platform).filter((p) => p === "instagram" || p === "tiktok"));
-      if (!platforms.size) { platforms.add("instagram"); platforms.add("tiktok"); }
+      // Always check both channels so a creator's first TikTok/Instagram post is caught too.
+      const platforms = new Set<"instagram" | "tiktok">(["instagram", "tiktok"]);
 
       let minPos = mine.length ? Math.min(...mine.map((p) => p.position ?? 0)) : 0;
       for (const platform of platforms) {
