@@ -62,6 +62,8 @@
   --color-pink-accent: var(--pink-accent);
   --color-purple: var(--purple);
   --color-purple-foreground: oklch(0.98 0 0);
+  /* Purple that stays legible on the dark canvas. */
+  --color-purple-soft: var(--purple-soft);
   --color-coral: var(--pink-accent);
   --color-blush: var(--pink-accent);
   --color-lime: var(--primary);
@@ -101,6 +103,7 @@
   --planner-surface: oklch(0.945 0.028 12);
   /* Racket Purple #5C37D0 */
   --purple: oklch(0.45 0.21 290);
+  --purple-soft: oklch(0.45 0.21 290);
   --brand-light: oklch(0.93 0.003 260);
 
 
@@ -157,6 +160,8 @@
   --pink-accent: oklch(0.86 0.07 12);
   /* Racket Purple #5C37D0 */
   --purple: oklch(0.45 0.21 290);
+  /* Brand purple is too dark to read on charcoal, so lift it for dark mode. */
+  --purple-soft: oklch(0.78 0.13 290);
   /* Light pink panel background #FAFAFA */
   --brand-light: oklch(0.98 0 0);
 
