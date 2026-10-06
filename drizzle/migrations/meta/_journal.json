@@ -99,6 +99,13 @@
       "when": 1791255042835,
       "tag": "0013_report_calendar",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791257290493,
+      "tag": "0014_report_auto_pull_posts",
+      "breakpoints": true
     }
   ]
 }

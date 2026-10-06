@@ -77,6 +77,7 @@ import { Route as AuthenticatedBriefsEditKeyRouteImport } from './routes/_authen
 import { Route as ApiPublicHooksDispatchScheduledEmailsRouteImport } from './routes/api/public/hooks/dispatch-scheduled-emails'
 import { Route as ApiPublicHooksMonthlyReportRefreshRouteImport } from './routes/api/public/hooks/monthly-report-refresh'
 import { Route as ApiPublicHooksReportMetricsWorkerRouteImport } from './routes/api/public/hooks/report-metrics-worker'
+import { Route as ApiPublicHooksReportPostDiscoveryRouteImport } from './routes/api/public/hooks/report-post-discovery'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -448,6 +449,12 @@ const ApiPublicHooksReportMetricsWorkerRoute =
     path: '/api/public/hooks/report-metrics-worker',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksReportPostDiscoveryRoute =
+  ApiPublicHooksReportPostDiscoveryRouteImport.update({
+    id: '/api/public/hooks/report-post-discovery',
+    path: '/api/public/hooks/report-post-discovery',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   id: '/lovable/email/auth/preview',
   path: '/lovable/email/auth/preview',
@@ -538,6 +545,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/dispatch-scheduled-emails': typeof ApiPublicHooksDispatchScheduledEmailsRoute
   '/api/public/hooks/monthly-report-refresh': typeof ApiPublicHooksMonthlyReportRefreshRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
+  '/api/public/hooks/report-post-discovery': typeof ApiPublicHooksReportPostDiscoveryRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -607,6 +615,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/dispatch-scheduled-emails': typeof ApiPublicHooksDispatchScheduledEmailsRoute
   '/api/public/hooks/monthly-report-refresh': typeof ApiPublicHooksMonthlyReportRefreshRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
+  '/api/public/hooks/report-post-discovery': typeof ApiPublicHooksReportPostDiscoveryRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -682,6 +691,7 @@ export interface FileRoutesById {
   '/api/public/hooks/dispatch-scheduled-emails': typeof ApiPublicHooksDispatchScheduledEmailsRoute
   '/api/public/hooks/monthly-report-refresh': typeof ApiPublicHooksMonthlyReportRefreshRoute
   '/api/public/hooks/report-metrics-worker': typeof ApiPublicHooksReportMetricsWorkerRoute
+  '/api/public/hooks/report-post-discovery': typeof ApiPublicHooksReportPostDiscoveryRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -757,6 +767,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/dispatch-scheduled-emails'
     | '/api/public/hooks/monthly-report-refresh'
     | '/api/public/hooks/report-metrics-worker'
+    | '/api/public/hooks/report-post-discovery'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -826,6 +837,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/dispatch-scheduled-emails'
     | '/api/public/hooks/monthly-report-refresh'
     | '/api/public/hooks/report-metrics-worker'
+    | '/api/public/hooks/report-post-discovery'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -900,6 +912,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/dispatch-scheduled-emails'
     | '/api/public/hooks/monthly-report-refresh'
     | '/api/public/hooks/report-metrics-worker'
+    | '/api/public/hooks/report-post-discovery'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
@@ -943,6 +956,7 @@ export interface RootRouteChildren {
   ApiPublicHooksDispatchScheduledEmailsRoute: typeof ApiPublicHooksDispatchScheduledEmailsRoute
   ApiPublicHooksMonthlyReportRefreshRoute: typeof ApiPublicHooksMonthlyReportRefreshRoute
   ApiPublicHooksReportMetricsWorkerRoute: typeof ApiPublicHooksReportMetricsWorkerRoute
+  ApiPublicHooksReportPostDiscoveryRoute: typeof ApiPublicHooksReportPostDiscoveryRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -1426,6 +1440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksReportMetricsWorkerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/report-post-discovery': {
+      id: '/api/public/hooks/report-post-discovery'
+      path: '/api/public/hooks/report-post-discovery'
+      fullPath: '/api/public/hooks/report-post-discovery'
+      preLoaderRoute: typeof ApiPublicHooksReportPostDiscoveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/auth/preview': {
       id: '/lovable/email/auth/preview'
       path: '/lovable/email/auth/preview'
@@ -1630,6 +1651,8 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicHooksMonthlyReportRefreshRoute,
   ApiPublicHooksReportMetricsWorkerRoute:
     ApiPublicHooksReportMetricsWorkerRoute,
+  ApiPublicHooksReportPostDiscoveryRoute:
+    ApiPublicHooksReportPostDiscoveryRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
