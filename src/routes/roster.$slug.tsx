@@ -183,7 +183,7 @@ function CreatorStats({
   if (rows.length === 0) return null;
 
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 flex-1">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -774,7 +774,7 @@ function PublicRosterPage() {
                         </div>
                       </div>
 
-                      <div className="mt-2.5 flex flex-wrap items-end justify-between gap-2">
+                      <div className="mt-2.5 flex flex-wrap items-start justify-between gap-2">
                         <CreatorStats stats={stats} />
                         {!roster.hide_statuses && (
                           <Badge
