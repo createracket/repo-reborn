@@ -56,7 +56,7 @@ function Chip({ c, onPick, large }: { c: CalendarCreator; onPick: (id: string) =
     <button
       type="button"
       onClick={() => onPick(c.id)}
-      className={`flex w-full items-center rounded-full bg-lime text-left font-medium text-primary-foreground transition hover:bg-lime/85 report-light:text-foreground ${large ? "gap-2.5 px-2 py-1.5 text-sm" : "gap-1.5 px-1.5 py-0.5 text-[11px]"}`}
+      className={`flex w-full items-center rounded-lg bg-lime text-left font-medium text-primary-foreground transition hover:bg-lime/85 report-light:text-foreground ${large ? "gap-2.5 px-2 py-1.5 text-sm" : "gap-1.5 px-1.5 py-0.5 text-[11px]"}`}
       title={c.name}
     >
       <span className={`shrink-0 overflow-hidden rounded-full bg-background/40 ${large ? "size-8" : "size-4"}`}>
@@ -69,7 +69,7 @@ function Chip({ c, onPick, large }: { c: CalendarCreator; onPick: (id: string) =
           />
         ) : null}
       </span>
-      <span className="truncate">{c.name}</span>
+      <span className="line-clamp-2 break-words leading-tight">{c.name}</span>
     </button>
   );
 }
@@ -79,10 +79,10 @@ function EventChip({ e, large }: { e: CalendarEvent; large?: boolean }) {
   const label = (e.label ?? "").trim() || "Event";
   return (
     <div
-      className={`flex w-full items-center rounded-full border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent report-light:border-pink-ink report-light:text-pink-ink ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`}
+      className={`flex w-full items-center rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent report-light:border-pink-ink report-light:text-pink-ink ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`}
       title={label}
     >
-      <span className="truncate">{label}</span>
+      <span className="line-clamp-2 break-words leading-tight">{label}</span>
     </div>
   );
 }
