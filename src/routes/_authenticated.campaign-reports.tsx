@@ -20,6 +20,7 @@ import { resizeImageFile } from "@/lib/image-resize";
 import { useServerFn } from "@tanstack/react-start";
 import { StatsRequestPanel } from "@/components/reports/StatsRequestPanel";
 import { AdCodeRequestPanel } from "@/components/reports/AdCodeRequestPanel";
+import { CreatorConnectPanel } from "@/components/reports/CreatorConnectPanel";
 import { ReportCalendarSettings, CreatorPostingDates } from "@/components/reports/ReportCalendarSettings";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -1938,6 +1939,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         onApplied={onChanged}
       />
       <AdCodeRequestPanel postId={post.id} creatorId={post.creator_id} creatorName={creatorName} platform={post.platform} postUrl={post.post_url} postedAt={post.posted_at} />
+      <CreatorConnectPanel postId={post.id} creatorId={post.creator_id} platform={post.platform} postUrl={post.post_url} onSynced={onChanged} />
 
       {open && (
       <>
