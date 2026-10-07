@@ -77,9 +77,9 @@ export const syncPostFromCreatorAccount = createServerFn({ method: 'POST' })
     try {
       const token = await s.freshToken(admin, conn)
       const m = post.platform === 'instagram' ? await s.fetchInstagramPost(token, post.post_url) : await s.fetchTikTokPost(token, post.post_url)
-      const update: Record<string, unknown> = { metrics_updated_at: new Date().toISOString() }
+      const update: Record<string, any> = { metrics_updated_at: new Date().toISOString() }
       for (const k of ['views', 'likes', 'comments', 'shares', 'saves', 'followers'] as const) if (typeof m[k] === 'number') update[k] = m[k]
-      await admin.from('campaign_report_posts').update(update).eq('id', post.id)
+      await admin.from("campaign_report_posts").update(update as any).eq('id', post.id)
       await admin.from('creator_social_connections').update({ last_sync_at: new Date().toISOString(), last_error: null }).eq('id', conn.id)
       return { metrics: m }
     } catch (e) {
