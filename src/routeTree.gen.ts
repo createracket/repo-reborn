@@ -72,7 +72,12 @@ import { Route as ApiPublicTranscribeVoiceNoteRouteImport } from './routes/api/p
 import { Route as ApiPublicUploadBriefFileRouteImport } from './routes/api/public/upload-brief-file'
 import { Route as ApiPublicWaitlistJoinRouteImport } from './routes/api/public/waitlist-join'
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
+import { Route as ReportSlugDetailedDotcsvRouteImport } from './routes/report.$slug.detailed[.]csv'
+import { Route as ReportSlugDetailedDotjsonRouteImport } from './routes/report.$slug.detailed[.]json'
 import { Route as ReportSlugMetricsDotcsvRouteImport } from './routes/report.$slug.metrics[.]csv'
+import { Route as ReportSlugMetricsDotjsonRouteImport } from './routes/report.$slug.metrics[.]json'
+import { Route as RosterSlugCreatorsDotcsvRouteImport } from './routes/roster.$slug.creators[.]csv'
+import { Route as RosterSlugCreatorsDotjsonRouteImport } from './routes/roster.$slug.creators[.]json'
 import { Route as AuthenticatedAdminSpotlightsIndexRouteImport } from './routes/_authenticated.admin.spotlights.index'
 import { Route as AuthenticatedBriefsEditKeyRouteImport } from './routes/_authenticated.briefs.edit.$key'
 import { Route as ApiPublicHooksDispatchScheduledEmailsRouteImport } from './routes/api/public/hooks/dispatch-scheduled-emails'
@@ -421,11 +426,41 @@ const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
   path: '/lovable/email/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReportSlugDetailedDotcsvRoute =
+  ReportSlugDetailedDotcsvRouteImport.update({
+    id: '/detailed.csv',
+    path: '/detailed.csv',
+    getParentRoute: () => ReportSlugRoute,
+  } as any)
+const ReportSlugDetailedDotjsonRoute =
+  ReportSlugDetailedDotjsonRouteImport.update({
+    id: '/detailed.json',
+    path: '/detailed.json',
+    getParentRoute: () => ReportSlugRoute,
+  } as any)
 const ReportSlugMetricsDotcsvRoute = ReportSlugMetricsDotcsvRouteImport.update({
   id: '/metrics.csv',
   path: '/metrics.csv',
   getParentRoute: () => ReportSlugRoute,
 } as any)
+const ReportSlugMetricsDotjsonRoute =
+  ReportSlugMetricsDotjsonRouteImport.update({
+    id: '/metrics.json',
+    path: '/metrics.json',
+    getParentRoute: () => ReportSlugRoute,
+  } as any)
+const RosterSlugCreatorsDotcsvRoute =
+  RosterSlugCreatorsDotcsvRouteImport.update({
+    id: '/creators.csv',
+    path: '/creators.csv',
+    getParentRoute: () => RosterSlugRoute,
+  } as any)
+const RosterSlugCreatorsDotjsonRoute =
+  RosterSlugCreatorsDotjsonRouteImport.update({
+    id: '/creators.json',
+    path: '/creators.json',
+    getParentRoute: () => RosterSlugRoute,
+  } as any)
 const AuthenticatedAdminSpotlightsIndexRoute =
   AuthenticatedAdminSpotlightsIndexRouteImport.update({
     id: '/',
@@ -519,7 +554,7 @@ export interface FileRoutesByFullPath {
   '/brief/$slug': typeof BriefSlugRoute
   '/creator-connect/$token': typeof CreatorConnectTokenRoute
   '/report/$slug': typeof ReportSlugRouteWithChildren
-  '/roster/$slug': typeof RosterSlugRoute
+  '/roster/$slug': typeof RosterSlugRouteWithChildren
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/stats/$token': typeof StatsTokenRoute
   '/talent/$token': typeof TalentTokenRoute
@@ -551,7 +586,12 @@ export interface FileRoutesByFullPath {
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/report/$slug/detailed.csv': typeof ReportSlugDetailedDotcsvRoute
+  '/report/$slug/detailed.json': typeof ReportSlugDetailedDotjsonRoute
   '/report/$slug/metrics.csv': typeof ReportSlugMetricsDotcsvRoute
+  '/report/$slug/metrics.json': typeof ReportSlugMetricsDotjsonRoute
+  '/roster/$slug/creators.csv': typeof RosterSlugCreatorsDotcsvRoute
+  '/roster/$slug/creators.json': typeof RosterSlugCreatorsDotjsonRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/briefs/': typeof AuthenticatedBriefsIndexRoute
   '/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
@@ -592,7 +632,7 @@ export interface FileRoutesByTo {
   '/brief/$slug': typeof BriefSlugRoute
   '/creator-connect/$token': typeof CreatorConnectTokenRoute
   '/report/$slug': typeof ReportSlugRouteWithChildren
-  '/roster/$slug': typeof RosterSlugRoute
+  '/roster/$slug': typeof RosterSlugRouteWithChildren
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/stats/$token': typeof StatsTokenRoute
   '/talent/$token': typeof TalentTokenRoute
@@ -623,7 +663,12 @@ export interface FileRoutesByTo {
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/report/$slug/detailed.csv': typeof ReportSlugDetailedDotcsvRoute
+  '/report/$slug/detailed.json': typeof ReportSlugDetailedDotjsonRoute
   '/report/$slug/metrics.csv': typeof ReportSlugMetricsDotcsvRoute
+  '/report/$slug/metrics.json': typeof ReportSlugMetricsDotjsonRoute
+  '/roster/$slug/creators.csv': typeof RosterSlugCreatorsDotcsvRoute
+  '/roster/$slug/creators.json': typeof RosterSlugCreatorsDotjsonRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/briefs': typeof AuthenticatedBriefsIndexRoute
   '/racket-desk': typeof AuthenticatedRacketDeskIndexRoute
@@ -669,7 +714,7 @@ export interface FileRoutesById {
   '/brief/$slug': typeof BriefSlugRoute
   '/creator-connect/$token': typeof CreatorConnectTokenRoute
   '/report/$slug': typeof ReportSlugRouteWithChildren
-  '/roster/$slug': typeof RosterSlugRoute
+  '/roster/$slug': typeof RosterSlugRouteWithChildren
   '/spotlight/$slug': typeof SpotlightSlugRoute
   '/stats/$token': typeof StatsTokenRoute
   '/talent/$token': typeof TalentTokenRoute
@@ -701,7 +746,12 @@ export interface FileRoutesById {
   '/api/public/upload-brief-file': typeof ApiPublicUploadBriefFileRoute
   '/api/public/waitlist-join': typeof ApiPublicWaitlistJoinRoute
   '/lovable/email/events': typeof LovableEmailEventsRoute
+  '/report/$slug/detailed.csv': typeof ReportSlugDetailedDotcsvRoute
+  '/report/$slug/detailed.json': typeof ReportSlugDetailedDotjsonRoute
   '/report/$slug/metrics.csv': typeof ReportSlugMetricsDotcsvRoute
+  '/report/$slug/metrics.json': typeof ReportSlugMetricsDotjsonRoute
+  '/roster/$slug/creators.csv': typeof RosterSlugCreatorsDotcsvRoute
+  '/roster/$slug/creators.json': typeof RosterSlugCreatorsDotjsonRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/briefs/': typeof AuthenticatedBriefsIndexRoute
   '/_authenticated/racket-desk/': typeof AuthenticatedRacketDeskIndexRoute
@@ -779,7 +829,12 @@ export interface FileRouteTypes {
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
+    | '/report/$slug/detailed.csv'
+    | '/report/$slug/detailed.json'
     | '/report/$slug/metrics.csv'
+    | '/report/$slug/metrics.json'
+    | '/roster/$slug/creators.csv'
+    | '/roster/$slug/creators.json'
     | '/admin/'
     | '/briefs/'
     | '/racket-desk/'
@@ -851,7 +906,12 @@ export interface FileRouteTypes {
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
+    | '/report/$slug/detailed.csv'
+    | '/report/$slug/detailed.json'
     | '/report/$slug/metrics.csv'
+    | '/report/$slug/metrics.json'
+    | '/roster/$slug/creators.csv'
+    | '/roster/$slug/creators.json'
     | '/admin'
     | '/briefs'
     | '/racket-desk'
@@ -928,7 +988,12 @@ export interface FileRouteTypes {
     | '/api/public/upload-brief-file'
     | '/api/public/waitlist-join'
     | '/lovable/email/events'
+    | '/report/$slug/detailed.csv'
+    | '/report/$slug/detailed.json'
     | '/report/$slug/metrics.csv'
+    | '/report/$slug/metrics.json'
+    | '/roster/$slug/creators.csv'
+    | '/roster/$slug/creators.json'
     | '/_authenticated/admin/'
     | '/_authenticated/briefs/'
     | '/_authenticated/racket-desk/'
@@ -965,7 +1030,7 @@ export interface RootRouteChildren {
   BriefSlugRoute: typeof BriefSlugRoute
   CreatorConnectTokenRoute: typeof CreatorConnectTokenRoute
   ReportSlugRoute: typeof ReportSlugRouteWithChildren
-  RosterSlugRoute: typeof RosterSlugRoute
+  RosterSlugRoute: typeof RosterSlugRouteWithChildren
   SpotlightSlugRoute: typeof SpotlightSlugRoute
   StatsTokenRoute: typeof StatsTokenRoute
   TalentTokenRoute: typeof TalentTokenRoute
@@ -1432,12 +1497,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/report/$slug/detailed.csv': {
+      id: '/report/$slug/detailed.csv'
+      path: '/detailed.csv'
+      fullPath: '/report/$slug/detailed.csv'
+      preLoaderRoute: typeof ReportSlugDetailedDotcsvRouteImport
+      parentRoute: typeof ReportSlugRoute
+    }
+    '/report/$slug/detailed.json': {
+      id: '/report/$slug/detailed.json'
+      path: '/detailed.json'
+      fullPath: '/report/$slug/detailed.json'
+      preLoaderRoute: typeof ReportSlugDetailedDotjsonRouteImport
+      parentRoute: typeof ReportSlugRoute
+    }
     '/report/$slug/metrics.csv': {
       id: '/report/$slug/metrics.csv'
       path: '/metrics.csv'
       fullPath: '/report/$slug/metrics.csv'
       preLoaderRoute: typeof ReportSlugMetricsDotcsvRouteImport
       parentRoute: typeof ReportSlugRoute
+    }
+    '/report/$slug/metrics.json': {
+      id: '/report/$slug/metrics.json'
+      path: '/metrics.json'
+      fullPath: '/report/$slug/metrics.json'
+      preLoaderRoute: typeof ReportSlugMetricsDotjsonRouteImport
+      parentRoute: typeof ReportSlugRoute
+    }
+    '/roster/$slug/creators.csv': {
+      id: '/roster/$slug/creators.csv'
+      path: '/creators.csv'
+      fullPath: '/roster/$slug/creators.csv'
+      preLoaderRoute: typeof RosterSlugCreatorsDotcsvRouteImport
+      parentRoute: typeof RosterSlugRoute
+    }
+    '/roster/$slug/creators.json': {
+      id: '/roster/$slug/creators.json'
+      path: '/creators.json'
+      fullPath: '/roster/$slug/creators.json'
+      preLoaderRoute: typeof RosterSlugCreatorsDotjsonRouteImport
+      parentRoute: typeof RosterSlugRoute
     }
     '/_authenticated/admin/spotlights/': {
       id: '/_authenticated/admin/spotlights/'
@@ -1642,15 +1742,35 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 interface ReportSlugRouteChildren {
+  ReportSlugDetailedDotcsvRoute: typeof ReportSlugDetailedDotcsvRoute
+  ReportSlugDetailedDotjsonRoute: typeof ReportSlugDetailedDotjsonRoute
   ReportSlugMetricsDotcsvRoute: typeof ReportSlugMetricsDotcsvRoute
+  ReportSlugMetricsDotjsonRoute: typeof ReportSlugMetricsDotjsonRoute
 }
 
 const ReportSlugRouteChildren: ReportSlugRouteChildren = {
+  ReportSlugDetailedDotcsvRoute: ReportSlugDetailedDotcsvRoute,
+  ReportSlugDetailedDotjsonRoute: ReportSlugDetailedDotjsonRoute,
   ReportSlugMetricsDotcsvRoute: ReportSlugMetricsDotcsvRoute,
+  ReportSlugMetricsDotjsonRoute: ReportSlugMetricsDotjsonRoute,
 }
 
 const ReportSlugRouteWithChildren = ReportSlugRoute._addFileChildren(
   ReportSlugRouteChildren,
+)
+
+interface RosterSlugRouteChildren {
+  RosterSlugCreatorsDotcsvRoute: typeof RosterSlugCreatorsDotcsvRoute
+  RosterSlugCreatorsDotjsonRoute: typeof RosterSlugCreatorsDotjsonRoute
+}
+
+const RosterSlugRouteChildren: RosterSlugRouteChildren = {
+  RosterSlugCreatorsDotcsvRoute: RosterSlugCreatorsDotcsvRoute,
+  RosterSlugCreatorsDotjsonRoute: RosterSlugCreatorsDotjsonRoute,
+}
+
+const RosterSlugRouteWithChildren = RosterSlugRoute._addFileChildren(
+  RosterSlugRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
@@ -1673,7 +1793,7 @@ const rootRouteChildren: RootRouteChildren = {
   BriefSlugRoute: BriefSlugRoute,
   CreatorConnectTokenRoute: CreatorConnectTokenRoute,
   ReportSlugRoute: ReportSlugRouteWithChildren,
-  RosterSlugRoute: RosterSlugRoute,
+  RosterSlugRoute: RosterSlugRouteWithChildren,
   SpotlightSlugRoute: SpotlightSlugRoute,
   StatsTokenRoute: StatsTokenRoute,
   TalentTokenRoute: TalentTokenRoute,

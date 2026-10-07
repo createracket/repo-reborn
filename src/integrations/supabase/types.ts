@@ -403,6 +403,7 @@ export type Database = {
       }
       campaign_report_posts: {
         Row: {
+          account_synced_at: string | null
           auto_added: boolean
           brand_tag: string | null
           caption: string | null
@@ -432,6 +433,7 @@ export type Database = {
           watch_time_hours: number | null
         }
         Insert: {
+          account_synced_at?: string | null
           auto_added?: boolean
           brand_tag?: string | null
           caption?: string | null
@@ -461,6 +463,7 @@ export type Database = {
           watch_time_hours?: number | null
         }
         Update: {
+          account_synced_at?: string | null
           auto_added?: boolean
           brand_tag?: string | null
           caption?: string | null
@@ -517,6 +520,7 @@ export type Database = {
           client_email: string | null
           created_at: string
           custom_links: Json
+          data_feed_key: string | null
           description: string | null
           header_image_url: string | null
           hide_categories: boolean
@@ -550,6 +554,7 @@ export type Database = {
           client_email?: string | null
           created_at?: string
           custom_links?: Json
+          data_feed_key?: string | null
           description?: string | null
           header_image_url?: string | null
           hide_categories?: boolean
@@ -583,6 +588,7 @@ export type Database = {
           client_email?: string | null
           created_at?: string
           custom_links?: Json
+          data_feed_key?: string | null
           description?: string | null
           header_image_url?: string | null
           hide_categories?: boolean

@@ -75,6 +75,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ReportAutoPull } from "@/components/reports/ReportAutoPull";
+import { ReportDataFeeds } from "@/components/reports/ReportDataFeeds";
 import { dismissReportPost } from "@/lib/report-post-discovery.functions";
 
 const sb = supabase as any;
@@ -861,6 +862,7 @@ function ReportDetailView({
         creatorsWithoutHandle={creators.filter((c) => !c.handle?.trim()).map((c) => c.name)}
         onChanged={onChanged}
       />
+      <ReportDataFeeds reportId={report.id} slug={report.slug} />
       {/* Meta card */}
 
       <Card>
