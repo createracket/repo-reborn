@@ -327,6 +327,17 @@ function RosterBuilderPage() {
   const [profiles, setProfiles] = useState<ProfileRow[]>([]);
   const [briefs, setBriefs] = useState<Brief[]>([]);
 
+  // Keep the open roster in the address bar so a page refresh reopens it.
+  useEffect(() => {
+    if (checking) return;
+    const current = new URL(window.location.href);
+    const want = selectedId ?? null;
+    if ((current.searchParams.get("edit") ?? null) === want) return;
+    if (want) current.searchParams.set("edit", want);
+    else current.searchParams.delete("edit");
+    window.history.replaceState(window.history.state, "", current.pathname + current.search + current.hash);
+  }, [selectedId, checking]);
+
   // bootstrap: verify admin + load rosters
   useEffect(() => {
     (async () => {
