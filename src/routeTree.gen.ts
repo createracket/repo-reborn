@@ -35,6 +35,7 @@ import { Route as AuthenticatedRosterBuilderRouteImport } from './routes/_authen
 import { Route as AdCodeTokenRouteImport } from './routes/ad-code.$token'
 import { Route as BrandsHowItWorksRouteImport } from './routes/brands.how-it-works'
 import { Route as BriefSlugRouteImport } from './routes/brief.$slug'
+import { Route as CreatorConnectTokenRouteImport } from './routes/creator-connect.$token'
 import { Route as ReportSlugRouteImport } from './routes/report.$slug'
 import { Route as RosterSlugRouteImport } from './routes/roster.$slug'
 import { Route as SpotlightSlugRouteImport } from './routes/spotlight.$slug'
@@ -82,6 +83,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as AuthenticatedAdminSpotlightsEditKeyRouteImport } from './routes/_authenticated.admin.spotlights.edit.$key'
+import { Route as ApiPublicCreatorOauthPlatformCallbackRouteImport } from './routes/api/public/creator-oauth.$platform.callback'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -213,6 +215,11 @@ const BrandsHowItWorksRoute = BrandsHowItWorksRouteImport.update({
 const BriefSlugRoute = BriefSlugRouteImport.update({
   id: '/brief/$slug',
   path: '/brief/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreatorConnectTokenRoute = CreatorConnectTokenRouteImport.update({
+  id: '/creator-connect/$token',
+  path: '/creator-connect/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportSlugRoute = ReportSlugRouteImport.update({
@@ -477,6 +484,12 @@ const AuthenticatedAdminSpotlightsEditKeyRoute =
     path: '/edit/$key',
     getParentRoute: () => AuthenticatedAdminSpotlightsRoute,
   } as any)
+const ApiPublicCreatorOauthPlatformCallbackRoute =
+  ApiPublicCreatorOauthPlatformCallbackRouteImport.update({
+    id: '/api/public/creator-oauth/$platform/callback',
+    path: '/api/public/creator-oauth/$platform/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -504,6 +517,7 @@ export interface FileRoutesByFullPath {
   '/ad-code/$token': typeof AdCodeTokenRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
+  '/creator-connect/$token': typeof CreatorConnectTokenRoute
   '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
@@ -551,6 +565,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/admin/spotlights/': typeof AuthenticatedAdminSpotlightsIndexRoute
   '/admin/spotlights/edit/$key': typeof AuthenticatedAdminSpotlightsEditKeyRoute
+  '/api/public/creator-oauth/$platform/callback': typeof ApiPublicCreatorOauthPlatformCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -575,6 +590,7 @@ export interface FileRoutesByTo {
   '/ad-code/$token': typeof AdCodeTokenRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
+  '/creator-connect/$token': typeof CreatorConnectTokenRoute
   '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
@@ -621,6 +637,7 @@ export interface FileRoutesByTo {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/admin/spotlights': typeof AuthenticatedAdminSpotlightsIndexRoute
   '/admin/spotlights/edit/$key': typeof AuthenticatedAdminSpotlightsEditKeyRoute
+  '/api/public/creator-oauth/$platform/callback': typeof ApiPublicCreatorOauthPlatformCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -650,6 +667,7 @@ export interface FileRoutesById {
   '/ad-code/$token': typeof AdCodeTokenRoute
   '/brands/how-it-works': typeof BrandsHowItWorksRoute
   '/brief/$slug': typeof BriefSlugRoute
+  '/creator-connect/$token': typeof CreatorConnectTokenRoute
   '/report/$slug': typeof ReportSlugRouteWithChildren
   '/roster/$slug': typeof RosterSlugRoute
   '/spotlight/$slug': typeof SpotlightSlugRoute
@@ -697,6 +715,7 @@ export interface FileRoutesById {
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/_authenticated/admin/spotlights/': typeof AuthenticatedAdminSpotlightsIndexRoute
   '/_authenticated/admin/spotlights/edit/$key': typeof AuthenticatedAdminSpotlightsEditKeyRoute
+  '/api/public/creator-oauth/$platform/callback': typeof ApiPublicCreatorOauthPlatformCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -726,6 +745,7 @@ export interface FileRouteTypes {
     | '/ad-code/$token'
     | '/brands/how-it-works'
     | '/brief/$slug'
+    | '/creator-connect/$token'
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
@@ -773,6 +793,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/admin/spotlights/'
     | '/admin/spotlights/edit/$key'
+    | '/api/public/creator-oauth/$platform/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -797,6 +818,7 @@ export interface FileRouteTypes {
     | '/ad-code/$token'
     | '/brands/how-it-works'
     | '/brief/$slug'
+    | '/creator-connect/$token'
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
@@ -843,6 +865,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/admin/spotlights'
     | '/admin/spotlights/edit/$key'
+    | '/api/public/creator-oauth/$platform/callback'
   id:
     | '__root__'
     | '/'
@@ -871,6 +894,7 @@ export interface FileRouteTypes {
     | '/ad-code/$token'
     | '/brands/how-it-works'
     | '/brief/$slug'
+    | '/creator-connect/$token'
     | '/report/$slug'
     | '/roster/$slug'
     | '/spotlight/$slug'
@@ -918,6 +942,7 @@ export interface FileRouteTypes {
     | '/lovable/email/transactional/preview'
     | '/_authenticated/admin/spotlights/'
     | '/_authenticated/admin/spotlights/edit/$key'
+    | '/api/public/creator-oauth/$platform/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -938,6 +963,7 @@ export interface RootRouteChildren {
   AdCodeTokenRoute: typeof AdCodeTokenRoute
   BrandsHowItWorksRoute: typeof BrandsHowItWorksRoute
   BriefSlugRoute: typeof BriefSlugRoute
+  CreatorConnectTokenRoute: typeof CreatorConnectTokenRoute
   ReportSlugRoute: typeof ReportSlugRouteWithChildren
   RosterSlugRoute: typeof RosterSlugRoute
   SpotlightSlugRoute: typeof SpotlightSlugRoute
@@ -960,6 +986,7 @@ export interface RootRouteChildren {
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  ApiPublicCreatorOauthPlatformCallbackRoute: typeof ApiPublicCreatorOauthPlatformCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1144,6 +1171,13 @@ declare module '@tanstack/react-router' {
       path: '/brief/$slug'
       fullPath: '/brief/$slug'
       preLoaderRoute: typeof BriefSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/creator-connect/$token': {
+      id: '/creator-connect/$token'
+      path: '/creator-connect/$token'
+      fullPath: '/creator-connect/$token'
+      preLoaderRoute: typeof CreatorConnectTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/report/$slug': {
@@ -1475,6 +1509,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSpotlightsEditKeyRouteImport
       parentRoute: typeof AuthenticatedAdminSpotlightsRoute
     }
+    '/api/public/creator-oauth/$platform/callback': {
+      id: '/api/public/creator-oauth/$platform/callback'
+      path: '/api/public/creator-oauth/$platform/callback'
+      fullPath: '/api/public/creator-oauth/$platform/callback'
+      preLoaderRoute: typeof ApiPublicCreatorOauthPlatformCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1630,6 +1671,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdCodeTokenRoute: AdCodeTokenRoute,
   BrandsHowItWorksRoute: BrandsHowItWorksRoute,
   BriefSlugRoute: BriefSlugRoute,
+  CreatorConnectTokenRoute: CreatorConnectTokenRoute,
   ReportSlugRoute: ReportSlugRouteWithChildren,
   RosterSlugRoute: RosterSlugRoute,
   SpotlightSlugRoute: SpotlightSlugRoute,
@@ -1656,6 +1698,8 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  ApiPublicCreatorOauthPlatformCallbackRoute:
+    ApiPublicCreatorOauthPlatformCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

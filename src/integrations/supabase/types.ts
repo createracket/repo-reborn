@@ -728,6 +728,94 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_connect_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          creator_id: string
+          id: string
+          token: string
+          viewed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          creator_id: string
+          id?: string
+          token: string
+          viewed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          creator_id?: string
+          id?: string
+          token?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_connect_links_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_report_creators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_social_connections: {
+        Row: {
+          access_token_enc: string
+          account_id: string | null
+          connected_at: string
+          creator_id: string
+          expires_at: string | null
+          id: string
+          last_error: string | null
+          last_sync_at: string | null
+          platform: string
+          refresh_expires_at: string | null
+          refresh_token_enc: string | null
+          username: string | null
+        }
+        Insert: {
+          access_token_enc: string
+          account_id?: string | null
+          connected_at?: string
+          creator_id: string
+          expires_at?: string | null
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          platform: string
+          refresh_expires_at?: string | null
+          refresh_token_enc?: string | null
+          username?: string | null
+        }
+        Update: {
+          access_token_enc?: string
+          account_id?: string | null
+          connected_at?: string
+          creator_id?: string
+          expires_at?: string | null
+          id?: string
+          last_error?: string | null
+          last_sync_at?: string | null
+          platform?: string
+          refresh_expires_at?: string | null
+          refresh_token_enc?: string | null
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_social_connections_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_report_creators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_custom_templates: {
         Row: {
           body_markdown: string
