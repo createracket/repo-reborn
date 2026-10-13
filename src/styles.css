@@ -60,6 +60,8 @@
 
   /* Brand accent tokens */
   --color-pink-accent: var(--pink-accent);
+  /* Dark ink that stays readable on top of brand pink in both themes. */
+  --color-pink-ink: oklch(0.23 0.006 270);
   --color-purple: var(--purple);
   --color-purple-foreground: oklch(0.98 0 0);
   /* Purple that stays legible on the dark canvas. */
@@ -339,4 +341,27 @@
 /* Light mode: the roster notes bullet is pale pink on white, so use brand purple for contrast. */
 .report-light .notes-bullet {
   background-color: var(--purple) !important;
+}
+
+/* Light mode: calendar key events are white boxes with a thick outline instead
+   of pink blocks. Pink stays on the platform toggles, green marks events that
+   carry a link people can open. */
+.report-light .calendar-event-chip {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+  border-width: 2px !important;
+  color: var(--foreground) !important;
+}
+.report-light .calendar-event-chip:hover {
+  background-color: var(--muted) !important;
+}
+.report-light .calendar-event-chip .calendar-event-tag {
+  background-color: var(--pink-accent) !important;
+  border-color: var(--pink-accent) !important;
+  color: var(--foreground) !important;
+}
+.report-light .calendar-event-chip .calendar-event-preview {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
 }

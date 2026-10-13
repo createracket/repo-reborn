@@ -11,7 +11,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { storageImage } from "@/lib/storage-image";
 
@@ -83,11 +83,28 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
   const label = (e.label ?? "").trim() || "Event";
   const tags = (e.platforms ?? []).filter(Boolean);
   const clampClass = clamp === 3 ? "line-clamp-3" : "line-clamp-2";
-  const cls = `flex w-full flex-col rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent report-light:border-pink-ink report-light:text-pink-ink ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`;
+  const cls = `calendar-event-chip flex w-full flex-col rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`;
   const body = (
     <>
       <span className={`${clampClass} break-words leading-tight`}>{label}</span>
-      {tags.length > 0 && <span className="mt-0.5 text-[9px] uppercase tracking-wider opacity-80">{tags.join(" · ")}</span>}
+      {(tags.length > 0 || !!e.url) && (
+        <span className="mt-0.5 flex flex-wrap items-center gap-1">
+          {tags.map((t) => (
+            <span
+              key={t}
+              className="calendar-event-tag rounded-full bg-pink-accent px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-pink-ink"
+            >
+              {t}
+            </span>
+          ))}
+          {e.url && (
+            <span className="calendar-event-preview inline-flex items-center gap-0.5 rounded-full bg-primary px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-primary-foreground">
+              Preview
+              <ExternalLink className="size-2" />
+            </span>
+          )}
+        </span>
+      )}
     </>
   );
   return e.url ? (
@@ -175,9 +192,9 @@ export function RosterCalendar({
             return (
               <div
                 key={key}
-                className={`min-h-24 rounded-lg border p-1.5 ${inMonth ? "border-border/60 bg-background report-light:border-border/30 report-light:bg-card" : "border-transparent bg-muted/20 opacity-50 report-light:bg-muted/40"} ${isToday(d) ? "ring-2 ring-pink-accent report-light:ring-pink-ink" : ""}`}
+                className={`min-h-24 rounded-lg border p-1.5 ${inMonth ? "border-border/60 bg-background report-light:border-border/30 report-light:bg-card" : "border-transparent bg-muted/20 opacity-50 report-light:bg-muted/40"} ${isToday(d) ? "ring-2 ring-pink-accent" : ""}`}
               >
-                <div className={`mb-1 text-xs ${isToday(d) ? "font-semibold text-pink-accent report-light:text-pink-ink" : "text-muted-foreground"}`}>{format(d, "d")}</div>
+                <div className={`mb-1 text-xs ${isToday(d) ? "font-semibold text-pink-accent" : "text-muted-foreground"}`}>{format(d, "d")}</div>
                 <div className="space-y-1">
                   {dayEvents.map((e, i) => (
                     <EventChip key={`ev-${i}`} e={e} clamp={3} />
@@ -210,7 +227,7 @@ export function RosterCalendar({
             const key = format(d, "yyyy-MM-dd");
             return (
               <div key={key} className="flex gap-3 rounded-xl border border-border/60 bg-background p-2.5 report-light:border-border/30 report-light:bg-card">
-                <div className={`flex w-11 shrink-0 flex-col items-center justify-center rounded-lg py-1 ${isToday(d) ? "bg-pink-accent text-foreground report-light:text-pink-ink" : "bg-muted/50"}`}>
+                <div className={`flex w-11 shrink-0 flex-col items-center justify-center rounded-lg py-1 ${isToday(d) ? "bg-pink-accent text-pink-ink" : "bg-muted/50"}`}>
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{format(d, "EEE")}</span>
                   <span className="font-display text-lg leading-none">{format(d, "d")}</span>
                 </div>
