@@ -343,12 +343,12 @@
   background-color: var(--purple) !important;
 }
 
-/* Light mode: calendar key events are white boxes with a thick outline instead
-   of pink blocks. Pink stays on the platform toggles, green marks events that
-   carry a link people can open. */
+/* Light mode: calendar key events are white boxes with a thick, soft outline
+   instead of pink blocks. Pink stays on the platform toggles, green marks
+   events that carry a link people can open. */
 .report-light .calendar-event-chip {
   background-color: var(--card) !important;
-  border-color: var(--border) !important;
+  border-color: color-mix(in oklab, var(--border) 38%, var(--card)) !important;
   border-width: 2px !important;
   color: var(--foreground) !important;
 }
