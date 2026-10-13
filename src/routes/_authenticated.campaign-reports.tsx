@@ -40,6 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { ReportMetricsUpdate } from "@/components/admin/ReportMetricsUpdate";
+import { ReportErSweep } from "@/components/reports/ReportErSweep";
 
 import {
   Select,
@@ -856,7 +857,12 @@ function ReportDetailView({
 
   return (
     <div className="space-y-6">
-      <ReportMetricsUpdate reportId={report.id} onFinished={onChanged} />
+      <div className="space-y-2">
+        <ReportMetricsUpdate reportId={report.id} onFinished={onChanged} />
+        <div className="flex justify-end">
+          <ReportErSweep reportId={report.id} onFinished={onChanged} />
+        </div>
+      </div>
       <ReportAutoPull
         report={report as any}
         creatorsWithoutHandle={creators.filter((c) => !c.handle?.trim()).map((c) => c.name)}

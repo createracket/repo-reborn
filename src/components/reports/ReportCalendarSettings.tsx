@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const sb = supabase as any;
 
-type Ev = { date: string; label: string };
+export const EVENT_PLATFORMS = ["IG", "TT", "YT", "Trial"] as const;
+type Ev = { date: string; label: string; url: string; platforms: string[] };
 
 /** Report builder card: calendar tab switch + key events (mirrors the roster builder). */
 export function ReportCalendarSettings({
@@ -20,7 +21,7 @@ export function ReportCalendarSettings({
 }: {
   reportId: string;
   showCalendar: boolean;
-  events: Array<{ date?: string | null; label?: string | null }> | null | undefined;
+  events: Array<{ date?: string | null; label?: string | null; url?: string | null; platforms?: string[] | null }> | null | undefined;
   onChanged: () => void | Promise<void>;
 }) {
   const [on, setOn] = useState(showCalendar);
@@ -29,7 +30,14 @@ export function ReportCalendarSettings({
 
   useEffect(() => {
     setOn(showCalendar);
-    setDraft((events ?? []).map((e) => ({ date: (e.date ?? "").slice(0, 10), label: e.label ?? "" })));
+    setDraft(
+      (events ?? []).map((e) => ({
+        date: (e.date ?? "").slice(0, 10),
+        label: e.label ?? "",
+        url: e.url ?? "",
+        platforms: Array.isArray(e.platforms) ? e.platforms : [],
+      })),
+    );
   }, [reportId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function toggle(next: boolean) {
@@ -42,13 +50,31 @@ export function ReportCalendarSettings({
     await onChanged();
   }
 
+  const patch = (i: number, p: Partial<Ev>) => setDraft((d) => d.map((x, j) => (j === i ? { ...x, ...p } : x)));
+  const move = (i: number, dir: -1 | 1) =>
+    setDraft((d) => {
+      const j = i + dir;
+      if (j < 0 || j >= d.length) return d;
+      const n = [...d];
+      [n[i], n[j]] = [n[j], n[i]];
+      return n;
+    });
+  const orderByDate = () =>
+    setDraft((d) => [...d].sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999")));
+
   async function save() {
     setSaving(true);
-    const cleaned = draft.filter((e) => e.date && e.label.trim()).map((e) => ({ date: e.date, label: e.label.trim() }));
+    const cleaned = draft
+      .filter((e) => e.date && e.label.trim())
+      .map((e) => {
+        let url = e.url.trim();
+        if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`;
+        return { date: e.date, label: e.label.trim(), url: url || null, platforms: e.platforms };
+      });
     const { error } = await sb.from("campaign_reports").update({ calendar_events: cleaned }).eq("id", reportId);
     setSaving(false);
     if (error) return toast.error(error.message);
-    setDraft(cleaned);
+    setDraft(cleaned.map((e) => ({ ...e, url: e.url ?? "" })));
     toast.success("Key events saved");
     await onChanged();
   }
@@ -72,36 +98,66 @@ export function ReportCalendarSettings({
           <div className="mt-1 text-xs text-muted-foreground">
             Moments you'll cover without a creator attached. They appear on the calendar only.
           </div>
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 space-y-3">
             {draft.map((ev, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Input
-                  type="date"
-                  className="w-40"
-                  value={ev.date}
-                  onChange={(e) => setDraft((d) => d.map((x, j) => (j === i ? { ...x, date: e.target.value } : x)))}
-                />
-                <Input
-                  placeholder="Event label"
-                  value={ev.label}
-                  onChange={(e) => setDraft((d) => d.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Remove key event"
-                  onClick={() => setDraft((d) => d.filter((_, j) => j !== i))}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
+              <div key={i} className="space-y-2 rounded-md border border-border/60 p-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Input type="date" className="w-40" value={ev.date} onChange={(e) => patch(i, { date: e.target.value })} />
+                  <Input
+                    className="min-w-40 flex-1"
+                    placeholder="Event label"
+                    value={ev.label}
+                    onChange={(e) => patch(i, { label: e.target.value })}
+                  />
+                  <div className="flex items-center">
+                    <Button type="button" variant="ghost" size="icon" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
+                      <ArrowUp className="size-4" />
+                    </Button>
+                    <Button type="button" variant="ghost" size="icon" aria-label="Move down" disabled={i === draft.length - 1} onClick={() => move(i, 1)}>
+                      <ArrowDown className="size-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Remove key event"
+                      onClick={() => setDraft((d) => d.filter((_, j) => j !== i))}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                </div>
+                <Input placeholder="Link (optional)" value={ev.url} onChange={(e) => patch(i, { url: e.target.value })} />
+                <div className="flex flex-wrap items-center gap-4">
+                  {EVENT_PLATFORMS.map((p) => (
+                    <label key={p} className="flex items-center gap-1.5 text-xs font-medium">
+                      <Switch
+                        checked={ev.platforms.includes(p)}
+                        onCheckedChange={(c) =>
+                          patch(i, { platforms: c ? [...ev.platforms, p] : ev.platforms.filter((x) => x !== p) })
+                        }
+                      />
+                      {p}
+                    </label>
+                  ))}
+                </div>
               </div>
             ))}
             {draft.length === 0 && <p className="text-xs text-muted-foreground">No key events yet.</p>}
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <Button type="button" variant="outline" size="sm" onClick={() => setDraft((d) => [...d, { date: "", label: "" }])}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setDraft((d) => [...d, { date: "", label: "", url: "", platforms: [] }])}
+              >
                 Add key event
               </Button>
+              {draft.length > 1 && (
+                <Button type="button" variant="outline" size="sm" onClick={orderByDate}>
+                  Order by date
+                </Button>
+              )}
               <Button type="button" size="sm" disabled={saving} onClick={save}>
                 {saving ? "Saving…" : "Save key events"}
               </Button>
