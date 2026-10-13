@@ -25,3 +25,4 @@
 - [x] Per-brief "Show to free members" switch: free dashboards see only switched-on briefs plus privately shared ones, with a Free badge and upsell fallback.
 - [ ] Enable direct creator account syncing after Instagram and TikTok provider app registration, permissions, and a real-account pilot; no provider credentials or approval are available yet.
 
+- [x] Hide the "Total creators" box on the Stand Atlantic report (per-report "Hide creator total" switch in the builder; Tixel untouched)
