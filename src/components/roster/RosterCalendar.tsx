@@ -26,6 +26,8 @@ export type CalendarCreator = {
 export type CalendarEvent = {
   date?: string | null;
   label?: string | null;
+  url?: string | null;
+  platforms?: string[] | null;
 };
 
 export function datesOf(c: CalendarCreator): string[] {
@@ -79,13 +81,22 @@ function Chip({ c, onPick, large, clamp = 2 }: { c: CalendarCreator; onPick: (id
 /** Key event marker — a moment to cover without a creator attached. */
 function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean; clamp?: 2 | 3 }) {
   const label = (e.label ?? "").trim() || "Event";
+  const tags = (e.platforms ?? []).filter(Boolean);
   const clampClass = clamp === 3 ? "line-clamp-3" : "line-clamp-2";
-  return (
-    <div
-      className={`flex w-full items-center rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent report-light:border-pink-ink report-light:text-pink-ink ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`}
-      title={label}
-    >
+  const cls = `flex w-full flex-col rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent report-light:border-pink-ink report-light:text-pink-ink ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`;
+  const body = (
+    <>
       <span className={`${clampClass} break-words leading-tight`}>{label}</span>
+      {tags.length > 0 && <span className="mt-0.5 text-[9px] uppercase tracking-wider opacity-80">{tags.join(" · ")}</span>}
+    </>
+  );
+  return e.url ? (
+    <a href={e.url} target="_blank" rel="noopener noreferrer" className={`${cls} transition hover:bg-pink-accent/20`} title={label}>
+      {body}
+    </a>
+  ) : (
+    <div className={cls} title={label}>
+      {body}
     </div>
   );
 }
