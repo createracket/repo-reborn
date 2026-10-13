@@ -60,6 +60,8 @@
 
   /* Brand accent tokens */
   --color-pink-accent: var(--pink-accent);
+  /* Dark ink that stays readable on top of brand pink in both themes. */
+  --color-pink-ink: oklch(0.23 0.006 270);
   --color-purple: var(--purple);
   --color-purple-foreground: oklch(0.98 0 0);
   /* Purple that stays legible on the dark canvas. */

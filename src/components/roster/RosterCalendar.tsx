@@ -92,7 +92,7 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
           {tags.map((t) => (
             <span
               key={t}
-              className="calendar-event-tag rounded-full bg-pink-accent/25 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-pink-accent"
+              className="calendar-event-tag rounded-full bg-pink-accent px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-pink-ink"
             >
               {t}
             </span>
@@ -192,9 +192,9 @@ export function RosterCalendar({
             return (
               <div
                 key={key}
-                className={`min-h-24 rounded-lg border p-1.5 ${inMonth ? "border-border/60 bg-background report-light:border-border/30 report-light:bg-card" : "border-transparent bg-muted/20 opacity-50 report-light:bg-muted/40"} ${isToday(d) ? "ring-2 ring-pink-accent report-light:ring-pink-ink" : ""}`}
+                className={`min-h-24 rounded-lg border p-1.5 ${inMonth ? "border-border/60 bg-background report-light:border-border/30 report-light:bg-card" : "border-transparent bg-muted/20 opacity-50 report-light:bg-muted/40"} ${isToday(d) ? "ring-2 ring-pink-accent" : ""}`}
               >
-                <div className={`mb-1 text-xs ${isToday(d) ? "font-semibold text-pink-accent report-light:text-pink-ink" : "text-muted-foreground"}`}>{format(d, "d")}</div>
+                <div className={`mb-1 text-xs ${isToday(d) ? "font-semibold text-pink-accent" : "text-muted-foreground"}`}>{format(d, "d")}</div>
                 <div className="space-y-1">
                   {dayEvents.map((e, i) => (
                     <EventChip key={`ev-${i}`} e={e} clamp={3} />
@@ -227,7 +227,7 @@ export function RosterCalendar({
             const key = format(d, "yyyy-MM-dd");
             return (
               <div key={key} className="flex gap-3 rounded-xl border border-border/60 bg-background p-2.5 report-light:border-border/30 report-light:bg-card">
-                <div className={`flex w-11 shrink-0 flex-col items-center justify-center rounded-lg py-1 ${isToday(d) ? "bg-pink-accent text-foreground report-light:text-pink-ink" : "bg-muted/50"}`}>
+                <div className={`flex w-11 shrink-0 flex-col items-center justify-center rounded-lg py-1 ${isToday(d) ? "bg-pink-accent text-pink-ink" : "bg-muted/50"}`}>
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{format(d, "EEE")}</span>
                   <span className="font-display text-lg leading-none">{format(d, "d")}</span>
                 </div>
