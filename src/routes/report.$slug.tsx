@@ -42,6 +42,7 @@ type PublicReport = {
   template: string | null;
   show_calendar?: boolean | null;
   calendar_events?: CalendarEvent[] | null;
+  hide_creator_count?: boolean | null;
 };
 
 type FeaturedComment = {
@@ -154,7 +155,7 @@ function PublicReportPage() {
     (async () => {
       const { data: r } = await (supabase as any)
         .from("public_campaign_reports")
-        .select("id, title, description, slug, published, published_at, header_image_url, profile_image_url, categories, hide_categories, template, custom_links, show_calendar, calendar_events")
+        .select("id, title, description, slug, published, published_at, header_image_url, profile_image_url, categories, hide_categories, template, custom_links, show_calendar, calendar_events, hide_creator_count")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
@@ -578,14 +579,20 @@ function PublicReportPage() {
           </div>
         </div>
         {allPosts.length > 0 && (
-          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div
+            className={`mt-8 grid gap-3 sm:grid-cols-2 ${
+              report.hide_creator_count ? "lg:grid-cols-4" : "lg:grid-cols-5"
+            }`}
+          >
             <TotalStat label="Total views" value={formatCount(totals.views)} />
             <TotalStat label={hasRealReach(allPosts) ? "Reach" : "Est. reach"} value={formatCount(totalReach)} />
             <TotalStat
               label="Est. engagement"
               value={estEngagementPct != null ? `${estEngagementPct.toFixed(2)}%` : "—"}
             />
-            <TotalStat label="Total creators" value={String(scopedCreators.length)} />
+            {!report.hide_creator_count && (
+              <TotalStat label="Total creators" value={String(scopedCreators.length)} />
+            )}
             <TotalStat label="Live posts" value={String(allPosts.length)} />
           </div>
         )}
@@ -605,14 +612,20 @@ function PublicReportPage() {
         })()}
 
         {monthFilter !== "all" && filteredCreators.length > 0 && (
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div
+            className={`mt-4 grid gap-3 sm:grid-cols-2 ${
+              report.hide_creator_count ? "lg:grid-cols-4" : "lg:grid-cols-5"
+            }`}
+          >
             <TotalStat label="Month views" value={formatCount(monthTotals.views)} />
             <TotalStat label="Month reach" value={formatCount(monthTotals.reach)} />
             <TotalStat
               label="Month engagement"
               value={monthTotals.engagementPct != null ? `${monthTotals.engagementPct.toFixed(2)}%` : "—"}
             />
-            <TotalStat label="Month creators" value={String(monthTotals.creators)} />
+            {!report.hide_creator_count && (
+              <TotalStat label="Month creators" value={String(monthTotals.creators)} />
+            )}
             <TotalStat label="Month posts" value={String(monthTotals.posts)} />
           </div>
         )}
