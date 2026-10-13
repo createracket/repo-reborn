@@ -665,7 +665,8 @@ function ReportDetailView({
   const [savingAccess, setSavingAccess] = useState(false);
   const readLinks = () => {
     const src = ((report as any).custom_links ?? []) as Array<{ label: string; url: string }>;
-    return [0, 1, 2].map((i) => ({ label: src[i]?.label ?? "", url: src[i]?.url ?? "" }));
+    const n = Math.max(3, src.length);
+    return Array.from({ length: n }, (_, i) => ({ label: src[i]?.label ?? "", url: src[i]?.url ?? "" }));
   };
   const [customLinks, setCustomLinks] = useState(readLinks);
 
@@ -919,12 +920,12 @@ function ReportDetailView({
             <Label>Description</Label>
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
             <div className="space-y-2 pt-2">
-              <Label>Custom links (up to 3)</Label>
+              <Label>Custom links</Label>
               <p className="text-xs text-muted-foreground">
                 Shown near the top of the public report page, under the description. Leave blank to skip.
               </p>
               {customLinks.map((link, i) => (
-                <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr]">
+                <div key={i} className="grid gap-2 sm:grid-cols-[1fr_2fr_auto]">
                   <Input
                     value={link.label}
                     onChange={(e) => setCustomLinks((prev) => prev.map((l, idx) => (idx === i ? { ...l, label: e.target.value } : l)))}
@@ -936,8 +937,29 @@ function ReportDetailView({
                     onChange={(e) => setCustomLinks((prev) => prev.map((l, idx) => (idx === i ? { ...l, url: e.target.value } : l)))}
                     placeholder="https://…"
                   />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-label={`Remove link ${i + 1}`}
+                    onClick={() =>
+                      setCustomLinks((prev) =>
+                        prev.length > 3 ? prev.filter((_, idx) => idx !== i) : prev.map((l, idx) => (idx === i ? { label: "", url: "" } : l)),
+                      )
+                    }
+                  >
+                    ✕
+                  </Button>
                 </div>
               ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCustomLinks((prev) => [...prev, { label: "", url: "" }])}
+              >
+                + Add link
+              </Button>
             </div>
           </div>
           <Collapsible className="md:col-span-2" open={mediaOpen} onOpenChange={setMediaOpen}>
