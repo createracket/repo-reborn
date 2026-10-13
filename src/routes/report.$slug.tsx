@@ -138,7 +138,7 @@ function PublicReportPage() {
   const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
   const [showExtras, setShowExtras] = useState(false);
   const [visibleCount, setVisibleCount] = useState(POSTS_PER_LOAD);
-  const [sortMode, setSortMode] = useState<"creator" | "latest">("latest");
+  const [sortMode, setSortMode] = useState<"creator" | "latest" | "views">("latest");
   const [gate, setGate] = useState<{ title: string; header_image_url: string | null; code_label: string } | null>(null);
   const [gateEmail, setGateEmail] = useState("");
   const [gateCode, setGateCode] = useState("");
@@ -415,6 +415,12 @@ function PublicReportPage() {
     .flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
     .sort((a, b) => byRecency(a.post, b.post));
 
+  // "Top views" ordering: most views first, ties fall back to recency.
+  const viewsOf = (p: PublicPost) => (p.views == null || p.views < 0 ? 0 : p.views);
+  const flatPostsByViews = [...flatPosts].sort(
+    (a, b) => viewsOf(b.post) - viewsOf(a.post) || byRecency(a.post, b.post),
+  );
+
   // Only render `visibleCount` posts at a time so long reports stay fast.
   const filteredPostCount = filteredCreators.reduce((n, c) => n + c.posts.length, 0);
   const visibleCreators = (() => {
@@ -429,6 +435,7 @@ function PublicReportPage() {
     return out;
   })();
   const visibleFlatPosts = flatPosts.slice(0, visibleCount);
+  const visibleFlatByViews = flatPostsByViews.slice(0, visibleCount);
   const hasMorePosts = filteredPostCount > visibleCount;
 
 
@@ -646,6 +653,7 @@ function PublicReportPage() {
               {([
                 { key: "creator", label: "By creator" },
                 { key: "latest", label: "Latest first" },
+                { key: "views", label: "Top views" },
               ] as const).map((opt) => (
                 <button
                   key={opt.key}
@@ -737,16 +745,18 @@ function PublicReportPage() {
             </p>
           ) : report.template === "simple" ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              {(sortMode === "latest"
-                ? visibleFlatPosts
-                : visibleCreators.flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
+              {(sortMode === "creator"
+                ? visibleCreators.flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
+                : sortMode === "latest"
+                  ? visibleFlatPosts
+                  : visibleFlatByViews
               ).map(({ post, creator }) => (
                 <SimplePostCard key={post.id} post={post} creator={creator} />
               ))}
             </div>
-          ) : sortMode === "latest" ? (
+          ) : sortMode !== "creator" ? (
             <div className="space-y-4">
-              {visibleFlatPosts.map(({ post, creator }) => (
+              {(sortMode === "latest" ? visibleFlatPosts : visibleFlatByViews).map(({ post, creator }) => (
                 <PostCard
                   key={post.id}
                   post={post}
