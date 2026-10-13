@@ -51,20 +51,10 @@ export function ReportCalendarSettings({
   }
 
   const patch = (i: number, p: Partial<Ev>) => setDraft((d) => d.map((x, j) => (j === i ? { ...x, ...p } : x)));
-  const move = (i: number, dir: -1 | 1) =>
-    setDraft((d) => {
-      const j = i + dir;
-      if (j < 0 || j >= d.length) return d;
-      const n = [...d];
-      [n[i], n[j]] = [n[j], n[i]];
-      return n;
-    });
-  const orderByDate = () =>
-    setDraft((d) => [...d].sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999")));
 
-  async function save() {
+  async function persist(list: Ev[], successMsg: string) {
     setSaving(true);
-    const cleaned = draft
+    const cleaned = list
       .filter((e) => e.date && e.label.trim())
       .map((e) => {
         let url = e.url.trim();
@@ -74,9 +64,22 @@ export function ReportCalendarSettings({
     const { error } = await sb.from("campaign_reports").update({ calendar_events: cleaned }).eq("id", reportId);
     setSaving(false);
     if (error) return toast.error(error.message);
-    setDraft(cleaned.map((e) => ({ ...e, url: e.url ?? "" })));
-    toast.success("Key events saved");
+    setDraft(
+      cleaned.map((e) => ({ date: e.date, label: e.label, url: e.url ?? "", platforms: e.platforms ?? [] })),
+    );
+    toast.success(successMsg);
     await onChanged();
+  }
+
+  async function save() {
+    await persist(draft, "Key events saved");
+  }
+
+  /** Like the roster builder's "Order by date": sorts and saves in one click (undated events go last). */
+  async function autoOrderByDate() {
+    const sorted = [...draft].sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"));
+    setDraft(sorted);
+    await persist(sorted, "Ordered by date");
   }
 
   return (
