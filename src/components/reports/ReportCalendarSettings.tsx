@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,20 +51,10 @@ export function ReportCalendarSettings({
   }
 
   const patch = (i: number, p: Partial<Ev>) => setDraft((d) => d.map((x, j) => (j === i ? { ...x, ...p } : x)));
-  const move = (i: number, dir: -1 | 1) =>
-    setDraft((d) => {
-      const j = i + dir;
-      if (j < 0 || j >= d.length) return d;
-      const n = [...d];
-      [n[i], n[j]] = [n[j], n[i]];
-      return n;
-    });
-  const orderByDate = () =>
-    setDraft((d) => [...d].sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999")));
 
-  async function save() {
+  async function persist(list: Ev[], successMsg: string) {
     setSaving(true);
-    const cleaned = draft
+    const cleaned = list
       .filter((e) => e.date && e.label.trim())
       .map((e) => {
         let url = e.url.trim();
@@ -74,9 +64,22 @@ export function ReportCalendarSettings({
     const { error } = await sb.from("campaign_reports").update({ calendar_events: cleaned }).eq("id", reportId);
     setSaving(false);
     if (error) return toast.error(error.message);
-    setDraft(cleaned.map((e) => ({ ...e, url: e.url ?? "" })));
-    toast.success("Key events saved");
+    setDraft(
+      cleaned.map((e) => ({ date: e.date, label: e.label, url: e.url ?? "", platforms: e.platforms ?? [] })),
+    );
+    toast.success(successMsg);
     await onChanged();
+  }
+
+  async function save() {
+    await persist(draft, "Key events saved");
+  }
+
+  /** Like the roster builder's "Order by date": sorts and saves in one click (undated events go last). */
+  async function autoOrderByDate() {
+    const sorted = [...draft].sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"));
+    setDraft(sorted);
+    await persist(sorted, "Ordered by date");
   }
 
   return (
@@ -110,12 +113,6 @@ export function ReportCalendarSettings({
                     onChange={(e) => patch(i, { label: e.target.value })}
                   />
                   <div className="flex items-center">
-                    <Button type="button" variant="ghost" size="icon" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
-                      <ArrowUp className="size-4" />
-                    </Button>
-                    <Button type="button" variant="ghost" size="icon" aria-label="Move down" disabled={i === draft.length - 1} onClick={() => move(i, 1)}>
-                      <ArrowDown className="size-4" />
-                    </Button>
                     <Button
                       type="button"
                       variant="ghost"
@@ -154,7 +151,13 @@ export function ReportCalendarSettings({
                 Add key event
               </Button>
               {draft.length > 1 && (
-                <Button type="button" variant="outline" size="sm" onClick={orderByDate}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  title="Sort key events by date (undated at the end)"
+                  onClick={autoOrderByDate}
+                >
                   Order by date
                 </Button>
               )}
