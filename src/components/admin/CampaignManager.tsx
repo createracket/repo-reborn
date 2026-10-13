@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, getRouteApi } from "@tanstack/react-router";
 import { Archive, ArchiveRestore, ChevronDown, ChevronRight, Plus, Unlink } from "lucide-react";
 import { toast } from "sonner";
 
@@ -86,7 +86,12 @@ export function CampaignManager() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState<Record<string, boolean>>({});
+  // Which campaign card is expanded lives in the URL (?campaign=<id>) so a
+  // refresh reopens the same campaign instead of collapsing everything.
+  const campaignApi = getRouteApi("/_authenticated/campaign-builder");
+  const { campaign: openCampaignId } = campaignApi.useSearch();
+  const toggleCampaign = (id: string) =>
+    navigate({ to: "/campaign-builder", search: (prev) => ({ ...prev, campaign: prev.campaign === id ? "" : id }), replace: true });
   const [newTitle, setNewTitle] = useState("");
   const [newClient, setNewClient] = useState("");
 
@@ -181,7 +186,7 @@ export function CampaignManager() {
 
       {[...campaigns.filter((c) => c.status !== "archived"), ...campaigns.filter((c) => c.status === "archived")].map((c, idx, arr) => {
         const linked = byCampaign[c.id] ?? [];
-        const isOpen = !!open[c.id];
+        const isOpen = openCampaignId === c.id;
         const isArchived = c.status === "archived";
         const firstArchived = isArchived && (idx === 0 || arr[idx - 1].status !== "archived");
         return (
@@ -193,7 +198,7 @@ export function CampaignManager() {
               <button
                 type="button"
                 className="flex flex-1 items-center gap-2 text-left"
-                onClick={() => setOpen((o) => ({ ...o, [c.id]: !isOpen }))}
+                onClick={() => toggleCampaign(c.id)}
               >
                 {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 <CardTitle className="text-lg">{c.title}</CardTitle>

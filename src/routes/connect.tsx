@@ -47,7 +47,7 @@ const briefSchema = z.object({
   title: z.string().trim().min(2, "Add a title").max(160),
   description: z.string().trim().min(10, "Add a bit more detail").max(5000),
   budget: z
-    .number({ invalid_type_error: "Enter a number" })
+    .number({ error: "Enter a number" })
     .nonnegative("Must be 0 or more")
     .max(10_000_000)
     .optional(),
