@@ -13,7 +13,7 @@ import {
   type CalendarEvent,
 } from "@/components/roster/RosterCalendar";
 
-const PLATFORMS = ["IG", "TT", "YT", "Trial"];
+const PLATFORMS = ["IG", "TT", "YT", "Trial", "Story"];
 const esc = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
 
 /** Public report calendar with PNG snapshot + CSV export of dates, events and platform toggles. */

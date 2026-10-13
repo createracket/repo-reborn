@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 const sb = supabase as any;
 
-export const EVENT_PLATFORMS = ["IG", "TT", "YT", "Trial"] as const;
+export const EVENT_PLATFORMS = ["IG", "TT", "YT", "Trial", "Story"] as const;
 type Ev = { date: string; label: string; url: string; platforms: string[] };
 
 /** Report builder card: calendar tab switch + key events (mirrors the roster builder). */
