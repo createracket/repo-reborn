@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { useEffect, useState } from "react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -7,7 +9,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAuthUser } from "@/hooks/use-auth";
 import { CampaignManager } from "@/components/admin/CampaignManager";
 
+const campaignBuilderSearchSchema = z.object({
+  // Which campaign card is expanded; empty string means none (keeps URL clean via default).
+  campaign: fallback(z.string(), "").default(""),
+});
+
 export const Route = createFileRoute("/_authenticated/campaign-builder")({
+  validateSearch: zodValidator(campaignBuilderSearchSchema),
   head: () => ({ meta: [{ title: "Campaign Manager — Create Racket" }, { name: "description", content: "Manage campaigns, briefs, rosters and reports." }, { property: "og:title", content: "Campaign Manager — Create Racket" }, { property: "og:description", content: "Manage campaigns, briefs, rosters and reports." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
   component: CampaignBuilderPage,
 });
