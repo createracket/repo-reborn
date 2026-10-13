@@ -111,6 +111,7 @@ type Report = {
   updated_at: string;
   categories: string[] | null;
   hide_categories: boolean | null;
+  hide_creator_count?: boolean | null;
   template: string | null;
   access_code: string | null;
   access_code_label: string | null;
@@ -220,7 +221,7 @@ function CampaignReportsPage() {
     const { data, error } = await sb
       .from("campaign_reports")
       .select(
-        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, template, access_code, access_code_label, profile_image_url, thumb_frame, custom_links, auto_refresh_monthly, show_calendar, calendar_events, auto_pull_posts, auto_pull_start, auto_pull_end, auto_pull_last_run, auto_pull_last_result",
+        "id, owner_id, title, description, slug, published, published_at, header_image_url, source_roster_id, created_at, updated_at, categories, hide_categories, hide_creator_count, template, access_code, access_code_label, profile_image_url, thumb_frame, custom_links, auto_refresh_monthly, show_calendar, calendar_events, auto_pull_posts, auto_pull_start, auto_pull_end, auto_pull_last_run, auto_pull_last_result",
       )
       .order("updated_at", { ascending: false });
     if (error) return toast.error(error.message);
@@ -659,6 +660,7 @@ function ReportDetailView({
   const [categories, setCategories] = useState<string[]>(report.categories ?? []);
   const [newCategory, setNewCategory] = useState("");
   const [hideCategories, setHideCategories] = useState<boolean>(!!report.hide_categories);
+  const [hideCreatorCount, setHideCreatorCount] = useState<boolean>(!!report.hide_creator_count);
   const [template, setTemplate] = useState<string>(report.template ?? "original");
   const [accessCode, setAccessCode] = useState(report.access_code ?? "");
   const [accessCodeLabel, setAccessCodeLabel] = useState(report.access_code_label ?? "Access code");
@@ -679,6 +681,7 @@ function ReportDetailView({
     setThumbFrame(readThumbFrame({ thumb_frame: (report as any).thumb_frame }));
     setCategories(report.categories ?? []);
     setHideCategories(!!report.hide_categories);
+    setHideCreatorCount(!!report.hide_creator_count);
     setTemplate(report.template ?? "original");
     setAccessCode(report.access_code ?? "");
     setAccessCodeLabel(report.access_code_label ?? "Access code");
@@ -1213,6 +1216,26 @@ function ReportDetailView({
                 const { error } = await sb
                   .from("campaign_reports")
                   .update({ hide_categories: next })
+                  .eq("id", report.id);
+                if (error) return toast.error(error.message);
+                await onChanged();
+              }}
+            />
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+            <div>
+              <div className="text-sm font-medium">Hide creator total</div>
+              <div className="text-xs text-muted-foreground">
+                Hides the "Total creators" box (and the matching month figure) on the public campaign report page.
+              </div>
+            </div>
+            <Switch
+              checked={hideCreatorCount}
+              onCheckedChange={async (next) => {
+                setHideCreatorCount(next);
+                const { error } = await sb
+                  .from("campaign_reports")
+                  .update({ hide_creator_count: next })
                   .eq("id", report.id);
                 if (error) return toast.error(error.message);
                 await onChanged();
