@@ -524,6 +524,7 @@ export type Database = {
           description: string | null
           header_image_url: string | null
           hide_categories: boolean
+          hide_creator_count: boolean
           id: string
           owner_id: string
           profile_image_url: string | null
@@ -558,6 +559,7 @@ export type Database = {
           description?: string | null
           header_image_url?: string | null
           hide_categories?: boolean
+          hide_creator_count?: boolean
           id?: string
           owner_id: string
           profile_image_url?: string | null
@@ -592,6 +594,7 @@ export type Database = {
           description?: string | null
           header_image_url?: string | null
           hide_categories?: boolean
+          hide_creator_count?: boolean
           id?: string
           owner_id?: string
           profile_image_url?: string | null
@@ -2884,6 +2887,7 @@ export type Database = {
           description: string | null
           header_image_url: string | null
           hide_categories: boolean | null
+          hide_creator_count: boolean | null
           id: string | null
           profile_image_url: string | null
           published: boolean | null
@@ -2902,6 +2906,7 @@ export type Database = {
           description?: string | null
           header_image_url?: string | null
           hide_categories?: boolean | null
+          hide_creator_count?: boolean | null
           id?: string | null
           profile_image_url?: string | null
           published?: boolean | null
@@ -2920,6 +2925,7 @@ export type Database = {
           description?: string | null
           header_image_url?: string | null
           hide_categories?: boolean | null
+          hide_creator_count?: boolean | null
           id?: string | null
           profile_image_url?: string | null
           published?: boolean | null
