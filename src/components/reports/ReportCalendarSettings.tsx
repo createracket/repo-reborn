@@ -151,7 +151,13 @@ export function ReportCalendarSettings({
                 Add key event
               </Button>
               {draft.length > 1 && (
-                <Button type="button" variant="outline" size="sm" onClick={orderByDate}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  title="Sort key events by date (undated at the end)"
+                  onClick={autoOrderByDate}
+                >
                   Order by date
                 </Button>
               )}
