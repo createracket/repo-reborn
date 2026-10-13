@@ -18,7 +18,8 @@ import { PostThumb } from "@/components/reports/PostThumb";
 import { getReportGate, unlockReport, getReportForMember } from "@/lib/report-access.functions";
 import { shareMeta } from "@/lib/share-meta";
 import { getSharePreview } from "@/lib/share-preview.functions";
-import { RosterCalendar, type CalendarEvent } from "@/components/roster/RosterCalendar";
+import { type CalendarEvent } from "@/components/roster/RosterCalendar";
+import { ReportCalendarSection } from "@/components/reports/ReportCalendarSection";
 
 // Posts load in batches of 18 so the first screen lands on full rows of six.
 const POSTS_PER_LOAD = 18;
@@ -625,19 +626,19 @@ function PublicReportPage() {
         )}
 
         {report.show_calendar && viewParam === "calendar" ? (
-          <section className="mt-6">
-            <RosterCalendar
-              creators={creators}
-              events={(report.calendar_events ?? []) as CalendarEvent[]}
-              onPick={(id) => {
-                setSortMode("creator");
-                setView("posts");
-                setTimeout(() => {
-                  document.getElementById(`creator-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }, 80);
-              }}
-            />
-          </section>
+          <ReportCalendarSection
+            title={report.title}
+            slug={report.slug}
+            creators={creators}
+            events={(report.calendar_events ?? []) as CalendarEvent[]}
+            onPick={(id) => {
+              setSortMode("creator");
+              setView("posts");
+              setTimeout(() => {
+                document.getElementById(`creator-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 80);
+            }}
+          />
         ) : (<>
         {(monthOptions.length > 0 || hasExtraMentions || allPosts.length > 0) && (
           <div className="mt-10 flex flex-wrap items-center justify-end gap-3">
