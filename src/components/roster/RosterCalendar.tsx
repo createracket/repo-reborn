@@ -11,7 +11,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { storageImage } from "@/lib/storage-image";
 
@@ -83,11 +83,28 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
   const label = (e.label ?? "").trim() || "Event";
   const tags = (e.platforms ?? []).filter(Boolean);
   const clampClass = clamp === 3 ? "line-clamp-3" : "line-clamp-2";
-  const cls = `flex w-full flex-col rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent report-light:border-pink-ink report-light:text-pink-ink ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`;
+  const cls = `calendar-event-chip flex w-full flex-col rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`;
   const body = (
     <>
       <span className={`${clampClass} break-words leading-tight`}>{label}</span>
-      {tags.length > 0 && <span className="mt-0.5 text-[9px] uppercase tracking-wider opacity-80">{tags.join(" · ")}</span>}
+      {(tags.length > 0 || !!e.url) && (
+        <span className="mt-0.5 flex flex-wrap items-center gap-1">
+          {tags.map((t) => (
+            <span
+              key={t}
+              className="calendar-event-tag rounded-full bg-pink-accent/25 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-pink-accent"
+            >
+              {t}
+            </span>
+          ))}
+          {e.url && (
+            <span className="calendar-event-preview inline-flex items-center gap-0.5 rounded-full bg-primary px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-primary-foreground">
+              Preview
+              <ExternalLink className="size-2" />
+            </span>
+          )}
+        </span>
+      )}
     </>
   );
   return e.url ? (
