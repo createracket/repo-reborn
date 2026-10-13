@@ -186,7 +186,7 @@ export function CampaignManager() {
 
       {[...campaigns.filter((c) => c.status !== "archived"), ...campaigns.filter((c) => c.status === "archived")].map((c, idx, arr) => {
         const linked = byCampaign[c.id] ?? [];
-        const isOpen = !!open[c.id];
+        const isOpen = openCampaignId === c.id;
         const isArchived = c.status === "archived";
         const firstArchived = isArchived && (idx === 0 || arr[idx - 1].status !== "archived");
         return (
@@ -198,7 +198,7 @@ export function CampaignManager() {
               <button
                 type="button"
                 className="flex flex-1 items-center gap-2 text-left"
-                onClick={() => setOpen((o) => ({ ...o, [c.id]: !isOpen }))}
+                onClick={() => toggleCampaign(c.id)}
               >
                 {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 <CardTitle className="text-lg">{c.title}</CardTitle>
