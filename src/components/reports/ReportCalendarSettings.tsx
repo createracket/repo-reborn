@@ -113,12 +113,6 @@ export function ReportCalendarSettings({
                     onChange={(e) => patch(i, { label: e.target.value })}
                   />
                   <div className="flex items-center">
-                    <Button type="button" variant="ghost" size="icon" aria-label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
-                      <ArrowUp className="size-4" />
-                    </Button>
-                    <Button type="button" variant="ghost" size="icon" aria-label="Move down" disabled={i === draft.length - 1} onClick={() => move(i, 1)}>
-                      <ArrowDown className="size-4" />
-                    </Button>
                     <Button
                       type="button"
                       variant="ghost"
