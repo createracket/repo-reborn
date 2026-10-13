@@ -86,7 +86,12 @@ export function CampaignManager() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState<Record<string, boolean>>({});
+  // Which campaign card is expanded lives in the URL (?campaign=<id>) so a
+  // refresh reopens the same campaign instead of collapsing everything.
+  const campaignApi = getRouteApi("/_authenticated/campaign-builder");
+  const { campaign: openCampaignId } = campaignApi.useSearch();
+  const toggleCampaign = (id: string) =>
+    navigate({ to: "/campaign-builder", search: (prev) => ({ ...prev, campaign: prev.campaign === id ? "" : id }), replace: true });
   const [newTitle, setNewTitle] = useState("");
   const [newClient, setNewClient] = useState("");
 
