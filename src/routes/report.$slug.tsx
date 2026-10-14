@@ -75,6 +75,7 @@ type PublicPost = {
   hashtags: string[];
   brand_tag: string | null;
   extra_mention?: boolean | null;
+  is_trial?: boolean | null;
   position: number;
   updated_at: string | null;
 };
@@ -138,6 +139,7 @@ function PublicReportPage() {
   const [monthFilter, setMonthFilter] = useState<string>("all");
   const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
   const [showExtras, setShowExtras] = useState(false);
+  const [trialOnly, setTrialOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState(POSTS_PER_LOAD);
   const [sortMode, setSortMode] = useState<"creator" | "latest" | "views">("latest");
   const [gate, setGate] = useState<{ title: string; header_image_url: string | null; code_label: string } | null>(null);
@@ -349,8 +351,14 @@ function PublicReportPage() {
 
   // Posts tagged as "extra mentions" are hidden (and excluded from every total)
   // unless the visitor switches the extra mentions toggle on.
+  const hasTrials = creators.some((c) => c.posts.some((p) => !!p.is_trial));
   const scopedCreators = creators
-    .map((c) => ({ ...c, posts: showExtras ? c.posts : c.posts.filter((p) => !p.extra_mention) }))
+    .map((c) => ({
+      ...c,
+      posts: c.posts.filter(
+        (p) => (showExtras || !p.extra_mention) && (!trialOnly || !!p.is_trial),
+      ),
+    }))
     .filter((c) => c.posts.length > 0);
   const hasExtraMentions = creators.some((c) => c.posts.some((p) => !!p.extra_mention));
   const allPosts = scopedCreators.flatMap((c) => c.posts);
