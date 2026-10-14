@@ -33,7 +33,6 @@ function ErSweepButton({ reportId, onFinished, recentOnly = false }: { reportId:
       const { data: posts, error: pe } = await q;
       if (pe) throw pe;
       if (recentOnly && !(posts ?? []).length) return toast.info("No posts added in the last 24 hours");
-      if (pe) throw pe;
       let updated = 0, skipped = 0, unchanged = 0;
       for (const p of posts ?? []) {
         const f = Number(p.followers);
