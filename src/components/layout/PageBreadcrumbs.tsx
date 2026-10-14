@@ -30,7 +30,7 @@ function getPageLabel(pathname: string): string | null {
   if (pathname.startsWith("/brief/")) return "Brief";
   if (pathname.startsWith("/roster/")) return "Roster";
   if (pathname.startsWith("/u/")) return "Profile";
-  if (pathname.startsWith("/report/")) return "Campaign Report";
+  if (pathname.startsWith("/report/")) return "Report";
 
   return null;
 }
