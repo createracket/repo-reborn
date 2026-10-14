@@ -712,6 +712,19 @@ function PublicReportPage() {
                 Extra mentions {showExtras ? "are on" : "are off"}
               </button>
             )}
+            {hasTrials && (
+              <button
+                onClick={() => setTrialOnly((v) => !v)}
+                aria-pressed={trialOnly}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                  trialOnly
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Trial reels
+              </button>
+            )}
             <div className="flex items-center gap-1.5">
               {(["all", "instagram", "tiktok"] as const).map((p) => {
                 const active = platformFilter === p;
@@ -857,6 +870,8 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
   const media = (
     <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
       <PostThumb src={post.thumbnail_url} />
+      {post.is_trial && <TrialBanner className="absolute inset-x-0 top-0 z-10" />}
+
 
       <span
         className="absolute left-2 top-2 inline-flex items-center rounded-full bg-background/80 p-1.5 backdrop-blur"
@@ -947,7 +962,8 @@ function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: 
   const sentiment = post.sentiment_score != null && post.sentiment_score !== 50 ? post.sentiment_score : null;
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
+      {post.is_trial && <TrialBanner />}
       <CardContent className="grid gap-6 p-6 md:grid-cols-[minmax(0,280px)_1fr]">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
