@@ -183,6 +183,7 @@ export function ReportCalendarSettings({
           </div>
         </div>
       </CardContent>
+      )}
     </Card>
   );
 }
