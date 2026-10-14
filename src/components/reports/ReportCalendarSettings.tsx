@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ export function ReportCalendarSettings({
   const [on, setOn] = useState(showCalendar);
   const [draft, setDraft] = useState<Ev[]>([]);
   const [saving, setSaving] = useState(false);
+  const [sectionOpen, setSectionOpen] = useState(false);
 
   useEffect(() => {
     setOn(showCalendar);
