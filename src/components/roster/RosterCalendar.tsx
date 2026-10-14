@@ -228,7 +228,7 @@ export function RosterCalendar({
             return (
               <div key={key} className="flex gap-3 rounded-xl border border-border/60 bg-background p-2.5 report-light:border-border/30 report-light:bg-card">
                 <div className={`flex w-11 shrink-0 flex-col items-center justify-center rounded-lg py-1 ${isToday(d) ? "bg-lime text-primary-foreground" : "bg-muted/50"}`}>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{format(d, "EEE")}</span>
+                  <span className={`text-[10px] uppercase tracking-wider ${isToday(d) ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{format(d, "EEE")}</span>
                   <span className="font-display text-lg leading-none">{format(d, "d")}</span>
                 </div>
                 <div className="min-w-0 flex-1 space-y-1.5">
