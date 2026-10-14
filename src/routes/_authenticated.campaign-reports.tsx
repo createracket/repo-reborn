@@ -1379,7 +1379,7 @@ function ReportDetailView({
             <CardDescription>Add creators and their live posts. Metrics can be auto-fetched or entered manually.</CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={orderByPostDate} title="Sort every creator's posts by post date (undated last)">
+            <Button variant="outline" size="sm" onClick={orderByPostDate} title="Sort every creator's posts newest first (undated last)">
               Order by date
             </Button>
             <Button onClick={addCreator}>
