@@ -6,20 +6,33 @@ import { Button } from "@/components/ui/button";
 const sb = supabase as any;
 
 /** Recalculates every post's ER as (views + likes + comments) ÷ followers. Posts without followers are skipped. */
-export function ReportErSweep({ reportId, onFinished }: { reportId: string; onFinished: () => void | Promise<void> }) {
+export function ReportErSweep(props: { reportId: string; onFinished: () => void | Promise<void> }) {
+  return (
+    <>
+      <ErSweepButton {...props} />
+      <ErSweepButton {...props} recentOnly />
+    </>
+  );
+}
+
+function ErSweepButton({ reportId, onFinished, recentOnly = false }: { reportId: string; onFinished: () => void | Promise<void>; recentOnly?: boolean }) {
   const [busy, setBusy] = useState(false);
   async function run() {
-    if (!confirm("Recalculate every post's engagement rate using views? This replaces existing ER values.")) return;
+    if (!confirm(recentOnly ? "Recalculate ER by views for posts added in the last 24 hours? This replaces their existing ER values." : "Recalculate every post's engagement rate using views? This replaces existing ER values.")) return;
     setBusy(true);
     try {
       const { data: creators, error: ce } = await sb.from("campaign_report_creators").select("id").eq("report_id", reportId);
       if (ce) throw ce;
       const ids = (creators ?? []).map((c: any) => c.id);
       if (!ids.length) return toast.info("No creators in this report yet");
-      const { data: posts, error: pe } = await sb
+      let q = sb
         .from("campaign_report_posts")
         .select("id, views, likes, comments, followers, engagement_rate_pct")
         .in("creator_id", ids);
+      if (recentOnly) q = q.gte("created_at", new Date(Date.now() - 24 * 3600 * 1000).toISOString());
+      const { data: posts, error: pe } = await q;
+      if (pe) throw pe;
+      if (recentOnly && !(posts ?? []).length) return toast.info("No posts added in the last 24 hours");
       if (pe) throw pe;
       let updated = 0, skipped = 0, unchanged = 0;
       for (const p of posts ?? []) {
@@ -42,7 +55,7 @@ export function ReportErSweep({ reportId, onFinished }: { reportId: string; onFi
   }
   return (
     <Button size="sm" variant="purple" disabled={busy} onClick={run}>
-      {busy ? "Calculating…" : "Calculate all ER by views"}
+      {busy ? "Calculating…" : recentOnly ? "Calculate ER for last 24h posts" : "Calculate all ER by views"}
     </Button>
   );
 }
