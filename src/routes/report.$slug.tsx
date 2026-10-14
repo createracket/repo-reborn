@@ -690,14 +690,18 @@ function PublicReportPage() {
                 </button>
               ))}
             </div>
-            {csvAvailable && (
-              <a
-                href={`/report/${report.slug}/metrics.csv`}
-                download
-                className="rounded-full border border-lime px-3 py-1.5 text-xs font-medium text-lime transition hover:ring-2 hover:ring-lime/60 report-light:bg-lime report-light:text-primary-foreground"
+            {hasTrials && (
+              <button
+                onClick={() => setTrialOnly((v) => !v)}
+                aria-pressed={trialOnly}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                  trialOnly
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border text-muted-foreground hover:text-foreground"
+                }`}
               >
-                Download CSV
-              </a>
+                Trial reels
+              </button>
             )}
             {hasExtraMentions && (
               <button
@@ -712,18 +716,14 @@ function PublicReportPage() {
                 Extra mentions {showExtras ? "are on" : "are off"}
               </button>
             )}
-            {hasTrials && (
-              <button
-                onClick={() => setTrialOnly((v) => !v)}
-                aria-pressed={trialOnly}
-                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                  trialOnly
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border text-muted-foreground hover:text-foreground"
-                }`}
+            {csvAvailable && (
+              <a
+                href={`/report/${report.slug}/metrics.csv`}
+                download
+                className="rounded-full border border-lime px-3 py-1.5 text-xs font-medium text-lime transition hover:ring-2 hover:ring-lime/60 report-light:bg-lime report-light:text-primary-foreground"
               >
-                Trial reels
-              </button>
+                Download CSV
+              </a>
             )}
             <div className="flex items-center gap-1.5">
               {(["all", "instagram", "tiktok"] as const).map((p) => {
