@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ export function ReportCalendarSettings({
   const [on, setOn] = useState(showCalendar);
   const [draft, setDraft] = useState<Ev[]>([]);
   const [saving, setSaving] = useState(false);
+  const [sectionOpen, setSectionOpen] = useState(true);
 
   useEffect(() => {
     setOn(showCalendar);
@@ -84,13 +85,27 @@ export function ReportCalendarSettings({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="font-display text-2xl">Calendar view</CardTitle>
-        <CardDescription>
-          Adds a Posts / Calendar toggle to the public report, placing creators on their posting dates. Set dates on
-          each creator below.
-        </CardDescription>
+      <CardHeader
+        className="flex-row items-center justify-between gap-3 space-y-0"
+        onClick={() => setSectionOpen((o) => !o)}
+      >
+        <div>
+          <CardTitle className="font-display text-2xl">Calendar view</CardTitle>
+          <CardDescription>
+            Adds a Posts / Calendar toggle to the public report, placing creators on their posting dates. Set dates on
+            each creator below.
+          </CardDescription>
+        </div>
+        <button
+          type="button"
+          className="text-muted-foreground hover:text-foreground"
+          aria-label={sectionOpen ? "Collapse section" : "Expand section"}
+          aria-expanded={sectionOpen}
+        >
+          {sectionOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+        </button>
       </CardHeader>
+      {sectionOpen && (
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
           <div className="text-sm font-medium">Show calendar view</div>
@@ -168,6 +183,7 @@ export function ReportCalendarSettings({
           </div>
         </div>
       </CardContent>
+      )}
     </Card>
   );
 }
