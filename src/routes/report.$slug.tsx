@@ -870,7 +870,9 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
   const media = (
     <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
       <PostThumb src={post.thumbnail_url} />
-      {post.is_trial && <TrialBanner className="absolute inset-x-0 top-0 z-10" />}
+      {post.is_trial && (
+        <TrialBanner className="absolute -inset-x-px -top-px z-10 rounded-t-[19px]" />
+      )}
 
 
       <span
@@ -963,7 +965,7 @@ function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: 
 
   return (
     <Card className="overflow-hidden">
-      {post.is_trial && <TrialBanner />}
+      {post.is_trial && <TrialBanner className="-mx-px -mt-px rounded-t-[19px]" />}
       <CardContent className="grid gap-6 p-6 md:grid-cols-[minmax(0,280px)_1fr]">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
@@ -1155,7 +1157,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 function TrialBanner({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`bg-muted-foreground/85 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-background backdrop-blur ${className}`}
+      className={`bg-lime/90 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-primary-foreground backdrop-blur-sm ${className}`}
     >
       Trial reel
     </div>
