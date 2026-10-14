@@ -27,7 +27,8 @@ export function ReportCalendarSettings({
   const [on, setOn] = useState(showCalendar);
   const [draft, setDraft] = useState<Ev[]>([]);
   const [saving, setSaving] = useState(false);
-  const [sectionOpen, setSectionOpen] = useState(true);
+  // Always start folded away; admins open it when they need it.
+  const [sectionOpen, setSectionOpen] = useState(false);
 
   useEffect(() => {
     setOn(showCalendar);
