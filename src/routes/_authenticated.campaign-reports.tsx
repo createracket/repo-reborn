@@ -836,6 +836,7 @@ function ReportDetailView({
           .filter((p) => p.creator_id === c.id)
           .slice()
           .sort((a, b) => (b.posted_at || "9999").localeCompare(a.posted_at || "9999"));
+        console.log("ORDER_DEBUG", c.name, list.slice(0, 3).map((p) => p.posted_at), list.slice(-3).map((p) => p.posted_at));
         list.forEach((p, i) =>
           updates.push(sb.from("campaign_report_posts").update({ position: i }).eq("id", p.id)),
         );
