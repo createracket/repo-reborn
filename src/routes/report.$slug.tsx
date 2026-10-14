@@ -645,7 +645,7 @@ function PublicReportPage() {
                 key={v}
                 type="button"
                 onClick={() => setView(v)}
-                className={`flex-1 rounded-full px-4 py-1.5 capitalize transition sm:flex-none ${(viewParam ?? "posts") === v ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+                className={`flex-1 rounded-full px-4 py-1.5 capitalize transition sm:flex-none ${(viewParam ?? "posts") === v ? "bg-pink-accent text-pink-ink" : "text-muted-foreground hover:text-foreground"}`}
               >
                 {v}
               </button>
