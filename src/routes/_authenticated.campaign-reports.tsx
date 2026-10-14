@@ -1662,6 +1662,9 @@ function CreatorRow({
             extraDates={(creator as any).extra_posting_dates}
             onChanged={onChanged}
           />
+          <Button variant="outline" size="sm" onClick={addPost}>
+            <Plus className="mr-2 size-4" /> Add live post
+          </Button>
           {posts.length === 0 ? (
             <p className="text-sm text-muted-foreground">No live posts yet.</p>
           ) : (
@@ -1675,9 +1678,6 @@ function CreatorRow({
               </SortableContext>
             </DndContext>
           )}
-          <Button variant="outline" size="sm" onClick={addPost}>
-            <Plus className="mr-2 size-4" /> Add live post
-          </Button>
         </div>
       )}
     </div>
