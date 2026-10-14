@@ -827,7 +827,7 @@ function ReportDetailView({
     await onChanged();
   }
 
-  /** Like the calendar's "Order by date": sorts each creator's posts by posted date (undated last) and saves. */
+  /** Like the calendar's "Order by date": sorts each creator's posts newest first (undated last) and saves. */
   async function orderByPostDate() {
     try {
       const updates: Promise<unknown>[] = [];
@@ -835,7 +835,7 @@ function ReportDetailView({
         const list = posts
           .filter((p) => p.creator_id === c.id)
           .slice()
-          .sort((a, b) => (a.posted_at || "9999").localeCompare(b.posted_at || "9999"));
+          .sort((a, b) => (b.posted_at || "9999").localeCompare(a.posted_at || "9999"));
         list.forEach((p, i) =>
           updates.push(sb.from("campaign_report_posts").update({ position: i }).eq("id", p.id)),
         );
