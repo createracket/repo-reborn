@@ -192,9 +192,9 @@ export function RosterCalendar({
             return (
               <div
                 key={key}
-                className={`min-h-24 rounded-lg border p-1.5 ${inMonth ? "border-border/60 bg-background report-light:border-border/30 report-light:bg-card" : "border-transparent bg-muted/20 opacity-50 report-light:bg-muted/40"} ${isToday(d) ? "ring-2 ring-pink-accent" : ""}`}
+                className={`min-h-24 rounded-lg border p-1.5 ${inMonth ? "border-border/60 bg-background report-light:border-border/30 report-light:bg-card" : "border-transparent bg-muted/20 opacity-50 report-light:bg-muted/40"} ${isToday(d) ? "ring-2 ring-lime" : ""}`}
               >
-                <div className={`mb-1 text-xs ${isToday(d) ? "font-semibold text-pink-accent" : "text-muted-foreground"}`}>{format(d, "d")}</div>
+                <div className={`mb-1 text-xs ${isToday(d) ? "font-semibold text-lime-soft" : "text-muted-foreground"}`}>{format(d, "d")}</div>
                 <div className="space-y-1">
                   {dayEvents.map((e, i) => (
                     <EventChip key={`ev-${i}`} e={e} clamp={3} />
@@ -227,8 +227,8 @@ export function RosterCalendar({
             const key = format(d, "yyyy-MM-dd");
             return (
               <div key={key} className="flex gap-3 rounded-xl border border-border/60 bg-background p-2.5 report-light:border-border/30 report-light:bg-card">
-                <div className={`flex w-11 shrink-0 flex-col items-center justify-center rounded-lg py-1 ${isToday(d) ? "bg-pink-accent text-pink-ink" : "bg-muted/50"}`}>
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{format(d, "EEE")}</span>
+                <div className={`flex w-11 shrink-0 flex-col items-center justify-center rounded-lg py-1 ${isToday(d) ? "bg-lime text-primary-foreground" : "bg-muted/50"}`}>
+                  <span className={`text-[10px] uppercase tracking-wider ${isToday(d) ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{format(d, "EEE")}</span>
                   <span className="font-display text-lg leading-none">{format(d, "d")}</span>
                 </div>
                 <div className="min-w-0 flex-1 space-y-1.5">
@@ -309,9 +309,9 @@ export function CalendarSnapshotContent({
           return (
             <div
               key={key}
-              className={`overflow-hidden rounded-xl border p-2 ${inMonth ? "border-border/60 bg-card" : "border-transparent bg-muted/40 opacity-50"} ${isToday(d) ? "ring-2 ring-pink-accent" : ""}`}
+              className={`overflow-hidden rounded-xl border p-2 ${inMonth ? "border-border/60 bg-card" : "border-transparent bg-muted/40 opacity-50"} ${isToday(d) ? "ring-2 ring-lime" : ""}`}
             >
-              <div className={`mb-1 text-sm ${isToday(d) ? "font-semibold text-pink-accent" : "text-muted-foreground"}`}>{format(d, "d")}</div>
+              <div className={`mb-1 text-sm ${isToday(d) ? "font-semibold text-lime-soft" : "text-muted-foreground"}`}>{format(d, "d")}</div>
               <div className="space-y-1">
                 {dayEvents.slice(0, 2).map((e, i) => (
                   <div
