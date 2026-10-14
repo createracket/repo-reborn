@@ -69,6 +69,8 @@
   --color-coral: var(--pink-accent);
   --color-blush: var(--pink-accent);
   --color-lime: var(--primary);
+  /* Green that stays legible as small text on both canvases. */
+  --color-lime-soft: var(--lime-soft);
   --color-brand-light: var(--brand-light);
   /* Footer keeps the soft brand pink in every theme. */
   --color-footer-pink: oklch(0.86 0.07 12);
@@ -89,6 +91,8 @@
   /* Primary — Racket Green #BADA55 */
   --primary: oklch(0.82 0.19 125);
   --primary-foreground: oklch(0.22 0 0);
+  /* Brand green is too pale for text on white paper, so deepen it here. */
+  --lime-soft: oklch(0.5 0.16 125);
 
   --secondary: oklch(0.89 0.004 260);
   --secondary-foreground: oklch(0.25 0 0);
@@ -148,6 +152,7 @@
   /* Primary — Racket Green #BADA55 */
   --primary: oklch(0.86 0.21 125);
   --primary-foreground: oklch(0.18 0 0);
+  --lime-soft: oklch(0.86 0.21 125);
 
   --secondary: oklch(0.32 0 0);
   --secondary-foreground: oklch(0.98 0 0);
