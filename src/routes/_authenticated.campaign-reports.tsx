@@ -826,6 +826,27 @@ function ReportDetailView({
     await onChanged();
   }
 
+  /** Like the calendar's "Order by date": sorts each creator's posts by posted date (undated last) and saves. */
+  async function orderByPostDate() {
+    try {
+      const updates: Promise<unknown>[] = [];
+      for (const c of creators) {
+        const list = posts
+          .filter((p) => p.creator_id === c.id)
+          .slice()
+          .sort((a, b) => (a.posted_at || "9999").localeCompare(b.posted_at || "9999"));
+        list.forEach((p, i) =>
+          updates.push(sb.from("campaign_report_posts").update({ position: i }).eq("id", p.id)),
+        );
+      }
+      await Promise.all(updates);
+      toast.success("Posts ordered by date");
+      await onChanged();
+    } catch (e) {
+      toast.error((e as Error).message ?? "Order failed");
+    }
+  }
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -1356,9 +1377,14 @@ function ReportDetailView({
             <CardTitle className="font-display text-2xl">Creators & posts</CardTitle>
             <CardDescription>Add creators and their live posts. Metrics can be auto-fetched or entered manually.</CardDescription>
           </div>
-          <Button onClick={addCreator}>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={orderByPostDate} title="Sort every creator's posts by post date (undated last)">
+              Order by date
+            </Button>
+            <Button onClick={addCreator}>
             <Plus className="mr-2 size-4" /> Add creator
           </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {creators.length === 0 ? (
