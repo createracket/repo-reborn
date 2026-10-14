@@ -871,12 +871,12 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
     <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
       <PostThumb src={post.thumbnail_url} />
       {post.is_trial && (
-        <TrialBanner className="absolute -inset-x-px -top-px z-10 rounded-t-[19px]" />
+        <TrialBanner className="absolute -inset-x-px -bottom-px z-10 rounded-b-xl" />
       )}
 
 
       <span
-        className={`absolute left-2 ${post.is_trial ? "top-10" : "top-2"} inline-flex items-center rounded-full bg-background/80 p-1.5 backdrop-blur`}
+        className={`absolute left-2 top-2 inline-flex items-center rounded-full bg-background/80 p-1.5 backdrop-blur`}
         title={PLATFORM_LABEL[post.platform]}
       >
         <Icon
