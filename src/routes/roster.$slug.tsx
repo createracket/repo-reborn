@@ -804,7 +804,14 @@ function PublicRosterPage() {
                         </p>
                       )}
 
-                      {(it.example_video_url || it.bio_page_url || it.content_review_url) && (
+                      {(() => {
+                        const rawLabel = it.content_review_label?.trim() ?? "";
+                        const labelIsUrl = /^https?:\/\//i.test(rawLabel);
+                        (it as { _contentHref?: string | null })._contentHref = it.content_review_url || (labelIsUrl ? rawLabel : null);
+                        (it as { _contentLabel?: string })._contentLabel = rawLabel && !labelIsUrl ? rawLabel : "Content";
+                        return null;
+                      })()}
+                      {(it.example_video_url || it.bio_page_url || (it as { _contentHref?: string | null })._contentHref) && (
                         <div className="mt-3 flex flex-wrap gap-3 text-xs">
                           {it.example_video_url && (
                             <a
@@ -816,14 +823,14 @@ function PublicRosterPage() {
                               Example video
                             </a>
                           )}
-                      {it.content_review_url && (
+                      {(it as { _contentHref?: string | null })._contentHref && (
                         <a
-                          href={it.content_review_url}
+                          href={(it as { _contentHref?: string | null })._contentHref as string}
                           target="_blank"
                           rel="noreferrer noopener"
                           className="text-pink-accent hover:underline"
                         >
-                          {it.content_review_label?.trim() || "Content to review"}
+                          {(it as { _contentLabel?: string })._contentLabel}
                         </a>
                       )}
                           {it.bio_page_url && (
