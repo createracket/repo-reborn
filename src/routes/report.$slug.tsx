@@ -1151,3 +1151,13 @@ function Metric({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function TrialBanner({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`bg-muted-foreground/85 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-background backdrop-blur ${className}`}
+    >
+      Trial reel
+    </div>
+  );
+}

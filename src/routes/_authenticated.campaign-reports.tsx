@@ -166,6 +166,7 @@ type Post = {
   hashtags: string[];
   brand_tag: string | null;
   extra_mention: boolean | null;
+  is_trial?: boolean | null;
   position: number;
   metrics_updated_at: string | null;
 };
@@ -1731,6 +1732,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
     hashtags: (post.hashtags ?? []).join(" "),
     brand_tag: post.brand_tag ?? "",
     extra_mention: !!post.extra_mention,
+    is_trial: !!post.is_trial,
     featured_comments: post.featured_comments ?? [],
   });
 
@@ -1756,6 +1758,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
       hashtags: (post.hashtags ?? []).join(" "),
       brand_tag: post.brand_tag ?? "",
       extra_mention: !!post.extra_mention,
+    is_trial: !!post.is_trial,
       featured_comments: post.featured_comments ?? [],
     });
   }, [post.id]);
@@ -1860,6 +1863,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
           .filter(Boolean),
         brand_tag: form.brand_tag.trim() || null,
         extra_mention: form.extra_mention,
+        is_trial: form.is_trial,
         featured_comments: form.featured_comments,
       })
       .eq("id", post.id);
@@ -1988,6 +1992,10 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
               onCheckedChange={(v) => set("extra_mention", v)}
             />
             <span>Extra mention</span>
+          </label>
+          <label className="flex items-center gap-1.5" title="Shows a TRIAL REEL banner and the Trial reels filter">
+            <Switch checked={form.is_trial} onCheckedChange={(v) => set("is_trial", v)} />
+            <span>Trial</span>
           </label>
           <span>
             {form.posted_at
