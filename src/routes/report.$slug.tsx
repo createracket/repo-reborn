@@ -1157,7 +1157,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 function TrialBanner({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`bg-lime/90 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-primary-foreground backdrop-blur-sm ${className}`}
+      className={`bg-muted-foreground/50 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-background backdrop-blur-sm ${className}`}
     >
       Trial reel
     </div>
