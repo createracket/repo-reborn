@@ -77,9 +77,9 @@ export function ReportCalendarSettings({
     await persist(draft, "Key events saved");
   }
 
-  /** Like the roster builder's "Order by date": sorts and saves in one click (undated events go last). */
+  /** Like the social posts' "Order by date": newest event first, undated events last, saved in one click. */
   async function autoOrderByDate() {
-    const sorted = [...draft].sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"));
+    const sorted = [...draft].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
     setDraft(sorted);
     await persist(sorted, "Ordered by date");
   }
