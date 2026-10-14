@@ -60,6 +60,9 @@
 
   /* Brand accent tokens */
   --color-pink-accent: var(--pink-accent);
+  /* Platform pills on calendar key events: soft grey chip, dark label, both themes. */
+  --color-event-tag: var(--event-tag);
+  --color-event-tag-ink: var(--event-tag-ink);
   /* Dark ink that stays readable on top of brand pink in both themes. */
   --color-pink-ink: oklch(0.23 0.006 270);
   --color-purple: var(--purple);
@@ -93,6 +96,9 @@
   --primary-foreground: oklch(0.22 0 0);
   /* Brand green is too pale for text on white paper, so deepen it here. */
   --lime-soft: oklch(0.5 0.16 125);
+  /* Calendar platform pills: soft grey chip with the page's dark ink. */
+  --event-tag: color-mix(in oklab, var(--foreground) 14%, var(--card));
+  --event-tag-ink: var(--foreground);
 
   --secondary: oklch(0.89 0.004 260);
   --secondary-foreground: oklch(0.25 0 0);
@@ -153,6 +159,9 @@
   --primary: oklch(0.86 0.21 125);
   --primary-foreground: oklch(0.18 0 0);
   --lime-soft: oklch(0.86 0.21 125);
+  /* Calendar platform pills on charcoal: a light grey chip so the label stays dark and legible. */
+  --event-tag: color-mix(in oklab, var(--foreground) 78%, var(--card));
+  --event-tag-ink: oklch(0.2 0 0);
 
   --secondary: oklch(0.32 0 0);
   --secondary-foreground: oklch(0.98 0 0);
@@ -359,11 +368,6 @@
 }
 .report-light .calendar-event-chip:hover {
   background-color: var(--muted) !important;
-}
-.report-light .calendar-event-chip .calendar-event-tag {
-  background-color: var(--pink-accent) !important;
-  border-color: var(--pink-accent) !important;
-  color: var(--foreground) !important;
 }
 .report-light .calendar-event-chip .calendar-event-preview {
   background-color: var(--primary) !important;
