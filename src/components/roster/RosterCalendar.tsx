@@ -99,7 +99,7 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
           ))}
           {e.url && (
             <span className="calendar-event-preview inline-flex items-center gap-0.5 rounded-full bg-primary px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-primary-foreground">
-              Preview
+              Content
               <ExternalLink className="size-2" />
             </span>
           )}
