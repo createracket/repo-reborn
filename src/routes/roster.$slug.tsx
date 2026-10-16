@@ -1020,6 +1020,11 @@ function PublicRosterPage() {
                               <p className="mt-2 pl-4 text-sm text-muted-foreground">
                                 <span className="text-foreground/80">Posting:</span> {r.dates}
                               </p>
+                              {r.rate ? (
+                                <p className="mt-1 pl-4 text-sm text-muted-foreground">
+                                  <span className="text-foreground/80">Rate:</span> {r.rate}
+                                </p>
+                              ) : null}
                               {r.notes ? (
                                 <p className="mt-1 pl-4 text-sm text-muted-foreground">
                                   <span className="text-foreground/80">Notes:</span> {r.notes}
