@@ -641,6 +641,7 @@ function PublicRosterPage() {
               id: it.id,
               name: it.name,
               cats,
+              status: roster.hide_statuses ? "" : statusLabel(it.status || "in_review"),
               fans: formatCount(totalFans(it)),
               followers: formatCount(socialAudience(it)),
               dates: dates || "TBC",
@@ -653,6 +654,7 @@ function PublicRosterPage() {
             ...notesRows.map((r) =>
               [
                 `- ${r.name}${r.cats ? ` — ${r.cats}` : ""} — ${r.fans} total fans · ${r.followers} social followers`,
+                ...(r.status ? [`  Status: ${r.status}`] : []),
                 `  Posting: ${r.dates}`,
                 ...(r.rate ? [`  Rate: ${r.rate}`] : []),
                 ...(r.notes ? [`  Notes: ${r.notes}`] : []),
@@ -1017,6 +1019,11 @@ function PublicRosterPage() {
                                   </span>
                                 </span>
                               </p>
+                              {r.status ? (
+                                <p className="mt-2 pl-4 text-sm text-muted-foreground">
+                                  <span className="text-foreground/80">Status:</span> {r.status}
+                                </p>
+                              ) : null}
                               <p className="mt-2 pl-4 text-sm text-muted-foreground">
                                 <span className="text-foreground/80">Posting:</span> {r.dates}
                               </p>
