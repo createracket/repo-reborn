@@ -997,7 +997,7 @@ function NewCampaignBriefForm({ campaignId, onCreated }: { campaignId: string; o
     description: "",
     contact_email: "",
     budget: "",
-    currency: DEFAULT_BRIEF_CURRENCY,
+    currency: DEFAULT_BRIEF_CURRENCY as string,
     transparency: "",
     timeline: "",
     target_audience: "",
