@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthSessionResult, getAuthUser } from "@/hooks/use-auth";
 import { findProfanityIn } from "@/lib/profanity";
+import { formatBriefBudget } from "@/lib/brief-currency";
 import {
   adminCreateUser,
   adminDeleteUser,
@@ -1388,7 +1389,7 @@ function UnifiedBriefs({
 
             <CardContent className="space-y-3 text-sm">
               <p className="whitespace-pre-wrap text-muted-foreground">{b.description}</p>
-              <KV k="Budget" v={b.budget ? `£${b.budget}` : "—"} />
+              <KV k="Budget" v={b.budget ? formatBriefBudget(b.budget, (b as any).currency) : "—"} />
               {!isUser ? (
                 <>
                   <KV k="Timeline" v={lead!.timeline ?? "—"} />
@@ -1529,7 +1530,7 @@ function EditBriefDialog({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Budget (£)</Label>
+              <Label>Budget (AUD)</Label>
               <Input type="number" value={form.budget ?? ""} onChange={(e) => setForm({ ...form, budget: e.target.value })} />
             </div>
             <div>

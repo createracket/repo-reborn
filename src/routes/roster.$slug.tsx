@@ -24,6 +24,7 @@ import { storageImage } from "@/lib/storage-image";
 import { parseCoPosts, coPostLabel } from "@/lib/co-posts";
 import { shareMeta } from "@/lib/share-meta";
 import { getSharePreview } from "@/lib/share-preview.functions";
+import { formatBriefBudget, DEFAULT_BRIEF_CURRENCY } from "@/lib/brief-currency";
 import {
   RosterCalendar,
   CalendarSnapshotContent,
@@ -774,7 +775,7 @@ function PublicRosterPage() {
                             )}
                             {it.rate != null && it.rate > 0 && (
                               <span className="font-semibold text-foreground">
-                                A${it.rate.toLocaleString()}{" "}
+                                {formatBriefBudget(it.rate, DEFAULT_BRIEF_CURRENCY)}{" "}
                                 <span className="font-normal text-muted-foreground">AUD rate</span>
                               </span>
                             )}

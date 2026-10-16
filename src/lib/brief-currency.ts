@@ -1,26 +1,29 @@
 export type BriefCurrency = "USD" | "AUD" | "GBP" | "NZD";
-export const BRIEF_CURRENCIES: BriefCurrency[] = ["USD", "AUD", "GBP", "NZD"];
+export const BRIEF_CURRENCIES: BriefCurrency[] = ["AUD", "USD", "GBP", "NZD"];
+
+/** Rates and budgets are quoted in Australian dollars unless a brief says otherwise. */
+export const DEFAULT_BRIEF_CURRENCY: BriefCurrency = "AUD";
 
 export const CURRENCY_SYMBOL: Record<BriefCurrency, string> = {
-  USD: "$",
-  AUD: "A$",
+  AUD: "$",
+  USD: "US$",
   GBP: "£",
   NZD: "NZ$",
 };
 
-// Approximate FX rates against GBP (updated 2026). Purely indicative — used
+// Approximate FX rates against AUD (updated 2026). Purely indicative — used
 // only for the "approx conversion" toggle on brief cards.
-const RATES_VS_GBP: Record<BriefCurrency, number> = {
-  GBP: 1,
-  USD: 1.27,
-  AUD: 1.92,
-  NZD: 2.10,
+const RATES_VS_AUD: Record<BriefCurrency, number> = {
+  AUD: 1,
+  USD: 0.66,
+  GBP: 0.52,
+  NZD: 1.09,
 };
 
 export function convertCurrency(amount: number, from: BriefCurrency, to: BriefCurrency): number {
   if (from === to) return amount;
-  const gbp = amount / RATES_VS_GBP[from];
-  return gbp * RATES_VS_GBP[to];
+  const aud = amount / RATES_VS_AUD[from];
+  return aud * RATES_VS_AUD[to];
 }
 
 export function formatBriefBudget(
@@ -30,7 +33,7 @@ export function formatBriefBudget(
   if (amount == null) return "—";
   const cur = (BRIEF_CURRENCIES as string[]).includes(currency ?? "")
     ? (currency as BriefCurrency)
-    : "GBP";
+    : DEFAULT_BRIEF_CURRENCY;
   const rounded = Math.round(amount);
   return `${CURRENCY_SYMBOL[cur]}${rounded.toLocaleString()}`;
 }

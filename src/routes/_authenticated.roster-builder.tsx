@@ -34,6 +34,7 @@ import { toProfileUrl } from "@/lib/social-handles";
 import { RosterMetricsUpdate } from "@/components/admin/RosterMetricsUpdate";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
+import { formatBriefBudget, DEFAULT_BRIEF_CURRENCY } from "@/lib/brief-currency";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -160,6 +161,7 @@ type Brief = {
   description: string;
   contact_email: string | null;
   budget: number | null;
+  currency: string | null;
   status: string;
   created_at: string;
 };
@@ -381,7 +383,7 @@ function RosterBuilderPage() {
           .order("display_name"),
         supabase
           .from("campaign_briefs")
-          .select("id, title, description, budget, status, created_at")
+          .select("id, title, description, budget, currency, status, created_at")
           .order("created_at", { ascending: false }),
 
       ]);
@@ -1192,7 +1194,7 @@ function RosterDetailView({
                     </p>
                     <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                       {linkedBrief.contact_email && <span>{linkedBrief.contact_email}</span>}
-                      {linkedBrief.budget != null && <span>£{linkedBrief.budget}</span>}
+                      {linkedBrief.budget != null && <span>{formatBriefBudget(linkedBrief.budget, linkedBrief.currency)}</span>}
                       <span>Status: {linkedBrief.status}</span>
                     </div>
                   </div>
@@ -1781,7 +1783,7 @@ function RosterDetailView({
                 <CardDescription>
                   Drag to reorder. Total social audience {formatCount(totalSocialAudience)} · Total fans {formatCount(totalFansCount)}
                   {roster.est_engagement_pct != null ? ` · Est. engagement ${roster.est_engagement_pct}%` : ""}
-                  {totalBudget > 0 ? ` · Total budget £${totalBudget.toLocaleString()}` : ""}. On-hold creators are excluded from totals.
+                  {totalBudget > 0 ? ` · Total budget ${formatBriefBudget(totalBudget, DEFAULT_BRIEF_CURRENCY)}` : ""}. On-hold creators are excluded from totals.
                 </CardDescription>
               </div>
               <div className="flex items-center gap-2">
@@ -2379,7 +2381,7 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, stat
               variant="outline"
               className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
             >
-              A${item.budget.toLocaleString()}
+              {formatBriefBudget(item.budget, DEFAULT_BRIEF_CURRENCY)}
             </Badge>
           )}
           {item.budget != null && item.budget > 0 && (
