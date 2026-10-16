@@ -24,6 +24,7 @@ import { storageImage } from "@/lib/storage-image";
 import { parseCoPosts, coPostLabel } from "@/lib/co-posts";
 import { shareMeta } from "@/lib/share-meta";
 import { getSharePreview } from "@/lib/share-preview.functions";
+import { formatBriefBudget, DEFAULT_BRIEF_CURRENCY } from "@/lib/brief-currency";
 import {
   RosterCalendar,
   CalendarSnapshotContent,

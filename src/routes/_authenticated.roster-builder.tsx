@@ -34,6 +34,7 @@ import { toProfileUrl } from "@/lib/social-handles";
 import { RosterMetricsUpdate } from "@/components/admin/RosterMetricsUpdate";
 import { Switch } from "@/components/ui/switch";
 import { normalizeSlug } from "@/lib/slugs";
+import { formatBriefBudget, DEFAULT_BRIEF_CURRENCY } from "@/lib/brief-currency";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -160,6 +161,7 @@ type Brief = {
   description: string;
   contact_email: string | null;
   budget: number | null;
+  currency: string | null;
   status: string;
   created_at: string;
 };

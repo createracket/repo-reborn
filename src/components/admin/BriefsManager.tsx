@@ -39,7 +39,7 @@ import { BriefStatusBadge, BriefStatusSelect, normalizeStatus, type BriefStatus 
 import { BriefRosterLink } from "@/components/admin/BriefRosterLink";
 import { BriefReportLink } from "@/components/admin/BriefReportLink";
 import { BudgetDisplay } from "@/components/briefs/BudgetDisplay";
-import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS, transparencyLabel } from "@/lib/brief-currency";
+import { BRIEF_CURRENCIES, TRANSPARENCY_OPTIONS, transparencyLabel, DEFAULT_BRIEF_CURRENCY } from "@/lib/brief-currency";
 import {
   DEFAULT_VIBE_CONFIG,
   loadVibeCheckConfig,

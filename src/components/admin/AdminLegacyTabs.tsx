@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthSessionResult, getAuthUser } from "@/hooks/use-auth";
 import { findProfanityIn } from "@/lib/profanity";
+import { formatBriefBudget } from "@/lib/brief-currency";
 import {
   adminCreateUser,
   adminDeleteUser,

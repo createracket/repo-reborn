@@ -5,6 +5,7 @@ import {
   type BriefCurrency,
   convertCurrency,
   formatBriefBudget,
+  DEFAULT_BRIEF_CURRENCY,
 } from "@/lib/brief-currency";
 
 export function BudgetDisplay({
