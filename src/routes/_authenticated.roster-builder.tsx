@@ -2381,7 +2381,7 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, stat
               variant="outline"
               className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
             >
-              A${item.budget.toLocaleString()}
+              {formatBriefBudget(item.budget, DEFAULT_BRIEF_CURRENCY)}
             </Badge>
           )}
           {item.budget != null && item.budget > 0 && (
