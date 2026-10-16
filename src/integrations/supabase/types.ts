@@ -1954,6 +1954,7 @@ export type Database = {
           posting_date: string | null
           profile_id: string | null
           roster_id: string
+          show_rate: boolean
           spotify_monthly_listens: number | null
           spotify_url: string | null
           status: string
@@ -2001,6 +2002,7 @@ export type Database = {
           posting_date?: string | null
           profile_id?: string | null
           roster_id: string
+          show_rate?: boolean
           spotify_monthly_listens?: number | null
           spotify_url?: string | null
           status?: string
@@ -2048,6 +2050,7 @@ export type Database = {
           posting_date?: string | null
           profile_id?: string | null
           roster_id?: string
+          show_rate?: boolean
           spotify_monthly_listens?: number | null
           spotify_url?: string | null
           status?: string

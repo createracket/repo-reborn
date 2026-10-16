@@ -97,6 +97,7 @@ type PublicItem = {
   category: string | null;
   categories: string[] | null;
   location: string | null;
+  rate?: number | null;
 };
 
 function itemCats(it: PublicItem): string[] {
@@ -769,6 +770,12 @@ function PublicRosterPage() {
                               <span className="font-semibold text-foreground">
                                 {formatCount(itemSocial)}{" "}
                                 <span className="font-normal text-muted-foreground">socials</span>
+                              </span>
+                            )}
+                            {it.rate != null && it.rate > 0 && (
+                              <span className="font-semibold text-foreground">
+                                A${it.rate.toLocaleString()}{" "}
+                                <span className="font-normal text-muted-foreground">AUD rate</span>
                               </span>
                             )}
                           </div>
