@@ -7,11 +7,27 @@ import { useState } from "react";
 export function PostThumb({
   src,
   className = "",
+  videoSrc,
 }: {
   src: string | null | undefined;
+  videoSrc?: string | null;
   className?: string;
 }) {
   const [failed, setFailed] = useState(false);
+
+  const uploadedVideo =
+    videoSrc && /\/storage\/v1\/object\/public\/.*\.(mp4|mov|webm|m4v)$/i.test(videoSrc) ? videoSrc : null;
+  if ((!src || failed) && uploadedVideo) {
+    return (
+      <video
+        src={`${uploadedVideo}#t=0.1`}
+        muted
+        playsInline
+        preload="metadata"
+        className={`size-full object-cover ${className}`}
+      />
+    );
+  }
 
   if (!src || failed) {
     return (

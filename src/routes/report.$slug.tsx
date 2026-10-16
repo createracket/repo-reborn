@@ -869,7 +869,7 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
   const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
   const media = (
     <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
-      <PostThumb src={post.thumbnail_url} />
+      <PostThumb src={post.thumbnail_url} videoSrc={post.post_url} />
       {post.is_trial && (
         <TrialBanner className="absolute -inset-x-px -bottom-px z-10 rounded-b-xl" />
       )}
@@ -1010,10 +1010,10 @@ function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: 
                 rel="noreferrer noopener"
                 className="block size-full"
               >
-                <PostThumb src={post.thumbnail_url} />
+                <PostThumb src={post.thumbnail_url} videoSrc={post.post_url} />
               </a>
             ) : (
-              <PostThumb src={post.thumbnail_url} />
+              <PostThumb src={post.thumbnail_url} videoSrc={post.post_url} />
             )}
 
           </div>
