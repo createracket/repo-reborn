@@ -58,7 +58,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { readThumbFrame, type ThumbFrame } from "@/lib/thumb-frame";
 import { normalizeSlug, validateSlug } from "@/lib/slugs";
 import { detectPlatform, formatCount } from "@/lib/youtube-utils";
-import { scrapePostMetrics } from "@/lib/campaign-scrapers.functions";
+import { scrapePostMetrics, scrapeProfileFollowers } from "@/lib/campaign-scrapers.functions";
+import { parseCoPosts, coPostSocialAudience, type CoPost } from "@/lib/co-posts";
+import { CoPostEditor } from "@/components/admin/CoPostEditor";
 import {
   DndContext,
   closestCenter,
@@ -168,6 +170,7 @@ type Post = {
   brand_tag: string | null;
   extra_mention: boolean | null;
   is_trial?: boolean | null;
+  co_posters?: unknown;
   position: number;
   metrics_updated_at: string | null;
 };
@@ -1702,6 +1705,15 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
   const [scraping, setScraping] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [open, setOpen] = useState(false);
+  const fetchFollowers = useServerFn(scrapeProfileFollowers);
+  const [coPosters, setCoPosters] = useState<CoPost[]>(() => parseCoPosts(post.co_posters));
+  useEffect(() => setCoPosters(parseCoPosts(post.co_posters)), [post.co_posters]);
+  const coFollowers = coPostSocialAudience(coPosters.filter((c) => c.platform !== "spotify"));
+  async function saveCoPosters(next: CoPost[]) {
+    setCoPosters(next);
+    const { error } = await sb.from("campaign_report_posts").update({ co_posters: next }).eq("id", post.id);
+    if (error) toast.error(error.message);
+  }
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: post.id,
@@ -1836,7 +1848,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
   }
 
   const erByViews = (() => {
-    const followers = numOrNull(form.followers);
+    const followers = (numOrNull(form.followers) ?? 0) + coFollowers;
     if (!followers || followers <= 0) return null;
     const total =
       (numOrNull(form.views) ?? 0) + (numOrNull(form.likes) ?? 0) + (numOrNull(form.comments) ?? 0);
@@ -1845,7 +1857,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
   })();
 
   const erByInteractions = (() => {
-    const followers = numOrNull(form.followers);
+    const followers = (numOrNull(form.followers) ?? 0) + coFollowers;
     if (!followers || followers <= 0) return null;
     const total =
       (numOrNull(form.likes) ?? 0) +
@@ -1905,6 +1917,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         brand_tag: form.brand_tag.trim() || null,
         extra_mention: form.extra_mention,
         is_trial: form.is_trial,
+        co_posters: coPosters,
         featured_comments: form.featured_comments,
       })
       .eq("id", post.id);
@@ -2116,6 +2129,24 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         <NumField label="Comments" v={form.comments} on={(x) => set("comments", x)} />
         <NumField label="Followers" v={form.followers} on={(x) => set("followers", x)} />
       </div>
+      <CoPostEditor
+        value={coPosters}
+        onChange={(next) => {
+          setCoPosters(next);
+          // Save once a row is complete or removed; typing in progress stays local.
+          if (next.length < coPosters.length || next.every((c) => c.url.trim())) void saveCoPosters(next);
+        }}
+        onFetch={async (url) => {
+          const r = await fetchFollowers({ data: { url } });
+          if (!r.ok) throw new Error(r.error);
+          return r.followers ?? null;
+        }}
+      />
+      {coFollowers > 0 && (
+        <p className="text-xs text-muted-foreground">
+          ER below uses {(numOrNull(form.followers) ?? 0).toLocaleString()} creator + {coFollowers.toLocaleString()} co-poster followers.
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-3">
         <Button size="sm" variant="outline" onClick={() => applyEr(erByViews, "views")}>
