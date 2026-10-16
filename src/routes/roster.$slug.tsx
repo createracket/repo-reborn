@@ -160,8 +160,12 @@ export const Route = createFileRoute("/roster/$slug")({
       noindex: true,
     }),
   }),
-  validateSearch: (search: Record<string, unknown>): { view?: "calendar" | "notes" } => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { view?: "calendar" | "notes"; filter?: string; status?: string } => ({
     view: search.view === "calendar" || search.view === "notes" ? search.view : undefined,
+    filter: typeof search.filter === "string" && search.filter ? search.filter : undefined,
+    status: typeof search.status === "string" && search.status ? search.status : undefined,
   }),
   component: PublicRosterPage,
 });
@@ -245,11 +249,15 @@ function PublicRosterPage() {
   const [gateCode, setGateCode] = useState("");
   const [gateError, setGateError] = useState<string | null>(null);
   const [gateBusy, setGateBusy] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [itemsLoaded, setItemsLoaded] = useState(false);
-  const { view: viewParam } = Route.useSearch();
+  const { view: viewParam, filter: filterParam, status: statusParam } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const categoryFilter = filterParam ?? "all";
+  const statusFilter = statusParam ?? "all";
+  const setCategoryFilter = (v: string) =>
+    navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, filter: v === "all" ? undefined : v }), replace: true });
+  const setStatusFilter = (v: string) =>
+    navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, status: v === "all" ? undefined : v }), replace: true });
   const view: "list" | "calendar" | "notes" = viewParam ?? "list";
   const setView = (v: "list" | "calendar" | "notes") =>
     navigate({
