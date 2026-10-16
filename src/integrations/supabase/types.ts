@@ -407,6 +407,7 @@ export type Database = {
           auto_added: boolean
           brand_tag: string | null
           caption: string | null
+          co_posters: Json
           comments: number | null
           created_at: string
           creator_id: string
@@ -438,6 +439,7 @@ export type Database = {
           auto_added?: boolean
           brand_tag?: string | null
           caption?: string | null
+          co_posters?: Json
           comments?: number | null
           created_at?: string
           creator_id: string
@@ -469,6 +471,7 @@ export type Database = {
           auto_added?: boolean
           brand_tag?: string | null
           caption?: string | null
+          co_posters?: Json
           comments?: number | null
           created_at?: string
           creator_id?: string

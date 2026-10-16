@@ -1,3 +1,4 @@
+import { coPostSocialAudience } from "@/lib/co-posts";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +28,7 @@ function ErSweepButton({ reportId, onFinished, recentOnly = false }: { reportId:
       if (!ids.length) return toast.info("No creators in this report yet");
       let q = sb
         .from("campaign_report_posts")
-        .select("id, views, likes, comments, followers, engagement_rate_pct")
+        .select("id, views, likes, comments, followers, co_posters, engagement_rate_pct")
         .in("creator_id", ids);
       if (recentOnly) q = q.gte("created_at", new Date(Date.now() - 24 * 3600 * 1000).toISOString());
       const { data: posts, error: pe } = await q;
@@ -35,7 +36,7 @@ function ErSweepButton({ reportId, onFinished, recentOnly = false }: { reportId:
       if (recentOnly && !(posts ?? []).length) return toast.info("No posts added in the last 24 hours");
       let updated = 0, skipped = 0, unchanged = 0;
       for (const p of posts ?? []) {
-        const f = Number(p.followers);
+        const f = (Number(p.followers) || 0) + coPostSocialAudience((p as any).co_posters);
         const total = (Number(p.views) || 0) + (Number(p.likes) || 0) + (Number(p.comments) || 0);
         if (!f || f <= 0 || total <= 0) { skipped++; continue; }
         const value = Number(((total / f) * 100).toFixed(2));
