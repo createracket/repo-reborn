@@ -51,7 +51,7 @@ const briefSchema = z.object({
     .nonnegative("Must be 0 or more")
     .max(10_000_000)
     .optional(),
-  currency: z.enum(["USD", "AUD", "GBP", "NZD"]).default("USD"),
+  currency: z.enum(["USD", "AUD", "GBP", "NZD"]).default(DEFAULT_BRIEF_CURRENCY),
   transparency: z
     .enum(["early_planning", "budget_pending", "locked_in", "live"])
     .optional(),
@@ -201,7 +201,7 @@ function ConnectPage() {
       title: fd.get("title")?.toString() ?? "",
       description: fd.get("description")?.toString() ?? "",
       budget: budgetRaw ? Number(budgetRaw) : undefined,
-      currency: (fd.get("currency")?.toString() as any) || "USD",
+      currency: (fd.get("currency")?.toString() as any) || DEFAULT_BRIEF_CURRENCY,
       transparency: (fd.get("transparency")?.toString() || undefined) as any,
       timeline: fd.get("timeline")?.toString() || undefined,
       target_audience: fd.get("target_audience")?.toString() || undefined,
@@ -566,7 +566,7 @@ function ConnectPage() {
                             <select
                               id="currency"
                               name="currency"
-                              defaultValue="USD"
+                              defaultValue="AUD"
                               className="rounded-md border border-input bg-background px-3 py-2 text-sm"
                             >
                               {BRIEF_CURRENCIES.map((c) => (

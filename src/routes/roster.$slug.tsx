@@ -774,7 +774,7 @@ function PublicRosterPage() {
                             )}
                             {it.rate != null && it.rate > 0 && (
                               <span className="font-semibold text-foreground">
-                                A${it.rate.toLocaleString()}{" "}
+                                {formatBriefBudget(it.rate, DEFAULT_BRIEF_CURRENCY)}{" "}
                                 <span className="font-normal text-muted-foreground">AUD rate</span>
                               </span>
                             )}

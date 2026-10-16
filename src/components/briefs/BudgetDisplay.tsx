@@ -18,7 +18,7 @@ export function BudgetDisplay({
 }) {
   const original = (BRIEF_CURRENCIES as string[]).includes(currency ?? "")
     ? (currency as BriefCurrency)
-    : "GBP";
+    : DEFAULT_BRIEF_CURRENCY;
   const [display, setDisplay] = useState<BriefCurrency>(original);
 
   if (amount == null) return <span className={className}>—</span>;

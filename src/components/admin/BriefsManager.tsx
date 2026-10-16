@@ -729,7 +729,7 @@ function EditBriefDialog({
         title: brief.title,
         description: brief.description,
         budget: brief.budget ?? "",
-        currency: brief.currency ?? "GBP",
+        currency: brief.currency ?? DEFAULT_BRIEF_CURRENCY,
         transparency: brief.transparency ?? "",
         contact_email: brief.contact_email ?? "",
         artist_archetypes: brief.artist_archetypes ?? [],
@@ -742,7 +742,7 @@ function EditBriefDialog({
         title: brief.title,
         description: brief.description,
         budget: brief.budget ?? "",
-        currency: brief.currency ?? "GBP",
+        currency: brief.currency ?? DEFAULT_BRIEF_CURRENCY,
         transparency: brief.transparency ?? "",
         contact_email: brief.contact_email ?? "",
         contact_name: brief.contact_name ?? "",
@@ -764,7 +764,7 @@ function EditBriefDialog({
       title: form.title,
       description: form.description,
       budget: form.budget === "" || form.budget == null ? null : Number(form.budget),
-      currency: form.currency || "GBP",
+      currency: form.currency || DEFAULT_BRIEF_CURRENCY,
       transparency: form.transparency || null,
       contact_email: form.contact_email || null,
     };
@@ -811,7 +811,7 @@ function EditBriefDialog({
               <Label>Budget</Label>
               <div className="flex gap-2">
                 <select
-                  value={form.currency ?? "GBP"}
+                  value={form.currency ?? DEFAULT_BRIEF_CURRENCY}
                   onChange={(e) => setForm({ ...form, currency: e.target.value })}
                   className="rounded-md border border-input bg-background px-2 py-2 text-sm"
                 >
@@ -997,7 +997,7 @@ function NewCampaignBriefForm({ campaignId, onCreated }: { campaignId: string; o
     description: "",
     contact_email: "",
     budget: "",
-    currency: "GBP",
+    currency: DEFAULT_BRIEF_CURRENCY,
     transparency: "",
     timeline: "",
     target_audience: "",
@@ -1037,7 +1037,7 @@ function NewCampaignBriefForm({ campaignId, onCreated }: { campaignId: string; o
         description: form.description.trim(),
         contact_email: form.contact_email.trim() || null,
         budget: form.budget ? Number(form.budget) : null,
-        currency: form.currency || "GBP",
+        currency: form.currency || DEFAULT_BRIEF_CURRENCY,
         transparency: form.transparency || null,
         timeline: form.timeline.trim() || null,
         target_audience: form.target_audience.trim() || null,
@@ -1049,7 +1049,7 @@ function NewCampaignBriefForm({ campaignId, onCreated }: { campaignId: string; o
       } as any);
       if (error) throw error;
       toast.success("Brief added to campaign");
-      setForm({ title: "", description: "", contact_email: "", budget: "", currency: "GBP", transparency: "", timeline: "", target_audience: "", status: "in_review" });
+      setForm({ title: "", description: "", contact_email: "", budget: "", currency: DEFAULT_BRIEF_CURRENCY, transparency: "", timeline: "", target_audience: "", status: "in_review" });
       setValues([]);
       setTypes([]);
       setArtistArchetypes([]);
