@@ -2043,7 +2043,18 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
               type="date"
               className="h-8 w-[150px]"
               value={form.posted_at}
-              onChange={(e) => set("posted_at", e.target.value)}
+              onChange={async (e) => {
+                const v = e.target.value;
+                set("posted_at", v);
+                if (v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) return;
+                const { error } = await sb
+                  .from("campaign_report_posts")
+                  .update({ posted_at: v ? new Date(`${v}T12:00:00Z`).toISOString() : null })
+                  .eq("id", post.id);
+                if (error) return toast.error(error.message);
+                toast.success("Date saved");
+                await onChanged();
+              }}
             />
           </label>
         )}
