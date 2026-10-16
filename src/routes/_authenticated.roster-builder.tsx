@@ -199,6 +199,7 @@ type RosterItem = {
   position: number;
   status: string;
   budget: number | null;
+  show_rate?: boolean | null;
   category: string | null;
   categories: string[];
   metrics_month: string | null;
@@ -2378,8 +2379,27 @@ function RosterItemRow({ item, onRemove, onChanged, categories, allowMulti, stat
               variant="outline"
               className="border-primary/40 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
             >
-              £{item.budget.toLocaleString()}
+              A${item.budget.toLocaleString()}
             </Badge>
+          )}
+          {item.budget != null && item.budget > 0 && (
+            <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground" title="Show this rate on the live roster">
+              <Switch
+                checked={!!item.show_rate}
+                onCheckedChange={async (v) => {
+                  const { error } = await supabase
+                    .from("roster_items")
+                    .update({ show_rate: v } as never)
+                    .eq("id", item.id);
+                  if (error) toast.error(error.message);
+                  else {
+                    toast.success(v ? "Rate visible on live page" : "Rate hidden");
+                    onChanged();
+                  }
+                }}
+              />
+              Show rate
+            </label>
           )}
           <div className="flex gap-1">
             <Button
@@ -2755,7 +2775,7 @@ function EditProspectPanel({
             + Add post date
           </Button>
         </div>
-        {fld("Budget (£)", "budget", "5000")}
+        {fld("Rate (AUD)", "budget", "5000")}
         {urlFld("Instagram URL", "instagram_url", "instagram", "instagram_followers")}
         {fld("IG followers", "instagram_followers", "12500")}
         {urlFld("TikTok URL", "tiktok_url", "tiktok", "tiktok_followers")}
