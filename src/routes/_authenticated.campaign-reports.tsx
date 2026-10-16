@@ -2036,6 +2036,17 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
           className="hidden"
           onChange={handleVideoUpload}
         />
+        {/\/storage\/v1\/object\/public\/.*report-post-videos\//.test(form.post_url) && (
+          <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            Date posted
+            <Input
+              type="date"
+              className="h-8 w-[150px]"
+              value={form.posted_at}
+              onChange={(e) => set("posted_at", e.target.value)}
+            />
+          </label>
+        )}
         {form.post_url && (
           <Button size="icon" variant="ghost" asChild>
             <a href={form.post_url} target="_blank" rel="noreferrer">
