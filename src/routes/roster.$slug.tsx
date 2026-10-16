@@ -644,6 +644,7 @@ function PublicRosterPage() {
               fans: formatCount(totalFans(it)),
               followers: formatCount(socialAudience(it)),
               dates: dates || "TBC",
+              rate: it.rate != null && it.rate > 0 ? `${formatBriefBudget(it.rate, DEFAULT_BRIEF_CURRENCY)} AUD` : "",
               notes: it.vibe?.trim() || "",
             };
           });
@@ -653,6 +654,7 @@ function PublicRosterPage() {
               [
                 `- ${r.name}${r.cats ? ` — ${r.cats}` : ""} — ${r.fans} total fans · ${r.followers} social followers`,
                 `  Posting: ${r.dates}`,
+                ...(r.rate ? [`  Rate: ${r.rate}`] : []),
                 ...(r.notes ? [`  Notes: ${r.notes}`] : []),
               ].join("\n"),
             ),
