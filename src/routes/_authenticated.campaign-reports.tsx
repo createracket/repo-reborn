@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
   ImagePlus,
+  Video as VideoIcon,
 } from "lucide-react";
 import { resizeImageFile } from "@/lib/image-resize";
 import { useServerFn } from "@tanstack/react-start";
@@ -1767,6 +1768,46 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("video/")) {
+      toast.error("Please choose a video file");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 200 * 1024 * 1024) {
+      toast.error("Video is over 200MB — please compress it first");
+      e.target.value = "";
+      return;
+    }
+    setUploadingVideo(true);
+    try {
+      const ext = (file.name.split(".").pop() || "mp4").toLowerCase().replace(/[^a-z0-9]/g, "") || "mp4";
+      const path = `report-post-videos/${post.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("spotlight-images")
+        .upload(path, file, { cacheControl: "31536000", upsert: false, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+      set("post_url", urlData.publicUrl);
+      // Save the link straight away so the upload is never lost.
+      const { error: saveErr } = await (supabase as any)
+        .from("campaign_report_posts")
+        .update({ post_url: urlData.publicUrl })
+        .eq("id", post.id);
+      if (saveErr) throw saveErr;
+      toast.success("Video uploaded and linked");
+      await onChanged?.();
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setUploadingVideo(false);
+      e.target.value = "";
+    }
+  }
+
   const [uploadingThumb, setUploadingThumb] = useState(false);
   async function handleThumbUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -1978,6 +2019,23 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
           <RefreshCw className={"mr-2 size-4 " + (scraping ? "animate-spin" : "")} />
           {scraping ? "Fetching…" : "Fetch metrics"}
         </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={uploadingVideo}
+          title="Upload a video (e.g. a story) instead of a live link — the URL box will link to it"
+          onClick={() => document.getElementById(`video-upload-${post.id}`)?.click()}
+        >
+          <VideoIcon className="mr-2 size-4" />
+          {uploadingVideo ? "Uploading…" : "Upload video"}
+        </Button>
+        <input
+          id={`video-upload-${post.id}`}
+          type="file"
+          accept="video/mp4,video/quicktime,video/webm,video/*"
+          className="hidden"
+          onChange={handleVideoUpload}
+        />
         {form.post_url && (
           <Button size="icon" variant="ghost" asChild>
             <a href={form.post_url} target="_blank" rel="noreferrer">
