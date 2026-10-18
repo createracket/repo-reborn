@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { withVisibleRosterRate } from "@/lib/roster-visible-rate";
 
 const GateInfoSchema = z.object({ slug: z.string().trim().min(1).max(200) });
 
@@ -14,7 +15,7 @@ const ROSTER_FIELDS =
   "id, title, description, slug, published, published_at, updated_at, header_image_url, profile_image_url, hide_prospect_tags, hide_statuses, hide_metric_socials, hide_metric_fans, hide_metric_reach, hide_metric_engagement, show_metric_creators, est_engagement_pct, categories, custom_links, show_calendar, calendar_events";
 
 const ITEM_FIELDS =
-  "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, content_review_label, co_posts, position, status, category, categories, location, posting_date, extra_posting_dates";
+  "id, kind, name, avatar_url, vibe, instagram_url, instagram_followers, tiktok_url, tiktok_followers, youtube_url, youtube_subscribers, spotify_url, spotify_monthly_listens, apple_music_url, apple_music_followers, example_video_url, bio_page_url, content_review_url, content_review_label, co_posts, position, status, category, categories, location, posting_date, extra_posting_dates, budget, show_rate";
 
 /** Public: returns just enough to render the passcode gate (title + header image). */
 export const getRosterGate = createServerFn({ method: "POST" })
@@ -76,7 +77,7 @@ export const unlockRoster = createServerFn({ method: "POST" })
       .from("roster_access_leads")
       .insert({ roster_id: roster.id as string, email: data.email.toLowerCase() });
 
-    return { ok: true as const, roster, items: items ?? [] };
+    return { ok: true as const, roster, items: (items ?? []).map(withVisibleRosterRate) };
   });
 
 /**
@@ -130,5 +131,5 @@ export const getRosterForMember = createServerFn({ method: "POST" })
       .eq("hidden", false)
       .order("position", { ascending: true });
 
-    return { ok: true as const, roster, items: items ?? [] };
+    return { ok: true as const, roster, items: (items ?? []).map(withVisibleRosterRate) };
   });
