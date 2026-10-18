@@ -4,6 +4,11 @@ type ReportPostOrder = {
   position: number;
 };
 
+/** Prepend without rewriting the positions of existing posts. */
+export function newReportPostPosition(posts: ReadonlyArray<{ position: number }>): number {
+  return posts.length ? Math.min(...posts.map((post) => post.position)) - 1 : 0;
+}
+
 /** An unknown publication date stays unknown; insertion time only orders the feed. */
 export function reportPostTime(post: ReportPostOrder): number | null {
   for (const value of [post.posted_at, post.created_at]) {

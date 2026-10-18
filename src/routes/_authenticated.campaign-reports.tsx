@@ -1522,7 +1522,7 @@ function CreatorRow({
     const { error } = await sb.from("campaign_report_posts").insert({
       creator_id: creator.id,
       platform: "instagram",
-      position: posts.length,
+      position: newReportPostPosition(posts),
       featured_comments: [],
       hashtags: [],
     });

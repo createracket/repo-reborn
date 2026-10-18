@@ -1,8 +1,18 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { compareReportPosts, reportPostTime } from "./report-post-order";
+import { compareReportPosts, reportPostTime, newReportPostPosition } from "./report-post-order";
 
 describe("live report recency", () => {
+  test("new empty entries precede all existing builder posts, including previous additions", () => {
+    const posts = [{ position: 4 }, { position: -2 }, { position: 0 }];
+    const position = newReportPostPosition(posts);
+    assert.equal(position, -3);
+    assert.equal(newReportPostPosition([...posts, { position }]), -4);
+    assert.deepEqual(posts.map((post) => post.position), [4, -2, 0]);
+  });
+  test("the first empty entry starts at position zero", () => {
+    assert.equal(newReportPostPosition([]), 0);
+  });
   test("new undated Stand Atlantic posts appear ahead of older dated posts", () => {
     const posts = [
       { id: "older", posted_at: "2026-10-14T12:02:17Z", created_at: "2026-10-14T12:24:37Z", position: 1 },
