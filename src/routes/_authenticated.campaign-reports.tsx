@@ -2049,7 +2049,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
           className="hidden"
           onChange={handleVideoUpload}
         />
-        {/\/storage\/v1\/object\/public\/.*report-post-videos\//.test(form.post_url) && (
+        {(
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             Date posted
             <Input
@@ -2236,10 +2236,6 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
                   className="mt-2 h-20 w-20 rounded-md object-cover border border-border/60"
                 />
               )}
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Posted date</Label>
-              <Input type="date" value={form.posted_at} onChange={(e) => set("posted_at", e.target.value)} />
             </div>
             <div className="space-y-1 md:col-span-2">
               <Label className="text-xs">Caption</Label>
