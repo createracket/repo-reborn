@@ -18,6 +18,7 @@ import {
   Video as VideoIcon,
 } from "lucide-react";
 import { resizeImageFile } from "@/lib/image-resize";
+import { newReportPostPosition } from "@/lib/report-post-order";
 import { useServerFn } from "@tanstack/react-start";
 import { StatsRequestPanel } from "@/components/reports/StatsRequestPanel";
 import { AdCodeRequestPanel } from "@/components/reports/AdCodeRequestPanel";
