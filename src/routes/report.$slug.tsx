@@ -20,6 +20,7 @@ import { shareMeta } from "@/lib/share-meta";
 import { getSharePreview } from "@/lib/share-preview.functions";
 import { type CalendarEvent } from "@/components/roster/RosterCalendar";
 import { ReportCalendarSection } from "@/components/reports/ReportCalendarSection";
+import { compareReportPosts, reportPostTime } from "@/lib/report-post-order";
 
 // Posts load in batches of 18 so the first screen lands on full rows of six.
 const POSTS_PER_LOAD = 18;
@@ -60,6 +61,7 @@ type PublicPost = {
   thumbnail_url: string | null;
   caption: string | null;
   posted_at: string | null;
+  created_at?: string | null;
   views: number | null;
   likes: number | null;
   comments: number | null;
@@ -393,20 +395,9 @@ function PublicReportPage() {
     }))
     .filter((c) => c.posts.length > 0);
 
-  // Recency ordering: undated posts sink to the bottom and keep builder order.
-  const postTime = (p: PublicPost) => {
-    if (!p.posted_at) return null;
-    const t = new Date(p.posted_at).getTime();
-    return Number.isNaN(t) ? null : t;
-  };
-  const byRecency = (a: PublicPost, b: PublicPost) => {
-    const ta = postTime(a);
-    const tb = postTime(b);
-    if (ta == null && tb == null) return a.position - b.position;
-    if (ta == null) return 1;
-    if (tb == null) return -1;
-    return tb - ta;
-  };
+  // Newly added undated posts must not disappear below every historical post.
+  const postTime = reportPostTime;
+  const byRecency = compareReportPosts;
 
   const orderedCreators = filteredCreators
     .map((c) => ({ ...c, posts: [...c.posts].sort(byRecency) }))
