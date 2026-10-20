@@ -94,7 +94,7 @@ function ListeningReportPage() {
 
           {(report.analysis?.futureIdeas?.length ?? 0) > 0 && (
             <div className="mt-6 rounded-2xl border border-primary/40 p-5">
-              <div className="text-[11px] uppercase tracking-[0.2em] text-primary">MAKE NEXT (MAYBE)</div>
+              <div className="text-[11px] tracking-[0.2em] text-primary">Make Next (maybe!)</div>
               <ul className="mt-3 space-y-3">
                 {report.analysis.futureIdeas.map((i) => (
                   <li key={i.title}>
