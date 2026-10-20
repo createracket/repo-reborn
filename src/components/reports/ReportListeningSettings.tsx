@@ -22,6 +22,8 @@ export function ReportListeningSettings({ reportId }: { reportId: string }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState(false);
+  // Always start folded away; admins open it when they need it.
+  const [sectionOpen, setSectionOpen] = useState(false);
   async function load() {
     setLoading(true); setError(false);
     try {
