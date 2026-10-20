@@ -52,9 +52,39 @@ export function ReportListeningSettings({ reportId }: { reportId: string }) {
     } catch { toast.error("Could not update Listening"); }
     finally { setBusy(null); }
   }
-  return <section className="space-y-4 border-y border-border py-6">
-    <div className="flex items-center justify-between"><h2 className="font-display text-2xl">Listening</h2><Button variant="ghost" size="icon" title="Refresh listening reports" aria-label="Refresh listening reports" onClick={load} disabled={loading || savingDisclaimer || disclaimer !== savedDisclaimer}><RefreshCw className="size-4" /></Button></div>
-    {!loading && !error && <div className="space-y-3">
+  return <Card>
+    <CardHeader
+      className="flex-row items-center justify-between gap-3 space-y-0"
+      onClick={() => setSectionOpen((o) => !o)}
+    >
+      <div>
+        <CardTitle className="font-display text-2xl">Listening</CardTitle>
+        <CardDescription>
+          Pull social listening reports from Racket Desk through to the public report, with an optional disclaimer.
+        </CardDescription>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Refresh listening reports"
+          aria-label="Refresh listening reports"
+          disabled={loading || savingDisclaimer || disclaimer !== savedDisclaimer}
+          onClick={(e) => { e.stopPropagation(); load(); }}
+        >
+          <RefreshCw className="size-4" />
+        </Button>
+        <button
+          type="button"
+          className="text-muted-foreground hover:text-foreground"
+          aria-label={sectionOpen ? "Collapse section" : "Expand section"}
+          aria-expanded={sectionOpen}
+        >
+          {sectionOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+        </button>
+      </div>
+    </CardHeader>
+    {sectionOpen && <CardContent className="space-y-3">
       <Label htmlFor={`listening-disclaimer-${reportId}`}>Disclaimer (optional)</Label>
       <Textarea id={`listening-disclaimer-${reportId}`} value={disclaimer} onChange={(event) => setDisclaimer(event.target.value)} disabled={savingDisclaimer} rows={2} />
       <Button variant="purple" size="sm" onClick={saveCopy} disabled={savingDisclaimer || disclaimer === savedDisclaimer}>{savingDisclaimer ? "Saving…" : "Save disclaimer"}</Button>
