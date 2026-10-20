@@ -1,10 +1,14 @@
 import { test } from "node:test";
 import { strict as assert } from "node:assert";
 import { listeningEnabled, listeningAnalysisSchema, listeningDisclaimerSchema } from "./campaign-listening";
-test("Listening is enabled for Chats only", () => {
+test("Listening is enabled for Chats", () => {
   assert.equal(listeningEnabled("chats-socials"), true);
+});
+test("Listening is enabled for Stand Atlantic", () => {
+  assert.equal(listeningEnabled("stat-socials"), true);
+});
+test("Listening is not enabled for other reports", () => {
   assert.equal(listeningEnabled("tixel-socials"), false);
-  assert.equal(listeningEnabled("stat-socials"), false);
 });
 test("Public listening content excludes private fields and unsafe links", () => {
   const analysis = listeningAnalysisSchema.parse({ notes: "private", email: "private", topPosts: [{ url: "javascript:alert(1)" }] });
