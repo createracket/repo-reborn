@@ -5,7 +5,8 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { RefreshCw } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
 import { listCampaignListeningChoices, setCampaignListeningLink, getCampaignListeningDisclaimer, saveCampaignListeningDisclaimer } from "@/lib/campaign-listening.functions";
 
 type Choice = { id: string; artist_name: string; report_title: string | null; created_at: string; saved: boolean; selected: boolean };
