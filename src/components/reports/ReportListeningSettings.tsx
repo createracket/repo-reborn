@@ -90,5 +90,6 @@ export function ReportListeningSettings({ reportId }: { reportId: string }) {
       <Button variant="purple" size="sm" onClick={saveCopy} disabled={savingDisclaimer || disclaimer === savedDisclaimer}>{savingDisclaimer ? "Saving…" : "Save disclaimer"}</Button>
     </div>}
     {loading ? <p className="text-sm text-muted-foreground">Loading reports…</p> : error ? <p role="alert" className="text-sm text-destructive">Could not load listening reports. Please retry.</p> : choices.length === 0 ? <p className="text-sm text-muted-foreground">No Racket Desk listening reports yet.</p> : <div className="divide-y divide-border">{choices.map((choice) => <label key={choice.id} className="flex items-center justify-between gap-4 py-3"><span className="min-w-0"><span className="block text-sm font-medium">{choice.report_title || choice.artist_name}</span><span className="text-xs text-muted-foreground">{choice.artist_name} · {new Date(choice.created_at).toLocaleDateString("en-AU")}{!choice.saved ? " · Unsaved scan" : ""}</span></span><Switch aria-label={`Show ${choice.report_title || choice.artist_name} in Listening`} checked={choice.selected} disabled={busy !== null} onCheckedChange={(selected) => toggle(choice, selected)} /></label>)}</div>}
-  </section>;
+    </CardContent>}
+  </Card>;
 }
