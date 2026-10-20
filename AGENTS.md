@@ -21,4 +21,4 @@
 - Live report recency falls back to insertion time for ordering; builder dates autosave. Month filters/calendars use publication dates. New entries use newReportPostPosition, avoiding rewrites of existing positions.
 - Protected roster payloads use withVisibleRosterRate to return opted-in rates and strip budget/show_rate, matching public visibility without exposing private pricing.
 - Non-video ER uses report-engagement.ts and saves engagement_rate_pct, keeping live reports and exports consistent.
-- Listening uses admin-selected scan links and a narrow RPC for the published, code-free Chats report; source scans and notes stay private and live reads never scrape.
+- Listening uses admin-selected scan links, separate disclaimer settings and narrow RPCs for the published, code-free Chats report; scans and notes stay private and reads never scrape.

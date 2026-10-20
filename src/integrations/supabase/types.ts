@@ -441,6 +441,36 @@ export type Database = {
           },
         ]
       }
+      campaign_report_listening_settings: {
+        Row: {
+          disclaimer: string
+          report_id: string
+        }
+        Insert: {
+          disclaimer?: string
+          report_id: string
+        }
+        Update: {
+          disclaimer?: string
+          report_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_report_listening_settings_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: true
+            referencedRelation: "campaign_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_report_listening_settings_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: true
+            referencedRelation: "public_campaign_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_report_posts: {
         Row: {
           account_synced_at: string | null
@@ -3180,6 +3210,10 @@ export type Database = {
       }
       get_campaign_brief_contact_email: {
         Args: { _brief_id: string }
+        Returns: string
+      }
+      get_campaign_listening_disclaimer: {
+        Args: { _slug: string }
         Returns: string
       }
       get_campaign_report_assignment: {
