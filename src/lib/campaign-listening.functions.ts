@@ -33,7 +33,7 @@ export const setCampaignListeningLink = createServerFn({ method: "POST" })
     if (data.selected) {
       const { data: scan, error: saveError } = await sb.from("social_listening_scans").update({ saved: true }).eq("id", data.scanId).select("id").maybeSingle();
       if (saveError || !scan) throw new Error("Listening report not found");
-      const { error } = await sb.from("campaign_report_listening_links").upsert({ report_id: data.reportId, scan_id: data.scanId });
+      const { error } = await sb.from("campaign_report_listening_links").upsert({ report_id: data.reportId, scan_id: data.scanId }, { onConflict: "report_id,scan_id", ignoreDuplicates: true });
       if (error) throw new Error("Could not add listening report");
     } else {
       const { error } = await sb.from("campaign_report_listening_links").delete().eq("report_id", data.reportId).eq("scan_id", data.scanId);
