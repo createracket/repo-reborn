@@ -1379,6 +1379,7 @@ function ReportDetailView({
 
       <ReportCalendarSettings
         reportId={report.id}
+        reportSlug={report.slug}
         showCalendar={!!(report as any).show_calendar}
         events={(report as any).calendar_events}
         onChanged={onChanged}
