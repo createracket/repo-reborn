@@ -83,6 +83,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { ReportAutoPull } from "@/components/reports/ReportAutoPull";
 import { ReportDataFeeds } from "@/components/reports/ReportDataFeeds";
 import { dismissReportPost } from "@/lib/report-post-discovery.functions";
+import { listeningEnabled } from "@/lib/campaign-listening";
+import { ReportListeningSettings } from "@/components/reports/ReportListeningSettings";
 
 const sb = supabase as any;
 
@@ -1381,6 +1383,8 @@ function ReportDetailView({
         events={(report as any).calendar_events}
         onChanged={onChanged}
       />
+
+      {listeningEnabled(report.slug) && <ReportListeningSettings reportId={report.id} />}
 
       {/* Creators */}
       <Card>

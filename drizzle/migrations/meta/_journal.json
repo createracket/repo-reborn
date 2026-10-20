@@ -162,6 +162,13 @@
       "when": 1792126156912,
       "tag": "0022_roster_item_show_rate",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792471112432,
+      "tag": "0023_campaign_report_listening_links",
+      "breakpoints": true
     }
   ]
 }
