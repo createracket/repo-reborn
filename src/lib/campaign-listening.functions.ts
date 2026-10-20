@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { listeningEnabled } from "./campaign-listening";
+import { listeningEnabled, listeningDisclaimerSchema } from "./campaign-listening";
 
 const inputSchema = z.object({ reportId: z.string().uuid() });
 async function verifyAdminReport(supabase: any, userId: string, reportId: string) {
@@ -40,4 +40,24 @@ export const setCampaignListeningLink = createServerFn({ method: "POST" })
       if (error) throw new Error("Could not remove listening report");
     }
     return { ok: true };
+  });
+
+export const getCampaignListeningDisclaimer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => inputSchema.parse(input))
+  .handler(async ({ context, data }) => {
+    await verifyAdminReport(context.supabase, context.userId, data.reportId);
+    const { data: row, error } = await context.supabase.from("campaign_report_listening_settings").select("disclaimer").eq("report_id", data.reportId).maybeSingle();
+    if (error) throw new Error("Could not load disclaimer");
+    return row?.disclaimer ?? "";
+  });
+
+export const saveCampaignListeningDisclaimer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => inputSchema.extend({ disclaimer: listeningDisclaimerSchema }).parse(input))
+  .handler(async ({ context, data }) => {
+    await verifyAdminReport(context.supabase, context.userId, data.reportId);
+    const { error } = await context.supabase.from("campaign_report_listening_settings").upsert({ report_id: data.reportId, disclaimer: data.disclaimer });
+    if (error) throw new Error("Could not save disclaimer");
+    return { disclaimer: data.disclaimer };
   });
