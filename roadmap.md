@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add and verify per-post likes-and-comments ER across social report builders.
+- [x] Add and verify per-post likes-and-comments ER across social report builders.
 
 - [x] Merge campaign and collab brief cards so campaign creation and brief editing begin in one campaign card.
 - [x] Move dashboard spotlights into Project planner tiles and remove the large spotlight sections.
