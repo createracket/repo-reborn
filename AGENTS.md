@@ -21,5 +21,5 @@
 - Report ordering falls back to insertion time; dates autosave. Month filters use publication dates; newReportPostPosition prepends without rewrites.
 - Protected roster payloads use withVisibleRosterRate to return opted-in rates and strip budget/show_rate, matching public visibility without exposing private pricing.
 - Non-video ER uses report-engagement.ts and saves engagement_rate_pct, keeping live reports and exports consistent.
-- Listening uses admin-selected links, disclaimer settings and narrow RPCs for eligible published, code-free reports; scans and notes stay private and reads never scrape.
+- Listening uses admin-selected scans and narrow RPCs for published, code-free reports; reads never scrape or expose notes. Top content excludes profile URLs to prevent placeholder cards.
 - Calendar platform options use a slug-scoped helper to isolate report-specific choices; selections use calendar_events.platforms.
