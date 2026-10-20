@@ -12,7 +12,7 @@
 - `campaign_briefs` is protected by column-level GRANTs, so every new column needs its own explicit GRANT in the same migration or authenticated reads of the whole table fail with 403.
 
 - Campaigns (`campaigns` table) group briefs, brief pages, rosters and reports via nullable `campaign_id` columns layered over the legacy brief→roster/report links; collab brief editing and creation live within the campaign card, so grouping never changes live sharing or access and campaign creation remains the starting point.
-- Utility actions that export or copy page content use the shared `purple` Button variant (semantic `--color-purple` / `--color-purple-foreground`) instead of per-page colour classes, so they stay legible in both themes.
+- Export/copy actions use the shared `purple` Button variant for legibility in both themes.
 - Brand purple *text* uses the `text-purple-soft` token (`--purple-soft`), which lifts to a lighter purple on the dark canvas and stays brand purple in light mode, so purple copy never drops below readable contrast.
 - Read-only live pages (dashboard, public roster, public report) re-run their load effects via useRefreshTick (interval while visible + on tab return), never on edit screens, so viewers see fresh data without reloads or losing unsaved input.
 - Builder pages show an "updated elsewhere — Refresh" bar (EditConflictBanner polls updated_at, ignores this tab's own saves) and the root shows a "New version available" pill comparing bundled script names; neither reloads automatically, so unsaved input is never lost.
@@ -20,3 +20,4 @@
 - Creator account connections use admin-issued token links (/creator-connect/<token>) and our own Instagram/TikTok OAuth apps; tokens are AES-encrypted in creator_social_connections (token columns never granted to clients) and syncing is admin-triggered per post, so creator credentials never reach the browser.
 - Live report recency falls back to insertion time for ordering; builder dates autosave. Month filters/calendars use publication dates. New entries use newReportPostPosition, avoiding rewrites of existing positions.
 - Protected roster payloads use withVisibleRosterRate to return opted-in rates and strip budget/show_rate, matching public visibility without exposing private pricing.
+- Non-video ER uses report-engagement.ts and saves engagement_rate_pct, keeping live reports and exports consistent.

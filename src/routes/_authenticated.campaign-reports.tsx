@@ -62,6 +62,7 @@ import { detectPlatform, formatCount } from "@/lib/youtube-utils";
 import { scrapePostMetrics, scrapeProfileFollowers } from "@/lib/campaign-scrapers.functions";
 import { parseCoPosts, coPostSocialAudience, type CoPost } from "@/lib/co-posts";
 import { CoPostEditor } from "@/components/admin/CoPostEditor";
+import { erByLikesAndComments } from "@/lib/report-engagement";
 import {
   DndContext,
   closestCenter,
@@ -91,6 +92,11 @@ export const Route = createFileRoute("/_authenticated/campaign-reports")({
   head: () => ({
     meta: [
       { title: "Campaign Reports — Create Racket" },
+      { name: "description", content: "Manage Create Racket social reports, posts and campaign engagement metrics." },
+      { property: "og:title", content: "Campaign Reports — Create Racket" },
+      { property: "og:description", content: "Manage social posts and engagement metrics in your Create Racket reports." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -1869,12 +1875,21 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
     return (total / followers) * 100;
   })();
 
-  async function applyEr(er: number | null, kind: "views" | "interactions") {
+  const erByNonVideo = erByLikesAndComments({
+    likes: numOrNull(form.likes),
+    comments: numOrNull(form.comments),
+    followers: numOrNull(form.followers),
+    coFollowers,
+  });
+
+  async function applyEr(er: number | null, kind: "views" | "interactions" | "likes-comments") {
     if (er == null) {
       toast.error(
         kind === "views"
           ? "Add followers and at least one of views, likes or comments first"
-          : "Add followers and at least one of likes, comments, shares or saves first",
+          : kind === "likes-comments"
+            ? "Add followers and likes or comments first"
+            : "Add followers and at least one of likes, comments, shares or saves first",
       );
       return;
     }
@@ -2165,6 +2180,15 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         <span className="text-xs text-muted-foreground">
           (likes + comments + shares + saves) ÷ followers
           {erByInteractions != null ? ` = ${erByInteractions.toFixed(1)}%` : ""}
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button size="sm" variant="outline" onClick={() => applyEr(erByNonVideo, "likes-comments")}>
+          ER by likes &amp; comments
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          (likes + comments) ÷ followers
+          {erByNonVideo != null ? ` = ${erByNonVideo.toFixed(1)}%` : ""}
         </span>
       </div>
 
