@@ -169,6 +169,13 @@
       "when": 1792471112432,
       "tag": "0023_campaign_report_listening_links",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792471506427,
+      "tag": "0024_listening_disclaimer",
+      "breakpoints": true
     }
   ]
 }
