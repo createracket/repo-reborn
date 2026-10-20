@@ -265,7 +265,7 @@ function SocialListeningPage() {
             <Panel title="What's working" items={a.whatsWorking} />
             <Panel title="Fan signals" items={a.fanSignals} />
             <div className="rounded-2xl border border-lime/40 bg-card p-5">
-              <div className="text-[11px] tracking-[0.2em] text-lime">Make Next (maybe!)</div>
+              <div className="text-[11px] tracking-[0.2em] text-lime">Make next (maybe)</div>
               <ul className="mt-3 space-y-3">
                 {a.futureIdeas.map((i) => (
                   <li key={i.title}>
