@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Add and verify per-post likes-and-comments ER across social report builders.
+
 - [x] Merge campaign and collab brief cards so campaign creation and brief editing begin in one campaign card.
 - [x] Move dashboard spotlights into Project planner tiles and remove the large spotlight sections.
 - [x] Replace the original blush light mode with the roster's grey/white light mode throughout eligible pages, including the dashboard.
