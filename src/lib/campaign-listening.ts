@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export function listeningEnabled(slug: string) { return slug === "chats-socials"; }
+export function listeningEnabled(slug: string) { return slug === "chats-socials" || slug === "stat-socials"; }
 export const listeningDisclaimerSchema = z.string().trim();
 export const listeningAnalysisSchema = z.object({
   whatsWorking: z.array(z.string()).catch([]),

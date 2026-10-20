@@ -8,7 +8,7 @@ async function verifyAdminReport(supabase: any, userId: string, reportId: string
   const { data: role, error } = await supabase.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
   if (error || !role) throw new Error("Admin access required");
   const { data: report } = await supabase.from("campaign_reports").select("id, slug").eq("id", reportId).maybeSingle();
-  if (!report || !listeningEnabled(report.slug)) throw new Error("Listening is available on the Chats report only");
+  if (!report || !listeningEnabled(report.slug)) throw new Error("Listening is available on the Chats and Stand Atlantic reports only");
 }
 export const listCampaignListeningChoices = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

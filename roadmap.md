@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add Stand Atlantic Listening with the latest relevant scan and bordered analysis sections; verify live display.
+
 - [x] Add a Listening tab to the Chats report and admin selection of saved Racket Desk listening reports; verify publishing and removal.
 
 - [x] Add and verify per-post likes-and-comments ER across social report builders.
