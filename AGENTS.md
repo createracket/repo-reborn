@@ -5,7 +5,7 @@
 - Talent intake forms are token links (/talent/<token>, no login) handled by public server fns using the admin client gated on a pending token; submissions create an unpublished partner_pages draft with links.talent_intake_text pre-filling the builder info dump, so admins review before anything goes live.
 - Talent intake has a per-link mode (standard|advanced); advanced links may call the shared runSpotlightDraft core via a token-gated server fn capped by ai_draft_count, and press releases are text-extracted server-side (unpdf/fflate) with only the text stored, keeping public AI use and storage bounded.
 - Dashboard-visible and specifically shared partner pages render in Project planner through PlannerTile regardless of legacy placement values; the personal spotlight status uses the same tile and avoids duplicate live pages, keeping one compact dashboard surface.
-- The admin Users table pages through `profiles` in the database (small first page, more on demand, filters and search as PostgREST queries) so opening the tab never downloads every account; panels that only need names read a separate lightweight id/email/name directory group.
+- Admin Users uses database pagination/search; name-only panels use a lightweight directory to avoid downloading every account.
 - Creator stats requests are token links (/stats/<token>, no login) backed by post_stats_requests; screenshots go to a private bucket and are AI-read server-side, and admins must click Apply before any post metrics change, so creator input never overwrites report data unreviewed.
 - Ad-code requests use separate token-gated links and an admin-only table; codes are returned only to the creator holding the link and admins, never added to public reports or emails, so post-specific advertising permission remains private.
 - Free-member dashboards render a second opportunity feed from the same briefs query, filtered by `campaign_briefs.visible_to_free` plus anything privately shared, so paid feeds stay untouched and free visibility is opt-in per brief.
@@ -21,3 +21,4 @@
 - Live report recency falls back to insertion time for ordering; builder dates autosave. Month filters/calendars use publication dates. New entries use newReportPostPosition, avoiding rewrites of existing positions.
 - Protected roster payloads use withVisibleRosterRate to return opted-in rates and strip budget/show_rate, matching public visibility without exposing private pricing.
 - Non-video ER uses report-engagement.ts and saves engagement_rate_pct, keeping live reports and exports consistent.
+- Listening uses admin-selected scan links and a narrow RPC for the published, code-free Chats report; source scans and notes stay private and live reads never scrape.
