@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Exclude the Chats profile placeholder from Listening top content and verify the live tab.
+- [x] Exclude the Chats profile placeholder from Listening top content and verify the live tab.
 
 - [x] Add Stand Atlantic Listening with the latest relevant scan and bordered analysis sections; verify live display.
 
