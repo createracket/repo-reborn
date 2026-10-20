@@ -401,6 +401,46 @@ export type Database = {
           },
         ]
       }
+      campaign_report_listening_links: {
+        Row: {
+          created_at: string
+          report_id: string
+          scan_id: string
+        }
+        Insert: {
+          created_at?: string
+          report_id: string
+          scan_id: string
+        }
+        Update: {
+          created_at?: string
+          report_id?: string
+          scan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_report_listening_links_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_report_listening_links_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "public_campaign_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_report_listening_links_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "social_listening_scans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       campaign_report_posts: {
         Row: {
           account_synced_at: string | null
@@ -3147,6 +3187,18 @@ export type Database = {
         Returns: {
           brand_email: string
           client_email: string
+        }[]
+      }
+      get_campaign_report_listening: {
+        Args: { _slug: string }
+        Returns: {
+          analysis: Json
+          artist_name: string
+          created_at: string
+          handle: string
+          id: string
+          platform: string
+          report_title: string
         }[]
       }
       get_profile_spotlights: {
