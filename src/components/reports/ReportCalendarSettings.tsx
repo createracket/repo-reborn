@@ -6,20 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { reportCalendarPlatforms } from "@/lib/report-calendar-platforms";
 
 const sb = supabase as any;
 
-export const EVENT_PLATFORMS = ["IG", "TT", "YT", "Trial", "Story"] as const;
 type Ev = { date: string; label: string; url: string; platforms: string[] };
 
 /** Report builder card: calendar tab switch + key events (mirrors the roster builder). */
 export function ReportCalendarSettings({
   reportId,
+  reportSlug,
   showCalendar,
   events,
   onChanged,
 }: {
   reportId: string;
+  reportSlug: string;
   showCalendar: boolean;
   events: Array<{ date?: string | null; label?: string | null; url?: string | null; platforms?: string[] | null }> | null | undefined;
   onChanged: () => void | Promise<void>;
@@ -142,7 +144,7 @@ export function ReportCalendarSettings({
                 </div>
                 <Input placeholder="Link (optional)" value={ev.url} onChange={(e) => patch(i, { url: e.target.value })} />
                 <div className="flex flex-wrap items-center gap-4">
-                  {EVENT_PLATFORMS.map((p) => (
+                  {reportCalendarPlatforms(reportSlug).map((p) => (
                     <label key={p} className="flex items-center gap-1.5 text-xs font-medium">
                       <Switch
                         checked={ev.platforms.includes(p)}

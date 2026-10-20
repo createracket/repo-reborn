@@ -18,7 +18,8 @@
 - Builder pages show an "updated elsewhere — Refresh" bar (EditConflictBanner polls updated_at, ignores this tab's own saves) and the root shows a "New version available" pill comparing bundled script names; neither reloads automatically, so unsaved input is never lost.
 - Report post auto-discovery is opt-in per report (auto_pull_posts + date window), runs from a daily secret-gated cron hook with a per-report lease, inserts posts with auto_added=true, and remembers deletions in campaign_report_dismissed_posts so removed posts never return.
 - Creator account connections use admin-issued token links (/creator-connect/<token>) and our own Instagram/TikTok OAuth apps; tokens are AES-encrypted in creator_social_connections (token columns never granted to clients) and syncing is admin-triggered per post, so creator credentials never reach the browser.
-- Live report recency falls back to insertion time for ordering; builder dates autosave. Month filters/calendars use publication dates. New entries use newReportPostPosition, avoiding rewrites of existing positions.
+- Report ordering falls back to insertion time; dates autosave. Month filters use publication dates; newReportPostPosition prepends without rewrites.
 - Protected roster payloads use withVisibleRosterRate to return opted-in rates and strip budget/show_rate, matching public visibility without exposing private pricing.
 - Non-video ER uses report-engagement.ts and saves engagement_rate_pct, keeping live reports and exports consistent.
 - Listening uses admin-selected scan links, separate disclaimer settings and narrow RPCs for the published, code-free Chats report; scans and notes stay private and reads never scrape.
+- Calendar platform options use a slug-scoped helper to isolate report-specific choices; selections use calendar_events.platforms.
