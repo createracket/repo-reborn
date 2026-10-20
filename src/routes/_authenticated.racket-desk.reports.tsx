@@ -249,7 +249,7 @@ function ReportCard({
           <Panel title="Fan signals" items={a.fanSignals} />
           {a.futureIdeas.length > 0 && (
             <div className="rounded-2xl border border-lime/40 p-5">
-              <div className="text-[11px] uppercase tracking-[0.2em] text-lime">Make next</div>
+              <div className="text-[11px] uppercase tracking-[0.2em] text-lime">MAKE NEXT (MAYBE)</div>
               <ul className="mt-3 space-y-3">
                 {a.futureIdeas.map((i) => (
                   <li key={i.title}>
