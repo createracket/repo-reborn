@@ -14,7 +14,7 @@ test("posting times default to fixed AEDT", () => {
   assert.equal(calendarTimeLabel({}), "");
 });
 
-test("Order by date sorts newest date then latest posting time, with untimed and undated entries last", () => {
+test("Order by date sorts soonest date then earliest posting time, with untimed and undated entries last", () => {
   const entries = [
     { id: "early", date: "2026-10-27", time: "09:30" },
     { id: "undated", date: "", time: "23:59" },
@@ -22,6 +22,6 @@ test("Order by date sorts newest date then latest posting time, with untimed and
     { id: "late", date: "2026-10-27", time: "17:21" },
     { id: "next-day", date: "2026-10-28", time: "00:00" },
   ];
-  assert.deepEqual(entries.sort(compareCalendarEvents).map((e) => e.id), ["next-day", "late", "early", "untimed", "undated"]);
+  assert.deepEqual(entries.sort(compareCalendarEvents).map((e) => e.id), ["early", "late", "untimed", "next-day", "undated"]);
   assert.equal(compareCalendarEvents({ date: "" }, { date: "", time: "15:00" }), 0);
 });
