@@ -7,13 +7,21 @@ export function validCalendarTime(value: string): boolean {
 type TimedEvent = { date?: string | null; time?: string | null; timezone?: string | null };
 
 /** Calendar wall-clock times are fixed AEDT (UTC+11), independent of the viewer's timezone. */
+/** Soonest date first, earliest posting time first; untimed and undated entries last. */
 export function compareCalendarEvents(a: TimedEvent, b: TimedEvent): number {
-  const dateOrder = (b.date || "").slice(0, 10).localeCompare((a.date || "").slice(0, 10));
+  const aDate = (a.date || "").slice(0, 10);
+  const bDate = (b.date || "").slice(0, 10);
+  if (!aDate && !bDate) return 0;
+  if (!aDate) return 1;
+  if (!bDate) return -1;
+  const dateOrder = aDate.localeCompare(bDate);
   if (dateOrder) return dateOrder;
-  if (!a.date && !b.date) return 0;
   const aTime = validCalendarTime(a.time ?? "") ? a.time ?? "" : "";
   const bTime = validCalendarTime(b.time ?? "") ? b.time ?? "" : "";
-  return bTime.localeCompare(aTime);
+  if (!aTime && !bTime) return 0;
+  if (!aTime) return 1;
+  if (!bTime) return -1;
+  return aTime.localeCompare(bTime);
 }
 
 export function calendarTimeLabel(event: TimedEvent): string {
