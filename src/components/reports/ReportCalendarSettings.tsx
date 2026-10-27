@@ -94,42 +94,21 @@ export function ReportCalendarSettings({
     await persist(sorted, "Ordered by date");
   }
 
-  return (
-    <Card>
-      <CardHeader
-        className="flex-row items-center justify-between gap-3 space-y-0"
-        onClick={() => setSectionOpen((o) => !o)}
-      >
-        <div>
-          <CardTitle className="font-display text-2xl">Calendar view</CardTitle>
-          <CardDescription>
-            Adds a Posts / Calendar toggle to the public report, placing creators on their posting dates. Set dates on
-            each creator below.
-          </CardDescription>
-        </div>
-        <button
-          type="button"
-          className="text-muted-foreground hover:text-foreground"
-          aria-label={sectionOpen ? "Collapse section" : "Expand section"}
-          aria-expanded={sectionOpen}
-        >
-          {sectionOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-        </button>
-      </CardHeader>
-      {sectionOpen && (
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
-          <div className="text-sm font-medium">Show calendar view</div>
-          <Switch checked={on} onCheckedChange={toggle} />
-        </div>
-        <div className="rounded-lg border border-border/60 p-3">
-          <div className="text-sm font-medium">Key events</div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            Moments you'll cover without a creator attached. They appear on the calendar only.
-          </div>
-          <div className="mt-3 space-y-3">
-            {draft.map((ev, i) => (
-              <div key={i} className="space-y-2 rounded-md border border-border/60 p-2">
+  async function toggleLive(i: number, live: boolean) {
+    const entry = draft[i];
+    if (!entry) return;
+    if (!entry.date || !entry.label.trim()) {
+      toast.error("Add a date and event label before changing Live status");
+      return;
+    }
+    await persist(draft.map((ev, j) => j === i ? { ...ev, live } : ev), live ? "Moved to Live" : "Restored to key events", true);
+  }
+
+  const indexed = draft.map((ev, i) => ({ ev, i, live: ev.live }));
+  const grouped = calendarEntriesByLive(indexed);
+  const renderEntry = (ev: Ev, i: number) => (
+
+              <div key={i} className="space-y-2 rounded-md border border-border/60 p-2" data-calendar-entry={ev.live ? "live" : "active"}>
                 <div className="flex flex-wrap items-center gap-2">
                   <Input type="date" className="w-40" value={ev.date} onChange={(e) => patch(i, { date: e.target.value })} />
                   <label className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -153,6 +132,15 @@ export function ReportCalendarSettings({
                     value={ev.label}
                     onChange={(e) => patch(i, { label: e.target.value })}
                   />
+                  <label className="flex items-center gap-1.5 text-xs font-medium">
+                    <Switch
+                      aria-label="Live status"
+                      checked={ev.live}
+                      disabled={saving}
+                      onCheckedChange={(live) => void toggleLive(i, live)}
+                    />
+                    Live
+                  </label>
                   <div className="flex items-center">
                     <Button
                       type="button"
@@ -206,14 +194,61 @@ export function ReportCalendarSettings({
                   )
                 )}
               </div>
-            ))}
+  );
+
+  return (
+    <Card>
+      <CardHeader
+        className="flex-row items-center justify-between gap-3 space-y-0"
+        onClick={() => setSectionOpen((o) => !o)}
+      >
+        <div>
+          <CardTitle className="font-display text-2xl">Calendar view</CardTitle>
+          <CardDescription>
+            Adds a Posts / Calendar toggle to the public report, placing creators on their posting dates. Set dates on
+            each creator below.
+          </CardDescription>
+        </div>
+        <button
+          type="button"
+          className="text-muted-foreground hover:text-foreground"
+          aria-label={sectionOpen ? "Collapse section" : "Expand section"}
+          aria-expanded={sectionOpen}
+        >
+          {sectionOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+        </button>
+      </CardHeader>
+      {sectionOpen && (
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+          <div className="text-sm font-medium">Show calendar view</div>
+          <Switch checked={on} onCheckedChange={toggle} />
+        </div>
+        <div className="rounded-lg border border-border/60 p-3">
+          <div className="text-sm font-medium">Key events</div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            Moments you'll cover without a creator attached. They appear on the calendar only.
+          </div>
+          <div className="mt-3 space-y-3">
+            {grouped.active.map(({ ev, i }) => renderEntry(ev, i))}
+            {grouped.live.length > 0 && (
+              <details className="group rounded-md border border-pink-accent/40 bg-pink-accent/5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-3 text-sm font-medium text-pink-accent hover:text-foreground">
+                  <span>Live · {grouped.live.length}</span>
+                  <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="space-y-3 px-2 pb-2">
+                  {grouped.live.map(({ ev, i }) => renderEntry(ev, i))}
+                </div>
+              </details>
+            )}
             {draft.length === 0 && <p className="text-xs text-muted-foreground">No key events yet.</p>}
             <div className="flex flex-wrap items-center gap-2 pt-1">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setDraft((d) => [...d, { date: "", time: "", timezone: REPORT_CALENDAR_TIMEZONE, label: "", url: "", platforms: [], _open: false }])}
+                onClick={() => setDraft((d) => [...d, { date: "", time: "", timezone: REPORT_CALENDAR_TIMEZONE, label: "", url: "", platforms: [], live: false, _open: false }])}
               >
                 Add key event
               </Button>
