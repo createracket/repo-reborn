@@ -1,5 +1,6 @@
 # Roadmap
 
+- [x] Replace the calendar box "Expand"/"Collapse" words with a small corner arrow; verify on the live Stand Atlantic calendar.
 - [x] Add calendar Live status with a collapsed admin section; verify saving, restoring, and unchanged public visibility.
 
 - [x] Add 24-hour AEDT times and FB to report calendar key events; verify saved time-aware ordering on The Chats.
