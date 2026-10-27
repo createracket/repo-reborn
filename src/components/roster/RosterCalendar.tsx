@@ -91,12 +91,13 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
   const labelRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (expanded) return; // keep the measured result so the collapse toggle stays
+    // Measure while still clamped, then open the box so live readers see the whole label.
     const el = labelRef.current;
     setOverflows(!!el && el.scrollHeight > el.clientHeight + 1);
-  }, [label, expanded, clamp, large]);
+    setExpanded(true);
+  }, [label, clamp, large]);
 
-  const showToggle = overflows || expanded;
+  const showToggle = overflows;
   const cls = `calendar-event-chip flex w-full flex-col rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`;
   const body = (
     <>
