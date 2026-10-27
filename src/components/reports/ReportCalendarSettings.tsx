@@ -86,7 +86,7 @@ export function ReportCalendarSettings({
     await persist(draft, "Key events saved");
   }
 
-  /** Like the social posts' "Order by date": newest event first, undated events last, saved in one click. */
+  /** Like the social posts' "Order by date": soonest event first, undated events last, saved in one click. */
   async function autoOrderByDate() {
     const sorted = [...draft].sort(compareCalendarEvents);
     await persist(sorted, "Ordered by date");
