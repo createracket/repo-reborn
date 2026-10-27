@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add 24-hour AEDT times and FB to report calendar key events; verify saved time-aware ordering on The Chats.
+- [x] Add 24-hour AEDT times and FB to report calendar key events; verify saved time-aware ordering on The Chats.
 
 - [x] Exclude the Chats profile placeholder from Listening top content and verify the live tab.
 
