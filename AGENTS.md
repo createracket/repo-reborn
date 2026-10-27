@@ -23,3 +23,4 @@
 - Non-video ER uses report-engagement.ts and saves engagement_rate_pct, keeping live reports and exports consistent.
 - Listening uses admin-selected scans and narrow RPCs for published, code-free reports; reads never scrape or expose notes. Top content excludes profile URLs to prevent placeholder cards.
 - Report calendar options use the shared reportCalendarPlatforms helper; key-event wall-clock times and timezone live in calendar_events JSON, and compareCalendarEvents orders dates then times without viewer-timezone conversion, preserving existing date-only events without a schema change.
+- Calendar event Live status persists as a boolean in calendar_events JSON and groups entries only inside ReportCalendarSettings; public renderers and exports ignore it so publishing is unchanged.
