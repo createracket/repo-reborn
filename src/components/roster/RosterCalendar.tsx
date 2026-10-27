@@ -14,6 +14,7 @@ import {
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { storageImage } from "@/lib/storage-image";
+import { calendarTimeLabel } from "@/lib/report-calendar-time";
 
 export type CalendarCreator = {
   id: string;
@@ -25,6 +26,8 @@ export type CalendarCreator = {
 
 export type CalendarEvent = {
   date?: string | null;
+  time?: string | null;
+  timezone?: string | null;
   label?: string | null;
   url?: string | null;
   platforms?: string[] | null;
@@ -87,6 +90,7 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
   const body = (
     <>
       <span className={`${clampClass} break-words leading-tight`}>{label}</span>
+      {calendarTimeLabel(e) && <span className="mt-0.5 text-[10px]">{calendarTimeLabel(e)}</span>}
       {(tags.length > 0 || !!e.url) && (
         <span className="mt-0.5 flex flex-wrap items-center gap-1">
           {tags.map((t) => (
@@ -319,6 +323,7 @@ export function CalendarSnapshotContent({
                     className="line-clamp-2 break-words rounded-lg border border-pink-accent px-2 py-0.5 text-[11px] font-medium leading-tight text-pink-accent"
                   >
                     {(e.label ?? "").trim() || "Event"}
+                    {calendarTimeLabel(e) && <span className="block text-[9px]">{calendarTimeLabel(e)}</span>}
                   </div>
                 ))}
                 {shown.map((c) => (

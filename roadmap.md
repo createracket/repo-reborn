@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add 24-hour AEDT times and FB to report calendar key events; verify saved time-aware ordering on The Chats.
+
 - [x] Exclude the Chats profile placeholder from Listening top content and verify the live tab.
 
 - [x] Add Stand Atlantic Listening with the latest relevant scan and bordered analysis sections; verify live display.
