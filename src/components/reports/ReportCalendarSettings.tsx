@@ -220,7 +220,7 @@ export function ReportCalendarSettings({
                   type="button"
                   variant="outline"
                   size="sm"
-                    title="Sort newest date and posting time first (undated at the end)"
+                    title="Sort soonest date and posting time first (undated at the end)"
                   onClick={autoOrderByDate}
                 >
                   Order by date
