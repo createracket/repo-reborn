@@ -11,7 +11,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { storageImage } from "@/lib/storage-image";
 import { calendarTimeLabel } from "@/lib/report-calendar-time";
@@ -100,7 +100,7 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
   const cls = `calendar-event-chip flex w-full flex-col rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`;
   const body = (
     <>
-      <span ref={labelRef} className={`${expanded ? "" : clampClass} break-words leading-tight`}>{label}</span>
+      <span ref={labelRef} className={`${expanded ? "" : clampClass} break-words leading-tight ${showToggle ? (large ? "pr-4" : "pr-3") : ""}`}>{label}</span>
       {calendarTimeLabel(e) && <span className="mt-0.5 text-[10px]">{calendarTimeLabel(e)}</span>}
       {(tags.length > 0 || !!e.url) && (
         <span className="mt-0.5 flex flex-wrap items-center gap-1">
@@ -122,17 +122,20 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
       )}
     </>
   );
+  // Small corner arrow (no words) — sits above the chip so linked events stay valid anchors.
   const toggle = showToggle ? (
     <button
       type="button"
-      className="calendar-event-toggle text-[10px] font-medium text-muted-foreground transition hover:text-foreground"
+      aria-label={expanded ? "Collapse event details" : "Expand event details"}
+      aria-expanded={expanded}
       onClick={() => setExpanded((v) => !v)}
+      className={`calendar-event-toggle absolute rounded p-0.5 text-muted-foreground transition hover:bg-muted/60 hover:text-foreground ${large ? "right-1 top-1" : "right-0.5 top-0.5"}`}
     >
-      {expanded ? "Collapse" : "Expand"}
+      {expanded ? <ChevronUp className={large ? "size-3" : "size-2.5"} /> : <ChevronDown className={large ? "size-3" : "size-2.5"} />}
     </button>
   ) : null;
   return (
-    <div>
+    <div className="relative">
       {e.url ? (
         <a href={e.url} target="_blank" rel="noopener noreferrer" className={`${cls} transition hover:bg-pink-accent/20`} title={label}>
           {body}
