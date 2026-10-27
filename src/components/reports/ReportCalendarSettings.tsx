@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { reportCalendarPlatforms } from "@/lib/report-calendar-platforms";
+import { compareCalendarEvents, REPORT_CALENDAR_TIMEZONE, validCalendarTime } from "@/lib/report-calendar-time";
 
 const sb = supabase as any;
 
-type Ev = { date: string; label: string; url: string; platforms: string[] };
+type Ev = { date: string; time: string; timezone: string; label: string; url: string; platforms: string[] };
 
 /** Report builder card: calendar tab switch + key events (mirrors the roster builder). */
 export function ReportCalendarSettings({
@@ -23,7 +24,7 @@ export function ReportCalendarSettings({
   reportId: string;
   reportSlug: string;
   showCalendar: boolean;
-  events: Array<{ date?: string | null; label?: string | null; url?: string | null; platforms?: string[] | null }> | null | undefined;
+  events: Array<{ date?: string | null; time?: string | null; timezone?: string | null; label?: string | null; url?: string | null; platforms?: string[] | null }> | null | undefined;
   onChanged: () => void | Promise<void>;
 }) {
   const [on, setOn] = useState(showCalendar);
@@ -37,6 +38,8 @@ export function ReportCalendarSettings({
     setDraft(
       (events ?? []).map((e) => ({
         date: (e.date ?? "").slice(0, 10),
+        time: e.time ?? "",
+        timezone: e.timezone || REPORT_CALENDAR_TIMEZONE,
         label: e.label ?? "",
         url: e.url ?? "",
         platforms: Array.isArray(e.platforms) ? e.platforms : [],
@@ -57,19 +60,23 @@ export function ReportCalendarSettings({
   const patch = (i: number, p: Partial<Ev>) => setDraft((d) => d.map((x, j) => (j === i ? { ...x, ...p } : x)));
 
   async function persist(list: Ev[], successMsg: string) {
+    if (list.some((e) => e.time.trim() && !validCalendarTime(e.time.trim()))) {
+      toast.error("Enter posting times as HH:mm, from 00:00 to 23:59");
+      return false;
+    }
     setSaving(true);
     const cleaned = list
       .filter((e) => e.date && e.label.trim())
       .map((e) => {
         let url = e.url.trim();
         if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`;
-        return { date: e.date, label: e.label.trim(), url: url || null, platforms: e.platforms };
+        return { date: e.date, time: e.time.trim() || null, timezone: e.timezone || REPORT_CALENDAR_TIMEZONE, label: e.label.trim(), url: url || null, platforms: e.platforms };
       });
     const { error } = await sb.from("campaign_reports").update({ calendar_events: cleaned }).eq("id", reportId);
     setSaving(false);
     if (error) return toast.error(error.message);
     setDraft(
-      cleaned.map((e) => ({ date: e.date, label: e.label, url: e.url ?? "", platforms: e.platforms ?? [] })),
+      cleaned.map((e) => ({ date: e.date, time: e.time ?? "", timezone: e.timezone, label: e.label, url: e.url ?? "", platforms: e.platforms ?? [] })),
     );
     toast.success(successMsg);
     await onChanged();
@@ -81,8 +88,7 @@ export function ReportCalendarSettings({
 
   /** Like the social posts' "Order by date": newest event first, undated events last, saved in one click. */
   async function autoOrderByDate() {
-    const sorted = [...draft].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-    setDraft(sorted);
+    const sorted = [...draft].sort(compareCalendarEvents);
     await persist(sorted, "Ordered by date");
   }
 
@@ -124,6 +130,21 @@ export function ReportCalendarSettings({
               <div key={i} className="space-y-2 rounded-md border border-border/60 p-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Input type="date" className="w-40" value={ev.date} onChange={(e) => patch(i, { date: e.target.value })} />
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>Time (24h)</span>
+                    <Input
+                      type="text"
+                      inputMode="text"
+                      aria-label="Posting time (24-hour AEDT)"
+                      placeholder="HH:mm"
+                      maxLength={5}
+                      className="w-24"
+                      value={ev.time}
+                      onChange={(e) => patch(i, { time: e.target.value })}
+                      aria-invalid={!!ev.time && !validCalendarTime(ev.time)}
+                    />
+                    <span>{ev.timezone} (UTC+11)</span>
+                  </label>
                   <Input
                     className="min-w-40 flex-1"
                     placeholder="Event label"
@@ -164,7 +185,7 @@ export function ReportCalendarSettings({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setDraft((d) => [...d, { date: "", label: "", url: "", platforms: [] }])}
+                onClick={() => setDraft((d) => [...d, { date: "", time: "", timezone: REPORT_CALENDAR_TIMEZONE, label: "", url: "", platforms: [] }])}
               >
                 Add key event
               </Button>
@@ -173,7 +194,7 @@ export function ReportCalendarSettings({
                   type="button"
                   variant="outline"
                   size="sm"
-                  title="Sort key events by date (undated at the end)"
+                    title="Sort newest date and posting time first (undated at the end)"
                   onClick={autoOrderByDate}
                 >
                   Order by date

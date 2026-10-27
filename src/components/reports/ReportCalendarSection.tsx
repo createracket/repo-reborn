@@ -3,6 +3,8 @@ import { format } from "date-fns";
 import { Camera, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { reportCalendarPlatforms } from "@/lib/report-calendar-platforms";
+import { REPORT_CALENDAR_TIMEZONE } from "@/lib/report-calendar-time";
 import {
   RosterCalendar,
   CalendarSnapshotContent,
@@ -13,7 +15,6 @@ import {
   type CalendarEvent,
 } from "@/components/roster/RosterCalendar";
 
-const PLATFORMS = ["IG", "TT", "YT", "Trial", "Story"];
 const esc = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
 
 /** Public report calendar with PNG snapshot + CSV export of dates, events and platform toggles. */
@@ -55,20 +56,23 @@ export function ReportCalendarSection({
   }
 
   function exportCsv() {
-    const header = ["date", "type", "name", "link", ...PLATFORMS];
+    const platforms = reportCalendarPlatforms(slug);
+    const header = ["date", "time", "timezone", "type", "name", "link", ...platforms];
     const rows: string[][] = [];
     for (const c of creators)
-      for (const d of datesOf(c)) rows.push([d, "Creator post", c.name, "", ...PLATFORMS.map(() => "")]);
+      for (const d of datesOf(c)) rows.push([d, "", "", "Creator post", c.name, "", ...platforms.map(() => "")]);
     for (const e of events)
       for (const d of eventDatesOf(e))
         rows.push([
           d,
+          e.time ?? "",
+          e.time ? e.timezone || REPORT_CALENDAR_TIMEZONE : "",
           "Key event",
           (e.label ?? "").trim(),
           e.url ?? "",
-          ...PLATFORMS.map((p) => ((e.platforms ?? []).includes(p) ? "Yes" : "No")),
+          ...platforms.map((p) => ((e.platforms ?? []).includes(p) ? "Yes" : "No")),
         ]);
-    rows.sort((a, b) => a[0].localeCompare(b[0]));
+    rows.sort((a, b) => a[0].localeCompare(b[0]) || a[1].localeCompare(b[1]));
     const csv = [header, ...rows].map((r) => r.map(esc).join(",")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
