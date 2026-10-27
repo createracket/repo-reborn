@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Link2, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { compareCalendarEvents, REPORT_CALENDAR_TIMEZONE, validCalendarTime } fr
 
 const sb = supabase as any;
 
-type Ev = { date: string; time: string; timezone: string; label: string; url: string; platforms: string[] };
+type Ev = { date: string; time: string; timezone: string; label: string; url: string; platforms: string[]; _open: boolean };
 
 /** Report builder card: calendar tab switch + key events (mirrors the roster builder). */
 export function ReportCalendarSettings({
@@ -43,6 +43,7 @@ export function ReportCalendarSettings({
         label: e.label ?? "",
         url: e.url ?? "",
         platforms: Array.isArray(e.platforms) ? e.platforms : [],
+        _open: false,
       })),
     );
   }, [reportId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -65,18 +66,17 @@ export function ReportCalendarSettings({
       return false;
     }
     setSaving(true);
-    const cleaned = list
-      .filter((e) => e.date && e.label.trim())
-      .map((e) => {
-        let url = e.url.trim();
-        if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`;
-        return { date: e.date, time: e.time.trim() || null, timezone: e.timezone || REPORT_CALENDAR_TIMEZONE, label: e.label.trim(), url: url || null, platforms: e.platforms };
-      });
+    const rows = list.filter((e) => e.date && e.label.trim());
+    const cleaned = rows.map((e) => {
+      let url = e.url.trim();
+      if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`;
+      return { date: e.date, time: e.time.trim() || null, timezone: e.timezone || REPORT_CALENDAR_TIMEZONE, label: e.label.trim(), url: url || null, platforms: e.platforms };
+    });
     const { error } = await sb.from("campaign_reports").update({ calendar_events: cleaned }).eq("id", reportId);
     setSaving(false);
     if (error) return toast.error(error.message);
     setDraft(
-      cleaned.map((e) => ({ date: e.date, time: e.time ?? "", timezone: e.timezone, label: e.label, url: e.url ?? "", platforms: e.platforms ?? [] })),
+      rows.map((e) => ({ date: e.date, time: e.time ?? "", timezone: e.timezone, label: e.label, url: e.url ?? "", platforms: e.platforms ?? [], _open: e._open })),
     );
     toast.success(successMsg);
     await onChanged();
@@ -156,6 +156,16 @@ export function ReportCalendarSettings({
                       type="button"
                       variant="ghost"
                       size="icon"
+                      aria-label={ev._open ? "Hide link and platform toggles" : "Show link and platform toggles"}
+                      aria-expanded={ev._open}
+                      onClick={() => patch(i, { _open: !ev._open })}
+                    >
+                      {ev._open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
                       aria-label="Remove key event"
                       onClick={() => setDraft((d) => d.filter((_, j) => j !== i))}
                     >
@@ -163,20 +173,36 @@ export function ReportCalendarSettings({
                     </Button>
                   </div>
                 </div>
-                <Input placeholder="Link (optional)" value={ev.url} onChange={(e) => patch(i, { url: e.target.value })} />
-                <div className="flex flex-wrap items-center gap-4">
-                  {reportCalendarPlatforms(reportSlug).map((p) => (
-                    <label key={p} className="flex items-center gap-1.5 text-xs font-medium">
-                      <Switch
-                        checked={ev.platforms.includes(p)}
-                        onCheckedChange={(c) =>
-                          patch(i, { platforms: c ? [...ev.platforms, p] : ev.platforms.filter((x) => x !== p) })
-                        }
-                      />
-                      {p}
-                    </label>
-                  ))}
-                </div>
+                {ev._open ? (
+                  <>
+                    <Input placeholder="Link (optional)" value={ev.url} onChange={(e) => patch(i, { url: e.target.value })} />
+                    <div className="flex flex-wrap items-center gap-4">
+                      {reportCalendarPlatforms(reportSlug).map((p) => (
+                        <label key={p} className="flex items-center gap-1.5 text-xs font-medium">
+                          <Switch
+                            checked={ev.platforms.includes(p)}
+                            onCheckedChange={(c) =>
+                              patch(i, { platforms: c ? [...ev.platforms, p] : ev.platforms.filter((x) => x !== p) })
+                            }
+                          />
+                          {p}
+                        </label>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  (ev.url.trim() || ev.platforms.length > 0) && (
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                      {ev.platforms.length > 0 && <span>{ev.platforms.join(" · ")}</span>}
+                      {ev.url.trim() && (
+                        <span className="inline-flex items-center gap-1">
+                          <Link2 className="size-3" />
+                          Link added
+                        </span>
+                      )}
+                    </div>
+                  )
+                )}
               </div>
             ))}
             {draft.length === 0 && <p className="text-xs text-muted-foreground">No key events yet.</p>}
@@ -185,7 +211,7 @@ export function ReportCalendarSettings({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setDraft((d) => [...d, { date: "", time: "", timezone: REPORT_CALENDAR_TIMEZONE, label: "", url: "", platforms: [] }])}
+                onClick={() => setDraft((d) => [...d, { date: "", time: "", timezone: REPORT_CALENDAR_TIMEZONE, label: "", url: "", platforms: [], _open: false }])}
               >
                 Add key event
               </Button>
@@ -194,7 +220,7 @@ export function ReportCalendarSettings({
                   type="button"
                   variant="outline"
                   size="sm"
-                    title="Sort newest date and posting time first (undated at the end)"
+                    title="Sort soonest date and posting time first (undated at the end)"
                   onClick={autoOrderByDate}
                 >
                   Order by date
