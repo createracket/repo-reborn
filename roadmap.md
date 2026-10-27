@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add calendar Live status with a collapsed admin section; verify saving, restoring, and unchanged public visibility.
+- [x] Add calendar Live status with a collapsed admin section; verify saving, restoring, and unchanged public visibility.
 
 - [x] Add 24-hour AEDT times and FB to report calendar key events; verify saved time-aware ordering on The Chats.
 
