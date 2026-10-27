@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   addMonths,
   eachDayOfInterval,
@@ -86,10 +86,21 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
   const label = (e.label ?? "").trim() || "Event";
   const tags = (e.platforms ?? []).filter(Boolean);
   const clampClass = clamp === 3 ? "line-clamp-3" : "line-clamp-2";
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  const labelRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (expanded) return; // keep the measured result so the collapse toggle stays
+    const el = labelRef.current;
+    setOverflows(!!el && el.scrollHeight > el.clientHeight + 1);
+  }, [label, expanded, clamp, large]);
+
+  const showToggle = overflows || expanded;
   const cls = `calendar-event-chip flex w-full flex-col rounded-lg border border-pink-accent bg-pink-accent/10 text-left font-medium text-pink-accent ${large ? "px-2.5 py-1.5 text-sm" : "px-2 py-0.5 text-[11px]"}`;
   const body = (
     <>
-      <span className={`${clampClass} break-words leading-tight`}>{label}</span>
+      <span ref={labelRef} className={`${expanded ? "" : clampClass} break-words leading-tight`}>{label}</span>
       {calendarTimeLabel(e) && <span className="mt-0.5 text-[10px]">{calendarTimeLabel(e)}</span>}
       {(tags.length > 0 || !!e.url) && (
         <span className="mt-0.5 flex flex-wrap items-center gap-1">
@@ -111,13 +122,27 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
       )}
     </>
   );
-  return e.url ? (
-    <a href={e.url} target="_blank" rel="noopener noreferrer" className={`${cls} transition hover:bg-pink-accent/20`} title={label}>
-      {body}
-    </a>
-  ) : (
-    <div className={cls} title={label}>
-      {body}
+  const toggle = showToggle ? (
+    <button
+      type="button"
+      className="calendar-event-toggle text-[10px] font-medium text-muted-foreground transition hover:text-foreground"
+      onClick={() => setExpanded((v) => !v)}
+    >
+      {expanded ? "Collapse" : "Expand"}
+    </button>
+  ) : null;
+  return (
+    <div>
+      {e.url ? (
+        <a href={e.url} target="_blank" rel="noopener noreferrer" className={`${cls} transition hover:bg-pink-accent/20`} title={label}>
+          {body}
+        </a>
+      ) : (
+        <div className={cls} title={label}>
+          {body}
+        </div>
+      )}
+      {toggle}
     </div>
   );
 }
