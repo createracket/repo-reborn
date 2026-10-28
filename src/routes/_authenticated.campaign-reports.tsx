@@ -2109,6 +2109,23 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
           className="hidden"
           onChange={handleVideoUpload}
         />
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={uploadingPhoto}
+          title="Upload a 9:16 photo (e.g. a story screenshot) as this post's image"
+          onClick={() => document.getElementById(`photo-upload-${post.id}`)?.click()}
+        >
+          <ImagePlus className="mr-2 size-4" />
+          {uploadingPhoto ? "Uploading…" : "Upload photo"}
+        </Button>
+        <input
+          id={`photo-upload-${post.id}`}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handlePhotoUpload}
+        />
         {(
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             Date posted
