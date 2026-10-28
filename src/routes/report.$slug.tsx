@@ -115,6 +115,14 @@ const PLATFORM_LABEL: Record<Platform, string> = {
   facebook: "Facebook",
 };
 
+const PLATFORM_FILTERS = ["all", "instagram", "tiktok", "youtube", "facebook"] as const;
+const PLATFORM_FILTER_LABEL: Record<Exclude<Platform, "all">, string> = {
+  instagram: "IG",
+  tiktok: "TikTok",
+  youtube: "YT",
+  facebook: "FB",
+};
+
 export const Route = createFileRoute("/report/$slug")({
   loader: ({ params }) =>
     getSharePreview({ data: { slug: params.slug, kind: "report" } }).catch(() => null),
@@ -146,6 +154,9 @@ function PublicReportPage() {
   const [monthFilter, setMonthFilter] = useState<string>("all");
   const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
   const [showExtras, setShowExtras] = useState(false);
+  const presentPlatforms = new Set<Platform>(
+    creators.flatMap((c) => c.posts.map((p) => p.platform)),
+  );
   const [trialOnly, setTrialOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState(POSTS_PER_LOAD);
   const [sortMode, setSortMode] = useState<"creator" | "latest" | "views">("latest");
