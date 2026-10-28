@@ -80,6 +80,7 @@ type PublicPost = {
   brand_tag: string | null;
   extra_mention?: boolean | null;
   is_trial?: boolean | null;
+  is_story?: boolean | null;
   position: number;
   updated_at: string | null;
 };
@@ -1157,6 +1158,16 @@ function TrialBanner({ className = "" }: { className?: string }) {
       className={`bg-muted-foreground/50 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-background backdrop-blur-sm ${className}`}
     >
       Trial reel
+    </div>
+  );
+}
+
+function StoryBanner({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`bg-muted-foreground/50 py-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-background backdrop-blur-sm ${className}`}
+    >
+      Story
     </div>
   );
 }
