@@ -2167,6 +2167,10 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
             <Switch checked={form.is_trial} onCheckedChange={(v) => set("is_trial", v)} />
             <span>Trial</span>
           </label>
+          <label className="flex items-center gap-1.5" title="Shows a STORY banner on the live report">
+            <Switch checked={form.is_story} onCheckedChange={(v) => set("is_story", v)} />
+            <span>Story</span>
+          </label>
           <span>
             {form.posted_at
               ? `${new Date(form.posted_at).toLocaleDateString("en-GB", {
