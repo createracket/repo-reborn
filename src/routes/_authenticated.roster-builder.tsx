@@ -1794,20 +1794,9 @@ function RosterDetailView({
                   title="Sort creators by soonest posting date (undated at the end)"
                   onClick={() => {
                     const latest = (it: RosterItem) =>
-                      [it.posting_date, ...(it.extra_posting_dates ?? [])].filter((d): d is string => !!d).sort().slice(-1)[0] ?? "";
+                      [it.posting_date, ...(it.extra_posting_dates ?? [])].filter((d): d is string => !!d).sort().slice(-1)[0];
                     const byDate = (arr: RosterItem[]) =>
-                      arr
-                        .map((it, i) => ({ it, i }))
-                        .sort((a, b) => {
-                          const da = latest(a.it);
-                          const db = latest(b.it);
-                          // Undated creators always sort to the bottom, soonest date first otherwise.
-                          if (!da && !db) return a.i - b.i;
-                          if (!da) return 1;
-                          if (!db) return -1;
-                          return da.localeCompare(db) || a.i - b.i;
-                        })
-                        .map((x) => x.it);
+                      arr.map((it, i) => ({ it, i })).sort((a, b) => compareRosterBySoonestDate(latest(a.it), latest(b.it), a.i - b.i)).map((x) => x.it);
                     const main = orderedItems.filter((it) => it.status !== "hold" && it.status !== "live");
                     const live = orderedItems.filter((it) => it.status === "live");
                     const arch = orderedItems.filter((it) => it.status === "hold");
