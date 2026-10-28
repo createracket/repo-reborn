@@ -179,6 +179,7 @@ type Post = {
   brand_tag: string | null;
   extra_mention: boolean | null;
   is_trial?: boolean | null;
+  is_story?: boolean | null;
   co_posters?: unknown;
   position: number;
   metrics_updated_at: string | null;
@@ -1758,6 +1759,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
     brand_tag: post.brand_tag ?? "",
     extra_mention: !!post.extra_mention,
     is_trial: !!post.is_trial,
+    is_story: !!post.is_story,
     featured_comments: post.featured_comments ?? [],
   });
 
