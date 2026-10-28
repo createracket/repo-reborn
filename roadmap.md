@@ -39,3 +39,4 @@
 - [ ] Enable direct creator account syncing after Instagram and TikTok provider app registration, permissions, and a real-account pilot; no provider credentials or approval are available yet.
 
 - [x] Hide the "Total creators" box on the Stand Atlantic report (per-report "Hide creator total" switch in the builder; Tixel untouched)
+- [x] Story toggle on report posts (grey STORY banner on live cards, mirroring Trial) plus a 9:16 Upload photo button beside Upload video in the report builder
