@@ -17,7 +17,7 @@ export function extractYouTubeId(url: string): string | null {
   }
 }
 
-export type Platform = "instagram" | "tiktok" | "youtube";
+export type Platform = "instagram" | "tiktok" | "youtube" | "facebook";
 
 export function detectPlatform(url: string): Platform | null {
   if (!url) return null;
@@ -26,6 +26,13 @@ export function detectPlatform(url: string): Platform | null {
     if (host.includes("instagram.com")) return "instagram";
     if (host.includes("tiktok.com")) return "tiktok";
     if (host === "youtu.be" || host.includes("youtube.com")) return "youtube";
+    if (
+      host.includes("facebook.com") ||
+      host === "fb.com" ||
+      host.includes("fb.watch") ||
+      host === "m.facebook.com"
+    )
+      return "facebook";
     return null;
   } catch {
     return null;

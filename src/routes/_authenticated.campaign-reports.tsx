@@ -158,7 +158,7 @@ type FeaturedComment = {
 type Post = {
   id: string;
   creator_id: string;
-  platform: "instagram" | "tiktok" | "youtube";
+  platform: "instagram" | "tiktok" | "youtube" | "facebook";
   post_url: string | null;
   thumbnail_url: string | null;
   caption: string | null;
@@ -2080,6 +2080,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
             <SelectItem value="instagram">Instagram</SelectItem>
             <SelectItem value="tiktok">TikTok</SelectItem>
             <SelectItem value="youtube">YouTube</SelectItem>
+            <SelectItem value="facebook">Facebook</SelectItem>
           </SelectContent>
         </Select>
         <Input
