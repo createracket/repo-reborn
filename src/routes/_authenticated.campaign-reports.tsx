@@ -179,6 +179,7 @@ type Post = {
   brand_tag: string | null;
   extra_mention: boolean | null;
   is_trial?: boolean | null;
+  is_story?: boolean | null;
   co_posters?: unknown;
   position: number;
   metrics_updated_at: string | null;
@@ -1758,6 +1759,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
     brand_tag: post.brand_tag ?? "",
     extra_mention: !!post.extra_mention,
     is_trial: !!post.is_trial,
+    is_story: !!post.is_story,
     featured_comments: post.featured_comments ?? [],
   });
 
@@ -1784,6 +1786,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
       brand_tag: post.brand_tag ?? "",
       extra_mention: !!post.extra_mention,
     is_trial: !!post.is_trial,
+    is_story: !!post.is_story,
       featured_comments: post.featured_comments ?? [],
     });
   }, [post.id]);
@@ -1828,6 +1831,41 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
       toast.error((err as Error).message);
     } finally {
       setUploadingVideo(false);
+      e.target.value = "";
+    }
+  }
+
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      e.target.value = "";
+      return;
+    }
+    setUploadingPhoto(true);
+    try {
+      const resized = await resizeImageFile(file, 1080);
+      const path = `report-post-photos/${post.id}/${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("spotlight-images")
+        .upload(path, resized, { cacheControl: "31536000", upsert: false, contentType: resized.type });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+      set("thumbnail_url", urlData.publicUrl);
+      // Save the image straight away so the upload is never lost.
+      const { error: saveErr } = await (supabase as any)
+        .from("campaign_report_posts")
+        .update({ thumbnail_url: urlData.publicUrl })
+        .eq("id", post.id);
+      if (saveErr) throw saveErr;
+      toast.success("Photo uploaded");
+      await onChanged?.();
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setUploadingPhoto(false);
       e.target.value = "";
     }
   }
@@ -1938,6 +1976,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         brand_tag: form.brand_tag.trim() || null,
         extra_mention: form.extra_mention,
         is_trial: form.is_trial,
+        is_story: form.is_story,
         co_posters: coPosters,
         featured_comments: form.featured_comments,
       })
@@ -2070,6 +2109,23 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
           className="hidden"
           onChange={handleVideoUpload}
         />
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={uploadingPhoto}
+          title="Upload a 9:16 photo (e.g. a story screenshot) as this post's image"
+          onClick={() => document.getElementById(`photo-upload-${post.id}`)?.click()}
+        >
+          <ImagePlus className="mr-2 size-4" />
+          {uploadingPhoto ? "Uploading…" : "Upload photo"}
+        </Button>
+        <input
+          id={`photo-upload-${post.id}`}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handlePhotoUpload}
+        />
         {(
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             Date posted
@@ -2110,6 +2166,10 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
           <label className="flex items-center gap-1.5" title="Shows a TRIAL REEL banner and the Trial reels filter">
             <Switch checked={form.is_trial} onCheckedChange={(v) => set("is_trial", v)} />
             <span>Trial</span>
+          </label>
+          <label className="flex items-center gap-1.5" title="Shows a STORY banner on the live report">
+            <Switch checked={form.is_story} onCheckedChange={(v) => set("is_story", v)} />
+            <span>Story</span>
           </label>
           <span>
             {form.posted_at

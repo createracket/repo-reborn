@@ -488,6 +488,7 @@ export type Database = {
           hashtags: string[]
           id: string
           interaction_pct: number | null
+          is_story: boolean
           is_trial: boolean
           likes: number | null
           metrics_updated_at: string | null
@@ -520,6 +521,7 @@ export type Database = {
           hashtags?: string[]
           id?: string
           interaction_pct?: number | null
+          is_story?: boolean
           is_trial?: boolean
           likes?: number | null
           metrics_updated_at?: string | null
@@ -552,6 +554,7 @@ export type Database = {
           hashtags?: string[]
           id?: string
           interaction_pct?: number | null
+          is_story?: boolean
           is_trial?: boolean
           likes?: number | null
           metrics_updated_at?: string | null
