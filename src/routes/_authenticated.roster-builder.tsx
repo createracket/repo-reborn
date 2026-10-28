@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
+import { compareRosterBySoonestDate } from "@/lib/roster-date-order";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 import { toProfileUrl } from "@/lib/social-handles";
 import { RosterMetricsUpdate } from "@/components/admin/RosterMetricsUpdate";
@@ -1794,9 +1795,9 @@ function RosterDetailView({
                   title="Sort creators by soonest posting date (undated at the end)"
                   onClick={() => {
                     const latest = (it: RosterItem) =>
-                      [it.posting_date, ...(it.extra_posting_dates ?? [])].filter((d): d is string => !!d).sort().slice(-1)[0] ?? "";
+                      [it.posting_date, ...(it.extra_posting_dates ?? [])].filter((d): d is string => !!d).sort().slice(-1)[0];
                     const byDate = (arr: RosterItem[]) =>
-                      arr.map((it, i) => ({ it, i })).sort((a, b) => latest(a.it).localeCompare(latest(b.it)) || a.i - b.i).map((x) => x.it);
+                      arr.map((it, i) => ({ it, i })).sort((a, b) => compareRosterBySoonestDate(latest(a.it), latest(b.it), a.i - b.i)).map((x) => x.it);
                     const main = orderedItems.filter((it) => it.status !== "hold" && it.status !== "live");
                     const live = orderedItems.filter((it) => it.status === "live");
                     const arch = orderedItems.filter((it) => it.status === "hold");
