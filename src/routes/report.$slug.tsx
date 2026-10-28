@@ -868,8 +868,11 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
   const media = (
     <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
       <PostThumb src={post.thumbnail_url} videoSrc={post.post_url} />
-      {post.is_trial && (
-        <TrialBanner className="absolute -inset-x-px -bottom-px z-10 rounded-b-xl" />
+      {(post.is_trial || post.is_story) && (
+        <div className="absolute -inset-x-px -bottom-px z-10 overflow-hidden rounded-b-xl">
+          {post.is_story && <StoryBanner />}
+          {post.is_trial && <TrialBanner />}
+        </div>
       )}
 
 
@@ -963,7 +966,12 @@ function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: 
 
   return (
     <Card className="overflow-hidden">
-      {post.is_trial && <TrialBanner className="-mx-px -mt-px rounded-t-[19px]" />}
+      {(post.is_trial || post.is_story) && (
+        <div className="-mx-px -mt-px overflow-hidden rounded-t-[19px]">
+          {post.is_trial && <TrialBanner />}
+          {post.is_story && <StoryBanner />}
+        </div>
+      )}
       <CardContent className="grid gap-6 p-6 md:grid-cols-[minmax(0,280px)_1fr]">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
