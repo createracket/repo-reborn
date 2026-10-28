@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { scrapeProfileFollowers, scrapeSpotifyArtist, scrapeAppleMusicArtist } from "@/lib/campaign-scrapers.functions";
+import { compareRosterBySoonestDate } from "@/lib/roster-date-order";
 import { isNameMatch, MISMATCH_MESSAGE } from "@/lib/streaming-match";
 import { toProfileUrl } from "@/lib/social-handles";
 import { RosterMetricsUpdate } from "@/components/admin/RosterMetricsUpdate";
