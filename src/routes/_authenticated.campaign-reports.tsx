@@ -1835,6 +1835,41 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
     }
   }
 
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      e.target.value = "";
+      return;
+    }
+    setUploadingPhoto(true);
+    try {
+      const resized = await resizeImageFile(file, 1080);
+      const path = `report-post-photos/${post.id}/${Date.now()}.jpg`;
+      const { error: upErr } = await supabase.storage
+        .from("spotlight-images")
+        .upload(path, resized, { cacheControl: "31536000", upsert: false, contentType: resized.type });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+      set("thumbnail_url", urlData.publicUrl);
+      // Save the image straight away so the upload is never lost.
+      const { error: saveErr } = await (supabase as any)
+        .from("campaign_report_posts")
+        .update({ thumbnail_url: urlData.publicUrl })
+        .eq("id", post.id);
+      if (saveErr) throw saveErr;
+      toast.success("Photo uploaded");
+      await onChanged?.();
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setUploadingPhoto(false);
+      e.target.value = "";
+    }
+  }
+
   const [uploadingThumb, setUploadingThumb] = useState(false);
   async function handleThumbUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
