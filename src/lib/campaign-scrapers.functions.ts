@@ -255,9 +255,15 @@ function sanitiseMetrics(result: ScrapeResult): ScrapeResult {
 export async function scrapePostMetricsRaw(url: string): Promise<ScrapeResult> {
   const platform = detectPlatform(url);
   if (!platform)
-    return { ok: false, error: "Unrecognised URL — must be Instagram, TikTok, or YouTube." };
+    return { ok: false, error: "Unrecognised URL — must be Instagram, TikTok, YouTube, or Facebook." };
   if (platform === "youtube") return sanitiseMetrics(await scrapeYouTube(url));
   if (platform === "instagram") return sanitiseMetrics(await scrapeInstagram(url));
+  if (platform === "facebook")
+    return {
+      ok: false,
+      error:
+        "Facebook metrics can't be auto-fetched yet — enter views, likes and comments manually.",
+    };
   return sanitiseMetrics(await scrapeTikTok(url));
 }
 

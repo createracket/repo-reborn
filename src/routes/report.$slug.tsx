@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ExternalLink, Instagram, Youtube, Music2, Users } from "lucide-react";
+import { ExternalLink, Instagram, Youtube, Music2, Users, Facebook } from "lucide-react";
 
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -105,12 +105,22 @@ const PLATFORM_ICON: Record<Platform, typeof Instagram> = {
   instagram: Instagram,
   tiktok: Music2,
   youtube: Youtube,
+  facebook: Facebook,
 };
 
 const PLATFORM_LABEL: Record<Platform, string> = {
   instagram: "Instagram",
   tiktok: "TikTok",
   youtube: "YouTube",
+  facebook: "Facebook",
+};
+
+const PLATFORM_FILTERS = ["all", "instagram", "tiktok", "youtube", "facebook"] as const;
+const PLATFORM_FILTER_LABEL: Record<Exclude<Platform, "all">, string> = {
+  instagram: "IG",
+  tiktok: "TikTok",
+  youtube: "YT",
+  facebook: "FB",
 };
 
 export const Route = createFileRoute("/report/$slug")({
@@ -144,6 +154,9 @@ function PublicReportPage() {
   const [monthFilter, setMonthFilter] = useState<string>("all");
   const [platformFilter, setPlatformFilter] = useState<Platform | "all">("all");
   const [showExtras, setShowExtras] = useState(false);
+  const presentPlatforms = new Set<Platform>(
+    creators.flatMap((c) => c.posts.map((p) => p.platform)),
+  );
   const [trialOnly, setTrialOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState(POSTS_PER_LOAD);
   const [sortMode, setSortMode] = useState<"creator" | "latest" | "views">("latest");
@@ -724,9 +737,9 @@ function PublicReportPage() {
               </a>
             )}
             <div className="flex items-center gap-1.5">
-              {(["all", "instagram", "tiktok"] as const).map((p) => {
+            {PLATFORM_FILTERS.filter((p) => p === "all" || presentPlatforms.has(p)).map((p) => {
                 const active = platformFilter === p;
-                const label = p === "all" ? "All" : p === "instagram" ? "IG" : "TikTok";
+                const label = p === "all" ? "All" : PLATFORM_FILTER_LABEL[p];
                 return (
                   <button
                     key={p}
@@ -1131,6 +1144,8 @@ function PlatformBadge({
       "border-pink-accent/30 bg-pink-accent/15 text-pink-accent",
     youtube:
       "border-destructive/30 bg-destructive/15 text-destructive",
+    facebook:
+      "border-primary/30 bg-primary/15 text-primary",
   };
   const classes = `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${badgeClasses[platform]}`;
   return postUrl ? (
