@@ -1786,6 +1786,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
       brand_tag: post.brand_tag ?? "",
       extra_mention: !!post.extra_mention,
     is_trial: !!post.is_trial,
+    is_story: !!post.is_story,
       featured_comments: post.featured_comments ?? [],
     });
   }, [post.id]);
@@ -1940,6 +1941,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         brand_tag: form.brand_tag.trim() || null,
         extra_mention: form.extra_mention,
         is_trial: form.is_trial,
+        is_story: form.is_story,
         co_posters: coPosters,
         featured_comments: form.featured_comments,
       })
