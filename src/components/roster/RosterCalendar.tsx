@@ -15,6 +15,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ExternalLink } from 
 import { Button } from "@/components/ui/button";
 import { storageImage } from "@/lib/storage-image";
 import { calendarTimeLabel } from "@/lib/report-calendar-time";
+import { calendarGridRange } from "@/lib/report-calendar-grid";
 
 export type CalendarCreator = {
   id: string;
