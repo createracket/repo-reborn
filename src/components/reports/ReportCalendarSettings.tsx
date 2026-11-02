@@ -231,25 +231,12 @@ export function ReportCalendarSettings({
             Moments you'll cover without a creator attached. They appear on the calendar only.
           </div>
           <div className="mt-3 space-y-3">
-            {grouped.active.map(({ ev, i }) => renderEntry(ev, i))}
-            {grouped.live.length > 0 && (
-              <details className="group rounded-md border border-pink-accent/40 bg-pink-accent/5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-3 text-sm font-medium text-pink-accent hover:text-foreground">
-                  <span>Live · {grouped.live.length}</span>
-                  <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
-                </summary>
-                <div className="space-y-3 px-2 pb-2">
-                  {grouped.live.map(({ ev, i }) => renderEntry(ev, i))}
-                </div>
-              </details>
-            )}
-            {draft.length === 0 && <p className="text-xs text-muted-foreground">No key events yet.</p>}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
+            <div className="flex flex-wrap items-center gap-2 pb-1">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setDraft((d) => [...d, { date: "", time: "", timezone: REPORT_CALENDAR_TIMEZONE, label: "", url: "", platforms: [], live: false, _open: false }])}
+                onClick={() => setDraft((d) => [{ date: "", time: "", timezone: REPORT_CALENDAR_TIMEZONE, label: "", url: "", platforms: [], live: false, _open: true }, ...d])}
               >
                 Add key event
               </Button>
@@ -268,6 +255,19 @@ export function ReportCalendarSettings({
                 {saving ? "Saving…" : "Save key events"}
               </Button>
             </div>
+            {grouped.active.map(({ ev, i }) => renderEntry(ev, i))}
+            {grouped.live.length > 0 && (
+              <details className="group rounded-md border border-pink-accent/40 bg-pink-accent/5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-3 text-sm font-medium text-pink-accent hover:text-foreground">
+                  <span>Live · {grouped.live.length}</span>
+                  <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="space-y-3 px-2 pb-2">
+                  {grouped.live.map(({ ev, i }) => renderEntry(ev, i))}
+                </div>
+              </details>
+            )}
+            {draft.length === 0 && <p className="text-xs text-muted-foreground">No key events yet.</p>}
           </div>
         </div>
       </CardContent>
