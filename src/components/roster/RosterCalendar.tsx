@@ -109,7 +109,7 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
           {tags.map((t) => (
             <span
               key={t}
-              className="calendar-event-tag rounded-full bg-event-tag px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-event-tag-ink"
+              className={`calendar-event-tag rounded-full px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider ${t === "TBC" ? "bg-purple text-white" : "bg-event-tag text-event-tag-ink"}`}
             >
               {t}
             </span>
