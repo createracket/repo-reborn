@@ -15,6 +15,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ExternalLink } from 
 import { Button } from "@/components/ui/button";
 import { storageImage } from "@/lib/storage-image";
 import { calendarTimeLabel } from "@/lib/report-calendar-time";
+import { calendarGridRange } from "@/lib/report-calendar-grid";
 
 export type CalendarCreator = {
   id: string;
@@ -157,6 +158,7 @@ export function RosterCalendar({
   onPick,
   month: monthProp,
   onMonthChange,
+  skipLoneSundayWeek = false,
 }: {
   creators: CalendarCreator[];
   events?: CalendarEvent[];
@@ -164,6 +166,8 @@ export function RosterCalendar({
   /** Controlled month (used so the snapshot captures the month being viewed). */
   month?: Date | null;
   onMonthChange?: (m: Date) => void;
+  /** Hide a leading week holding only a Sunday 1st (display only). */
+  skipLoneSundayWeek?: boolean;
 }) {
   const [internalMonth, setInternalMonth] = useState(() => initialMonth(creators));
   const month = monthProp ?? internalMonth;
@@ -186,10 +190,7 @@ export function RosterCalendar({
     return m;
   }, [events]);
 
-  const days = eachDayOfInterval({
-    start: startOfWeek(startOfMonth(month), { weekStartsOn: 1 }),
-    end: endOfWeek(endOfMonth(month), { weekStartsOn: 1 }),
-  });
+  const days = eachDayOfInterval(calendarGridRange(month, { skipLoneSundayWeek }));
   const monthDays = days.filter(
     (d) => isSameMonth(d, month) && (byDay.has(format(d, "yyyy-MM-dd")) || eventsByDay.has(format(d, "yyyy-MM-dd"))),
   );

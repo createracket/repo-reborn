@@ -170,6 +170,7 @@ export function ReportCalendarSettings({
                       {reportCalendarPlatforms(reportSlug).map((p) => (
                         <label key={p} className="flex items-center gap-1.5 text-xs font-medium">
                           <Switch
+                            className={p === "TBC" ? "data-[state=checked]:bg-purple" : undefined}
                             checked={ev.platforms.includes(p)}
                             onCheckedChange={(c) =>
                               patch(i, { platforms: c ? [...ev.platforms, p] : ev.platforms.filter((x) => x !== p) })

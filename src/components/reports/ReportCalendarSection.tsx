@@ -4,6 +4,7 @@ import { Camera, Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { reportCalendarPlatforms } from "@/lib/report-calendar-platforms";
+import { skipsLoneSundayWeek } from "@/lib/report-calendar-grid";
 import { REPORT_CALENDAR_TIMEZONE } from "@/lib/report-calendar-time";
 import {
   RosterCalendar,
@@ -97,7 +98,14 @@ export function ReportCalendarSection({
           {snapping ? "Creating image…" : "Download snapshot"}
         </Button>
       </div>
-      <RosterCalendar creators={creators} events={events} month={month} onMonthChange={setMonth} onPick={onPick} />
+      <RosterCalendar
+        creators={creators}
+        events={events}
+        month={month}
+        onMonthChange={setMonth}
+        onPick={onPick}
+        skipLoneSundayWeek={skipsLoneSundayWeek(slug)}
+      />
       <div aria-hidden style={{ position: "fixed", top: 0, left: -10000 }}>
         <div ref={snapRef}>
           <CalendarSnapshotContent title={title} month={snapMonth} creators={creators} events={events} />
