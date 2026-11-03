@@ -21,6 +21,7 @@ import { getSharePreview } from "@/lib/share-preview.functions";
 import { type CalendarEvent } from "@/components/roster/RosterCalendar";
 import { ReportCalendarSection } from "@/components/reports/ReportCalendarSection";
 import { compareReportPosts, reportPostTime } from "@/lib/report-post-order";
+import { hasNewFollowers, orderByNewFollowers } from "@/lib/report-new-followers";
 import { listeningEnabled } from "@/lib/campaign-listening";
 import { ReportListeningSection } from "@/components/reports/ReportListeningSection";
 
