@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import { strict as assert } from "node:assert";
 import { format } from "date-fns";
-import { calendarGridRange, skipsLoneSundayWeek } from "./report-calendar-grid";
+import { calendarGridRange, calendarListDays, skipsLoneSundayWeek } from "./report-calendar-grid";
 
 const f = (d: Date) => format(d, "yyyy-MM-dd");
 
@@ -23,4 +23,12 @@ test("other reports keep the Mon 26 Oct start for November", () => {
 test("only the Chats report opts in", () => {
   assert.equal(skipsLoneSundayWeek("chats-socials"), true);
   assert.equal(skipsLoneSundayWeek("stat-socials"), false);
+});
+
+test("Phone list keeps Sunday 1 November in November even when the grid skips it", () => {
+  const nov = new Date(2026, 10, 1);
+  const days = calendarListDays(nov);
+  assert.equal(days.length, 30);
+  assert.equal(days[0].getDate(), 1);
+  assert.equal(days[0].getMonth(), 10);
 });

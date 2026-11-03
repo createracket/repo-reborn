@@ -15,7 +15,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ExternalLink } from 
 import { Button } from "@/components/ui/button";
 import { storageImage } from "@/lib/storage-image";
 import { calendarTimeLabel } from "@/lib/report-calendar-time";
-import { calendarGridRange } from "@/lib/report-calendar-grid";
+import { calendarGridRange, calendarListDays } from "@/lib/report-calendar-grid";
 
 export type CalendarCreator = {
   id: string;
@@ -191,8 +191,10 @@ export function RosterCalendar({
   }, [events]);
 
   const days = eachDayOfInterval(calendarGridRange(month, { skipLoneSundayWeek }));
-  const monthDays = days.filter(
-    (d) => isSameMonth(d, month) && (byDay.has(format(d, "yyyy-MM-dd")) || eventsByDay.has(format(d, "yyyy-MM-dd"))),
+  // Phone list covers every day of the month, independent of the trimmed desktop grid,
+  // so a hidden lone Sunday 1st still shows under its own month.
+  const monthDays = calendarListDays(month).filter(
+    (d) => byDay.has(format(d, "yyyy-MM-dd")) || eventsByDay.has(format(d, "yyyy-MM-dd")),
   );
 
   return (
