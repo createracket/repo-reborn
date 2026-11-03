@@ -21,6 +21,7 @@ import { getSharePreview } from "@/lib/share-preview.functions";
 import { type CalendarEvent } from "@/components/roster/RosterCalendar";
 import { ReportCalendarSection } from "@/components/reports/ReportCalendarSection";
 import { compareReportPosts, reportPostTime } from "@/lib/report-post-order";
+import { hasNewFollowers, orderByNewFollowers } from "@/lib/report-new-followers";
 import { listeningEnabled } from "@/lib/campaign-listening";
 import { ReportListeningSection } from "@/components/reports/ReportListeningSection";
 
@@ -81,6 +82,7 @@ type PublicPost = {
   extra_mention?: boolean | null;
   is_trial?: boolean | null;
   is_story?: boolean | null;
+  new_followers?: number | null;
   position: number;
   updated_at: string | null;
 };
@@ -159,7 +161,7 @@ function PublicReportPage() {
   );
   const [trialOnly, setTrialOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState(POSTS_PER_LOAD);
-  const [sortMode, setSortMode] = useState<"creator" | "latest" | "views">("latest");
+  const [sortMode, setSortMode] = useState<"creator" | "latest" | "views" | "followers">("latest");
   const [gate, setGate] = useState<{ title: string; header_image_url: string | null; code_label: string } | null>(null);
   const [gateEmail, setGateEmail] = useState("");
   const [gateCode, setGateCode] = useState("");
@@ -436,9 +438,15 @@ function PublicReportPage() {
   const flatPostsByViews = [...flatPosts].sort(
     (a, b) => viewsOf(b.post) - viewsOf(a.post) || byRecency(a.post, b.post),
   );
+  // "Followers" ordering: only posts with a manual new-followers entry.
+  const hasFollowerEntries = creators.some((c) => c.posts.some((p) => hasNewFollowers(p)));
+  const flatPostsByFollowers = orderByNewFollowers(flatPosts, (i) => i.post, (a, b) => byRecency(a.post, b.post));
 
   // Only render `visibleCount` posts at a time so long reports stay fast.
-  const filteredPostCount = filteredCreators.reduce((n, c) => n + c.posts.length, 0);
+  const filteredPostCount =
+    sortMode === "followers"
+      ? flatPostsByFollowers.length
+      : filteredCreators.reduce((n, c) => n + c.posts.length, 0);
   const visibleCreators = (() => {
     let budget = visibleCount;
     const out: typeof orderedCreators = [];
@@ -452,6 +460,9 @@ function PublicReportPage() {
   })();
   const visibleFlatPosts = flatPosts.slice(0, visibleCount);
   const visibleFlatByViews = flatPostsByViews.slice(0, visibleCount);
+  const visibleFlatByFollowers = flatPostsByFollowers.slice(0, visibleCount);
+  const visibleFlatSorted =
+    sortMode === "latest" ? visibleFlatPosts : sortMode === "followers" ? visibleFlatByFollowers : visibleFlatByViews;
   const hasMorePosts = filteredPostCount > visibleCount;
 
 
@@ -686,6 +697,7 @@ function PublicReportPage() {
                 { key: "creator", label: "By creator" },
                 { key: "latest", label: "Latest first" },
                 { key: "views", label: "Top views" },
+                ...(hasFollowerEntries ? ([{ key: "followers", label: "Followers" }] as const) : []),
               ] as const).map((opt) => (
                 <button
                   key={opt.key}
@@ -782,26 +794,26 @@ function PublicReportPage() {
 
 
         <section className="mt-6 space-y-10">
-          {filteredCreators.length === 0 ? (
+          {filteredCreators.length === 0 || (sortMode === "followers" && flatPostsByFollowers.length === 0) ? (
             <p className="text-sm text-muted-foreground">
-              {monthFilter === "all" && platformFilter === "all"
-                ? "No creators on this report yet."
-                : "No posts match this filter."}
+              {sortMode === "followers"
+                ? "No posts with new followers match this filter."
+                : monthFilter === "all" && platformFilter === "all"
+                  ? "No creators on this report yet."
+                  : "No posts match this filter."}
             </p>
           ) : report.template === "simple" ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
               {(sortMode === "creator"
                 ? visibleCreators.flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
-                : sortMode === "latest"
-                  ? visibleFlatPosts
-                  : visibleFlatByViews
+                : visibleFlatSorted
               ).map(({ post, creator }) => (
                 <SimplePostCard key={post.id} post={post} creator={creator} />
               ))}
             </div>
           ) : sortMode !== "creator" ? (
             <div className="space-y-4">
-              {(sortMode === "latest" ? visibleFlatPosts : visibleFlatByViews).map(({ post, creator }) => (
+              {visibleFlatSorted.map(({ post, creator }) => (
                 <PostCard
                   key={post.id}
                   post={post}
@@ -927,7 +939,11 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
         <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 border-t border-border/60 pt-2.5">
           <SimpleMetric label="Views" value={formatCount(post.views)} />
           <SimpleMetric label="Likes" value={formatCount(post.likes)} />
-          <SimpleMetric label="Comments" value={formatCount(post.comments)} />
+          {hasNewFollowers(post) ? (
+            <SimpleMetric label="Followers" value={formatCount(post.new_followers ?? null)} />
+          ) : (
+            <SimpleMetric label="Comments" value={formatCount(post.comments)} />
+          )}
           <SimpleMetric label="ER %" value={formatPct(post.engagement_rate_pct)} />
         </div>
       </CardContent>

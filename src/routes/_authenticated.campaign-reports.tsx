@@ -180,6 +180,7 @@ type Post = {
   extra_mention: boolean | null;
   is_trial?: boolean | null;
   is_story?: boolean | null;
+  new_followers?: number | null;
   co_posters?: unknown;
   position: number;
   metrics_updated_at: string | null;
@@ -1750,6 +1751,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
     shares: post.shares?.toString() ?? "",
     saves: post.saves?.toString() ?? "",
     followers: post.followers?.toString() ?? "",
+    new_followers: post.new_followers?.toString() ?? "",
     reach_pct: post.reach_pct?.toString() ?? "",
     engagement_rate_pct: post.engagement_rate_pct?.toString() ?? "",
     interaction_pct: post.interaction_pct?.toString() ?? "",
@@ -1777,6 +1779,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
       shares: post.shares?.toString() ?? "",
       saves: post.saves?.toString() ?? "",
       followers: post.followers?.toString() ?? "",
+      new_followers: post.new_followers?.toString() ?? "",
       reach_pct: post.reach_pct?.toString() ?? "",
       engagement_rate_pct: post.engagement_rate_pct?.toString() ?? "",
       interaction_pct: post.interaction_pct?.toString() ?? "",
@@ -1964,6 +1967,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         shares: numOrNull(form.shares),
         saves: numOrNull(form.saves),
         followers: numOrNull(form.followers),
+        new_followers: numOrNull(form.new_followers) == null ? null : Math.round(numOrNull(form.new_followers) as number),
         reach_pct: numOrNull(form.reach_pct),
         engagement_rate_pct: numOrNull(form.engagement_rate_pct),
         interaction_pct: numOrNull(form.interaction_pct),
@@ -2210,6 +2214,7 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         <NumField label="Likes" v={form.likes} on={(x) => set("likes", x)} />
         <NumField label="Comments" v={form.comments} on={(x) => set("comments", x)} />
         <NumField label="Followers" v={form.followers} on={(x) => set("followers", x)} />
+        <NumField label="New followers" v={form.new_followers} on={(x) => set("new_followers", x)} />
       </div>
       <CoPostEditor
         value={coPosters}
