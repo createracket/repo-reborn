@@ -492,6 +492,7 @@ export type Database = {
           is_trial: boolean
           likes: number | null
           metrics_updated_at: string | null
+          new_followers: number | null
           platform: string
           position: number
           post_url: string | null
@@ -525,6 +526,7 @@ export type Database = {
           is_trial?: boolean
           likes?: number | null
           metrics_updated_at?: string | null
+          new_followers?: number | null
           platform?: string
           position?: number
           post_url?: string | null
@@ -558,6 +560,7 @@ export type Database = {
           is_trial?: boolean
           likes?: number | null
           metrics_updated_at?: string | null
+          new_followers?: number | null
           platform?: string
           position?: number
           post_url?: string | null
