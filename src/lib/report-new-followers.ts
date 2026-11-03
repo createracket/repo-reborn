@@ -1,3 +1,9 @@
+// Trial scope: only the Tixel social report offers new followers for now.
+const NEW_FOLLOWERS_REPORTS = new Set(["tixel-report"]);
+export function newFollowersEnabled(slug: string | null | undefined): boolean {
+  return !!slug && NEW_FOLLOWERS_REPORTS.has(slug);
+}
+
 // Manually entered "new followers" gained from a report post.
 // A post only counts as having an entry when a non-negative number was saved.
 export function hasNewFollowers(p: { new_followers?: number | null }): boolean {

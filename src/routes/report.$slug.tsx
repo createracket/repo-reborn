@@ -21,7 +21,7 @@ import { getSharePreview } from "@/lib/share-preview.functions";
 import { type CalendarEvent } from "@/components/roster/RosterCalendar";
 import { ReportCalendarSection } from "@/components/reports/ReportCalendarSection";
 import { compareReportPosts, reportPostTime } from "@/lib/report-post-order";
-import { hasNewFollowers, orderByNewFollowers } from "@/lib/report-new-followers";
+import { hasNewFollowers, newFollowersEnabled, orderByNewFollowers } from "@/lib/report-new-followers";
 import { listeningEnabled } from "@/lib/campaign-listening";
 import { ReportListeningSection } from "@/components/reports/ReportListeningSection";
 
@@ -439,7 +439,7 @@ function PublicReportPage() {
     (a, b) => viewsOf(b.post) - viewsOf(a.post) || byRecency(a.post, b.post),
   );
   // "Followers" ordering: only posts with a manual new-followers entry.
-  const hasFollowerEntries = creators.some((c) => c.posts.some((p) => hasNewFollowers(p)));
+  const hasFollowerEntries = newFollowersEnabled(report?.slug) && creators.some((c) => c.posts.some((p) => hasNewFollowers(p)));
   const flatPostsByFollowers = orderByNewFollowers(flatPosts, (i) => i.post, (a, b) => byRecency(a.post, b.post));
 
   // Only render `visibleCount` posts at a time so long reports stay fast.
@@ -808,7 +808,7 @@ function PublicReportPage() {
                 ? visibleCreators.flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
                 : visibleFlatSorted
               ).map(({ post, creator }) => (
-                <SimplePostCard key={post.id} post={post} creator={creator} />
+                <SimplePostCard key={post.id} post={post} creator={creator} showNewFollowers={newFollowersEnabled(report.slug)} />
               ))}
             </div>
           ) : sortMode !== "creator" ? (
@@ -888,7 +888,7 @@ function TotalStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCreator }) {
+function SimplePostCard({ post, creator, showNewFollowers = false }: { post: PublicPost; creator: PublicCreator; showNewFollowers?: boolean }) {
   const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
   const media = (
     <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
@@ -939,7 +939,7 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
         <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 border-t border-border/60 pt-2.5">
           <SimpleMetric label="Views" value={formatCount(post.views)} />
           <SimpleMetric label="Likes" value={formatCount(post.likes)} />
-          {hasNewFollowers(post) ? (
+          {showNewFollowers && hasNewFollowers(post) ? (
             <SimpleMetric label="Followers" value={formatCount(post.new_followers ?? null)} />
           ) : (
             <SimpleMetric label="Comments" value={formatCount(post.comments)} />

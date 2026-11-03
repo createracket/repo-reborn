@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { hasNewFollowers, orderByNewFollowers } from "./report-new-followers";
+import { hasNewFollowers, newFollowersEnabled, orderByNewFollowers } from "./report-new-followers";
 
 describe("new followers", () => {
   test("only posts with an entered value count as having new followers", () => {
@@ -22,5 +22,14 @@ describe("new followers", () => {
       orderByNewFollowers(posts, (p) => p).map((p) => p.id),
       ["c", "e", "a"],
     );
+  });
+});
+
+describe("new followers scope", () => {
+  test("only the Tixel social report offers new followers for now", () => {
+    assert.equal(newFollowersEnabled("tixel-report"), true);
+    assert.equal(newFollowersEnabled("stat-socials"), false);
+    assert.equal(newFollowersEnabled("chats-socials"), false);
+    assert.equal(newFollowersEnabled(null), false);
   });
 });
