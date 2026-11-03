@@ -940,7 +940,7 @@ function SimplePostCard({ post, creator }: { post: PublicPost; creator: PublicCr
           <SimpleMetric label="Views" value={formatCount(post.views)} />
           <SimpleMetric label="Likes" value={formatCount(post.likes)} />
           {hasNewFollowers(post) ? (
-            <SimpleMetric label="New followers" value={formatCount(post.new_followers ?? null)} />
+            <SimpleMetric label="Followers" value={formatCount(post.new_followers ?? null)} />
           ) : (
             <SimpleMetric label="Comments" value={formatCount(post.comments)} />
           )}
