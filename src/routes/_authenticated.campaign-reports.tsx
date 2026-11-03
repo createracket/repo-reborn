@@ -83,6 +83,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { ReportAutoPull } from "@/components/reports/ReportAutoPull";
 import { ReportDataFeeds } from "@/components/reports/ReportDataFeeds";
 import { dismissReportPost } from "@/lib/report-post-discovery.functions";
+import { newFollowersEnabled } from "@/lib/report-new-followers";
 import { listeningEnabled } from "@/lib/campaign-listening";
 import { ReportListeningSettings } from "@/components/reports/ReportListeningSettings";
 
@@ -1419,6 +1420,7 @@ function ReportDetailView({
                       posts={posts.filter((p) => p.creator_id === c.id)}
                       onChanged={onChanged}
                       categories={categories}
+                      showNewFollowers={newFollowersEnabled(report.slug)}
                     />
                   ))}
                 </div>
@@ -1438,11 +1440,13 @@ function CreatorRow({
   posts,
   onChanged,
   categories,
+  showNewFollowers = false,
 }: {
   creator: Creator;
   posts: Post[];
   onChanged: () => Promise<void>;
   categories: string[];
+  showNewFollowers?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(creator.name);
@@ -1690,7 +1694,7 @@ function CreatorRow({
               <SortableContext items={posts.map((p) => p.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-3">
                   {posts.map((p) => (
-                    <PostEditor key={p.id} post={p} onChanged={onChanged} creatorName={creator.name} />
+                    <PostEditor key={p.id} post={p} onChanged={onChanged} creatorName={creator.name} showNewFollowers={showNewFollowers} />
                   ))}
                 </div>
               </SortableContext>
@@ -1712,7 +1716,7 @@ function numOrNull(v: string): number | null {
   return isNaN(n) ? null : n;
 }
 
-function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: () => Promise<void>; creatorName: string }) {
+function PostEditor({ post, onChanged, creatorName, showNewFollowers = false }: { post: Post; onChanged: () => Promise<void>; creatorName: string; showNewFollowers?: boolean }) {
   const scrape = useServerFn(scrapePostMetrics);
   const dismiss = useServerFn(dismissReportPost);
   const [saving, setSaving] = useState(false);
@@ -2214,7 +2218,9 @@ function PostEditor({ post, onChanged, creatorName }: { post: Post; onChanged: (
         <NumField label="Likes" v={form.likes} on={(x) => set("likes", x)} />
         <NumField label="Comments" v={form.comments} on={(x) => set("comments", x)} />
         <NumField label="Followers" v={form.followers} on={(x) => set("followers", x)} />
-        <NumField label="New followers" v={form.new_followers} on={(x) => set("new_followers", x)} />
+        {showNewFollowers && (
+          <NumField label="New followers" v={form.new_followers} on={(x) => set("new_followers", x)} />
+        )}
       </div>
       <CoPostEditor
         value={coPosters}
