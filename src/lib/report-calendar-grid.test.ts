@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import { strict as assert } from "node:assert";
 import { format } from "date-fns";
-import { calendarGridRange, skipsLoneSundayWeek } from "./report-calendar-grid";
+import { calendarGridRange, calendarListDays, skipsLoneSundayWeek } from "./report-calendar-grid";
 
 const f = (d: Date) => format(d, "yyyy-MM-dd");
 
