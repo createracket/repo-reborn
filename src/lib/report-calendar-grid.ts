@@ -1,4 +1,4 @@
-import { addDays, endOfMonth, endOfWeek, getDay, startOfMonth, startOfWeek } from "date-fns";
+import { addDays, eachDayOfInterval, endOfMonth, endOfWeek, getDay, startOfMonth, startOfWeek } from "date-fns";
 
 // Reports whose live calendar hides a leading week that holds only a Sunday 1st
 // (that week already closes the previous month's grid).
@@ -18,4 +18,9 @@ export function calendarGridRange(month: Date, opts: { skipLoneSundayWeek?: bool
   const start =
     opts.skipLoneSundayWeek && getDay(first) === 0 ? addDays(first, 1) : startOfWeek(first, { weekStartsOn: 1 });
   return { start, end: endOfWeek(endOfMonth(month), { weekStartsOn: 1 }) };
+}
+
+/** Every day of the month for the phone list — never trimmed by the desktop grid. */
+export function calendarListDays(month: Date): Date[] {
+  return eachDayOfInterval({ start: startOfMonth(month), end: endOfMonth(month) });
 }

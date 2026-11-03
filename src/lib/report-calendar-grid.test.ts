@@ -24,3 +24,11 @@ test("only the Chats report opts in", () => {
   assert.equal(skipsLoneSundayWeek("chats-socials"), true);
   assert.equal(skipsLoneSundayWeek("stat-socials"), false);
 });
+
+test("Phone list keeps Sunday 1 November in November even when the grid skips it", () => {
+  const nov = new Date(2026, 10, 1);
+  const days = calendarListDays(nov);
+  assert.equal(days.length, 30);
+  assert.equal(days[0].getDate(), 1);
+  assert.equal(days[0].getMonth(), 10);
+});
