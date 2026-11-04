@@ -2,8 +2,10 @@ import { test } from "node:test";
 import { strict as assert } from "node:assert";
 import { reviewEnabled, calendarEventKey, findCalendarEvent, reviewCommentSchema, normalizeDraftLink, draftDisplayTags } from "./report-review";
 
-test("Review tab is only on the Chats report", () => {
+test("Review tab is only on the Chats and Tixel brand ads reports", () => {
   assert.equal(reviewEnabled("chats-socials"), true);
+  assert.equal(reviewEnabled("tixel-brand-ads"), true);
+  assert.equal(reviewEnabled("tixel-report"), false);
   assert.equal(reviewEnabled("stat-socials"), false);
 });
 test("Draft links resolve to the calendar entry and its platform tags", () => {
