@@ -52,6 +52,13 @@ export function normalizeDraftLink(input: string | null | undefined): string | n
 export type ReviewDraftComment = { id: string; author_name: string | null; body: string; created_at: string };
 export type ReviewDraft = {
   id: string; calendar_event_key: string | null; platform: string | null; media_url: string | null; media_type: string;
-  link_url: string | null; caption: string; approval_status: string; approved_at: string | null; approved_by_name: string | null;
+  link_url: string | null; platforms?: string[] | null; caption: string; approval_status: string; approved_at: string | null; approved_by_name: string | null;
   comments: ReviewDraftComment[];
 };
+
+/** Tags shown on a Review card: the draft's own toggles when any are on, otherwise the linked calendar entry's. */
+export function draftDisplayTags(draftPlatforms: string[] | null | undefined, eventPlatforms: string[] | null | undefined, legacy?: string | null): string[] {
+  if (draftPlatforms?.length) return draftPlatforms;
+  if (eventPlatforms?.length) return eventPlatforms;
+  return legacy ? [legacy] : [];
+}

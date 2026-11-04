@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import { strict as assert } from "node:assert";
-import { reviewEnabled, calendarEventKey, findCalendarEvent, reviewCommentSchema, normalizeDraftLink } from "./report-review";
+import { reviewEnabled, calendarEventKey, findCalendarEvent, reviewCommentSchema, normalizeDraftLink, draftDisplayTags } from "./report-review";
 
 test("Review tab is only on the Chats report", () => {
   assert.equal(reviewEnabled("chats-socials"), true);
@@ -23,4 +23,9 @@ test("Draft content links accept web links only", () => {
   assert.equal(normalizeDraftLink("https://drive.google.com/x"), "https://drive.google.com/x");
   assert.equal(normalizeDraftLink("javascript:alert(1)"), null);
   assert.equal(normalizeDraftLink("   "), null);
+});
+test("Draft toggles are used first, then the linked calendar entry's tags", () => {
+  assert.deepEqual(draftDisplayTags(["IG", "TBC"], ["TT"]), ["IG", "TBC"]);
+  assert.deepEqual(draftDisplayTags([], ["TT", "FB"]), ["TT", "FB"]);
+  assert.deepEqual(draftDisplayTags([], null), []);
 });
