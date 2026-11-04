@@ -18,7 +18,9 @@ import { PostThumb } from "@/components/reports/PostThumb";
 import { getReportGate, unlockReport, getReportForMember } from "@/lib/report-access.functions";
 import { shareMeta } from "@/lib/share-meta";
 import { getSharePreview } from "@/lib/share-preview.functions";
-import { type CalendarEvent } from "@/components/roster/RosterCalendar";
+import { type CalendarEvent, datesOf } from "@/components/roster/RosterCalendar";
+import { useServerFn } from "@tanstack/react-start";
+import { getReviewDrafts } from "@/lib/report-review.functions";
 import { ReportCalendarSection } from "@/components/reports/ReportCalendarSection";
 import { compareReportPosts, reportPostTime } from "@/lib/report-post-order";
 import { hasNewFollowers, newFollowersEnabled, orderByNewFollowers } from "@/lib/report-new-followers";
@@ -152,6 +154,19 @@ function PublicReportPage() {
   const setView = (v: "posts" | "calendar" | "listening" | "review") =>
     navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, view: v === "posts" ? undefined : v }), replace: true });
   const [report, setReport] = useState<PublicReport | null>(null);
+  const [hasListening, setHasListening] = useState(false);
+  const [hasReview, setHasReview] = useState(false);
+  const loadReviewDrafts = useServerFn(getReviewDrafts);
+  useEffect(() => {
+    let cancelled = false;
+    if (listeningEnabled(slug)) {
+      supabase.rpc("get_campaign_report_listening", { _slug: slug }).then(({ data }) => { if (!cancelled) setHasListening((data ?? []).length > 0); });
+    }
+    if (reviewEnabled(slug)) {
+      loadReviewDrafts({ data: { slug } }).then((rows) => { if (!cancelled) setHasReview((rows ?? []).length > 0); }, () => {});
+    }
+    return () => { cancelled = true; };
+  }, [slug, refreshTick]);
   const [csvAvailable, setCsvAvailable] = useState(false);
   const [creators, setCreators] = useState<PublicCreator[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "missing" | "gated">("loading");
@@ -384,6 +399,16 @@ function PublicReportPage() {
     .filter((c) => c.posts.length > 0);
   const hasExtraMentions = creators.some((c) => c.posts.some((p) => !!p.extra_mention));
   const allPosts = scopedCreators.flatMap((c) => c.posts);
+  const hasPosts = creators.some((c) => c.posts.length > 0);
+  const hasCalendar = !!report?.show_calendar && (((report?.calendar_events ?? []) as CalendarEvent[]).length > 0 || creators.some((c) => datesOf(c as never).length > 0));
+  const availableViews = ([
+    ...(hasPosts ? ["posts" as const] : []),
+    ...(hasCalendar ? ["calendar" as const] : []),
+    ...(listeningEnabled(slug) && hasListening ? ["listening" as const] : []),
+    ...(reviewEnabled(slug) && hasReview ? ["review" as const] : []),
+  ]);
+  const requestedView = viewParam ?? "posts";
+  const activeView = (availableViews as string[]).includes(requestedView) ? requestedView : (availableViews[0] ?? "posts");
 
   const monthOptions = (() => {
     const map = new Map<string, string>();
@@ -606,7 +631,7 @@ function PublicReportPage() {
             )}
           </div>
         </div>
-        {allPosts.length > 0 && viewParam !== "review" && (
+        {allPosts.length > 0 && activeView !== "review" && (
           <div
             className={`mt-8 grid gap-3 sm:grid-cols-2 ${
               report.hide_creator_count ? "lg:grid-cols-4" : "lg:grid-cols-5"
@@ -639,7 +664,7 @@ function PublicReportPage() {
           );
         })()}
 
-        {monthFilter !== "all" && filteredCreators.length > 0 && viewParam !== "review" && (
+        {monthFilter !== "all" && filteredCreators.length > 0 && activeView !== "review" && (
           <div
             className={`mt-4 grid gap-3 sm:grid-cols-2 ${
               report.hide_creator_count ? "lg:grid-cols-4" : "lg:grid-cols-5"
@@ -658,16 +683,16 @@ function PublicReportPage() {
           </div>
         )}
 
-        {(report.show_calendar || listeningEnabled(slug) || reviewEnabled(slug)) && (
+        {availableViews.length > 1 && (
           <div className="mt-10 inline-flex w-full rounded-full border border-border/60 p-0.5 text-sm sm:w-auto">
-            {(["posts", ...(report.show_calendar ? ["calendar" as const] : []), ...(listeningEnabled(slug) ? ["listening" as const] : []), ...(reviewEnabled(slug) ? ["review" as const] : [])] as const).map((v) => (
+            {availableViews.map((v) => (
               <Button
                 key={v}
                 type="button"
                 variant="ghost"
-                aria-pressed={(viewParam ?? "posts") === v}
+                aria-pressed={activeView === v}
                 onClick={() => setView(v)}
-                className={`h-auto flex-1 rounded-full px-4 py-1.5 capitalize transition sm:flex-none ${(viewParam ?? "posts") === v ? "bg-pink-accent text-pink-ink hover:bg-pink-accent hover:text-pink-ink" : "text-muted-foreground hover:text-foreground"}`}
+                className={`h-auto flex-1 rounded-full px-4 py-1.5 capitalize transition sm:flex-none ${activeView === v ? "bg-pink-accent text-pink-ink hover:bg-pink-accent hover:text-pink-ink" : "text-muted-foreground hover:text-foreground"}`}
               >
                 {v}
               </Button>
@@ -675,11 +700,11 @@ function PublicReportPage() {
           </div>
         )}
 
-        {reviewEnabled(slug) && viewParam === "review" ? (
+        {activeView === "review" ? (
           <ReportReviewSection slug={slug} events={(report.calendar_events ?? []) as CalendarEvent[]} refreshTick={refreshTick} />
-        ) : listeningEnabled(slug) && viewParam === "listening" ? (
+        ) : activeView === "listening" ? (
           <ReportListeningSection slug={slug} refreshTick={refreshTick} />
-        ) : report.show_calendar && viewParam === "calendar" ? (
+        ) : activeView === "calendar" ? (
           <ReportCalendarSection
             title={report.title}
             slug={report.slug}
