@@ -246,6 +246,13 @@
       "when": 1793804107638,
       "tag": "0034_report_draft_archive",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1793834044894,
+      "tag": "0035_report_draft_thumbnail",
+      "breakpoints": true
     }
   ]
 }

@@ -14,7 +14,7 @@ import { calendarEventKey, findCalendarEvent, normalizeDraftLink, DRAFT_MEDIA_BU
 type CalEvent = { date?: string | null; time?: string | null; label?: string | null; platforms?: string[] | null };
 type Comment = { id: string; author_name: string | null; body: string; created_at: string; resolved: boolean };
 type Draft = {
-  id: string; calendar_event_key: string | null; media_url: string | null; media_path: string | null; link_url: string | null; platforms: string[] | null; media_type: string; caption: string; hide_banner: boolean; archived: boolean;
+  id: string; calendar_event_key: string | null; media_url: string | null; media_path: string | null; thumbnail_path: string | null; link_url: string | null; platforms: string[] | null; media_type: string; caption: string; hide_banner: boolean; archived: boolean;
   published: boolean; approval_status: string; approved_at: string | null; approved_by_name: string | null; position: number;
   report_draft_comments: Comment[];
 };
@@ -56,13 +56,13 @@ export function ReportDraftSettings({ reportId, slug, events }: { reportId: stri
   async function load() {
     const { data, error } = await sb
       .from("report_draft_posts")
-      .select("id, calendar_event_key, media_url, media_path, link_url, platforms, media_type, caption, hide_banner, archived, published, approval_status, approved_at, approved_by_name, position, report_draft_comments(id, author_name, body, created_at, resolved)")
+      .select("id, calendar_event_key, media_url, media_path, thumbnail_path, link_url, platforms, media_type, caption, hide_banner, archived, published, approval_status, approved_at, approved_by_name, position, report_draft_comments(id, author_name, body, created_at, resolved)")
       .eq("report_id", reportId)
       .order("position").order("created_at");
     if (error) toast.error("Could not load drafts");
     setDrafts(data ?? []);
     setLoading(false);
-    void signPreviews(((data ?? []) as Draft[]).map((d) => d.media_path).filter((p): p is string => !!p));
+    void signPreviews(((data ?? []) as Draft[]).flatMap((d) => [d.media_path, d.thumbnail_path]).filter((p): p is string => !!p));
   }
   async function signPreviews(paths: string[]) {
     if (!paths.length) return;
@@ -90,10 +90,11 @@ export function ReportDraftSettings({ reportId, slug, events }: { reportId: stri
   }
   async function remove(id: string) {
     if (!confirm("Delete this draft and its comments?")) return;
-    const path = drafts.find((d) => d.id === id)?.media_path;
+    const target = drafts.find((d) => d.id === id);
+    const paths = [target?.media_path, target?.thumbnail_path].filter((p): p is string => !!p);
     const { error } = await sb.from("report_draft_posts").delete().eq("id", id);
     if (error) return toast.error("Could not delete draft");
-    if (path) void supabase.storage.from(DRAFT_MEDIA_BUCKET).remove([path]);
+    if (paths.length) void supabase.storage.from(DRAFT_MEDIA_BUCKET).remove(paths);
     setDrafts((ds) => ds.filter((d) => d.id !== id));
   }
   async function upload(d: Draft, file: File) {
@@ -110,6 +111,26 @@ export function ReportDraftSettings({ reportId, slug, events }: { reportId: stri
       if (old) void supabase.storage.from(DRAFT_MEDIA_BUCKET).remove([old]);
     } catch (e) { toast.error((e as Error).message); }
     finally { setBusy(null); }
+  }
+  async function uploadThumbnail(d: Draft, file: File) {
+    if (!file.type.startsWith("image/")) return toast.error("Thumbnail must be an image");
+    setBusy(d.id);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${reportId}/${d.id}-thumb-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from(DRAFT_MEDIA_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
+      if (error) throw error;
+      const old = d.thumbnail_path;
+      await update(d.id, { thumbnail_path: path }, "Thumbnail uploaded");
+      await signPreviews([path]);
+      if (old) void supabase.storage.from(DRAFT_MEDIA_BUCKET).remove([old]);
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setBusy(null); }
+  }
+  async function removeThumbnail(d: Draft) {
+    const old = d.thumbnail_path;
+    if (!old) return;
+    if (await update(d.id, { thumbnail_path: null }, "Thumbnail removed")) void supabase.storage.from(DRAFT_MEDIA_BUCKET).remove([old]);
   }
   async function resolveComment(draftId: string, c: Comment) {
     const { error } = await sb.from("report_draft_comments").update({ resolved: !c.resolved }).eq("id", c.id);
@@ -135,7 +156,8 @@ export function ReportDraftSettings({ reportId, slug, events }: { reportId: stri
                   <div className="aspect-[9/16] overflow-hidden rounded-md bg-muted">
                     {(() => {
                       const src = d.media_path ? previews[d.media_path] : d.media_url;
-                      if (src) return d.media_type === "video" ? <video src={src} muted className="h-full w-full object-cover" /> : <img src={src} alt="" className="h-full w-full object-cover" />;
+                      const poster = d.thumbnail_path ? previews[d.thumbnail_path] : undefined;
+                      if (src) return d.media_type === "video" ? <video src={src} poster={poster} muted className="h-full w-full object-cover" /> : <img src={src} alt="" className="h-full w-full object-cover" />;
                       if (d.link_url) return <div className="flex h-full items-center justify-center p-3 text-center text-xs text-muted-foreground"><ExternalLink className="mr-1 size-3" /> Linked content</div>;
                       return null;
                     })()}
@@ -145,6 +167,18 @@ export function ReportDraftSettings({ reportId, slug, events }: { reportId: stri
                     <input type="file" accept="image/*,video/*" className="hidden" disabled={busy === d.id}
                       onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(d, f); e.target.value = ""; }} />
                   </label>
+                  {d.media_type === "video" && d.media_path && (
+                    <div className="flex flex-col gap-1">
+                      <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-purple-soft hover:underline">
+                        <Upload className="size-3" /> {d.thumbnail_path ? "Replace thumbnail" : "Upload thumbnail"}
+                        <input type="file" accept="image/*" className="hidden" disabled={busy === d.id}
+                          onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadThumbnail(d, f); e.target.value = ""; }} />
+                      </label>
+                      {d.thumbnail_path && (
+                        <button type="button" className="self-start text-xs text-muted-foreground hover:underline" onClick={() => void removeThumbnail(d)}>Remove thumbnail</button>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-3">

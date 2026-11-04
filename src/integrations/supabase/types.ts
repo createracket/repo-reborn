@@ -2015,6 +2015,7 @@ export type Database = {
           position: number
           published: boolean
           report_id: string
+          thumbnail_path: string | null
           updated_at: string
         }
         Insert: {
@@ -2036,6 +2037,7 @@ export type Database = {
           position?: number
           published?: boolean
           report_id: string
+          thumbnail_path?: string | null
           updated_at?: string
         }
         Update: {
@@ -2057,6 +2059,7 @@ export type Database = {
           position?: number
           published?: boolean
           report_id?: string
+          thumbnail_path?: string | null
           updated_at?: string
         }
         Relationships: [

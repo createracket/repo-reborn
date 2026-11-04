@@ -66,7 +66,7 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
     <article className="flex flex-col overflow-hidden rounded-[20px] border border-border bg-card">
       <div className="relative m-2 aspect-[9/16] overflow-hidden rounded-xl bg-muted">
         {draft.media_url && (draft.media_type === "video"
-          ? <video src={draft.media_url} controls playsInline className="h-full w-full object-cover" />
+          ? <video src={draft.media_url} poster={draft.thumbnail_url ?? undefined} preload={draft.thumbnail_url ? "none" : "metadata"} controls playsInline className="h-full w-full object-cover" />
           : <img src={draft.media_url} alt={draft.caption.slice(0, 80) || "Draft content"} loading="lazy" className="h-full w-full object-cover" />)}
         {!draft.media_url && draft.link_url && (
           <a href={draft.link_url} target="_blank" rel="noopener noreferrer" className="flex h-full w-full flex-col items-center justify-center gap-2 p-6 text-center text-sm font-medium text-purple-soft hover:underline">
