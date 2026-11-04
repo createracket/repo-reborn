@@ -50,7 +50,7 @@ export function normalizeDraftLink(input: string | null | undefined): string | n
   }
 }
 
-export type ReviewDraftComment = { id: string; author_name: string | null; body: string; created_at: string };
+export type ReviewDraftComment = { id: string; author_name: string | null; body: string; created_at: string; resolved?: boolean };
 export type ReviewDraft = {
   id: string; calendar_event_key: string | null; platform: string | null; media_url: string | null; media_type: string;
   link_url: string | null; platforms?: string[] | null; caption: string; hide_banner?: boolean; approval_status: string; approved_at: string | null; approved_by_name: string | null;
