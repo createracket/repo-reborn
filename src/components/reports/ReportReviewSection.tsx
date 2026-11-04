@@ -73,7 +73,7 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
             <ExternalLink className="size-6" /> Open draft content
           </a>
         )}
-        <div className="absolute inset-x-0 bottom-0 rounded-b-xl bg-muted-foreground/50 py-1 text-center text-xs font-semibold uppercase tracking-wider text-background">Draft</div>
+        {!draft.hide_banner && <div className="absolute inset-x-0 bottom-0 rounded-b-xl bg-muted-foreground/50 py-1 text-center text-xs font-semibold uppercase tracking-wider text-background">Draft</div>}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-2 px-3 pb-3">
         {tags.length > 0 && (

@@ -14,7 +14,7 @@ import { calendarEventKey, findCalendarEvent, normalizeDraftLink, DRAFT_MEDIA_BU
 type CalEvent = { date?: string | null; time?: string | null; label?: string | null; platforms?: string[] | null };
 type Comment = { id: string; author_name: string | null; body: string; created_at: string; resolved: boolean };
 type Draft = {
-  id: string; calendar_event_key: string | null; media_url: string | null; media_path: string | null; link_url: string | null; platforms: string[] | null; media_type: string; caption: string;
+  id: string; calendar_event_key: string | null; media_url: string | null; media_path: string | null; link_url: string | null; platforms: string[] | null; media_type: string; caption: string; hide_banner: boolean;
   published: boolean; approval_status: string; approved_at: string | null; approved_by_name: string | null; position: number;
   report_draft_comments: Comment[];
 };
@@ -55,7 +55,7 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
   async function load() {
     const { data, error } = await sb
       .from("report_draft_posts")
-      .select("id, calendar_event_key, media_url, media_path, link_url, platforms, media_type, caption, published, approval_status, approved_at, approved_by_name, position, report_draft_comments(id, author_name, body, created_at, resolved)")
+      .select("id, calendar_event_key, media_url, media_path, link_url, platforms, media_type, caption, hide_banner, published, approval_status, approved_at, approved_by_name, position, report_draft_comments(id, author_name, body, created_at, resolved)")
       .eq("report_id", reportId)
       .order("position").order("created_at");
     if (error) toast.error("Could not load drafts");
@@ -162,6 +162,10 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
                       <Label className="flex items-center gap-2 text-sm">
                         <Switch checked={d.published} onCheckedChange={(c) => update(d.id, { published: c }, c ? "Showing on Review tab" : "Hidden from Review tab")} />
                         Show on Review tab
+                      </Label>
+                      <Label className="flex items-center gap-2 text-sm">
+                        <Switch checked={!d.hide_banner} onCheckedChange={(c) => update(d.id, { hide_banner: !c }, c ? "Draft banner shown" : "Draft banner hidden")} />
+                        Draft banner
                       </Label>
                       <Button type="button" variant="ghost" size="icon" aria-label="Delete draft" onClick={() => remove(d.id)}><Trash2 className="size-4" /></Button>
                     </div>
