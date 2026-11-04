@@ -96,7 +96,7 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
           </div>
         )}
         {approved && (
-          <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+          <p className="flex items-center gap-1.5 text-sm font-medium text-lime-soft">
             <CheckCircle2 className="size-4" /> Approved{draft.approved_by_name ? ` by ${draft.approved_by_name}` : ""}{draft.approved_at ? ` · ${new Date(draft.approved_at).toLocaleDateString("en-AU")}` : ""}
           </p>
         )}
