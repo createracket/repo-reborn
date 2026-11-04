@@ -125,7 +125,7 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
               <CheckCircle2 className="size-4" /> {approved ? "Undo approval" : "Approve"}
             </Button>
             <Button type="button" variant="outline" size="sm" className="w-full" disabled={busy} onClick={() => setShowAmends((s) => !s)}>
-              <MessageSquare className="size-4" /> Edit notes
+              <MessageSquare className="size-4" /> Request amends
             </Button>
           </div>
         </div>
