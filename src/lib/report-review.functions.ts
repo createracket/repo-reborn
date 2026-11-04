@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { reviewApproveSchema, reviewCommentSchema, reviewEnabled, MAX_COMMENTS_PER_DRAFT } from "./report-review";
+import { z } from "zod";
+import { reviewApproveSchema, reviewCommentSchema, reviewEnabled, MAX_COMMENTS_PER_DRAFT, DRAFT_MEDIA_BUCKET, DRAFT_MEDIA_URL_TTL_SECONDS, type ReviewDraft } from "./report-review";
 
 // Public (no login) actions. Only drafts that are published on a published,
 // code-free Review-enabled report can be touched.
@@ -44,4 +45,30 @@ export const setDraftApproval = createServerFn({ method: "POST" })
       .eq("id", data.draftId);
     if (error) throw new Error("Could not save approval");
     return { ok: true };
+  });
+
+type ReviewDraftRow = ReviewDraft & { media_path: string | null };
+
+// Public read for the Review tab. Uploaded files live in a private bucket; this
+// returns short-lived signed links only for drafts the review RPC exposes
+// (published drafts on a published, code-free Review-enabled report).
+export const getReviewDrafts = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({ slug: z.string().min(1).max(200) }).parse(input))
+  .handler(async ({ data }): Promise<ReviewDraft[]> => {
+    if (!reviewEnabled(data.slug)) return [];
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin.rpc("get_report_review_drafts", { _slug: data.slug });
+    if (error) throw new Error("Drafts could not be loaded");
+    const drafts = ((rows as unknown) as ReviewDraftRow[]) ?? [];
+    const paths = drafts.map((d) => d.media_path).filter((p): p is string => !!p);
+    const signed = new Map<string, string>();
+    if (paths.length) {
+      const { data: urls } = await supabaseAdmin.storage.from(DRAFT_MEDIA_BUCKET).createSignedUrls(paths, DRAFT_MEDIA_URL_TTL_SECONDS);
+      for (const u of urls ?? []) if (u.path && u.signedUrl) signed.set(u.path, u.signedUrl);
+    }
+    return drafts.map(({ media_path, ...d }) => ({
+      ...d,
+      link_url: d.link_url ?? null,
+      media_url: media_path ? signed.get(media_path) ?? null : d.media_url,
+    }));
   });

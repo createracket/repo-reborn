@@ -2004,6 +2004,8 @@ export type Database = {
           caption: string
           created_at: string
           id: string
+          link_url: string | null
+          media_path: string | null
           media_type: string
           media_url: string | null
           platform: string | null
@@ -2020,6 +2022,8 @@ export type Database = {
           caption?: string
           created_at?: string
           id?: string
+          link_url?: string | null
+          media_path?: string | null
           media_type?: string
           media_url?: string | null
           platform?: string | null
@@ -2036,6 +2040,8 @@ export type Database = {
           caption?: string
           created_at?: string
           id?: string
+          link_url?: string | null
+          media_path?: string | null
           media_type?: string
           media_url?: string | null
           platform?: string | null

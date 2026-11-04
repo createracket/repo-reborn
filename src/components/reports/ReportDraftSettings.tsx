@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, Trash2, Upload, Plus } from "lucide-react";
+import { ChevronDown, ChevronRight, ExternalLink, Trash2, Upload, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { calendarEventKey, findCalendarEvent } from "@/lib/report-review";
+import { Input } from "@/components/ui/input";
+import { calendarEventKey, findCalendarEvent, normalizeDraftLink, DRAFT_MEDIA_BUCKET, DRAFT_MEDIA_URL_TTL_SECONDS } from "@/lib/report-review";
 
 type CalEvent = { date?: string | null; time?: string | null; label?: string | null; platforms?: string[] | null };
 type Comment = { id: string; author_name: string | null; body: string; created_at: string; resolved: boolean };
 type Draft = {
-  id: string; calendar_event_key: string | null; media_url: string | null; media_type: string; caption: string;
+  id: string; calendar_event_key: string | null; media_url: string | null; media_path: string | null; link_url: string | null; media_type: string; caption: string;
   published: boolean; approval_status: string; approved_at: string | null; approved_by_name: string | null; position: number;
   report_draft_comments: Comment[];
 };
@@ -24,16 +25,26 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
+  // Admin-only previews of privately stored uploads (path -> short-lived link).
+  const [previews, setPreviews] = useState<Record<string, string>>({});
 
   async function load() {
     const { data, error } = await sb
       .from("report_draft_posts")
-      .select("id, calendar_event_key, media_url, media_type, caption, published, approval_status, approved_at, approved_by_name, position, report_draft_comments(id, author_name, body, created_at, resolved)")
+      .select("id, calendar_event_key, media_url, media_path, link_url, media_type, caption, published, approval_status, approved_at, approved_by_name, position, report_draft_comments(id, author_name, body, created_at, resolved)")
       .eq("report_id", reportId)
       .order("position").order("created_at");
     if (error) toast.error("Could not load drafts");
     setDrafts(data ?? []);
     setLoading(false);
+    void signPreviews(((data ?? []) as Draft[]).map((d) => d.media_path).filter((p): p is string => !!p));
+  }
+  async function signPreviews(paths: string[]) {
+    if (!paths.length) return;
+    const { data } = await supabase.storage.from(DRAFT_MEDIA_BUCKET).createSignedUrls(paths, DRAFT_MEDIA_URL_TTL_SECONDS);
+    const next: Record<string, string> = {};
+    for (const u of data ?? []) if (u.path && u.signedUrl) next[u.path] = u.signedUrl;
+    setPreviews((p) => ({ ...p, ...next }));
   }
   useEffect(() => { void load(); }, [reportId]);
 
@@ -53,8 +64,10 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
   }
   async function remove(id: string) {
     if (!confirm("Delete this draft and its comments?")) return;
+    const path = drafts.find((d) => d.id === id)?.media_path;
     const { error } = await sb.from("report_draft_posts").delete().eq("id", id);
     if (error) return toast.error("Could not delete draft");
+    if (path) void supabase.storage.from(DRAFT_MEDIA_BUCKET).remove([path]);
     setDrafts((ds) => ds.filter((d) => d.id !== id));
   }
   async function upload(d: Draft, file: File) {
@@ -62,11 +75,13 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
     try {
       const isVideo = file.type.startsWith("video/");
       const ext = file.name.split(".").pop() || (isVideo ? "mp4" : "jpg");
-      const path = `report-drafts/${reportId}/${d.id}-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("spotlight-images").upload(path, file, { contentType: file.type, upsert: false });
+      const path = `${reportId}/${d.id}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from(DRAFT_MEDIA_BUCKET).upload(path, file, { contentType: file.type, upsert: false });
       if (error) throw error;
-      const url = supabase.storage.from("spotlight-images").getPublicUrl(path).data.publicUrl;
-      await update(d.id, { media_url: url, media_type: isVideo ? "video" : "image" }, "Media uploaded");
+      const old = d.media_path;
+      await update(d.id, { media_path: path, media_url: null, media_type: isVideo ? "video" : "image" }, "Media uploaded");
+      await signPreviews([path]);
+      if (old) void supabase.storage.from(DRAFT_MEDIA_BUCKET).remove([old]);
     } catch (e) { toast.error((e as Error).message); }
     finally { setBusy(null); }
   }
@@ -89,7 +104,7 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
       <CardHeader className="flex-row items-center justify-between gap-3 space-y-0 cursor-pointer" onClick={() => setOpen((o) => !o)}>
         <div>
           <CardTitle className="font-display text-2xl">Draft content</CardTitle>
-          <CardDescription>Drafts for client review on the live Review tab. Link each to a calendar entry to pull through its platform tags.</CardDescription>
+          <CardDescription>Drafts for client review on the live Review tab. Uploads stay private and only show on the Review tab; or paste a link to the content instead.</CardDescription>
         </div>
         {open ? <ChevronDown className="size-5 text-muted-foreground" /> : <ChevronRight className="size-5 text-muted-foreground" />}
       </CardHeader>
@@ -102,10 +117,15 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
               <div key={d.id} className="grid gap-4 rounded-lg border border-border p-4 md:grid-cols-[140px_1fr]">
                 <div className="space-y-2">
                   <div className="aspect-[9/16] overflow-hidden rounded-md bg-muted">
-                    {d.media_url && (d.media_type === "video" ? <video src={d.media_url} muted className="h-full w-full object-cover" /> : <img src={d.media_url} alt="" className="h-full w-full object-cover" />)}
+                    {(() => {
+                      const src = d.media_path ? previews[d.media_path] : d.media_url;
+                      if (src) return d.media_type === "video" ? <video src={src} muted className="h-full w-full object-cover" /> : <img src={src} alt="" className="h-full w-full object-cover" />;
+                      if (d.link_url) return <div className="flex h-full items-center justify-center p-3 text-center text-xs text-muted-foreground"><ExternalLink className="mr-1 size-3" /> Linked content</div>;
+                      return null;
+                    })()}
                   </div>
                   <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-purple-soft hover:underline">
-                    <Upload className="size-3" /> {d.media_url ? "Replace media" : "Upload photo/video"}
+                    <Upload className="size-3" /> {d.media_path || d.media_url ? "Replace media" : "Upload photo/video"}
                     <input type="file" accept="image/*,video/*" className="hidden" disabled={busy === d.id}
                       onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(d, f); e.target.value = ""; }} />
                   </label>
@@ -133,6 +153,27 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
                       {d.calendar_event_key && !ev && <option value={d.calendar_event_key}>Missing entry (edited or removed)</option>}
                     </select>
                     {ev?.platforms?.length ? <p className="text-xs text-muted-foreground">Tags: {ev.platforms.join(" · ")}</p> : null}
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Content link (optional, instead of or as well as an upload)</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        key={d.link_url ?? ""}
+                        defaultValue={d.link_url ?? ""}
+                        placeholder="https://dropbox.com/…"
+                        onBlur={(e) => {
+                          const raw = e.target.value.trim();
+                          const next = normalizeDraftLink(raw);
+                          if (raw && !next) return void toast.error("Add a full web link, e.g. https://…");
+                          if (next !== (d.link_url ?? null)) void update(d.id, { link_url: next }, next ? "Link saved" : "Link removed");
+                        }}
+                      />
+                      {d.link_url && (
+                        <Button asChild variant="outline" size="icon" aria-label="Open content link">
+                          <a href={d.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /></a>
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Draft caption</Label>
