@@ -606,7 +606,7 @@ function PublicReportPage() {
             )}
           </div>
         </div>
-        {allPosts.length > 0 && (
+        {allPosts.length > 0 && viewParam !== "review" && (
           <div
             className={`mt-8 grid gap-3 sm:grid-cols-2 ${
               report.hide_creator_count ? "lg:grid-cols-4" : "lg:grid-cols-5"
@@ -639,7 +639,7 @@ function PublicReportPage() {
           );
         })()}
 
-        {monthFilter !== "all" && filteredCreators.length > 0 && (
+        {monthFilter !== "all" && filteredCreators.length > 0 && viewParam !== "review" && (
           <div
             className={`mt-4 grid gap-3 sm:grid-cols-2 ${
               report.hide_creator_count ? "lg:grid-cols-4" : "lg:grid-cols-5"
