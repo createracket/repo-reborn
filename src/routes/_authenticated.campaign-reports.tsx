@@ -1392,7 +1392,7 @@ function ReportDetailView({
 
       {listeningEnabled(report.slug) && <ReportListeningSettings reportId={report.id} />}
 
-      {reviewEnabled(report.slug) && <ReportDraftSettings reportId={report.id} events={(report as any).calendar_events} />}
+      {reviewEnabled(report.slug) && <ReportDraftSettings reportId={report.id} slug={report.slug} events={(report as any).calendar_events} />}
 
       {/* Creators */}
       <Card>
