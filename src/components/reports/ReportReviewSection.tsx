@@ -84,7 +84,7 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
         {(event?.label || when) && <p className="text-xs text-muted-foreground">{[event?.label, when].filter(Boolean).join(" · ")}</p>}
         {draft.link_url && (
           <Button asChild variant="purple" size="sm" className="h-6 self-start gap-1 rounded-full px-2.5 text-[11px]">
-            <a href={draft.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3" /> Content</a>
+            <a href={draft.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3" /> {hideCaptionHeading && !draft.hide_banner ? "Draft" : "Content"}</a>
           </Button>
         )}
         {hideCaptionHeading ? (
