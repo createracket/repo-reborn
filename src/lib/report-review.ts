@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-/** The Review (draft approval) tab is only on the Chats Socials report for now. */
+/** The Review (draft approval) tab is only on selected reports for now. */
+const REVIEW_REPORTS = new Set(["chats-socials", "tixel-brand-ads"]);
 export function reviewEnabled(slug: string) {
-  return slug === "chats-socials";
+  return REVIEW_REPORTS.has(slug);
 }
 
 type CalEvent = { date?: string | null; time?: string | null; label?: string | null; platforms?: string[] | null };
