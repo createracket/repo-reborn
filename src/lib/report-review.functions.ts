@@ -47,7 +47,7 @@ export const setDraftApproval = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-type ReviewDraftRow = ReviewDraft & { media_path: string | null };
+type ReviewDraftRow = ReviewDraft & { media_path: string | null; thumbnail_path?: string | null };
 
 // Public read for the Review tab. Uploaded files live in a private bucket; this
 // returns short-lived signed links only for drafts the review RPC exposes
@@ -60,14 +60,15 @@ export const getReviewDrafts = createServerFn({ method: "POST" })
     const { data: rows, error } = await supabaseAdmin.rpc("get_report_review_drafts", { _slug: data.slug });
     if (error) throw new Error("Drafts could not be loaded");
     const drafts = ((rows as unknown) as ReviewDraftRow[]) ?? [];
-    const paths = drafts.map((d) => d.media_path).filter((p): p is string => !!p);
+    const paths = drafts.flatMap((d) => [d.media_path, d.thumbnail_path]).filter((p): p is string => !!p);
     const signed = new Map<string, string>();
     if (paths.length) {
       const { data: urls } = await supabaseAdmin.storage.from(DRAFT_MEDIA_BUCKET).createSignedUrls(paths, DRAFT_MEDIA_URL_TTL_SECONDS);
       for (const u of urls ?? []) if (u.path && u.signedUrl) signed.set(u.path, u.signedUrl);
     }
-    return drafts.map(({ media_path, ...d }) => ({
+    return drafts.map(({ media_path, thumbnail_path, ...d }) => ({
       ...d,
+      thumbnail_url: thumbnail_path ? signed.get(thumbnail_path) ?? null : null,
       link_url: d.link_url ?? null,
       media_url: media_path ? signed.get(media_path) ?? null : d.media_url,
     }));
