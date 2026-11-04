@@ -2000,6 +2000,7 @@ export type Database = {
           approval_status: string
           approved_at: string | null
           approved_by_name: string | null
+          archived: boolean
           calendar_event_key: string | null
           caption: string
           created_at: string
@@ -2020,6 +2021,7 @@ export type Database = {
           approval_status?: string
           approved_at?: string | null
           approved_by_name?: string | null
+          archived?: boolean
           calendar_event_key?: string | null
           caption?: string
           created_at?: string
@@ -2040,6 +2042,7 @@ export type Database = {
           approval_status?: string
           approved_at?: string | null
           approved_by_name?: string | null
+          archived?: boolean
           calendar_event_key?: string | null
           caption?: string
           created_at?: string
