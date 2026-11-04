@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import { strict as assert } from "node:assert";
-import { reviewEnabled, calendarEventKey, findCalendarEvent, reviewCommentSchema } from "./report-review";
+import { reviewEnabled, calendarEventKey, findCalendarEvent, reviewCommentSchema, normalizeDraftLink } from "./report-review";
 
 test("Review tab is only on the Chats report", () => {
   assert.equal(reviewEnabled("chats-socials"), true);
@@ -17,4 +17,10 @@ test("Comments are required and capped at 1000 characters", () => {
   assert.equal(reviewCommentSchema.safeParse({ draftId: id, body: " " }).success, false);
   assert.equal(reviewCommentSchema.safeParse({ draftId: id, body: "x".repeat(1001) }).success, false);
   assert.equal(reviewCommentSchema.safeParse({ draftId: id, body: "Change caption" }).success, true);
+});
+test("Draft content links accept web links only", () => {
+  assert.equal(normalizeDraftLink("dropbox.com/s/abc"), "https://dropbox.com/s/abc");
+  assert.equal(normalizeDraftLink("https://drive.google.com/x"), "https://drive.google.com/x");
+  assert.equal(normalizeDraftLink("javascript:alert(1)"), null);
+  assert.equal(normalizeDraftLink("   "), null);
 });
