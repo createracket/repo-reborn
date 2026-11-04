@@ -116,11 +116,11 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
               <Button type="button" className="w-full" disabled={busy || !body.trim()} onClick={sendComment}>Send comment</Button>
             </>
           )}
-          <div className="flex gap-2">
-            <Button type="button" variant={approved ? "outline" : "default"} className="flex-1" disabled={busy} onClick={toggleApprove}>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant={approved ? "outline" : "default"} className="min-w-[9rem] flex-1" disabled={busy} onClick={toggleApprove}>
               <CheckCircle2 className="size-4" /> {approved ? "Undo approval" : "Approve"}
             </Button>
-            <Button type="button" variant="outline" className="flex-1" disabled={busy} onClick={() => setShowAmends((s) => !s)}>
+            <Button type="button" variant="outline" className="min-w-[9rem] flex-1" disabled={busy} onClick={() => setShowAmends((s) => !s)}>
               <MessageSquare className="size-4" /> Request amends
             </Button>
           </div>
