@@ -30,12 +30,12 @@ export function ReportReviewSection({ slug, events, refreshTick }: { slug: strin
   if (!drafts.length) return <p className="mt-8 text-sm text-muted-foreground">No drafts to review right now.</p>;
   return (
     <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {drafts.map((d) => <DraftCard key={d.id} draft={d} event={findCalendarEvent(events, d.calendar_event_key)} onChanged={() => setTick((t) => t + 1)} />)}
+      {drafts.map((d) => <DraftCard key={d.id} draft={d} event={findCalendarEvent(events, d.calendar_event_key)} onChanged={() => setTick((t) => t + 1)} hideCaptionHeading={slug === "tixel-brand-ads"} />)}
     </section>
   );
 }
 
-function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent | null; onChanged: () => void }) {
+function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { draft: Draft; event: CalEvent | null; onChanged: () => void; hideCaptionHeading?: boolean }) {
   const comment = useServerFn(submitDraftComment);
   const approve = useServerFn(setDraftApproval);
   const [name, setName] = useState("");
@@ -87,10 +87,14 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
             <a href={draft.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3" /> Content</a>
           </Button>
         )}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-purple-soft">Caption</p>
-          <p className="mt-1 whitespace-pre-wrap break-words text-sm">{draft.caption || "—"}</p>
-        </div>
+        {hideCaptionHeading ? (
+          draft.caption ? <p className="whitespace-pre-wrap break-words text-sm">{draft.caption}</p> : null
+        ) : (
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-purple-soft">Caption</p>
+            <p className="mt-1 whitespace-pre-wrap break-words text-sm">{draft.caption || "—"}</p>
+          </div>
+        )}
         {approved && (
           <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
             <CheckCircle2 className="size-4" /> Approved{draft.approved_by_name ? ` by ${draft.approved_by_name}` : ""}{draft.approved_at ? ` · ${new Date(draft.approved_at).toLocaleDateString("en-AU")}` : ""}
