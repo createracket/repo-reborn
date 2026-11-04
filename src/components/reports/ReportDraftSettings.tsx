@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, ExternalLink, Trash2, Upload, Plus } from "lucide-react";
+import { ChevronDown, ChevronRight, ExternalLink, Save, Trash2, Upload, Plus } from "lucide-react";
+import { reportCalendarPlatforms } from "@/lib/report-calendar-platforms";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { calendarEventKey, findCalendarEvent, normalizeDraftLink, DRAFT_MEDIA_BU
 type CalEvent = { date?: string | null; time?: string | null; label?: string | null; platforms?: string[] | null };
 type Comment = { id: string; author_name: string | null; body: string; created_at: string; resolved: boolean };
 type Draft = {
-  id: string; calendar_event_key: string | null; media_url: string | null; media_path: string | null; link_url: string | null; media_type: string; caption: string;
+  id: string; calendar_event_key: string | null; media_url: string | null; media_path: string | null; link_url: string | null; platforms: string[] | null; media_type: string; caption: string;
   published: boolean; approval_status: string; approved_at: string | null; approved_by_name: string | null; position: number;
   report_draft_comments: Comment[];
 };
@@ -27,11 +28,34 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
   const [busy, setBusy] = useState<string | null>(null);
   // Admin-only previews of privately stored uploads (path -> short-lived link).
   const [previews, setPreviews] = useState<Record<string, string>>({});
+  // Unsaved text edits per draft, kept until the admin saves.
+  const [edits, setEdits] = useState<Record<string, { caption?: string; link?: string }>>({});
+  const setEdit = (id: string, patch: { caption?: string; link?: string }) => setEdits((e) => ({ ...e, [id]: { ...e[id], ...patch } }));
+  const clearEdit = (id: string, key: "caption" | "link") => setEdits((e) => { const n = { ...e[id] }; delete n[key]; return { ...e, [id]: n }; });
+  const hasUnsaved = Object.values(edits).some((e) => e && Object.keys(e).length > 0);
+  useEffect(() => {
+    if (!hasUnsaved) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [hasUnsaved]);
+  async function saveCaption(d: Draft) {
+    const v = edits[d.id]?.caption;
+    if (v === undefined || v === d.caption) return clearEdit(d.id, "caption");
+    if (await update(d.id, { caption: v }, "Caption saved")) clearEdit(d.id, "caption");
+  }
+  async function saveLink(d: Draft) {
+    const raw = (edits[d.id]?.link ?? d.link_url ?? "").trim();
+    const next = normalizeDraftLink(raw);
+    if (raw && !next) return void toast.error("Add a full web link, e.g. https://…");
+    if (next === (d.link_url ?? null)) return clearEdit(d.id, "link");
+    if (await update(d.id, { link_url: next }, next ? "Link saved" : "Link removed")) clearEdit(d.id, "link");
+  }
 
   async function load() {
     const { data, error } = await sb
       .from("report_draft_posts")
-      .select("id, calendar_event_key, media_url, media_path, link_url, media_type, caption, published, approval_status, approved_at, approved_by_name, position, report_draft_comments(id, author_name, body, created_at, resolved)")
+      .select("id, calendar_event_key, media_url, media_path, link_url, platforms, media_type, caption, published, approval_status, approved_at, approved_by_name, position, report_draft_comments(id, author_name, body, created_at, resolved)")
       .eq("report_id", reportId)
       .order("position").order("created_at");
     if (error) toast.error("Could not load drafts");
@@ -52,9 +76,10 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
     setBusy(id);
     const { error } = await sb.from("report_draft_posts").update(patch).eq("id", id);
     setBusy(null);
-    if (error) return toast.error("Could not save draft");
+    if (error) { toast.error("Could not save draft"); return false; }
     setDrafts((ds) => ds.map((d) => (d.id === id ? { ...d, ...patch } : d)));
     if (msg) toast.success(msg);
+    return true;
   }
   async function add() {
     const position = drafts.length ? Math.min(...drafts.map((d) => d.position)) - 1 : 0;
@@ -152,22 +177,20 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
                       {eventOptions.map((e) => { const k = calendarEventKey(e); return <option key={k} value={k}>{[e.date, e.time, e.label].filter(Boolean).join(" · ")}</option>; })}
                       {d.calendar_event_key && !ev && <option value={d.calendar_event_key}>Missing entry (edited or removed)</option>}
                     </select>
-                    {ev?.platforms?.length ? <p className="text-xs text-muted-foreground">Tags: {ev.platforms.join(" · ")}</p> : null}
+                    {ev?.platforms?.length ? <p className="text-xs text-muted-foreground">Calendar tags: {ev.platforms.join(" · ")}</p> : null}
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Content link (optional, instead of or as well as an upload)</Label>
                     <div className="flex gap-2">
                       <Input
-                        key={d.link_url ?? ""}
-                        defaultValue={d.link_url ?? ""}
+                        value={edits[d.id]?.link ?? d.link_url ?? ""}
                         placeholder="https://dropbox.com/…"
-                        onBlur={(e) => {
-                          const raw = e.target.value.trim();
-                          const next = normalizeDraftLink(raw);
-                          if (raw && !next) return void toast.error("Add a full web link, e.g. https://…");
-                          if (next !== (d.link_url ?? null)) void update(d.id, { link_url: next }, next ? "Link saved" : "Link removed");
-                        }}
+                        onChange={(e) => setEdit(d.id, { link: e.target.value })}
+                        onKeyDown={(e) => { if (e.key === "Enter") void saveLink(d); }}
                       />
+                      <Button type="button" variant="purple" size="sm" disabled={busy === d.id || edits[d.id]?.link === undefined} onClick={() => saveLink(d)}>
+                        <Save className="size-4" /> {edits[d.id]?.link === undefined ? "Saved" : "Save"}
+                      </Button>
                       {d.link_url && (
                         <Button asChild variant="outline" size="icon" aria-label="Open content link">
                           <a href={d.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /></a>
@@ -176,11 +199,36 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
                     </div>
                   </div>
                   <div className="space-y-1">
+                    <Label className="text-xs">Platform tags{ev ? " (leave all off to use the calendar entry's tags)" : ""}</Label>
+                    <div className="flex flex-wrap items-center gap-4">
+                      {reportCalendarPlatforms().map((p) => {
+                        const cur = d.platforms ?? [];
+                        return (
+                          <label key={p} className="flex items-center gap-1.5 text-xs font-medium">
+                            <Switch
+                              className={p === "TBC" ? "data-[state=checked]:bg-purple" : undefined}
+                              checked={cur.includes(p)}
+                              disabled={busy === d.id}
+                              onCheckedChange={(c) => update(d.id, { platforms: c ? [...cur, p] : cur.filter((x) => x !== p) }, `${p} ${c ? "on" : "off"} — saved`)}
+                            />
+                            {p}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
                     <Label className="text-xs">Draft caption</Label>
                     <Textarea
-                      defaultValue={d.caption}
-                      onBlur={(e) => { if (e.target.value !== d.caption) void update(d.id, { caption: e.target.value }, "Caption saved"); }}
+                      value={edits[d.id]?.caption ?? d.caption}
+                      onChange={(e) => setEdit(d.id, { caption: e.target.value })}
                     />
+                    <div className="flex items-center justify-end gap-2">
+                      {edits[d.id]?.caption !== undefined && <span className="text-xs text-muted-foreground">Unsaved changes</span>}
+                      <Button type="button" variant="purple" size="sm" disabled={busy === d.id || edits[d.id]?.caption === undefined} onClick={() => saveCaption(d)}>
+                        <Save className="size-4" /> {edits[d.id]?.caption === undefined ? "Saved" : "Save caption"}
+                      </Button>
+                    </div>
                   </div>
                   {d.report_draft_comments.length > 0 && (
                     <ul className="space-y-2 border-t border-border pt-3">

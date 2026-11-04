@@ -2009,6 +2009,7 @@ export type Database = {
           media_type: string
           media_url: string | null
           platform: string | null
+          platforms: string[]
           position: number
           published: boolean
           report_id: string
@@ -2027,6 +2028,7 @@ export type Database = {
           media_type?: string
           media_url?: string | null
           platform?: string | null
+          platforms?: string[]
           position?: number
           published?: boolean
           report_id: string
@@ -2045,6 +2047,7 @@ export type Database = {
           media_type?: string
           media_url?: string | null
           platform?: string | null
+          platforms?: string[]
           position?: number
           published?: boolean
           report_id?: string

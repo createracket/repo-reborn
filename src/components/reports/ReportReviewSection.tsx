@@ -5,7 +5,7 @@ import { CheckCircle2, ExternalLink, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { findCalendarEvent, type ReviewDraft } from "@/lib/report-review";
+import { findCalendarEvent, draftDisplayTags, type ReviewDraft } from "@/lib/report-review";
 import { submitDraftComment, setDraftApproval, getReviewDrafts } from "@/lib/report-review.functions";
 
 type Draft = ReviewDraft;
@@ -42,7 +42,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
   const [body, setBody] = useState("");
   const [showAmends, setShowAmends] = useState(false);
   const [busy, setBusy] = useState(false);
-  const tags = event?.platforms?.length ? event.platforms : draft.platform ? [draft.platform] : [];
+  const tags = draftDisplayTags(draft.platforms, event?.platforms, draft.platform);
   const approved = draft.approval_status === "approved";
   const when = event?.date
     ? `${new Date(`${event.date}T00:00:00`).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" })}${event.time ? ` · ${event.time} ${event.timezone ?? "AEDT"}` : ""}`
