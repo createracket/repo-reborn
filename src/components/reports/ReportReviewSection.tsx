@@ -81,7 +81,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
             {tags.map((t) => <span key={t} className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${t === "TBC" ? "bg-purple text-purple-foreground" : "bg-pink-accent text-pink-ink"}`}>{t}</span>)}
           </div>
         )}
-        {(event?.label || when) && <p className="text-sm text-muted-foreground">{[event?.label, when].filter(Boolean).join(" · ")}</p>}
+        {(event?.label || when) && <p className="text-xs text-muted-foreground">{[event?.label, when].filter(Boolean).join(" · ")}</p>}
         {draft.link_url && (
           <Button asChild variant="purple" size="sm" className="self-start">
             <a href={draft.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /> View content</a>
