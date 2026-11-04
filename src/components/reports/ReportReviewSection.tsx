@@ -29,7 +29,7 @@ export function ReportReviewSection({ slug, events, refreshTick }: { slug: strin
   if (error) return <p role="alert" className="mt-8 text-sm text-destructive">Drafts could not be loaded.</p>;
   if (!drafts.length) return <p className="mt-8 text-sm text-muted-foreground">No drafts to review right now.</p>;
   return (
-    <section className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+    <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {drafts.map((d) => <DraftCard key={d.id} draft={d} event={findCalendarEvent(events, d.calendar_event_key)} onChanged={() => setTick((t) => t + 1)} />)}
     </section>
   );
@@ -89,7 +89,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
         )}
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-purple-soft">Caption</p>
-          <p className="mt-1 whitespace-pre-wrap break-words text-xs">{draft.caption || "—"}</p>
+          <p className="mt-1 whitespace-pre-wrap break-words text-sm">{draft.caption || "—"}</p>
         </div>
         {approved && (
           <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
