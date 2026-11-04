@@ -100,7 +100,9 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
             <CheckCircle2 className="size-4" /> Approved{draft.approved_by_name ? ` by ${draft.approved_by_name}` : ""}{draft.approved_at ? ` · ${new Date(draft.approved_at).toLocaleDateString("en-AU")}` : ""}
           </p>
         )}
-        {draft.approval_status === "amends" && !approved && <p className="text-sm font-medium text-purple-soft">Amends requested</p>}
+        {draft.approval_status === "amends" && !approved && (draft.comments.length > 0 && draft.comments.every((c) => c.resolved)
+          ? <p className="text-sm font-medium text-lime report-light:text-lime-deep">Updated</p>
+          : <p className="text-sm font-medium text-purple-soft">Amends requested</p>)}
         {draft.comments.length > 0 && (
           <ul className="space-y-2 border-t border-border pt-3">
             {draft.comments.map((c) => (
