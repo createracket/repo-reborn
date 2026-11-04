@@ -121,7 +121,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
               <CheckCircle2 className="size-4" /> {approved ? "Undo approval" : "Approve"}
             </Button>
             <Button type="button" variant="outline" size="sm" className="w-full" disabled={busy} onClick={() => setShowAmends((s) => !s)}>
-              <MessageSquare className="size-4" /> Request amends
+              <MessageSquare className="size-4" /> Amends
             </Button>
           </div>
         </div>
