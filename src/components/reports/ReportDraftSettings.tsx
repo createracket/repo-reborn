@@ -32,6 +32,13 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
   const [edits, setEdits] = useState<Record<string, { caption?: string; link?: string }>>({});
   const setEdit = (id: string, patch: { caption?: string; link?: string }) => setEdits((e) => ({ ...e, [id]: { ...e[id], ...patch } }));
   const clearEdit = (id: string, key: "caption" | "link") => setEdits((e) => { const n = { ...e[id] }; delete n[key]; return { ...e, [id]: n }; });
+  const hasUnsaved = Object.values(edits).some((e) => e && Object.keys(e).length > 0);
+  useEffect(() => {
+    if (!hasUnsaved) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [hasUnsaved]);
   async function saveCaption(d: Draft) {
     const v = edits[d.id]?.caption;
     if (v === undefined || v === d.caption) return clearEdit(d.id, "caption");
