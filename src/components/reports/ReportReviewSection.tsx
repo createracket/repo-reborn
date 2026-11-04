@@ -83,8 +83,8 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
         )}
         {(event?.label || when) && <p className="text-xs text-muted-foreground">{[event?.label, when].filter(Boolean).join(" · ")}</p>}
         {draft.link_url && (
-          <Button asChild variant="purple" size="sm" className="self-start">
-            <a href={draft.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /> View content</a>
+          <Button asChild variant="purple" size="sm" className="h-6 self-start gap-1 rounded-full px-2.5 text-[11px]">
+            <a href={draft.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-3" /> Content</a>
           </Button>
         )}
         <div>
