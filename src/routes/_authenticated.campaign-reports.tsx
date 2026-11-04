@@ -86,6 +86,8 @@ import { dismissReportPost } from "@/lib/report-post-discovery.functions";
 import { newFollowersEnabled } from "@/lib/report-new-followers";
 import { listeningEnabled } from "@/lib/campaign-listening";
 import { ReportListeningSettings } from "@/components/reports/ReportListeningSettings";
+import { ReportDraftSettings } from "@/components/reports/ReportDraftSettings";
+import { reviewEnabled } from "@/lib/report-review";
 
 const sb = supabase as any;
 
@@ -1389,6 +1391,8 @@ function ReportDetailView({
       />
 
       {listeningEnabled(report.slug) && <ReportListeningSettings reportId={report.id} />}
+
+      {reviewEnabled(report.slug) && <ReportDraftSettings reportId={report.id} events={(report as any).calendar_events} />}
 
       {/* Creators */}
       <Card>

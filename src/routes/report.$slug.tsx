@@ -24,6 +24,8 @@ import { compareReportPosts, reportPostTime } from "@/lib/report-post-order";
 import { hasNewFollowers, newFollowersEnabled, orderByNewFollowers } from "@/lib/report-new-followers";
 import { listeningEnabled } from "@/lib/campaign-listening";
 import { ReportListeningSection } from "@/components/reports/ReportListeningSection";
+import { ReportReviewSection } from "@/components/reports/ReportReviewSection";
+import { reviewEnabled } from "@/lib/report-review";
 
 // Posts load in batches of 18 so the first screen lands on full rows of six.
 const POSTS_PER_LOAD = 18;
@@ -136,8 +138,8 @@ export const Route = createFileRoute("/report/$slug")({
       noindex: true,
     }),
   }),
-  validateSearch: (search: Record<string, unknown>): { view?: "calendar" | "listening" } => ({
-    view: search.view === "calendar" || search.view === "listening" ? search.view : undefined,
+  validateSearch: (search: Record<string, unknown>): { view?: "calendar" | "listening" | "review" } => ({
+    view: search.view === "calendar" || search.view === "listening" || search.view === "review" ? search.view : undefined,
   }),
   component: PublicReportPage,
 });
@@ -147,7 +149,7 @@ function PublicReportPage() {
   const refreshTick = useRefreshTick(15 * 60_000);
   const { view: viewParam } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const setView = (v: "posts" | "calendar" | "listening") =>
+  const setView = (v: "posts" | "calendar" | "listening" | "review") =>
     navigate({ search: (prev: Record<string, unknown>) => ({ ...prev, view: v === "posts" ? undefined : v }), replace: true });
   const [report, setReport] = useState<PublicReport | null>(null);
   const [csvAvailable, setCsvAvailable] = useState(false);
@@ -656,9 +658,9 @@ function PublicReportPage() {
           </div>
         )}
 
-        {(report.show_calendar || listeningEnabled(slug)) && (
+        {(report.show_calendar || listeningEnabled(slug) || reviewEnabled(slug)) && (
           <div className="mt-10 inline-flex w-full rounded-full border border-border/60 p-0.5 text-sm sm:w-auto">
-            {(["posts", ...(report.show_calendar ? ["calendar" as const] : []), ...(listeningEnabled(slug) ? ["listening" as const] : [])] as const).map((v) => (
+            {(["posts", ...(report.show_calendar ? ["calendar" as const] : []), ...(listeningEnabled(slug) ? ["listening" as const] : []), ...(reviewEnabled(slug) ? ["review" as const] : [])] as const).map((v) => (
               <Button
                 key={v}
                 type="button"
@@ -673,7 +675,9 @@ function PublicReportPage() {
           </div>
         )}
 
-        {listeningEnabled(slug) && viewParam === "listening" ? (
+        {reviewEnabled(slug) && viewParam === "review" ? (
+          <ReportReviewSection slug={slug} events={(report.calendar_events ?? []) as CalendarEvent[]} refreshTick={refreshTick} />
+        ) : listeningEnabled(slug) && viewParam === "listening" ? (
           <ReportListeningSection slug={slug} refreshTick={refreshTick} />
         ) : report.show_calendar && viewParam === "calendar" ? (
           <ReportCalendarSection
