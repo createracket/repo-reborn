@@ -88,7 +88,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
           </Button>
         )}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider">Caption</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-purple-soft">Caption</p>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm">{draft.caption || "—"}</p>
         </div>
         {approved && (
