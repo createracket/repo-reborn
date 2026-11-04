@@ -79,7 +79,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
       <div className="flex flex-1 flex-col gap-3 px-5 pb-5">
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {tags.map((t) => <span key={t} className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${t === "TBC" ? "bg-purple text-white" : "bg-pink-accent text-pink-ink"}`}>{t}</span>)}
+            {tags.map((t) => <span key={t} className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${t === "TBC" ? "bg-purple text-purple-foreground" : "bg-pink-accent text-pink-ink"}`}>{t}</span>)}
           </div>
         )}
         {(event?.label || when) && <p className="text-sm text-muted-foreground">{[event?.label, when].filter(Boolean).join(" · ")}</p>}
@@ -88,7 +88,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
           <p className="mt-1 whitespace-pre-wrap break-words text-sm">{draft.caption || "—"}</p>
         </div>
         {approved && (
-          <p className="flex items-center gap-1.5 text-sm font-medium text-lime">
+          <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
             <CheckCircle2 className="size-4" /> Approved{draft.approved_by_name ? ` by ${draft.approved_by_name}` : ""}{draft.approved_at ? ` · ${new Date(draft.approved_at).toLocaleDateString("en-AU")}` : ""}
           </p>
         )}
