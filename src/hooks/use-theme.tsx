@@ -20,6 +20,8 @@ const ALWAYS_DARK = ["/", "/auth", "/login", "/signup"];
 /** Other public/shared pages remain dark; reports and rosters have a visitor-facing toggle. */
 const ALWAYS_DARK_PREFIXES = ["/partner", "/spotlight/"];
 const REPORT_PREFIX = "/report/";
+/** Shared pages that open in light mode until the visitor picks a theme. */
+const LIGHT_DEFAULT = ["/report/tixel-brand-ads"];
 const ROSTER_PREFIX = "/roster/";
 
 function isReportPath(pathname: string) {
@@ -63,7 +65,7 @@ function hasSupabaseSession() {
  * Inline script injected into <head> so the correct theme is applied before
  * first paint. Reports and rosters share a visitor-accessible preference.
  */
-export const themeInitScript = `(function(){try{var d=document.documentElement;var p=location.pathname.replace(/\\/+$/ ,"")||"/";var r=p.indexOf("${REPORT_PREFIX}")===0&&p.length>${REPORT_PREFIX.length};var roster=p.indexOf("${ROSTER_PREFIX}")===0&&p.length>${ROSTER_PREFIX.length};var shared=r||roster;var t=localStorage.getItem(shared?"${REPORT_STORAGE_KEY}":"${STORAGE_KEY}");var ad=${JSON.stringify(ALWAYS_DARK)};var ap=${JSON.stringify(ALWAYS_DARK_PREFIXES)};var alwaysDark=ad.indexOf(p)>-1;for(var j=0;j<ap.length&&!alwaysDark&&!shared;j++){var pre=ap[j];if(p===pre.replace(/\\/$/,"")||p.indexOf(pre)===0){alwaysDark=true}}var s=false;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"&&localStorage.getItem(k)){s=true;break}}if(t==="light"&&!alwaysDark&&(s||shared)){d.classList.remove("dark");d.classList.add("report-light")}else{d.classList.add("dark");d.classList.remove("report-light")}}catch(e){document.documentElement.classList.add("dark")}})();`;
+export const themeInitScript = `(function(){try{var d=document.documentElement;var p=location.pathname.replace(/\\/+$/ ,"")||"/";var r=p.indexOf("${REPORT_PREFIX}")===0&&p.length>${REPORT_PREFIX.length};var roster=p.indexOf("${ROSTER_PREFIX}")===0&&p.length>${ROSTER_PREFIX.length};var shared=r||roster;var t=localStorage.getItem(shared?"${REPORT_STORAGE_KEY}":"${STORAGE_KEY}");if(t===null&&${JSON.stringify(LIGHT_DEFAULT)}.indexOf(p)>-1){t="light"}var ad=${JSON.stringify(ALWAYS_DARK)};var ap=${JSON.stringify(ALWAYS_DARK_PREFIXES)};var alwaysDark=ad.indexOf(p)>-1;for(var j=0;j<ap.length&&!alwaysDark&&!shared;j++){var pre=ap[j];if(p===pre.replace(/\\/$/,"")||p.indexOf(pre)===0){alwaysDark=true}}var s=false;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf("sb-")===0&&k.slice(-11)==="-auth-token"&&localStorage.getItem(k)){s=true;break}}if(t==="light"&&!alwaysDark&&(s||shared)){d.classList.remove("dark");d.classList.add("report-light")}else{d.classList.add("dark");d.classList.remove("report-light")}}catch(e){document.documentElement.classList.add("dark")}})();`;
 
 type ThemeContextValue = {
   theme: Theme;
@@ -98,6 +100,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch {
       stored = null;
     }
+    if (stored === null && LIGHT_DEFAULT.includes(pathname.replace(/\/+$/, ""))) stored = "light";
     setPreference(stored === "light" ? "light" : "dark");
     setSignedIn(hasSupabaseSession());
   }, [pathname, isShared]);
