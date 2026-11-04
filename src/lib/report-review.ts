@@ -28,3 +28,23 @@ export const reviewApproveSchema = z.object({
   approved: z.boolean(),
 });
 export const MAX_COMMENTS_PER_DRAFT = 50;
+
+/** Private bucket for draft uploads; files are only reachable via short-lived signed links. */
+export const DRAFT_MEDIA_BUCKET = "report-draft-media";
+/** Signed links for the Review tab expire after an hour (the page re-signs on refresh). */
+export const DRAFT_MEDIA_URL_TTL_SECONDS = 60 * 60;
+
+/** Accepts an http(s) content link (adding https:// when missing); anything else returns null. */
+export function normalizeDraftLink(input: string | null | undefined): string | null {
+  const raw = (input ?? "").trim();
+  if (!raw) return null;
+  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const u = new URL(withScheme);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return null;
+    if (!u.hostname.includes(".")) return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
