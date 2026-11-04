@@ -2003,6 +2003,7 @@ export type Database = {
           calendar_event_key: string | null
           caption: string
           created_at: string
+          hide_banner: boolean
           id: string
           link_url: string | null
           media_path: string | null
@@ -2022,6 +2023,7 @@ export type Database = {
           calendar_event_key?: string | null
           caption?: string
           created_at?: string
+          hide_banner?: boolean
           id?: string
           link_url?: string | null
           media_path?: string | null
@@ -2041,6 +2043,7 @@ export type Database = {
           calendar_event_key?: string | null
           caption?: string
           created_at?: string
+          hide_banner?: boolean
           id?: string
           link_url?: string | null
           media_path?: string | null
