@@ -21,7 +21,7 @@ type Draft = {
 
 const sb = supabase as any;
 
-export function ReportDraftSettings({ reportId, events }: { reportId: string; events: CalEvent[] | null | undefined }) {
+export function ReportDraftSettings({ reportId, slug, events }: { reportId: string; slug?: string; events: CalEvent[] | null | undefined }) {
   const [open, setOpen] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
@@ -205,7 +205,7 @@ export function ReportDraftSettings({ reportId, events }: { reportId: string; ev
                   <div className="space-y-1">
                     <Label className="text-xs">Platform tags{ev ? " (leave all off to use the calendar entry's tags)" : ""}</Label>
                     <div className="flex flex-wrap items-center gap-4">
-                      {reportCalendarPlatforms().map((p) => {
+                      {[...reportCalendarPlatforms(), ...(slug === "tixel-brand-ads" ? ["Organic usage"] : [])].map((p) => {
                         const cur = d.platforms ?? [];
                         return (
                           <label key={p} className="flex items-center gap-1.5 text-xs font-medium">
