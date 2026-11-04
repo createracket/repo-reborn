@@ -29,7 +29,7 @@ export function ReportReviewSection({ slug, events, refreshTick }: { slug: strin
   if (error) return <p role="alert" className="mt-8 text-sm text-destructive">Drafts could not be loaded.</p>;
   if (!drafts.length) return <p className="mt-8 text-sm text-muted-foreground">No drafts to review right now.</p>;
   return (
-    <section className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
       {drafts.map((d) => <DraftCard key={d.id} draft={d} event={findCalendarEvent(events, d.calendar_event_key)} onChanged={() => setTick((t) => t + 1)} />)}
     </section>
   );
@@ -64,7 +64,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
 
   return (
     <article className="flex flex-col overflow-hidden rounded-[20px] border border-border bg-card">
-      <div className="relative m-3 aspect-[9/16] overflow-hidden rounded-xl bg-muted">
+      <div className="relative m-2 aspect-[9/16] overflow-hidden rounded-xl bg-muted">
         {draft.media_url && (draft.media_type === "video"
           ? <video src={draft.media_url} controls playsInline className="h-full w-full object-cover" />
           : <img src={draft.media_url} alt={draft.caption.slice(0, 80) || "Draft content"} loading="lazy" className="h-full w-full object-cover" />)}
@@ -75,7 +75,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
         )}
         <div className="absolute inset-x-0 bottom-0 rounded-b-xl bg-muted-foreground/50 py-1 text-center text-xs font-semibold uppercase tracking-wider text-background">Draft</div>
       </div>
-      <div className="flex flex-1 flex-col gap-3 px-5 pb-5">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 px-3 pb-3">
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {tags.map((t) => <span key={t} className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${t === "TBC" ? "bg-purple text-purple-foreground" : "bg-pink-accent text-pink-ink"}`}>{t}</span>)}
@@ -89,7 +89,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
         )}
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-purple-soft">Caption</p>
-          <p className="mt-1 whitespace-pre-wrap break-words text-sm">{draft.caption || "—"}</p>
+          <p className="mt-1 whitespace-pre-wrap break-words text-xs">{draft.caption || "—"}</p>
         </div>
         {approved && (
           <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
@@ -109,18 +109,18 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
           </ul>
         )}
         <div className="mt-auto space-y-2 pt-2">
-          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)" maxLength={80} aria-label="Your name" />
+          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" maxLength={80} aria-label="Your name (optional)" className="h-8 text-xs" />
           {showAmends && (
             <>
               <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="What needs changing?" maxLength={1000} aria-label="Amend comment" />
               <Button type="button" className="w-full" disabled={busy || !body.trim()} onClick={sendComment}>Send comment</Button>
             </>
           )}
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" variant={approved ? "outline" : "default"} className="min-w-[9rem] flex-1" disabled={busy} onClick={toggleApprove}>
+          <div className="flex flex-col gap-2">
+            <Button type="button" variant={approved ? "outline" : "default"} size="sm" className="w-full" disabled={busy} onClick={toggleApprove}>
               <CheckCircle2 className="size-4" /> {approved ? "Undo approval" : "Approve"}
             </Button>
-            <Button type="button" variant="outline" className="min-w-[9rem] flex-1" disabled={busy} onClick={() => setShowAmends((s) => !s)}>
+            <Button type="button" variant="outline" size="sm" className="w-full" disabled={busy} onClick={() => setShowAmends((s) => !s)}>
               <MessageSquare className="size-4" /> Request amends
             </Button>
           </div>
