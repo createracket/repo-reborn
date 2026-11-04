@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { CheckCircle2, MessageSquare } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { CheckCircle2, ExternalLink, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { findCalendarEvent } from "@/lib/report-review";
-import { submitDraftComment, setDraftApproval } from "@/lib/report-review.functions";
+import { findCalendarEvent, type ReviewDraft } from "@/lib/report-review";
+import { submitDraftComment, setDraftApproval, getReviewDrafts } from "@/lib/report-review.functions";
 
-type Comment = { id: string; author_name: string | null; body: string; created_at: string };
-type Draft = {
-  id: string; calendar_event_key: string | null; platform: string | null; media_url: string | null; media_type: string;
-  caption: string; approval_status: string; approved_at: string | null; approved_by_name: string | null; comments: Comment[];
-};
+type Draft = ReviewDraft;
 type CalEvent = { date?: string | null; time?: string | null; timezone?: string | null; label?: string | null; platforms?: string[] | null };
 
 export function ReportReviewSection({ slug, events, refreshTick }: { slug: string; events: CalEvent[]; refreshTick: number }) {
@@ -21,14 +16,13 @@ export function ReportReviewSection({ slug, events, refreshTick }: { slug: strin
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [tick, setTick] = useState(0);
+  const loadDrafts = useServerFn(getReviewDrafts);
   useEffect(() => {
     let cancelled = false;
-    supabase.rpc("get_report_review_drafts", { _slug: slug }).then(({ data, error }) => {
-      if (cancelled) return;
-      setError(!!error);
-      setDrafts(((data as unknown) as Draft[]) ?? []);
-      setLoading(false);
-    });
+    loadDrafts({ data: { slug } }).then(
+      (rows) => { if (cancelled) return; setError(false); setDrafts(rows ?? []); setLoading(false); },
+      () => { if (cancelled) return; setError(true); setLoading(false); },
+    );
     return () => { cancelled = true; };
   }, [slug, refreshTick, tick]);
   if (loading) return <p className="mt-8 text-sm text-muted-foreground">Loading drafts…</p>;
@@ -74,6 +68,11 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
         {draft.media_url && (draft.media_type === "video"
           ? <video src={draft.media_url} controls playsInline className="h-full w-full object-cover" />
           : <img src={draft.media_url} alt={draft.caption.slice(0, 80) || "Draft content"} loading="lazy" className="h-full w-full object-cover" />)}
+        {!draft.media_url && draft.link_url && (
+          <a href={draft.link_url} target="_blank" rel="noopener noreferrer" className="flex h-full w-full flex-col items-center justify-center gap-2 p-6 text-center text-sm font-medium text-purple-soft hover:underline">
+            <ExternalLink className="size-6" /> Open draft content
+          </a>
+        )}
         <div className="absolute inset-x-0 bottom-0 rounded-b-xl bg-muted-foreground/50 py-1 text-center text-xs font-semibold uppercase tracking-wider text-background">Draft</div>
       </div>
       <div className="flex flex-1 flex-col gap-3 px-5 pb-5">
@@ -83,6 +82,11 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
           </div>
         )}
         {(event?.label || when) && <p className="text-sm text-muted-foreground">{[event?.label, when].filter(Boolean).join(" · ")}</p>}
+        {draft.link_url && (
+          <Button asChild variant="purple" size="sm" className="self-start">
+            <a href={draft.link_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="size-4" /> View content</a>
+          </Button>
+        )}
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider">Caption</p>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm">{draft.caption || "—"}</p>
