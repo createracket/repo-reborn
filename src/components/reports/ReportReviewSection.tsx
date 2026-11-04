@@ -112,7 +112,7 @@ function DraftCard({ draft, event, onChanged }: { draft: Draft; event: CalEvent 
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" maxLength={80} aria-label="Your name (optional)" className="h-8 text-xs" />
           {showAmends && (
             <>
-              <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="What needs changing?" maxLength={1000} aria-label="Amend comment" />
+              <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="What needs changing?" maxLength={1000} aria-label="Amend comment" className="min-h-16 text-xs" />
               <Button type="button" className="w-full" disabled={busy || !body.trim()} onClick={sendComment}>Send comment</Button>
             </>
           )}
