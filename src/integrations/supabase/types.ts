@@ -1960,6 +1960,107 @@ export type Database = {
         }
         Relationships: []
       }
+      report_draft_comments: {
+        Row: {
+          author_name: string | null
+          body: string
+          created_at: string
+          draft_id: string
+          id: string
+          resolved: boolean
+        }
+        Insert: {
+          author_name?: string | null
+          body: string
+          created_at?: string
+          draft_id: string
+          id?: string
+          resolved?: boolean
+        }
+        Update: {
+          author_name?: string | null
+          body?: string
+          created_at?: string
+          draft_id?: string
+          id?: string
+          resolved?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_draft_comments_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: false
+            referencedRelation: "report_draft_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_draft_posts: {
+        Row: {
+          approval_status: string
+          approved_at: string | null
+          approved_by_name: string | null
+          calendar_event_key: string | null
+          caption: string
+          created_at: string
+          id: string
+          media_type: string
+          media_url: string | null
+          platform: string | null
+          position: number
+          published: boolean
+          report_id: string
+          updated_at: string
+        }
+        Insert: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by_name?: string | null
+          calendar_event_key?: string | null
+          caption?: string
+          created_at?: string
+          id?: string
+          media_type?: string
+          media_url?: string | null
+          platform?: string | null
+          position?: number
+          published?: boolean
+          report_id: string
+          updated_at?: string
+        }
+        Update: {
+          approval_status?: string
+          approved_at?: string | null
+          approved_by_name?: string | null
+          calendar_event_key?: string | null
+          caption?: string
+          created_at?: string
+          id?: string
+          media_type?: string
+          media_url?: string | null
+          platform?: string | null
+          position?: number
+          published?: boolean
+          report_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_draft_posts_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_draft_posts_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "public_campaign_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roster_access_leads: {
         Row: {
           created_at: string
@@ -3253,6 +3354,7 @@ export type Database = {
         }[]
       }
       get_public_roster: { Args: { p_slug: string }; Returns: Json }
+      get_report_review_drafts: { Args: { _slug: string }; Returns: Json }
       get_roster_assignment: {
         Args: { _roster_id: string }
         Returns: {
