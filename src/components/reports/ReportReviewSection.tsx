@@ -113,10 +113,10 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
           </ul>
         )}
         <div className="mt-auto space-y-2 pt-2">
-          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)" maxLength={80} aria-label="Your name (optional)" className="h-8 text-xs" />
           {showAmends && (
             <>
               <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Edit notes..." maxLength={1000} aria-label="Amend comment" className="min-h-16 text-xs" />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)" maxLength={80} aria-label="Your name (optional)" className="h-8 text-xs" />
               <Button type="button" className="w-full" disabled={busy || !body.trim()} onClick={sendComment}>Send comment</Button>
             </>
           )}
@@ -125,7 +125,7 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
               <CheckCircle2 className="size-4" /> {approved ? "Undo approval" : "Approve"}
             </Button>
             <Button type="button" variant="outline" size="sm" className="w-full" disabled={busy} onClick={() => setShowAmends((s) => !s)}>
-              <MessageSquare className="size-4" /> Amends
+              <MessageSquare className="size-4" /> Edit notes
             </Button>
           </div>
         </div>
