@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, ExternalLink, Save, Trash2, Upload, Plus } from "lucide-react";
+import { Archive, ArchiveRestore, ChevronDown, ChevronRight, ExternalLink, Save, Trash2, Upload, Plus } from "lucide-react";
 import { reportCalendarPlatforms } from "@/lib/report-calendar-platforms";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import { calendarEventKey, findCalendarEvent, normalizeDraftLink, DRAFT_MEDIA_BU
 type CalEvent = { date?: string | null; time?: string | null; label?: string | null; platforms?: string[] | null };
 type Comment = { id: string; author_name: string | null; body: string; created_at: string; resolved: boolean };
 type Draft = {
-  id: string; calendar_event_key: string | null; media_url: string | null; media_path: string | null; link_url: string | null; platforms: string[] | null; media_type: string; caption: string; hide_banner: boolean;
+  id: string; calendar_event_key: string | null; media_url: string | null; media_path: string | null; link_url: string | null; platforms: string[] | null; media_type: string; caption: string; hide_banner: boolean; archived: boolean;
   published: boolean; approval_status: string; approved_at: string | null; approved_by_name: string | null; position: number;
   report_draft_comments: Comment[];
 };
@@ -23,6 +23,7 @@ const sb = supabase as any;
 
 export function ReportDraftSettings({ reportId, slug, events }: { reportId: string; slug?: string; events: CalEvent[] | null | undefined }) {
   const [open, setOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -55,7 +56,7 @@ export function ReportDraftSettings({ reportId, slug, events }: { reportId: stri
   async function load() {
     const { data, error } = await sb
       .from("report_draft_posts")
-      .select("id, calendar_event_key, media_url, media_path, link_url, platforms, media_type, caption, hide_banner, published, approval_status, approved_at, approved_by_name, position, report_draft_comments(id, author_name, body, created_at, resolved)")
+      .select("id, calendar_event_key, media_url, media_path, link_url, platforms, media_type, caption, hide_banner, archived, published, approval_status, approved_at, approved_by_name, position, report_draft_comments(id, author_name, body, created_at, resolved)")
       .eq("report_id", reportId)
       .order("position").order("created_at");
     if (error) toast.error("Could not load drafts");
@@ -124,19 +125,9 @@ export function ReportDraftSettings({ reportId, slug, events }: { reportId: stri
   const eventOptions = (events ?? []).filter((e) => e.date || e.label);
   const statusLabel = (s: string) => (s === "approved" ? "Approved" : s === "amends" ? "Amends needed" : "Pending");
 
-  return (
-    <Card>
-      <CardHeader className="flex-row items-center justify-between gap-3 space-y-0 cursor-pointer" onClick={() => setOpen((o) => !o)}>
-        <div>
-          <CardTitle className="font-display text-2xl">Draft content</CardTitle>
-          <CardDescription>Drafts for client review on the live Review tab. Uploads stay private and only show on the Review tab; or paste a link to the content instead.</CardDescription>
-        </div>
-        {open ? <ChevronDown className="size-5 text-muted-foreground" /> : <ChevronRight className="size-5 text-muted-foreground" />}
-      </CardHeader>
-      {open && (
-        <CardContent className="space-y-4">
-          <Button type="button" variant="outline" onClick={add}><Plus className="size-4" /> Add draft</Button>
-          {loading ? <p className="text-sm text-muted-foreground">Loading…</p> : !drafts.length ? <p className="text-sm text-muted-foreground">No drafts yet.</p> : drafts.map((d) => {
+  const activeDrafts = drafts.filter((d) => !d.archived);
+  const archivedDrafts = drafts.filter((d) => d.archived);
+  const renderDraft = (d: Draft) => {
             const ev = findCalendarEvent(events ?? [], d.calendar_event_key);
             return (
               <div key={d.id} className="grid gap-4 rounded-lg border border-border p-4 md:grid-cols-[140px_1fr]">
@@ -167,6 +158,7 @@ export function ReportDraftSettings({ reportId, slug, events }: { reportId: stri
                         <Switch checked={!d.hide_banner} onCheckedChange={(c) => update(d.id, { hide_banner: !c }, c ? "Draft banner shown" : "Draft banner hidden")} />
                         Draft banner
                       </Label>
+                      <Button type="button" variant="ghost" size="icon" aria-label={d.archived ? "Restore draft" : "Archive draft"} title={d.archived ? "Restore" : "Archive"} onClick={() => update(d.id, { archived: !d.archived }, d.archived ? "Draft restored" : "Draft archived — hidden from Review tab")}>{d.archived ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}</Button>
                       <Button type="button" variant="ghost" size="icon" aria-label="Delete draft" onClick={() => remove(d.id)}><Trash2 className="size-4" /></Button>
                     </div>
                   </div>
@@ -252,7 +244,33 @@ export function ReportDraftSettings({ reportId, slug, events }: { reportId: stri
                 </div>
               </div>
             );
-          })}
+          };
+
+  return (
+    <Card>
+      <CardHeader className="flex-row items-center justify-between gap-3 space-y-0 cursor-pointer" onClick={() => setOpen((o) => !o)}>
+        <div>
+          <CardTitle className="font-display text-2xl">Draft content</CardTitle>
+          <CardDescription>Drafts for client review on the live Review tab. Uploads stay private and only show on the Review tab; or paste a link to the content instead.</CardDescription>
+        </div>
+        {open ? <ChevronDown className="size-5 text-muted-foreground" /> : <ChevronRight className="size-5 text-muted-foreground" />}
+      </CardHeader>
+      {open && (
+        <CardContent className="space-y-4">
+          <Button type="button" variant="outline" onClick={add}><Plus className="size-4" /> Add draft</Button>
+          {loading ? <p className="text-sm text-muted-foreground">Loading…</p> : !drafts.length ? <p className="text-sm text-muted-foreground">No drafts yet.</p> : (
+            <>
+              {activeDrafts.length ? activeDrafts.map(renderDraft) : <p className="text-sm text-muted-foreground">No active drafts.</p>}
+              {archivedDrafts.length > 0 && (
+                <div className="rounded-lg border border-dashed border-border">
+                  <button type="button" onClick={() => setShowArchived((v) => !v)} className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium">
+                    {showArchived ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />} Archive ({archivedDrafts.length})
+                  </button>
+                  {showArchived && <div className="space-y-4 px-4 pb-4">{archivedDrafts.map(renderDraft)}</div>}
+                </div>
+              )}
+            </>
+          )}
         </CardContent>
       )}
     </Card>
