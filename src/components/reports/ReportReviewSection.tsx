@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { CheckCircle2, ExternalLink, MessageSquare } from "lucide-react";
+import { CheckCircle2, ChevronDown, ExternalLink, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,6 +44,8 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
   const [busy, setBusy] = useState(false);
   const tags = draftDisplayTags(draft.platforms, event?.platforms, draft.platform);
   const approved = draft.approval_status === "approved";
+  const unresolvedComments = draft.comments.filter((c) => !c.resolved);
+  const resolvedComments = draft.comments.filter((c) => c.resolved);
   const when = event?.date
     ? `${new Date(`${event.date}T00:00:00`).toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short" })}${event.time ? ` · ${event.time} ${event.timezone ?? "AEDT"}` : ""}`
     : null;
@@ -103,9 +105,9 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
         {draft.approval_status === "amends" && !approved && (draft.comments.length > 0 && draft.comments.every((c) => c.resolved)
           ? <p className="text-sm font-medium text-lime-soft">Updated</p>
           : <p className="text-sm font-medium text-purple-soft">Amends requested</p>)}
-        {draft.comments.length > 0 && (
+        {unresolvedComments.length > 0 && (
           <ul className="space-y-2 border-t border-border pt-3">
-            {draft.comments.map((c) => (
+            {unresolvedComments.map((c) => (
               <li key={c.id} className="text-sm">
                 <span className="font-medium">{c.author_name || "Reviewer"}</span>
                 <span className="text-muted-foreground"> · {new Date(c.created_at).toLocaleDateString("en-AU")}</span>
@@ -113,6 +115,23 @@ function DraftCard({ draft, event, onChanged, hideCaptionHeading = false }: { dr
               </li>
             ))}
           </ul>
+        )}
+        {resolvedComments.length > 0 && (
+          <details className="group min-w-0 border-t border-border pt-2">
+            <summary className="flex cursor-pointer list-none items-center gap-1 text-xs text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
+              <ChevronDown className="size-3 shrink-0 transition-transform group-open:rotate-180" />
+              See edit notes
+            </summary>
+            <ul className="mt-2 space-y-2">
+              {resolvedComments.map((c) => (
+                <li key={c.id} className="text-sm">
+                  <span className="font-medium">{c.author_name || "Reviewer"}</span>
+                  <span className="text-muted-foreground"> · {new Date(c.created_at).toLocaleDateString("en-AU")}</span>
+                  <p className="whitespace-pre-wrap break-words">{c.body}</p>
+                </li>
+              ))}
+            </ul>
+          </details>
         )}
         <div className="mt-auto space-y-2 pt-2">
           {showAmends && (
