@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import { strict as assert } from "node:assert";
-import { reviewEnabled, calendarEventKey, findCalendarEvent, reviewCommentSchema, normalizeDraftLink, draftDisplayTags } from "./report-review";
+import { reviewEnabled, calendarEventKey, findCalendarEvent, reviewCommentSchema, normalizeDraftLink, draftDisplayTags, draftReviewRank, sortDraftsForReview } from "./report-review";
 
 test("Review tab is only on the Chats and Tixel brand ads reports", () => {
   assert.equal(reviewEnabled("chats-socials"), true);
