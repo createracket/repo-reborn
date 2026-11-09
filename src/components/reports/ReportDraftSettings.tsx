@@ -146,8 +146,8 @@ export function ReportDraftSettings({ reportId, slug, events }: { reportId: stri
   const eventOptions = (events ?? []).filter((e) => e.date || e.label);
   const statusLabel = (s: string) => (s === "approved" ? "Approved" : s === "amends" ? "Amends needed" : "Pending");
 
-  const activeDrafts = drafts.filter((d) => !d.archived);
-  const archivedDrafts = drafts.filter((d) => d.archived);
+  const activeDrafts = sortDraftsForReview(drafts.filter((d) => !d.archived));
+  const archivedDrafts = sortDraftsForReview(drafts.filter((d) => d.archived));
   const renderDraft = (d: Draft) => {
             const ev = findCalendarEvent(events ?? [], d.calendar_event_key);
             return (
