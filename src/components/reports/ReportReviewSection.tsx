@@ -5,7 +5,7 @@ import { CheckCircle2, ChevronDown, ExternalLink, MessageSquare } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { findCalendarEvent, draftDisplayTags, type ReviewDraft } from "@/lib/report-review";
+import { findCalendarEvent, draftDisplayTags, sortDraftsForReview, type ReviewDraft } from "@/lib/report-review";
 import { submitDraftComment, setDraftApproval, getReviewDrafts } from "@/lib/report-review.functions";
 
 type Draft = ReviewDraft;

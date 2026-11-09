@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { calendarEventKey, findCalendarEvent, normalizeDraftLink, DRAFT_MEDIA_BUCKET, DRAFT_MEDIA_URL_TTL_SECONDS } from "@/lib/report-review";
+import { calendarEventKey, findCalendarEvent, normalizeDraftLink, sortDraftsForReview, DRAFT_MEDIA_BUCKET, DRAFT_MEDIA_URL_TTL_SECONDS } from "@/lib/report-review";
 
 type CalEvent = { date?: string | null; time?: string | null; label?: string | null; platforms?: string[] | null };
 type Comment = { id: string; author_name: string | null; body: string; created_at: string; resolved: boolean };

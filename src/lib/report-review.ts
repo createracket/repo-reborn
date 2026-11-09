@@ -57,6 +57,25 @@ export type ReviewDraft = {
   comments: ReviewDraftComment[];
 };
 
+type DraftOrderInput = { hide_banner?: boolean | null; approval_status?: string | null };
+
+/**
+ * Review-list rank: entries still showing the Draft tag come first, then approved
+ * ones that still show it, then anything without the tag. Ties keep their saved order.
+ */
+export function draftReviewRank(d: DraftOrderInput): number {
+  const showsTag = !d.hide_banner;
+  const approved = d.approval_status === "approved";
+  if (showsTag && !approved) return 0;
+  if (showsTag && approved) return 1;
+  return 2;
+}
+
+/** Sorts drafts for display without mutating the input. */
+export function sortDraftsForReview<T extends DraftOrderInput>(drafts: T[]): T[] {
+  return [...drafts].sort((a, b) => draftReviewRank(a) - draftReviewRank(b));
+}
+
 /** Tags shown on a Review card: the draft's own toggles when any are on, otherwise the linked calendar entry's. */
 export function draftDisplayTags(draftPlatforms: string[] | null | undefined, eventPlatforms: string[] | null | undefined, legacy?: string | null): string[] {
   if (draftPlatforms?.length) return draftPlatforms;
