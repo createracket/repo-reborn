@@ -31,3 +31,20 @@ test("Draft toggles are used first, then the linked calendar entry's tags", () =
   assert.deepEqual(draftDisplayTags([], ["TT", "FB"]), ["TT", "FB"]);
   assert.deepEqual(draftDisplayTags([], null), []);
 });
+test("Draft-tagged entries sort ahead of approved and untagged ones", () => {
+  const drafts = [
+    { id: "untagged-approved", hide_banner: true, approval_status: "approved" },
+    { id: "tagged-approved", hide_banner: false, approval_status: "approved" },
+    { id: "tagged-pending", hide_banner: false, approval_status: "pending" },
+    { id: "tagged-amends", hide_banner: false, approval_status: "amends" },
+    { id: "untagged-pending", hide_banner: true, approval_status: "pending" },
+  ];
+  assert.deepEqual(
+    sortDraftsForReview(drafts).map((d) => d.id),
+    ["tagged-pending", "tagged-amends", "tagged-approved", "untagged-approved", "untagged-pending"],
+  );
+  assert.equal(draftReviewRank({ hide_banner: false, approval_status: "pending" }), 0);
+  assert.equal(draftReviewRank({ hide_banner: false, approval_status: "approved" }), 1);
+  assert.equal(draftReviewRank({ hide_banner: true, approval_status: "approved" }), 2);
+  assert.equal(sortDraftsForReview(drafts).length, drafts.length, "sorting must not drop entries");
+});
