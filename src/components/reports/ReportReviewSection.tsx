@@ -5,7 +5,7 @@ import { CheckCircle2, ChevronDown, ExternalLink, MessageSquare } from "lucide-r
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { findCalendarEvent, draftDisplayTags, type ReviewDraft } from "@/lib/report-review";
+import { findCalendarEvent, draftDisplayTags, sortDraftsForReview, type ReviewDraft } from "@/lib/report-review";
 import { submitDraftComment, setDraftApproval, getReviewDrafts } from "@/lib/report-review.functions";
 
 type Draft = ReviewDraft;
@@ -28,9 +28,10 @@ export function ReportReviewSection({ slug, events, refreshTick }: { slug: strin
   if (loading) return <p className="mt-8 text-sm text-muted-foreground">Loading drafts…</p>;
   if (error) return <p role="alert" className="mt-8 text-sm text-destructive">Drafts could not be loaded.</p>;
   if (!drafts.length) return <p className="mt-8 text-sm text-muted-foreground">No drafts to review right now.</p>;
+  const ordered = sortDraftsForReview(drafts);
   return (
     <section className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-      {drafts.map((d) => <DraftCard key={d.id} draft={d} event={findCalendarEvent(events, d.calendar_event_key)} onChanged={() => setTick((t) => t + 1)} hideCaptionHeading={slug === "tixel-brand-ads"} />)}
+      {ordered.map((d) => <DraftCard key={d.id} draft={d} event={findCalendarEvent(events, d.calendar_event_key)} onChanged={() => setTick((t) => t + 1)} hideCaptionHeading={slug === "tixel-brand-ads"} />)}
     </section>
   );
 }
