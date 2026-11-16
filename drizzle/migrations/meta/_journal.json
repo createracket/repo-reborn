@@ -260,6 +260,13 @@
       "when": 1794800404805,
       "tag": "0036_jungle_report_listening",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1794801023103,
+      "tag": "0037_restrict_brief_form_config_reads",
+      "breakpoints": true
     }
   ]
 }
