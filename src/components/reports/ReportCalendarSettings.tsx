@@ -220,9 +220,10 @@ export function ReportCalendarSettings({
                         const inputId = `channel-thumb-${reportId}-${i}-${channel.replaceAll(" ", "-")}`;
                         return <div key={channel} className="flex min-w-0 flex-wrap items-center gap-2">
                           <label className="flex items-center gap-1.5 text-xs font-medium"><Switch aria-label={`${channel} brand channel`} checked={value?.enabled ?? false} onCheckedChange={(enabled) => patch(i, { brand_channels: { ...ev.brand_channels, [channel]: { ...value, enabled } } })} />{channel}</label>
-                          {value?.thumbnail_url && <img src={value.thumbnail_url} alt={`${channel} thumbnail`} className="size-8 shrink-0 rounded object-cover" />}
                           <input id={inputId} type="file" accept="image/*" className="hidden" aria-label={`Upload ${channel} thumbnail`} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadChannelThumbnail(i, channel, file); event.target.value = ""; }} />
-                          <Button type="button" variant="outline" size="icon" className="size-7" title={`Upload ${channel} thumbnail`} aria-label={`Choose ${channel} thumbnail`} onClick={() => document.getElementById(inputId)?.click()}><ImagePlus className="size-3.5" /></Button>
+                          <Button type="button" variant="outline" size="icon" className={value?.thumbnail_url ? "group relative size-8 overflow-hidden p-0" : "size-7"} title={value?.thumbnail_url ? `Change ${channel} thumbnail` : `Upload ${channel} thumbnail`} aria-label={`Choose ${channel} thumbnail`} onClick={() => document.getElementById(inputId)?.click()}>
+                            {value?.thumbnail_url ? <><img src={value.thumbnail_url} alt={`${channel} thumbnail`} className="size-full object-cover" /><span className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"><ImagePlus className="size-3.5" /></span></> : <ImagePlus className="size-3.5" />}
+                          </Button>
                           {value?.thumbnail_url && <Button type="button" variant="ghost" size="icon" className="size-7" aria-label={`Remove ${channel} thumbnail`} onClick={() => patch(i, { brand_channels: { ...ev.brand_channels, [channel]: { ...value, thumbnail_url: null } } })}><X className="size-3.5" /></Button>}
                         </div>;
                       })}</div>
@@ -232,7 +233,7 @@ export function ReportCalendarSettings({
                   (ev.url.trim() || ev.platforms.length > 0 || selectedCalendarChannels(ev.brand_channels).length > 0) && (
                     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                       {ev.platforms.length > 0 && <span>{ev.platforms.join(" · ")}</span>}
-                      {selectedCalendarChannels(ev.brand_channels).map((channel) => <span key={channel.name} className="inline-flex items-center gap-1">{channel.thumbnail_url && <img src={channel.thumbnail_url} alt="" className="size-5 rounded object-cover" />}{channel.name}</span>)}
+                      <span className="inline-flex items-center gap-1">{selectedCalendarChannels(ev.brand_channels).map((channel) => channel.thumbnail_url ? <img key={channel.name} src={channel.thumbnail_url} alt={channel.name} title={channel.name} className="size-5 rounded object-cover" /> : null)}</span>
                       {ev.url.trim() && (
                         <span className="inline-flex items-center gap-1">
                           <Link2 className="size-3" />

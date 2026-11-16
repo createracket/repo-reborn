@@ -106,10 +106,9 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
     <>
       <span ref={labelRef} className={`${expanded ? "" : clampClass} break-words leading-tight ${showToggle ? (large ? "pr-4" : "pr-3") : ""}`}>{label}</span>
       {calendarTimeLabel(e) && <span className="mt-0.5 text-[10px]">{calendarTimeLabel(e)}</span>}
-      {selectedCalendarChannels(e.brand_channels).map((channel) => <span key={channel.name} className="mt-1 inline-flex max-w-full items-center gap-1 text-[9px] leading-tight">
-        {channel.thumbnail_url && <img src={channel.thumbnail_url} alt="" className="size-5 shrink-0 rounded object-cover" loading="lazy" />}
-        <span className="min-w-0 break-words">{channel.name}</span>
-      </span>)}
+      {selectedCalendarChannels(e.brand_channels).some((channel) => channel.thumbnail_url) && <span className="mt-1 flex items-center gap-1">
+        {selectedCalendarChannels(e.brand_channels).map((channel) => channel.thumbnail_url ? <img key={channel.name} src={channel.thumbnail_url} alt={channel.name} title={channel.name} className="size-5 shrink-0 rounded object-cover" loading="lazy" /> : null)}
+      </span>}
       {(tags.length > 0 || !!e.url) && (
         <span className="mt-0.5 flex flex-wrap items-center gap-1">
           {tags.map((t) => (
