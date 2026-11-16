@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add and verify Jungle-only per-social-post co-post channel switches and live icons within existing creator inputs.
+- [x] Add and verify Jungle-only per-social-post co-post channel switches and live icons within existing creator inputs; both switches persist after refresh.
 
 - [x] Add Jungle-only calendar brand channels with independent small thumbnails; verified both uploads and selections persist after refresh and fit on phones.
 
