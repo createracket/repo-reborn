@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, Link2, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Link2, Trash2, ImagePlus, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { reportCalendarPlatforms } from "@/lib/report-calendar-platforms";
 import { compareCalendarEvents, REPORT_CALENDAR_TIMEZONE, validCalendarTime } from "@/lib/report-calendar-time";
 import { calendarEntriesByLive } from "@/lib/report-calendar-live";
+import { calendarBrandChannels, selectedCalendarChannels, type CalendarBrandChannels, type JungleChannel } from "@/lib/report-calendar-channels";
 
 const sb = supabase as any;
 
-type Ev = { date: string; time: string; timezone: string; label: string; url: string; platforms: string[]; live: boolean; _open: boolean };
+type Ev = { date: string; time: string; timezone: string; label: string; url: string; platforms: string[]; brand_channels: CalendarBrandChannels; live: boolean; _open: boolean };
 
 /** Report builder card: calendar tab switch + key events (mirrors the roster builder). */
 export function ReportCalendarSettings({
@@ -25,12 +26,13 @@ export function ReportCalendarSettings({
   reportId: string;
   reportSlug: string;
   showCalendar: boolean;
-  events: Array<{ date?: string | null; time?: string | null; timezone?: string | null; label?: string | null; url?: string | null; platforms?: string[] | null; live?: boolean | null }> | null | undefined;
+  events: Array<{ date?: string | null; time?: string | null; timezone?: string | null; label?: string | null; url?: string | null; platforms?: string[] | null; brand_channels?: CalendarBrandChannels | null; live?: boolean | null }> | null | undefined;
   onChanged: () => void | Promise<void>;
 }) {
   const [on, setOn] = useState(showCalendar);
   const [draft, setDraft] = useState<Ev[]>([]);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   // Always start folded away; admins open it when they need it.
   const [sectionOpen, setSectionOpen] = useState(false);
 
@@ -44,6 +46,7 @@ export function ReportCalendarSettings({
         label: e.label ?? "",
         url: e.url ?? "",
         platforms: Array.isArray(e.platforms) ? e.platforms : [],
+        brand_channels: e.brand_channels ?? {},
          live: e.live === true,
         _open: false,
       })),
@@ -72,16 +75,46 @@ export function ReportCalendarSettings({
     const cleaned = rows.map((e) => {
       let url = e.url.trim();
       if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`;
-      return { date: e.date, time: e.time.trim() || null, timezone: e.timezone || REPORT_CALENDAR_TIMEZONE, label: e.label.trim(), url: url || null, platforms: e.platforms, live: e.live };
+      return { date: e.date, time: e.time.trim() || null, timezone: e.timezone || REPORT_CALENDAR_TIMEZONE, label: e.label.trim(), url: url || null, platforms: e.platforms, live: e.live, ...(reportSlug === "jungle" ? { brand_channels: e.brand_channels } : {}) };
     });
     const { error } = await sb.from("campaign_reports").update({ calendar_events: cleaned }).eq("id", reportId);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return false; }
     setDraft(
       (keepIncomplete ? list : rows).map((e) => ({ ...e })),
     );
     toast.success(successMsg);
     await onChanged();
+    return true;
+  }
+
+  async function uploadChannelThumbnail(i: number, channel: JungleChannel, file: File) {
+    const entry = draft[i];
+    if (!entry || reportSlug !== "jungle") return;
+    if (!entry.date || !entry.label.trim()) { toast.error("Add a date and event label before uploading a thumbnail"); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Please choose a photo"); return; }
+    setUploading(true);
+    let path: string | undefined;
+    try {
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement("canvas");
+      canvas.width = 96; canvas.height = 96;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not prepare thumbnail");
+      const side = Math.min(bitmap.width, bitmap.height);
+      ctx.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, 96, 96);
+      bitmap.close();
+      const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((value) => value ? resolve(value) : reject(new Error("Could not prepare thumbnail")), "image/jpeg", 0.85));
+      path = `report-calendar-channels/${reportId}/${crypto.randomUUID()}.jpg`;
+      const { error } = await supabase.storage.from("spotlight-images").upload(path, blob, { contentType: "image/jpeg", upsert: false });
+      if (error) throw error;
+      const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
+      const next = draft.map((ev, j) => j === i ? { ...ev, brand_channels: { ...ev.brand_channels, [channel]: { enabled: ev.brand_channels[channel]?.enabled ?? false, thumbnail_url: data.publicUrl } } } : ev);
+      if (!await persist(next, "Thumbnail saved", true)) await supabase.storage.from("spotlight-images").remove([path]);
+    } catch {
+      if (path) await supabase.storage.from("spotlight-images").remove([path]);
+      toast.error("Could not upload thumbnail");
+    } finally { setUploading(false); }
   }
 
   async function save() {
@@ -180,11 +213,26 @@ export function ReportCalendarSettings({
                         </label>
                       ))}
                     </div>
+                    {calendarBrandChannels(reportSlug).length > 0 && <div className="space-y-2 border-t border-border pt-3">
+                      <div className="text-xs font-medium">Brand channel</div>
+                      <div className="flex flex-wrap gap-4">{calendarBrandChannels(reportSlug).map((channel) => {
+                        const value = ev.brand_channels[channel];
+                        const inputId = `channel-thumb-${reportId}-${i}-${channel.replaceAll(" ", "-")}`;
+                        return <div key={channel} className="flex min-w-0 flex-wrap items-center gap-2">
+                          <label className="flex items-center gap-1.5 text-xs font-medium"><Switch aria-label={`${channel} brand channel`} checked={value?.enabled ?? false} onCheckedChange={(enabled) => patch(i, { brand_channels: { ...ev.brand_channels, [channel]: { ...value, enabled } } })} />{channel}</label>
+                          {value?.thumbnail_url && <img src={value.thumbnail_url} alt={`${channel} thumbnail`} className="size-8 shrink-0 rounded object-cover" />}
+                          <input id={inputId} type="file" accept="image/*" className="hidden" aria-label={`Upload ${channel} thumbnail`} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadChannelThumbnail(i, channel, file); event.target.value = ""; }} />
+                          <Button type="button" variant="outline" size="icon" className="size-7" title={`Upload ${channel} thumbnail`} aria-label={`Choose ${channel} thumbnail`} onClick={() => document.getElementById(inputId)?.click()}><ImagePlus className="size-3.5" /></Button>
+                          {value?.thumbnail_url && <Button type="button" variant="ghost" size="icon" className="size-7" aria-label={`Remove ${channel} thumbnail`} onClick={() => patch(i, { brand_channels: { ...ev.brand_channels, [channel]: { ...value, thumbnail_url: null } } })}><X className="size-3.5" /></Button>}
+                        </div>;
+                      })}</div>
+                    </div>}
                   </>
                 ) : (
-                  (ev.url.trim() || ev.platforms.length > 0) && (
+                  (ev.url.trim() || ev.platforms.length > 0 || selectedCalendarChannels(ev.brand_channels).length > 0) && (
                     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                       {ev.platforms.length > 0 && <span>{ev.platforms.join(" · ")}</span>}
+                      {selectedCalendarChannels(ev.brand_channels).map((channel) => <span key={channel.name} className="inline-flex items-center gap-1">{channel.thumbnail_url && <img src={channel.thumbnail_url} alt="" className="size-5 rounded object-cover" />}{channel.name}</span>)}
                       {ev.url.trim() && (
                         <span className="inline-flex items-center gap-1">
                           <Link2 className="size-3" />
@@ -220,7 +268,7 @@ export function ReportCalendarSettings({
         </button>
       </CardHeader>
       {sectionOpen && (
-      <CardContent className="space-y-4">
+      <CardContent><fieldset disabled={uploading || saving} className="min-w-0 space-y-4">
         <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
           <div className="text-sm font-medium">Show calendar view</div>
           <Switch checked={on} onCheckedChange={toggle} />
@@ -236,7 +284,7 @@ export function ReportCalendarSettings({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setDraft((d) => [{ date: "", time: "", timezone: REPORT_CALENDAR_TIMEZONE, label: "", url: "", platforms: [], live: false, _open: true }, ...d])}
+                onClick={() => setDraft((d) => [{ date: "", time: "", timezone: REPORT_CALENDAR_TIMEZONE, label: "", url: "", platforms: [], brand_channels: {}, live: false, _open: true }, ...d])}
               >
                 Add key event
               </Button>
@@ -252,7 +300,7 @@ export function ReportCalendarSettings({
                 </Button>
               )}
               <Button type="button" size="sm" disabled={saving} onClick={save}>
-                {saving ? "Saving…" : "Save key events"}
+                {uploading ? "Uploading…" : saving ? "Saving…" : "Save key events"}
               </Button>
             </div>
             {grouped.active.map(({ ev, i }) => renderEntry(ev, i))}
@@ -270,7 +318,7 @@ export function ReportCalendarSettings({
             {draft.length === 0 && <p className="text-xs text-muted-foreground">No key events yet.</p>}
           </div>
         </div>
-      </CardContent>
+      </fieldset></CardContent>
       )}
     </Card>
   );

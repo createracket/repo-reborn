@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add Jungle-only calendar brand channels with independent small thumbnails; verified both uploads and selections persist after refresh and fit on phones.
+
 - [x] Enable Jungle Listening with multiple Racket Desk selections and verify saved selections persist after refresh.
 
 - [x] Replace the calendar box "Expand"/"Collapse" words with a small corner arrow; verify on the live Stand Atlantic calendar.

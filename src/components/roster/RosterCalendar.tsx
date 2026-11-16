@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { storageImage } from "@/lib/storage-image";
 import { calendarTimeLabel } from "@/lib/report-calendar-time";
 import { calendarGridRange, calendarListDays } from "@/lib/report-calendar-grid";
+import { selectedCalendarChannels, type CalendarBrandChannels } from "@/lib/report-calendar-channels";
 
 export type CalendarCreator = {
   id: string;
@@ -32,6 +33,7 @@ export type CalendarEvent = {
   label?: string | null;
   url?: string | null;
   platforms?: string[] | null;
+  brand_channels?: CalendarBrandChannels | null;
 };
 
 export function datesOf(c: CalendarCreator): string[] {
@@ -104,6 +106,10 @@ function EventChip({ e, large, clamp = 2 }: { e: CalendarEvent; large?: boolean;
     <>
       <span ref={labelRef} className={`${expanded ? "" : clampClass} break-words leading-tight ${showToggle ? (large ? "pr-4" : "pr-3") : ""}`}>{label}</span>
       {calendarTimeLabel(e) && <span className="mt-0.5 text-[10px]">{calendarTimeLabel(e)}</span>}
+      {selectedCalendarChannels(e.brand_channels).map((channel) => <span key={channel.name} className="mt-1 inline-flex max-w-full items-center gap-1 text-[9px] leading-tight">
+        {channel.thumbnail_url && <img src={channel.thumbnail_url} alt="" className="size-5 shrink-0 rounded object-cover" loading="lazy" />}
+        <span className="min-w-0 break-words">{channel.name}</span>
+      </span>)}
       {(tags.length > 0 || !!e.url) && (
         <span className="mt-0.5 flex flex-wrap items-center gap-1">
           {tags.map((t) => (
