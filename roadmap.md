@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Enable Jungle Listening with multiple Racket Desk selections and verify saved selections.
+
 - [x] Replace the calendar box "Expand"/"Collapse" words with a small corner arrow; verify on the live Stand Atlantic calendar.
 - [x] Add calendar Live status with a collapsed admin section; verify saving, restoring, and unchanged public visibility.
 
