@@ -10,6 +10,7 @@
 - Ad-code requests use separate token-gated links and an admin-only table; codes are returned only to the creator holding the link and admins, never added to public reports or emails, so post-specific advertising permission remains private.
 - Free-member dashboards render a second opportunity feed from the same briefs query, filtered by `campaign_briefs.visible_to_free` plus anything privately shared, so paid feeds stay untouched and free visibility is opt-in per brief.
 - `campaign_briefs` is protected by column-level GRANTs, so every new column needs its own explicit GRANT in the same migration or authenticated reads of the whole table fail with 403.
+- `brief_form_config` client reads select only `id, config`; guests read only the default public form and signed-in users additionally read dashboard settings, protecting editor metadata and future private configuration rows.
 
 - Campaigns (`campaigns` table) group briefs, brief pages, rosters and reports via nullable `campaign_id` columns layered over the legacy brief→roster/report links; collab brief editing and creation live within the campaign card, so grouping never changes live sharing or access and campaign creation remains the starting point.
 - Export/copy actions use the shared `purple` Button variant for legibility in both themes.
