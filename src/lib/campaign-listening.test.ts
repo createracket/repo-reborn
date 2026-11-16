@@ -7,6 +7,9 @@ test("Listening is enabled for Chats", () => {
 test("Listening is enabled for Stand Atlantic", () => {
   assert.equal(listeningEnabled("stat-socials"), true);
 });
+test("Listening is enabled for Jungle", () => {
+  assert.equal(listeningEnabled("jungle"), true);
+});
 test("Listening is not enabled for other reports", () => {
   assert.equal(listeningEnabled("tixel-socials"), false);
 });
