@@ -3,12 +3,14 @@ import { ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { listeningAnalysisSchema, type CampaignListeningReport } from "@/lib/campaign-listening";
 import { formatCount } from "@/lib/youtube-utils";
+import { Button } from "@/components/ui/button";
 
 export function ReportListeningSection({ slug, refreshTick }: { slug: string; refreshTick: number }) {
   const [reports, setReports] = useState<CampaignListeningReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [disclaimer, setDisclaimer] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -26,9 +28,15 @@ export function ReportListeningSection({ slug, refreshTick }: { slug: string; re
     });
     return () => { cancelled = true; };
   }, [slug, refreshTick]);
+  const selectedReport = reports.find((report) => report.id === selectedId) ?? reports[0];
   return <section className="mt-8 space-y-10">
     {!loading && !error && disclaimer && <p className="whitespace-pre-wrap break-words border-l-2 border-border pl-4 text-sm text-muted-foreground">{disclaimer}</p>}
-    {loading ? <p className="text-sm text-muted-foreground">Loading listening reports…</p> : error ? <p role="alert" className="text-sm text-destructive">Listening reports could not be loaded.</p> : !reports.length ? <p className="text-sm text-muted-foreground">No listening reports published yet.</p> : reports.map((report) => <article key={report.id} className="border-b border-border pb-8">
+    {!loading && !error && reports.length > 1 && <div className="flex flex-wrap gap-2" role="group" aria-label="Listening reports">
+      {reports.map((report) => <Button key={report.id} variant="outline" size="sm" aria-pressed={selectedReport?.id === report.id} className={`h-auto min-h-8 max-w-full whitespace-normal break-words text-left ${selectedReport?.id === report.id ? "border-pink-accent bg-pink-accent text-pink-ink hover:bg-pink-accent/90 hover:text-pink-ink" : ""}`} onClick={() => setSelectedId(report.id)}>
+        {report.report_title || report.artist_name}{reports.filter((other) => (other.report_title || other.artist_name) === (report.report_title || report.artist_name)).length > 1 ? ` · ${report.platform} · ${new Date(report.created_at).toLocaleDateString("en-AU")}` : ""}
+      </Button>)}
+    </div>}
+    {loading ? <p className="text-sm text-muted-foreground">Loading listening reports…</p> : error ? <p role="alert" className="text-sm text-destructive">Listening reports could not be loaded.</p> : !reports.length ? <p className="text-sm text-muted-foreground">No listening reports published yet.</p> : (selectedReport ? [selectedReport] : []).map((report) => <article key={report.id} className="border-b border-border pb-8">
       <h2 className="font-display text-2xl">{report.report_title || report.artist_name}</h2><p className="mt-1 text-sm text-muted-foreground">@{report.handle} · {report.platform} · {new Date(report.created_at).toLocaleDateString("en-AU")}</p>
       <div className="mt-6 grid gap-6 md:grid-cols-2"><Signals title="What's working" items={report.analysis.whatsWorking} /><Signals title="Fan signals" items={report.analysis.fanSignals} /></div>
       {report.analysis.futureIdeas.length > 0 && <div className="mt-6 rounded-lg border border-border p-5"><h3 className="text-sm font-semibold text-purple-soft">Inspo ideas</h3><ul className="mt-3 space-y-3">{report.analysis.futureIdeas.map((idea, i) => <li key={i}><p className="text-sm font-medium">{idea.title}</p><p className="text-sm text-muted-foreground">{idea.why}</p></li>)}</ul></div>}
