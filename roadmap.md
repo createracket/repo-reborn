@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add Jungle-only calendar brand channels with independent small thumbnails; verify upload and saved selections.
+- [x] Add Jungle-only calendar brand channels with independent small thumbnails; verified both uploads and selections persist after refresh and fit on phones.
 
 - [x] Enable Jungle Listening with multiple Racket Desk selections and verify saved selections persist after refresh.
 
