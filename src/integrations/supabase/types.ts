@@ -475,6 +475,7 @@ export type Database = {
         Row: {
           account_synced_at: string | null
           auto_added: boolean
+          brand_channels: Json
           brand_tag: string | null
           caption: string | null
           co_posters: Json
@@ -509,6 +510,7 @@ export type Database = {
         Insert: {
           account_synced_at?: string | null
           auto_added?: boolean
+          brand_channels?: Json
           brand_tag?: string | null
           caption?: string | null
           co_posters?: Json
@@ -543,6 +545,7 @@ export type Database = {
         Update: {
           account_synced_at?: string | null
           auto_added?: boolean
+          brand_channels?: Json
           brand_tag?: string | null
           caption?: string | null
           co_posters?: Json

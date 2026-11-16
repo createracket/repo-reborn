@@ -88,6 +88,8 @@ import { listeningEnabled } from "@/lib/campaign-listening";
 import { ReportListeningSettings } from "@/components/reports/ReportListeningSettings";
 import { ReportDraftSettings } from "@/components/reports/ReportDraftSettings";
 import { reviewEnabled } from "@/lib/report-review";
+import { channelThumbnails, type CalendarBrandChannels } from "@/lib/report-calendar-channels";
+import { PostBrandChannels } from "@/components/reports/PostBrandChannels";
 
 const sb = supabase as any;
 
@@ -183,6 +185,7 @@ type Post = {
   extra_mention: boolean | null;
   is_trial?: boolean | null;
   is_story?: boolean | null;
+  brand_channels?: CalendarBrandChannels | null;
   new_followers?: number | null;
   co_posters?: unknown;
   position: number;
@@ -1425,6 +1428,7 @@ function ReportDetailView({
                       onChanged={onChanged}
                       categories={categories}
                       showNewFollowers={newFollowersEnabled(report.slug)}
+                      brandThumbnails={report.slug === "jungle" ? channelThumbnails((report as any).calendar_events) : undefined}
                     />
                   ))}
                 </div>
@@ -1445,12 +1449,14 @@ function CreatorRow({
   onChanged,
   categories,
   showNewFollowers = false,
+  brandThumbnails,
 }: {
   creator: Creator;
   posts: Post[];
   onChanged: () => Promise<void>;
   categories: string[];
   showNewFollowers?: boolean;
+  brandThumbnails?: CalendarBrandChannels;
 }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(creator.name);
@@ -1698,7 +1704,7 @@ function CreatorRow({
               <SortableContext items={posts.map((p) => p.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-3">
                   {posts.map((p) => (
-                    <PostEditor key={p.id} post={p} onChanged={onChanged} creatorName={creator.name} showNewFollowers={showNewFollowers} />
+                    <PostEditor key={p.id} post={p} onChanged={onChanged} creatorName={creator.name} showNewFollowers={showNewFollowers} brandThumbnails={brandThumbnails} />
                   ))}
                 </div>
               </SortableContext>
@@ -1720,7 +1726,7 @@ function numOrNull(v: string): number | null {
   return isNaN(n) ? null : n;
 }
 
-function PostEditor({ post, onChanged, creatorName, showNewFollowers = false }: { post: Post; onChanged: () => Promise<void>; creatorName: string; showNewFollowers?: boolean }) {
+function PostEditor({ post, onChanged, creatorName, showNewFollowers = false, brandThumbnails }: { post: Post; onChanged: () => Promise<void>; creatorName: string; showNewFollowers?: boolean; brandThumbnails?: CalendarBrandChannels }) {
   const scrape = useServerFn(scrapePostMetrics);
   const dismiss = useServerFn(dismissReportPost);
   const [saving, setSaving] = useState(false);
@@ -2205,6 +2211,7 @@ function PostEditor({ post, onChanged, creatorName, showNewFollowers = false }: 
           </button>
         </div>
       </div>
+      {brandThumbnails && <PostBrandChannels postId={post.id} channels={post.brand_channels} thumbnails={brandThumbnails} />}
       <StatsRequestPanel
         postId={post.id}
         creatorId={post.creator_id}
