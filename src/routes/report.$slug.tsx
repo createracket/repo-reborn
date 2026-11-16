@@ -28,6 +28,8 @@ import { listeningEnabled } from "@/lib/campaign-listening";
 import { ReportListeningSection } from "@/components/reports/ReportListeningSection";
 import { ReportReviewSection } from "@/components/reports/ReportReviewSection";
 import { reviewEnabled } from "@/lib/report-review";
+import { channelThumbnails, type CalendarBrandChannels } from "@/lib/report-calendar-channels";
+import { PostBrandIcons } from "@/components/reports/PostBrandChannels";
 
 // Posts load in batches of 18 so the first screen lands on full rows of six.
 const POSTS_PER_LOAD = 18;
@@ -86,6 +88,7 @@ type PublicPost = {
   extra_mention?: boolean | null;
   is_trial?: boolean | null;
   is_story?: boolean | null;
+  brand_channels?: CalendarBrandChannels | null;
   new_followers?: number | null;
   position: number;
   updated_at: string | null;
@@ -837,7 +840,7 @@ function PublicReportPage() {
                 ? visibleCreators.flatMap((c) => c.posts.map((p) => ({ post: p, creator: c })))
                 : visibleFlatSorted
               ).map(({ post, creator }) => (
-                <SimplePostCard key={post.id} post={post} creator={creator} showNewFollowers={newFollowersEnabled(report.slug)} />
+                <SimplePostCard key={post.id} post={post} creator={creator} showNewFollowers={newFollowersEnabled(report.slug)} brandThumbnails={report.slug === "jungle" ? channelThumbnails(report.calendar_events) : undefined} />
               ))}
             </div>
           ) : sortMode !== "creator" ? (
@@ -848,6 +851,7 @@ function PublicReportPage() {
                   post={post}
                   creator={creator}
                   hideCategory={!!report.hide_categories}
+                  brandThumbnails={report.slug === "jungle" ? channelThumbnails(report.calendar_events) : undefined}
                 />
               ))}
             </div>
@@ -880,7 +884,7 @@ function PublicReportPage() {
                   </Card>
                 ) : (
                   c.posts.map((p) => (
-                    <PostCard key={p.id} post={p} creator={c} hideCategory={!!report.hide_categories} />
+                    <PostCard key={p.id} post={p} creator={c} hideCategory={!!report.hide_categories} brandThumbnails={report.slug === "jungle" ? channelThumbnails(report.calendar_events) : undefined} />
                   ))
                 )}
               </div>
@@ -917,7 +921,7 @@ function TotalStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SimplePostCard({ post, creator, showNewFollowers = false }: { post: PublicPost; creator: PublicCreator; showNewFollowers?: boolean }) {
+function SimplePostCard({ post, creator, showNewFollowers = false, brandThumbnails }: { post: PublicPost; creator: PublicCreator; showNewFollowers?: boolean; brandThumbnails?: CalendarBrandChannels }) {
   const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
   const media = (
     <div className="relative overflow-hidden rounded-xl bg-muted" style={{ aspectRatio: "9 / 16" }}>
@@ -961,6 +965,7 @@ function SimplePostCard({ post, creator, showNewFollowers = false }: { post: Pub
         )}
         <div className="min-w-0">
           <p className="truncate font-display text-sm leading-tight">{creator.name}</p>
+          {brandThumbnails && <div className="mt-1"><PostBrandIcons channels={post.brand_channels} thumbnails={brandThumbnails} /></div>}
           {creator.handle && (
             <p className="truncate text-[11px] text-muted-foreground">{creator.handle}</p>
           )}
@@ -1017,7 +1022,7 @@ function ExpandableCaption({ caption }: { caption: string }) {
   );
 }
 
-function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: PublicCreator; hideCategory: boolean }) {
+function PostCard({ post, creator, hideCategory, brandThumbnails }: { post: PublicPost; creator: PublicCreator; hideCategory: boolean; brandThumbnails?: CalendarBrandChannels }) {
   const Icon = PLATFORM_ICON[post.platform] ?? Instagram;
   // Only show sentiment if it was intentionally adjusted (default seed is 50).
   const sentiment = post.sentiment_score != null && post.sentiment_score !== 50 ? post.sentiment_score : null;
@@ -1061,6 +1066,7 @@ function PostCard({ post, creator, hideCategory }: { post: PublicPost; creator: 
                   {creator.category}
                 </span>
               )}
+              {brandThumbnails && <div className="mt-1"><PostBrandIcons channels={post.brand_channels} thumbnails={brandThumbnails} /></div>}
             </div>
           </div>
           <div
