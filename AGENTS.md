@@ -23,6 +23,7 @@
 - Protected roster payloads use withVisibleRosterRate to return opted-in rates and strip budget/show_rate, matching public visibility without exposing private pricing.
 - Non-video ER uses report-engagement.ts and saves engagement_rate_pct, keeping live reports and exports consistent.
 - Listening uses admin-selected scans and narrow RPCs for published, code-free reports; reads never scrape or expose notes. Top content excludes profile URLs to prevent placeholder cards.
+- Shared Listening sections render one selected scan at a time, with a selector only for multiple scans and a first-scan fallback when selection disappears, avoiding stacked reports across every supported report page.
 - Calendar brand channels live in each event's JSON, with independent enabled flags and browser-resized thumbnails in the existing report image bucket, avoiding a separate schema and keeping calendar images small.
 - Social post co-post channel flags save independently in post JSON and reuse the report calendar's channel thumbnails; their switches autosave without overwriting other unsaved post fields.
 - Report calendar options use the shared reportCalendarPlatforms helper; key-event wall-clock times and timezone live in calendar_events JSON, and compareCalendarEvents orders dates then times without viewer-timezone conversion, preserving existing date-only events without a schema change.
