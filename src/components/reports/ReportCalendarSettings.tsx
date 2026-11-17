@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { reportCalendarPlatforms } from "@/lib/report-calendar-platforms";
 import { compareCalendarEvents, REPORT_CALENDAR_TIMEZONE, validCalendarTime } from "@/lib/report-calendar-time";
 import { calendarEntriesByLive } from "@/lib/report-calendar-live";
-import { calendarBrandChannels, selectedCalendarChannels, type CalendarBrandChannels, type JungleChannel } from "@/lib/report-calendar-channels";
+import { calendarBrandChannels, channelThumbnails, fillChannelThumbnails, selectedCalendarChannels, type CalendarBrandChannels, type JungleChannel } from "@/lib/report-calendar-channels";
 
 const sb = supabase as any;
 
@@ -109,7 +109,7 @@ export function ReportCalendarSettings({
       const { error } = await supabase.storage.from("spotlight-images").upload(path, blob, { contentType: "image/jpeg", upsert: false });
       if (error) throw error;
       const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
-      const next = draft.map((ev, j) => j === i ? { ...ev, brand_channels: { ...ev.brand_channels, [channel]: { enabled: ev.brand_channels[channel]?.enabled ?? false, thumbnail_url: data.publicUrl } } } : ev);
+      const next = draft.map((ev, j) => j === i || ev.brand_channels[channel] ? { ...ev, brand_channels: { ...ev.brand_channels, [channel]: { enabled: ev.brand_channels[channel]?.enabled ?? false, thumbnail_url: data.publicUrl } } } : ev);
       if (!await persist(next, "Thumbnail saved", true)) await supabase.storage.from("spotlight-images").remove([path]);
     } catch {
       if (path) await supabase.storage.from("spotlight-images").remove([path]);
