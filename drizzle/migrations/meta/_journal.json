@@ -274,6 +274,13 @@
       "when": 1794802067509,
       "tag": "0038_jungle_post_brand_channels",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1794888852268,
+      "tag": "0039_restrict_example_opportunities_select",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Signed-in users can view example opportunities" ON public.example_opportunities;
+CREATE POLICY "Admins can view example opportunities" ON public.example_opportunities FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'admin'::app_role));
