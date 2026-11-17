@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { reportCalendarPlatforms } from "@/lib/report-calendar-platforms";
 import { compareCalendarEvents, REPORT_CALENDAR_TIMEZONE, validCalendarTime } from "@/lib/report-calendar-time";
 import { calendarEntriesByLive } from "@/lib/report-calendar-live";
-import { calendarBrandChannels, selectedCalendarChannels, type CalendarBrandChannels, type JungleChannel } from "@/lib/report-calendar-channels";
+import { calendarBrandChannels, channelThumbnails, fillChannelThumbnails, selectedCalendarChannels, type CalendarBrandChannels, type JungleChannel } from "@/lib/report-calendar-channels";
 
 const sb = supabase as any;
 
@@ -109,7 +109,7 @@ export function ReportCalendarSettings({
       const { error } = await supabase.storage.from("spotlight-images").upload(path, blob, { contentType: "image/jpeg", upsert: false });
       if (error) throw error;
       const { data } = supabase.storage.from("spotlight-images").getPublicUrl(path);
-      const next = draft.map((ev, j) => j === i ? { ...ev, brand_channels: { ...ev.brand_channels, [channel]: { enabled: ev.brand_channels[channel]?.enabled ?? false, thumbnail_url: data.publicUrl } } } : ev);
+      const next = draft.map((ev, j) => j === i || ev.brand_channels[channel] ? { ...ev, brand_channels: { ...ev.brand_channels, [channel]: { enabled: ev.brand_channels[channel]?.enabled ?? false, thumbnail_url: data.publicUrl } } } : ev);
       if (!await persist(next, "Thumbnail saved", true)) await supabase.storage.from("spotlight-images").remove([path]);
     } catch {
       if (path) await supabase.storage.from("spotlight-images").remove([path]);
@@ -217,14 +217,14 @@ export function ReportCalendarSettings({
                       <div className="text-xs font-medium">Brand channel</div>
                       <div className="flex flex-wrap gap-4">{calendarBrandChannels(reportSlug).map((channel) => {
                         const value = ev.brand_channels[channel];
+                        const thumb = value?.thumbnail_url || channelThumbnails(draft)[channel]?.thumbnail_url || null;
                         const inputId = `channel-thumb-${reportId}-${i}-${channel.replaceAll(" ", "-")}`;
                         return <div key={channel} className="flex min-w-0 flex-wrap items-center gap-2">
-                          <label className="flex items-center gap-1.5 text-xs font-medium"><Switch aria-label={`${channel} brand channel`} checked={value?.enabled ?? false} onCheckedChange={(enabled) => patch(i, { brand_channels: { ...ev.brand_channels, [channel]: { ...value, enabled } } })} />{channel}</label>
+                          <label className="flex items-center gap-1.5 text-xs font-medium"><Switch aria-label={`${channel} brand channel`} checked={value?.enabled ?? false} onCheckedChange={(enabled) => patch(i, { brand_channels: { ...ev.brand_channels, [channel]: { ...value, enabled, thumbnail_url: thumb } } })} />{channel}</label>
                           <input id={inputId} type="file" accept="image/*" className="hidden" aria-label={`Upload ${channel} thumbnail`} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadChannelThumbnail(i, channel, file); event.target.value = ""; }} />
-                          <Button type="button" variant="outline" size="icon" className={value?.thumbnail_url ? "group relative size-8 overflow-hidden p-0" : "size-7"} title={value?.thumbnail_url ? `Change ${channel} thumbnail` : `Upload ${channel} thumbnail`} aria-label={`Choose ${channel} thumbnail`} onClick={() => document.getElementById(inputId)?.click()}>
-                            {value?.thumbnail_url ? <><img src={value.thumbnail_url} alt={`${channel} thumbnail`} className="size-full object-cover" /><span className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"><ImagePlus className="size-3.5" /></span></> : <ImagePlus className="size-3.5" />}
+                          <Button type="button" variant="outline" size="icon" className={thumb ? "group relative size-8 overflow-hidden p-0" : "size-7"} title={thumb ? `Change ${channel} thumbnail` : `Upload ${channel} thumbnail`} aria-label={`Choose ${channel} thumbnail`} onClick={() => document.getElementById(inputId)?.click()}>
+                            {thumb ? <><img src={thumb} alt={`${channel} thumbnail`} className="size-full object-cover" /><span className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"><ImagePlus className="size-3.5" /></span></> : <ImagePlus className="size-3.5" />}
                           </Button>
-                          {value?.thumbnail_url && <Button type="button" variant="ghost" size="icon" className="size-7" aria-label={`Remove ${channel} thumbnail`} onClick={() => patch(i, { brand_channels: { ...ev.brand_channels, [channel]: { ...value, thumbnail_url: null } } })}><X className="size-3.5" /></Button>}
                         </div>;
                       })}</div>
                     </div>}

@@ -14,4 +14,16 @@ export function calendarBrandChannels(slug: string): readonly JungleChannel[] {
 }
 export function selectedCalendarChannels(channels?: CalendarBrandChannels | null) {
   return JUNGLE_CHANNELS.filter((name) => channels?.[name]?.enabled).map((name) => ({ name, thumbnail_url: channels?.[name]?.thumbnail_url ?? null }));
+}/** Each channel uses one icon across the report: events missing a thumbnail borrow the one uploaded elsewhere. */
+export function fillChannelThumbnails<T extends { brand_channels?: CalendarBrandChannels | null }>(events: T[]): T[] {
+  const shared = channelThumbnails(events);
+  return events.map((event) => {
+    if (!event.brand_channels) return event;
+    const next: CalendarBrandChannels = { ...event.brand_channels };
+    for (const name of JUNGLE_CHANNELS) {
+      const value = next[name];
+      if (value && !value.thumbnail_url && shared[name]?.thumbnail_url) next[name] = { ...value, thumbnail_url: shared[name]!.thumbnail_url };
+    }
+    return { ...event, brand_channels: next };
+  });
 }

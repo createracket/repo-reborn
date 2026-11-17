@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { storageImage } from "@/lib/storage-image";
 import { calendarTimeLabel } from "@/lib/report-calendar-time";
 import { calendarGridRange, calendarListDays } from "@/lib/report-calendar-grid";
-import { selectedCalendarChannels, type CalendarBrandChannels } from "@/lib/report-calendar-channels";
+import { fillChannelThumbnails, selectedCalendarChannels, type CalendarBrandChannels } from "@/lib/report-calendar-channels";
 
 export type CalendarCreator = {
   id: string;
@@ -189,7 +189,7 @@ export function RosterCalendar({
 
   const eventsByDay = useMemo(() => {
     const m = new Map<string, CalendarEvent[]>();
-    for (const e of events) {
+    for (const e of fillChannelThumbnails(events)) {
       for (const k of eventDatesOf(e)) m.set(k, [...(m.get(k) ?? []), e]);
     }
     return m;
@@ -314,7 +314,7 @@ export function CalendarSnapshotContent({
 
   const eventsByDay = useMemo(() => {
     const m = new Map<string, CalendarEvent[]>();
-    for (const e of events) {
+    for (const e of fillChannelThumbnails(events)) {
       for (const k of eventDatesOf(e)) m.set(k, [...(m.get(k) ?? []), e]);
     }
     return m;
