@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Replace the seller-stories brief's third Inspo folder link with the supplied video file; verified playback of both Instagram players and both Dropbox videos.
+
 - [x] Add and verify Jungle-only per-social-post co-post channel switches and live icons within existing creator inputs; both switches persist after refresh.
 
 - [x] Add Jungle-only calendar brand channels with independent small thumbnails; verified both uploads and selections persist after refresh and fit on phones.
