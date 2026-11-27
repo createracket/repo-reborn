@@ -19,6 +19,11 @@ export const Route = createFileRoute("/_authenticated/briefs/edit/$key")({
   head: () => ({
     meta: [
       { title: "Edit brief — Create Racket" },
+      { name: "description", content: "Manage campaign brief content, media and sharing on Create Racket." },
+      { property: "og:title", content: "Edit brief — Create Racket" },
+      { property: "og:description", content: "Manage campaign brief content, media and sharing on Create Racket." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

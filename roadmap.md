@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add drag-and-drop video ordering to all brief video sections, preserving covers; verified mouse/keyboard dragging, saved order after refresh and live display, then restored the original Tixel order.
+
 - [x] Replace the seller-stories brief's third Inspo folder link with the supplied video file; verified playback of both Instagram players and both Dropbox videos.
 
 - [x] Add and verify Jungle-only per-social-post co-post channel switches and live icons within existing creator inputs; both switches persist after refresh.

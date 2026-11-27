@@ -1,5 +1,7 @@
 # Project architecture decisions
 
+- Brief video sorting uses dnd-kit handles and atomically reorders existing video/cover field pairs in the form or duplicate section content; the normal brief save persists order without a new schema.
+
 - ClipCard supports opt-in official Instagram iframes for the seller-stories brief; Dropbox single files keep native playback and folders remain links because they serve archives, not video streams.
 
 - All eligible light-mode pages use the roster's grey/white palette and `.report-light` variants; reports and rosters share a guest-accessible saved preference while always-dark public pages stay dark, keeping the light experience consistent.
