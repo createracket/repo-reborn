@@ -2,6 +2,12 @@ import { test } from "node:test";
 import { strict as assert } from "node:assert";
 import { canReorderBriefVideos, reorderBriefVideos } from "./brief-video-order";
 
+test("Playback choices move with their videos when reordered", () => {
+  const result = reorderBriefVideos({ video1: "first", video1_inline: "true", video2: "second", video2_inline: "false" }, 2, 1);
+  assert.equal(result['video1_inline'], "false");
+  assert.equal(result['video2_inline'], "true");
+});
+
 test("Brief video dragging is available only with at least two video entries", () => {
   assert.equal(canReorderBriefVideos({ video1: "first", video2: " " }), false);
   assert.equal(canReorderBriefVideos({ video1: "first", video3: "third" }), true);

@@ -1,8 +1,8 @@
 # Project architecture decisions
 
-- Brief video sorting uses dnd-kit handles and atomically reorders existing video/cover field pairs in the form or duplicate section content; the normal brief save persists order without a new schema.
+- Brief video sorting uses dnd-kit handles and atomically reorders video/cover/playback field groups in the form or duplicate section content; the normal brief save persists order without a new schema.
 
-- ClipCard supports opt-in official Instagram iframes for the seller-stories brief; Dropbox single files keep native playback and folders remain links because they serve archives, not video streams.
+- ClipCard uses per-video saved inline choices for official Instagram/TikTok players, preserving seller-stories' existing inline default when unset; Dropbox files keep native playback and folders remain links because they serve archives.
 
 - All eligible light-mode pages use the roster's grey/white palette and `.report-light` variants; reports and rosters share a guest-accessible saved preference while always-dark public pages stay dark, keeping the light experience consistent.
 - Data feeds (report metrics.csv/.json, roster creators.csv/.json, key-gated report detailed.csv/.json) share data-feeds.server.ts, read saved data only (never scrape) and never include notes, emails or tokens; public feeds need a published, code-free page; monthly refresh is opt-in per report via auto_refresh_monthly and a cron-called hook, so exports stay cheap and predictable.

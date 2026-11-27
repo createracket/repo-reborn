@@ -31,13 +31,13 @@ export function ClipCard({
       <div className="relative aspect-[9/16] overflow-hidden rounded-3xl border border-border/60 bg-muted/40">
         <iframe
           src={embedSrc}
-          title={caption ?? "Instagram video"}
+          title={caption ?? `${label} video`}
           allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
           allowFullScreen
           loading="lazy"
           className="size-full border-0"
         />
-        <a href={href} target="_blank" rel="noreferrer" aria-label="Open on Instagram" title="Open on Instagram" className="absolute bottom-2 right-2 rounded-full bg-background p-2 text-foreground">
+        <a href={href} target="_blank" rel="noreferrer" aria-label={`Open on ${label}`} title={`Open on ${label}`} className="absolute bottom-2 right-2 rounded-full bg-background p-2 text-foreground">
           <ExternalLink className="size-4" />
         </a>
       </div>

@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAuthSessionResult, getAuthUser } from "@/hooks/use-auth";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { getSocialEmbed } from "@/lib/social-embed";
-import { getClipMedia } from "@/lib/clip-media";
+import { getClipMedia, clipPlaysInline } from "@/lib/clip-media";
 import { getClipPosters } from "@/lib/clip-poster.functions";
 import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember, registerSpotlightGuestInterest, registerSpotlightMemberInterest } from "@/lib/spotlight-access.functions";
 import { RichText } from "@/lib/rich-text";
@@ -41,10 +41,14 @@ type PartnerLinks = {
   video2?: string;
   video3?: string;
   video1_cover?: string;
+  video1_inline?: string;
   video2_cover?: string;
+  video2_inline?: string;
   video3_cover?: string;
+  video3_inline?: string;
   video4?: string;
   video4_cover?: string;
+  video4_inline?: string;
   photo1?: string;
   photo2?: string;
   photo3?: string;
@@ -874,18 +878,18 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
 
             /* Videos */
             videos: (() => {
-              const raw: Array<{ url?: string; cover?: string }> = [
-                { url: links.video1, cover: links.video1_cover },
-                { url: links.video2, cover: links.video2_cover },
-                { url: links.video3, cover: links.video3_cover },
-                { url: links.video4, cover: links.video4_cover },
+              const raw: Array<{ url?: string; cover?: string; inline?: string }> = [
+                { url: links.video1, cover: links.video1_cover, inline: links.video1_inline },
+                { url: links.video2, cover: links.video2_cover, inline: links.video2_inline },
+                { url: links.video3, cover: links.video3_cover, inline: links.video3_inline },
+                { url: links.video4, cover: links.video4_cover, inline: links.video4_inline },
               ];
               const videos = raw
                 .map((v) => {
                   const media = getClipMedia(v.url);
-                  return media ? { media, cover: v.cover } : null;
+                  return media ? { media, cover: v.cover, inline: v.inline } : null;
                 })
-                .filter((v): v is { media: NonNullable<ReturnType<typeof getClipMedia>>; cover: string | undefined } => !!v);
+                .filter((v): v is { media: NonNullable<ReturnType<typeof getClipMedia>>; cover: string | undefined; inline: string | undefined } => !!v);
               if (videos.length === 0) return null;
               return (
                 <section className="mt-16">
@@ -895,7 +899,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
                         href={v.media.href}
                         provider={v.media.provider}
                         videoSrc={v.media.videoSrc}
-                        inlineSocial={kind === "brief" && slug === "tixel-seller-stories"}
+                        inlineSocial={clipPlaysInline(v.inline, kind === "brief" && slug === "tixel-seller-stories")}
                         poster={v.cover ?? posters[v.media.posterKey] ?? null}
                         caption={v.media.provider === "dropbox" && !v.media.videoSrc ? "Dropbox folder" : null}
                       />
@@ -961,10 +965,10 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             if (instance.type === "videos") {
               const videos = [1, 2, 3, 4].flatMap((number) => {
                 const media = getClipMedia(content[`video${number}`]);
-                return media ? [{ media, cover: content[`video${number}_cover`] }] : [];
+                return media ? [{ media, cover: content[`video${number}_cover`], inline: content[`video${number}_inline`] }] : [];
               });
               if (!videos.length) return null;
-              return <section className="mt-16"><MediaCarousel title={label || "Watch"} count={videos.length} shape="video">{videos.map((video) => <ClipCard href={video.media.href} provider={video.media.provider} videoSrc={video.media.videoSrc} inlineSocial={kind === "brief" && slug === "tixel-seller-stories"} poster={video.cover ?? posters[video.media.posterKey] ?? null} caption={video.media.provider === "dropbox" && !video.media.videoSrc ? "Dropbox folder" : null} />)}</MediaCarousel></section>;
+              return <section className="mt-16"><MediaCarousel title={label || "Watch"} count={videos.length} shape="video">{videos.map((video) => <ClipCard href={video.media.href} provider={video.media.provider} videoSrc={video.media.videoSrc} inlineSocial={clipPlaysInline(video.inline, kind === "brief" && slug === "tixel-seller-stories")} poster={video.cover ?? posters[video.media.posterKey] ?? null} caption={video.media.provider === "dropbox" && !video.media.videoSrc ? "Dropbox folder" : null} />)}</MediaCarousel></section>;
             }
             if (instance.type === "photos") {
               const photos = [1, 2, 3, 4].map((number) => content[`photo${number}`]).filter((photo): photo is string => !!photo?.trim());

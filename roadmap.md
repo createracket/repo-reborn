@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add per-social-video admin playback switches, preserve choices during reorder, and verify both saved modes on the signed-out live brief; restored existing on-page playback.
+
 - [x] Add drag-and-drop video ordering to all brief video sections, preserving covers; verified mouse/keyboard dragging, saved order after refresh and live display, then restored the original Tixel order.
 
 - [x] Replace the seller-stories brief's third Inspo folder link with the supplied video file; verified playback of both Instagram players and both Dropbox videos.

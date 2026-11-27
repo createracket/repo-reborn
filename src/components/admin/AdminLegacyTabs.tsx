@@ -1,3 +1,4 @@
+import { clipPlaysInline, getClipEmbedSrc } from "@/lib/clip-media";
 import { BriefVideoSorter } from "@/components/admin/BriefVideoSorter";
 import { BRIEF_VIDEO_SLOTS, canReorderBriefVideos, reorderBriefVideos, type BriefVideoSlot } from "@/lib/brief-video-order";
 import { SpotlightAccessPanel } from "@/components/admin/SpotlightAccessPanel";
@@ -1989,9 +1990,13 @@ export function SpotlightForm({
     video3: editData?.links?.video3 ?? "",
     video4: editData?.links?.video4 ?? "",
     video1_cover: editData?.links?.video1_cover ?? "",
+    video1_inline: String(clipPlaysInline(editData?.links?.video1_inline, sectionKind === "brief" && editData?.slug === "tixel-seller-stories")),
     video2_cover: editData?.links?.video2_cover ?? "",
+    video2_inline: String(clipPlaysInline(editData?.links?.video2_inline, sectionKind === "brief" && editData?.slug === "tixel-seller-stories")),
     video3_cover: editData?.links?.video3_cover ?? "",
+    video3_inline: String(clipPlaysInline(editData?.links?.video3_inline, sectionKind === "brief" && editData?.slug === "tixel-seller-stories")),
     video4_cover: editData?.links?.video4_cover ?? "",
+    video4_inline: String(clipPlaysInline(editData?.links?.video4_inline, sectionKind === "brief" && editData?.slug === "tixel-seller-stories")),
     photo1: editData?.links?.photo1 ?? "",
     photo2: editData?.links?.photo2 ?? "",
     photo3: editData?.links?.photo3 ?? "",
@@ -2080,6 +2085,8 @@ export function SpotlightForm({
           const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover" | "video4_cover";
           videoFields[urlKey] = instanceValue(urlKey, form[urlKey]);
           videoFields[coverKey] = instanceValue(coverKey, form[coverKey]);
+          const inlineKey = `video${n}_inline` as "video1_inline" | "video2_inline" | "video3_inline" | "video4_inline";
+          videoFields[inlineKey] = instanceValue(inlineKey, form[inlineKey]);
         });
         const reorderVideos = (from: BriefVideoSlot, to: BriefVideoSlot) => {
           if (isDuplicate) {
@@ -2090,7 +2097,7 @@ export function SpotlightForm({
             setForm((previous) => ({ ...previous, ...reorderBriefVideos(videoFields, from, to) }));
           }
         };
-        return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_videos)} onChange={(e) => updateHeading(e.target.value, () => set("label_videos", e.target.value))} placeholder="Watch" /></div><p className="text-xs text-muted-foreground">Add up to four public TikTok, Instagram or Dropbox links. Dropbox single-file videos play on the live page; folders open on Dropbox. A cover image is recommended for Instagram clips.</p><BriefVideoSorter enabled={sectionKind === "brief" && canReorderBriefVideos(videoFields)} onReorder={reorderVideos}>{(n) => { const urlKey = `video${n}` as "video1" | "video2" | "video3" | "video4"; const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover" | "video4_cover"; const url = instanceValue(urlKey, form[urlKey]); const cover = instanceValue(coverKey, form[coverKey]); return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${urlKey}-${instanceId}`}>Video {n}</Label><Input id={`${urlKey}-${instanceId}`} value={url} onChange={(e) => updateInstanceValue(urlKey, e.target.value, () => set(urlKey, e.target.value))} placeholder="TikTok, Instagram or Dropbox video URL" /><FetchPreviewButton url={url} onFetched={(value) => updateInstanceValue(coverKey, value, () => set(coverKey, value))} /><Input value={cover} onChange={(e) => updateInstanceValue(coverKey, e.target.value, () => set(coverKey, e.target.value))} placeholder="Cover image URL (optional)" /><ImageUploader label={`Video ${n} cover`} value={cover} onChange={(value) => updateInstanceValue(coverKey, value, () => set(coverKey, value))} aspect="9 / 16" hint="9:16 preferred, under 8MB." folder="video-covers" /></div>; }}</BriefVideoSorter></div>;
+        return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_videos)} onChange={(e) => updateHeading(e.target.value, () => set("label_videos", e.target.value))} placeholder="Watch" /></div><p className="text-xs text-muted-foreground">Add up to four public TikTok, Instagram or Dropbox links. Dropbox single-file videos play on the live page; folders open on Dropbox. A cover image is recommended for Instagram clips.</p><BriefVideoSorter enabled={sectionKind === "brief" && canReorderBriefVideos(videoFields)} onReorder={reorderVideos}>{(n) => { const urlKey = `video${n}` as "video1" | "video2" | "video3" | "video4"; const coverKey = `video${n}_cover` as "video1_cover" | "video2_cover" | "video3_cover" | "video4_cover"; const inlineKey = `video${n}_inline` as "video1_inline" | "video2_inline" | "video3_inline" | "video4_inline"; const url = instanceValue(urlKey, form[urlKey]); const cover = instanceValue(coverKey, form[coverKey]); return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${urlKey}-${instanceId}`}>Video {n}</Label><Input id={`${urlKey}-${instanceId}`} value={url} onChange={(e) => updateInstanceValue(urlKey, e.target.value, () => set(urlKey, e.target.value))} placeholder="TikTok, Instagram or Dropbox video URL" /><div className="flex items-center gap-2">{getClipEmbedSrc(url) ? <><Switch id={`${inlineKey}-${instanceId}`} checked={clipPlaysInline(instanceValue(inlineKey, form[inlineKey]), sectionKind === "brief" && form.slug === "tixel-seller-stories")} onCheckedChange={(checked) => updateInstanceValue(inlineKey, String(checked), () => set(inlineKey, String(checked)))} /><Label htmlFor={`${inlineKey}-${instanceId}`}>Play on page</Label></> : null}</div><FetchPreviewButton url={url} onFetched={(value) => updateInstanceValue(coverKey, value, () => set(coverKey, value))} /><Input value={cover} onChange={(e) => updateInstanceValue(coverKey, e.target.value, () => set(coverKey, e.target.value))} placeholder="Cover image URL (optional)" /><ImageUploader label={`Video ${n} cover`} value={cover} onChange={(value) => updateInstanceValue(coverKey, value, () => set(coverKey, value))} aspect="9 / 16" hint="9:16 preferred, under 8MB." folder="video-covers" /></div>; }}</BriefVideoSorter></div>;
       }
       case "photos":
         return <div className="space-y-4"><div className="space-y-1.5"><Label htmlFor={`label-${instanceId}`}>Section heading</Label><Input id={`label-${instanceId}`} value={heading(form.label_photos)} onChange={(e) => updateHeading(e.target.value, () => set("label_photos", e.target.value))} placeholder="Photos" /></div><p className="text-xs text-muted-foreground">Upload up to four images. Portrait 4:5 images work best.</p>{([1, 2, 3, 4] as const).map((n) => { const photoKey = `photo${n}` as "photo1" | "photo2" | "photo3" | "photo4"; const photo = instanceValue(photoKey, form[photoKey]); return <div key={n} className="space-y-2 rounded-md border border-border/60 p-3"><Label htmlFor={`${photoKey}-${instanceId}`}>Photo {n}</Label><Input id={`${photoKey}-${instanceId}`} value={photo} onChange={(e) => updateInstanceValue(photoKey, e.target.value, () => set(photoKey, e.target.value))} placeholder="Image URL (optional)" /><ImageUploader label={`Photo ${n}`} value={photo} onChange={(value) => updateInstanceValue(photoKey, value, () => set(photoKey, value))} aspect="4 / 5" hint="4:5 preferred, under 8MB." folder="spotlights" /></div>; })}</div>;
@@ -2425,9 +2432,13 @@ export function SpotlightForm({
         video3: form.video3,
         video4: form.video4,
         video1_cover: form.video1_cover,
+        video1_inline: form.video1_inline,
         video2_cover: form.video2_cover,
+        video2_inline: form.video2_inline,
         video3_cover: form.video3_cover,
+        video3_inline: form.video3_inline,
         video4_cover: form.video4_cover,
+        video4_inline: form.video4_inline,
         photo1: form.photo1,
         photo2: form.photo2,
         photo3: form.photo3,
@@ -2513,6 +2524,7 @@ export function SpotlightForm({
         host_bio: "", partnership_pitch: "", eoi_opportunities: "", dos_donts: "", audience_segments: "", vibe_tags: "",
         instagram: "", tiktok: "", youtube: "", spotify: "", apple_music: "", twitch: "", facebook: "", x: "", custom_label: "", custom_url: "", spotifyEmbed: "", contact: "",
         video1: "", video2: "", video3: "", video4: "",
+        video1_inline: "false", video2_inline: "false", video3_inline: "false", video4_inline: "false",
         video1_cover: "", video2_cover: "", video3_cover: "", video4_cover: "",
         photo1: "", photo2: "", photo3: "", photo4: "",
         header_image_url: "", profile_image_url: "", colour_thumbnails: false, hide_metrics: false, published: false,

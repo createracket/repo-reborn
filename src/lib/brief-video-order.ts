@@ -7,7 +7,7 @@ export function canReorderBriefVideos(fields: BriefVideoFields): boolean {
 }
 
 export function reorderBriefVideos(fields: BriefVideoFields, from: BriefVideoSlot, to: BriefVideoSlot): BriefVideoFields {
-  const videos = BRIEF_VIDEO_SLOTS.map((n) => ({ url: fields[`video${n}`] ?? "", cover: fields[`video${n}_cover`] ?? "" }));
+  const videos = BRIEF_VIDEO_SLOTS.map((n) => ({ url: fields[`video${n}`] ?? "", cover: fields[`video${n}_cover`] ?? "", inline: fields[`video${n}_inline`] ?? "" }));
   const moved = videos.splice(from - 1, 1)[0];
   if (!moved) return fields;
   videos.splice(to - 1, 0, moved);
@@ -15,6 +15,7 @@ export function reorderBriefVideos(fields: BriefVideoFields, from: BriefVideoSlo
   videos.forEach((video, index) => {
     result[`video${index + 1}`] = video.url;
     result[`video${index + 1}_cover`] = video.cover;
+    result[`video${index + 1}_inline`] = video.inline;
   });
   return result;
 }
