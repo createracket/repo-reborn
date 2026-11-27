@@ -895,6 +895,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
                         href={v.media.href}
                         provider={v.media.provider}
                         videoSrc={v.media.videoSrc}
+                        inlineSocial={kind === "brief" && slug === "tixel-seller-stories"}
                         poster={v.cover ?? posters[v.media.posterKey] ?? null}
                         caption={v.media.provider === "dropbox" && !v.media.videoSrc ? "Dropbox folder" : null}
                       />
@@ -963,7 +964,7 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
                 return media ? [{ media, cover: content[`video${number}_cover`] }] : [];
               });
               if (!videos.length) return null;
-              return <section className="mt-16"><MediaCarousel title={label || "Watch"} count={videos.length} shape="video">{videos.map((video) => <ClipCard href={video.media.href} provider={video.media.provider} videoSrc={video.media.videoSrc} poster={video.cover ?? posters[video.media.posterKey] ?? null} caption={video.media.provider === "dropbox" && !video.media.videoSrc ? "Dropbox folder" : null} />)}</MediaCarousel></section>;
+              return <section className="mt-16"><MediaCarousel title={label || "Watch"} count={videos.length} shape="video">{videos.map((video) => <ClipCard href={video.media.href} provider={video.media.provider} videoSrc={video.media.videoSrc} inlineSocial={kind === "brief" && slug === "tixel-seller-stories"} poster={video.cover ?? posters[video.media.posterKey] ?? null} caption={video.media.provider === "dropbox" && !video.media.videoSrc ? "Dropbox folder" : null} />)}</MediaCarousel></section>;
             }
             if (instance.type === "photos") {
               const photos = [1, 2, 3, 4].map((number) => content[`photo${number}`]).filter((photo): photo is string => !!photo?.trim());

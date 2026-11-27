@@ -10,6 +10,19 @@ export type ClipMedia = {
 const DROPBOX_HOSTS = new Set(["dropbox.com", "www.dropbox.com"]);
 const VIDEO_FILE_RE = /\.(mp4|m4v|mov|webm|ogv)$/i;
 
+export function getClipEmbedSrc(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" || !["instagram.com", "www.instagram.com"].includes(parsed.hostname)) return null;
+    const match = parsed.pathname.match(/^\/(?:[^/]+\/)?(p|reels?|tv)\/([A-Za-z0-9_-]+)\/?$/);
+    if (!match) return null;
+    const kind = match[1] === "reels" ? "reel" : match[1];
+    return `https://www.instagram.com/${kind}/${match[2]}/embed/`;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Converts a Dropbox single-file share link to its direct media URL.
  * Folder links remain external because Dropbox serves those as a ZIP download.

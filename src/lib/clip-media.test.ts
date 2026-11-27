@@ -1,6 +1,17 @@
 import { test } from "node:test";
 import { strict as assert } from "node:assert";
-import { getClipMedia } from "./clip-media";
+import { getClipMedia, getClipEmbedSrc } from "./clip-media";
+
+test("Tixel's first two Instagram links resolve to inline players", () => {
+  assert.equal(getClipEmbedSrc("https://www.instagram.com/p/Dd6A3YYIe1w/"), "https://www.instagram.com/p/Dd6A3YYIe1w/embed/");
+  assert.equal(getClipEmbedSrc("https://www.instagram.com/danielllagibson/reel/DeVqPFpz3kR/"), "https://www.instagram.com/reel/DeVqPFpz3kR/embed/");
+});
+
+test("Inline Instagram players reject unrelated hosts and insecure URLs", () => {
+  assert.equal(getClipEmbedSrc("https://instagram.com.evil.example/p/ABC/"), null);
+  assert.equal(getClipEmbedSrc("http://www.instagram.com/p/ABC/"), null);
+  assert.equal(getClipEmbedSrc("https://www.dropbox.com/scl/fo/abc/folder"), null);
+});
 
 test("Dropbox single-file links use a direct inline video URL", () => {
   const media = getClipMedia("https://www.dropbox.com/scl/fi/abc/example.mp4?rlkey=secret&dl=0");

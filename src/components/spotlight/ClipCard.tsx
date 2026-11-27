@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ExternalLink, Instagram, Music2, Play } from "lucide-react";
+import { getClipEmbedSrc } from "@/lib/clip-media";
 
 /**
  * Portrait (9:16) social clip card for spotlight pages.
@@ -11,16 +12,37 @@ export function ClipCard({
   poster,
   caption,
   videoSrc,
+  inlineSocial = false,
 }: {
   href: string;
   provider: "tiktok" | "instagram" | "dropbox";
   poster?: string | null;
   caption?: string | null;
   videoSrc?: string | null;
+  inlineSocial?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
   const showPoster = !!poster && !failed;
   const label = provider === "tiktok" ? "TikTok" : provider === "instagram" ? "Instagram" : "Dropbox";
+  const embedSrc = inlineSocial ? getClipEmbedSrc(href) : null;
+
+  if (embedSrc) {
+    return (
+      <div className="relative aspect-[9/16] overflow-hidden rounded-3xl border border-border/60 bg-muted/40">
+        <iframe
+          src={embedSrc}
+          title={caption ?? "Instagram video"}
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+          allowFullScreen
+          loading="lazy"
+          className="size-full border-0"
+        />
+        <a href={href} target="_blank" rel="noreferrer" aria-label="Open on Instagram" title="Open on Instagram" className="absolute bottom-2 right-2 rounded-full bg-background p-2 text-foreground">
+          <ExternalLink className="size-4" />
+        </a>
+      </div>
+    );
+  }
 
   if (videoSrc && !failed) {
     return (
@@ -53,7 +75,7 @@ export function ClipCard({
     >
       {showPoster ? (
         <img
-          src={poster!}
+          src={poster ?? undefined}
           alt=""
           loading="lazy"
           onError={() => setFailed(true)}
