@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getAuthSessionResult, getAuthUser } from "@/hooks/use-auth";
 import { AdminEditButton } from "@/components/admin/AdminEditButton";
 import { getSocialEmbed } from "@/lib/social-embed";
+import { getClipMedia } from "@/lib/clip-media";
 import { getClipPosters } from "@/lib/clip-poster.functions";
 import { getSpotlightGate, unlockSpotlight, getSpotlightPreview, getSpotlightForMember, registerSpotlightGuestInterest, registerSpotlightMemberInterest } from "@/lib/spotlight-access.functions";
 import { RichText } from "@/lib/rich-text";
@@ -316,7 +317,9 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
   // Fetch provider poster thumbnails (TikTok) for clips without a manual cover.
   useEffect(() => {
     const l = page?.links ?? {};
-    const urls = [l.video1, l.video2, l.video3, l.video4].filter((u): u is string => !!u);
+    const urls = [l.video1, l.video2, l.video3, l.video4].filter(
+      (u): u is string => !!u && !!getSocialEmbed(u),
+    );
     if (urls.length === 0) return;
     let cancelled = false;
     (async () => {
@@ -879,19 +882,21 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
               ];
               const videos = raw
                 .map((v) => {
-                  const embed = v.url ? getSocialEmbed(v.url) : null;
-                  return embed ? { embed, cover: v.cover } : null;
+                  const media = getClipMedia(v.url);
+                  return media ? { media, cover: v.cover } : null;
                 })
-                .filter((v): v is { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover: string | undefined } => !!v);
+                .filter((v): v is { media: NonNullable<ReturnType<typeof getClipMedia>>; cover: string | undefined } => !!v);
               if (videos.length === 0) return null;
               return (
                 <section className="mt-16">
                   <MediaCarousel title={sectionLabel("videos", "Watch")} count={videos.length} shape="video">
                     {videos.map((v) => (
                       <ClipCard
-                        href={v.embed.href}
-                        provider={v.embed.provider}
-                        poster={v.cover ?? posters[v.embed.href] ?? null}
+                        href={v.media.href}
+                        provider={v.media.provider}
+                        videoSrc={v.media.videoSrc}
+                        poster={v.cover ?? posters[v.media.posterKey] ?? null}
+                        caption={v.media.provider === "dropbox" && !v.media.videoSrc ? "Dropbox folder" : null}
                       />
                     ))}
                   </MediaCarousel>
@@ -954,12 +959,11 @@ export function SpotlightPageView({ slug, kind }: { slug: string; kind: "spotlig
             }
             if (instance.type === "videos") {
               const videos = [1, 2, 3, 4].flatMap((number) => {
-                const url = content[`video${number}`];
-                const embed = url ? getSocialEmbed(url) : null;
-                return embed ? [{ embed, cover: content[`video${number}_cover`] }] : [];
+                const media = getClipMedia(content[`video${number}`]);
+                return media ? [{ media, cover: content[`video${number}_cover`] }] : [];
               });
               if (!videos.length) return null;
-              return <section className="mt-16"><MediaCarousel title={label || "Watch"} count={videos.length} shape="video">{videos.map((video) => <ClipCard href={video.embed.href} provider={video.embed.provider} poster={video.cover ?? posters[video.embed.href] ?? null} />)}</MediaCarousel></section>;
+              return <section className="mt-16"><MediaCarousel title={label || "Watch"} count={videos.length} shape="video">{videos.map((video) => <ClipCard href={video.media.href} provider={video.media.provider} videoSrc={video.media.videoSrc} poster={video.cover ?? posters[video.media.posterKey] ?? null} caption={video.media.provider === "dropbox" && !video.media.videoSrc ? "Dropbox folder" : null} />)}</MediaCarousel></section>;
             }
             if (instance.type === "photos") {
               const photos = [1, 2, 3, 4].map((number) => content[`photo${number}`]).filter((photo): photo is string => !!photo?.trim());

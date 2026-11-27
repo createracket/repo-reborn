@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ClipCard } from "@/components/spotlight/ClipCard";
 import { getClipPosters } from "@/lib/clip-poster.functions";
 import { getSocialEmbed } from "@/lib/social-embed";
+import { getClipMedia } from "@/lib/clip-media";
 
 export type ProfileMedia = {
   video1?: string;
@@ -59,12 +60,11 @@ export function FeaturedVideos({
     };
   }, [key]);
 
-  type Clip = { embed: NonNullable<ReturnType<typeof getSocialEmbed>>; cover?: string };
+  type Clip = { clip: NonNullable<ReturnType<typeof getClipMedia>>; cover?: string };
   const videos: Clip[] = [];
   for (const k of MEDIA_VIDEO_KEYS) {
-    const url = media[k];
-    const embed = url ? getSocialEmbed(url) : null;
-    if (embed) videos.push({ embed, cover: media[`${k}_cover` as keyof ProfileMedia] });
+    const clip = getClipMedia(media[k]);
+    if (clip) videos.push({ clip, cover: media[`${k}_cover` as keyof ProfileMedia] });
   }
 
   if (videos.length === 0) return null;
@@ -78,9 +78,11 @@ export function FeaturedVideos({
         {videos.map((v, i) => (
           <ClipCard
             key={i}
-            href={v.embed.href}
-            provider={v.embed.provider}
-            poster={v.cover ?? posters[v.embed.href] ?? null}
+            href={v.clip.href}
+            provider={v.clip.provider}
+            videoSrc={v.clip.videoSrc}
+            poster={v.cover ?? posters[v.clip.posterKey] ?? null}
+            caption={v.clip.provider === "dropbox" && !v.clip.videoSrc ? "Dropbox folder" : null}
           />
         ))}
       </div>

@@ -1,32 +1,53 @@
 import { useState } from "react";
-import { Instagram, Music2, Play } from "lucide-react";
+import { ExternalLink, Instagram, Music2, Play } from "lucide-react";
 
 /**
  * Portrait (9:16) social clip card for spotlight pages.
- * Shows only the media artwork with our own overlay — no platform chrome.
- * Clicking opens the original post on the platform.
+ * Social posts open on their platform; Dropbox files play directly in the card.
  */
 export function ClipCard({
   href,
   provider,
   poster,
   caption,
+  videoSrc,
 }: {
   href: string;
-  provider: "tiktok" | "instagram";
+  provider: "tiktok" | "instagram" | "dropbox";
   poster?: string | null;
   caption?: string | null;
+  videoSrc?: string | null;
 }) {
   const [failed, setFailed] = useState(false);
   const showPoster = !!poster && !failed;
-  const label = provider === "tiktok" ? "TikTok" : "Instagram";
+  const label = provider === "tiktok" ? "TikTok" : provider === "instagram" ? "Instagram" : "Dropbox";
+
+  if (videoSrc && !failed) {
+    return (
+      <div
+        className="relative overflow-hidden rounded-3xl border border-border/60 bg-muted/40"
+        style={{ aspectRatio: "9 / 16" }}
+      >
+        <video
+          src={videoSrc}
+          poster={poster ?? undefined}
+          controls
+          playsInline
+          preload="metadata"
+          aria-label={caption ?? "Dropbox video"}
+          onError={() => setFailed(true)}
+          className="size-full object-cover"
+        />
+      </div>
+    );
+  }
 
   return (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
-      aria-label={`Watch on ${label}`}
+      aria-label={`Open on ${label}`}
       className="group relative block overflow-hidden rounded-3xl border border-border/60 bg-muted/40 transition-colors hover:border-pink-accent/60"
       style={{ aspectRatio: "9 / 16" }}
     >
@@ -53,14 +74,20 @@ export function ClipCard({
       >
         {provider === "tiktok" ? (
           <Music2 className="size-4" aria-label={label} />
-        ) : (
+        ) : provider === "instagram" ? (
           <Instagram className="size-4" aria-label={label} />
+        ) : (
+          <ExternalLink className="size-4" aria-label={label} />
         )}
       </span>
 
       <span className="absolute inset-0 flex items-center justify-center">
         <span className="flex size-16 items-center justify-center rounded-full border border-foreground/20 bg-foreground/10 backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:border-primary group-hover:bg-primary">
-          <Play className="size-6 translate-x-[1px] fill-current text-foreground transition-colors group-hover:text-primary-foreground" />
+          {provider === "dropbox" ? (
+            <ExternalLink className="size-6 text-foreground transition-colors group-hover:text-primary-foreground" />
+          ) : (
+            <Play className="size-6 translate-x-[1px] fill-current text-foreground transition-colors group-hover:text-primary-foreground" />
+          )}
         </span>
       </span>
 
